@@ -9802,3 +9802,67 @@ FECHA Y HORA DE LIBERACIÓN: 2026-09-26
 - **Capitán de migración liberó el lote:** Claude - REPARACION DE ADMIN. Resultado: PR
   #235 (`49860952`) y PR #237 (`6dff79e2`) fusionados, Producción verificada. Estado:
   CULMINADA. Reservas de `usuarios/page.tsx` y `api/admin/users/route.ts` liberadas.
+
+
+### TRASPASO A NUEVA CONVERSACIÓN · REDES POR COMPOSIO · MIGRAR PINTEREST — 2026-09-26 — Claude
+
+**Léelo completo antes de ejecutar nada. Milton pidió respuestas CORTAS y claras.**
+
+#### 1. Entorno (obligatorio)
+- **Worktree correcto:** `/Users/miltondavila/.codex/worktrees/produccion-validacion-composio/Creador de articulos` (no uses otro).
+- **Localhost de pruebas: `http://localhost:3001`** (no 127.0.0.1). Si no responde, levántalo con `mcp__Claude_Browser__preview_start` con el nombre `web-3001` (está en `/Users/miltondavila/Creador de articulos/.claude/launch.json`), o a mano: `cd` al worktree y `set -a; source .env.local; set +a; PORT=3001 npm run dev --workspace=apps/web`.
+- **Base local:** PostgreSQL `postgresql://miltondavila@127.0.0.1:5432/autoarticulos` (solo pruebas; usuario de prueba `lorenalvarez30@gmail.com`, ya sesionada en el panel lateral). Para ver todas las redes en local hay que activar sus permisos `allow*Publishing` y revertirlos después. Los permisos y credenciales falsas de la prueba anterior ya fueron limpiados.
+- **Producción:** `https://seototal.lasolucionweb.com` (SIEMPRE este dominio; el de Vercel `auto-articulos-web.vercel.app` rompe la conexión de Bing por cookies/sesión).
+- **GitHub:** `gh` debe estar con la cuenta `miltondavila-ux` (`gh auth status`; si está en `10minuteswebsite`, `gh auth switch -h github.com -u miltondavila-ux`). El token ya tiene scope `workflow`.
+- **Navegadores Chrome (`mcp__claude-in-chrome__*`):** `list_connected_browsers` y `select_browser`. El de `deviceId fc4343e5-4696-4294-bcd1-49682f3f340d` tenía la sesión de **Lorena**; el de `277def4c-fdb3-486d-a4d2-51dcbbc81d28` tenía la de una **clienta real (rosalia@diagonal3.com): NO tocar cuentas de clientes reales**. Antes de probar algo confirma el usuario con `fetch('/api/me')`. Las herramientas solo ven pestañas de su propio grupo (`tabs_context_mcp createIfEmpty:true`).
+- **Logs de producción:** `cd apps/web && vercel logs --environment production --branch main --since 2h --query "texto"` (sin `--branch main` filtra por la rama actual y no muestra nada).
+- **Panel de Composio (para leer esquemas de herramientas):** `https://dashboard.composio.dev/10minuteswebsite_workspace/10minuteswebsite_workspace_first_project/toolkits/pinterest` — la sesión del panel lateral expiró; **Milton debe iniciar sesión** (no escribas contraseñas).
+
+#### 2. Reglas de trabajo
+- **Capitán de migración:** ya reclamado por «Claude» para este trabajo (`scripts/migration-coordinator.sh status`). Si continúas tú: `release` y `claim` de nuevo con tu motivo. Antes de cualquier push, tener la capitanía; al terminar, `release`. Anotar en este documento.
+- Nunca push directo a `main`: rama + PR + fusionar (`gh pr merge N --squash`). El clasificador de Claude Code a veces bloquea el merge; si pasa, Milton lo autoriza en el chat.
+- Una rama por tema, `git add` de archivos concretos (nunca `-A`), porque otras sesiones pueden dejar cambios sin commitear en el worktree.
+- **El cliente NO debe ver la palabra «Composio» ni «PostPeer»** en textos de la interfaz ni del manual (solo el menú/módulo de Administración).
+- Actualizar el manual (`apps/web/src/content/manual-usuario.ts`) en el mismo lote que cualquier cambio visible.
+- Errores siempre en español claro, sin JSON ni inglés (`friendlyConnectionError`, `friendlyPublishError`).
+- Sin migración de base de datos salvo autorización expresa. Banderas `COMPOSIO_CONSUMER_READY.*` y `COMPOSIO_ROUTING_ENABLED` cerradas (`false`); cambiarlas solo con autorización de Milton.
+- Contenido para el cliente: patrón visual estándar de GSC/GA (tarjeta, «Cómo hacerlo paso a paso», Nueva conexión, éxito estático, Probar conexión, Cambiar, Desconectar, Volver al menú). Ya medido con auditorías (ver `INFORME_AUDITORIA_REDES_SOCIALES.md`).
+
+#### 3. Dónde estamos (todo en producción, `main` ≈ `4db022ae`+)
+- GSC y GA por Composio, validados con usuarios reales.
+- Facebook e Instagram por Composio: **piloto solo con Lorena** (variables de repo `COMPOSIO_PILOT_USERS_FACEBOOK/INSTAGRAM` = `lorenalvarez30@gmail.com`, módulo «Conexión por Composio» habilitado). Publican de verdad; verificado en los Logs de Composio. Pendiente decidir (Milton) el lanzamiento a todos: **espera la respuesta de Composio sobre control de gastos**.
+- Todas las conexiones de Difusión y Bing con el mismo patrón visual que GSC/GA (PRs #231, #234, #238, #244, #245, #239). Bing: reconexión probada en producción con Lorena; el retorno ahora siempre empieza en el dominio registrado y un admin ve el «Detalle técnico» si falla.
+- Historial: enlace real de Facebook; Instagram guarda el permalink al publicar (`INSTAGRAM_GET_IG_MEDIA`, solo lectura) y las publicaciones antiguas lo consultan al pulsar «Ver en la red social».
+- Página antigua «Redes Sociales» retirada (redirige a Conexiones → Difusión).
+
+#### 4. TAREA ABIERTA · Migrar Pinterest a Composio (Threads queda con conexión propia)
+**Decisión de Milton:** «nadie usa Pinterest porque nunca nos dieron el API»: **no hay conexiones antiguas que conservar** → no hace falta puente de compatibilidad; la pantalla pasa directo a Composio. Composio SÍ tiene Pinterest (OAuth2, «OAuth administrado por Composio», 26 herramientas: `PINTEREST_LIST_BOARDS`, `PINTEREST_CREATE_PIN`, `PINTEREST_GET_PROFILE`, etc.).
+**Trabajo a medias (sin PR):** rama `claude/pinterest-composio` (commit `63d1edec`, «wip»): ya añade `pinterest` al tipo `ComposioAppId` (shared), a `COMPOSIO_TOOL_ALLOWLIST` (`PINTEREST_LIST_BOARDS` read, `PINTEREST_CREATE_PIN` write), a `COMPOSIO_APPS` (web) y a `COMPOSIO_CONSUMER_READY` (false). **NO compila todavía.** Errores de TypeScript pendientes (`npx tsc --noEmit --incremental false -p apps/web/tsconfig.json` y `apps/worker`):
+- `packages/shared/src/composio.ts` `COMPOSIO_TEST_TOOL`: falta `pinterest: "PINTEREST_LIST_BOARDS"`.
+- `apps/web/src/lib/composio-connections.ts`: `selectionLabel` (pinterest → `pageId ? (pageName ?? pageId) : null`), `saveSelection` (pinterest → `{ pageId: chosen.id, pageName: chosen.label }`; se reutilizan `pageId/pageName` para id/nombre del tablero, **sin migración**), `userMayConnectApp` (pinterest → `allowPinterestPublishing`).
+- `apps/web/src/lib/composio-options.ts`: `optionsForPinterest(data)` (tableros `{id,name,privacy}`) y el `switch` de `buildOptions`.
+- `apps/web/src/lib/composio-route.ts` (~línea 136-158): el `switch` por app.
+- `apps/web/src/app/api/composio/callback/route.ts`: `CONNECTION_SLUG.pinterest = "pinterest"` y vista `difusion`.
+- `apps/web/src/components/ComposioConnect.tsx`: constantes `APP_NOTES`, `CHOOSE_TITLE`, `CHOOSE_NOTE`, `CONNECTION_STEPS` (5 pasos), `SUCCESS_TITLE`, `SUCCESS_SELECTION_LABEL`; y `apps/web/src/components/connection-return-context.ts` (`CHOSEN_NOUN`).
+- `apps/web/src/components/PinterestSection.tsx`: reemplazar por una tarjeta Composio como `FacebookSection.tsx` (`<ConnectionCard>` + `<ComposioConnect inline apps={["pinterest"]} />`).
+- `apps/web/src/app/api/social-opportunities/generate/route.ts` (`getConnectedNetworks`, línea ~395-420): `pinterest` conectado también si hay `composioConnection` ACTIVE de `pinterest` con `pageId` (igual que `composioInstagram`).
+- **Worker** `apps/worker/src/socialPublish.ts` `processPinterestJob` (~línea 729): si `getComposioSocialAccount(job.userId, "pinterest")` tiene `pageId` (tablero), publicar por Composio con un adaptador nuevo `composioPinterestPin` en `packages/shared/src/composio-social.ts` (crear Pin: tablero, título, descripción ≤500, enlace del artículo, imagen). Extender el tipo `app` de `getComposioSocialAccount` y de `run(...)` a `"pinterest"`; PostId = enlace del Pin si viene.
+- **Resolver/piloto:** el worker decide con `methodFor`; con la bandera en `false` solo usa Composio si el usuario está en `COMPOSIO_PILOT_USERS_PINTEREST` (userId o correo). Hay que **pasar esa variable a los 3 workflows** (`.github/workflows/worker.yml`, `social-worker.yml`, `worker-test.yml`, como ya se hizo con FACEBOOK/INSTAGRAM: `${{ vars.COMPOSIO_PILOT_USERS_PINTEREST }}`) y Milton define la variable de repo con `gh variable set` (él la ejecuta en su terminal; a Claude el clasificador se lo bloquea).
+- Pruebas: añadir a `apps/web/src/lib/composio-options.test.ts` el caso de tableros; `apps/worker/src/composio.test.ts` (allowlist); `tsx --test`. Actualizar el manual.
+- **Esquema de las herramientas:** leer los parámetros exactos de `PINTEREST_LIST_BOARDS` y `PINTEREST_CREATE_PIN` en el panel de Composio (ver §1) **antes** de escribir el adaptador; no adivinar (con Instagram así se verificó `ig_media_id` / `fields`).
+
+**Pasos que SOLO puede hacer Milton (guíalo, uno a uno):**
+1. Iniciar sesión en el panel de Composio (panel lateral).
+2. En Composio: crear el **auth config de Pinterest** (con «OAuth administrado por Composio»).
+3. En SEO TOTAL → Administración → Composio: registrar el ID de ese auth config para la app Pinterest (la pantalla lista las apps de `COMPOSIO_APPS`).
+4. Definir la variable de repo del piloto (`gh variable set COMPOSIO_PILOT_USERS_PINTEREST --body "lorenalvarez30@gmail.com" --repo miltondavila-ux/auto-articulos`) y habilitar/mantener el módulo «Conexión por Composio» de Lorena (ya está).
+5. Conectar Pinterest con una cuenta real (Lorena o de prueba) y elegir un tablero; probar una publicación.
+
+**Verificación esperada en producción:** tarjeta de Pinterest en el patrón estándar; conectar → aviso «Autorización completada…» → dropdown de tableros → éxito estático → Probar conexión; y en los **Logs de Composio** una llamada `PINTEREST_CREATE_PIN` correcta al publicar.
+
+#### 5. Otros pendientes (menores)
+- Investigar el error 500 de `POST /api/me/upload-image` visto en los logs de producción (13:29 UTC del 26/9, un usuario; mensaje «Error: Fail…»).
+- Lorena no tiene activado «Publicar en Threads» en Administración (por eso `Probar conexión` de Threads da 403); Threads se queda con conexión propia.
+- Historial de Lorena: 6 publicaciones de Pinterest y 5 de Google Business Profile con error (antiguas); revisar si el mensaje traducido es claro.
+- Facebook/Instagram a todos los usuarios: decisión de Milton tras la respuesta de Composio.
+- Ramas locales `claude/*` antiguas sin subir de proyectos previos: no son de este trabajo; no tocar.
