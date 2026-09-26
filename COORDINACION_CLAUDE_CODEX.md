@@ -9792,3 +9792,13 @@ SIGUIENTE ACCIÓN EXACTA: ninguna obligatoria
 RESPONSABLE SIGUIENTE: ninguno
 FECHA Y HORA DE LIBERACIÓN: 2026-09-26
 ```
+
+### Capitanía — Claude - REPARACION DE ADMIN — 2026-09-26
+
+- **Capitán de migración:** Claude - REPARACION DE ADMIN — revisó y aplicó el lote
+  completo. Motivos: publicar el rediseño de Administración y los límites de difusión
+  (PR #235) y separar los controles de Artículos y de Difusión (PR #237). Sin
+  migraciones de schema.
+- **Capitán de migración liberó el lote:** Claude - REPARACION DE ADMIN. Resultado: PR
+  #235 (`49860952`) y PR #237 (`6dff79e2`) fusionados, Producción verificada. Estado:
+  CULMINADA. Reservas de `usuarios/page.tsx` y `api/admin/users/route.ts` liberadas.

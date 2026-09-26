@@ -1689,8 +1689,7 @@ reservas liberadas. Estado final: ARCHIVADA.
   `apps/web/src/content/manual-usuario.ts` (solo si el manual lo menciona).
 - **Migraciones:** ninguna prevista (la columna `socialDailyLimits` ya existe).
 
-- **Actualización 2026-09-26 (REPARACION DE ADMIN):** estado **PAUSADA — a la espera de
-  aprobación de Milton en localhost**. Rediseño estilo Apple de las 5 pestañas y de la
+- **Actualización 2026-09-26 (REPARACION DE ADMIN):** estado **CULMINADA (2026-09-26, ver cierre abajo)**. Rediseño estilo Apple de las 5 pestañas y de la
   ficha de usuario (secciones Cuenta, Acceso, Redes sociales y blogs, Imágenes con IA,
   Límites de uso para la creación de artículos, Acciones, Historial); guardado único
   «Guardar cambios/Descartar»; límites diarios de difusión por red y formato con
@@ -1718,3 +1717,34 @@ reservas liberadas. Estado final: ARCHIVADA.
 
 - **Actualización 2026-09-26 (CONEXION DE GSC NO SE DESCONECTA — parte 2, elegir propiedad):** en la cuenta de Rosalia `selectedSiteDomain="Español"` (nombre de panel, no dominio); `composio-options.ts` lo usaba como bloqueo y dejaba las 134 propiedades no elegibles (108 por «trabaja con español», 26 por permiso). Fix: `lockableDomain()` — el bloqueo por dominio solo aplica si el valor es un dominio real; GSC y Analytics. Sin migraciones ni cambios de datos. Rama `claude/gsc-propiedades-sin-panel`. Reservas: `lib/composio-options.ts`, `lib/composio-options.test.ts`, `lib/composio-connections.ts`, `content/manual-usuario.ts`. Pruebas 71/71, tsc limpio, build OK. Pendiente: sugerencia «por parecido» (falta definir con qué se compara).
 - **CIERRE 2026-09-26 — ARCHIVADA.** Milton confirmó en vivo, con la cuenta de Rosalia Martín (rol `user`), que desconectar, reconectar y elegir propiedad funcionan. Commits en `main`: `5ff6bc47` (PR #240, desconectar GSC/GA abierto a toda cuenta activa) y `d8183e3e` (PR #242, un nombre de panel como «Español» ya no bloquea las propiedades). Verificado por Claude en producción: opciones de GSC de Rosalia pasaron de 0 a 108 elegibles (26 bloqueadas por permiso, correcto) y `rosaliamartin.com` recomendada. El guardado y «Probar conexión» los hizo Milton. PR #241 (solo docs) cerrado sin fusionar por superado. Reservas liberadas; sin migraciones; capitanía no reclamada. Pendiente no ejecutado: sugerencia «por parecido» (falta definir con qué compara) y prueba en vivo de Google Analytics.
+
+### Cierre — Claude - REPARACION DE ADMIN — 2026-09-26
+
+```text
+IDENTIDAD: Claude - Sonnet 5 - REPARACION DE ADMIN
+PROYECTO: Administración (/dashboard/usuarios) estilo Apple + límites de difusión
+ESTADO FINAL: CULMINADA
+RAMA: claude/reparacion-admin (fusionada), claude/reparacion-admin-nombres (fusionada),
+      claude/reparacion-admin-cierre (solo documentación, PR #236)
+WORKTREE: .worktrees/reparacion-admin (a retirar tras fusionar #236)
+COMMIT BASE: 0445e0b2
+ÚLTIMO COMMIT: 6dff79e2 (código en Producción)
+ARCHIVOS MODIFICADOS: apps/web/src/app/dashboard/usuarios/page.tsx,
+  apps/web/src/app/api/admin/users/route.ts, apps/web/src/content/manual-usuario.ts,
+  COORDINACION_CLAUDE_CODEX.md, INVENTARIO_CONVERSACIONES.md, CONTROLADOR_DE_VERSIONES.md
+ARCHIVOS RESERVADOS: usuarios/page.tsx y api/admin/users/route.ts
+ARCHIVOS LIBERADOS: los mismos, 2026-09-26
+MIGRACIONES: ninguna en el código. Milton ejecutó a mano en Supabase el UPDATE de relleno de
+  socialDailyLimits (16 claves en 1); verificado: 99 cuentas, sin vacíos.
+PRUEBAS EJECUTADAS: npm test 61/61; tsc; next build; localhost (guardar límites,
+  aprobaciones, inválido, Descartar, límites de artículos/lote, confirmaciones);
+  Producción con sesión admin (5 pestañas, ficha, guardado real y restauración, regresión
+  de 9 rutas)
+PRODUCCIÓN/PREVIEW: PR #235 -> 49860952; PR #237 -> 6dff79e2; Vercel Production success
+ERRORES O BLOQUEOS: ninguno abierto
+TRABAJO PENDIENTE: no probados en Producción: «Acceder como», «Copiar credenciales»,
+  guardar en «Editar». Retirar worktree y ramas tras fusionar #236.
+SIGUIENTE ACCIÓN EXACTA: fusionar PR #236 (documentación)
+RESPONSABLE SIGUIENTE: Milton
+FECHA Y HORA DE LIBERACIÓN: 2026-09-26 (capitanía liberada con scripts/migration-coordinator.sh)
+```
