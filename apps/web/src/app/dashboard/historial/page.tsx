@@ -1,6 +1,26 @@
 "use client";
 
 import { socialPostUrl } from "@/lib/social-post-url";
+import { friendlyPublishError } from "@auto-articulos/shared/src/friendly-error";
+
+/** Publicaciones de Instagram antiguas: pide el enlace público al pulsar y lo abre en otra pestaña. */
+async function abrirEnlaceInstagram(id: string) {
+  const ventana = window.open("about:blank", "_blank");
+  try {
+    const res = await fetch("/api/social-opportunities/instagram-link", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.url) {
+      if (ventana) ventana.location.href = data.url;
+      else window.location.href = data.url;
+      return;
+    }
+    ventana?.close();
+    window.alert(typeof data.error === "string" ? data.error : "No pudimos abrir la publicación en Instagram.");
+  } catch {
+    ventana?.close();
+    window.alert("No pudimos abrir la publicación en Instagram. Inténtalo de nuevo.");
+  }
+}
 import { MENU_NAMES } from "@/lib/menu-names";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import type { CSSProperties } from "react";
@@ -994,6 +1014,16 @@ function HistorialRedes() {
                             Ver en la red social &rarr;
                           </a>
                         )}
+                        {opp.status === "published" && !socialPostUrl(opp.platform, opp.postId) && opp.platform.startsWith("instagram") && opp.postId && (
+                          <button
+                            type="button"
+                            onClick={() => abrirEnlaceInstagram(opp.id)}
+                            className="link-button"
+                            style={{ color: "#16803c", background: "transparent", border: 0, padding: 0, cursor: "pointer", font: "inherit" }}
+                          >
+                            Ver en la red social &rarr;
+                          </button>
+                        )}
                       </div>
                       {opp.imageUrl && (
                         <div style={{ marginTop: 12 }}>
@@ -1049,7 +1079,7 @@ function HistorialRedes() {
                             border: "1px solid rgba(255, 59, 48, 0.2)",
                           }}
                         >
-                          <strong>Error:</strong> {opp.errorLog}
+                          <strong>Error:</strong> {friendlyPublishError(opp.errorLog, opp.platform)}
                         </div>
                       )}
                       {opp.titleId && (
@@ -1490,7 +1520,7 @@ function HistorialRedes() {
                         border: "1px solid rgba(255, 59, 48, 0.2)",
                       }}
                     >
-                      <strong>Error:</strong> {opp.errorLog}
+                      <strong>Error:</strong> {friendlyPublishError(opp.errorLog, opp.platform)}
                     </div>
                   )}
                   {opp.titleId && (

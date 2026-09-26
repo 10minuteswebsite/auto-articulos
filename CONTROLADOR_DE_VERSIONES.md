@@ -3609,6 +3609,17 @@ Estado: VERIFICADA (PR #224, `abb687dd`). PR #225 (`36ecd08`, mejoras 1, 2 y
 5): FUSIONADA A `main`, DEPLOYMENT/PRODUCCIÓN SIN CONFIRMACIÓN EXPLÍCITA EN
 COORDINACIÓN A LA FECHA DE ESTA ENTRADA.
 
+## Claude — CONEXION DE GSC NO SE DESCONECTA — cierre — 2026-09-26
+
+- **Commits en `main`:** `5ff6bc47` (PR #240) y `d8183e3e` (PR #242). Sin migraciones ni cambios de schema; sin datos modificados.
+- **#240:** `POST /api/composio/disconnect` usa `getComposioUserForApp`; GSC y GA abiertos a toda cuenta activa. Regresión de `479ca92f` (2026-09-23).
+- **#242:** `lockableDomain()` en `composio-options.ts`; el bloqueo de «un dominio por cuenta» solo aplica si `selectedSiteDomain` es un dominio real. Causa: la cuenta de Rosalia guarda `selectedSiteDomain="Español"` (nombre de panel).
+- **Auditorías:** integridad (diffs completos revisados), funcional (`npm test` 71/71, `tsc` limpio, `next build` OK), regresión (Preview de Vercel OK en ambos PR; solo cambian la ruta de desconexión y la regla de bloqueo).
+- **Producción:** Vercel `success` en ambos commits; `/login` 200; opciones de GSC de Rosalia 0 → 108 elegibles, 26 bloqueadas por permiso, 1 recomendada. Desconectar/reconectar/guardar/probar: confirmado por Milton en vivo.
+- **Efecto:** cuentas con nombre de panel en lugar de dominio dejan de tener todas las propiedades bloqueadas (GSC y Analytics).
+- **Pendientes:** prueba en vivo de Analytics; `scripts/generate-product-update.ts` no corrió en los commits (sin `DATABASE_URL` local).
+- **Estado:** VERIFICADA Y ARCHIVADA.
+
 ## Versión desplegada — 2026-09-26 — REPARACION DE ADMIN
 
 - **Commit:** `49860952` (PR #235, squash). Deployment de Producción de Vercel

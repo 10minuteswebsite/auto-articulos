@@ -253,11 +253,12 @@ Esta sección se actualiza con los cambios visibles para usuarios y es parte del
 
 Ruta: /dashboard/configuracion
 
-Configuración es un índice de 6 páginas independientes. Una barra de
+Configuración es un índice de páginas independientes. Una barra de
 navegación visible en todo momento, con la sección actual resaltada, te
-permite moverte entre las 6 páginas sin volver primero al índice. Si una
-opción no aparece en Redes Sociales, puede estar deshabilitada para tu
-cuenta por el administrador.
+permite moverte entre ellas sin volver primero al índice. Las redes sociales
+y Google Business Profile se conectan en **Conexiones** (pestaña Difusión);
+si una red no aparece allí, puede estar deshabilitada para tu cuenta por el
+administrador.
 
 ### Configuración inicial
 
@@ -280,13 +281,11 @@ Google Search Console permite usar ${MENU_NAMES.ia}, consultar el estado de inde
 
 Ruta: /dashboard/configuracion/indexacion
 
-Abre Bing Webmaster Tools con tu sesión iniciada, vuelve a SEO TOTAL y pulsa **Conectar Bing Webmaster Tools**. Acepta los permisos y elige o guarda el sitio correcto. Al terminar de aceptar los permisos, Bing te devuelve automáticamente a esta misma pantalla (Configuración → Indexación). Si la conexión venció, usa **Reconectar Bing** una sola vez y espera la redirección. Desde esta sección también puedes enviar el sitemap y enviar a Bing los artículos publicados que todavía estén pendientes de indexación.
+Abre Bing Webmaster Tools con tu sesión iniciada, vuelve a SEO TOTAL y pulsa **Nueva conexión**. Acepta los permisos y elige o guarda el sitio correcto. Al terminar de aceptar los permisos, Bing te devuelve automáticamente a esta misma pantalla (Configuración → Indexación). Si la conexión venció, usa **Nueva conexión** una sola vez y espera la redirección. Desde esta sección también puedes enviar el sitemap y enviar a Bing los artículos publicados que todavía estén pendientes de indexación.
 
 ### Redes sociales
 
-Ruta: /dashboard/configuracion/redes-sociales
-
-Aquí conectas Google Business Profile y las redes sociales. Las redes son opcionales: solo conéctalas si quieres publicar allí. Cada tarjeta te explica los pasos antes de pedirte datos. Instagram necesita una cuenta profesional vinculada a una página de Facebook. Algunas redes requieren que el administrador active tu permiso; si ves un aviso de que no está disponible, pide acceso al administrador. Puedes desconectar una red desde el mismo lugar.
+Esta página se retiró: si entras a la dirección antigua (/dashboard/configuracion/redes-sociales) te lleva automáticamente a **Configuración → Conexiones → Difusión**. Allí conectas Google Business Profile y todas las redes, cada una con su tarjeta, sus pasos y las mismas acciones (Nueva conexión, Probar conexión, Desconectar). Las redes son opcionales: solo conéctalas si quieres publicar allí. Instagram necesita una cuenta profesional vinculada a una página de Facebook. Algunas redes requieren que el administrador active tu permiso; si ves un aviso de que no está disponible, pide acceso al administrador.
 
 ### Cuenta
 
@@ -417,9 +416,46 @@ código de lo que elegiste, **Probar conexión** y **Volver al menú de
 Conexiones**. Instagram publica imágenes con texto y Facebook publica en la
 Página que elijas; ninguna de las dos publica Stories. En **Historial**, el
 enlace **Ver en la red social** solo aparece cuando la publicación tiene un
-enlace público; si no lo tiene, no se muestra. El aviso rojo de reconexión
+enlace público; si no lo tiene, no se muestra. En Instagram, las publicaciones
+nuevas guardan su enlace al publicarse y las antiguas lo consultan la primera
+vez que pulsas **Ver en la red social**. El aviso rojo de reconexión
 solo aparece para cuentas que ya tenían Search Console o Analytics conectados
 por la vía anterior; una cuenta nueva conecta desde el asistente inicial.
+
+Actualización (2026-09-26, 3): al volver de autorizar Threads, LinkedIn,
+Pinterest, Tumblr o Blogger, ahora regresas a la pantalla de esa conexión
+dentro de Conexiones. Si salió bien, en Threads y LinkedIn verás la pantalla
+de **Conexión exitosa** con el botón **Volver al Inicio**; en Pinterest,
+Tumblr y Blogger verás un aviso para elegir dónde se publicará. Si algo falla,
+aparece un aviso claro que te dice qué hacer. Los errores de publicación en
+**Historial** también se muestran en español y explican el paso a seguir (por
+ejemplo, volver a conectar la red cuando la autorización venció).
+
+Actualización (2026-09-26, 4): Bluesky y DEV.to ahora siguen el mismo patrón
+que Search Console y Analytics: una tarjeta con los pasos de **Cómo hacerlo
+paso a paso**, el botón **Conectar**, la pantalla de **Conexión exitosa** al
+terminar y, cuando ya están conectadas, los botones **Cambiar**, **Probar
+conexión** y **Desconectar**. **Probar conexión** comprueba en el momento que
+la cuenta sigue funcionando y te responde con un mensaje corto; si algo falla,
+te dice qué hacer (por ejemplo, volver a conectar).
+
+Actualización (2026-09-26, 5): Threads, LinkedIn, Pinterest, Tumblr y Blogger
+siguen ahora el mismo patrón que Search Console y Analytics. Cada una tiene su
+tarjeta con **Cómo hacerlo paso a paso**, el botón **Nueva conexión**, la
+elección de dónde se publicará (tablero en Pinterest, blog en Tumblr y
+Blogger) con **Aprobar y guardar**, la pantalla de **Conexión exitosa** y, ya
+conectadas, los botones **Cambiar**, **Probar conexión** y **Desconectar**. Si
+la autorización venció, la tarjeta te lo dice y te pide pulsar **Nueva
+conexión** para renovarla. **Google Search Console** y **Google Analytics** se pueden conectar, cambiar y **Desconectar** desde cualquier cuenta activa, sin permiso especial del administrador. Si tu cuenta tiene guardado el nombre de un panel (por ejemplo «Español») en lugar de un dominio, la lista de Search Console y de Analytics muestra todas tus propiedades con permiso de propietario o usuario completo, y tú eliges la tuya; si tiene un dominio real, solo se puede elegir el sitio que coincide con él. Los datos técnicos de la aplicación (claves) los ve
+y edita solo el administrador, en un bloque aparte.
+
+Actualización (2026-09-26, 6): **Google Business Profile** ahora tiene su propia
+tarjeta en Conexiones (Difusión) con el mismo patrón que las demás: **Cómo
+hacerlo paso a paso**, **Nueva conexión**, la pantalla de **Conexión exitosa**,
+**Probar conexión** y **Desconectar**. **Bing Webmaster Tools** también usa las
+mismas etiquetas y guía (**Nueva conexión**, **Aprobar y guardar**, **Probar
+conexión**, **Desconectar**); su envío nocturno de sitemap y su indexación no
+cambian.
 
 ## Problemas frecuentes
 

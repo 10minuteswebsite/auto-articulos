@@ -1705,6 +1705,19 @@ reservas liberadas. Estado final: ARCHIVADA.
   worktree `.codex/worktrees/produccion-validacion-composio`; se revierte con
   `git apply -R admin.patch`. Reservas mantenidas en esos dos archivos.
 
+## Claude - CONEXION DE GSC NO SE DESCONECTA — 2026-09-26
+
+- **Nombre exacto recibido:** `CONEXION DE GSC NO SE DESCONECTA` (cuenta afectada reportada: rosalia@diagonal3.com).
+- **Causa (triple auditoría de código):** `479ca92f` (2026-09-23) dejó `POST /api/composio/disconnect` con `getComposioUser()` (opt-in del módulo `conexion-composio`), mientras conectar/elegir/probar/opciones de GSC y GA quedaron abiertos vía `getComposioUserForApp`. Toda cuenta no admin sin el módulo recibe 403 al desconectar. Afecta a todas esas cuentas, no solo a una. Rol real de rosalia NO verificado (sin acceso a la base de producción).
+- **Fix:** `disconnect/route.ts` usa `getComposioUserForApp(body.app)`; regla extraída a `lib/composio-access.ts` con prueba. Manual actualizado. Sin migraciones.
+- **Rama / worktree:** `claude/gsc-no-se-desconecta` / `.worktrees/gsc-no-se-desconecta`, base `origin/main` `c07425e3`.
+- **Reservas:** `api/composio/_access.ts`, `api/composio/disconnect/route.ts`, `lib/composio-access*.ts`, `content/manual-usuario.ts` (se liberan al fusionar el PR).
+- **Pruebas:** `npm test` 70/70, `tsc` limpio, `next build` OK. Producción: sin desplegar; falta autorización de Milton y verificación posterior.
+- **Estado:** ACTIVO (PR abierto, pendiente de autorización).
+
+- **Actualización 2026-09-26 (CONEXION DE GSC NO SE DESCONECTA — parte 2, elegir propiedad):** en la cuenta de Rosalia `selectedSiteDomain="Español"` (nombre de panel, no dominio); `composio-options.ts` lo usaba como bloqueo y dejaba las 134 propiedades no elegibles (108 por «trabaja con español», 26 por permiso). Fix: `lockableDomain()` — el bloqueo por dominio solo aplica si el valor es un dominio real; GSC y Analytics. Sin migraciones ni cambios de datos. Rama `claude/gsc-propiedades-sin-panel`. Reservas: `lib/composio-options.ts`, `lib/composio-options.test.ts`, `lib/composio-connections.ts`, `content/manual-usuario.ts`. Pruebas 71/71, tsc limpio, build OK. Pendiente: sugerencia «por parecido» (falta definir con qué se compara).
+- **CIERRE 2026-09-26 — ARCHIVADA.** Milton confirmó en vivo, con la cuenta de Rosalia Martín (rol `user`), que desconectar, reconectar y elegir propiedad funcionan. Commits en `main`: `5ff6bc47` (PR #240, desconectar GSC/GA abierto a toda cuenta activa) y `d8183e3e` (PR #242, un nombre de panel como «Español» ya no bloquea las propiedades). Verificado por Claude en producción: opciones de GSC de Rosalia pasaron de 0 a 108 elegibles (26 bloqueadas por permiso, correcto) y `rosaliamartin.com` recomendada. El guardado y «Probar conexión» los hizo Milton. PR #241 (solo docs) cerrado sin fusionar por superado. Reservas liberadas; sin migraciones; capitanía no reclamada. Pendiente no ejecutado: sugerencia «por parecido» (falta definir con qué compara) y prueba en vivo de Google Analytics.
+
 ### Cierre — Claude - REPARACION DE ADMIN — 2026-09-26
 
 ```text
