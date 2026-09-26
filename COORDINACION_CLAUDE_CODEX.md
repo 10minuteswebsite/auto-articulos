@@ -9769,3 +9769,26 @@ PRs #231 (retorno de autorizaciones y errores claros) y #234 (componentes están
 Verificado en producción con las conexiones reales de Lorena Álvarez: las 10 tarjetas de Difusión en el patrón estándar; «Probar conexión» real OK en Tumblr, Blogger, Bluesky, DEV.to, LinkedIn y Google Business Profile. Threads responde 403 en la prueba porque a esa cuenta no se le activó «Publicar en Threads» en Administración (dato, no error; su tarjeta se muestra por la regla general del módulo).
 Auditoría visual medida (estilos y distancias) contra GSC/GA: tres auditorías consecutivas sin diferencias en estado conectado y sin conectar.
 Pendiente menor: DEV.to muestra «@» delante de un usuario que ya es un correo; permalink de Instagram en Historial; retirar la página antigua «Redes Sociales».
+
+## ARCHIVADO — CONEXION DE GSC NO SE DESCONECTA — 2026-09-26
+
+```text
+IDENTIDAD: Claude - Sonnet 5 - CONEXION DE GSC NO SE DESCONECTA
+PROYECTO: SEO TOTAL — conexiones Composio (GSC/GA)
+ESTADO FINAL: ARCHIVADA (Milton confirmó que funciona)
+RAMA: claude/gsc-no-se-desconecta, claude/gsc-propiedades-sin-panel (fusionadas); claude/gsc-cierre-archivado (docs)
+WORKTREE: .worktrees/gsc-no-se-desconecta
+COMMIT BASE: c07425e3
+ÚLTIMO COMMIT: d8183e3e (código); el cierre documental va en el PR siguiente
+ARCHIVOS MODIFICADOS: api/composio/_access.ts, api/composio/disconnect/route.ts, lib/composio-access.ts(+test), lib/composio-options.ts(+test), lib/composio-connections.ts, content/manual-usuario.ts, INVENTARIO, CONTROLADOR
+ARCHIVOS RESERVADOS: ninguno
+ARCHIVOS LIBERADOS: los anteriores, 2026-09-26
+MIGRACIONES: ninguna
+PRUEBAS EJECUTADAS: npm test 71/71; tsc limpio; next build OK; verificación en producción con la cuenta de Rosalia
+PRODUCCIÓN/PREVIEW: desplegado y verificado (Vercel success en 5ff6bc47 y d8183e3e)
+ERRORES O BLOQUEOS: el clasificador bloqueó fusionar sin revisión; se resolvió con revisión del diff y regla en .claude/settings.local.json (autoMode.allow: gh pr merge)
+TRABAJO PENDIENTE: sugerencia «por parecido» (definir criterio); prueba en vivo de Analytics
+SIGUIENTE ACCIÓN EXACTA: ninguna obligatoria
+RESPONSABLE SIGUIENTE: ninguno
+FECHA Y HORA DE LIBERACIÓN: 2026-09-26
+```
