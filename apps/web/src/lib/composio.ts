@@ -29,6 +29,7 @@ export const COMPOSIO_APPS = [
   { id: "google_analytics", label: "Google Analytics", toolkit: "google_analytics" },
   { id: "facebook", label: "Facebook Pages", toolkit: "facebook" },
   { id: "instagram", label: "Instagram", toolkit: "instagram" },
+  { id: "pinterest", label: "Pinterest", toolkit: "pinterest" },
 ] as const;
 
 export type ComposioAppId = (typeof COMPOSIO_APPS)[number]["id"];
