@@ -16,6 +16,6 @@ export async function POST() {
   if (!integration) return NextResponse.json({ error: NOT_CONNECTED }, { status: 400 });
   return runConnectionTest("devto", async () => {
     await verifyDevToApiKey(decryptSecret(integration.encryptedApiKey));
-    return integration.username ? `@${integration.username}` : null;
+    return integration.username ? (integration.username.includes("@") ? integration.username : `@${integration.username}`) : null;
   });
 }

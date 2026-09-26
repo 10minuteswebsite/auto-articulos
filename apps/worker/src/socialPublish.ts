@@ -26,6 +26,7 @@ import {
   truncatePlainCaption,
   composioFacebookPost,
   composioInstagramPost,
+  composioInstagramPermalink,
   methodFor,
   friendlyPublishError,
 } from "@auto-articulos/shared";
@@ -1124,7 +1125,9 @@ async function processInstagramJob(job: {
     if (!imageUrl) throw new Error("No se pudo adaptar la imagen del artículo para Instagram.");
     const caption = job.suggestedText.includes("[ENLACE]") ? job.suggestedText.replace("[ENLACE]", job.articleUrl) : job.suggestedText;
     const result = await composioInstagramPost(composio, composio.igAccountId, imageUrl, caption);
-    const postId = String(result.id ?? result.post_id ?? result.postId ?? "");
+    const mediaId = String(result.id ?? result.post_id ?? result.postId ?? "");
+    // Se guarda el enlace público cuando se puede obtener; si no, el id (el Historial lo resuelve al pulsar).
+    const postId = (await composioInstagramPermalink(composio, mediaId)) ?? mediaId;
     await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId, publishedAt: new Date(), errorLog: null, imageUrl } });
     if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Instagram mediante la conexión alternativa${composio.username ? ` (@${composio.username})` : ""}${postId ? ` - ID: ${postId}` : ""}` } });
     return true;

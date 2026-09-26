@@ -253,11 +253,12 @@ Esta sección se actualiza con los cambios visibles para usuarios y es parte del
 
 Ruta: /dashboard/configuracion
 
-Configuración es un índice de 6 páginas independientes. Una barra de
+Configuración es un índice de páginas independientes. Una barra de
 navegación visible en todo momento, con la sección actual resaltada, te
-permite moverte entre las 6 páginas sin volver primero al índice. Si una
-opción no aparece en Redes Sociales, puede estar deshabilitada para tu
-cuenta por el administrador.
+permite moverte entre ellas sin volver primero al índice. Las redes sociales
+y Google Business Profile se conectan en **Conexiones** (pestaña Difusión);
+si una red no aparece allí, puede estar deshabilitada para tu cuenta por el
+administrador.
 
 ### Configuración inicial
 
@@ -280,13 +281,11 @@ Google Search Console permite usar ${MENU_NAMES.ia}, consultar el estado de inde
 
 Ruta: /dashboard/configuracion/indexacion
 
-Abre Bing Webmaster Tools con tu sesión iniciada, vuelve a SEO TOTAL y pulsa **Conectar Bing Webmaster Tools**. Acepta los permisos y elige o guarda el sitio correcto. Al terminar de aceptar los permisos, Bing te devuelve automáticamente a esta misma pantalla (Configuración → Indexación). Si la conexión venció, usa **Reconectar Bing** una sola vez y espera la redirección. Desde esta sección también puedes enviar el sitemap y enviar a Bing los artículos publicados que todavía estén pendientes de indexación.
+Abre Bing Webmaster Tools con tu sesión iniciada, vuelve a SEO TOTAL y pulsa **Nueva conexión**. Acepta los permisos y elige o guarda el sitio correcto. Al terminar de aceptar los permisos, Bing te devuelve automáticamente a esta misma pantalla (Configuración → Indexación). Si la conexión venció, usa **Nueva conexión** una sola vez y espera la redirección. Desde esta sección también puedes enviar el sitemap y enviar a Bing los artículos publicados que todavía estén pendientes de indexación.
 
 ### Redes sociales
 
-Ruta: /dashboard/configuracion/redes-sociales
-
-Aquí conectas Google Business Profile y las redes sociales. Las redes son opcionales: solo conéctalas si quieres publicar allí. Cada tarjeta te explica los pasos antes de pedirte datos. Instagram necesita una cuenta profesional vinculada a una página de Facebook. Algunas redes requieren que el administrador active tu permiso; si ves un aviso de que no está disponible, pide acceso al administrador. Puedes desconectar una red desde el mismo lugar.
+Esta página se retiró: si entras a la dirección antigua (/dashboard/configuracion/redes-sociales) te lleva automáticamente a **Configuración → Conexiones → Difusión**. Allí conectas Google Business Profile y todas las redes, cada una con su tarjeta, sus pasos y las mismas acciones (Nueva conexión, Probar conexión, Desconectar). Las redes son opcionales: solo conéctalas si quieres publicar allí. Instagram necesita una cuenta profesional vinculada a una página de Facebook. Algunas redes requieren que el administrador active tu permiso; si ves un aviso de que no está disponible, pide acceso al administrador.
 
 ### Cuenta
 
@@ -417,7 +416,9 @@ código de lo que elegiste, **Probar conexión** y **Volver al menú de
 Conexiones**. Instagram publica imágenes con texto y Facebook publica en la
 Página que elijas; ninguna de las dos publica Stories. En **Historial**, el
 enlace **Ver en la red social** solo aparece cuando la publicación tiene un
-enlace público; si no lo tiene, no se muestra. El aviso rojo de reconexión
+enlace público; si no lo tiene, no se muestra. En Instagram, las publicaciones
+nuevas guardan su enlace al publicarse y las antiguas lo consultan la primera
+vez que pulsas **Ver en la red social**. El aviso rojo de reconexión
 solo aparece para cuentas que ya tenían Search Console o Analytics conectados
 por la vía anterior; una cuenta nueva conecta desde el asistente inicial.
 

@@ -129,6 +129,9 @@ export const COMPOSIO_TOOL_ALLOWLIST: Record<ComposioAppId, readonly AllowedTool
     { slug: "INSTAGRAM_POST_IG_USER_MEDIA", kind: "write" },
     { slug: "INSTAGRAM_CREATE_CAROUSEL_CONTAINER", kind: "write" },
     { slug: "INSTAGRAM_POST_IG_USER_MEDIA_PUBLISH", kind: "write" },
+    // Solo lectura: devuelve el enlace público (permalink) de una publicación ya publicada
+    // (parámetros verificados en la definición en vivo el 2026-09-26: ig_media_id, fields).
+    { slug: "INSTAGRAM_GET_IG_MEDIA", kind: "read" },
   ],
 };
 
