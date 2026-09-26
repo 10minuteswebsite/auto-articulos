@@ -8,6 +8,11 @@ import { friendlyConnectionError } from "@/lib/composio-error-message";
 
 type Connection = { connected: boolean; username?: string };
 
+/** «@usuario»; si el usuario guardado ya es un correo (trae «@»), se muestra tal cual. */
+function devToHandle(username: string): string {
+  return username.includes("@") ? username : `@${username}`;
+}
+
 export default function DevToSection({ allowed = true }: { allowed?: boolean }) {
   const [connection, setConnection] = useState<Connection | null>(null);
   const [username, setUsername] = useState("");
@@ -47,7 +52,7 @@ export default function DevToSection({ allowed = true }: { allowed?: boolean }) 
         setMessage({ ok: false, text: friendlyConnectionError(result.error, "No se pudo conectar DEV.to. Revisa los pasos e inténtalo de nuevo.") });
         return;
       }
-      setJustConnected(result.username ? `@${result.username}` : "DEV.to");
+      setJustConnected(result.username ? devToHandle(result.username) : "DEV.to");
       setApiKey("");
       setEditing(false);
       await load();
@@ -117,7 +122,7 @@ export default function DevToSection({ allowed = true }: { allowed?: boolean }) 
         </>
       ) : (
         <>
-          <ConnectionActiveBox label="Cuenta conectada" value={connection?.username ? `@${connection.username}` : null} />
+          <ConnectionActiveBox label="Cuenta conectada" value={connection?.username ? devToHandle(connection.username) : null} />
           <ConnectionActions
             network="devto"
             disabled={saving}
