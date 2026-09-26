@@ -11,7 +11,6 @@ export type { ReturnResult } from "@/components/connection-return-context";
 export const LEGACY_RETURN_NETWORKS: Record<string, { label: string; lead: string; choice: string | null; accountField: string | null }> = {
   threads: { label: "Threads", lead: "Conexión administrada desde esta tarjeta. Autoriza aquí la cuenta de Threads que usará SEO TOTAL.", choice: null, accountField: "threadsUsername" },
   linkedin: { label: "LinkedIn", lead: "Conexión administrada desde esta tarjeta. Autoriza aquí la cuenta de LinkedIn que usará SEO TOTAL.", choice: null, accountField: "linkedinUsername" },
-  pinterest: { label: "Pinterest", lead: "", choice: "el tablero", accountField: null },
   tumblr: { label: "Tumblr", lead: "", choice: "el blog", accountField: null },
   blogger: { label: "Blogger", lead: "", choice: "el blog", accountField: null },
   "business-profile": { label: "Google Business Profile", lead: "Conexión administrada desde esta tarjeta. Conecta la cuenta de Google que administra tu Perfil de Negocio.", choice: null, accountField: null },

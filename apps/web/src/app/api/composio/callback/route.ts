@@ -10,6 +10,7 @@ const CONNECTION_SLUG: Record<string, string> = {
   google_analytics: "google-analytics",
   facebook: "facebook",
   instagram: "instagram",
+  pinterest: "pinterest",
 };
 
 /**
@@ -35,6 +36,6 @@ export async function GET(request: NextRequest) {
     if (conexion) back.searchParams.set("conexion", conexion);
   }
   // ANALÍTICAS lee datos (Google); DIFUSIÓN publica (Facebook, Instagram).
-  back.searchParams.set("vista", app === "facebook" || app === "instagram" ? "difusion" : "analiticas");
+  back.searchParams.set("vista", app === "facebook" || app === "instagram" || app === "pinterest" ? "difusion" : "analiticas");
   return NextResponse.redirect(back);
 }

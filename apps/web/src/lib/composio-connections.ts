@@ -45,6 +45,7 @@ export interface ConnectingUser {
   disabledModules?: string | null;
   allowFacebookPublishing?: boolean;
   allowInstagramPublishing?: boolean;
+  allowPinterestPublishing?: boolean;
 }
 
 /** Acceso al módulo: administradores y quien tenga «Habilitado». */
@@ -56,6 +57,7 @@ export function canUseComposioModule(user: ConnectingUser): boolean {
 export function userMayConnectApp(user: ConnectingUser, app: ComposioAppId): boolean {
   if (app === "facebook") return user.allowFacebookPublishing === true;
   if (app === "instagram") return user.allowInstagramPublishing === true;
+  if (app === "pinterest") return user.allowPinterestPublishing === true;
   return true;
 }
 
@@ -120,6 +122,8 @@ function selectionLabel(app: ComposioAppId, row: SelectionFields): string | null
       return row.pageId ? (row.pageName ?? row.pageId) : null;
     case "instagram":
       return row.igAccountId ? (row.username ? `@${row.username}` : row.igAccountId) : null;
+    case "pinterest":
+      return row.pageId ? (row.pageName ?? row.pageId) : null;
   }
 }
 
@@ -410,6 +414,10 @@ export async function saveSelection(user: ConnectingUser, appId: unknown, option
       break;
     case "instagram":
       data = { igAccountId: chosen.id, username: chosen.label.replace(/^@/, "") };
+      break;
+    case "pinterest":
+      // El tablero reutiliza pageId/pageName (sin migración).
+      data = { pageId: chosen.id, pageName: chosen.label };
       break;
   }
   await prisma.composioConnection.update({ where: { id: row.id }, data });

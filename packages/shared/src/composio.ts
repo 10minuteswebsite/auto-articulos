@@ -228,6 +228,7 @@ const APP_TOOLKIT: Record<ComposioAppId, string> = {
   google_analytics: "google_analytics",
   facebook: "facebook",
   instagram: "instagram",
+  pinterest: "pinterest",
 };
 
 export interface ToolResult {

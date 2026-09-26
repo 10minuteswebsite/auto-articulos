@@ -27,6 +27,7 @@ import {
   composioFacebookPost,
   composioInstagramPost,
   composioInstagramPermalink,
+  composioPinterestPin,
   methodFor,
   friendlyPublishError,
 } from "@auto-articulos/shared";
@@ -39,7 +40,7 @@ import { deriveDevToEditorialTags, isDevToEligible } from "./devtoEditorial";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_IMAGE_URL = "https://api.openai.com/v1/images/generations";
 
-async function getComposioSocialAccount(userId: string, app: "facebook" | "instagram") {
+async function getComposioSocialAccount(userId: string, app: "facebook" | "instagram" | "pinterest") {
   const [user, connection, setting] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId }, select: { email: true, role: true, disabledModules: true } }),
     prisma.composioConnection.findFirst({ where: { userId, app, status: "ACTIVE" }, orderBy: { updatedAt: "desc" }, select: { connectedAccountId: true, pageId: true, igAccountId: true, pageName: true, username: true } }),
@@ -734,6 +735,25 @@ async function processPinterestJob(job: {
   articleTitle: string;
   suggestedText: string;
 }): Promise<boolean> {
+  const composio = await getComposioSocialAccount(job.userId, "pinterest");
+  if (composio?.pageId) {
+    await validateArticleUrl(job.articleUrl);
+    const composioImage = await getArticleOpenGraphImage(job.articleUrl);
+    if (!composioImage) throw new Error("El artículo no tiene una imagen OG pública para Pinterest.");
+    const pin = await composioPinterestPin(composio, {
+      boardId: composio.pageId,
+      title: job.articleTitle,
+      description: truncatePlainCaption(job.suggestedText.replace("[ENLACE]", "").trim(), 500),
+      link: job.articleUrl,
+      imageUrl: composioImage,
+    });
+    await prisma.socialOpportunity.update({
+      where: { id: job.id },
+      data: { status: "published", postId: pin.link ?? pin.id ?? "", publishedAt: new Date(), errorLog: null },
+    });
+    if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Pinterest (${composio.pageName ?? composio.pageId})${pin.id ? ` - ID: ${pin.id}` : ""}` } });
+    return true;
+  }
   const integration = await prisma.pinterestIntegration.findUnique({ where: { userId: job.userId } });
   if (!integration) throw new Error("Pinterest no está configurado en tu cuenta.");
   if (!integration.boardId) throw new Error("Pinterest está conectado, pero todavía no has seleccionado un tablero.");

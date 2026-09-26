@@ -61,6 +61,7 @@ const APP_NOTES: Record<string, string> = {
     "Permite publicar en tu Página de Facebook desde SEO TOTAL. Las Stories no se ofrecen cuando esta conexión está activa.",
   instagram:
     "Permite publicar imágenes con texto en tu cuenta Business o Creator de Instagram. Las Stories no se ofrecen cuando esta conexión está activa.",
+  pinterest: "Permite publicar tus artículos como Pins con imagen y enlace en el tablero de Pinterest que elijas.",
 };
 
 const CHOOSE_TITLE: Record<string, string> = {
@@ -68,6 +69,7 @@ const CHOOSE_TITLE: Record<string, string> = {
   google_analytics: "Elige la propiedad que usarás",
   facebook: "Elige la Página que usarás",
   instagram: "Elige la cuenta de Instagram que usarás",
+  pinterest: "Elige el tablero que usarás",
 };
 
 const CHOOSE_NOTE: Record<string, string> = {
@@ -79,6 +81,7 @@ const CHOOSE_NOTE: Record<string, string> = {
     "Elige la Página de tu negocio, no tu perfil personal. SEO TOTAL publicará solo en la Página que elijas; las demás no se usarán.",
   instagram:
     "Solo aparecen las cuentas Business o Creator vinculadas a una Página de Facebook. SEO TOTAL publicará solo en la que elijas.",
+  pinterest: "Elige el tablero de esta cuenta donde se publicarán los Pins; los demás no se usarán.",
 };
 
 const CONNECTION_STEPS: Record<string, string[]> = {
@@ -110,6 +113,13 @@ const CONNECTION_STEPS: Record<string, string[]> = {
     "Elige la cuenta de Instagram correcta y pulsa Aprobar y guardar.",
     "Pulsa Probar conexión y comprueba el mensaje verde.",
   ],
+  pinterest: [
+    "Abre Pinterest en otra pestaña del mismo navegador.",
+    "Confirma que estás dentro de la cuenta de Pinterest que quieres usar.",
+    "Pulsa Nueva conexión y autoriza el acceso solicitado.",
+    "Elige el tablero correcto y pulsa Aprobar y guardar.",
+    "Pulsa Probar conexión y comprueba el mensaje verde.",
+  ],
 };
 
 const STATUS_LABEL: Record<Connection["status"], { text: string; color: string }> = {
@@ -131,6 +141,7 @@ const CHOSEN_NOUN: Record<string, string> = {
   google_analytics: "la propiedad",
   facebook: "la Página",
   instagram: "la cuenta de Instagram",
+  pinterest: "el tablero",
 };
 
 const SUCCESS_TITLE: Record<string, string> = {
@@ -138,6 +149,7 @@ const SUCCESS_TITLE: Record<string, string> = {
   google_analytics: "Google Analytics quedó conectado correctamente",
   facebook: "Facebook quedó conectado correctamente",
   instagram: "Instagram quedó conectado correctamente",
+  pinterest: "Pinterest quedó conectado correctamente",
 };
 
 const SUCCESS_SELECTION_LABEL: Record<string, string> = {
@@ -145,6 +157,7 @@ const SUCCESS_SELECTION_LABEL: Record<string, string> = {
   google_analytics: "Propiedad conectada",
   facebook: "Página conectada",
   instagram: "Cuenta conectada",
+  pinterest: "Tablero conectado",
 };
 
 export default function ComposioConnect({ apps, embedded = false, inline = false, activeOnly = false, showInactiveActions = false }: ComposioConnectProps = {}) {
@@ -340,7 +353,7 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
           if (inline && showInactiveActions && connection.status !== "ACTIVE") {
             return (
               <button key={connection.app} type="button" onClick={() => connect(connection.app)} disabled={busy !== null} style={{ ...secondaryButtonStyle, marginTop: 12 }}>
-                {isBusy ? "Abriendo…" : `Nueva conexión de ${connection.app === "facebook" ? "Facebook" : "Instagram"}`}
+                {isBusy ? "Abriendo…" : `Nueva conexión de ${connection.app === "facebook" ? "Facebook" : connection.app === "pinterest" ? "Pinterest" : "Instagram"}`}
               </button>
             );
           }
@@ -407,7 +420,9 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                           ? "Página de Facebook conectada:"
                           : connection.app === "instagram"
                             ? "Cuenta de Instagram conectada:"
-                            : "Propiedad conectada:"
+                            : connection.app === "pinterest"
+                              ? "Tablero de Pinterest conectado:"
+                              : "Propiedad conectada:"
                         : "Conectado con:"}
                     </strong>{" "}{connection.selection}
                   </p>
