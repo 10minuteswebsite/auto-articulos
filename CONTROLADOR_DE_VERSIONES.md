@@ -3670,3 +3670,102 @@ COORDINACIÓN A LA FECHA DE ESTA ENTRADA.
 - Verificado en Producción (sesión admin, cuenta de pruebas Lorena): secciones Cuenta,
   Acceso, Difusión, Imágenes con IA, Límites de artículos, Acciones e Historial; 16
   formatos de difusión; sin títulos antiguos. Sin migraciones. Capitanía liberada.
+
+## Versión desplegada — 2026-09-26 — CONEXION COMPOSIO mejoras UX 3/4/6/7/8/9/10 + piloto Facebook/Instagram
+
+- **Commits/PRs (fusionados en ese orden sobre `main`, `d8c2adfd`):** PR #226 (errores de
+  conexión en español claro, mejora 10; traductor `friendlyConnectionError`, nunca JSON ni
+  inglés); PR #228 (mejoras 3, 6, 7, 8, 9: dropdown ordenado con selección única, éxito con
+  nombre y código, «Probar conexión» corta sin listar otras cuentas, botón «Volver al menú
+  de Conexiones», sin pasos si ya está activa); PR #229 (mejora 4: sitemap al guardar la
+  propiedad de Search Console — «ya estaba en Google» / «Enviamos tu sitemap», sin
+  migración; manual de usuario actualizado); PR #227 (workflows: pasan
+  `COMPOSIO_PILOT_USERS_FACEBOOK/INSTAGRAM` al worker, independiente, sin variables no
+  cambia el comportamiento).
+- **Verificado en localhost:3001** (cuenta de Lorena): dropdown, éxito con nombre+código,
+  sitemap en éxito, prueba con error claro, botón de volver, pasos ocultos. `tsx --test`:
+  10 en verde. `tsc` web limpio. La llamada real a Google/Composio del sitemap solo se
+  probó después en producción con una cuenta real.
+- **Piloto habilitado:** variables de repo `COMPOSIO_PILOT_USERS_FACEBOOK` y
+  `COMPOSIO_PILOT_USERS_INSTAGRAM` = `lorenalvarez30@gmail.com`; módulo «Conexión por
+  Composio» habilitado para Lorena. Sin tocar `COMPOSIO_CONSUMER_READY.*` ni
+  `COMPOSIO_ROUTING_ENABLED`.
+- **Pendientes abiertos al cierre de este lote:** #11 (aviso rojo «PASO 1 DE 2» salía
+  también a usuarios nuevos), #12 (el cliente no debe ver la palabra «Composio»), #13
+  (enlace roto de Facebook en Historial).
+- **Responsable:** Claude. **Estado:** DESPLEGADA.
+
+## Versión desplegada y verificada — 2026-09-26 — Piloto Facebook/Instagram por Composio en producción
+
+- **Piloto:** Lorena Álvarez (`lorenalvarez30@gmail.com`, userId
+  `cms8cv2f40000x3xauyqqeenc`).
+- **Producción verificada con los Logs de Composio** (proyecto
+  `10minuteswebsite_workspace_first_project`): Facebook Page
+  `FACEBOOK_CREATE_PHOTO_POST` Success 08:40:23 hora local Milton (el post apareció en la
+  Página); Instagram `INSTAGRAM_POST_IG_USER_MEDIA` 08:47:43 e
+  `INSTAGRAM_POST_IG_USER_MEDIA_PUBLISH` 08:47:47, ambos Success.
+- Generación limitada a `facebook-page` e `instagram-post`, sin Stories. El worker normal
+  (cada 5 min) tomó las publicaciones antes que `worker-test.yml`; para confirmar la vía se
+  usaron los Logs de Composio.
+- **Pendientes:** #11, #12, #13 (ver entrada anterior); mensaje en Historial que indique la
+  vía usada; ampliar a más usuarios o cambiar `COMPOSIO_CONSUMER_READY.facebook/instagram`
+  solo con autorización de Milton.
+- **Responsable:** Claude. **Estado:** VERIFICADA EN PRODUCCIÓN (piloto acotado a Lorena).
+
+## Versión desplegada — 2026-09-26 — Lote pendientes 11/12/13 + paridad Facebook/Instagram por Composio
+
+- **Commit:** `0445e0b2` (PR #230, squash). Vercel Production `success`. Verificado en
+  pantalla real de Lorena.
+- **#11:** el aviso rojo solo sale ahora a cuentas que ya tenían Search Console conectado
+  por la vía anterior.
+- **#12:** el cliente ya no ve la palabra «Composio» en interfaz, errores ni manual
+  (permanecen el menú y el módulo de Administración).
+- **#13:** Historial usa el enlace real de Facebook; sin enlace conocido no se muestra el
+  botón (Instagram queda sin enlace en este lote: el permalink exige una operación nueva de
+  Composio fuera de la lista permitida).
+- Facebook e Instagram pasan al mismo patrón visual y de UX que GSC/GA (tarjeta propia, 5
+  pasos, notas al elegir, mensajes de retorno, dropdown, éxito con nombre y código, probar
+  conexión, volver al menú). Manual actualizado.
+- **Pendiente:** permalink de Instagram; mensaje en historial de la vía usada; lanzamiento
+  a todos los usuarios (decisión de Milton; para el lanzamiento a todos considerar aviso de
+  reconexión para quienes tengan Facebook/Instagram por la vía anterior).
+- **Responsable:** Claude. **Estado:** DESPLEGADA Y VERIFICADA.
+
+## Versión desplegada y verificada — 2026-09-26 — Redes: estandarización completa (patrón GSC/GA en todas las conexiones)
+
+- **Commits:** PR #231 (retorno de autorizaciones y errores claros) y PR #234
+  (componentes estándar + Threads/LinkedIn/Pinterest/Tumblr/Blogger/Bluesky/DEV.to/Google
+  Business Profile/Bing con el patrón de GSC/GA; incluye el trabajo de los PR #232 y #233,
+  cerrados sin fusión propia) fusionados en `main` (`a23f532d`). Vercel Production
+  `success`. Sin migración ni cambio de banderas.
+- **Verificado en producción con las conexiones reales de Lorena Álvarez:** las 10
+  tarjetas de Difusión en el patrón estándar; «Probar conexión» real OK en Tumblr, Blogger,
+  Bluesky, DEV.to, LinkedIn y Google Business Profile. Threads responde 403 en la prueba
+  porque a esa cuenta no se le activó «Publicar en Threads» en Administración (dato, no
+  error; su tarjeta se muestra por la regla general del módulo).
+- **Auditoría visual medida** (estilos y distancias) contra GSC/GA: tres auditorías
+  consecutivas sin diferencias en estado conectado y sin conectar.
+- **Pendiente menor al cierre:** DEV.to mostraba «@» delante de un usuario que ya es un
+  correo; permalink de Instagram en Historial; retirar la página antigua «Redes Sociales»
+  (los tres se resolvieron después, ver la entrada siguiente, PR #244).
+- **Responsable:** Claude. **Estado:** DESPLEGADA Y VERIFICADA.
+
+## Commits — 2026-09-26 — ajustes finales de redes y Bing (Coordinación no detalla el formato completo de auditoría/producción para estos tres)
+
+- PR #239 (`c07425e3`): Bing vuelve a mostrar el motivo técnico de una reconexión fallida
+  (solo administradores) y no ofrece «Nueva conexión» mientras carga.
+- PR #244 (`7efe035`): enlace real de Instagram en Historial (guarda el permalink al
+  publicarse vía `INSTAGRAM_GET_IG_MEDIA`, de solo lectura, y lo consulta para
+  publicaciones antiguas al pulsar «Ver en la red social»), corrige el «@» de más delante
+  de un usuario que ya es un correo en DEV.to, y retira la página antigua «Redes Sociales»
+  (la URL antigua redirige a Configuración → Conexiones → Difusión).
+- PR #245 (`9e187a8`): la conexión de Bing siempre empieza en el dominio registrado
+  (`https://seototal.lasolucionweb.com`), evitando que se rompa por cookies/sesión al pasar
+  por el dominio de Vercel.
+- Coordinación no registra para estos tres PR el mismo detalle de auditoría/producción que
+  otros lotes (Fecha y hora exacta, Auditoría 1/2/3, Logs verificados, etc.); esta entrada
+  transcribe lo que sí consta en la sección "Dónde estamos" del traspaso de Pinterest
+  (2026-09-26) y en el propio mensaje de cada commit. Quien retome debe completar el
+  detalle si hiciera falta.
+- **Estado:** FUSIONADOS A `main` según Coordinación; confirmación de despliegue detallada
+  pendiente.
