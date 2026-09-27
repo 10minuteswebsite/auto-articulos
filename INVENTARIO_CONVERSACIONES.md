@@ -1748,3 +1748,29 @@ SIGUIENTE ACCIÓN EXACTA: fusionar PR #236 (documentación)
 RESPONSABLE SIGUIENTE: Milton
 FECHA Y HORA DE LIBERACIÓN: 2026-09-26 (capitanía liberada con scripts/migration-coordinator.sh)
 ```
+
+### Addendum (agregado por la tarea programada diaria de propagación, 2026-09-27, sin editar la Parte A ni la Parte B anteriores)
+
+Reserva activa nueva declarada en `COORDINACION_CLAUDE_CODEX.md` (sección "TRASPASO A NUEVA
+CONVERSACIÓN · REDES POR COMPOSIO · MIGRAR PINTEREST — 2026-09-26 — Claude"), verificada
+EN VIVO con `git fetch origin claude/pinterest-composio` + `git merge-base --is-ancestor`:
+
+- **Rama:** `claude/pinterest-composio`. **Confirmado activa:** `git merge-base
+  --is-ancestor origin/claude/pinterest-composio origin/main` devuelve que NO es ancestro
+  de `origin/main` — sigue sin fusionar.
+- **Commit de punta:** `63d1edec` ("wip: Pinterest por Composio — registro en shared y
+  web (NO compila todavía: faltan switch)"). El propio mensaje del commit confirma que el
+  build no pasa todavía.
+- **Worktree según Coordinación (no verificable desde este entorno remoto, sin acceso al
+  filesystem de Milton):** `/Users/miltondavila/.codex/worktrees/produccion-validacion-composio/Creador de articulos`.
+- **Tarea:** migrar Pinterest a Composio (Threads queda con conexión propia). Coordinación
+  detalla una lista larga de archivos por tocar (`packages/shared/src/composio.ts`,
+  `composio-connections.ts`, `composio-options.ts`, `composio-route.ts`,
+  `api/composio/callback/route.ts`, `ComposioConnect.tsx`, `PinterestSection.tsx`,
+  `social-opportunities/generate/route.ts`, `apps/worker/src/socialPublish.ts`) — no se
+  transcribe aquí para no duplicar; ver el detalle completo en `COORDINACION_CLAUDE_CODEX.md`.
+- **Bloqueado en varios pasos por acciones que solo puede hacer Milton** (iniciar sesión en
+  el panel de Composio, crear el auth config de Pinterest, definir la variable de repo del
+  piloto, conectar una cuenta real).
+- Ninguna acción tomada por esta tarea programada sobre esa rama ni ese worktree: solo se
+  verificó y se deja registrada la reserva.
