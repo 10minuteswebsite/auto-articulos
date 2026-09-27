@@ -240,6 +240,17 @@ HANDOFF, solo alimenta ideas hacia él).
   las cuentas piloto que usan la conexión por Composio, la conexión la
   gestiona ese servicio. Marcada ahí como "tarea aparte pendiente"; sin
   fecha límite ni responsable asignado todavía.
+- **(27/9/2026, origen: tarea programada diaria de propagación, al revisar
+  `COORDINACION_CLAUDE_CODEX.md` → "TRASPASO A NUEVA CONVERSACIÓN · REDES POR
+  COMPOSIO · MIGRAR PINTEREST — 2026-09-26 — Claude", sección "5. Otros
+  pendientes (menores)")** Investigar el error 500 de `POST
+  /api/me/upload-image` visto en los logs de producción (13:29 UTC del
+  26/9, un usuario; mensaje "Error: Fail…"). Sin más detalle todavía; nadie
+  asignado.
+- **(27/9/2026, origen: la misma sección de Coordinación citada arriba)**
+  Revisar el Historial de Lorena Álvarez: tiene 6 publicaciones antiguas de
+  Pinterest y 5 de Google Business Profile marcadas con error; confirmar si
+  el mensaje traducido de esos errores es claro para la persona usuaria.
 
 ## Hecho
 
