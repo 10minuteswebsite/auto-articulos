@@ -32,11 +32,18 @@ async function main() {
   // deploy del fix de persistencia (PR #247). Buscar por nombre porque no
   // tenemos su email a mano en este script.
   const zuzolo = await prisma.user.findMany({
-    where: { name: { contains: "Zuzolo", mode: "insensitive" } },
+    where: {
+      OR: [
+        { firstName: { contains: "Zuzolo", mode: "insensitive" } },
+        { lastName: { contains: "Zuzolo", mode: "insensitive" } },
+        { email: { contains: "zuzolo", mode: "insensitive" } },
+      ],
+    },
     select: {
       id: true,
       email: true,
-      name: true,
+      firstName: true,
+      lastName: true,
       hasImageCredits: true,
       platformDomain: true,
       updatedAt: true,
