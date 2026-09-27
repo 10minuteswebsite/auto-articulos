@@ -9865,4 +9865,52 @@ FECHA Y HORA DE LIBERACIÓN: 2026-09-26
 - Lorena no tiene activado «Publicar en Threads» en Administración (por eso `Probar conexión` de Threads da 403); Threads se queda con conexión propia.
 - Historial de Lorena: 6 publicaciones de Pinterest y 5 de Google Business Profile con error (antiguas); revisar si el mensaje traducido es claro.
 - Facebook/Instagram a todos los usuarios: decisión de Milton tras la respuesta de Composio.
+
+## Claude (tarea programada diaria de propagación) — 2026-09-27
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-09-26
+(commit `ec7a5da`). Se revisó el diff de `COORDINACION_CLAUDE_CODEX.md` entre `ec7a5da` y
+`origin/main` actual (`7aebf5f`): 173 líneas nuevas repartidas en 13 secciones, todas del
+26/9, del proyecto `CONEXION COMPOSIO` (mejoras UX 3/4/6/7/8/9/10, piloto y resultado de
+Facebook/Instagram, lote de pendientes 11/12/13, estandarización completa de redes y su
+cierre en producción), del proyecto `REPARACION DE ADMIN` (tarea activa y su capitanía
+liberada — ya estaban propagadas a `CONTROLADOR_DE_VERSIONES.md` e
+`INVENTARIO_CONVERSACIONES.md` por el propio commit `4db022a`, no se duplicó nada), el
+archivado de `CONEXION DE GSC NO SE DESCONECTA` (también ya propagado por el commit
+`2de3664`, no se duplicó), y el traspaso a nueva conversación para migrar Pinterest a
+Composio.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: agregadas 5 entradas nuevas cubriendo lo que faltaba sin
+  propagar — el lote de mejoras UX 3/4/6/7/8/9/10 (PRs #226, #228, #229, #227), el piloto
+  de Facebook/Instagram validado en producción con los Logs de Composio, el lote de
+  pendientes 11/12/13 (PR #230), el cierre de la estandarización completa de redes (PRs
+  #231/#234) verificado con las conexiones reales de Lorena, y una entrada final que
+  transcribe lo poco que Coordinación detalla de los PR #239, #244 y #245 (Bing, enlace de
+  Instagram en Historial, retiro de la página antigua «Redes Sociales»), señalando que para
+  estos tres Coordinación no da el mismo detalle de auditoría/producción que los demás
+  lotes.
+- `INVENTARIO_CONVERSACIONES.md`: agregado un addendum a la Parte A con la reserva activa
+  de la rama `claude/pinterest-composio` (traspaso «MIGRAR PINTEREST»), verificado en vivo
+  con `git fetch` + `git merge-base --is-ancestor` que la rama sigue sin fusionar (commit de
+  punta `63d1edec`, el propio mensaje dice que no compila todavía). No se tocó la Parte B
+  porque la tarea sigue activa, no cerrada.
+- `TO-DO.md`: agregados dos ítems sueltos a "Pendientes" — investigar el error 500 de
+  `POST /api/me/upload-image` visto en producción, y revisar si el mensaje traducido de los
+  errores antiguos de Pinterest/Google Business Profile en el Historial de Lorena es claro.
+  No se copió "Facebook/Instagram a todos los usuarios" porque ya está tracked activamente
+  en Coordinación como decisión pendiente de Milton dentro de un proyecto con capitán
+  propio, igual que el criterio usado en la corrida del 2026-09-26 para las mejoras de UX.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. Se verificó contra el código real
+  (no solo transcrito de Coordinación) que los desarrolladores ya actualizaron el manual en
+  el mismo lote de cada PR con cambios visibles (sitemap de GSC, patrón estándar de
+  Facebook/Instagram/redes/Bing, retiro de la página antigua «Redes Sociales» con su
+  redirección) — no había ningún cambio visible para el cliente sin reflejar.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. No se encontró ninguna mención nueva a
+  árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
 - Ramas locales `claude/*` antiguas sin subir de proyectos previos: no son de este trabajo; no tocar.
