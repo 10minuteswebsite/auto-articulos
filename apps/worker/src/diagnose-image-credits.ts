@@ -34,19 +34,17 @@ async function main() {
   const zuzolo = await prisma.user.findMany({
     where: {
       OR: [
-        { firstName: { contains: "Zuzolo", mode: "insensitive" } },
-        { lastName: { contains: "Zuzolo", mode: "insensitive" } },
+        { name: { contains: "Zuzolo", mode: "insensitive" } },
         { email: { contains: "zuzolo", mode: "insensitive" } },
       ],
     },
     select: {
       id: true,
       email: true,
-      firstName: true,
-      lastName: true,
+      name: true,
       hasImageCredits: true,
       platformDomain: true,
-      updatedAt: true,
+      createdAt: true,
     },
   });
   console.log("Cuenta(s) de Rafael Zuzolo:", JSON.stringify(zuzolo, null, 2));
