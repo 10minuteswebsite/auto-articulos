@@ -193,12 +193,26 @@ export default function OportunidadesPage() {
       ? "Tu límite mensual se renovará al comenzar el próximo mes."
       : "Puedes intentarlo en otro lote cuando tengas cupo disponible.";
 
-  const confirmImageCredits = useCallback(() => {
+  const confirmImageCredits = useCallback(async () => {
+    // Persistir en la base de datos, no solo en el estado local: si solo
+    // cambiara el estado del navegador, el aviso volvía a aparecer en la
+    // próxima recarga (o en otra pestaña) porque la consulta al servidor
+    // seguía devolviendo hasImageCredits=false.
     setHasImageCredits(true);
     setMessage({
       kind: "info",
       text: "Has indicado que ya recibiste créditos. Puedes intentar continuar; si aún no están activos, vuelve aquí y solicítalos.",
     });
+    try {
+      await fetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hasImageCredits: true }),
+      });
+    } catch {
+      // Si falla la persistencia, el estado local ya deja reintentar de
+      // inmediato; en la próxima carga se revalidará contra el servidor.
+    }
   }, []);
 
   async function acceptDisclosure() {
