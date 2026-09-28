@@ -80,7 +80,7 @@ export default function PreValidationGuard({
     firstMissingUrl = "/dashboard/configuracion?tab=wizard";
   } else if (type === "oportunidades" && !isGoogleReady) {
     firstMissingName = "Paso 4: Google Search Console";
-    firstMissingUrl = "/dashboard/configuracion?tab=wizard";
+    firstMissingUrl = "/dashboard/configuracion/conexiones?conexion=google-search-console";
   } else if (!hasImageCredits) {
     firstMissingName = "Solicitar créditos de imagen";
     firstMissingUrl = helpUrl ?? "#";
@@ -128,7 +128,7 @@ export default function PreValidationGuard({
             missingText: !googleConnected
               ? "Falta conectar"
               : "Falta seleccionar propiedad",
-            actionUrl: "/dashboard/configuracion?tab=wizard",
+            actionUrl: "/dashboard/configuracion/conexiones?conexion=google-search-console",
             actionLabel: "Conectar GSC",
           },
         ]

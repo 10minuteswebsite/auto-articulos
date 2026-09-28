@@ -122,7 +122,7 @@ nada de tu cuenta.
 
 ### Buscadores
 
-Puedes conectar Google Search Console y Bing Webmaster. Selecciona la propiedad o sitio correcto después de conectar la cuenta. Estas conexiones permiten analizar contenido inteligente y, cuando la indexación está activada, enviar artículos a buscadores según la configuración disponible.
+Puedes conectar Google Search Console y Bing Webmaster. Selecciona la propiedad o sitio correcto después de conectar la cuenta. Si Oportunidades te muestra «Falta conectar» en Google Search Console, el botón **Conectar GSC** te lleva directo a esa tarjeta en Conexiones. Estas conexiones permiten analizar contenido inteligente y, cuando la indexación está activada, enviar artículos a buscadores según la configuración disponible.
 
 ### Redes sociales
 

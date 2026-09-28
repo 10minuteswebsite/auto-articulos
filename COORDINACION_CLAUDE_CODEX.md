@@ -1,5 +1,19 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — fix enlace «Conectar GSC» y estado de GSC en Oportunidades — 2026-09-28
+
+- Reclamo de capitanía (sin migración): `migration-coordinator.sh claim "Claude"`.
+- Causa: `/dashboard/oportunidades` solo leía la conexión antigua de Google
+  (`/api/search-integrations/google`), mientras la tarjeta de Conexiones usa
+  Composio. Resultado: aviso «Falta conectar» junto a «Conexión activa».
+- Arreglo: Oportunidades también consulta `/api/composio/status` (mismo
+  criterio que el panel de Inicio) y el botón «Conectar GSC» apunta a
+  `/dashboard/configuracion/conexiones?conexion=google-search-console`.
+- Archivos: `oportunidades/page.tsx`, `PreValidationGuard.tsx`, `manual-usuario.ts`.
+- Auditorías: tsc sin errores en los archivos tocados, `git diff --check` OK.
+  Estado: PR abierta, pendiente de autorización de Milton para fusionar.
+
+
 ## Despliegue verificado — 2026-09-23 — PR #220
 
 - Se fusionó la PR #220 (`8d2cd706`) a `main` para publicar los cambios
