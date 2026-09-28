@@ -1,6 +1,6 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
-## Claude — fix enlace «Conectar GSC» y estado de GSC en Oportunidades — 2026-09-28
+## Claude — CIERRE fix «Conectar GSC», estado de GSC y conteo de categorías en Oportunidades — 2026-09-28
 
 - Reclamo de capitanía (sin migración): `migration-coordinator.sh claim "Claude"`.
 - Causa: `/dashboard/oportunidades` solo leía la conexión antigua de Google
@@ -11,7 +11,17 @@
   `/dashboard/configuracion/conexiones?conexion=google-search-console`.
 - Archivos: `oportunidades/page.tsx`, `PreValidationGuard.tsx`, `manual-usuario.ts`.
 - Auditorías: tsc sin errores en los archivos tocados, `git diff --check` OK.
-  Estado: PR abierta, pendiente de autorización de Milton para fusionar.
+  - También corregido: el aviso mostraba «0 categorías» porque Oportunidades no
+  pasaba `categoriesCount` al guard (Publicar sí lo pasaba).
+- Publicado: PR #251 fusionada (`50095a0d`) el 2026-09-28 con autorización
+  explícita de Milton, según el Protocolo de No Destrucción. Despliegue
+  Production en Vercel completado; el código nuevo está en los JS servidos.
+- Verificado en producción con la cuenta de jose antonio gomez velasco: entra
+  directo a Oportunidades, sin «Falta conectar» ni aviso de configuración.
+  Si un navegador aún muestra lo anterior, es caché local (Cmd+Shift+R).
+- Pendiente, fuera de alcance: los pasos 1-3 del guard aún envían al asistente
+  genérico `/dashboard/configuracion?tab=wizard`.
+- Capitanía liberada. Estado: CERRADO Y ARCHIVADO.
 
 
 ## Despliegue verificado — 2026-09-23 — PR #220
