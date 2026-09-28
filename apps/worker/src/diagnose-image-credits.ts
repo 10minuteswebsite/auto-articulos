@@ -27,6 +27,28 @@ async function main() {
   });
   console.log("Cuenta de pruebas (Lorena):", JSON.stringify(lorena, null, 2));
 
+  // Búsqueda puntual (27/9/2026): Milton reporta que a Rafael Zuzolo le
+  // sigue apareciendo el aviso de falta de créditos de imagen después del
+  // deploy del fix de persistencia (PR #247). Buscar por nombre porque no
+  // tenemos su email a mano en este script.
+  const zuzolo = await prisma.user.findMany({
+    where: {
+      OR: [
+        { name: { contains: "Zuzolo", mode: "insensitive" } },
+        { email: { contains: "zuzolo", mode: "insensitive" } },
+      ],
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      hasImageCredits: true,
+      platformDomain: true,
+      createdAt: true,
+    },
+  });
+  console.log("Cuenta(s) de Rafael Zuzolo:", JSON.stringify(zuzolo, null, 2));
+
   // Títulos recientes cuyo mensaje de error coincide con el detector de
   // créditos de imagen, para ver si el texto claro (displayMessage) se
   // guardó bien y en qué runs aparece.
