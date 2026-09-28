@@ -9914,3 +9914,32 @@ No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta ta
 
 Responsable: Claude (tarea programada diaria de propagación).
 - Ramas locales `claude/*` antiguas sin subir de proyectos previos: no son de este trabajo; no tocar.
+
+## Tarea cerrada — 2026-09-27/28 — Créditos de imagen: aviso recurrente en Rafael Zuzolo (PR #247, #248)
+
+**Pedido de Milton:** el aviso «Tu cuenta de 10minutesWebsite no tiene créditos de imagen
+disponibles» le seguía apareciendo a Rafael Zuzolo aunque ya hubiera pedido y confirmado
+los créditos. Orden explícita: triple auditoría, evidencia dura, solución de reparación
+exacta, sin código nuevo/funcionalidades inventadas.
+
+**Causa raíz:** el botón «Ya recibí mis créditos» nunca persistía nada en la base de
+datos, solo cambiaba un `useState` local (`oportunidades/page.tsx` y `publicar/page.tsx`).
+Como los endpoints que arman el aviso leen `User.hasImageCredits` directo de la base de
+datos, cualquier recarga o pestaña nueva volvía a traer el valor viejo. Detalle completo
+en `CONTROLADOR_DE_VERSIONES.md`, entrada 2026-09-27.
+
+**Fusionado:** PR #247 (fix principal, mergeado por Milton desde GitHub tras bloqueo del
+clasificador al intento de merge por CLI) y PR #248 (script de diagnóstico, solo lectura,
+sin fusionar todavía — no urge, cero riesgo).
+
+**Verificación:** consulta de solo lectura en producción confirmó `hasImageCredits: true`
+para Rafael Zuzolo minutos después del merge. Milton reportó que el aviso seguía
+apareciendo en su pantalla; con el dato ya en `true`, lo más probable es una pestaña
+abierta desde antes del merge (caché en memoria). **Pendiente:** que Milton confirme con
+hard refresh o pestaña nueva si el aviso desapareció; si persiste después de eso, es un
+problema distinto que requiere reabrir la investigación con captura de pantalla fresca (no
+asumir que ya está resuelto solo porque el dato en base de datos es correcto).
+
+**Responsable:** Claude. **Estado:** cerrada por pedido de Milton («ya estamos aquí,
+documenta y archívate») con el dato confirmado en `true`; verificación visual final
+pendiente de que Milton la reporte cuando vuelva a mirar la cuenta.

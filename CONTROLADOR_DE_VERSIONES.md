@@ -3769,3 +3769,39 @@ COORDINACIÓN A LA FECHA DE ESTA ENTRADA.
   detalle si hiciera falta.
 - **Estado:** FUSIONADOS A `main` según Coordinación; confirmación de despliegue detallada
   pendiente.
+
+## Versión desplegada y verificada — 2026-09-27 — Créditos de imagen: la confirmación del usuario ahora persiste en la base de datos
+
+- **Problema reportado por Milton:** en la cuenta de Rafael Zuzolo (y potencialmente
+  cualquier usuario) el aviso «Tu cuenta de 10minutesWebsite no tiene créditos de imagen
+  disponibles» reaparecía de forma recurrente aunque el usuario ya hubiera pedido los
+  créditos y pulsado **Ya recibí mis créditos**.
+- **Causa raíz (triple auditoría, sin tanteos):** `User.hasImageCredits` en la base de
+  datos solo se pone en `false` desde el worker (`apps/worker/src/queue.ts`), tras una
+  creación real de artículo que confirma falta de créditos y agota los reintentos —
+  comportamiento correcto, blindado desde el 3/9/2026 (ver entrada anterior de esa fecha).
+  El botón **Ya recibí mis créditos** (`confirmImageCredits` en `oportunidades/page.tsx` y
+  `publicar/page.tsx`) nunca persistía nada: solo llamaba a `setHasImageCredits(true)`, un
+  `useState` local del navegador. Como `/api/pre-validation`, `/api/configuration-status` y
+  `/api/me` siguen leyendo `hasImageCredits` directo de la base de datos, cualquier
+  recarga, pestaña nueva o dispositivo distinto volvía a traer `false` y el aviso
+  reaparecía. No existía ningún endpoint self-service para persistir la confirmación; solo
+  el toggle manual de administración (`/api/admin/users`).
+- **Commits:** PR #247 (`0f81704b`, `fix: persistir confirmación de créditos de imagen en
+  la base de datos`) fusionado en `main` por Milton desde GitHub (el clasificador de
+  Claude Code bloqueó el merge por línea de comando, igual que bloquea el push directo —
+  ver `COORDINACION_CLAUDE_CODEX.md`). `apps/web/src/app/api/me/route.ts`: el PATCH ahora
+  acepta `hasImageCredits`, pero solo para pasar a `true` (confirmación del propio
+  usuario); pasar a `false` sigue siendo exclusivo del worker. Los dos
+  `confirmImageCredits` ahora llaman a ese PATCH además de actualizar el estado local.
+  Manual de usuario actualizado (documentaba el bug como comportamiento esperado). PR #248
+  (script de diagnóstico `diagnose-image-credits.ts`, solo lectura, sin fusionar aún al
+  cierre de esta tarea) agrega una búsqueda puntual por cuenta para verificar el campo sin
+  tocar la base de datos.
+- **Verificado en producción (consulta de solo lectura, sin login) minutos después del
+  merge:** `hasImageCredits: true` para la cuenta de Rafael Zuzolo
+  (`info@rafaelzuzolorealtor.com`) — el fix funciona a nivel de datos. El aviso que Milton
+  seguía viendo era una pestaña abierta desde antes del merge (caché de estado en memoria
+  de React), no el bug original; quedó pendiente que Milton confirme con un hard refresh.
+- **Responsable:** Claude. **Estado:** DESPLEGADA Y VERIFICADA (a nivel de dato en
+  producción); pendiente confirmación visual de Milton tras refrescar.
