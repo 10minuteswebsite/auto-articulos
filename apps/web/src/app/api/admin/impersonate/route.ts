@@ -66,7 +66,8 @@ export async function POST(request: NextRequest) {
   response.cookies.set(IMPERSONATION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    // "lax": con "strict" la cookie se pierde al volver de Google/Composio y el callback OAuth ve al admin, no al cliente.
+    sameSite: "lax",
     path: "/",
     maxAge: IMPERSONATION_TTL_MS / 1000,
   });
