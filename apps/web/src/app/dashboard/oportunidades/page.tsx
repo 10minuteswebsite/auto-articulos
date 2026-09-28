@@ -88,6 +88,7 @@ export default function OportunidadesPage() {
     googleConnected: boolean;
     hasSiteUrl: boolean;
     hasCategories: boolean;
+    categoriesCount: number;
   } | null>(null);
   // Paneles reales de la cuenta (ver Category.panel), derivados de sus
   // categorías. [] en cuentas sin esta función — la enorme mayoría — y ahí
@@ -113,6 +114,7 @@ export default function OportunidadesPage() {
       categoriesResponse,
       promptsResponse,
       statsResponse,
+      composioResponse,
     ] = await Promise.all([
       fetch("/api/opportunities", { cache: "no-store" }),
       fetch("/api/me", { cache: "no-store" }),
@@ -121,6 +123,7 @@ export default function OportunidadesPage() {
       fetch("/api/categories", { cache: "no-store" }),
       fetch("/api/prompts", { cache: "no-store" }),
       fetch("/api/dashboard-stats", { cache: "no-store" }),
+      fetch("/api/composio/status", { cache: "no-store" }),
     ]);
     const data = await opportunitiesResponse.json().catch(() => ({}));
     if (opportunitiesResponse.ok) {
@@ -165,6 +168,17 @@ export default function OportunidadesPage() {
       if (typeof stats.publishedThisMonth === "number") setPublishedThisMonth(stats.publishedThisMonth);
     }
     const google = await googleResponse.json().catch(() => ({}));
+    // La tarjeta de Conexiones administra Search Console por Composio; sin
+    // consultarla aquí este aviso contradecía a esa pantalla.
+    const composio = composioResponse.ok
+      ? await composioResponse.json().catch(() => null)
+      : null;
+    const composioSearchConsole = Array.isArray(composio?.connections)
+      ? composio.connections.find((c: { app: string }) => c.app === "google_search_console")
+      : null;
+    const composioReady = Boolean(
+      composioSearchConsole?.status === "ACTIVE" && composioSearchConsole.selection,
+    );
     const categoriesData = await categoriesResponse.json().catch(() => ({}));
     const allCategories: { panel?: string }[] = Array.isArray(
       categoriesData.categories,
@@ -172,9 +186,10 @@ export default function OportunidadesPage() {
       ? categoriesData.categories
       : [];
     setSetupStatus({
-      googleConnected: Boolean(google.connected),
-      hasSiteUrl: Boolean(google.siteUrl),
+      googleConnected: Boolean(google.connected) || composioReady,
+      hasSiteUrl: Boolean(google.siteUrl) || composioReady,
       hasCategories: allCategories.length > 0,
+      categoriesCount: allCategories.length,
     });
     const panels = Array.from(
       new Set(allCategories.map((c) => c.panel).filter((p): p is string => Boolean(p))),
@@ -524,6 +539,7 @@ export default function OportunidadesPage() {
         type="oportunidades"
         credentialsConfigured={true}
         hasCategories={Boolean(setupStatus?.hasCategories)}
+        categoriesCount={setupStatus?.categoriesCount ?? 0}
         hasLanguage={Boolean(contentLanguage && contentLanguage.trim().length > 0)}
         languageName={activeLangName}
         hasImageCredits={hasImageCredits}
