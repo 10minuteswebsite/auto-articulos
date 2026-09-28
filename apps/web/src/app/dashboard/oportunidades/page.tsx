@@ -88,6 +88,7 @@ export default function OportunidadesPage() {
     googleConnected: boolean;
     hasSiteUrl: boolean;
     hasCategories: boolean;
+    categoriesCount: number;
   } | null>(null);
   // Paneles reales de la cuenta (ver Category.panel), derivados de sus
   // categorías. [] en cuentas sin esta función — la enorme mayoría — y ahí
@@ -188,6 +189,7 @@ export default function OportunidadesPage() {
       googleConnected: Boolean(google.connected) || composioReady,
       hasSiteUrl: Boolean(google.siteUrl) || composioReady,
       hasCategories: allCategories.length > 0,
+      categoriesCount: allCategories.length,
     });
     const panels = Array.from(
       new Set(allCategories.map((c) => c.panel).filter((p): p is string => Boolean(p))),
@@ -537,6 +539,7 @@ export default function OportunidadesPage() {
         type="oportunidades"
         credentialsConfigured={true}
         hasCategories={Boolean(setupStatus?.hasCategories)}
+        categoriesCount={setupStatus?.categoriesCount ?? 0}
         hasLanguage={Boolean(contentLanguage && contentLanguage.trim().length > 0)}
         languageName={activeLangName}
         hasImageCredits={hasImageCredits}
