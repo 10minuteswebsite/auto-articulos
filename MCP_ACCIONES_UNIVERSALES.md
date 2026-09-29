@@ -36,14 +36,34 @@ confirmación explícita.
 
 ## Estado de implementación
 
-- **Disponible hoy en ChatGPT:** `listar_oportunidades`,
-  `estado_de_publicaciones` (solo lectura).
-- **Implementado localmente, pendiente de validar/desplegar:** publicación de
-  oportunidades seleccionadas y publicación de títulos manuales dentro de una
-  categoría, ambas con previsualización y confirmación.
-- **Planificado:** las acciones de este catálogo. Cada una debe reutilizar las
-  reglas y handlers existentes de la aplicación; no duplicar lógica de cupos,
-  créditos, idioma, integraciones o permisos.
+- **Disponible hoy vía OAuth (Alexa+/ChatGPT) o token personal:**
+  `listar_oportunidades`, `crear_oportunidades`,
+  `publicar_oportunidades_seleccionadas`, `publicar_titulos_en_categoria`,
+  `publicar_categoria`, `estado_de_publicaciones` (sección 1 y 2 de este
+  catálogo), más `ver_resumen_cuenta`, `ver_estado_configuracion`,
+  `ver_integraciones`, `listar_categorias`, `listar_idiomas`,
+  `ver_limites_y_creditos` (sección 1, "Panorama y diagnóstico" — agregadas
+  29/9/2026, todas de solo lectura).
+- **Token personal de API (29/9/2026):** cualquier asistente de IA (Claude,
+  ChatGPT, Gemini, Meta MUSE u otro) puede conectarse ahora con un token que
+  el usuario genera y copia desde Configuración → Asistentes IA — sin pasar
+  por el registro de cliente OAuth que exige Alexa+. Detalle técnico e
+  infraestructura en `apps/web/src/lib/mcp/api-token.ts` y
+  `apps/web/src/app/api/mcp/token-lookup/route.ts` (la verificación por hash
+  no puede correr en el Edge Runtime del middleware — se resuelve con un
+  fetch interno a una ruta nodejs, documentado en ese archivo).
+- **Cómo sumar una función nueva:** crear o editar un archivo de dominio en
+  `apps/web/src/lib/mcp/tools/` (uno por sección de este catálogo, ej.
+  `social.ts` para la sección 5) que exporte un array de tools reusando el
+  route handler existente de la web, y sumarlo en
+  `apps/web/src/lib/mcp/tools/index.ts`. El servidor
+  (`apps/web/src/app/api/mcp/route.ts`) y el middleware no cambian nunca por
+  esto — así es como este catálogo queda "vivo" sin rediseñar nada cada vez.
+- **Planificado (secciones 3-7 de este catálogo):** indexación/sitemaps,
+  gestión de ejecuciones (cancelar/reintentar), acciones de redes sociales
+  (generar/editar/publicar propuestas), preferencias de cuenta (idioma,
+  firma) e integraciones (conectar/desconectar OAuth de terceros). Todas de
+  escritura — quedan para su propia auditoría, no se tocaron en este lote.
 
 ## 1. Panorama y diagnóstico
 

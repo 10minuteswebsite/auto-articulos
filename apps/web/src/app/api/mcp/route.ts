@@ -14,14 +14,17 @@ import { findTool, listToolsPayload } from "@/lib/mcp/tools";
 /**
  * Servidor MCP de SEO TOTAL — transporte "streamable HTTP".
  *
- * Es el endpoint al que se conecta un cliente MCP (Alexa+ actúa como cliente;
- * también sirve para Claude, ChatGPT o cualquier otro). Alexa+ for Builders
- * exige la versión 2025-11-25 de la spec y este transporte, no stdio.
+ * Es el endpoint al que se conecta un cliente MCP: Alexa+ (OAuth 2.1, exige
+ * la versión 2025-11-25 de la spec y este transporte, no stdio), y también
+ * cualquier otro asistente — Claude, ChatGPT, Meta MUSE, Gemini — con el
+ * token personal que cada usuario genera en Configuración → Asistentes IA
+ * (ver `apps/web/src/lib/mcp/api-token.ts`).
  *
  * La autenticación NO se hace acá: la resuelve el middleware, que valida el
- * Bearer y deja `x-user-id` en el request. Si no hay token válido, el
- * middleware corta con 401 antes de llegar a esta ruta — que es justo lo que
- * Alexa necesita para disparar el account linking por su cuenta.
+ * Bearer (OAuth, sesión firmada, o token personal) y deja `x-user-id` en el
+ * request. Si no hay token válido, el middleware corta con 401 antes de
+ * llegar a esta ruta — que es justo lo que Alexa necesita para disparar el
+ * account linking por su cuenta.
  */
 
 // Prisma no corre en Edge; estas tools van contra la base.

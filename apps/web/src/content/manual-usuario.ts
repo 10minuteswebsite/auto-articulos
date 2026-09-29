@@ -316,6 +316,17 @@ Si dejás cualquiera de los dos campos vacío, esta combinación no se genera �
 
 **Segmento de No Publicar:** en el campo "Temas a excluir" escribe, separados por comas, los temas o palabras que no quieres que la publicación inteligente tome en cuenta al proponer títulos (ej. "seguros de vida, criptomonedas, política") y presiona "Guardar segmento de no publicar". Cualquier título nuevo que toque uno de esos temas se descarta automáticamente antes de mostrarse en el contenido inteligente, sin importar cuánta demanda real tenga. Dejarlo vacío no cambia nada de tu cuenta.
 
+### Asistentes IA
+
+Ruta: /dashboard/configuracion/mcp
+
+Conecta cualquier asistente de inteligencia artificial (Claude, ChatGPT, Meta MUSE, u otro) directamente a tu cuenta, para consultar tus oportunidades, tu estado de publicaciones y publicar artículos hablando o escribiendo con él.
+
+1. Pulsa **Generar token** (o **Regenerar token** si ya tenías uno; el anterior deja de funcionar de inmediato).
+2. El valor del token solo se muestra una vez, en el momento de generarlo — cópialo con el botón **Copiar token**. Si lo pierdes, genera uno nuevo.
+3. Copia también el bloque de **Prompt para tu asistente** con el botón **Copiar prompt**, y pégalo como instrucciones (o primer mensaje) de tu asistente de IA. Ese texto ya incluye la dirección del servidor, el token, y las reglas de seguridad: nunca publica nada sin mostrarte antes qué va a hacer y pedirte confirmación explícita.
+4. Pulsa **Revocar** si quieres desconectar todos los asistentes sin generar uno nuevo.
+
 ### Estado de configuración
 
 Inicio muestra una lista de progreso con lo obligatorio y opcional. Para publicar necesitas credenciales de la plataforma, categorías sincronizadas e idioma. Google, Bing y redes sociales amplían lo que puedes hacer, pero no impiden publicar artículos.
