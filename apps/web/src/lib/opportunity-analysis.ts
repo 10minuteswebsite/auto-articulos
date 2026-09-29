@@ -467,7 +467,24 @@ Responde SOLO JSON valido: {"asignaciones": [{"indice": 0, "categoryName": "nomb
       // NOMBRE (lo que el modelo esta razonando de verdad, visible y legible)
       // y mapearlo a id en codigo elimina esa clase de error por completo,
       // en vez de solo mitigarla.
-      const categoryIdByExactName = new Map(categories.map((c) => [c.name, c.id]));
+      // Hallazgo de auditoria 2026-09-29: si dos categorias reales de la
+      // cuenta compartieran el mismo nombre exacto (el schema no exige
+      // nombre unico), un Map simple se quedaria solo con la ULTIMA y un
+      // titulo podria terminar en la categoria equivocada de las dos, en
+      // silencio. Se detecta el caso y se deja constancia en el log; se
+      // conserva la PRIMERA coincidencia (orden estable de input.categories)
+      // en vez de la ultima, para que el resultado sea al menos
+      // predecible.
+      const categoryIdByExactName = new Map<string, string>();
+      for (const category of categories) {
+        if (categoryIdByExactName.has(category.name)) {
+          console.error(
+            `reasonAboutCategoryAssignment: dos categorias reales comparten el nombre "${category.name}" — se usara la primera (id ${categoryIdByExactName.get(category.name)}), ignorando id ${category.id}.`,
+          );
+          continue;
+        }
+        categoryIdByExactName.set(category.name, category.id);
+      }
       for (const entry of parsed.asignaciones) {
         if (!entry || typeof entry !== "object") continue;
         const record = entry as Record<string, unknown>;
@@ -545,9 +562,16 @@ function hasContextualEvidenceForYear(
   rows: GoogleSearchAnalyticsRow[],
 ): boolean {
   const titleTokens = intentTokens(title);
+  // El año debe aparecer como numero propio (con limites que no sean otro
+  // digito a los lados), no como substring de cualquier otro numero de la
+  // fila (ej. impressions:120260 o position:2.02609 "contienen" 2026 sin que
+  // el año aparezca de verdad). Hallazgo de auditoria 2026-09-29: el chequeo
+  // anterior (String.includes) podia dar un falso positivo con cualquier
+  // cifra coincidente, debilitando la garantia de "prohibido inventar años".
+  const yearBoundaryPattern = new RegExp(`(?<!\\d)${year}(?!\\d)`);
   return rows.some((row) => {
     const serialized = JSON.stringify(row);
-    if (!serialized.includes(year)) return false;
+    if (!yearBoundaryPattern.test(serialized)) return false;
     const evidenceTokens = intentTokens(serialized);
     const shared = [...titleTokens].filter((token) => evidenceTokens.has(token));
     return shared.length >= 2;
