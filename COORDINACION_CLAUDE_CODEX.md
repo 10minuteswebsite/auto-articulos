@@ -10298,3 +10298,30 @@ que habían quedado fuera de main tras el push adicional al PR #259 ya
 cerrado (GitHub no reabre/refusiona un PR ya fusionado). Sin capitanía
 reclamada (otra sesión la tenía activa para trabajo no relacionado; este
 cambio no toca base de datos).
+
+## Claude — CATEGORÍA "CHAT GPT" MAL ASIGNADA: NOMBRE EN VEZ DE ID — 2026-09-29
+
+**Hallazgo real (Milton probando en vivo, cuenta Guillermo Martínez):** un
+título de bienes raíces (alquiler con opción a compra) quedó asignado a la
+categoría "Chat GPT". Verificado con evidencia dura en
+`/dashboard/historial` (13 ejecuciones reales de esta cuenta): esa
+categoría **nunca se había usado** para publicar nada — ni por nombre ni
+por tema tiene relación con bienes raíces.
+
+**Causa probable:** `reasonAboutCategoryAssignment` pedía al modelo el id
+opaco (cuid) de la categoría correcta entre 26 opciones en una sola
+respuesta — mismatch de índice/id conocido en LLMs con listas largas, no
+necesariamente mal juicio del tema.
+
+**Fix (PR #262, sin fusionar todavía):** el prompt ahora pide el **nombre
+exacto** de la categoría en vez del id; el mapeo nombre→id se hace en
+código por comparación exacta de texto. Elimina la clase de error de raíz.
+Se aprovechó para reforzar también el caso "Flow House" (desarrollo
+específico confirmado por Milton, no categoría de ciudad general) con un
+ejemplo explícito en el prompt.
+
+**Verificación:** `tsc --noEmit --strict` limpio. Pendiente reverificar en
+producción con Guillermo Martínez.
+
+**Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
+reverificación.

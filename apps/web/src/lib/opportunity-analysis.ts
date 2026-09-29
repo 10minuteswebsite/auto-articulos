@@ -394,10 +394,11 @@ Ejemplo de reubicacion correcta: un titulo sobre ALQUILAR o ARRENDAR una propied
 
 Ejemplo de que NO rechazar solo por redaccion: si el titulo usa "poliza" en vez de "seguro", o "cobertura medica" en vez de "seguro de salud", y el tema real es el mismo que los ejemplos de una categoria de seguros, SI pertenece a esa categoria — no rechaces ni reubiques solo porque la palabra exacta no coincide con el nombre de la categoria o sus ejemplos.
 
-CATEGORIAS PERMITIDAS (con ejemplos ya publicados; usa el "id" exacto en tu respuesta):
+Ejemplo de categoria de un desarrollo/proyecto ESPECIFICO vs una categoria de area/ciudad GENERAL: si una categoria se llama como un desarrollo o edificio especifico (ej. "Flow House", un proyecto en construccion), un titulo pertenece ahi SOLO si trata directamente sobre ESE desarrollo (unidades, precios, amenidades, proceso de compra en ese proyecto). Contenido general del area donde esta ubicado (mejores escuelas, playas cercanas, vida en esa ciudad) pertenece a la categoria de esa CIUDAD si existe una (ej. una categoria con el nombre de la ciudad), no a la del desarrollo especifico, aunque esten en la misma zona.
+
+CATEGORIAS PERMITIDAS (usa el "nombre" EXACTO, letra por letra, en tu respuesta — NO un id):
 ${JSON.stringify(
   categories.map((c) => ({
-    id: c.id,
     nombre: c.name,
     ejemplos: (c.publishedExamples ?? []).slice(0, 15),
   })),
@@ -406,7 +407,7 @@ ${JSON.stringify(
 TITULOS A CLASIFICAR:
 ${JSON.stringify(titles.map((text, index) => ({ indice: index, texto: text })))}
 
-Responde SOLO JSON valido: {"asignaciones": [{"indice": 0, "categoryId": "id-real-de-la-lista-o-null"}, ...]} — un elemento por cada indice de la lista de arriba.`;
+Responde SOLO JSON valido: {"asignaciones": [{"indice": 0, "categoryName": "nombre-exacto-de-la-lista-o-null"}, ...]} — un elemento por cada indice de la lista de arriba. El "categoryName" debe copiarse letra por letra de la lista CATEGORIAS PERMITIDAS, nunca inventado ni resumido.`;
 
   // Reintento (2 intentos, igual que callOpenAiWithRetry): desde el
   // rediseño 2026-09-29 esta funcion se llama UNA sola vez por corrida
@@ -452,19 +453,34 @@ Responde SOLO JSON valido: {"asignaciones": [{"indice": 0, "categoryId": "id-rea
         lastError = new Error("La respuesta de clasificacion de categorias no trajo 'asignaciones'.");
         continue;
       }
+      // Traduccion nombre -> id en CODIGO, no confiando en que el modelo
+      // devuelva el id correcto (ver nota arriba): comparacion EXACTA de
+      // texto contra los nombres reales de input.categories. Hallazgo real
+      // 2026-09-29 (cuenta de Guillermo Martinez): pedirle al modelo que
+      // devuelva directamente el id (una cadena opaca tipo cuid) entre 26
+      // categorias en una sola respuesta produjo al menos un caso real de
+      // titulo asignado a una categoria ("Chat GPT") que ni por nombre ni
+      // por ejemplos publicados tenia relacion alguna con el tema — nunca
+      // se habia usado esa categoria en el historial real de la cuenta. La
+      // hipotesis mas probable es confusion de indice/id en una lista larga
+      // (error conocido de LLMs), no un mal juicio del tema. Pedir el
+      // NOMBRE (lo que el modelo esta razonando de verdad, visible y legible)
+      // y mapearlo a id en codigo elimina esa clase de error por completo,
+      // en vez de solo mitigarla.
+      const categoryIdByExactName = new Map(categories.map((c) => [c.name, c.id]));
       for (const entry of parsed.asignaciones) {
         if (!entry || typeof entry !== "object") continue;
         const record = entry as Record<string, unknown>;
         const index = record.indice;
-        const categoryId = record.categoryId;
+        const categoryName = record.categoryName;
         if (
           typeof index === "number" &&
           index >= 0 &&
           index < titles.length &&
-          typeof categoryId === "string" &&
-          categoryId.length > 0
+          typeof categoryName === "string"
         ) {
-          result[index] = categoryId;
+          const matchedId = categoryIdByExactName.get(categoryName);
+          if (matchedId) result[index] = matchedId;
         }
       }
       return result;
