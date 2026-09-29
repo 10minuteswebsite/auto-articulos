@@ -688,6 +688,17 @@ export async function analyzeSeoOpportunities(input: {
   // evidencia para que GA4 o Bing puedan iniciar el análisis cuando GSC no
   // esté conectado, sin perder la procedencia en la consulta entregada a IA.
   externalEvidenceRows?: ExternalEvidenceRow[];
+  // Tope dinamico de titulos ACEPTADOS por categoria en esta corrida, pedido
+  // de Milton 29/9/2026: en vez de un numero fijo en codigo (como el viejo
+  // MAX_TITLES_PER_CATEGORY que existio y se retiro el 2/9/2026), el tope lo
+  // dicta el mismo limite diario que el usuario ya tiene configurado en
+  // Administracion (User.dailyArticleLimit). undefined/null = ese usuario no
+  // tiene limite diario configurado -> tampoco hay tope por categoria (mismo
+  // criterio "sin valor = sin limite" que ya usa el resto del sistema). No
+  // cambia la evidencia exigida, needKey, cero canibalizacion ni la
+  // asignacion de categoria: solo corta cuantos de los titulos YA VALIDADOS
+  // se aceptan por categoria.
+  categoryTitleCap?: number | null;
 }): Promise<OpportunityAnalysisResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY no esta configurada.");
@@ -752,6 +763,7 @@ export async function analyzeSeoOpportunities(input: {
     rejectedCollision: 0,
     rejectedCollisionByReasoning: 0,
     ambiguousCollisionChecks: 0,
+    rejectedCategoryCapReached: 0,
     accepted: 0,
   };
 
@@ -766,6 +778,15 @@ export async function analyzeSeoOpportunities(input: {
   const groupsByCategory = new Map<string, OpportunityAnalysisGroup>();
   const allResult: OpportunityAnalysisGroup[] = [];
   const validCategoryIds = new Set(input.categories.map((item) => item.id));
+  // Tope dinamico por categoria (ver categoryTitleCap arriba): null/undefined
+  // o un numero invalido (<1, no finito) se tratan como "sin tope", igual que
+  // el resto del sistema trata dailyArticleLimit nulo como "sin limite".
+  const categoryTitleCap =
+    typeof input.categoryTitleCap === "number" &&
+    Number.isFinite(input.categoryTitleCap) &&
+    input.categoryTitleCap >= 1
+      ? input.categoryTitleCap
+      : null;
   const evidenceRows = [
     ...allCurrentRows,
     ...input.previousRows,
@@ -1027,6 +1048,18 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
 
       const newTitles: OpportunityAnalysisGroup["titles"] = [];
       for (const candidate of group.titles) {
+        // Tope dinamico por categoria (ver categoryTitleCap arriba): cuenta
+        // lo ya aceptado en lotes anteriores de esta categoria MAS lo
+        // aceptado en este mismo lote. Corta el resto de candidatos de esta
+        // categoria sin gastar validacion/razonamiento en ellos; no afecta a
+        // otras categorias ni a los titulos ya aceptados.
+        if (
+          categoryTitleCap !== null &&
+          (existingGroup?.titles.length ?? 0) + newTitles.length >= categoryTitleCap
+        ) {
+          if (debugEnabled) debugCounters.rejectedCategoryCapReached++;
+          break;
+        }
         if (!candidate || typeof candidate !== "object") continue;
         const value = candidate as Record<string, unknown>;
         if (typeof value.text !== "string") continue;

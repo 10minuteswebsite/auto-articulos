@@ -124,7 +124,7 @@ export async function POST(request: Request) {
     .catch(() => ({ force: false, panel: "" }));
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    select: { lastOpportunityAnalysisAt: true, selectedSiteDomain: true, selectedSitePanel: true, platformDomain: true, clientLocations: true, businessLocations: true, excludedTopics: true },
+    select: { lastOpportunityAnalysisAt: true, selectedSiteDomain: true, selectedSitePanel: true, platformDomain: true, clientLocations: true, businessLocations: true, excludedTopics: true, dailyArticleLimit: true },
   });
   const selectedSiteDomain = user.selectedSiteDomain;
   // Ubicaciones REALES declaradas por el dueño de la cuenta (Configuración →
@@ -302,6 +302,13 @@ export async function POST(request: Request) {
       businessLocations,
       excludedTopics: user.excludedTopics ?? undefined,
       externalEvidenceRows,
+      // Tope de titulos por categoria, pedido de Milton 29/9/2026: dinamico,
+      // dictado por el mismo tope diario que ya configura en Administracion
+      // para cada usuario (User.dailyArticleLimit). null = sin limite diario
+      // configurado -> sin tope por categoria tampoco (mismo criterio
+      // "null significa sin limite" que ya usa el resto del sistema, ver
+      // dailyArticleLimit en apps/web/src/app/dashboard/usuarios/page.tsx).
+      categoryTitleCap: user.dailyArticleLimit,
     });
 
     const now = new Date();

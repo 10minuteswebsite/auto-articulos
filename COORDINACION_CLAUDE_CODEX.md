@@ -10071,3 +10071,42 @@ verificación en producción.
 **Capitán de migración liberó el lote:** Claude. Resultado: PR #254 abierto
 (sin migración), cierra zona ciega de canibalización con razonamiento del
 modelo — pendiente de fusión y verificación en producción.
+
+## Claude — TOPE DINAMICO POR CATEGORIA — 2026-09-29
+
+**Pedido de Milton:** tras confirmar que no existe tope de títulos por
+categoría (se retiró el 2/9/2026, ver historial de `MAX_TITLES_PER_CATEGORY`),
+pidió uno dinámico: el tope por categoría lo dicta el mismo límite diario
+(`User.dailyArticleLimit`) que ya se configura por usuario en Administración,
+en vez de un número fijo en código.
+
+**Capitán de migración:** Claude — reclamado y liberado, sin migración (el
+campo `dailyArticleLimit` ya existe en el schema).
+
+**Implementado (PR pendiente, sin fusionar):**
+- `apps/web/src/app/api/opportunities/route.ts`: se agrega
+  `dailyArticleLimit` al `select` del usuario y se pasa como
+  `categoryTitleCap` a `analyzeSeoOpportunities`.
+- `apps/web/src/lib/opportunity-analysis.ts`: nuevo parámetro
+  `categoryTitleCap?: number | null`. `null`/`undefined`/inválido (<1, no
+  finito) = sin tope, mismo criterio "sin valor = sin límite" que ya usa
+  `dailyArticleLimit` en el resto del sistema. El corte se aplica sobre los
+  títulos YA VALIDADOS (cuenta lo aceptado en lotes anteriores de la misma
+  categoría + lo aceptado en el lote actual); no toca evidencia GSC/GA/Bing,
+  needKey, cero canibalización ni la regla de asignación de categoría — solo
+  detiene la acumulación por categoría al llegar al tope, sin gastar
+  validación/razonamiento en los candidatos sobrantes de esa categoría.
+
+**Verificación:** `tsc --noEmit --strict` limpio sobre ambos archivos (sin
+los errores preexistentes de paquetes del monorepo sin compilar, ya
+conocidos, verificados línea por línea que no incluyen las líneas nuevas).
+Sin tests dedicados. Cambio no verificable 100% en local sin una llamada real
+a OpenAI — se valida corriendo "Actualizar análisis" en una cuenta real con
+`dailyArticleLimit` bajo tras fusionar.
+
+**Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
+verificación en producción.
+
+**Capitán de migración liberó el lote:** Claude. Resultado: PR #255 abierto
+(sin migración), tope dinámico por categoría = dailyArticleLimit — pendiente
+de fusión y verificación en producción.
