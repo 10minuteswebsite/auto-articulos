@@ -251,6 +251,15 @@ HANDOFF, solo alimenta ideas hacia él).
   Revisar el Historial de Lorena Álvarez: tiene 6 publicaciones antiguas de
   Pinterest y 5 de Google Business Profile marcadas con error; confirmar si
   el mensaje traducido de esos errores es claro para la persona usuaria.
+- **(29/9/2026, origen: tarea programada diaria de propagación, al revisar
+  `COORDINACION_CLAUDE_CODEX.md` → "Claude — CIERRE fix «Conectar GSC»,
+  estado de GSC y conteo de categorías en Oportunidades — 2026-09-28")**
+  Los pasos 1-3 del checklist de `PreValidationGuard` (10minutesWebsite,
+  Categorías, Idioma) todavía envían al asistente genérico
+  `/dashboard/configuracion?tab=wizard` en lugar de llevar directo al paso
+  específico que falta, a diferencia de lo que ya se corrigió para el paso
+  de Google Search Console en ese mismo cierre. Señalado como "fuera de
+  alcance" de ese fix; sin fecha límite ni responsable asignado todavía.
 
 ## Hecho
 
