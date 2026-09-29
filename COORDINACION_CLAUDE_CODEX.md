@@ -10223,3 +10223,9 @@ verificada la mejora de velocidad.
 **Responsable:** Claude. **Estado:** PR #259 con push adicional, pendiente
 de fusión y reverificación (velocidad + reubicación + el caso Flow House
 pendiente).
+
+**Nota:** PR #260 fusionado (`d4c3a98d`) — contenía los commits de rendimiento
+que habían quedado fuera de main tras el push adicional al PR #259 ya
+cerrado (GitHub no reabre/refusiona un PR ya fusionado). Sin capitanía
+reclamada (otra sesión la tenía activa para trabajo no relacionado; este
+cambio no toca base de datos).
