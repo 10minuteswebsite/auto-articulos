@@ -355,6 +355,94 @@ Responde SOLO JSON valido: {"mismaNecesidadIndices": [indices de la LISTA que so
   }
 }
 
+// Hallazgo real 2026-09-29 (cuenta de Guillermo Martinez, diagnostico en
+// vivo): la regla de asignacion de categoria (ver REGLA DE ASIGNACION DE
+// CATEGORIA en PROMPT_HEADER, corregida ese mismo dia para exigir afinidad
+// tematica real) solo vivia en el TEXTO del prompt, sin ningun respaldo en
+// codigo. Ese es exactamente el mismo patron de bug que ya se corrigio
+// muchas veces antes en este archivo para otras reglas (cita de evidencia,
+// combo de geolocalizacion, temas excluidos, anios recientes): una
+// instruccion que compite contra ~15 reglas obligatorias mas en la misma
+// llamada, el modelo la ignora tarde o temprano. Resultado real observado:
+// titulos sobre ALQUILAR una propiedad y hasta uno sobre el uso de un
+// microondas quedaron en la categoria "Compra" (compra de propiedades) de
+// esa cuenta. Igual que con la canibalizacion, la solucion NO es una lista
+// de palabras prohibidas (eso ya fallo antes, ver titleFitsCategory
+// retirado el 16/9/2026) sino preguntarle al modelo, en una llamada aparte y
+// enfocada, si el tema REAL de cada titulo pertenece de verdad a la
+// categoria — con la misma garantia de que un error de red no bloquea de
+// mas (se asume que SI pertenece si la consulta falla, igual que el resto
+// de este archivo).
+async function reasonAboutCategoryFit(
+  categoryName: string,
+  publishedExamples: string[] | undefined,
+  titles: string[],
+  apiKey: string,
+): Promise<Set<number>> {
+  if (titles.length === 0) return new Set();
+  const prompt = `Eres un editor SEO. Decide, para cada titulo de la lista, si su TEMA REAL pertenece genuinamente a la categoria "${categoryName}" de este blog (a juzgar por su nombre y los ejemplos ya publicados en ella), o si en realidad trata un tema distinto que no deberia archivarse ahi aunque comparta el mismo rubro general o alguna palabra.
+
+Ejemplo de tema que NO pertenece aunque comparta rubro: en una categoria de compra de propiedades, un titulo sobre ALQUILAR o ARRENDAR una propiedad no pertenece (comprar y alquilar son transacciones distintas); un titulo sobre el uso de un electrodomestico no pertenece a ninguna categoria de bienes raices.
+
+Ejemplo de tema que SI pertenece aunque use otras palabras: en una categoria de seguros de salud, un titulo que dice "poliza" en vez de "seguro", o "cobertura medica" en vez de "seguro de salud", SI pertenece — es el mismo tema con otro vocabulario, no un tema distinto. Rechaza solo cuando el tema REAL (la transaccion, el producto o el servicio del que trata el titulo) es distinto, nunca solo porque la redaccion no coincide con el nombre exacto de la categoria o con las palabras de los ejemplos.
+
+EJEMPLOS YA PUBLICADOS EN "${categoryName}":
+${JSON.stringify((publishedExamples ?? []).slice(0, 30))}
+
+TITULOS A EVALUAR:
+${JSON.stringify(titles.map((text, index) => ({ indice: index, texto: text })))}
+
+Responde SOLO JSON valido: {"pertenecenIndices": [indices de la lista de arriba cuyo tema REAL pertenece genuinamente a "${categoryName}"; lista vacia si ninguno]}`;
+
+  try {
+    const response = await fetch(OPENAI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0,
+        max_tokens: 500,
+        response_format: { type: "json_object" },
+      }),
+    });
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    // Fallo abierto vs cerrado, a proposito DISTINTO del resto del archivo
+    // (ver reasonAboutAmbiguousCollisions, que si falla abierto): un titulo
+    // mal archivado es visible para el cliente en su blog; un titulo
+    // perdido por una falla de red es invisible y se recupera solo en el
+    // siguiente lote (cada categoria acumula titulos de TODOS los lotes).
+    // Ese costo asimetrico es exactamente el que motivo esta auditoria
+    // (cuenta de Guillermo Martinez, 29/9/2026) — aqui SI conviene rechazar
+    // ante la duda.
+    if (!response.ok) {
+      return new Set();
+    }
+    const raw = data.choices?.[0]?.message?.content ?? "";
+    const parsed = JSON.parse(raw) as { pertenecenIndices?: unknown };
+    if (!Array.isArray(parsed.pertenecenIndices)) {
+      return new Set();
+    }
+    return new Set(
+      parsed.pertenecenIndices.filter(
+        (value): value is number =>
+          typeof value === "number" && value >= 0 && value < titles.length,
+      ),
+    );
+  } catch (err) {
+    console.error(
+      "reasonAboutCategoryFit: fallo la consulta de juicio, se rechaza por seguridad (categoria visible para el cliente):",
+      err,
+    );
+    return new Set();
+  }
+}
+
 // Garantía determinista 2026-09-16 (hallazgo real: se coló un título -
 // "Relación entre seguros de vida y salud en Miami" - cuyo rationale no
 // citaba ninguna consulta, página o cluster real, solo decía "una necesidad
@@ -764,6 +852,7 @@ export async function analyzeSeoOpportunities(input: {
     rejectedCollisionByReasoning: 0,
     ambiguousCollisionChecks: 0,
     rejectedCategoryCapReached: 0,
+    rejectedCategoryMismatch: 0,
     accepted: 0,
   };
 
@@ -778,6 +867,7 @@ export async function analyzeSeoOpportunities(input: {
   const groupsByCategory = new Map<string, OpportunityAnalysisGroup>();
   const allResult: OpportunityAnalysisGroup[] = [];
   const validCategoryIds = new Set(input.categories.map((item) => item.id));
+  const categoriesById = new Map(input.categories.map((item) => [item.id, item]));
   // Tope dinamico por categoria (ver categoryTitleCap arriba): null/undefined
   // o un numero invalido (<1, no finito) se tratan como "sin tope", igual que
   // el resto del sistema trata dailyArticleLimit nulo como "sin limite".
@@ -1046,8 +1136,46 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
 
       const existingGroup = groupsByCategory.get(group.categoryId);
 
+      // Respaldo determinista de afinidad de categoria (ver
+      // reasonAboutCategoryFit arriba): una sola llamada por grupo/lote que
+      // le pregunta al modelo, con el nombre real de la categoria y sus
+      // ejemplos ya publicados, cuales de estos titulos pertenecen de
+      // verdad. La regla del prompt (REGLA DE ASIGNACION DE CATEGORIA) ya lo
+      // pide, pero sin este chequeo en codigo nada garantiza que el modelo
+      // la respete en cada lote.
+      const categoryInfo = categoriesById.get(group.categoryId);
+      // Si esta categoria ya llego a su tope dinamico (ver categoryTitleCap)
+      // con lotes anteriores, el bucle de abajo va a cortar en la primera
+      // vuelta de todas formas: no tiene sentido gastar una llamada de
+      // razonamiento entera para candidatos que ya no se van a aceptar.
+      const categoryAlreadyAtCap =
+        categoryTitleCap !== null && (existingGroup?.titles.length ?? 0) >= categoryTitleCap;
+      const indexedTitleTexts: Array<{ index: number; text: string }> = [];
+      if (!categoryAlreadyAtCap) {
+        group.titles.forEach((candidate, index) => {
+          if (!candidate || typeof candidate !== "object") return;
+          const value = candidate as Record<string, unknown>;
+          if (typeof value.text === "string" && value.text.trim().length > 0) {
+            indexedTitleTexts.push({ index, text: value.text.trim() });
+          }
+        });
+      }
+      let categoryFitIndices = new Set<number>();
+      if (indexedTitleTexts.length > 0) {
+        const fitSubIndices = await reasonAboutCategoryFit(
+          categoryInfo?.name ?? group.categoryId,
+          categoryInfo?.publishedExamples,
+          indexedTitleTexts.map((item) => item.text),
+          apiKey as string,
+        );
+        categoryFitIndices = new Set(
+          [...fitSubIndices].map((subIndex) => indexedTitleTexts[subIndex].index),
+        );
+      }
+
       const newTitles: OpportunityAnalysisGroup["titles"] = [];
-      for (const candidate of group.titles) {
+      for (let candidateIndex = 0; candidateIndex < group.titles.length; candidateIndex++) {
+        const candidate = group.titles[candidateIndex];
         // Tope dinamico por categoria (ver categoryTitleCap arriba): cuenta
         // lo ya aceptado en lotes anteriores de esta categoria MAS lo
         // aceptado en este mismo lote. Corta el resto de candidatos de esta
@@ -1065,6 +1193,15 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         if (typeof value.text !== "string") continue;
         const text = value.text.trim();
         if (debugEnabled && text) debugCounters.modelProposedTitles++;
+        if (text && !categoryFitIndices.has(candidateIndex)) {
+          if (debugEnabled) {
+            debugCounters.rejectedCategoryMismatch++;
+            console.log(
+              `[OPPORTUNITY_DEBUG] Rechazado por no pertenecer de verdad a la categoria "${categoryInfo?.name ?? group.categoryId}". Titulo: "${text}"`,
+            );
+          }
+          continue;
+        }
         const normalized = normalizeTitle(text);
         if (!text || seen.has(normalized)) {
           if (debugEnabled && text) debugCounters.rejectedEmptyOrDuplicateExact++;
