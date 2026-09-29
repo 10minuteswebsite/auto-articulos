@@ -10325,3 +10325,11 @@ producción con Guillermo Martínez.
 
 **Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
 reverificación.
+
+**Capitán de migración liberó el lote:** Claude. Resultado: PR #258 fusionado
+(token personal de API para MCP + herramientas de panorama). Migración
+`20260929120000_add_mcp_api_token` aplicada en producción vía el workflow
+"Migración manual de base de datos" (corrida `36641257935`, disparada por
+Milton, éxito: `db push` + refuerzo de RLS en verde). Pendiente para Milton:
+generar el token real en Configuración → Asistentes IA con la cuenta de
+Lorena Álvarez y probarlo con Meta MUSE.
