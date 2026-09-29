@@ -188,39 +188,61 @@ export async function POST(request: Request) {
     const hasCachedGscRows = currentRows.length > 0 || previousRows.length > 0;
     const resolved = await resolveSearchConsoleForUser(userId, selectedSiteDomain ?? "");
     const hasSearchConsole = Boolean(integration?.siteUrl) || resolved.source === "COMPOSIO";
+    // Bug real encontrado 29/9/2026 (cuenta de Flor Méndez): Google Search
+    // Console puede rechazar la consulta con un error real y específico (ej.
+    // "User does not have sufficient permission for site ...", cuando el
+    // dueño de la cuenta perdió el permiso de verificación en esa propiedad)
+    // sin que eso signifique que el análisis completo deba fallar — Google
+    // Analytics o Bing pueden seguir dando evidencia real. Antes, este error
+    // se escapaba sin capturar hasta el catch genérico de más abajo, que
+    // devuelve "No se pudo completar el análisis esta vez." sin explicar qué
+    // hay que resolver. Ahora se captura aquí mismo, se registra el motivo
+    // real y se sigue el análisis como si Search Console no estuviera
+    // disponible esta corrida (mismo comportamiento ya existente cuando la
+    // cuenta no tiene Search Console conectado), dejando que GA4/Bing (o el
+    // mensaje explícito de "sin evidencia" de más abajo) tomen el control.
+    let gscError: string | null = null;
     if ((!cachedGsc || !hasCachedGscRows) && hasSearchConsole) {
-      if (resolved.source === "COMPOSIO") {
-        if (!resolved.apiKey || !resolved.state.composio?.connectedAccountId || !resolved.state.composio.siteUrl) {
-          throw new Error("Search Console requiere reconectar la cuenta por Composio y seleccionar un sitio.");
+      try {
+        if (resolved.source === "COMPOSIO") {
+          if (!resolved.apiKey || !resolved.state.composio?.connectedAccountId || !resolved.state.composio.siteUrl) {
+            throw new Error("Search Console requiere reconectar la cuenta por Composio y seleccionar un sitio.");
+          }
+          const query = (start: string, finish: string, dimensions?: string[]) => composioQuerySearchAnalytics(
+            { apiKey: resolved.apiKey!, userId, connectedAccountId: resolved.state.composio!.connectedAccountId },
+            resolved.state.composio!.siteUrl!, start, finish, dimensions,
+          );
+          [currentRows, previousRows, countryRows] = await Promise.all([
+            query(isoDate(currentStart), isoDate(end)),
+            query(isoDate(previousStart), isoDate(previousEnd)),
+            query(isoDate(currentStart), isoDate(end), ["country"]),
+          ]);
+        } else {
+          if (!integration?.encryptedRefreshToken || !integration.siteUrl) {
+            throw new Error("Conecta Google Search Console y selecciona un sitio primero.");
+          }
+          const collected = await collectDeepGoogleEvidence(
+            await getGoogleAccessToken(decryptSecret(integration.encryptedRefreshToken)),
+            integration.siteUrl, isoDate(currentStart), isoDate(end), isoDate(previousStart), isoDate(previousEnd),
+          );
+          currentRows = collected.currentRows;
+          previousRows = collected.previousRows;
+          countryRows = collected.countryRows;
         }
-        const query = (start: string, finish: string, dimensions?: string[]) => composioQuerySearchAnalytics(
-          { apiKey: resolved.apiKey!, userId, connectedAccountId: resolved.state.composio!.connectedAccountId },
-          resolved.state.composio!.siteUrl!, start, finish, dimensions,
-        );
-        [currentRows, previousRows, countryRows] = await Promise.all([
-          query(isoDate(currentStart), isoDate(end)),
-          query(isoDate(previousStart), isoDate(previousEnd)),
-          query(isoDate(currentStart), isoDate(end), ["country"]),
-        ]);
-      } else {
-        if (!integration?.encryptedRefreshToken || !integration.siteUrl) {
-          throw new Error("Conecta Google Search Console y selecciona un sitio primero.");
+        if (currentRows.length > 0 || previousRows.length > 0 || countryRows.length > 0) {
+          await writeOpportunityEvidenceCache(
+            { ...cacheScope, source: "gsc" },
+            JSON.parse(JSON.stringify({ currentRows, previousRows, countryRows })),
+            previousStart,
+            end,
+          );
         }
-        const collected = await collectDeepGoogleEvidence(
-          await getGoogleAccessToken(decryptSecret(integration.encryptedRefreshToken)),
-          integration.siteUrl, isoDate(currentStart), isoDate(end), isoDate(previousStart), isoDate(previousEnd),
-        );
-        currentRows = collected.currentRows;
-        previousRows = collected.previousRows;
-        countryRows = collected.countryRows;
-      }
-      if (currentRows.length > 0 || previousRows.length > 0 || countryRows.length > 0) {
-        await writeOpportunityEvidenceCache(
-          { ...cacheScope, source: "gsc" },
-          JSON.parse(JSON.stringify({ currentRows, previousRows, countryRows })),
-          previousStart,
-          end,
-        );
+      } catch (err) {
+        gscError = err instanceof Error ? err.message : String(err);
+        console.error("POST /api/opportunities: Search Console falló, se continua sin su evidencia:", err);
+        currentRows = [];
+        previousRows = [];
+        countryRows = [];
       }
     }
     const existing = await existingPromise;
@@ -264,7 +286,11 @@ export async function POST(request: Request) {
     ]);
     if (currentRows.length === 0 && googleAnalyticsSignals.rows.length === 0 && bingSignals.rows.length === 0) {
       return NextResponse.json(
-        { error: "No hay evidencia disponible en GSC, Google Analytics o Bing Webmaster Tools." },
+        {
+          error: gscError
+            ? `Google Search Console respondió con un error y no hay otra evidencia disponible (Google Analytics o Bing Webmaster Tools): ${gscError}`
+            : "No hay evidencia disponible en GSC, Google Analytics o Bing Webmaster Tools.",
+        },
         { status: 422 },
       );
     }
