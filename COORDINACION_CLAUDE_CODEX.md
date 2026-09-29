@@ -10156,3 +10156,26 @@ reverificación en producción con Guillermo Martínez.
 **Capitán de migración liberó el lote:** Claude. Resultado: PR #257 abierto
 (sin migración), respaldo determinista de afinidad de categoría + triple
 auditoría — pendiente de fusión y reverificación con Guillermo Martínez.
+
+## Claude — REUBICACIÓN DE CATEGORÍA (sin capitanía, sin migración) — 2026-09-29
+
+PR #259 (`claude/fix-categoria-reubicacion`), sin fusionar todavía. Extiende
+el fix de categoría de hoy (PR #257): en vez de solo aceptar/rechazar la
+categoría que el modelo eligió, `reasonAboutCategoryAssignment` reclasifica
+cada título contra la lista completa de categorías reales de la cuenta (una
+sola llamada por lote) y lo reubica en la correcta si existe. Motivo:
+Guillermo Martínez tiene 26 categorías reales; el fix anterior solo devolvió
+resultados en 2 porque rechazaba en vez de reubicar (títulos de alquiler
+propuestos en "Compra" se perdían en vez de aparecer en "Rentas", que sí
+existe). Triple auditado (detalle completo en el mensaje del commit
+`e8f98f99`): un bug propio de doble conteo del tope por categoría y una
+variable muerta que rompía `noUnusedLocals` se encontraron y corrigieron
+antes de subir.
+
+**No se reclamó capitanía de migración:** otra sesión la tenía activa en
+paralelo para un trabajo no relacionado (MCP/token de API); este cambio no
+toca la base de datos, así que no hacía falta esperar — solo se evitó
+cualquier comando de Prisma.
+
+Responsable: Claude. Estado: PR abierto, pendiente de fusión y
+reverificación con Guillermo Martínez.
