@@ -10106,3 +10106,7 @@ a OpenAI — se valida corriendo "Actualizar análisis" en una cuenta real con
 
 **Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
 verificación en producción.
+
+**Capitán de migración liberó el lote:** Claude. Resultado: PR #255 abierto
+(sin migración), tope dinámico por categoría = dailyArticleLimit — pendiente
+de fusión y verificación en producción.
