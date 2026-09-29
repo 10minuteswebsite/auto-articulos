@@ -1,7 +1,6 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
-import { toolText } from "./protocol";
+import { jsonRequest, readRoute, toolText, type ToolDef } from "./shared";
 
 /**
  * Las tools NO reimplementan lógica de negocio: invocan los mismos route
@@ -24,39 +23,7 @@ import { GET as listarOportunidadesRoute, POST as analizarOportunidadesRoute } f
 import { POST as ejecutarOportunidadRoute } from "@/app/api/opportunities/execute/route";
 import { POST as publicarTitulosRoute } from "@/app/api/runs/route";
 
-type ToolHandler = (args: Record<string, unknown>) => Promise<ReturnType<typeof toolText>>;
-
-type ToolDef = {
-  name: string;
-  title: string;
-  description: string;
-  inputSchema: Record<string, unknown>;
-  requiredScope: "oportunidades:leer" | "oportunidades:publicar";
-  annotations: {
-    readOnlyHint: boolean;
-    destructiveHint: boolean;
-    idempotentHint: boolean;
-    openWorldHint: boolean;
-  };
-  handler: ToolHandler;
-};
-
-/** Construye un request sintético para pasarle el body a un route handler. */
-function jsonRequest(path: string, body: unknown) {
-  return new NextRequest(`https://interno.local${path}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body ?? {}),
-  });
-}
-
-/** Lee la respuesta de un route handler y normaliza el error de negocio. */
-async function readRoute(response: Response) {
-  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-  return { ok: response.ok, status: response.status, data };
-}
-
-export const TOOLS: ToolDef[] = [
+export const OPPORTUNITY_TOOLS: ToolDef[] = [
   {
     name: "listar_oportunidades",
     title: "Listar oportunidades",
@@ -281,7 +248,7 @@ export const TOOLS: ToolDef[] = [
       if (!ok) {
         // El route handler ya devuelve mensajes en español pensados para el
         // usuario final (cupo excedido, run en curso, falta credencial); se
-        // pasan tal cual para que Alexa los lea sin reinterpretarlos.
+        // pasan tal cual para que el asistente los lea sin reinterpretarlos.
         return toolText(String(data.error ?? "No se pudo publicar."), true);
       }
       return toolText(
@@ -321,18 +288,3 @@ export const TOOLS: ToolDef[] = [
     },
   },
 ];
-
-export function findTool(name: string, scopes: string[]) {
-  return TOOLS.find((tool) => tool.name === name && scopes.includes(tool.requiredScope));
-}
-
-/** Forma que espera `tools/list` (sin el handler, que es interno). */
-export function listToolsPayload(scopes: string[]) {
-  return TOOLS.filter((tool) => scopes.includes(tool.requiredScope)).map(({ name, title, description, inputSchema, annotations }) => ({
-    name,
-    title,
-    description,
-    inputSchema,
-    annotations,
-  }));
-}

@@ -15,25 +15,25 @@ enum UserRole {
 }
 
 model User {
-  id                                String    @id @default(cuid())
+  id                                String        @id @default(cuid())
   name                              String?
   firstName                         String?
   lastName                          String?
   phone                             String?
-  email                             String    @unique
+  email                             String        @unique
   passwordHash                      String
   // Guardada cifrada (no en texto plano) además del hash, para que el
   // admin pueda recuperarla y compartirla con la persona invitada — pedido
   // explícito del usuario el 31/7/2026. El login sigue verificando contra
   // passwordHash (bcrypt); este campo nunca se usa para autenticar.
   initialPasswordEncrypted          String?
-  role                              UserRole  @default(user)
-  monthlyArticleLimit               Int?      @default(300)
-  dailyArticleLimit                 Int?      @default(5)
+  role                              UserRole      @default(user)
+  monthlyArticleLimit               Int?          @default(300)
+  dailyArticleLimit                 Int?          @default(5)
   // Máximo de publicaciones sociales/blog por plataforma y día. JSON para
   // permitir añadir plataformas sin otra migración; todas empiezan en 1.
-  socialDailyLimits                 Json      @default("{}")
-  maxTitlesPerBatch                 Int       @default(20)
+  socialDailyLimits                 Json          @default("{}")
+  maxTitlesPerBatch                 Int           @default(20)
   // Encontrado el 2/8/2026: usuarios en Europa (ej. Lidia Capdevila) tienen
   // su cuenta real en 10minutesWebsite.site en vez de .net. El login/las
   // acciones generales funcionan igual en ambos, pero la generación de
@@ -41,12 +41,12 @@ model User {
   // (mtime=null en el archivo final) cuando el dominio no coincide con el
   // servidor real de la cuenta. "net" (valor por defecto, sin cambios para
   // nadie existente) o "site".
-  platformDomain                    String    @default("net")
+  platformDomain                    String        @default("net")
   // Dominio real elegido durante la primera conexión. Es independiente del
   // servidor de acceso (net/site/tagcrush) y del idioma del panel.
   selectedSiteDomain                String?
   selectedSitePanel                 String?
-  siteSelectionConfirmed            Boolean   @default(false)
+  siteSelectionConfirmed            Boolean       @default(false)
   // País declarado al CREAR la cuenta (código ISO 3166-1 alpha-2, ej. "ES",
   // "MX") — pedido explícito del usuario, 14/8/2026. Solo se pregunta a las
   // cuentas nuevas (registro de prueba y alta desde Administración); las
@@ -59,7 +59,7 @@ model User {
   // cuenta, que es lo que causaba selectores de botón rotos — ver
   // apps/worker/src/automation/10minutesWebsite.ts, 4/8/2026). "es" por
   // defecto, sin cambios para nadie existente.
-  contentLanguage                   String    @default("es")
+  contentLanguage                   String        @default("es")
   // Texto propio del usuario (ej. firma/aviso legal) que se agrega
   // automáticamente al final del contenido de CADA artículo nuevo — pedido
   // explícito del usuario, 6/8/2026. Null/vacío = no se agrega nada.
@@ -97,7 +97,7 @@ model User {
   // sola vez, la primera vez que se entra a Oportunidades; null significa
   // que todavía no lo ha aceptado.
   opportunitiesDisclosureAcceptedAt DateTime?
-  createdAt                         DateTime  @default(now())
+  createdAt                         DateTime      @default(now())
   // Bloqueo entre procesos (no solo entre "lanes" del mismo proceso): con
   // varios workers de GitHub Actions corriendo en paralelo (31/7/2026,
   // pedido explícito por carga real de ~40 usuarios), el bloqueo en
@@ -109,29 +109,29 @@ model User {
   workerBusyUntil                   DateTime?
   // Control de acceso a publicación en Instagram. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowInstagramPublishing          Boolean   @default(false)
+  allowInstagramPublishing          Boolean       @default(false)
   // Control de acceso a publicación en LinkedIn. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowLinkedInPublishing           Boolean   @default(false)
+  allowLinkedInPublishing           Boolean       @default(false)
   // Control de acceso a publicación en Threads. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowThreadsPublishing            Boolean   @default(false)
-  allowFacebookPublishing           Boolean   @default(false)
+  allowThreadsPublishing            Boolean       @default(false)
+  allowFacebookPublishing           Boolean       @default(false)
   // Control de acceso a publicación en Pinterest. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowPinterestPublishing          Boolean   @default(false)
+  allowPinterestPublishing          Boolean       @default(false)
   // Control de acceso a publicación en Tumblr. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowTumblrPublishing              Boolean   @default(false)
+  allowTumblrPublishing             Boolean       @default(false)
   // Control de acceso a publicación en Bluesky. Solo el admin puede activarlo.
-  allowBlueskyPublishing             Boolean   @default(false)
+  allowBlueskyPublishing            Boolean       @default(false)
   // Control de acceso a publicación en Mastodon. Solo el admin puede activarlo.
-  allowMastodonPublishing            Boolean   @default(false)
+  allowMastodonPublishing           Boolean       @default(false)
   // Control de acceso a publicación de artículos adaptados en DEV.to.
-  allowDevToPublishing               Boolean   @default(false)
-  allowBloggerPublishing             Boolean   @default(false)
+  allowDevToPublishing              Boolean       @default(false)
+  allowBloggerPublishing            Boolean       @default(false)
   // Control de acceso a publicación en Google Business Profile mediante PostPeer.
-  allowGoogleBusinessPublishing      Boolean   @default(false)
+  allowGoogleBusinessPublishing     Boolean       @default(false)
   // Control de acceso al generador de imágenes con IA para redes sociales
   // (20/8/2026, "Creador de Imágenes para Redes Sociales"). Solo el admin
   // puede activarlo por usuario — es un upsell, no un reemplazo forzado.
@@ -140,7 +140,7 @@ model User {
   // imagen con IA (partiendo de la OG + logo/foto del usuario) en vez de
   // usar la OG sin tocar. No afecta Carrusel/Infografía (ya generan imagen
   // propia, no usan la OG).
-  aiImageGenerationEnabled          Boolean   @default(false)
+  aiImageGenerationEnabled          Boolean       @default(false)
   // Foto de perfil del usuario y logo de su negocio/marca.
   // Se usan como elementos visuales en las publicaciones de redes sociales
   // (carruseles, reels, infografías). Subidas como URLs de Vercel Blob.
@@ -165,9 +165,9 @@ model User {
   // admin — en true por defecto para TODOS los usuarios existentes/creados
   // por admin (nunca se bloquean por esto), pero se crea en false para
   // quienes se inscriben solos, así que su acceso depende del período de
-  isTrialSignup                     Boolean   @default(false)
+  isTrialSignup                     Boolean       @default(false)
   trialStartedAt                    DateTime?
-  trialUnlocked                     Boolean   @default(true)
+  trialUnlocked                     Boolean       @default(true)
   // Control de visibilidad de módulos para el usuario (13/8/2026).
   // JSON serializado con los IDs de módulos deshabilitados para este usuario
   // (ej. ["oportunidades-redes", "actualizaciones"]). Null = hereda la visibilidad global.
@@ -175,9 +175,9 @@ model User {
   // Disponibilidad de créditos de imagen en 10minutesWebsite (13/8/2026).
   // Si está en false, la cuenta no tiene créditos y se muestra un pop-up con
   // enlace a https://www.10minuteswebsite.com/ayuda para solicitar más créditos.
-  hasImageCredits                   Boolean   @default(true)
+  hasImageCredits                   Boolean       @default(true)
   defaultPromptId                   String?
-  defaultPrompt                     Prompt?   @relation(fields: [defaultPromptId], references: [id], onDelete: SetNull)
+  defaultPrompt                     Prompt?       @relation(fields: [defaultPromptId], references: [id], onDelete: SetNull)
   // Segunda línea de ejecución de publicación (2026-09-07/08, "MCP 10MWS"):
   // por defecto TODAS las cuentas (nuevas y existentes) siguen publicando
   // exactamente igual que hoy, manejando un navegador (BROWSER). Solo pasa
@@ -190,9 +190,9 @@ model User {
   publishMethod                     PublishMethod @default(BROWSER)
 
   credentials                Credential[]
-  mcpConnections              McpConnection[]
-  composioConnections         ComposioConnection[]
-  postPeerConnection           PostPeerConnection?
+  mcpConnections             McpConnection[]
+  composioConnections        ComposioConnection[]
+  postPeerConnection         PostPeerConnection?
   runs                       Run[]
   categories                 Category[]
   categorySyncJobs           CategorySyncJob[]
@@ -206,17 +206,18 @@ model User {
   twitterIntegration         TwitterIntegration?
   linkedinIntegration        LinkedInIntegration?
   instagramIntegration       InstagramIntegration?
-  facebookPageIntegration   FacebookPageIntegration?
-  pinterestIntegration      PinterestIntegration?
-  tumblrIntegration         TumblrIntegration?
+  facebookPageIntegration    FacebookPageIntegration?
+  pinterestIntegration       PinterestIntegration?
+  tumblrIntegration          TumblrIntegration?
   blueskyIntegration         BlueskyIntegration?
-  mastodonIntegration         MastodonIntegration?
+  mastodonIntegration        MastodonIntegration?
   devToIntegration           DevToIntegration?
   bloggerIntegration         BloggerIntegration?
   socialOpportunities        SocialOpportunity[]
   oauthAuthorizationCodes    OAuthAuthorizationCode[]
   oauthAccessTokens          OAuthAccessToken[]
   oauthRefreshTokens         OAuthRefreshToken[]
+  mcpApiToken                McpApiToken?
   trialDomainRegistries      TrialDomainRegistry[]
   titleGenerationRequests    TitleGenerationRequest[]
 }
@@ -225,8 +226,8 @@ model User {
 // Los valores secretos nunca se guardan: codeHash/tokenHash son SHA-256 de
 // valores aleatorios que solo se entregan una vez al cliente OAuth.
 model OAuthAuthorizationCode {
-  id            String   @id @default(cuid())
-  codeHash      String   @unique
+  id            String    @id @default(cuid())
+  codeHash      String    @unique
   userId        String
   clientId      String
   redirectUri   String
@@ -235,7 +236,7 @@ model OAuthAuthorizationCode {
   codeChallenge String
   expiresAt     DateTime
   usedAt        DateTime?
-  createdAt     DateTime @default(now())
+  createdAt     DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -244,15 +245,15 @@ model OAuthAuthorizationCode {
 }
 
 model OAuthAccessToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
   userId    String
   clientId  String
   scopes    String
   resource  String
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -261,15 +262,15 @@ model OAuthAccessToken {
 }
 
 model OAuthRefreshToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
   userId    String
   clientId  String
   scopes    String
   resource  String
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -378,16 +379,16 @@ model FacebookPageIntegration {
 }
 
 model PinterestIntegration {
-  id                   String   @id @default(cuid())
-  userId               String   @unique
-  pinterestUserId      String?
-  accessTokenEncrypted String
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  pinterestUserId       String?
+  accessTokenEncrypted  String
   refreshTokenEncrypted String?
-  expiresAt            DateTime?
-  boardId              String?
-  boardName            String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  expiresAt             DateTime?
+  boardId               String?
+  boardName             String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -409,15 +410,15 @@ model MastodonIntegration {
 
 // Conexión OAuth2 con Tumblr para publicar posts con imagen y enlace.
 model TumblrIntegration {
-  id                   String   @id @default(cuid())
-  userId               String   @unique
-  blogIdentifier       String
-  blogTitle            String?
-  accessTokenEncrypted String
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  blogIdentifier        String
+  blogTitle             String?
+  accessTokenEncrypted  String
   refreshTokenEncrypted String?
-  expiresAt            DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  expiresAt             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -436,27 +437,27 @@ model BlueskyIntegration {
 
 // API key de DEV.to cifrada para publicar artículos adaptados con canonical URL.
 model DevToIntegration {
-  id                   String   @id @default(cuid())
-  userId               String   @unique
-  username             String?
-  encryptedApiKey      String
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  username        String?
+  encryptedApiKey String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model BloggerIntegration {
-  id                    String   @id @default(cuid())
-  userId                String   @unique
+  id                    String    @id @default(cuid())
+  userId                String    @unique
   bloggerUserId         String?
   blogId                String
   blogName              String?
   accessTokenEncrypted  String
   refreshTokenEncrypted String?
   expiresAt             DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -529,6 +530,27 @@ model McpConnection {
 
   @@unique([userId, provider])
   @@index([userId])
+}
+
+// Token personal de API para conectar CUALQUIER asistente de IA (Claude,
+// ChatGPT, Gemini, Meta MUSE, etc.) al servidor MCP propio, sin pasar por el
+// registro de cliente OAuth que exige Alexa+ (ver OAuthAccessToken). Pedido
+// explícito de Milton, 29/9/2026: el usuario lo genera y copia desde
+// Configuración, junto con un prompt listo para pegarle a su asistente.
+// Solo se guarda el hash (sha256, igual que OAuthAccessToken.tokenHash) —
+// el valor real solo se muestra una vez, al generarlo. Un solo token activo
+// por usuario: generar uno nuevo revoca el anterior, para que "revocar" sea
+// simple de explicar y no haya que gestionar una lista.
+model McpApiToken {
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  tokenHash  String    @unique
+  name       String    @default("Asistente IA")
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // CREACION DE PUBLICACIONES PROPIAS — una fila por solicitud de títulos con la
@@ -632,16 +654,16 @@ enum PostPeerConnectionStatus {
 // PostPeer conserva los tokens OAuth. Solo se guarda la identidad de la
 // integración para poder publicar por usuario y no mezclar cuentas.
 model PostPeerConnection {
-  id            String                   @id @default(cuid())
-  userId        String                   @unique
-  profileId     String                   @unique
-  accountId     String                   @unique
-  accountName   String?
-  status        PostPeerConnectionStatus @default(PENDING)
-  connectedAt   DateTime?
-  lastError     String?
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
+  id          String                   @id @default(cuid())
+  userId      String                   @unique
+  profileId   String                   @unique
+  accountId   String                   @unique
+  accountName String?
+  status      PostPeerConnectionStatus @default(PENDING)
+  connectedAt DateTime?
+  lastError   String?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -758,20 +780,20 @@ model OpportunityTitle {
 // que GSC, GA4 y Bing puedan caducar y actualizarse de forma independiente,
 // sin repetir consultas costosas cuando el informe aún está vigente.
 model OpportunityEvidenceCache {
-  id          String   @id @default(cuid())
-  userId      String
-  siteDomain  String   @default("")
-  panel       String   @default("")
-  source      String
-  payload     Json
-  fetchedAt   DateTime
-  expiresAt   DateTime
-  periodStart DateTime?
-  periodEnd   DateTime?
-  status      String   @default("ok")
+  id           String    @id @default(cuid())
+  userId       String
+  siteDomain   String    @default("")
+  panel        String    @default("")
+  source       String
+  payload      Json
+  fetchedAt    DateTime
+  expiresAt    DateTime
+  periodStart  DateTime?
+  periodEnd    DateTime?
+  status       String    @default("ok")
   errorMessage String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -787,21 +809,21 @@ enum CategorySyncStatus {
 }
 
 model CategorySyncJob {
-  id           String             @id @default(cuid())
-  userId       String
-  status       CategorySyncStatus @default(pending)
-  errorMessage String?
-  createdAt    DateTime           @default(now())
-  finishedAt   DateTime?
+  id             String             @id @default(cuid())
+  userId         String
+  status         CategorySyncStatus @default(pending)
+  errorMessage   String?
+  createdAt      DateTime           @default(now())
+  finishedAt     DateTime?
   // "sync" (default, comportamiento histórico: descarga categorías) o
   // "detect": solo inicia sesión y lee los paneles/sitios reales de la
   // cuenta (ver listPanelLabels en el worker), sin tocar categorías. Lo usa
   // el wizard para mostrar los sitios reales antes de que la persona elija
   // uno, en vez de dejarlo escribir un dominio a mano sin verificar.
-  mode           String   @default("sync")
+  mode           String             @default("sync")
   // Etiquetas reales de panel encontradas por un job mode="detect" exitoso.
   // Vacío = la cuenta no tiene selector de paneles (un solo sitio real).
-  detectedPanels String[] @default([])
+  detectedPanels String[]           @default([])
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -953,34 +975,34 @@ model SystemSetting {
 }
 
 model SocialOpportunity {
-  id            String    @id @default(cuid())
-  userId        String
-  titleId       String?
-  articleUrl    String
-  articleTitle  String
-  platform      String // "threads" | "linkedin" | "x" | "instagram" | "facebook" | "pinterest" | "tumblr" | "blogger"
-  suggestedText String    @db.Text
-  status        String    @default("pending") // "pending" | "published" | "skipped"
+  id              String    @id @default(cuid())
+  userId          String
+  titleId         String?
+  articleUrl      String
+  articleTitle    String
+  platform        String // "threads" | "linkedin" | "x" | "instagram" | "facebook" | "pinterest" | "tumblr" | "blogger"
+  suggestedText   String    @db.Text
+  status          String    @default("pending") // "pending" | "published" | "skipped"
   progressPercent Int       @default(0)
   progressStage   String?
   startedAt       DateTime?
   finishedAt      DateTime?
-  postId        String?
-  errorLog      String?   @db.Text
-  skipReason    String?
+  postId          String?
+  errorLog        String?   @db.Text
+  skipReason      String?
   // Columna real en la base desde la migración 20260811000000 pero nunca
   // declarada en este schema — Prisma Client no podía leerla ni escribirla
   // pese a existir en la tabla. Corregido 22/8/2026 al agregar el guardado
   // del prompt/imagen de IA que pidió Milton.
-  imageUrl      String?
+  imageUrl        String?
   // Prompt EXACTO que se le mandó al generador de imagen (línea cruda del
   // Director Creativo, sin modificar) — para que Milton pueda ver en el
   // histórico qué se usó realmente en cada publicación, sin tener que
   // reconstruirlo desde los logs de GitHub Actions. Pedido explícito de
   // Milton, 22/8/2026.
-  aiImagePrompt String?   @db.Text
-  createdAt     DateTime  @default(now())
-  publishedAt   DateTime?
+  aiImagePrompt   String?   @db.Text
+  createdAt       DateTime  @default(now())
+  publishedAt     DateTime?
 
   user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   title Title? @relation(fields: [titleId], references: [id], onDelete: SetNull)
@@ -1014,8 +1036,8 @@ model ProductUpdate {
 model TrialDomainRegistry {
   id               String   @id @default(cuid())
   userId           String
-  normalizedDomain String?  // Dominio raíz limpio (ej. "mimarcareal.com")
-  accountUsername  String?  // Username de 10minutesWebsite (en minúsculas y limpio)
+  normalizedDomain String? // Dominio raíz limpio (ej. "mimarcareal.com")
+  accountUsername  String? // Username de 10minutesWebsite (en minúsculas y limpio)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
