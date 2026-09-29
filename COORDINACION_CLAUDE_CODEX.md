@@ -10067,3 +10067,7 @@ verificable en local sin una llamada real a OpenAI — se valida corriendo
 
 **Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
 verificación en producción.
+
+**Capitán de migración liberó el lote:** Claude. Resultado: PR #254 abierto
+(sin migración), cierra zona ciega de canibalización con razonamiento del
+modelo — pendiente de fusión y verificación en producción.
