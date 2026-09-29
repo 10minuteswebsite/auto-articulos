@@ -9938,3 +9938,38 @@ No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta ta
 
 Responsable: Claude (tarea programada diaria de propagación).
 - Ramas locales `claude/*` antiguas sin subir de proyectos previos: no son de este trabajo; no tocar.
+
+## Claude (tarea programada diaria de propagación) — 2026-09-29
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-09-27
+(commit `de0f9ed`). Se revisó el rango `de0f9ed..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: dos commits (`50095a0`, `bd0b7a1`, PR #251/#252), que en
+conjunto agregan una única entrada nueva — "Claude — CIERRE fix «Conectar GSC», estado de
+GSC y conteo de categorías en Oportunidades — 2026-09-28" —, ya cerrada y archivada.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: agregada una entrada nueva ("Versión desplegada y
+  verificada — 2026-09-28 — Fix «Conectar GSC» y conteo de categorías en Oportunidades
+  (PR #251)") con los commits, la causa, el arreglo, archivos tocados, auditorías y la
+  verificación en producción con la cuenta de jose antonio gomez velasco.
+- `TO-DO.md`: agregado un ítem suelto a "Pendientes" — que los pasos 1-3 del checklist de
+  `PreValidationGuard` (10minutesWebsite, Categorías, Idioma) siguen enviando al asistente
+  genérico del wizard en vez de al paso específico, tal como quedó señalado "fuera de
+  alcance" en el propio cierre del fix de GSC.
+- `INVENTARIO_CONVERSACIONES.md`: sin cambios. Esta entrada no declaró ni usó una rama
+  propia (capitanía reclamada "sin migración" y el fix fue directo a PR contra `main`), y
+  no aparece registrada como reserva activa en ningún momento del rango revisado — igual
+  que otros cierres de un solo PR ya documentados solo en `CONTROLADOR_DE_VERSIONES.md`
+  (p.ej. "Despliegue verificado — 2026-09-23 — PR #220"). No se encontró ninguna reserva
+  de Parte A que verificar ni ningún nombre de conversación nuevo que registrar en Parte B.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. Se verificó contra el código real
+  (commit `50095a0d`) que el manual ya se actualizó en el mismo PR del fix (sección
+  "Buscadores", texto sobre el botón «Conectar GSC») — no había ningún cambio visible para
+  el cliente sin reflejar.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. No se encontró ninguna mención nueva a
+  árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
