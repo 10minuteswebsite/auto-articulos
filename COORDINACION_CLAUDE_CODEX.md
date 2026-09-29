@@ -10157,6 +10157,29 @@ reverificación en producción con Guillermo Martínez.
 (sin migración), respaldo determinista de afinidad de categoría + triple
 auditoría — pendiente de fusión y reverificación con Guillermo Martínez.
 
+## Claude — REUBICACIÓN DE CATEGORÍA (sin capitanía, sin migración) — 2026-09-29
+
+PR #259 (`claude/fix-categoria-reubicacion`), sin fusionar todavía. Extiende
+el fix de categoría de hoy (PR #257): en vez de solo aceptar/rechazar la
+categoría que el modelo eligió, `reasonAboutCategoryAssignment` reclasifica
+cada título contra la lista completa de categorías reales de la cuenta (una
+sola llamada por lote) y lo reubica en la correcta si existe. Motivo:
+Guillermo Martínez tiene 26 categorías reales; el fix anterior solo devolvió
+resultados en 2 porque rechazaba en vez de reubicar (títulos de alquiler
+propuestos en "Compra" se perdían en vez de aparecer en "Rentas", que sí
+existe). Triple auditado (detalle completo en el mensaje del commit
+`e8f98f99`): un bug propio de doble conteo del tope por categoría y una
+variable muerta que rompía `noUnusedLocals` se encontraron y corrigieron
+antes de subir.
+
+**No se reclamó capitanía de migración:** otra sesión la tenía activa en
+paralelo para un trabajo no relacionado (MCP/token de API); este cambio no
+toca la base de datos, así que no hacía falta esperar — solo se evitó
+cualquier comando de Prisma.
+
+Responsable: Claude. Estado: PR abierto, pendiente de fusión y
+reverificación con Guillermo Martínez.
+
 ## Capitanía — MCP: token personal de API + herramientas de panorama (2026-09-29)
 
 **Capitán de migración:** Claude — reclamó el lote. Motivo: activar el
@@ -10215,3 +10238,13 @@ producción y probar en vivo con la cuenta de pruebas de Lorena Álvarez
 (generar el token real, llamar `/api/mcp` con `curl`) antes de darle luz
 verde a Milton para probarlo con MUSE — no hay base de datos local
 disponible en este entorno para probarlo antes.
+
+## Capitanía — MCP: reclamada de nuevo para fusionar PR #258 (2026-09-29)
+
+**Capitán de migración:** Claude — la capitanía anterior para este mismo
+lote (PR #258, token personal de API) se había liberado sola sin fusión
+mientras esperaba revisión de Milton; PR #259 se fusionó en el medio sin
+tocar la base. Se reclama de nuevo solo para fusionar #258 y aplicar su
+migración (`20260929120000_add_mcp_api_token`), con autorización explícita
+de Milton para operar en autónomo. Nadie más ejecuta Prisma hasta su
+liberación.

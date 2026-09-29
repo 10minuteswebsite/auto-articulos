@@ -366,33 +366,47 @@ Responde SOLO JSON valido: {"mismaNecesidadIndices": [indices de la LISTA que so
 // llamada, el modelo la ignora tarde o temprano. Resultado real observado:
 // titulos sobre ALQUILAR una propiedad y hasta uno sobre el uso de un
 // microondas quedaron en la categoria "Compra" (compra de propiedades) de
-// esa cuenta. Igual que con la canibalizacion, la solucion NO es una lista
-// de palabras prohibidas (eso ya fallo antes, ver titleFitsCategory
-// retirado el 16/9/2026) sino preguntarle al modelo, en una llamada aparte y
-// enfocada, si el tema REAL de cada titulo pertenece de verdad a la
-// categoria — con la misma garantia de que un error de red no bloquea de
-// mas (se asume que SI pertenece si la consulta falla, igual que el resto
-// de este archivo).
-async function reasonAboutCategoryFit(
-  categoryName: string,
-  publishedExamples: string[] | undefined,
+// esa cuenta.
+//
+// Primera version de este respaldo (retirada el mismo dia): solo
+// aceptaba/rechazaba la categoria que el modelo ya habia elegido, sin
+// reubicar. En una cuenta con 26 categorias (incluida "Rentas", que SI
+// existe) eso perdia oportunidades legitimas en vez de archivarlas donde
+// corresponde: un titulo de alquiler propuesto en "Compra" se rechazaba
+// entero en lugar de aparecer en "Rentas". Version actual: UNA sola llamada
+// por lote (no una por categoria — mas barata y mas rapida) que reclasifica
+// cada titulo del lote contra la lista COMPLETA de categorias reales de la
+// cuenta, devolviendo la categoria correcta (que puede ser la misma que
+// propuso el modelo, u otra) o ninguna si de verdad no hay una categoria
+// real para ese tema. Igual que con la canibalizacion, la solucion NO es
+// una lista de palabras prohibidas (eso ya fallo antes, ver
+// titleFitsCategory retirado el 16/9/2026) sino preguntarle al modelo, con
+// juicio real, a que categoria pertenece cada titulo.
+async function reasonAboutCategoryAssignment(
+  categories: Array<{ id: string; name: string; publishedExamples?: string[] }>,
   titles: string[],
   apiKey: string,
-): Promise<Set<number>> {
-  if (titles.length === 0) return new Set();
-  const prompt = `Eres un editor SEO. Decide, para cada titulo de la lista, si su TEMA REAL pertenece genuinamente a la categoria "${categoryName}" de este blog (a juzgar por su nombre y los ejemplos ya publicados en ella), o si en realidad trata un tema distinto que no deberia archivarse ahi aunque comparta el mismo rubro general o alguna palabra.
+): Promise<Array<string | null>> {
+  if (titles.length === 0) return [];
+  const prompt = `Eres un editor SEO. Para cada titulo de la lista, decide a CUAL de las categorias permitidas pertenece de verdad su TEMA REAL (a juzgar por el nombre de la categoria y sus ejemplos ya publicados) — sin importar en que categoria fue propuesto originalmente por otro proceso. Si genuinamente NINGUNA categoria permitida trata ese tema, responde categoryId null para ese indice.
 
-Ejemplo de tema que NO pertenece aunque comparta rubro: en una categoria de compra de propiedades, un titulo sobre ALQUILAR o ARRENDAR una propiedad no pertenece (comprar y alquilar son transacciones distintas); un titulo sobre el uso de un electrodomestico no pertenece a ninguna categoria de bienes raices.
+Ejemplo de reubicacion correcta: un titulo sobre ALQUILAR o ARRENDAR una propiedad pertenece a una categoria de alquiler/renta si existe una en la lista (aunque otro proceso lo haya propuesto en una categoria de compra) — comprar y alquilar son transacciones distintas. Un titulo sobre el uso de un electrodomestico no pertenece a ninguna categoria de bienes raices (responde null).
 
-Ejemplo de tema que SI pertenece aunque use otras palabras: en una categoria de seguros de salud, un titulo que dice "poliza" en vez de "seguro", o "cobertura medica" en vez de "seguro de salud", SI pertenece — es el mismo tema con otro vocabulario, no un tema distinto. Rechaza solo cuando el tema REAL (la transaccion, el producto o el servicio del que trata el titulo) es distinto, nunca solo porque la redaccion no coincide con el nombre exacto de la categoria o con las palabras de los ejemplos.
+Ejemplo de que NO rechazar solo por redaccion: si el titulo usa "poliza" en vez de "seguro", o "cobertura medica" en vez de "seguro de salud", y el tema real es el mismo que los ejemplos de una categoria de seguros, SI pertenece a esa categoria — no rechaces ni reubiques solo porque la palabra exacta no coincide con el nombre de la categoria o sus ejemplos.
 
-EJEMPLOS YA PUBLICADOS EN "${categoryName}":
-${JSON.stringify((publishedExamples ?? []).slice(0, 30))}
+CATEGORIAS PERMITIDAS (con ejemplos ya publicados; usa el "id" exacto en tu respuesta):
+${JSON.stringify(
+  categories.map((c) => ({
+    id: c.id,
+    nombre: c.name,
+    ejemplos: (c.publishedExamples ?? []).slice(0, 15),
+  })),
+)}
 
-TITULOS A EVALUAR:
+TITULOS A CLASIFICAR:
 ${JSON.stringify(titles.map((text, index) => ({ indice: index, texto: text })))}
 
-Responde SOLO JSON valido: {"pertenecenIndices": [indices de la lista de arriba cuyo tema REAL pertenece genuinamente a "${categoryName}"; lista vacia si ninguno]}`;
+Responde SOLO JSON valido: {"asignaciones": [{"indice": 0, "categoryId": "id-real-de-la-lista-o-null"}, ...]} — un elemento por cada indice de la lista de arriba.`;
 
   try {
     const response = await fetch(OPENAI_URL, {
@@ -405,7 +419,7 @@ Responde SOLO JSON valido: {"pertenecenIndices": [indices de la lista de arriba 
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
         temperature: 0,
-        max_tokens: 500,
+        max_tokens: 4000,
         response_format: { type: "json_object" },
       }),
     });
@@ -419,27 +433,35 @@ Responde SOLO JSON valido: {"pertenecenIndices": [indices de la lista de arriba 
     // siguiente lote (cada categoria acumula titulos de TODOS los lotes).
     // Ese costo asimetrico es exactamente el que motivo esta auditoria
     // (cuenta de Guillermo Martinez, 29/9/2026) — aqui SI conviene rechazar
-    // ante la duda.
-    if (!response.ok) {
-      return new Set();
-    }
+    // ante la duda: por defecto TODOS los indices quedan en null (rechazo)
+    // y solo se llenan los que la respuesta confirma explicitamente.
+    const result: Array<string | null> = new Array(titles.length).fill(null);
+    if (!response.ok) return result;
     const raw = data.choices?.[0]?.message?.content ?? "";
-    const parsed = JSON.parse(raw) as { pertenecenIndices?: unknown };
-    if (!Array.isArray(parsed.pertenecenIndices)) {
-      return new Set();
+    const parsed = JSON.parse(raw) as { asignaciones?: unknown };
+    if (!Array.isArray(parsed.asignaciones)) return result;
+    for (const entry of parsed.asignaciones) {
+      if (!entry || typeof entry !== "object") continue;
+      const record = entry as Record<string, unknown>;
+      const index = record.indice;
+      const categoryId = record.categoryId;
+      if (
+        typeof index === "number" &&
+        index >= 0 &&
+        index < titles.length &&
+        typeof categoryId === "string" &&
+        categoryId.length > 0
+      ) {
+        result[index] = categoryId;
+      }
     }
-    return new Set(
-      parsed.pertenecenIndices.filter(
-        (value): value is number =>
-          typeof value === "number" && value >= 0 && value < titles.length,
-      ),
-    );
+    return result;
   } catch (err) {
     console.error(
-      "reasonAboutCategoryFit: fallo la consulta de juicio, se rechaza por seguridad (categoria visible para el cliente):",
+      "reasonAboutCategoryAssignment: fallo la consulta de juicio, se rechaza por seguridad (categoria visible para el cliente):",
       err,
     );
-    return new Set();
+    return new Array(titles.length).fill(null);
   }
 }
 
@@ -867,7 +889,6 @@ export async function analyzeSeoOpportunities(input: {
   const groupsByCategory = new Map<string, OpportunityAnalysisGroup>();
   const allResult: OpportunityAnalysisGroup[] = [];
   const validCategoryIds = new Set(input.categories.map((item) => item.id));
-  const categoriesById = new Map(input.categories.map((item) => [item.id, item]));
   // Tope dinamico por categoria (ver categoryTitleCap arriba): null/undefined
   // o un numero invalido (<1, no finito) se tratan como "sin tope", igual que
   // el resto del sistema trata dailyArticleLimit nulo como "sin limite".
@@ -1124,6 +1145,15 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
   // declaradas, porque esos titulos nunca tienen (ni deben tener) una cita
   // de busqueda real detras.
   async function applyOpportunityItems(opportunities: unknown[], source: "evidence" | "geo") {
+    // Paso 1: aplanar TODOS los titulos de TODOS los grupos que devolvio
+    // esta llamada, guardando el grupo original (rationale/impressions/
+    // clicks) para poder crear el grupo destino si hace falta.
+    type RawCandidate = {
+      originGroup: Record<string, unknown>;
+      value: Record<string, unknown>;
+      text: string;
+    };
+    const rawCandidates: RawCandidate[] = [];
     for (const item of opportunities) {
       if (!item || typeof item !== "object") continue;
       const group = item as Record<string, unknown>;
@@ -1133,78 +1163,62 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         !Array.isArray(group.titles)
       )
         continue;
-
-      const existingGroup = groupsByCategory.get(group.categoryId);
-
-      // Respaldo determinista de afinidad de categoria (ver
-      // reasonAboutCategoryFit arriba): una sola llamada por grupo/lote que
-      // le pregunta al modelo, con el nombre real de la categoria y sus
-      // ejemplos ya publicados, cuales de estos titulos pertenecen de
-      // verdad. La regla del prompt (REGLA DE ASIGNACION DE CATEGORIA) ya lo
-      // pide, pero sin este chequeo en codigo nada garantiza que el modelo
-      // la respete en cada lote.
-      const categoryInfo = categoriesById.get(group.categoryId);
-      // Si esta categoria ya llego a su tope dinamico (ver categoryTitleCap)
-      // con lotes anteriores, el bucle de abajo va a cortar en la primera
-      // vuelta de todas formas: no tiene sentido gastar una llamada de
-      // razonamiento entera para candidatos que ya no se van a aceptar.
-      const categoryAlreadyAtCap =
-        categoryTitleCap !== null && (existingGroup?.titles.length ?? 0) >= categoryTitleCap;
-      const indexedTitleTexts: Array<{ index: number; text: string }> = [];
-      if (!categoryAlreadyAtCap) {
-        group.titles.forEach((candidate, index) => {
-          if (!candidate || typeof candidate !== "object") return;
-          const value = candidate as Record<string, unknown>;
-          if (typeof value.text === "string" && value.text.trim().length > 0) {
-            indexedTitleTexts.push({ index, text: value.text.trim() });
-          }
-        });
-      }
-      let categoryFitIndices = new Set<number>();
-      if (indexedTitleTexts.length > 0) {
-        const fitSubIndices = await reasonAboutCategoryFit(
-          categoryInfo?.name ?? group.categoryId,
-          categoryInfo?.publishedExamples,
-          indexedTitleTexts.map((item) => item.text),
-          apiKey as string,
-        );
-        categoryFitIndices = new Set(
-          [...fitSubIndices].map((subIndex) => indexedTitleTexts[subIndex].index),
-        );
-      }
-
-      const newTitles: OpportunityAnalysisGroup["titles"] = [];
-      for (let candidateIndex = 0; candidateIndex < group.titles.length; candidateIndex++) {
-        const candidate = group.titles[candidateIndex];
-        // Tope dinamico por categoria (ver categoryTitleCap arriba): cuenta
-        // lo ya aceptado en lotes anteriores de esta categoria MAS lo
-        // aceptado en este mismo lote. Corta el resto de candidatos de esta
-        // categoria sin gastar validacion/razonamiento en ellos; no afecta a
-        // otras categorias ni a los titulos ya aceptados.
-        if (
-          categoryTitleCap !== null &&
-          (existingGroup?.titles.length ?? 0) + newTitles.length >= categoryTitleCap
-        ) {
-          if (debugEnabled) debugCounters.rejectedCategoryCapReached++;
-          break;
-        }
+      for (const candidate of group.titles) {
         if (!candidate || typeof candidate !== "object") continue;
         const value = candidate as Record<string, unknown>;
         if (typeof value.text !== "string") continue;
         const text = value.text.trim();
-        if (debugEnabled && text) debugCounters.modelProposedTitles++;
-        if (text && !categoryFitIndices.has(candidateIndex)) {
-          if (debugEnabled) {
-            debugCounters.rejectedCategoryMismatch++;
-            console.log(
-              `[OPPORTUNITY_DEBUG] Rechazado por no pertenecer de verdad a la categoria "${categoryInfo?.name ?? group.categoryId}". Titulo: "${text}"`,
-            );
-          }
-          continue;
+        if (!text) continue;
+        rawCandidates.push({ originGroup: group, value, text });
+      }
+    }
+    if (rawCandidates.length === 0) return;
+    if (debugEnabled) debugCounters.modelProposedTitles += rawCandidates.length;
+
+    // Paso 2: UNA sola llamada de razonamiento para TODO el lote (no una por
+    // categoria como antes) que reclasifica cada titulo contra las 26+
+    // categorias reales de la cuenta, en vez de solo aceptar o rechazar la
+    // categoria que el modelo eligio. Hallazgo real 2026-09-29 (cuenta de
+    // Guillermo Martinez): rechazar sin reubicar perdia oportunidades
+    // legitimas que el modelo archivaba mal (ej. titulos de alquiler
+    // propuestos en "Compra" en vez de en "Rentas", que SI existe en esa
+    // cuenta). Reubicar en la categoria correcta, en vez de solo bloquear la
+    // incorrecta, es lo que de verdad cierra el hallazgo de hoy.
+    const correctedCategoryIds = await reasonAboutCategoryAssignment(
+      input.categories,
+      rawCandidates.map((c) => c.text),
+      apiKey as string,
+    );
+
+    for (let i = 0; i < rawCandidates.length; i++) {
+      const { originGroup, value, text } = rawCandidates[i];
+      const correctedCategoryId = correctedCategoryIds[i];
+      if (!correctedCategoryId || !validCategoryIds.has(correctedCategoryId)) {
+        if (debugEnabled) {
+          debugCounters.rejectedCategoryMismatch++;
+          console.log(
+            `[OPPORTUNITY_DEBUG] Rechazado: ninguna categoria real le corresponde (propuesta original: "${originGroup.categoryId}"). Titulo: "${text}"`,
+          );
         }
+        continue;
+      }
+      // groupsByCategory.get(...).titles es el MISMO array donde se empuja
+      // mas abajo apenas se acepta un titulo: su .length ya refleja en vivo
+      // lo aceptado en lotes anteriores MAS lo aceptado en esta misma
+      // llamada hasta este punto (incluyendo titulos reubicados aqui desde
+      // otra categoria original) — no hace falta un contador aparte.
+      const existingGroup = groupsByCategory.get(correctedCategoryId);
+      if (
+        categoryTitleCap !== null &&
+        (existingGroup?.titles.length ?? 0) >= categoryTitleCap
+      ) {
+        if (debugEnabled) debugCounters.rejectedCategoryCapReached++;
+        continue;
+      }
+      {
         const normalized = normalizeTitle(text);
-        if (!text || seen.has(normalized)) {
-          if (debugEnabled && text) debugCounters.rejectedEmptyOrDuplicateExact++;
+        if (seen.has(normalized)) {
+          if (debugEnabled) debugCounters.rejectedEmptyOrDuplicateExact++;
           continue;
         }
         const rationale =
@@ -1304,25 +1318,29 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         intentSignatures.push(signature);
         if (needKey) needKeyByTitle.set(text, needKey);
         if (debugEnabled) debugCounters.accepted++;
-        newTitles.push({ text, rationale });
-      }
 
-      if (newTitles.length === 0) continue;
-
-      if (existingGroup) {
-        existingGroup.titles.push(...newTitles);
-      } else {
-        const newGroup: OpportunityAnalysisGroup = {
-          categoryId: group.categoryId,
-          rationale:
-            typeof group.rationale === "string" ? group.rationale.trim() : "",
-          impressions:
-            typeof group.impressions === "number" ? group.impressions : 0,
-          clicks: typeof group.clicks === "number" ? group.clicks : 0,
-          titles: newTitles,
-        };
-        groupsByCategory.set(group.categoryId, newGroup);
-        allResult.push(newGroup);
+        if (existingGroup) {
+          existingGroup.titles.push({ text, rationale });
+        } else {
+          // Grupo nuevo para esta categoria (corregida): reutiliza el
+          // rationale/impressions/clicks del grupo original donde el modelo
+          // propuso este titulo por primera vez — sigue siendo evidencia
+          // numerica real de ese lote, aunque el titulo se haya reubicado a
+          // otra categoria.
+          const newGroup: OpportunityAnalysisGroup = {
+            categoryId: correctedCategoryId,
+            rationale:
+              typeof originGroup.rationale === "string"
+                ? originGroup.rationale.trim()
+                : "",
+            impressions:
+              typeof originGroup.impressions === "number" ? originGroup.impressions : 0,
+            clicks: typeof originGroup.clicks === "number" ? originGroup.clicks : 0,
+            titles: [{ text, rationale }],
+          };
+          groupsByCategory.set(correctedCategoryId, newGroup);
+          allResult.push(newGroup);
+        }
       }
     }
   }
