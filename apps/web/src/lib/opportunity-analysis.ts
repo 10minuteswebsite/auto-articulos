@@ -300,10 +300,11 @@ const PROMPT_HEADER = [
   "- Piensa como un usuario real: que mas buscaria alguien que ya busco esto?",
   "- La meta es VOLUMEN de oportunidades reales, no solo las mas faciles",
   "",
-  "REGLA DE ASIGNACION DE CATEGORIA (organizativa, NO es un filtro de negocio):",
-  "- La categoria es UNICAMENTE el lugar del blog donde el articulo queda archivado. NUNCA es el criterio para decidir SI un tema se escribe: esa decision depende exclusivamente de que exista evidencia real (Search Console, Google Analytics o Bing) y de que no canibalice una necesidad ya cubierta (ver regla de cero canibalizacion mas abajo).",
-  "- PROHIBIDO descartar una consulta, pagina o tendencia real con evidencia solo porque no calza perfecto con el nombre o los ejemplos de ninguna categoria existente: asignala a la categoria PERMITIDA cuyo tema sea el MAS CERCANO. Si de verdad ninguna categoria es remotamente afin (tema completamente ajeno al negocio del usuario), puedes omitirla, pero la falta de coincidencia de palabras con el nombre de la categoria NUNCA es motivo de descarte por si sola.",
-  "- Evita mezclar en un mismo titulo dos temas completamente distintos; esto es una regla de claridad editorial del titulo, no una excusa para descartar la consulta.",
+  "REGLA DE ASIGNACION DE CATEGORIA (ESTRICTA, exige afinidad tematica real):",
+  "- La categoria es el lugar del blog donde el articulo queda archivado. La decision de SI un tema se escribe depende de que exista evidencia real (Search Console, Google Analytics o Bing) y de que no canibalice una necesidad ya cubierta (ver regla de cero canibalizacion mas abajo) — pero la categoria elegida debe tratar de VERDAD el mismo tema que el titulo, no ser simplemente 'la menos lejana' de las disponibles.",
+  "- PROHIBIDO descartar una consulta, pagina o tendencia real con evidencia solo por una diferencia de REDACCION o de PALABRAS EXACTAS frente al nombre de la categoria (ej: un titulo sobre deducibles va en 'Deducibles' aunque no repita esa palabra literal). Esa flexibilidad es solo de vocabulario, nunca de tema.",
+  "- PROHIBIDO forzar un titulo en una categoria cuyo TEMA real es otro solo porque es la 'mas parecida' disponible (ej: una consulta real sobre propiedades en Orlando NO va en una categoria de 'Casas en Miami' — son ciudades y mercados distintos, aunque ambas sean bienes raices). Si ninguna categoria permitida trata de verdad el mismo tema/ciudad/producto que la evidencia, DESCARTA esa consulta: no existe una categoria de 'archivo general' donde meter lo que no encaja.",
+  "- Evita mezclar en un mismo titulo dos temas completamente distintos; esto es una regla de claridad editorial del titulo, ademas de la regla de afinidad de arriba.",
   "- PROHIBIDO inventar un titulo que no se pueda justificar con evidencia real presente en RENDIMIENTO ACTUAL (Search Console), SEÑALES DE GOOGLE ANALYTICS o SEÑALES DE BING que se te dan mas abajo. El 'rationale' de cada titulo debe CITAR TEXTUALMENTE entre comillas la consulta o pagina real que lo respalda (ej: la consulta 'seguros de salud en miami'); si el titulo es una rama inferida que no tiene una consulta exacta propia, cita en cambio la consulta o cluster real del que se deriva (ej: 'se deriva del cluster de consultas sobre seguros de salud en Miami'). Un rationale sin ninguna cita textual entre comillas de un dato real NO es valido.",
   "",
   "REGLA OBLIGATORIA DE CERO CANIBALIZACION (ESTRICTA, sin excepciones):",
@@ -353,7 +354,7 @@ const PROMPT_HEADER = [
   "- Crear nuevas tematicas long tail derivadas de consultas exitosas, no solo variaciones de redaccion",
   "- Identificar nichos no explotados basados en datos reales",
   "- Usar ubicaciones y perfiles de cliente que aparezcan en las consultas, paginas o titulos existentes",
-  "- Proponer intenciones de busqueda nuevas que se infieran de los patrones de las consultas existentes, asignandolas luego a la categoria mas afin (ver REGLA DE ASIGNACION DE CATEGORIA arriba)",
+  "- Proponer intenciones de busqueda nuevas que se infieran de los patrones de las consultas existentes, asignandolas luego a la categoria que trate de verdad ese tema (ver REGLA DE ASIGNACION DE CATEGORIA arriba)",
   "",
   "PRECAUCIONES (no restricciones):",
   "- Si no tienes evidencia directa para un detalle muy especifico (precio exacto, cifra concreta), mantenlo generico pero relevante",
@@ -390,7 +391,7 @@ const PROMPT_HEADER = [
   "- SE SOSPECHOSAMENTE POCO CONSERVADOR cuando la evidencia es abundante: si este lote trae docenas de consultas reales distintas, un resultado de 1 o 2 categorias es casi siempre una señal de que te quedaste corto, no de que falte evidencia — revisa de nuevo cada consulta del lote, una por una, antes de decidir que no hay mas oportunidades. Una consulta con pocas impresiones sigue siendo evidencia real valida; no exijas volumen alto para animarte a proponer un titulo.",
   "- Cada titulo debe tener una justificacion basada en datos reales que nombre la intencion de busqueda distinta que cubre",
   "- No inventes años, nacionalidades, ciudades, precios, estadísticas ni perfiles. Un modificador solo puede aparecer en un titulo si está respaldado por una consulta, página o señal real entregada.",
-  "- Si la consulta o rama no encaja claramente en la categoria asignada, descártala; nunca la coloques en la categoria más parecida por una palabra compartida.",
+  "- Si la consulta o rama no encaja claramente en la categoria asignada, descártala; nunca la coloques en la categoria más parecida solo porque no hay otra mejor (ver REGLA DE ASIGNACION DE CATEGORIA arriba).",
   "- CERO canibalizacion, ni dentro del mismo grupo ni contra TITULOS YA EXISTENTES ni contra OPORTUNIDADES YA CREADAS EN ESTA CORRIDA (ver REGLA OBLIGATORIA DE CERO CANIBALIZACION)",
   "- Usa unicamente categoryId existentes en la lista permitida",
   "- impressions y clicks del grupo deben ser representativos de la evidencia usada",
@@ -646,14 +647,24 @@ export async function analyzeSeoOpportunities(input: {
   ];
 
   // 2026-09-16: se retiró aquí el veto determinista "titleFitsCategory"
-  // (vocabulario distintivo de la categoría contra el título). La categoría
-  // es solo el lugar de archivo del artículo; decidir SI se escribe un
-  // título depende de la demanda real (GSC/GA/Bing, ya inyectada arriba en
-  // el prompt) y de no-canibalización (needKey más abajo), no del nombre de
-  // la categoría. Motivo del retiro: el propio veto había descartado antes
-  // títulos con demanda real por no compartir raíz de palabra con el nombre
-  // de su categoría (caso real: título sin "deducible" en categoría
-  // "Deducibles"). Ver registro en COORDINACION_CLAUDE_CODEX.md.
+  // (vocabulario distintivo de la categoría contra el título) porque
+  // descartaba títulos con demanda real solo por no compartir raíz de
+  // palabra con el nombre de su categoría (caso real: título sin
+  // "deducible" en categoría "Deducibles"). Decidir SI se escribe un título
+  // sigue dependiendo únicamente de la demanda real (GSC/GA/Bing) y de
+  // no-canibalización (needKey más abajo), nunca del nombre de la
+  // categoría — pero A QUÉ categoría se asigna sigue exigiendo afinidad
+  // TEMÁTICA real (ver REGLA DE ASIGNACION DE CATEGORIA en el prompt).
+  // 2026-09-29: la regla del prompt había quedado, sin querer, ordenando
+  // "asigna a la categoría más cercana aunque no calce" — eso producía
+  // justo lo que este veto evitaba por otra vía: títulos sobre un tema/
+  // ciudad ajenos (ej. evidencia real de Orlando) forzados dentro de una
+  // categoría de otro tema/ciudad (ej. "Casas en Miami") solo por ser la
+  // menos lejana disponible. Se corrigió la regla del prompt para exigir
+  // afinidad temática real y permitir descartar si ninguna categoría
+  // encaja de verdad, sin volver a comparar por vocabulario/palabra
+  // compartida (el fallo original que motivó este retiro). Ver
+  // COORDINACION_CLAUDE_CODEX.md.
 
   // Palabras clave de temas excluidos, parseadas desde input.excludedTopics
   const excludedKeywords = new Set<string>();
