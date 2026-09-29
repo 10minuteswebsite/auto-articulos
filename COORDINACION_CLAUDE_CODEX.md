@@ -10111,6 +10111,52 @@ verificación en producción.
 (sin migración), tope dinámico por categoría = dailyArticleLimit — pendiente
 de fusión y verificación en producción.
 
+## Claude — HALLAZGO REAL EN PRODUCCION: CATEGORIA SIN RESPALDO DE CODIGO — 2026-09-29
+
+**Pedido de Milton:** prueba final del fix de categoría (PR #253) con la
+cuenta real de Guillermo Martínez. Resultado: "está muy muy malo" — títulos
+sobre ALQUILAR una propiedad (y uno sobre uso de microondas) quedaron
+archivados en la categoría "Compra" (compra de propiedades). Los títulos en
+sí eran correctos (evidencia real, long tail legítimo); el problema era
+100% la categoría asignada.
+
+**Causa raíz:** el PR #253 de esta misma mañana corrigió la regla de
+asignación de categoría solo en el TEXTO del prompt, sin ningún respaldo en
+código — a diferencia de TODAS las demás reglas obligatorias de este mismo
+archivo (cita de evidencia, combo de geolocalización, temas excluidos, años
+recientes), que sí tienen guardarraíl determinista además de la instrucción
+en el prompt. Sin ese respaldo, el modelo terminó ignorando la regla en
+producción con datos reales, tal como ya había pasado antes con otras
+reglas de este archivo cuando solo vivían en el prompt.
+
+**Fix (PR pendiente, sin fusionar):** `reasonAboutCategoryFit`, nueva
+función en `opportunity-analysis.ts` — mismo patrón que
+`reasonAboutAmbiguousCollisions` (canibalización, hoy mismo): una llamada
+corta y aparte a OpenAI que recibe el nombre real de la categoría, sus
+ejemplos ya publicados y los títulos candidatos, y devuelve cuáles
+pertenecen de verdad. Los que no pasan se rechazan en `applyOpportunityItems`
+ANTES de aceptarse, con contador de diagnóstico
+(`rejectedCategoryMismatch`). Si la consulta falla, se asume que el título
+SÍ pertenece (mismo criterio de "no bloquear de más" del resto del archivo).
+No es una lista de palabras prohibidas (eso ya falló antes con
+`titleFitsCategory`, retirado el 16/9/2026): es razonamiento real, igual que
+pidió Milton para canibalización.
+
+**Capitán de migración:** Claude — reclamado y liberado, sin migración.
+
+**Verificación:** `tsc --noEmit --strict` limpio sobre el archivo. Cambio no
+verificable en local sin una llamada real a OpenAI — se valida corriendo
+"Actualizar análisis" de nuevo en la cuenta de Guillermo Martínez tras
+fusionar, confirmando que los títulos de alquiler/microondas ya no caen en
+"Compra".
+
+**Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
+reverificación en producción con Guillermo Martínez.
+
+**Capitán de migración liberó el lote:** Claude. Resultado: PR #257 abierto
+(sin migración), respaldo determinista de afinidad de categoría + triple
+auditoría — pendiente de fusión y reverificación con Guillermo Martínez.
+
 ## Capitanía — MCP: token personal de API + herramientas de panorama (2026-09-29)
 
 **Capitán de migración:** Claude — reclamó el lote. Motivo: activar el
