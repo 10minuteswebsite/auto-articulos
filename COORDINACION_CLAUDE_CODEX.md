@@ -10179,3 +10179,47 @@ cualquier comando de Prisma.
 
 Responsable: Claude. Estado: PR abierto, pendiente de fusión y
 reverificación con Guillermo Martínez.
+
+## Claude — PERF: REUBICACIÓN DE CATEGORÍA EN UN SOLO PASO FINAL — 2026-09-29
+
+Milton probó en vivo (cuenta Guillermo Martínez) el commit anterior
+(reubicación por lote, `e8f98f99`/PR #259 fusionado) y confirmó que el
+análisis pasó de ~1 min a ~2:30-3 min: `reasonAboutCategoryAssignment` se
+llamaba una vez POR LOTE (hasta 20+ veces por corrida).
+
+**Fix (commit `b61314ce`, mismo PR #259 / rama `claude/fix-categoria-reubicacion`,
+push adicional):** ninguna otra validación de `applyOpportunityItems`
+(duplicado exacto, evidencia citada/combo geo, tema excluido, año reciente,
+needKey/colisión de intención incluido el razonamiento de canibalización)
+depende de a qué categoría termina un título. Se revirtió
+`applyOpportunityItems` a usar la categoría ORIGINAL del modelo (solo para
+el feedback cruzado entre lotes, sin llamada extra) y se movió la
+reubicación real + el tope dinámico por categoría a UN SOLO paso final,
+después de lotes+geo+recuperación, sobre el resultado ya completo. Se
+agregó reintento (2 intentos) a `reasonAboutCategoryAssignment` porque al
+consolidarse en una sola llamada por corrida, si falla ahora arrastra todo
+el resultado en vez de solo un lote.
+
+No se tocó: evidencia GSC/GA/Bing, needKey, cero canibalización, selección
+de títulos. El tope dinámico por categoría (PR #255) se aplica igual, solo
+que como recorte final en vez de corte temprano.
+
+**Verificación:** `tsc --noEmit --strict --noUnusedLocals --noUnusedParameters`
+limpio. **Pendiente:** fusionar y reverificar en producción con Guillermo
+Martínez que (a) el tiempo de análisis bajó, (b) las reubicaciones de
+categoría (ej. MLS→FlexMLS, alquiler→Rentas) siguen funcionando igual de
+bien que en la versión por lote.
+
+**Nota aparte (hallazgo de Milton en la misma prueba, sin resolver
+todavía):** "Flow House" es un desarrollo específico en construcción (no
+una categoría general de ciudad). En la corrida por lote, contenido general
+de Port St. Lucie (escuelas, playas) se clasificó ahí en vez de en la
+categoría "Port St. Lucie" que sí existe — el prompt de
+`reasonAboutCategoryAssignment` no distingue bien entre una categoría de
+desarrollo específico y una de ciudad/área general. **No se corrigió
+todavía** — queda pendiente reforzar el prompt con este caso una vez
+verificada la mejora de velocidad.
+
+**Responsable:** Claude. **Estado:** PR #259 con push adicional, pendiente
+de fusión y reverificación (velocidad + reubicación + el caso Flow House
+pendiente).

@@ -408,61 +408,75 @@ ${JSON.stringify(titles.map((text, index) => ({ indice: index, texto: text })))}
 
 Responde SOLO JSON valido: {"asignaciones": [{"indice": 0, "categoryId": "id-real-de-la-lista-o-null"}, ...]} — un elemento por cada indice de la lista de arriba.`;
 
-  try {
-    const response = await fetch(OPENAI_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0,
-        max_tokens: 4000,
-        response_format: { type: "json_object" },
-      }),
-    });
-    const data = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    // Fallo abierto vs cerrado, a proposito DISTINTO del resto del archivo
-    // (ver reasonAboutAmbiguousCollisions, que si falla abierto): un titulo
-    // mal archivado es visible para el cliente en su blog; un titulo
-    // perdido por una falla de red es invisible y se recupera solo en el
-    // siguiente lote (cada categoria acumula titulos de TODOS los lotes).
-    // Ese costo asimetrico es exactamente el que motivo esta auditoria
-    // (cuenta de Guillermo Martinez, 29/9/2026) — aqui SI conviene rechazar
-    // ante la duda: por defecto TODOS los indices quedan en null (rechazo)
-    // y solo se llenan los que la respuesta confirma explicitamente.
-    const result: Array<string | null> = new Array(titles.length).fill(null);
-    if (!response.ok) return result;
-    const raw = data.choices?.[0]?.message?.content ?? "";
-    const parsed = JSON.parse(raw) as { asignaciones?: unknown };
-    if (!Array.isArray(parsed.asignaciones)) return result;
-    for (const entry of parsed.asignaciones) {
-      if (!entry || typeof entry !== "object") continue;
-      const record = entry as Record<string, unknown>;
-      const index = record.indice;
-      const categoryId = record.categoryId;
-      if (
-        typeof index === "number" &&
-        index >= 0 &&
-        index < titles.length &&
-        typeof categoryId === "string" &&
-        categoryId.length > 0
-      ) {
-        result[index] = categoryId;
+  // Reintento (2 intentos, igual que callOpenAiWithRetry): desde el
+  // rediseño 2026-09-29 esta funcion se llama UNA sola vez por corrida
+  // completa (antes se llamaba por lote), asi que si falla ahora arrastra
+  // TODO el resultado en vez de solo un lote — vale la pena un reintento
+  // antes de rendirse y rechazar todo.
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const response = await fetch(OPENAI_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0,
+          max_tokens: 4000,
+          response_format: { type: "json_object" },
+        }),
+      });
+      const data = (await response.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      if (!response.ok) {
+        lastError = new Error("OpenAI respondio con error al clasificar categorias.");
+        continue;
       }
+      const raw = data.choices?.[0]?.message?.content ?? "";
+      const parsed = JSON.parse(raw) as { asignaciones?: unknown };
+      // Fallo abierto vs cerrado, a proposito DISTINTO del resto del
+      // archivo (ver reasonAboutAmbiguousCollisions, que si falla abierto):
+      // un titulo mal archivado es visible para el cliente en su blog; un
+      // titulo perdido por una falla de red o un JSON invalido es invisible
+      // y no tiene otra oportunidad de aparecer (esta es la unica llamada
+      // de reubicacion de toda la corrida). Por defecto TODOS los indices
+      // quedan en null (rechazo) y solo se llenan los que la respuesta
+      // confirma explicitamente.
+      const result: Array<string | null> = new Array(titles.length).fill(null);
+      if (!Array.isArray(parsed.asignaciones)) {
+        lastError = new Error("La respuesta de clasificacion de categorias no trajo 'asignaciones'.");
+        continue;
+      }
+      for (const entry of parsed.asignaciones) {
+        if (!entry || typeof entry !== "object") continue;
+        const record = entry as Record<string, unknown>;
+        const index = record.indice;
+        const categoryId = record.categoryId;
+        if (
+          typeof index === "number" &&
+          index >= 0 &&
+          index < titles.length &&
+          typeof categoryId === "string" &&
+          categoryId.length > 0
+        ) {
+          result[index] = categoryId;
+        }
+      }
+      return result;
+    } catch (err) {
+      lastError = err;
     }
-    return result;
-  } catch (err) {
-    console.error(
-      "reasonAboutCategoryAssignment: fallo la consulta de juicio, se rechaza por seguridad (categoria visible para el cliente):",
-      err,
-    );
-    return new Array(titles.length).fill(null);
   }
+  console.error(
+    "reasonAboutCategoryAssignment: fallo la consulta de juicio tras reintentar, se rechaza por seguridad (categoria visible para el cliente):",
+    lastError,
+  );
+  return new Array(titles.length).fill(null);
 }
 
 // Garantía determinista 2026-09-16 (hallazgo real: se coló un título -
@@ -1123,6 +1137,72 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
     }
   }
 
+  // Paso final UNICO de reubicacion de categoria + tope dinamico (rediseño
+  // 2026-09-29 por lentitud, confirmado por Milton probando en vivo: antes
+  // se llamaba una vez POR LOTE, hasta 20+ veces por corrida, lo que
+  // triplico el tiempo total de ~1 min a ~2:30-3 min). Ninguna otra
+  // validacion (duplicado exacto, evidencia citada/combo geo, tema
+  // excluido, anio reciente, needKey/colision de intencion) depende de a
+  // que categoria termina un titulo — ya se aplicaron todas dentro de
+  // applyOpportunityItems, usando la categoria ORIGINAL solo para el
+  // feedback cruzado entre lotes. Aqui, una sola vez, sobre el resultado ya
+  // completo, se reclasifica cada titulo contra la lista COMPLETA de
+  // categorias reales de la cuenta (puede ser la misma que propuso el
+  // modelo, u otra) y se aplica el tope dinamico por categoria
+  // (categoryTitleCap) sobre el resultado final ya reubicado.
+  if (allResult.length > 0) {
+    const flatSourceTitles: Array<{ group: OpportunityAnalysisGroup; index: number }> = [];
+    const flatTexts: string[] = [];
+    for (const group of allResult) {
+      group.titles.forEach((_title, index) => {
+        flatSourceTitles.push({ group, index });
+        flatTexts.push(group.titles[index].text);
+      });
+    }
+    const correctedCategoryIds = await reasonAboutCategoryAssignment(
+      input.categories,
+      flatTexts,
+      apiKey,
+    );
+    const finalGroupsByCategory = new Map<string, OpportunityAnalysisGroup>();
+    const finalResult: OpportunityAnalysisGroup[] = [];
+    for (let i = 0; i < flatSourceTitles.length; i++) {
+      const { group: sourceGroup, index } = flatSourceTitles[i];
+      const correctedCategoryId = correctedCategoryIds[i];
+      if (!correctedCategoryId || !validCategoryIds.has(correctedCategoryId)) {
+        if (debugEnabled) {
+          debugCounters.rejectedCategoryMismatch++;
+          console.log(
+            `[OPPORTUNITY_DEBUG] Rechazado en paso final: ninguna categoria real le corresponde (propuesta original: "${sourceGroup.categoryId}"). Titulo: "${sourceGroup.titles[index].text}"`,
+          );
+        }
+        continue;
+      }
+      let destGroup = finalGroupsByCategory.get(correctedCategoryId);
+      if (!destGroup) {
+        destGroup = {
+          categoryId: correctedCategoryId,
+          rationale: sourceGroup.rationale,
+          impressions: sourceGroup.impressions,
+          clicks: sourceGroup.clicks,
+          titles: [],
+        };
+        finalGroupsByCategory.set(correctedCategoryId, destGroup);
+        finalResult.push(destGroup);
+      }
+      if (categoryTitleCap !== null && destGroup.titles.length >= categoryTitleCap) {
+        if (debugEnabled) debugCounters.rejectedCategoryCapReached++;
+        continue;
+      }
+      destGroup.titles.push(sourceGroup.titles[index]);
+    }
+    // finalResult puede tener grupos vacios si TODOS sus titulos se
+    // rechazaron por tope o por no tener categoria real: se filtran antes
+    // de devolver, igual que el resto del archivo nunca deja grupos vacios.
+    allResult.length = 0;
+    allResult.push(...finalResult.filter((group) => group.titles.length > 0));
+  }
+
   if (debugEnabled) {
     console.log("[OPPORTUNITY_DEBUG] Resumen final:", JSON.stringify(debugCounters, null, 2));
   }
@@ -1144,16 +1224,23 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
   // titulo use de verdad una ubicacion de cliente y una de negocio ya
   // declaradas, porque esos titulos nunca tienen (ni deben tener) una cita
   // de busqueda real detras.
+  // NOTA 2026-09-29 (rediseño por lentitud, mismo dia): la reubicacion de
+  // categoria (reasonAboutCategoryAssignment) YA NO se llama aqui, por
+  // lote — se movia hasta 20+ veces por corrida (una por lote), lo que
+  // triplico el tiempo total (de ~1 min a ~2:30-3 min, confirmado por
+  // Milton probando en vivo con la cuenta de Guillermo Martinez). Ninguna
+  // otra validacion de esta funcion (duplicado exacto, evidencia citada/
+  // combo geo, tema excluido, anio reciente, needKey/colision de intencion
+  // incluido el razonamiento de canibalizacion) depende de a que categoria
+  // termina un titulo, asi que esta funcion sigue usando la categoria
+  // ORIGINAL que propuso el modelo (solo para agrupar/mostrar el feedback
+  // cruzado entre lotes, ver alreadyProposedByCategory mas abajo en el
+  // prompt — no necesita ser la categoria final correcta para eso). La
+  // reubicacion real a la categoria correcta (y el tope dinamico por
+  // categoria, que depende de ella) se aplica UNA sola vez al final de
+  // analyzeSeoOpportunities, sobre el resultado ya completo — ver el paso
+  // final despues del bucle de lotes/geo/recuperacion.
   async function applyOpportunityItems(opportunities: unknown[], source: "evidence" | "geo") {
-    // Paso 1: aplanar TODOS los titulos de TODOS los grupos que devolvio
-    // esta llamada, guardando el grupo original (rationale/impressions/
-    // clicks) para poder crear el grupo destino si hace falta.
-    type RawCandidate = {
-      originGroup: Record<string, unknown>;
-      value: Record<string, unknown>;
-      text: string;
-    };
-    const rawCandidates: RawCandidate[] = [];
     for (const item of opportunities) {
       if (!item || typeof item !== "object") continue;
       const group = item as Record<string, unknown>;
@@ -1163,59 +1250,15 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         !Array.isArray(group.titles)
       )
         continue;
+      const existingGroup = groupsByCategory.get(group.categoryId);
+      const newTitles: OpportunityAnalysisGroup["titles"] = [];
       for (const candidate of group.titles) {
         if (!candidate || typeof candidate !== "object") continue;
         const value = candidate as Record<string, unknown>;
         if (typeof value.text !== "string") continue;
         const text = value.text.trim();
+        if (debugEnabled && text) debugCounters.modelProposedTitles++;
         if (!text) continue;
-        rawCandidates.push({ originGroup: group, value, text });
-      }
-    }
-    if (rawCandidates.length === 0) return;
-    if (debugEnabled) debugCounters.modelProposedTitles += rawCandidates.length;
-
-    // Paso 2: UNA sola llamada de razonamiento para TODO el lote (no una por
-    // categoria como antes) que reclasifica cada titulo contra las 26+
-    // categorias reales de la cuenta, en vez de solo aceptar o rechazar la
-    // categoria que el modelo eligio. Hallazgo real 2026-09-29 (cuenta de
-    // Guillermo Martinez): rechazar sin reubicar perdia oportunidades
-    // legitimas que el modelo archivaba mal (ej. titulos de alquiler
-    // propuestos en "Compra" en vez de en "Rentas", que SI existe en esa
-    // cuenta). Reubicar en la categoria correcta, en vez de solo bloquear la
-    // incorrecta, es lo que de verdad cierra el hallazgo de hoy.
-    const correctedCategoryIds = await reasonAboutCategoryAssignment(
-      input.categories,
-      rawCandidates.map((c) => c.text),
-      apiKey as string,
-    );
-
-    for (let i = 0; i < rawCandidates.length; i++) {
-      const { originGroup, value, text } = rawCandidates[i];
-      const correctedCategoryId = correctedCategoryIds[i];
-      if (!correctedCategoryId || !validCategoryIds.has(correctedCategoryId)) {
-        if (debugEnabled) {
-          debugCounters.rejectedCategoryMismatch++;
-          console.log(
-            `[OPPORTUNITY_DEBUG] Rechazado: ninguna categoria real le corresponde (propuesta original: "${originGroup.categoryId}"). Titulo: "${text}"`,
-          );
-        }
-        continue;
-      }
-      // groupsByCategory.get(...).titles es el MISMO array donde se empuja
-      // mas abajo apenas se acepta un titulo: su .length ya refleja en vivo
-      // lo aceptado en lotes anteriores MAS lo aceptado en esta misma
-      // llamada hasta este punto (incluyendo titulos reubicados aqui desde
-      // otra categoria original) — no hace falta un contador aparte.
-      const existingGroup = groupsByCategory.get(correctedCategoryId);
-      if (
-        categoryTitleCap !== null &&
-        (existingGroup?.titles.length ?? 0) >= categoryTitleCap
-      ) {
-        if (debugEnabled) debugCounters.rejectedCategoryCapReached++;
-        continue;
-      }
-      {
         const normalized = normalizeTitle(text);
         if (seen.has(normalized)) {
           if (debugEnabled) debugCounters.rejectedEmptyOrDuplicateExact++;
@@ -1318,29 +1361,24 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         intentSignatures.push(signature);
         if (needKey) needKeyByTitle.set(text, needKey);
         if (debugEnabled) debugCounters.accepted++;
+        newTitles.push({ text, rationale });
+      }
 
-        if (existingGroup) {
-          existingGroup.titles.push({ text, rationale });
-        } else {
-          // Grupo nuevo para esta categoria (corregida): reutiliza el
-          // rationale/impressions/clicks del grupo original donde el modelo
-          // propuso este titulo por primera vez — sigue siendo evidencia
-          // numerica real de ese lote, aunque el titulo se haya reubicado a
-          // otra categoria.
-          const newGroup: OpportunityAnalysisGroup = {
-            categoryId: correctedCategoryId,
-            rationale:
-              typeof originGroup.rationale === "string"
-                ? originGroup.rationale.trim()
-                : "",
-            impressions:
-              typeof originGroup.impressions === "number" ? originGroup.impressions : 0,
-            clicks: typeof originGroup.clicks === "number" ? originGroup.clicks : 0,
-            titles: [{ text, rationale }],
-          };
-          groupsByCategory.set(correctedCategoryId, newGroup);
-          allResult.push(newGroup);
-        }
+      if (newTitles.length === 0) continue;
+      if (existingGroup) {
+        existingGroup.titles.push(...newTitles);
+      } else {
+        const newGroup: OpportunityAnalysisGroup = {
+          categoryId: group.categoryId,
+          rationale:
+            typeof group.rationale === "string" ? group.rationale.trim() : "",
+          impressions:
+            typeof group.impressions === "number" ? group.impressions : 0,
+          clicks: typeof group.clicks === "number" ? group.clicks : 0,
+          titles: newTitles,
+        };
+        groupsByCategory.set(group.categoryId, newGroup);
+        allResult.push(newGroup);
       }
     }
   }
