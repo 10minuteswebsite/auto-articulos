@@ -231,6 +231,130 @@ function collidesWithIntent(
   return false;
 }
 
+// Hallazgo real 2026-09-29: el respaldo de arriba (tokenSetsOverlap) exige al
+// menos 3 tokens sustantivos en AMBOS lados para poder comparar por
+// solapamiento. Cuando el needKey o el título visible quedan con menos de 3
+// tokens tras filtrar palabras de relleno del dominio (ej. "seguro_salud_
+// inmigrante_miami" queda en solo "seguro"+"miami"), el respaldo se abstiene
+// por completo (ni compara) en vez de exigir un umbral más estricto — y no
+// existe ningún umbral numérico que separe ahí un duplicado real
+// (needKey con un sinónimo, ej. "seguro" vs "poliza") de una necesidad
+// genuinamente distinta que solo comparte una ciudad (ej. "seguro" vs
+// "trabajo" en la misma ciudad): ambos casos dan la MISMA proporción de
+// solapamiento. Probar con un umbral distinto no distingue uno del otro,
+// solo cambia cuál de los dos se rompe. La única manera correcta de decidir
+// eso es razonar el significado, no contar palabras — así que en vez de una
+// tabla de sinónimos o un umbral más agresivo, estos casos se le preguntan
+// directamente al modelo (ver reasonAboutAmbiguousCollisions más abajo).
+// Esta función solo detecta DETERMINÍSTICAMENTE cuáles pares están en esa
+// zona ciega (comparten al menos un token pero uno de los dos lados no llega
+// a 3), sin decidir nada por sí sola.
+function findAmbiguousIntentMatches(
+  candidate: IntentSignature,
+  existing: IntentSignature[],
+): IntentSignature[] {
+  const MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON = 3;
+  const matches: IntentSignature[] = [];
+  for (const signature of existing) {
+    // Mismo criterio de exclusión que collidesWithIntent: dos combos
+    // geolocalizados solo difieren por diseño en la ubicación declarada, no
+    // hace falta preguntarle nada al modelo sobre ese caso.
+    if (candidate.isGeoLocationCombo && signature.isGeoLocationCombo) continue;
+    // Si el needKey ya coincidió exacto, collidesWithIntent ya lo habría
+    // marcado como colisión antes de llegar aquí; no hace falta preguntar.
+    if (
+      candidate.needKeyNormalized &&
+      signature.needKeyNormalized &&
+      candidate.needKeyNormalized === signature.needKeyNormalized
+    ) {
+      continue;
+    }
+    const needKeySharedTokens = [...candidate.tokens].filter((token) =>
+      signature.tokens.has(token),
+    ).length;
+    const needKeyInBlindSpot =
+      needKeySharedTokens > 0 &&
+      (candidate.tokens.size < MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON ||
+        signature.tokens.size < MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON);
+
+    const titleSharedTokens = [...candidate.titleTokens].filter((token) =>
+      signature.titleTokens.has(token),
+    ).length;
+    const titleInBlindSpot =
+      titleSharedTokens > 0 &&
+      (candidate.titleTokens.size < MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON ||
+        signature.titleTokens.size < MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON);
+
+    if (needKeyInBlindSpot || titleInBlindSpot) {
+      matches.push(signature);
+    }
+  }
+  return matches;
+}
+
+// Llamada corta y aparte a OpenAI (no la principal de análisis) para
+// resolver, con juicio real, los casos que caen en la zona ciega de arriba.
+// Solo se dispara cuando de verdad hay ambigüedad (pocos casos por corrida);
+// si falla o no se puede interpretar, se asume que NO colisiona (mismo
+// criterio "no bloquear de más" que ya rige el resto del archivo) en vez de
+// descartar un título real por un error de red.
+async function reasonAboutAmbiguousCollisions(
+  candidate: { text: string; needKey?: string },
+  ambiguous: IntentSignature[],
+  apiKey: string,
+): Promise<Set<number>> {
+  if (ambiguous.length === 0) return new Set();
+  const prompt = `Eres un editor SEO experto. Decide, para cada titulo de la LISTA, si representa REALMENTE LA MISMA necesidad de busqueda que el TITULO NUEVO (mismo objeto + contexto + perfil + ubicacion real que busca el usuario), aunque usen palabras distintas o sinonimos — o si es una necesidad genuinamente distinta aunque comparta alguna palabra suelta (como una misma ciudad).
+
+Ejemplo de MISMA necesidad (colisiona) aunque cambien las palabras: "mejor seguro de salud para inmigrantes en Miami" y "mejor poliza de salud para inmigrantes en Miami" — seguro y poliza son el mismo producto para el mismo perfil y ciudad.
+Ejemplo de necesidad DISTINTA (no colisiona) aunque compartan una palabra: "seguro de salud en Florida" y "trabajos en el sector salud en Florida" — uno busca un seguro, el otro un empleo; comparten la ubicacion pero no la necesidad.
+
+TITULO NUEVO:
+texto: "${candidate.text}"
+needKey declarado: ${candidate.needKey ?? "(no declarado)"}
+
+LISTA (titulos ya aceptados en esta corrida):
+${JSON.stringify(ambiguous.map((item, index) => ({ indice: index, texto: item.source, needKey: item.needKeyNormalized })))}
+
+Responde SOLO JSON valido: {"mismaNecesidadIndices": [indices de la LISTA que son la MISMA necesidad que el TITULO NUEVO; lista vacia si ninguno]}`;
+
+  try {
+    const response = await fetch(OPENAI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0,
+        max_tokens: 500,
+        response_format: { type: "json_object" },
+      }),
+    });
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    if (!response.ok) return new Set();
+    const raw = data.choices?.[0]?.message?.content ?? "";
+    const parsed = JSON.parse(raw) as { mismaNecesidadIndices?: unknown };
+    if (!Array.isArray(parsed.mismaNecesidadIndices)) return new Set();
+    return new Set(
+      parsed.mismaNecesidadIndices.filter(
+        (value): value is number =>
+          typeof value === "number" && value >= 0 && value < ambiguous.length,
+      ),
+    );
+  } catch (err) {
+    console.error(
+      "reasonAboutAmbiguousCollisions: fallo la consulta de juicio, se asume que no colisiona:",
+      err,
+    );
+    return new Set();
+  }
+}
+
 // Garantía determinista 2026-09-16 (hallazgo real: se coló un título -
 // "Relación entre seguros de vida y salud en Miami" - cuyo rationale no
 // citaba ninguna consulta, página o cluster real, solo decía "una necesidad
@@ -626,6 +750,8 @@ export async function analyzeSeoOpportunities(input: {
     rejectedExcludedTopic: 0,
     rejectedBadYear: 0,
     rejectedCollision: 0,
+    rejectedCollisionByReasoning: 0,
+    ambiguousCollisionChecks: 0,
     accepted: 0,
   };
 
@@ -786,7 +912,7 @@ ${JSON.stringify(alreadyProposedByCategory)}`;
         `[OPPORTUNITY_DEBUG] Lote ${batchIndex + 1}/${batchesToProcess.length}: ${batch.length} filas de evidencia, modelo devolvio ${opportunities.length} categorias.`,
       );
     }
-    applyOpportunityItems(opportunities, "evidence");
+    await applyOpportunityItems(opportunities, "evidence");
   }
 
   // PASO DEDICADO DE GEOLOCALIZACION (7/9/2026, pedido explicito de Milton:
@@ -829,7 +955,7 @@ Si genuinamente ninguna combinacion tiene sentido real para este negocio, respon
     try {
       const parsedGeo = await callOpenAiWithRetry(geoPrompt, apiKey);
       const geoOpportunities = parsedGeo.opportunities;
-      if (Array.isArray(geoOpportunities)) applyOpportunityItems(geoOpportunities, "geo");
+      if (Array.isArray(geoOpportunities)) await applyOpportunityItems(geoOpportunities, "geo");
     } catch (err) {
       console.error("Paso dedicado de geolocalizacion fallo (no bloquea el resto del analisis):", err);
     }
@@ -858,7 +984,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
     try {
       const recovered = await callOpenAiWithRetry(recoveryPrompt, apiKey);
       if (Array.isArray(recovered.opportunities)) {
-        applyOpportunityItems(recovered.opportunities, "evidence");
+        await applyOpportunityItems(recovered.opportunities, "evidence");
       }
     } catch (err) {
       console.error("Pasada de recuperación de oportunidades falló:", err);
@@ -886,7 +1012,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
   // titulo use de verdad una ubicacion de cliente y una de negocio ya
   // declaradas, porque esos titulos nunca tienen (ni deben tener) una cita
   // de busqueda real detras.
-  function applyOpportunityItems(opportunities: unknown[], source: "evidence" | "geo") {
+  async function applyOpportunityItems(opportunities: unknown[], source: "evidence" | "geo") {
     for (const item of opportunities) {
       if (!item || typeof item !== "object") continue;
       const group = item as Record<string, unknown>;
@@ -977,6 +1103,32 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         if (collidesWithIntent(signature, intentSignatures)) {
           if (debugEnabled) debugCounters.rejectedCollision++;
           continue;
+        }
+        // Zona ciega del chequeo determinista de arriba (ver
+        // findAmbiguousIntentMatches y reasonAboutAmbiguousCollisions): solo
+        // se activa cuando de verdad hay un caso corto/ambiguo que comparte
+        // al menos una palabra. Se le pregunta al modelo, con juicio real,
+        // si es la misma necesidad — no se decide por conteo de palabras.
+        const ambiguousMatches = findAmbiguousIntentMatches(signature, intentSignatures);
+        if (ambiguousMatches.length > 0) {
+          if (debugEnabled) debugCounters.ambiguousCollisionChecks++;
+          const collidingIndices = await reasonAboutAmbiguousCollisions(
+            { text, needKey },
+            ambiguousMatches,
+            // apiKey ya se validó como no vacío al inicio de la funcion
+            // exportada; TypeScript no propaga esa validacion dentro de esta
+            // funcion anidada aunque la variable sea const.
+            apiKey as string,
+          );
+          if (collidingIndices.size > 0) {
+            if (debugEnabled) {
+              debugCounters.rejectedCollisionByReasoning++;
+              console.log(
+                `[OPPORTUNITY_DEBUG] Rechazado por razonamiento de colision ambigua. Titulo: "${text}" | colisiona con: ${JSON.stringify([...collidingIndices].map((i) => ambiguousMatches[i]?.source))}`,
+              );
+            }
+            continue;
+          }
         }
         seen.add(normalized);
         intentSignatures.push(signature);

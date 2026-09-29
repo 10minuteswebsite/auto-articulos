@@ -10009,3 +10009,65 @@ llamada real a OpenAI con datos reales.
 
 **Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
 verificación en producción.
+
+## Claude — AUDITORIA DE CANIBALIZACION — 2026-09-29
+
+**Pedido de Milton:** tras cerrar el bug de categoría, auditar en triple la
+regla de cero canibalización de `opportunity-analysis.ts` (misma función,
+tarea aparte).
+
+**Capitán de migración:** Claude — reclamado y liberado, sin migración
+(cambio de código puro, sin schema).
+
+**Hallazgo confirmado con datos reales del dominio:** el respaldo
+determinista de canibalización (`tokenSetsOverlap`) exige al menos 3 tokens
+sustantivos en ambos lados para comparar por solapamiento. Cuando el
+`needKey` o el título visible quedan con menos de 3 tokens tras filtrar
+palabras de relleno del dominio (`salud`, `inmigrante` están en esa lista),
+el chequeo se abstiene por completo — no compara, no rechaza. Probado con
+Node y vocabulario real de este rubro: `seguro_salud_inmigrante_miami` vs
+`poliza_salud_inmigrante_miami` (mismo producto, sinónimo) queda en solo 2
+tokens cada uno y pasa como no-colisión.
+
+**Primera propuesta (rechazada tras auditoría propia):** bajar el umbral de
+tokens para firmas cortas. Se probó matemáticamente que el mismo ratio de
+solapamiento (0.5) se obtiene tanto para el duplicado real (`seguro` vs
+`poliza`) como para un falso positivo real (`seguro_salud_florida` vs
+`trabajo_salud_florida` — necesidades distintas que solo comparten
+ubicación). Ningún umbral numérico separa ambos casos; se descartó por
+inviable, no por preferencia.
+
+**Segunda propuesta (rechazada por Milton):** diccionario de sinónimos
+(`seguro`/`poliza`, etc.) en `stemIntentToken`. Milton la rechazó
+explícitamente por ser un mecanismo "robótico" que no razona, inconsistente
+con que el resto del sistema (needKey, cero canibalización) ya delega ese
+juicio al modelo.
+
+**Solución implementada (PR pendiente, sin fusionar):** dos funciones
+nuevas en `opportunity-analysis.ts`:
+- `findAmbiguousIntentMatches`: detecta determinísticamente solo los pares
+  en la zona ciega (comparten ≥1 token, algún lado con <3 tokens).
+- `reasonAboutAmbiguousCollisions`: llamada corta y aparte a OpenAI
+  (`gpt-4o-mini`, `max_tokens: 500`, `temperature: 0`) que le pregunta al
+  modelo, con los dos textos reales, si representan la misma necesidad —
+  razonamiento semántico real, no tabla ni umbral. Si falla, se asume "no
+  colisiona" (mismo criterio de no bloquear de más que ya rige el resto del
+  archivo).
+
+Se conecta dentro de `applyOpportunityItems` (ahora `async`) justo después
+del chequeo determinista existente, que queda intacto. Cero cambios a
+evidencia GSC/GA/Bing, needKey, longtail, geolocalización o a la regla de
+categoría recién corregida (tarea anterior de hoy mismo).
+
+**Verificación:** `tsc --noEmit --strict` limpio sobre el archivo (sin los
+errores preexistentes de paquetes del monorepo sin compilar, ya conocidos).
+Sin tests dedicados a este archivo (no existían antes tampoco). Cambio no
+verificable en local sin una llamada real a OpenAI — se valida corriendo
+"Actualizar análisis" en una cuenta real tras fusionar.
+
+**Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
+verificación en producción.
+
+**Capitán de migración liberó el lote:** Claude. Resultado: PR #254 abierto
+(sin migración), cierra zona ciega de canibalización con razonamiento del
+modelo — pendiente de fusión y verificación en producción.
