@@ -10333,3 +10333,34 @@ reverificación.
 Milton, éxito: `db push` + refuerzo de RLS en verde). Pendiente para Milton:
 generar el token real en Configuración → Asistentes IA con la cuenta de
 Lorena Álvarez y probarlo con Meta MUSE.
+
+## Claude — AUDITORÍA COMPLETA DEL ALGORITMO (3 PASADAS) — 2026-09-29
+
+**Pedido de Milton:** auditar el algoritmo de Oportunidades 3 veces seguidas
+sin encontrar nada; cualquier hallazgo reinicia el contador; el resultado
+final debe ser una solución correcta, no solo un plan con pendientes.
+
+**Pasada 1 (encontró 2 huecos, corregidos en PR #263):**
+1. `hasContextualEvidenceForYear` comparaba el año como substring literal
+   del JSON completo de la fila — falso positivo si cualquier número de la
+   fila contenía esos 4 dígitos por coincidencia. Fix: regex con límites de
+   no-dígito a ambos lados.
+2. `reasonAboutCategoryAssignment` (fix del caso "Chat GPT", mismo día)
+   traducía nombre→id con un Map simple: si dos categorías compartieran
+   nombre exacto, se quedaba con la última en silencio. Fix: detecta el
+   caso, lo loguea, conserva la primera coincidencia (predecible).
+
+**Pasadas 2 y 3 (limpias):** revisado `opportunity-analysis.ts` completo,
+`route.ts` completo, `execute/route.ts` (flujo de publicación) — categoría
+corregida se persiste una sola vez sin re-derivarse, sin fuga entre
+paneles/sitios, consistencia prompt↔código, sin duplicación entre llamadas.
+
+**Fuera de alcance (documentado, no corregido):** no hay candado contra dos
+corridas de "Analizar contenido" concurrentes para el mismo usuario — es de
+la capa de API, preexistente a los cambios de hoy, no del algoritmo de
+categoría/canibalización en sí. Queda pendiente si Milton lo prioriza.
+
+**Verificación:** `tsc --noEmit --strict` limpio; regex de año verificado
+con Node (falso positivo → false, caso real → true).
+
+**Responsable:** Claude. **Estado:** PR #263 abierto, pendiente de fusión.
