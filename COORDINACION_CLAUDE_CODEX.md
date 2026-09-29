@@ -10152,3 +10152,7 @@ fusionar, confirmando que los títulos de alquiler/microondas ya no caen en
 
 **Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
 reverificación en producción con Guillermo Martínez.
+
+**Capitán de migración liberó el lote:** Claude. Resultado: PR #257 abierto
+(sin migración), respaldo determinista de afinidad de categoría + triple
+auditoría — pendiente de fusión y reverificación con Guillermo Martínez.
