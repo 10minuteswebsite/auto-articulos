@@ -9973,3 +9973,39 @@ Propagado por documento:
 No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude — REVISIÓN DE ALGORITMO DE SELECCIÓN — 2026-09-29
+
+**Pedido de Milton:** usuarios reportan artículos generados sin relación con la
+categoría donde se archivan (ej: título sobre "casas en Orlando" propuesto en
+categoría "Casas en Miami"). Orden explícita: no tocar la lógica de selección
+de títulos (eso va antes y ya funciona), revisar solo el paso de asignación de
+categoría, que va después.
+
+**Causa raíz confirmada en código** (`apps/web/src/lib/opportunity-analysis.ts`):
+el 2026-09-16 (PR relacionado a "la categoria deja de condicionar tambien la
+propuesta de la IA") se cambió la regla del prompt de "descarta si no encaja
+con ninguna categoría" a "asigna a la categoría PERMITIDA cuyo tema sea el MÁS
+CERCANO", sin exigir afinidad temática real — eso fuerza evidencia de un
+tema/ciudad distinto dentro de la categoría "menos lejana" disponible. Además
+quedó sin limpiar una línea residual en `REGLAS OBLIGATORIAS` (más abajo en el
+mismo prompt) que ordenaba lo contrario, contradiciendo la regla principal.
+
+**Capitán de migración:** Claude — reclamado y liberado, sin migración
+(cambio de solo texto de prompt).
+
+**Fix (PR #253, rama `claude/fix-categoria-afinidad-real`, sin fusionar
+todavía):** se reescribió la `REGLA DE ASIGNACION DE CATEGORIA` para exigir
+afinidad temática real (mantiene flexibilidad de vocabulario/palabra exacta,
+pero prohíbe forzar un título en la categoría "más parecida" si el tema real
+es otro; si ninguna categoría calza de verdad, se descarta la consulta) y se
+limpió la línea residual contradictoria. Cero cambios a evidencia GSC/GA/Bing,
+needKey, cero canibalización, longtail o geolocalización.
+
+**Pendiente:** Milton fusiona el PR y se verifica en una cuenta real
+("Actualizar análisis" en producción) que las categorías ya no reciban
+títulos de tema ajeno — cambio de solo prompt, no verificable en local sin una
+llamada real a OpenAI con datos reales.
+
+**Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión y
+verificación en producción.
