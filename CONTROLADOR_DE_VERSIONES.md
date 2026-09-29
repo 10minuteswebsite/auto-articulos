@@ -3769,3 +3769,25 @@ COORDINACIÓN A LA FECHA DE ESTA ENTRADA.
   detalle si hiciera falta.
 - **Estado:** FUSIONADOS A `main` según Coordinación; confirmación de despliegue detallada
   pendiente.
+
+## Versión desplegada y verificada — 2026-09-28 — Fix «Conectar GSC» y conteo de categorías en Oportunidades (PR #251)
+
+- **Commits:** `50095a0d` (fix, PR #251) y `bd0b7a1` (cierre documental, PR #252),
+  fusionados en `main`. Vercel Production `success`; sin migraciones.
+- **Causa:** `/dashboard/oportunidades` solo leía la conexión antigua de Google
+  (`/api/search-integrations/google`), mientras la tarjeta de Conexiones usa Composio,
+  lo que mostraba «Falta conectar» junto a «Conexión activa». Además, Oportunidades no
+  pasaba `categoriesCount` al guard (Publicar sí lo pasaba), mostrando «0 categorías».
+- **Arreglo:** Oportunidades también consulta `/api/composio/status` (mismo criterio que
+  el panel de Inicio); el botón «Conectar GSC» apunta a
+  `/dashboard/configuracion/conexiones?conexion=google-search-console`; se corrige el
+  paso de `categoriesCount` al guard.
+- **Archivos:** `oportunidades/page.tsx`, `PreValidationGuard.tsx`, `manual-usuario.ts`
+  (manual ya actualizado en el propio PR #251, sin pendiente de propagación).
+- **Auditorías:** tsc sin errores en los archivos tocados, `git diff --check` OK.
+- **Verificado en producción** con la cuenta de jose antonio gomez velasco: entra directo
+  a Oportunidades, sin «Falta conectar» ni aviso de configuración.
+- **Pendiente, fuera de alcance:** los pasos 1-3 del guard aún envían al asistente
+  genérico `/dashboard/configuracion?tab=wizard` (ver TO-DO.md).
+- **Responsable:** Claude. **Estado:** DESPLEGADA Y VERIFICADA. Capitanía liberada;
+  CERRADO Y ARCHIVADO en Coordinación.
