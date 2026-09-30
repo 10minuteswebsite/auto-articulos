@@ -1774,3 +1774,39 @@ EN VIVO con `git fetch origin claude/pinterest-composio` + `git merge-base --is-
   piloto, conectar una cuenta real).
 - Ninguna acción tomada por esta tarea programada sobre esa rama ni ese worktree: solo se
   verificó y se deja registrada la reserva.
+
+### Addendum (agregado por la tarea programada diaria de propagación, 2026-09-30, sin editar la Parte A ni la Parte B anteriores)
+
+**Parte A:** sin cambios. Se verificó contra `git ls-remote`/`git log` que todas las ramas
+del lote de categoría y del lote de MCP de esta ventana (`claude/fix-categoria-afinidad-real`,
+`claude/fix-afinidad-categoria-respaldo-codigo`, `claude/fix-categoria-reubicacion`,
+`claude/perf-categoria-paso-final`, `claude/fix-categoria-nombre-no-id`,
+`claude/fix-categoria-especifica-vs-general`, `claude/tope-dinamico-categoria`,
+`claude/mcp-token-personal-20260929`, `claude/mcp-url-articulo-20260929`,
+`claude/mcp-titulos-ia-20260930`, `claude/mcp-copy-dinamica-20260930`) quedaron como
+punteros sueltos en `origin` tras fusionarse (squash) — ninguna es una reserva activa
+ahora mismo. Detalle de despliegue de cada una en `CONTROLADOR_DE_VERSIONES.md`.
+
+**Parte B — nombres de conversación nuevos encontrados en `COORDINACION_CLAUDE_CODEX.md`**
+(todas ya cerradas y fusionadas a `main`; detalle técnico completo en Coordinación y en
+`CONTROLADOR_DE_VERSIONES.md`, no se transcribe aquí para no duplicar):
+
+- `Claude — REVISIÓN DE ALGORITMO DE SELECCIÓN — 2026-09-29` (PR #253).
+- `Claude — AUDITORIA DE CANIBALIZACION — 2026-09-29` (PR #254).
+- `Claude — TOPE DINAMICO POR CATEGORIA — 2026-09-29` (PR #255).
+- `Claude — HALLAZGO REAL EN PRODUCCION: CATEGORIA SIN RESPALDO DE CODIGO — 2026-09-29`
+  (PR #257).
+- `Claude — REUBICACIÓN DE CATEGORÍA — 2026-09-29` (PR #259).
+- `Capitanía — MCP: token personal de API + herramientas de panorama — 2026-09-29`
+  (PR #258, con migración `20260929120000_add_mcp_api_token`).
+- `Claude — PERF: REUBICACIÓN DE CATEGORÍA EN UN SOLO PASO FINAL — 2026-09-29`
+  (PR #259, push adicional + PR #260).
+- `Claude — CATEGORÍA "CHAT GPT" MAL ASIGNADA: NOMBRE EN VEZ DE ID — 2026-09-29`
+  (PR #262).
+- `Claude — AUDITORÍA COMPLETA DEL ALGORITMO (3 PASADAS) — 2026-09-29` (PR #263).
+- `Claude — CATEGORÍA ESPECÍFICA VS GENERAL: REGLA GENERALIZADA — 2026-09-29`
+  (PR #265).
+- `Capitanía — MCP: URL del artículo en estado_de_publicaciones — 2026-09-29`.
+- `Capitanía — MCP: crear_titulos_con_ia — 2026-09-30`.
+- `Capitanía — MCP: copy neutro, capacidades dinámicas y Actualizaciones pendientes —
+  2026-09-30`.
