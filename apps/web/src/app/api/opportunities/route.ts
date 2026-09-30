@@ -17,6 +17,13 @@ import {
 } from "@/lib/opportunity-evidence-cache";
 import { platformProductNameOrNeutral } from "@auto-articulos/shared";
 
+// El análisis puede consultar varias fuentes y procesar hasta 20 lotes de
+// evidencia contra el modelo. Sin este límite explícito Vercel aplica el
+// timeout corto de la función y Safari lo muestra al usuario como "Load
+// failed", aunque el resto del dashboard sí haya cargado correctamente.
+export const maxDuration = 300;
+export const dynamic = "force-dynamic";
+
 
 function isoDate(date: Date) {
   return date.toISOString().slice(0, 10);

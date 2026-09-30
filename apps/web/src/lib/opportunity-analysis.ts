@@ -871,17 +871,13 @@ export async function analyzeSeoOpportunities(input: {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY no esta configurada.");
 
-  // Bajado de 250 a 100 (7/9/2026, pedido de Milton: al menos 10 títulos por
-  // corrida cuando hay evidencia real, como confirmó el diagnóstico de
-  // producción con 262 consultas distintas disponibles). Con 250, una cuenta
-  // con ~450 filas de Search Console solo generaba 2 lotes — 2 oportunidades
-  // reales de que el modelo cubriera 10 categorías distintas. Con 100 filas
-  // por lote, la misma evidencia produce más pasadas (más llamadas a OpenAI,
-  // mismo techo de MAX_BATCHES), dando más intentos de cubrir categorías que
-  // quedaron sin título en un lote anterior — sin bajar el listón de
-  // evidencia real exigido a cada título.
-  const BATCH_SIZE = 100;
-  const MAX_BATCHES = 20;
+  // Mantener lotes de tamaño moderado evita que una cuenta con mucha
+  // evidencia convierta una ejecución en decenas de llamadas secuenciales a
+  // OpenAI. En producción eso agotaba el tiempo de la función y el navegador
+  // lo mostraba como "Load failed". Se conservan hasta 8 lotes, suficiente
+  // para cubrir cientos de filas sin dejar la petición abierta indefinidamente.
+  const BATCH_SIZE = 150;
+  const MAX_BATCHES = 8;
   const externalRows: GoogleSearchAnalyticsRow[] = (input.externalEvidenceRows ?? [])
     .filter((row) => (row.query ?? row.page ?? "").trim().length > 0)
     .map((row) => ({
