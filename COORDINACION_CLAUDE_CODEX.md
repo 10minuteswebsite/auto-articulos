@@ -10585,3 +10585,25 @@ errores (worktree aislado `/private/tmp/mcp-prompts-workflows-20260930`).
 Sin migración, sin cambios de schema. **Pendiente después de desplegar:**
 prueba real por `curl` de `prompts/list` y `prompts/get` contra producción
 (igual que se hizo con `tools/call` al lanzar el token personal).
+
+## Capitanía — MCP: sin jerga técnica hacia el usuario (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Milton revisó otra vez
+la transcripción real de MUSE y notó que el asistente le habló al usuario
+en términos técnicos ("listar_categorías necesita la conexión, aún no
+configurada de mi lado", mencionando tokens/conectores directamente) —
+lenguaje que una persona normal no entiende. Se agregó una regla explícita
+a `instructions` del `initialize` (`apps/web/src/app/api/mcp/route.ts`) y
+al prompt copiable de Configuración → Asistentes IA: nunca mencionar
+nombres técnicos de herramientas, tokens, APIs, conectores ni el estado
+interno de la conexión del asistente — traducir siempre a lenguaje
+cotidiano (qué le falta a la cuenta, qué botón tocar en la web).
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
+errores (worktree aislado `/private/tmp/mcp-sin-jerga-20260930`). Cambio de
+solo texto en 2 archivos. Sin migración, sin cambios de schema.
+
+**Nota aparte:** al reclamar este lote se encontró que la capitanía del
+lote anterior (`prompts/list+get`, PR #271) había quedado sin liberar por
+error — se liberó recién ahora, retroactivamente, ya verificado en
+producción.
