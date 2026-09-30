@@ -13,16 +13,31 @@ type TokenStatus =
   | { active: false }
   | { active: true; name: string; createdAt: string; lastUsedAt: string | null };
 
-function buildPrompt(serverUrl: string, token: string) {
+type Capability = { name: string; title: string; description: string; soloLectura: boolean };
+
+/**
+ * El prompt y la lista de capacidades se arman con las herramientas reales
+ * del servidor (`/api/mcp/capabilities`, que lee el mismo catálogo que usa
+ * `/api/mcp`), no con una copia escrita a mano — así, cuando se agrega una
+ * herramienta nueva al MCP, esta pantalla y el prompt se actualizan solos.
+ */
+function buildPrompt(serverUrl: string, token: string, capabilities: Capability[]) {
+  const listaHerramientas = capabilities.length
+    ? capabilities.map((c) => `- ${c.name}: ${c.title}`).join("\n")
+    : "(no se pudo cargar la lista de herramientas; usa tools/list del servidor)";
+
   return `Eres un asistente conectado a SEO Total, la plataforma que genera y publica artículos SEO y publicaciones en redes sociales para mi negocio.
 
 Servidor MCP: ${serverUrl}
 Autenticación: cabecera "Authorization: Bearer ${token}"
 
+Herramientas disponibles hoy:
+${listaHerramientas}
+
 Reglas que debes seguir siempre:
 - Antes de publicar cualquier título o categoría, llama primero a la herramienta con confirmar=false (o sin ese parámetro) para ver la vista previa, léemela o muéstramela, y espera mi confirmación explícita antes de volver a llamarla con confirmar=true.
 - Nunca interpretes un "sí" genérico como confirmación si antes no mostraste exactamente qué se va a publicar.
-- Usa listar_oportunidades y estado_de_publicaciones (y el resto de herramientas de solo lectura) libremente para informarme, sin pedir permiso.
+- Usa las herramientas de solo lectura libremente para informarme, sin pedir permiso.
 - Si algo falla o falta una conexión/credencial, explícamelo en lenguaje claro en vez de reintentar solo.
 - Nunca me pidas ni manejes contraseñas, tokens ni secretos dentro de la conversación: eso se configura solo en la interfaz web de SEO Total.`;
 }
@@ -36,11 +51,21 @@ export default function ConfiguracionMcpPage() {
   const [copiedToken, setCopiedToken] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [serverUrl, setServerUrl] = useState("");
+  const [capabilities, setCapabilities] = useState<Capability[]>([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setServerUrl(`${window.location.origin}/api/mcp`);
     }
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/mcp/capabilities")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { tools?: Capability[] } | null) => {
+        if (data?.tools) setCapabilities(data.tools);
+      })
+      .catch(() => {});
   }, []);
 
   const load = useCallback(async () => {
@@ -102,27 +127,59 @@ export default function ConfiguracionMcpPage() {
     setTimeout(() => mark(false), 2000);
   }
 
-  const prompt = freshToken ? buildPrompt(serverUrl, freshToken) : null;
+  const prompt = freshToken ? buildPrompt(serverUrl, freshToken, capabilities) : null;
+  const soloLectura = capabilities.filter((c) => c.soloLectura);
+  const conAccion = capabilities.filter((c) => !c.soloLectura);
 
   return (
     <div>
       <ModuleIntro titulo="Asistentes IA">
         <IntroP>
-          Conecta cualquier asistente de inteligencia artificial — Claude, ChatGPT,
-          Meta MUSE, o el que uses — directamente a tu cuenta de SEO Total. Con un
-          token personal, el asistente puede consultar tus oportunidades, tu estado
-          de publicaciones y publicar artículos por vos, siempre pidiéndote
-          confirmación antes de publicar algo real.
+          Conecta cualquier asistente de inteligencia artificial —Claude, ChatGPT,
+          Meta MUSE o el que uses— directamente a tu cuenta de SEO Total. Con un
+          token personal, el asistente puede consultar tu información y publicar
+          artículos por ti, siempre pidiéndote confirmación antes de publicar algo
+          real.
         </IntroP>
         <IntroP>
-          Generá el token una vez, copiá el prompt de abajo y pegalo como
+          Genera el token una sola vez, copia el prompt de abajo y pégalo como
           instrucciones de tu asistente. El valor del token solo se muestra en el
-          momento de generarlo — después no se puede volver a ver, solo revocar y
+          momento de generarlo: después no podrás volver a verlo, solo revocarlo y
           generar uno nuevo.
         </IntroP>
       </ModuleIntro>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {capabilities.length > 0 && (
+          <section style={sectionStyle}>
+            <h2 style={h2Style}>Qué puede hacer hoy un asistente conectado</h2>
+            {conAccion.length > 0 && (
+              <>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f", marginBottom: 6 }}>
+                  Con confirmación previa:
+                </p>
+                <ul style={{ margin: "0 0 14px", paddingLeft: 20, fontSize: 14, lineHeight: 1.6, color: "#1d1d1f" }}>
+                  {conAccion.map((c) => (
+                    <li key={c.name}>{c.title}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {soloLectura.length > 0 && (
+              <>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f", marginBottom: 6 }}>
+                  Solo consulta, sin pedir permiso:
+                </p>
+                <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, lineHeight: 1.6, color: "#1d1d1f" }}>
+                  {soloLectura.map((c) => (
+                    <li key={c.name}>{c.title}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </section>
+        )}
+
         <section style={sectionStyle}>
           <h2 style={h2Style}>Token personal</h2>
 
@@ -132,7 +189,7 @@ export default function ConfiguracionMcpPage() {
             <>
               {status?.active ? (
                 <p style={{ color: "#1d1d1f", fontSize: 14, marginBottom: 12 }}>
-                  Tenés un token activo ({status.name}), generado el{" "}
+                  Tienes un token activo ({status.name}), generado el{" "}
                   {new Date(status.createdAt).toLocaleDateString("es")}
                   {status.lastUsedAt
                     ? `, usado por última vez el ${new Date(status.lastUsedAt).toLocaleString("es")}`
@@ -141,7 +198,7 @@ export default function ConfiguracionMcpPage() {
                 </p>
               ) : (
                 <p style={{ color: "#6e6e73", fontSize: 14, marginBottom: 12 }}>
-                  Todavía no generaste un token.
+                  Todavía no has generado un token.
                 </p>
               )}
 
@@ -167,7 +224,7 @@ export default function ConfiguracionMcpPage() {
 
               {status?.active && !freshToken && (
                 <p style={{ color: "#6e6e73", fontSize: 13, marginTop: 12 }}>
-                  Si regenerás el token, el anterior deja de funcionar de inmediato
+                  Si regeneras el token, el anterior deja de funcionar de inmediato
                   para cualquier asistente que ya lo tenga configurado.
                 </p>
               )}
@@ -201,7 +258,7 @@ export default function ConfiguracionMcpPage() {
 
             <h2 style={{ ...h2Style, marginTop: 24 }}>Prompt para tu asistente</h2>
             <IntroP>
-              Pegá este texto completo como instrucciones (o primer mensaje) de tu
+              Pega este texto completo como instrucciones (o primer mensaje) de tu
               asistente de IA para que sepa cómo conectarse y qué reglas seguir.
             </IntroP>
             <pre

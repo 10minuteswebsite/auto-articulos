@@ -320,12 +320,14 @@ Si dejás cualquiera de los dos campos vacío, esta combinación no se genera �
 
 Ruta: /dashboard/configuracion/mcp
 
-Conecta cualquier asistente de inteligencia artificial (Claude, ChatGPT, Meta MUSE, u otro) directamente a tu cuenta, para consultar tus oportunidades, tu estado de publicaciones y publicar artículos hablando o escribiendo con él.
+Conecta cualquier asistente de inteligencia artificial (Claude, ChatGPT, Meta MUSE, u otro) directamente a tu cuenta, para consultar tu información, crear títulos con IA y publicar artículos hablando o escribiendo con él. La pantalla muestra la lista actualizada de todo lo que el asistente puede hacer hoy.
 
 1. Pulsa **Generar token** (o **Regenerar token** si ya tenías uno; el anterior deja de funcionar de inmediato).
 2. El valor del token solo se muestra una vez, en el momento de generarlo — cópialo con el botón **Copiar token**. Si lo pierdes, genera uno nuevo.
-3. Copia también el bloque de **Prompt para tu asistente** con el botón **Copiar prompt**, y pégalo como instrucciones (o primer mensaje) de tu asistente de IA. Ese texto ya incluye la dirección del servidor, el token, y las reglas de seguridad: nunca publica nada sin mostrarte antes qué va a hacer y pedirte confirmación explícita.
+3. Copia también el bloque de **Prompt para tu asistente** con el botón **Copiar prompt**, y pégalo como instrucciones (o primer mensaje) de tu asistente de IA. Ese texto ya incluye la dirección del servidor, el token, la lista de herramientas disponibles y las reglas de seguridad: nunca publica nada sin mostrarte antes qué va a hacer y pedirte confirmación explícita.
 4. Pulsa **Revocar** si quieres desconectar todos los asistentes sin generar uno nuevo.
+
+Entre lo que puede hacer un asistente conectado: consultar oportunidades, categorías, idiomas, integraciones y límites; usar "Crear con la IA del sistema" (las mismas preguntas guiadas de Publicar) para proponer títulos nuevos; publicar oportunidades o títulos con tu confirmación explícita; y, al consultar el estado de tus publicaciones, darte el enlace real de cada artículo ya publicado.
 
 ### Estado de configuración
 
