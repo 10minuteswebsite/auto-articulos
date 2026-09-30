@@ -3305,3 +3305,29 @@ segunda vez. Deployment válido informado por CONEXION POSTPEER: `dpl_HKDYsh3jkF
 hubo merge, deploy, migración ni reset adicional por esta reconciliación. Ver hallazgo técnico
 relacionado en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Responsable: Codex (CONEXION POSTPEER). Estado:
 RECONCILIADO, SIN ACCIÓN DE DESPLIEGUE ADICIONAL.
+
+## Versión — 2026-09-30 — recuperación segura de categorías por panel
+
+Fecha y hora: 2026-09-30, America/New_York
+Versión/commit: pendiente
+Rama: `codex/category-panel-autodetect-20260930`
+Worktree: `/Users/miltondavila/.codex/worktrees/c8b6/Creador de articulos`
+Conversación/proyecto: categorías de Juan Mora y cuentas con panel/idioma desalineado
+Cambios incluidos: fallback de sincronización cuando el panel elegido devuelve cero categorías; recuperación automática solo si existe un único panel inequívoco; bloqueo explícito si habría que mezclar varios paneles.
+Archivos modificados: `apps/worker/src/categorySync.ts`, `apps/worker/src/categoryPanelFallback.ts`, `apps/worker/src/categoryPanelFallback.test.ts`, documentación de coordinación.
+Archivos eliminados: ninguno
+Migraciones creadas: ninguna
+Migraciones aplicadas: ninguna
+Auditoría 1: APROBADA — fallback inequívoco probado (3/3); no mezcla paneles.
+Auditoría 2: APROBADA — worker build, suite worker 20/20 y web build 85/85 rutas.
+Auditoría 3: pendiente de PR/Preview/Vercel y verificación productiva
+Diff revisado: sí; sin archivos eliminados ni schema/migraciones.
+Deployment/Vercel: pendiente
+Estado de Vercel: pendiente
+Dominio verificado: pendiente
+Logs verificados: pendiente
+Producción verificada: pendiente
+Problemas conocidos: este checkout no tenía `node_modules` al preparar la versión.
+Responsable: Codex - GPT-5
+Siguiente acción: instalar dependencias, ejecutar auditorías, commit, PR, checks, merge y verificar Vercel.
+Estado: PREPARADA

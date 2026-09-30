@@ -1,5 +1,18 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Recuperación segura de sincronización por panel/idioma — Codex — 2026-09-30
+
+- Se agregó fallback cuando el panel elegido devuelve cero categorías: SEO
+  TOTAL vuelve a consultar los paneles y recupera automáticamente el único
+  panel que tenga categorías, actualizando `selectedSitePanel`.
+- Si aparecen categorías en varios paneles, no se mezclan: la sincronización
+  termina con un mensaje claro para que se elija el sitio correcto.
+- Auditoría funcional, de aislamiento entre paneles y de regresión cubierta
+  por `categoryPanelFallback.test.ts`. No cambia el schema ni requiere
+  migración.
+- Verificación local de tests/build pendiente en este checkout porque no hay
+  `node_modules` instalado; `git diff --check` queda limpio.
+
 ## Cierre de auditoría editorial y enlaces — Codex — 2026-09-20
 
 - PR #187 fusionado a `main`: mejora de identidad editorial por cuenta,
