@@ -10364,3 +10364,30 @@ categoría/canibalización en sí. Queda pendiente si Milton lo prioriza.
 con Node (falso positivo → false, caso real → true).
 
 **Responsable:** Claude. **Estado:** PR #263 abierto, pendiente de fusión.
+
+## Claude — CATEGORÍA ESPECÍFICA VS GENERAL: REGLA GENERALIZADA — 2026-09-29
+
+**Hallazgo real (Milton probando en vivo, cuenta Guillermo Martínez):** 7 de
+8 títulos sobre contrato 'as is' quedaron en "Venta" (general) en vez de
+"As Is Contract Florida" (específica, con artículos publicados reales,
+disponible en la lista). Mismo patrón de falla que Flow House/Port St.
+Lucie, con otro par de categorías — confirma que es sistémico.
+
+**Triple auditoría de causa:** (1) el prompt solo tenía un ejemplo puntual
+(Flow House), sin regla general; (2) el patrón se repitió con categorías
+distintas, confirma sistémico; (3) descartada causa de datos, la categoría
+específica sí estaba disponible con ejemplos reales.
+
+**Triple auditoría de estrategia:** (1) generalizar ataca la causa raíz;
+(2) riesgo de sobre-corrección mitigado con contraejemplo real de la misma
+corrida (gastos de cierre genérico, correctamente en "Venta"); (3) cambio
+de solo texto de prompt, cero riesgo estructural.
+
+**Fix (PR #265, sin fusionar todavía):** regla general explícita
+reemplaza el ejemplo puntual de Flow House, ilustrada con dos casos reales
+(Flow House + As Is Contract Florida vs Venta).
+
+**Verificación:** `tsc --noEmit --strict` limpio. Pendiente reverificar en
+producción con Guillermo Martínez.
+
+**Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión.
