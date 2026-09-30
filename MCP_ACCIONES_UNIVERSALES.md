@@ -78,6 +78,16 @@ confirmación explícita.
   descripciones de `crear_oportunidades` (análisis de Search Console) vs
   `crear_titulos_con_ia` (a partir de una descripción del negocio), que el
   asistente confundía.
+- **Sumado 30/9/2026, `prompts/list` y `prompts/get`:** a partir de un
+  documento de buenas prácticas de MCP que Milton compartió, se implementó
+  la capacidad de "prompts" del propio protocolo (`apps/web/src/lib/mcp/prompts.ts`),
+  distinta de `tools/list` — en vez de que el asistente improvise el orden
+  de llamadas, el servidor publica "recetas" con nombre que ya traen el
+  flujo completo: `empezar` (menú numerado inicial), `publicar_contenido`
+  (resuelve la ambigüedad crear_oportunidades vs crear_titulos_con_ia paso a
+  paso) y `diagnosticar_cuenta`. También se reestructuraron las
+  descripciones de las 14 tools existentes al formato Propósito / Cuándo
+  usarla / Cuándo NO usarla / Contexto necesario / Siguiente paso típico.
 - **Planificado (secciones 3-7 de este catálogo):** indexación/sitemaps,
   gestión de ejecuciones (cancelar/reintentar), acciones de redes sociales
   (generar/editar/publicar propuestas), preferencias de cuenta (idioma,

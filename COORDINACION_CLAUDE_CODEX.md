@@ -10555,3 +10555,33 @@ Sin migración, sin cambios de schema.
 **Capitán de migración:** Claude — reclamó el lote. Motivo: registrar la
 entrada de Actualizaciones del lote "asistente proactivo" (PR #269), mismo
 patrón manual que el anterior (`add-product-update-20260930-mcp.ts`).
+
+## Capitanía — MCP: prompts/list+get y descripciones estructuradas (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Milton compartió un
+documento de buenas prácticas de MCP (`MCP_USAGE_GUIDANCE.md`) y pidió
+ejecutar las ideas alineadas a los objetivos ya en curso (usuario no se
+pierde, asistente proactivo). Dos cambios:
+
+1. **`prompts/list` / `prompts/get`** (`apps/web/src/lib/mcp/prompts.ts`,
+   integrado en `apps/web/src/app/api/mcp/route.ts`): capacidad del
+   protocolo MCP que el servidor nunca implementaba. En vez de que el
+   asistente improvise el orden de llamadas a partir de `tools/list`, el
+   servidor publica 3 "recetas" con nombre: `empezar` (menú numerado
+   inicial, mismo texto que ya vive en `instructions`), `publicar_contenido`
+   (el flujo completo que resuelve exactamente la ambigüedad
+   crear_oportunidades vs crear_titulos_con_ia donde se perdió el usuario
+   real con MUSE) y `diagnosticar_cuenta`. `initialize.capabilities` ahora
+   anuncia `prompts`, y las `instructions` le dicen al asistente que
+   revise `prompts/list` antes de improvisar.
+2. **Descripciones estructuradas en las 14 tools existentes**, formato
+   Propósito / Cuándo usarla / Cuándo NO usarla / Contexto necesario /
+   Siguiente paso típico — mismo criterio que ya se usó para desambiguar
+   `crear_oportunidades` vs `crear_titulos_con_ia` el 30/9, extendido a
+   todo el catálogo.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
+errores (worktree aislado `/private/tmp/mcp-prompts-workflows-20260930`).
+Sin migración, sin cambios de schema. **Pendiente después de desplegar:**
+prueba real por `curl` de `prompts/list` y `prompts/get` contra producción
+(igual que se hizo con `tools/call` al lanzar el token personal).
