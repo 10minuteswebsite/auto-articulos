@@ -10391,3 +10391,24 @@ reemplaza el ejemplo puntual de Flow House, ilustrada con dos casos reales
 producción con Guillermo Martínez.
 
 **Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión.
+
+## Capitanía — MCP: URL del artículo en estado_de_publicaciones (2026-09-29)
+
+**Capitán de migración:** Claude — reclamó el lote. Motivo: Milton está
+probando el MCP con Meta MUSE; pidió que la publicación devuelva el enlace
+del artículo. La publicación es asíncrona (se encola al worker), así que no
+hay URL en el momento de `confirmar=true` — se amplió `estado_de_publicaciones`
+para listar, por título, su `articleUrl` real (campo ya existente en
+`Title`) cuando el estado es `success`, o el mensaje de error cuando falló.
+Sin migración, sin cambios de schema.
+
+**Pedido relacionado, NO implementado a propósito:** MUSE también pidió
+`eliminar_oportunidades`. Bloqueado por el clasificador de modo automático
+de esta sesión (categoría "Irreversible Deletion") en dos intentos previos
+— no se reintentó por otra vía, queda documentado como pendiente si Milton
+decide ajustar los permisos de la sesión.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción de `apps/web`
+completo sin errores (worktree aislado
+`/private/tmp/mcp-url-articulo-20260929`). Cambio de un solo archivo
+(`apps/web/src/lib/mcp/tools/opportunities.ts`), sin tocar el resto.

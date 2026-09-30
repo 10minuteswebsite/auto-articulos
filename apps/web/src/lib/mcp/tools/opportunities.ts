@@ -261,7 +261,7 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
     name: "estado_de_publicaciones",
     title: "Estado de las publicaciones",
     description:
-      "Informa si hay una publicación en curso y cómo salieron las últimas. Solo lectura.",
+      "Informa si hay una publicación en curso y cómo salieron las últimas, incluyendo el enlace de cada artículo publicado con éxito. La publicación es asíncrona: al llamar a publicar_categoria/publicar_oportunidades_seleccionadas/publicar_titulos_en_categoria con confirmar=true el artículo todavía se está generando, no hay URL disponible todavía — usa esta herramienta un momento después para obtenerla. Solo lectura.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     requiredScope: "oportunidades:leer",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
@@ -271,14 +271,22 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
         where: { userId },
         orderBy: { createdAt: "desc" },
         take: 5,
-        include: { category: true, titles: true },
+        include: { category: true, titles: { orderBy: { order: "asc" } } },
       });
       if (runs.length === 0) return toolText("Todavía no hay publicaciones registradas.");
 
       const enCurso = runs.filter((r) => r.status === "pending" || r.status === "running");
       const lineas = runs.map((r) => {
         const nombre = r.category?.name ?? "sin categoría";
-        return `${nombre}: ${r.status}, ${r.titles.length} ${r.titles.length === 1 ? "título" : "títulos"}`;
+        const detalleTitulos = r.titles
+          .map((t) => {
+            if (t.status === "success" && t.articleUrl) return `    - "${t.finalTitle ?? t.text}": ${t.articleUrl}`;
+            if (t.status === "success") return `    - "${t.finalTitle ?? t.text}": publicado, todavía sin URL registrada`;
+            if (t.status === "error") return `    - "${t.text}": error — ${t.errorMessage ?? "sin detalle"}`;
+            return `    - "${t.text}": ${t.status}`;
+          })
+          .join("\n");
+        return `${nombre}: ${r.status}, ${r.titles.length} ${r.titles.length === 1 ? "título" : "títulos"}\n${detalleTitulos}`;
       });
       const cabecera =
         enCurso.length > 0
