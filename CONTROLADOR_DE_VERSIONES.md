@@ -3791,3 +3791,113 @@ COORDINACIÓN A LA FECHA DE ESTA ENTRADA.
   genérico `/dashboard/configuracion?tab=wizard` (ver TO-DO.md).
 - **Responsable:** Claude. **Estado:** DESPLEGADA Y VERIFICADA. Capitanía liberada;
   CERRADO Y ARCHIVADO en Coordinación.
+
+## Commits — 2026-09-29 — Cadena de fixes de asignación de categoría en Oportunidades (afinidad real → canibalización → tope dinámico → respaldo determinista → reubicación → rendimiento → nombre vs. id → auditoría de 3 pasadas → específica vs. general)
+
+- **Commits (todos sobre `apps/web/src/lib/opportunity-analysis.ts` y archivos
+  relacionados de Oportunidades, ya en `origin/main`):**
+  - `39128fc` — PR #253: exige afinidad temática real al asignar categoría (ya no fuerza
+    la categoría "más cercana" sin relación real).
+  - `4f6ca4a` — PR #254: cierra zona ciega de canibalización (`findAmbiguousIntentMatches`
+    + `reasonAboutAmbiguousCollisions`, razonamiento corto de OpenAI para firmas cortas de
+    <3 tokens).
+  - `6712459` — PR #255: tope dinámico de títulos por categoría = `dailyArticleLimit` del
+    usuario (antes no había tope; se retiró uno fijo el 2/9/2026).
+  - `65b896a` — PR #257: respaldo determinista de afinidad de categoría
+    (`reasonAboutCategoryFit`) tras hallazgo real con la cuenta de Guillermo Martínez
+    (títulos de alquiler quedando en "Compra"; el PR #253 solo había tocado el prompt, sin
+    guardarraíl en código).
+  - `da93477` — PR #259: reubica el título en la categoría correcta (de las 26 reales de
+    la cuenta) en vez de solo rechazarlo.
+  - `d4c3a98` — PR #260: mueve la reubicación de categoría a un solo paso final (antes se
+    llamaba una vez por lote, ~20+ veces por corrida; el análisis había pasado de ~1 min a
+    ~2:30-3 min).
+  - `0ee7f72` — PR #262: el prompt pide el nombre exacto de la categoría en vez del id
+    opaco (cuid), tras otro hallazgo real: un título de bienes raíces quedó en la
+    categoría "Chat GPT".
+  - `944e42b` — PR #263: cierra dos huecos encontrados en una auditoría completa de 3
+    pasadas pedida por Milton (comparación de año como substring literal sin límites de
+    dígito; colisión silenciosa de nombre de categoría duplicado en el Map nombre→id).
+  - `075c125` — PR #265: generaliza la regla "categoría específica vs. general" (antes
+    solo tenía el ejemplo puntual "Flow House"; el mismo patrón de falla se repitió con
+    "As Is Contract Florida" quedando en "Venta").
+- **Patrón repetido en todo el lote, documentado en `COORDINACION_CLAUDE_CODEX.md`:**
+  cada fix se probó en vivo con la cuenta real de Guillermo Martínez y encontró un bug
+  nuevo de categoría, que motivó el siguiente PR de la misma cadena (afinidad real →
+  respaldo determinista → reubicación → nombre vs. id → específica vs. general). Ninguna
+  de las entradas de Coordinación revisadas en este rango cierra la cadena con una
+  verificación final de "ya no hay más casos" — la última (PR #265) queda "pendiente
+  reverificar en producción con Guillermo Martínez".
+- **Auditorías reportadas por commit:** `tsc --noEmit --strict` (y en el PR #263,
+  `--noUnusedLocals --noUnusedParameters`) limpio en cada uno. Ninguno tiene test
+  dedicado (no existían antes tampoco). Ninguno es 100% verificable en local por depender
+  de una llamada real a OpenAI.
+- **Cero cambios, en todo el lote, a:** evidencia GSC/GA/Bing, `needKey`, selección de
+  títulos, longtail, geolocalización.
+- **Sin migración en ningún commit de este lote** (schema sin cambios).
+- **Estado:** FUSIONADOS A `main` (confirmado contra `git log`/`origin/main` por esta
+  misma tarea programada). Coordinación no registra confirmación explícita de despliegue
+  en Vercel Production para este lote (a diferencia de otros lotes de este mismo
+  documento) ni una verificación final en producción posterior al PR #265 — queda para
+  quien retome confirmar Vercel y cerrar el ciclo de pruebas con Guillermo Martínez.
+
+## Versión desplegada — 2026-09-29 — MCP: token personal de API + herramientas de panorama (PR #258)
+
+- **Commit:** `a2c8272` (PR #258, `feat(mcp): token personal de API + herramientas de
+  panorama para cualquier asistente de IA`), fusionado en `main`.
+- **Qué habilita:** que cualquier asistente de IA (Milton quiere probar primero con Meta
+  MUSE) opere la cuenta del usuario autenticándose con un token personal generado desde
+  Configuración → Asistentes IA (`/dashboard/configuracion/mcp`), sin registro de cliente
+  OAuth. Suma 6 tools nuevas de solo lectura (`ver_resumen_cuenta`,
+  `ver_estado_configuracion`, `ver_integraciones`, `listar_categorias`, `listar_idiomas`,
+  `ver_limites_y_creditos`) que reusan los route handlers existentes de la web.
+- **Modelo nuevo:** `McpApiToken` (un token activo por usuario, se guarda solo el hash,
+  mismo esquema que `OAuthAccessToken`) + migración `20260929120000_add_mcp_api_token`.
+- **Migración aplicada en producción** vía el workflow "Migración manual de base de
+  datos" (corrida `36641257935`, disparada por Milton): `db push` + refuerzo de RLS en
+  verde, según registra `COORDINACION_CLAUDE_CODEX.md`.
+- **Auditorías reportadas:** `npx tsc --noEmit` limpio en `apps/web` y `apps/worker`;
+  build de producción de `apps/web` completo sin errores (incluye la nueva pantalla);
+  suite del worker 20/20 en verde (sin cambios ahí); `git diff --check` limpio. Todo
+  corrido en worktree aislado sin credenciales reales.
+- **Manual del bot de ayuda:** `apps/web/src/content/manual-usuario.ts` ya tiene la
+  sección "Asistentes IA" (verificado por esta misma tarea programada contra el código
+  real vigente al 2026-09-30).
+- **Pendiente, no confirmado en el rango revisado de Coordinación:** que Milton (o
+  Lorena Álvarez) genere el token real y lo pruebe en vivo con Meta MUSE.
+- **Responsable:** Claude. **Estado:** DESPLEGADA (migración aplicada y verificada);
+  prueba end-to-end con un asistente de IA real pendiente.
+
+## Commits — 2026-09-29/2026-09-30 — MCP: URL del artículo publicado, crear_titulos_con_ia, copy neutro y catálogo dinámico
+
+- **Commits (ya en `origin/main`, sin migración en ninguno):**
+  - `7d3a5f5` — amplía `estado_de_publicaciones` del MCP para devolver, por título, el
+    `articleUrl` real cuando la publicación tuvo éxito (o el mensaje de error si falló);
+    la publicación es asíncrona, así que no había URL disponible al confirmar.
+  - `ea9c1c9` — nueva tool `crear_titulos_con_ia`
+    (`apps/web/src/lib/mcp/tools/content-generation.ts`), expone "Crear con la IA del
+    sistema" (preguntas guiadas de Publicar) al MCP, reusando `POST
+    /api/title-generation` sin reimplementar cupo ni filtro de repetidos.
+  - `b8a90e3` — copy de Configuración → Asistentes IA pasado de "vos" rioplatense a "tú"
+    (español neutro); nuevo endpoint público `GET /api/mcp/capabilities` que lee el
+    array `TOOLS` real, así la pantalla y el prompt copiable listan las herramientas
+    disponibles sin mantenimiento manual; script
+    `scripts/add-product-update-20260930-mcp.ts` agregado para registrar en
+    `ProductUpdate` (Actualizaciones + manual del bot de ayuda) el trabajo de MCP que el
+    hook automático (`generate-product-update.ts`) no pudo generar solo porque los
+    worktrees aislados de estos commits no tienen `OPENAI_API_KEY`/`DATABASE_URL`
+    reales.
+- **Auditorías reportadas por commit:** `npx tsc --noEmit` limpio, build de producción
+  de `apps/web` completo sin errores, cada uno en su propio worktree aislado
+  (`/private/tmp/mcp-url-articulo-20260929`, `/private/tmp/mcp-titulos-ia-20260930`,
+  `/private/tmp/mcp-copy-dinamica-20260930`).
+- **Pendiente, no ejecutado todavía (requiere credenciales reales que este entorno no
+  tiene):** correr `npx tsx scripts/add-product-update-20260930-mcp.ts` para que
+  Actualizaciones y el bot de ayuda reflejen el trabajo de MCP — Milton u otra sesión con
+  las credenciales de producción debe correrlo una vez.
+- **Pedido de MUSE explícitamente NO implementado:** `eliminar_oportunidades`, bloqueado
+  por el clasificador de modo automático de esa sesión (categoría "Irreversible
+  Deletion"); ver ítem correspondiente en `TO-DO.md`.
+- **Estado:** FUSIONADOS A `main`. Coordinación no registra confirmación explícita de
+  despliegue en Vercel Production para este lote ni prueba en vivo con un asistente de
+  IA real todavía.
