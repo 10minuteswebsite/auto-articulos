@@ -1,5 +1,6 @@
 import { OPPORTUNITY_TOOLS } from "./opportunities";
 import { ACCOUNT_TOOLS } from "./account";
+import { CONTENT_GENERATION_TOOLS } from "./content-generation";
 import type { ToolDef } from "./shared";
 
 /**
@@ -12,7 +13,7 @@ import type { ToolDef } from "./shared";
  * sumarlo acá abajo. Ni `app/api/mcp/route.ts` ni `middleware.ts` cambian
  * nunca por esto.
  */
-export const TOOLS: ToolDef[] = [...OPPORTUNITY_TOOLS, ...ACCOUNT_TOOLS];
+export const TOOLS: ToolDef[] = [...OPPORTUNITY_TOOLS, ...ACCOUNT_TOOLS, ...CONTENT_GENERATION_TOOLS];
 
 export function findTool(name: string, scopes: string[]) {
   return TOOLS.find((tool) => tool.name === name && scopes.includes(tool.requiredScope));

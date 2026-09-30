@@ -10412,3 +10412,17 @@ decide ajustar los permisos de la sesión.
 completo sin errores (worktree aislado
 `/private/tmp/mcp-url-articulo-20260929`). Cambio de un solo archivo
 (`apps/web/src/lib/mcp/tools/opportunities.ts`), sin tocar el resto.
+
+## Capitanía — MCP: crear_titulos_con_ia (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Milton notó que "Crear
+con la IA del sistema" (preguntas guiadas del panel Publicar, proyecto
+CREACION DE PUBLICACIONES PROPIAS) no estaba expuesto en el MCP. Nueva tool
+`crear_titulos_con_ia` en `apps/web/src/lib/mcp/tools/content-generation.ts`,
+reusa `POST /api/title-generation` (mismo cupo de 3 solicitudes/día, mismo
+filtro de repetidos, mismo prompt de administrador) — no reimplementa nada.
+Sin migración, sin cambios de schema.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción de `apps/web`
+completo sin errores (worktree aislado
+`/private/tmp/mcp-titulos-ia-20260930`).
