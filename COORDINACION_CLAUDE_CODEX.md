@@ -10426,3 +10426,38 @@ Sin migración, sin cambios de schema.
 **Auditorías:** `npx tsc --noEmit` limpio, build de producción de `apps/web`
 completo sin errores (worktree aislado
 `/private/tmp/mcp-titulos-ia-20260930`).
+
+## Capitanía — MCP: copy neutro, capacidades dinámicas y Actualizaciones pendientes (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Milton pidió tres cosas
+sobre lo ya construido de MCP:
+
+1. **Copy de Configuración → Asistentes IA en español neutro** (usaba "vos"
+   rioplatense; reemplazado por "tú" en todo el texto y el prompt copiable).
+2. **Que sea dinámico:** nuevo endpoint público `GET /api/mcp/capabilities`
+   que lee directo del array `TOOLS` real (no una copia escrita a mano) —
+   la pantalla y el prompt copiable arman su lista de "qué puede hacer un
+   asistente hoy" desde ahí, así que la próxima tool que se agregue aparece
+   sola, sin editar esta pantalla.
+3. **Registro en Actualizaciones y en el manual del robot de ayuda:**
+   hallazgo importante — el hook `generate-product-update.ts` (que llena la
+   tabla `ProductUpdate`, la misma que lee el asistente de ayuda vía
+   `getCurrentProductKnowledge()`) necesita `OPENAI_API_KEY` y
+   `DATABASE_URL` reales, y todos los commits de MCP se hicieron en
+   worktrees aislados sin esas credenciales a propósito (protocolo de
+   seguridad) — el hook falló en silencio (visible como advertencia, nunca
+   bloqueó el commit) y **ninguna entrada de Actualizaciones se generó para
+   todo el trabajo de MCP**. Se agregó `scripts/add-product-update-20260930-mcp.ts`,
+   mismo patrón manual sin IA que ya usa el repo
+   (`add-product-update-20260922-interface.ts`), con las dos entradas que
+   faltan. **Pendiente de que Milton (u otra sesión con las credenciales
+   reales) lo corra una vez:** `npx tsx scripts/add-product-update-20260930-mcp.ts`.
+   También se amplió la sección "Asistentes IA" de
+   `apps/web/src/content/manual-usuario.ts` (el manual base que sí se
+   actualiza en cada PR) para mencionar `crear_titulos_con_ia` y el enlace
+   del artículo.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
+errores (worktree aislado `/private/tmp/mcp-copy-dinamica-20260930`). El
+script de Actualizaciones no se ejecutó (requiere credenciales reales que
+este entorno no tiene).
