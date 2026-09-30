@@ -260,6 +260,22 @@ HANDOFF, solo alimenta ideas hacia él).
   específico que falta, a diferencia de lo que ya se corrigió para el paso
   de Google Search Console en ese mismo cierre. Señalado como "fuera de
   alcance" de ese fix; sin fecha límite ni responsable asignado todavía.
+- **(30/9/2026, origen: tarea programada diaria de propagación, al revisar
+  `COORDINACION_CLAUDE_CODEX.md` → "Claude — AUDITORÍA COMPLETA DEL
+  ALGORITMO (3 PASADAS) — 2026-09-29", sección "Fuera de alcance")** No
+  existe candado contra dos corridas de "Analizar contenido" concurrentes
+  para el mismo usuario en Oportunidades — es de la capa de API, preexiste
+  a toda la cadena de fixes de categoría de esa fecha. Señalado como fuera
+  de alcance de esa auditoría; sin fecha límite ni responsable asignado
+  todavía.
+- **(30/9/2026, origen: tarea programada diaria de propagación, al revisar
+  `COORDINACION_CLAUDE_CODEX.md` → "Capitanía — MCP: URL del artículo en
+  estado_de_publicaciones (2026-09-29)")** Meta MUSE (probando el MCP)
+  pidió también una tool `eliminar_oportunidades`, no implementada a
+  propósito: quedó bloqueada por el clasificador de modo automático de esa
+  sesión (categoría "Irreversible Deletion") en dos intentos previos, sin
+  reintentarse por otra vía. Pendiente si Milton decide ajustar los
+  permisos de la sesión para esa tool.
 
 ## Hecho
 
