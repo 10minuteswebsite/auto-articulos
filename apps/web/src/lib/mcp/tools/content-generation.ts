@@ -15,9 +15,9 @@ import { POST as generarTitulosIARoute } from "@/app/api/title-generation/route"
 export const CONTENT_GENERATION_TOOLS: ToolDef[] = [
   {
     name: "crear_titulos_con_ia",
-    title: "Crear títulos con la IA del sistema",
+    title: "Crear títulos con la IA (a partir de una descripción del negocio)",
     description:
-      "Genera hasta 9 propuestas de títulos para una categoría, a partir de quién es el cliente tipo, el tema y qué busca resolver el cliente — la misma función 'Crear con la IA del sistema' del panel Publicar. No publica nada: solo propone títulos. Para publicarlos después, usa publicar_titulos_en_categoria con los textos exactos devueltos aquí. Cupo de 3 solicitudes de este tipo por día por cuenta.",
+      "Genera hasta 9 propuestas de títulos para una categoría, a partir de una descripción que TÚ das (cliente tipo, tema, qué busca resolver el cliente) — la misma función 'Crear con la IA del sistema' del panel Publicar. No requiere Google Search Console ni categorías con datos previos: pide los 4 datos obligatorios antes de llamarla. Distinto de crear_oportunidades: esta no analiza nada externo, solo usa lo que le describas. No publica nada — para publicar después usa publicar_titulos_en_categoria con los textos exactos devueltos aquí. Cupo de 3 solicitudes de este tipo por día por cuenta.",
     inputSchema: {
       type: "object",
       properties: {

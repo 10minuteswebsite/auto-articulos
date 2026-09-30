@@ -59,6 +59,25 @@ confirmación explícita.
   `apps/web/src/lib/mcp/tools/index.ts`. El servidor
   (`apps/web/src/app/api/mcp/route.ts`) y el middleware no cambian nunca por
   esto — así es como este catálogo queda "vivo" sin rediseñar nada cada vez.
+- **Sumado 30/9/2026, comportamiento proactivo:** evidencia real de una
+  conversación con Meta MUSE mostró que el asistente esperaba preguntas
+  abiertas en vez de guiar como el Home real (menú numerado). Se reforzó
+  `instructions` del `initialize` (`apps/web/src/app/api/mcp/route.ts`) y el
+  prompt copiable de Configuración → Asistentes IA para que el asistente
+  ofrezca proactivamente el mismo menú numerado del Home (Contenido propio /
+  Contenido generado por IA / Redes y blogs) desde el primer mensaje, y
+  llame a la nueva tool `ver_manual_seo_total` (solo lectura, devuelve el
+  manual real de la plataforma — el mismo que ya alimenta al robot de ayuda
+  web, `apps/web/src/content/manual-usuario.ts` — con filtro opcional por
+  tema) cuando no sepa cómo guiar. También se corrigió un bug real
+  encontrado en esa misma conversación: `crear_oportunidades` no enviaba
+  `panel` a `/api/opportunities`, así que en cuentas con varios paneles
+  reales devolvía "Sincroniza tus categorías primero" aunque ya estuvieran
+  sincronizadas — la tool ahora resuelve el panel igual que ya lo hace la
+  página web (primer panel real disponible). Se desambiguaron además las
+  descripciones de `crear_oportunidades` (análisis de Search Console) vs
+  `crear_titulos_con_ia` (a partir de una descripción del negocio), que el
+  asistente confundía.
 - **Planificado (secciones 3-7 de este catálogo):** indexación/sitemaps,
   gestión de ejecuciones (cancelar/reintentar), acciones de redes sociales
   (generar/editar/publicar propuestas), preferencias de cuenta (idioma,

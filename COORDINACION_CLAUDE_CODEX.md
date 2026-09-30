@@ -10508,3 +10508,46 @@ Propagado por documento:
 No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Capitanía — MCP: asistente proactivo + fix real de bug de panel (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Motivo: Milton pasó una
+conversación real de un usuario con Meta MUSE (análisis honesto del propio
+MUSE, `analisis-mcp-seo-total.md`) donde el asistente quedó bloqueado y
+perdido. Se verificó cada causa contra el código real antes de tocar nada
+(no se asumió nada del reporte):
+
+1. **Bug real confirmado, no "falta de sincronización":**
+   `crear_oportunidades` nunca enviaba `panel` a `POST /api/opportunities`
+   (`apps/web/src/app/api/opportunities/route.ts:139`), que filtra
+   categorías por ese campo. En cuentas con un solo panel (`Category.panel`
+   default `""`) no se notaba; en cuentas multi-panel (como la del caso
+   real, 5 categorías con paneles propios) la consulta no encontraba
+   ninguna categoría — de ahí "Sincroniza tus categorías primero" con
+   categorías YA sincronizadas. Prueba adicional: `listar_categorias` (sin
+   filtro de panel) sí las mostraba bien — inconsistencia real entre dos
+   tools del mismo MCP. Fix: la tool ahora resuelve el panel igual que ya
+   lo hace `oportunidades/page.tsx` (primer panel real disponible entre las
+   categorías del usuario, si no hay uno fijado en la cuenta).
+2. **Confusión confirmada** entre `crear_oportunidades` (análisis de Search
+   Console) y `crear_titulos_con_ia` (a partir de una descripción del
+   negocio) — descripciones reescritas para desambiguar.
+3. **Comportamiento reactivo confirmado** en la transcripción real: el
+   primer mensaje del asistente fue una pregunta abierta en vez de un menú
+   numerado. Se reforzó `instructions` del `initialize`
+   (`apps/web/src/app/api/mcp/route.ts`) y el prompt copiable de
+   Configuración → Asistentes IA para que el asistente ofrezca
+   proactivamente el mismo menú numerado del Home real desde el primer
+   mensaje — pedido central de Milton.
+4. **Nueva tool `ver_manual_seo_total`** (solo lectura,
+   `apps/web/src/lib/mcp/tools/guidance.ts`): devuelve el manual real de la
+   plataforma (el mismo `BASE_USER_MANUAL` que ya alimenta al robot de
+   ayuda web, no un documento nuevo), con índice o filtro por tema. El
+   asistente la usa cuando no sabe cómo guiar, en vez de inventar.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
+errores (worktree aislado `/private/tmp/mcp-proactivo-20260930`). La
+función de búsqueda del manual se probó aparte con un script real contra
+`BASE_USER_MANUAL` (encontró un bug propio — buscaba solo en el título de
+cada sección, no en el contenido — corregido y reverificado antes de subir).
+Sin migración, sin cambios de schema.
