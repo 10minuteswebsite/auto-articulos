@@ -67,6 +67,16 @@ export default function CategorySyncProgress({
   const [log, setLog] = useState<LogEntry[]>([]);
   const lastStatus = useRef<CategorySyncStatus | null>(null);
 
+  // Cada clic de sincronización es un intento nuevo. Sin este reset, el
+  // componente conservaba el éxito/error del intento anterior y lo mostraba
+  // antes de los eventos del job actual (caso Juan Mora: "no hay categorías"
+  // de la corrida anterior, seguido por "Solicitud enviada" de la nueva).
+  useEffect(() => {
+    if (!active) return;
+    setLog([]);
+    lastStatus.current = null;
+  }, [active]);
+
   // Cronómetro: arranca al activarse y se reinicia en cada intento nuevo.
   useEffect(() => {
     if (!active) return;
