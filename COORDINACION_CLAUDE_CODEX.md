@@ -10551,3 +10551,7 @@ función de búsqueda del manual se probó aparte con un script real contra
 `BASE_USER_MANUAL` (encontró un bug propio — buscaba solo en el título de
 cada sección, no en el contenido — corregido y reverificado antes de subir).
 Sin migración, sin cambios de schema.
+
+**Capitán de migración:** Claude — reclamó el lote. Motivo: registrar la
+entrada de Actualizaciones del lote "asistente proactivo" (PR #269), mismo
+patrón manual que el anterior (`add-product-update-20260930-mcp.ts`).
