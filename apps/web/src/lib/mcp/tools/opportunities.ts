@@ -66,9 +66,9 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
 
   {
     name: "crear_oportunidades",
-    title: "Crear oportunidades",
+    title: "Crear oportunidades (análisis de Search Console)",
     description:
-      "Analiza Google Search Console y otras señales de internet para crear contenido inteligente agrupado por categoría. No publica ningún artículo — solo propone títulos para revisar. Requiere que Google Search Console esté conectado. Se recomienda no repetir el análisis antes de 3 días; si el usuario insiste explícitamente, pasa forzar=true.",
+      "Analiza Google Search Console y otras señales de internet para crear contenido inteligente agrupado por categoría, a partir de lo que la cuenta YA tiene indexado. No publica ningún artículo — solo propone títulos para revisar. Requiere Google Search Console conectado y categorías ya sincronizadas (usa ver_estado_configuracion o listar_categorias para confirmarlo antes). Distinto de crear_titulos_con_ia: esta no pide datos al usuario, analiza señales reales; la otra genera desde una descripción del negocio y no requiere Search Console. Se recomienda no repetir el análisis antes de 3 días; si el usuario insiste explícitamente, pasa forzar=true.",
     inputSchema: {
       type: "object",
       properties: {
@@ -83,8 +83,25 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
     requiredScope: "oportunidades:publicar",
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
     handler: async (args) => {
+      // Cuentas con varios paneles (ver Category.panel) necesitan indicar a
+      // cuál analizar — la web lo resuelve con un selector (primer panel
+      // real disponible, `oportunidades/page.tsx`); acá no hay pantalla, así
+      // que se resuelve igual: si la cuenta no tiene un panel único fijado
+      // (`selectedSitePanel`), se usa el primer panel real que aparezca
+      // entre sus categorías sincronizadas. Sin esto, una cuenta multi-panel
+      // recibía "Sincroniza tus categorías primero" con las categorías YA
+      // sincronizadas, porque el análisis buscaba panel="" y ninguna
+      // categoría real tiene ese valor.
+      const userId = await getCurrentUserId();
+      const [user, categorias] = await Promise.all([
+        prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSitePanel: true } }),
+        prisma.category.findMany({ where: { userId, source: { not: "archived" } }, select: { panel: true } }),
+      ]);
+      const panelesReales = Array.from(new Set(categorias.map((c) => c.panel).filter((p): p is string => Boolean(p))));
+      const panel = user.selectedSitePanel || panelesReales[0] || "";
+
       const { ok, data } = await readRoute(
-        await analizarOportunidadesRoute(jsonRequest("/api/opportunities", { force: Boolean(args.forzar) })),
+        await analizarOportunidadesRoute(jsonRequest("/api/opportunities", { force: Boolean(args.forzar), panel })),
       );
       if (!ok) {
         return toolText(String(data.error ?? "No se pudo analizar."), true);
