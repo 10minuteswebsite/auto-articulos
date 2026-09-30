@@ -10607,3 +10607,9 @@ solo texto en 2 archivos. Sin migración, sin cambios de schema.
 lote anterior (`prompts/list+get`, PR #271) había quedado sin liberar por
 error — se liberó recién ahora, retroactivamente, ya verificado en
 producción.
+\n+## Recuperación segura de sincronización por panel/idioma — Codex — 2026-09-30
+\n+Se agregó fallback cuando el panel elegido devuelve cero categorías: se
+consulta el resto y se recupera automáticamente solo si existe un único panel
+con categorías. Si hay varios, no se mezclan sitios y se devuelve un mensaje
+accionable. No cambia schema ni requiere migración. Auditorías locales: worker
+build OK, tests 20/20, fallback 3/3, web build 85/85 rutas y diff limpio.

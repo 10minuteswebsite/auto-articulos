@@ -3901,3 +3901,9 @@ COORDINACIÓN A LA FECHA DE ESTA ENTRADA.
 - **Estado:** FUSIONADOS A `main`. Coordinación no registra confirmación explícita de
   despliegue en Vercel Production para este lote ni prueba en vivo con un asistente de
   IA real todavía.
+\n+## Versión — 2026-09-30 — recuperación segura de categorías por panel
+\n+Commits: `470a08b7` y merge con `origin/main` `55019c9f`. Rama:
+`codex/category-panel-autodetect-20260930`. Sin migraciones propias ni
+archivos eliminados. Worker build OK, tests 20/20, fallback tests 3/3, web
+build 85/85 rutas y `git diff --check` OK. PR #273: Preview Vercel OK;
+merge productivo pendiente de checks tras actualizar contra `main`.
