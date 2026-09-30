@@ -17,7 +17,11 @@ export const CONTENT_GENERATION_TOOLS: ToolDef[] = [
     name: "crear_titulos_con_ia",
     title: "Crear títulos con la IA (a partir de una descripción del negocio)",
     description:
-      "Genera hasta 9 propuestas de títulos para una categoría, a partir de una descripción que TÚ das (cliente tipo, tema, qué busca resolver el cliente) — la misma función 'Crear con la IA del sistema' del panel Publicar. No requiere Google Search Console ni categorías con datos previos: pide los 4 datos obligatorios antes de llamarla. Distinto de crear_oportunidades: esta no analiza nada externo, solo usa lo que le describas. No publica nada — para publicar después usa publicar_titulos_en_categoria con los textos exactos devueltos aquí. Cupo de 3 solicitudes de este tipo por día por cuenta.",
+      "Propósito: generar hasta 9 propuestas de títulos para una categoría, a partir de una descripción que TÚ das (cliente tipo, tema, qué busca resolver el cliente) — la misma función 'Crear con la IA del sistema' del panel Publicar.\n" +
+      "Cuándo usarla: el usuario quiere contenido con IA pero no tiene Google Search Console, o prefiere describir su negocio con palabras en vez de que analices datos externos.\n" +
+      "Cuándo NO usarla: si el usuario tiene Search Console conectado y quiere que la IA analice datos reales de su sitio (usa crear_oportunidades). No inventes cliente_tipo/tema/deseo_cliente sin preguntarle al usuario — pregúntaselos siempre.\n" +
+      "Contexto necesario: nombre de categoría existente (listar_categorias), y los 4 datos obligatorios (categoria, cliente_tipo, tema, deseo_cliente) — pídelos si faltan, no los inventes. Cupo de 3 solicitudes por día por cuenta.\n" +
+      "Siguiente paso típico: publicar_titulos_en_categoria con los textos exactos devueltos aquí (no publica nada por sí sola).",
     inputSchema: {
       type: "object",
       properties: {

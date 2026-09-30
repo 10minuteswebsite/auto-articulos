@@ -49,7 +49,11 @@ export const GUIDANCE_TOOLS: ToolDef[] = [
     name: "ver_manual_seo_total",
     title: "Ver el manual de SEO Total",
     description:
-      "Consulta el manual real de la plataforma: cómo funciona cada módulo, qué significa cada botón, y el orden recomendado de pasos. Úsala cuando no tengas claro cómo guiar al usuario, cuando te pida ayuda general, o al conectar por primera vez para saber qué menú ofrecer. Sin argumentos devuelve el índice completo; con 'tema' devuelve solo las secciones que coincidan (ej. 'oportunidades', 'configuración', 'redes sociales'). Solo lectura.",
+      "Propósito: consultar el manual real y actualizado de la plataforma — cómo funciona cada módulo, qué significa cada botón, orden recomendado de pasos.\n" +
+      "Cuándo usarla: no tienes claro cómo guiar al usuario, te pide ayuda general, o necesitas verificar un paso exacto de la interfaz web antes de explicarlo.\n" +
+      "Cuándo NO usarla: para el estado actual de la cuenta del usuario (usa ver_estado_configuracion, ver_resumen_cuenta, etc.) — el manual explica cómo funciona la plataforma en general, no los datos de esta cuenta.\n" +
+      "Contexto necesario: ninguno. Sin argumentos devuelve el índice completo; con 'tema' devuelve solo las secciones que coincidan (ej. 'oportunidades', 'configuración', 'redes sociales').\n" +
+      "Siguiente paso típico: explicarle al usuario lo que encontraste en tus propias palabras, sin inventar nada que no esté en el manual.",
     inputSchema: {
       type: "object",
       properties: {

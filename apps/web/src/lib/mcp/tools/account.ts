@@ -31,7 +31,11 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
     name: "ver_resumen_cuenta",
     title: "Ver resumen de la cuenta",
     description:
-      "Muestra cuántos artículos se publicaron hoy y este mes, el cupo diario/mensual, la racha de publicación y las categorías con más oportunidades. Solo lectura.",
+      "Propósito: panorama general — cuánto se publicó hoy y este mes, cupo restante, racha y categorías con más oportunidades.\n" +
+      "Cuándo usarla: el usuario pregunta '¿cómo voy?', '¿cuánto llevo publicado?', o para orientarte antes de proponer una acción.\n" +
+      "Cuándo NO usarla: para saber QUÉ falta configurar (usa ver_estado_configuracion) o el detalle de una publicación puntual (usa estado_de_publicaciones).\n" +
+      "Contexto necesario: ninguno.\n" +
+      "Siguiente paso típico: si hay cupo y oportunidades pendientes, ofrecer publicarlas.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     requiredScope: "oportunidades:leer",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
@@ -61,7 +65,11 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
     name: "ver_estado_configuracion",
     title: "Ver estado de configuración",
     description:
-      "Indica qué le falta configurar a la cuenta para poder publicar (credenciales, categorías, idioma, créditos de imagen) y qué integraciones opcionales tiene o no tiene conectadas. Solo lectura.",
+      "Propósito: saber qué le falta a la cuenta para poder publicar (credenciales, categorías, idioma, créditos) y qué integraciones opcionales le faltan.\n" +
+      "Cuándo usarla: SIEMPRE antes de iniciar un flujo de publicación nuevo (primer paso recomendado), o cuando cualquier acción falle sin motivo claro.\n" +
+      "Cuándo NO usarla: para ver cuánto se publicó (usa ver_resumen_cuenta) o el detalle de cada integración (usa ver_integraciones).\n" +
+      "Contexto necesario: ninguno.\n" +
+      "Siguiente paso típico: si falta algo obligatorio, explicárselo al usuario en lenguaje claro y detener el flujo hasta que lo resuelva en la web; si todo está bien, seguir con listar_categorias o listar_oportunidades.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     requiredScope: "oportunidades:leer",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
@@ -89,7 +97,11 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
     name: "ver_integraciones",
     title: "Ver integraciones conectadas",
     description:
-      "Lista qué integraciones (Google Search Console, Analytics, Bing, redes sociales) están conectadas y cuáles no. Solo lectura.",
+      "Propósito: detalle de qué integraciones externas (Google Search Console, Analytics, Bing, redes sociales) están conectadas y cuáles no.\n" +
+      "Cuándo usarla: antes de crear_oportunidades (para confirmar que Search Console está conectado), o cuando el usuario pregunta por una red social o buscador puntual.\n" +
+      "Cuándo NO usarla: para el panorama general de configuración obligatoria (usa ver_estado_configuracion, que ya incluye esto resumido).\n" +
+      "Contexto necesario: ninguno.\n" +
+      "Siguiente paso típico: si falta una integración que el usuario necesita, indícale que se conecta desde Configuración → Conexiones (no puedes conectarla vos desde el chat).",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     requiredScope: "oportunidades:leer",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
@@ -106,7 +118,12 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
   {
     name: "listar_categorias",
     title: "Listar categorías",
-    description: "Devuelve las categorías sincronizadas desde la plataforma del usuario. Solo lectura.",
+    description:
+      "Propósito: listar las categorías reales sincronizadas de la cuenta.\n" +
+      "Cuándo usarla: antes de publicar (para confirmar el nombre exacto de una categoría) o cuando el usuario pregunta en qué categorías puede publicar.\n" +
+      "Cuándo NO usarla: no reemplaza a ver_estado_configuracion para saber si hay categorías configuradas en general.\n" +
+      "Contexto necesario: ninguno.\n" +
+      "Siguiente paso típico: usar el nombre exacto devuelto aquí en crear_titulos_con_ia, publicar_titulos_en_categoria o publicar_categoria — nunca inventar un nombre de categoría.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     requiredScope: "oportunidades:leer",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
@@ -127,7 +144,12 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
   {
     name: "listar_idiomas",
     title: "Listar idiomas disponibles",
-    description: "Devuelve los idiomas sincronizados desde la plataforma y cuál está configurado para escribir los artículos. Solo lectura.",
+    description:
+      "Propósito: ver el idioma actual de redacción de artículos y los idiomas disponibles en la cuenta.\n" +
+      "Cuándo usarla: el usuario pregunta en qué idioma se escribe, o quiere confirmar antes de publicar en una cuenta con varios idiomas.\n" +
+      "Cuándo NO usarla: no permite CAMBIAR el idioma — eso solo se hace en Configuración → Cuenta, esta tool es solo lectura.\n" +
+      "Contexto necesario: ninguno.\n" +
+      "Siguiente paso típico: si el usuario quiere otro idioma, indícale que lo cambie desde la web; no puedes hacerlo por él.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     requiredScope: "oportunidades:leer",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
@@ -148,7 +170,12 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
   {
     name: "ver_limites_y_creditos",
     title: "Ver límites y créditos",
-    description: "Muestra el cupo diario y mensual de artículos, y si hay créditos de imagen disponibles. Solo lectura.",
+    description:
+      "Propósito: ver el cupo diario/mensual de artículos, el máximo por lote, y si hay créditos de imagen disponibles.\n" +
+      "Cuándo usarla: antes de un lote grande de publicación, o cuando una publicación falla y sospechas que fue por cupo agotado.\n" +
+      "Cuándo NO usarla: para ver cuánto YA se publicó (usa ver_resumen_cuenta, que tiene esos números).\n" +
+      "Contexto necesario: ninguno.\n" +
+      "Siguiente paso típico: si el cupo está agotado, explicarle al usuario cuándo se renueva en vez de reintentar la publicación.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     requiredScope: "oportunidades:leer",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },

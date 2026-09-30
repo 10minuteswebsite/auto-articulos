@@ -10,6 +10,7 @@ import {
   type JsonRpcRequest,
 } from "@/lib/mcp/protocol";
 import { findTool, listToolsPayload } from "@/lib/mcp/tools";
+import { findPrompt, listPromptsPayload } from "@/lib/mcp/prompts";
 
 /**
  * Servidor MCP de SEO TOTAL — transporte "streamable HTTP".
@@ -69,17 +70,17 @@ async function manejar(mensaje: JsonRpcRequest, scopes: string[]) {
     case "initialize":
       return rpcResult(id, {
         protocolVersion: MCP_PROTOCOL_VERSION,
-        capabilities: { tools: { listChanged: false } },
+        capabilities: { tools: { listChanged: false }, prompts: { listChanged: false } },
         serverInfo: { name: "auto-articulos", version: "0.1.0" },
         instructions:
           "Eres el asistente de SEO TOTAL, una plataforma diseñada para que la persona usuaria NUNCA tenga que adivinar qué escribir — todo se navega por opciones numeradas, igual que su panel web. Debes comportarte igual: proactivo, nunca reactivo.\n\n" +
-          "Al conectarte (primer mensaje de la conversación), NO hagas una pregunta abierta como '¿en qué te ayudo?'. En vez de eso, saluda brevemente y ofrece el mismo menú numerado que la persona vería en su Inicio:\n" +
+          "Este servidor publica flujos de trabajo con nombre vía prompts/list (ej. 'empezar', 'publicar_contenido', 'diagnosticar_cuenta'). Antes de improvisar una secuencia de herramientas por tu cuenta, revisa si ya existe un prompt para lo que la persona quiere lograr y síguelo — resuelve automáticamente ambigüedades como cuál herramienta usar para generar contenido.\n\n" +
+          "Al conectarte (primer mensaje de la conversación) o cuando la persona no sepa qué hacer, usa el prompt 'empezar': saluda brevemente y ofrece el mismo menú numerado que vería en su Inicio:\n" +
           "1) Contenido propio — escribir y publicar tus propios títulos.\n" +
           "2) Contenido generado por IA — que la IA proponga y publique artículos por ti.\n" +
           "3) Publicar en redes sociales y blogs públicos.\n" +
           "Deja que la persona elija un número o lo diga con sus palabras; en cada paso siguiente, sigue ofreciendo opciones numeradas concretas en vez de preguntas abiertas.\n\n" +
           "Si en cualquier momento no sabes cómo guiar a la persona, no tienes claro qué botón o pantalla corresponde, o necesitas explicar cómo funciona algo, llama a ver_manual_seo_total (sin argumentos para el índice, o con 'tema' para una sección) — es el manual real y siempre actualizado de la plataforma, no lo inventes de memoria.\n\n" +
-          "Dos herramientas se confunden fácil, léelas con cuidado antes de elegir: crear_oportunidades analiza Search Console (requiere que ya haya datos reales, sin pedir nada a la persona); crear_titulos_con_ia genera a partir de lo que la persona te describa (cliente tipo, tema, qué busca resolver) y no depende de Search Console.\n\n" +
           "Publicar tiene consecuencias públicas reales: usa siempre confirmar=false primero, muéstrale a la persona exactamente qué se va a publicar, y espera su confirmación explícita antes de volver a llamar con confirmar=true.",
       });
 
@@ -92,6 +93,30 @@ async function manejar(mensaje: JsonRpcRequest, scopes: string[]) {
 
     case "tools/list":
       return rpcResult(id, { tools: listToolsPayload(scopes) });
+
+    case "prompts/list":
+      return rpcResult(id, { prompts: listPromptsPayload() });
+
+    case "prompts/get": {
+      const nombrePrompt = mensaje.params?.name;
+      if (typeof nombrePrompt !== "string") {
+        return rpcError(id, RPC_INVALID_PARAMS, "Falta el nombre del prompt.");
+      }
+      const prompt = findPrompt(nombrePrompt);
+      if (!prompt) {
+        return rpcError(id, RPC_METHOD_NOT_FOUND, `No existe el prompt "${nombrePrompt}".`);
+      }
+      const argsPrompt = (mensaje.params?.arguments ?? {}) as Record<string, string>;
+      return rpcResult(id, {
+        description: prompt.description,
+        messages: [
+          {
+            role: "user",
+            content: { type: "text", text: prompt.build(argsPrompt) },
+          },
+        ],
+      });
+    }
 
     case "tools/call": {
       const nombre = mensaje.params?.name;

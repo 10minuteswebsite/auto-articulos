@@ -28,7 +28,11 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
     name: "listar_oportunidades",
     title: "Listar oportunidades",
     description:
-      "Devuelve el contenido inteligente guardado, agrupado por categoría, con la cantidad de títulos y las impresiones de cada una. Solo lectura: no publica ni modifica nada. Úsala antes de publicar para saber qué hay pendiente.",
+      "Propósito: ver el contenido inteligente ya guardado, agrupado por categoría, con cantidad de títulos e impresiones.\n" +
+      "Cuándo usarla: antes de publicar, para saber qué hay pendiente; o cuando el usuario pregunta qué oportunidades tiene.\n" +
+      "Cuándo NO usarla: si buscas generar oportunidades nuevas (usa crear_oportunidades o crear_titulos_con_ia) o el estado de algo ya publicado (usa estado_de_publicaciones).\n" +
+      "Contexto necesario: ninguno.\n" +
+      "Siguiente paso típico: si hay resultados, publicar_oportunidades_seleccionadas o publicar_categoria; si está vacío, crear_oportunidades o crear_titulos_con_ia.",
     inputSchema: {
       type: "object",
       properties: {
@@ -68,7 +72,11 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
     name: "crear_oportunidades",
     title: "Crear oportunidades (análisis de Search Console)",
     description:
-      "Analiza Google Search Console y otras señales de internet para crear contenido inteligente agrupado por categoría, a partir de lo que la cuenta YA tiene indexado. No publica ningún artículo — solo propone títulos para revisar. Requiere Google Search Console conectado y categorías ya sincronizadas (usa ver_estado_configuracion o listar_categorias para confirmarlo antes). Distinto de crear_titulos_con_ia: esta no pide datos al usuario, analiza señales reales; la otra genera desde una descripción del negocio y no requiere Search Console. Se recomienda no repetir el análisis antes de 3 días; si el usuario insiste explícitamente, pasa forzar=true.",
+      "Propósito: analizar Google Search Console y otras señales reales de internet para proponer contenido inteligente agrupado por categoría, a partir de lo que la cuenta YA tiene indexado.\n" +
+      "Cuándo usarla: el usuario quiere que la IA analice datos reales de su sitio (no una descripción manual) y tiene Google Search Console conectado.\n" +
+      "Cuándo NO usarla: si no hay Search Console conectado (verifica con ver_integraciones), o si el usuario prefiere describir su negocio con sus palabras — en ese caso usa crear_titulos_con_ia. No repitas el análisis antes de 3 días salvo que el usuario insista explícitamente (forzar=true).\n" +
+      "Contexto necesario: Google Search Console conectado y categorías sincronizadas (confirma con ver_estado_configuracion o listar_categorias).\n" +
+      "Siguiente paso típico: listar_oportunidades para revisar lo generado, luego publicar_categoria o publicar_oportunidades_seleccionadas.",
     inputSchema: {
       type: "object",
       properties: {
@@ -117,7 +125,11 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
     name: "publicar_oportunidades_seleccionadas",
     title: "Publicar oportunidades seleccionadas",
     description:
-      "Publica títulos concretos de una sola categoría. Primero llama con confirmar=false para mostrar la vista previa. Solo usa confirmar=true después de que el usuario confirme expresamente la lista exacta; esta acción genera y publica artículos reales.",
+      "Propósito: publicar títulos concretos (por ID) de una sola categoría, ya existentes en las oportunidades guardadas.\n" +
+      "Cuándo usarla: el usuario ya vio una lista de listar_oportunidades y eligió títulos específicos para publicar.\n" +
+      "Cuándo NO usarla: si el usuario quiere publicar TODA una categoría de una (usa publicar_categoria, más simple), o si los títulos todavía no existen como oportunidad (usa publicar_titulos_en_categoria).\n" +
+      "Contexto necesario: IDs de título reales, obtenidos de listar_oportunidades — nunca los inventes.\n" +
+      "Siguiente paso típico: llamar primero con confirmar=false (vista previa, sin publicar), mostrarle al usuario, y solo tras su confirmación explícita volver a llamar con confirmar=true. Después, estado_de_publicaciones para el enlace final.",
     inputSchema: {
       type: "object",
       properties: {
@@ -160,7 +172,11 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
     name: "publicar_titulos_en_categoria",
     title: "Publicar títulos en una categoría",
     description:
-      "Crea y publica una lista de títulos indicada por el usuario dentro de una categoría existente. Primero previsualiza con confirmar=false; solo publica con confirmar=true tras confirmación explícita.",
+      "Propósito: crear y publicar títulos NUEVOS (escritos o dictados por el usuario, o devueltos por crear_titulos_con_ia) dentro de una categoría existente — no requieren venir de una oportunidad guardada.\n" +
+      "Cuándo usarla: el usuario te dio títulos concretos (a mano, o los generaste con crear_titulos_con_ia) y quiere publicarlos.\n" +
+      "Cuándo NO usarla: si los títulos ya están guardados como oportunidad con ID (usa publicar_oportunidades_seleccionadas o publicar_categoria en su lugar).\n" +
+      "Contexto necesario: nombre exacto de una categoría existente (confírmalo con listar_categorias) y el texto de cada título.\n" +
+      "Siguiente paso típico: llamar primero con confirmar=false (vista previa, sin publicar), mostrarle al usuario, y solo tras su confirmación explícita volver a llamar con confirmar=true. Después, estado_de_publicaciones para el enlace final.",
     inputSchema: {
       type: "object",
       properties: {
@@ -195,7 +211,11 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
     name: "publicar_categoria",
     title: "Publicar una categoría",
     description:
-      "PUBLICA ARTÍCULOS REALES en el sitio del usuario. Acción con consecuencias visibles públicamente y que consume créditos de generación. Llama SIEMPRE primero con confirmar=false: eso no publica nada, solo devuelve qué títulos se publicarían para que el usuario los escuche y decida. Solo vuelve a llamar con confirmar=true después de que el usuario haya dicho que sí de forma explícita.",
+      "Propósito: publicar TODOS los títulos pendientes de una categoría completa de una sola vez — PUBLICA ARTÍCULOS REALES en el sitio del usuario.\n" +
+      "Cuándo usarla: el usuario quiere publicar 'toda' una categoría, sin elegir títulos uno por uno.\n" +
+      "Cuándo NO usarla: si solo quiere publicar algunos títulos específicos (usa publicar_oportunidades_seleccionadas), o si los títulos son nuevos y no vienen de una oportunidad guardada (usa publicar_titulos_en_categoria).\n" +
+      "Contexto necesario: nombre de la categoría (búsqueda tolerante a mayúsculas/acentos) con oportunidades ya guardadas.\n" +
+      "Siguiente paso típico: llamar SIEMPRE primero con confirmar=false — no publica nada, solo devuelve qué títulos se publicarían para que el usuario los vea y decida. Solo llamar con confirmar=true después de un sí explícito. Después, estado_de_publicaciones para el enlace final.",
     inputSchema: {
       type: "object",
       properties: {
@@ -278,7 +298,11 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
     name: "estado_de_publicaciones",
     title: "Estado de las publicaciones",
     description:
-      "Informa si hay una publicación en curso y cómo salieron las últimas, incluyendo el enlace de cada artículo publicado con éxito. La publicación es asíncrona: al llamar a publicar_categoria/publicar_oportunidades_seleccionadas/publicar_titulos_en_categoria con confirmar=true el artículo todavía se está generando, no hay URL disponible todavía — usa esta herramienta un momento después para obtenerla. Solo lectura.",
+      "Propósito: ver si hay una publicación en curso y cómo salieron las últimas, incluyendo el enlace real de cada artículo publicado con éxito.\n" +
+      "Cuándo usarla: después de publicar (confirmar=true) para confirmar el resultado y dar el enlace; o cuando el usuario pregunta por el estado de sus publicaciones.\n" +
+      "Cuándo NO usarla: para ver oportunidades sin publicar (usa listar_oportunidades).\n" +
+      "Contexto necesario: ninguno.\n" +
+      "Siguiente paso típico: si un título quedó con error, explicárselo al usuario en lenguaje claro. La publicación es asíncrona — justo después de confirmar=true el artículo todavía se está generando y puede no tener URL todavía; vuelve a llamar esta herramienta un momento después si hace falta.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     requiredScope: "oportunidades:leer",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
