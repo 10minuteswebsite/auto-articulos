@@ -8,6 +8,7 @@ import {
   verifyImpersonationToken,
   verifySessionToken,
 } from "./lib/session";
+import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
 
 const PUBLIC_PATHS = [
   "/login",
@@ -24,6 +25,11 @@ const PUBLIC_PATHS = [
   // Documento de descubrimiento OAuth del servidor MCP: por definición se
   // consulta SIN token (es lo que le dice al cliente dónde autenticarse).
   "/.well-known/oauth-protected-resource",
+  // Ruta nodejs auxiliar que el propio middleware llama por `fetch` para
+  // resolver tokens personales (ver handleMcpAuth) — no lleva cookie de
+  // sesión, así que no puede pasar por el gate de abajo. No expone nada sin
+  // un Bearer `sta_` válido.
+  "/api/mcp/token-lookup",
 ];
 
 /** Endpoint del servidor MCP; se autentica con Bearer, no con cookie. */
@@ -142,9 +148,25 @@ export async function middleware(request: NextRequest) {
 async function handleMcpAuth(request: NextRequest) {
   const authorization = request.headers.get("authorization");
   const bearer = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
-  const oauth = await verifyMcpAccessToken(bearer);
-  const sessionUserId = oauth ? null : await verifySessionToken(bearer);
-  const userId = oauth?.userId ?? sessionUserId;
+
+  let userId: string | null = null;
+  let scopes = ["oportunidades:leer", "oportunidades:publicar"];
+
+  if (bearer?.startsWith(MCP_API_TOKEN_PREFIX)) {
+    // Token personal de API (Configuración → Asistentes IA): es el propio
+    // dueño de la cuenta operando sus propios datos con cualquier asistente
+    // (Claude, ChatGPT, Meta MUSE, etc.), no un cliente de terceros con
+    // permisos acotados — por eso lleva todos los scopes existentes.
+    userId = await resolvePersonalToken(request, bearer);
+  } else {
+    const oauth = await verifyMcpAccessToken(bearer);
+    const sessionUserId = oauth ? null : await verifySessionToken(bearer);
+    userId = oauth?.userId ?? sessionUserId;
+    // Los Bearer de sesión solo se mantienen para la prueba manual heredada;
+    // conservan el comportamiento previo. Los OAuth quedan limitados a los
+    // scopes firmados durante el account linking.
+    if (oauth) scopes = oauth.scopes;
+  }
 
   if (!userId) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
@@ -152,13 +174,31 @@ async function handleMcpAuth(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", userId);
-  // Los Bearer de sesión solo se mantienen para la prueba manual heredada;
-  // conservan el comportamiento previo. Los OAuth quedan limitados a los
-  // scopes firmados durante el account linking.
-  requestHeaders.set("x-mcp-scopes", (oauth?.scopes ?? ["oportunidades:leer", "oportunidades:publicar"]).join(" "));
+  requestHeaders.set("x-mcp-scopes", scopes.join(" "));
   // Deliberadamente NO se propaga la suplantación de admin: un token de
   // máquina no debería poder operar la cuenta de otro usuario por voz.
   return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
+/**
+ * El token personal se verifica por hash contra la base (para poder
+ * revocarlo desde Configuración) y Prisma no corre en el Edge Runtime del
+ * middleware — se resuelve con un `fetch` interno, server a server, a
+ * `/api/mcp/token-lookup` (nodejs). Mismo patrón que recomienda Vercel para
+ * este split edge/node.
+ */
+async function resolvePersonalToken(request: NextRequest, bearer: string): Promise<string | null> {
+  try {
+    const response = await fetch(new URL("/api/mcp/token-lookup", request.url), {
+      method: "POST",
+      headers: { authorization: `Bearer ${bearer}` },
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { userId?: string };
+    return data.userId ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**

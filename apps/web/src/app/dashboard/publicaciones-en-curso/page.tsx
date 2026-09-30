@@ -95,11 +95,22 @@ export default function PublicacionesEnCursoPage() {
     return () => clearInterval(interval);
   }, [activeRuns.length, socialRuns.length, loadRuns]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div>
+        <ModuleIntro titulo="Progreso de las publicaciones" instruccionesColapsadas>
+          <IntroP>Estamos comprobando las publicaciones que están en curso.</IntroP>
+        </ModuleIntro>
+        <section style={{ ...sectionStyle, borderTop: "1px solid #d2d2d7", textAlign: "center" }}>
+          <p className="muted" style={{ margin: 0, fontSize: 14 }}>Cargando progreso...</p>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <ModuleIntro titulo="Progreso de las publicaciones">
+      <ModuleIntro titulo="Progreso de las publicaciones" instruccionesColapsadas>
         <IntroP>
           Esta pantalla es la sala de espera. Aquí ves lo que se está publicando ahora mismo, tanto artículos como publicaciones en redes sociales, con su avance y la etapa concreta en la que va cada uno.
         </IntroP>
@@ -111,7 +122,7 @@ export default function PublicacionesEnCursoPage() {
         </IntroP>
       </ModuleIntro>
       {workerWarning && (
-        <section style={{ ...sectionStyle, border: "1px solid #ff9500", background: "#fffaf2", color: "#6b3d00" }}>
+        <section style={{ ...sectionStyle, borderRadius: 6, border: "1px solid #d2d2d7", background: "#f5f5f7", color: "#1d1d1f" }}>
           <strong>Publicación encolada</strong>
           <p style={{ margin: "6px 0 0", fontSize: 13 }}>{workerWarning}</p>
         </section>
@@ -127,25 +138,31 @@ export default function PublicacionesEnCursoPage() {
             />
           ))}
           {socialRuns.length > 0 && (
-            <section style={{ ...sectionStyle, display: "flex", flexDirection: "column", gap: 10 }}>
+            <section
+              style={{
+                borderTop: "1px solid #d2d2d7",
+                borderBottom: "1px solid #d2d2d7",
+                padding: "18px 0",
+              }}
+            >
               <h2 style={{ ...h2Style, margin: 0 }}>Publicaciones de redes sociales</h2>
               {socialRuns.map((item) => (
-                <div key={item.id} style={{ padding: 14, border: "1px solid #e5e5ea", borderRadius: 12 }}>
+                <div key={item.id} style={{ padding: "14px 0", borderTop: "1px solid #e5e5ea", marginTop: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                     <div><strong>{item.articleTitle}</strong><div style={{ color: "#6e6e73", fontSize: 12, marginTop: 4 }}>{item.platform} · {item.progressStage ?? (item.status === "processing" ? "Publicando..." : "En cola")}</div></div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ color: item.status === "processing" ? "#1d1d1f" : "#8a4b08", fontSize: 12, fontWeight: 600 }}>{item.progressPercent}%</span>
+                      <span style={{ color: "#1d1d1f", fontSize: 12, fontWeight: 600 }}>{item.progressPercent}%</span>
                       <button
                         type="button"
                         onClick={() => cancelSocialRun(item.id)}
                         disabled={cancellingId === item.id}
-                        style={{ border: "1px solid #ff3b30", color: "#ff3b30", background: "#fff", borderRadius: 8, padding: "4px 8px", fontSize: 11, cursor: "pointer" }}
+                        style={{ border: "1px solid #d2d2d7", color: "#1d1d1f", background: "#fff", borderRadius: 6, padding: "4px 8px", fontSize: 11, cursor: "pointer" }}
                       >
                         {cancellingId === item.id ? "Cancelando..." : "Cancelar"}
                       </button>
                     </div>
                   </div>
-                  <div style={{ height: 5, background: "#f1f1f4", borderRadius: 999, overflow: "hidden", marginTop: 10 }}>
+                  <div style={{ height: 5, background: "#f1f1f4", borderRadius: 6, overflow: "hidden", marginTop: 10 }}>
                     <div style={{ height: "100%", width: `${Math.max(0, Math.min(100, item.progressPercent ?? 0))}%`, background: "#1d1d1f", transition: "width .4s ease" }} />
                   </div>
                   <details style={{ marginTop: 10, color: "#6e6e73", fontSize: 12 }}>
@@ -164,14 +181,21 @@ export default function PublicacionesEnCursoPage() {
           )}
         </div>
       ) : (
-        <section style={{ ...sectionStyle, textAlign: "center" }}>
+        <section
+          style={{
+            borderTop: "1px solid #d2d2d7",
+            borderBottom: "1px solid #d2d2d7",
+            padding: "22px 0 24px",
+            textAlign: "center",
+          }}
+        >
           <h2 style={h2Style}>No hay ninguna ejecución en curso</h2>
           <p style={{ fontSize: 13, color: "#6e6e73" }}>
             Ve a "{MENU_NAMES.propios}" para elegir una categoría, pegar títulos e iniciar
             una nueva tanda.
           </p>
-          <Link href="/dashboard/publicar" style={{ textDecoration: "none" }}>
-            <button style={buttonStyle}>Ir a Publicar</button>
+          <Link href="/dashboard/publicar" className="button" style={{ ...buttonStyle, textDecoration: "none" }}>
+            Ir a Publicar
           </Link>
         </section>
       )}

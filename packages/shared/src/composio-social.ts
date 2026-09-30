@@ -17,3 +17,25 @@ export async function composioInstagramPost(account: ComposioSocialAccount, inst
   if (!creationId) return created;
   return run(account, "instagram", "INSTAGRAM_POST_IG_USER_MEDIA_PUBLISH", { ig_user_id: instagramUserId, creation_id: creationId });
 }
+
+function findPermalink(value: unknown, depth = 0): string | null {
+  if (!value || typeof value !== "object" || depth > 4) return null;
+  for (const [key, inner] of Object.entries(value as Record<string, unknown>)) {
+    if (key === "permalink" && typeof inner === "string" && /^https?:\/\//i.test(inner)) return inner;
+    const found = findPermalink(inner, depth + 1);
+    if (found) return found;
+  }
+  return null;
+}
+
+/** Enlace público de una publicación de Instagram ya publicada; null si no se pudo obtener (nunca lanza). */
+export async function composioInstagramPermalink(account: ComposioSocialAccount, mediaId: string): Promise<string | null> {
+  if (!/^\d+$/.test(mediaId)) return null;
+  try {
+    return findPermalink(await run(account, "instagram", "INSTAGRAM_GET_IG_MEDIA", { ig_media_id: mediaId, fields: "permalink" }));
+  } catch {
+    return null;
+  }
+}
+
+export { findPermalink as _findInstagramPermalink };

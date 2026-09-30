@@ -1615,6 +1615,13 @@ reservas liberadas. Estado final: ARCHIVADA.
   (PR #207), integración de interfaz en DIFUSIÓN pendiente de PR, Preview y despliegue. Detalle
   completo en `COORDINACION_CLAUDE_CODEX.md`.
 
+## Codex — corrección de retornos OAuth de conexiones — 2026-09-24
+
+- Problema: los callbacks de Bing, Google Search Console y Google Analytics devolvían a pantallas antiguas o generales.
+- Solución desplegada en `67547d5b`: retorno a la conexión específica dentro de Conexiones.
+- Vercel Production READY; sin migraciones ni archivos eliminados.
+- Estado: CERRADA / ARCHIVADA; no quedan acciones de esta conversación.
+
 ## Codex — CONEXION COMPOSIO — 2026-09-22
 
 - Continuación del programa `CONEXION COMPOSIO` (traspasado a Codex el 2026-09-19, ver entradas
@@ -1631,3 +1638,175 @@ reservas liberadas. Estado final: ARCHIVADA.
 - Reservas: el lote sigue local a esta fecha, sin rama ni PR abiertos según Coordinación — no
   verificable contra git desde este entorno remoto.
 - Estado: EN CURSO — auditoría completa, pendiente de PR, Preview, revisión y despliegue.
+
+## Codex / Claude — CONEXION COMPOSIO — 2026-09-25
+
+- Continuación del programa `CONEXION COMPOSIO` (entrada anterior arriba, 2026-09-22). Codex hizo la
+  validación local de la transición GSC → GA uno-a-uno, una auditoría del camino de usuario completo,
+  una aclaratoria de UI (el wizard no debe mostrar la pantalla global de éxito; sin pantallas viejas
+  debajo de las nuevas), una triple auditoría final del localhost realmente activo, y una auditoría de
+  redes sociales bajo Composio (Facebook/Instagram sin Stories). Cerró con un traspaso operativo formal
+  a Claude ("TRASPASO A CLAUDE · CONEXIÓN COMPOSIO · ESTADO VIGENTE — 2026-09-25", en
+  `COORDINACION_CLAUDE_CODEX.md`).
+- Claude tomó el control, hizo pruebas visuales locales adicionales y liberó el lote como **PR #224**
+  (commit `abb687dd`, fusionado a `main`). Verificado en producción con prueba real de Milton usando el
+  usuario **Rafael Zuzolo**: flujo completo aviso GSC → reconexión → éxito → aviso GA → reconexión →
+  éxito → Inicio limpio — "Prueba muy exitosa". Detalle completo en `CONTROLADOR_DE_VERSIONES.md`,
+  entrada "Versión desplegada y verificada — 2026-09-25 — CONEXION COMPOSIO (avisos de reconexión
+  GSC/GA)".
+- Tras esa prueba real, Milton pidió 8 mejoras de UX (traspasadas a una nueva conversación de Claude:
+  "TRASPASO A NUEVA CONVERSACIÓN · CONEXIÓN COMPOSIO · 8 MEJORAS UX — 2026-09-25"). Las mejoras 1
+  (botón "Reconectar ahora"), 2 (mensaje y pulso en la pantalla de reconexión) y 5 (aviso de GA
+  distinto al de GSC, con etiqueta "PASO 2 DE 2") quedaron codificadas y fusionadas a `main` como
+  **PR #225** (commit `36ecd08`), en la rama `claude/composio-traspaso-8-mejoras`. Las mejoras 3, 4, 6,
+  7, 8 y un ítem adicional detectado por Claude (9: ocultar el paso a paso de conexión cuando ya está
+  "Conexión activa") siguen pendientes de codificar.
+- Verificación en vivo de esta misma corrida (tarea programada diaria de propagación, 2026-09-26):
+  `git fetch origin claude/composio-traspaso-8-mejoras` + `git diff origin/claude/composio-traspaso-8-mejoras
+  origin/main --stat` muestra que la única diferencia restante es la propia edición de
+  `COORDINACION_CLAUDE_CODEX.md` (7 líneas) — el código de esa rama ya está contenido en `main` (llegó
+  ahí vía squash-merge del PR #225, por eso `git merge-base --is-ancestor` no la marca como ancestro
+  literal aunque el contenido ya esté fusionado). **No queda ninguna reserva activa de archivos por
+  esta rama** para la Parte A de este documento; ver también `REPARADOR_DEL_ARBOL_PRINCIPAL.md` sobre
+  la rama remota obsoleta.
+- Estado: EN CURSO — PR #224 verificado en producción con usuario real; PR #225 fusionado a `main` sin
+  confirmación explícita de deployment/Producción en Coordinación a esta fecha; mejoras 3, 4, 6, 7, 8 y
+  9 sin capitán ni rama asignada todavía.
+
+### Claude - REPARACION DE ADMIN — 2026-09-26
+
+- **Nombre exacto (dado por Milton):** `REPARACION DE ADMIN`. Estado: **ACTIVO**.
+- **Problema:** la página de Administración (`/dashboard/usuarios`) creció sin orden
+  y no funciona bien; además el segmento de límites diarios de difusión (redes y
+  blogs) quedó sin culminar (hoy se edita como JSON crudo).
+- **Orden de Milton:** (1) rediseño estilo Apple, muy organizado, **sin perder
+  ninguna funcionalidad**; (2) culminar límites diarios de difusión; (3) aprobar
+  primero en localhost; nada a Producción sin su autorización.
+- **Rama / worktree:** `claude/reparacion-admin` / `.worktrees/reparacion-admin`,
+  base `origin/main` `0445e0b2`.
+- **Reservas:** `apps/web/src/app/dashboard/usuarios/page.tsx`,
+  `apps/web/src/app/api/admin/users/route.ts`,
+  `apps/web/src/content/manual-usuario.ts` (solo si el manual lo menciona).
+- **Migraciones:** ninguna prevista (la columna `socialDailyLimits` ya existe).
+
+- **Actualización 2026-09-26 (REPARACION DE ADMIN):** estado **CULMINADA (2026-09-26, ver cierre abajo)**. Rediseño estilo Apple de las 5 pestañas y de la
+  ficha de usuario (secciones Cuenta, Acceso, Redes sociales y blogs, Imágenes con IA,
+  Límites de uso para la creación de artículos, Acciones, Historial); guardado único
+  «Guardar cambios/Descartar»; límites diarios de difusión por red y formato con
+  «hoy N» (API `socialPublishedToday`, validación 400). Manual actualizado.
+  Commits: `c2c92b42`, `2bd290e5` (+ ajuste de alineación). Sin migraciones.
+- **Pruebas:** `npm test` 61/61; `tsc` limpio; `next build` OK; en localhost
+  (127.0.0.1:3001, base local) se verificó guardar límites de difusión, aprobaciones,
+  valor inválido, Descartar, límites de artículos/lote, Editar/Eliminar hasta la
+  confirmación. NO probado: «Acceder como», «Copiar credenciales» (clipboard), guardar
+  Editar. Producción: sin push ni PR; sin capitanía reclamada.
+- **Nota del localhost compartido:** por decisión de Milton se aplicó `admin.patch`
+  (solo `usuarios/page.tsx` y `api/admin/users/route.ts`) como cambio sin commit en el
+  worktree `.codex/worktrees/produccion-validacion-composio`; se revierte con
+  `git apply -R admin.patch`. Reservas mantenidas en esos dos archivos.
+
+## Claude - CONEXION DE GSC NO SE DESCONECTA — 2026-09-26
+
+- **Nombre exacto recibido:** `CONEXION DE GSC NO SE DESCONECTA` (cuenta afectada reportada: rosalia@diagonal3.com).
+- **Causa (triple auditoría de código):** `479ca92f` (2026-09-23) dejó `POST /api/composio/disconnect` con `getComposioUser()` (opt-in del módulo `conexion-composio`), mientras conectar/elegir/probar/opciones de GSC y GA quedaron abiertos vía `getComposioUserForApp`. Toda cuenta no admin sin el módulo recibe 403 al desconectar. Afecta a todas esas cuentas, no solo a una. Rol real de rosalia NO verificado (sin acceso a la base de producción).
+- **Fix:** `disconnect/route.ts` usa `getComposioUserForApp(body.app)`; regla extraída a `lib/composio-access.ts` con prueba. Manual actualizado. Sin migraciones.
+- **Rama / worktree:** `claude/gsc-no-se-desconecta` / `.worktrees/gsc-no-se-desconecta`, base `origin/main` `c07425e3`.
+- **Reservas:** `api/composio/_access.ts`, `api/composio/disconnect/route.ts`, `lib/composio-access*.ts`, `content/manual-usuario.ts` (se liberan al fusionar el PR).
+- **Pruebas:** `npm test` 70/70, `tsc` limpio, `next build` OK. Producción: sin desplegar; falta autorización de Milton y verificación posterior.
+- **Estado:** ACTIVO (PR abierto, pendiente de autorización).
+
+- **Actualización 2026-09-26 (CONEXION DE GSC NO SE DESCONECTA — parte 2, elegir propiedad):** en la cuenta de Rosalia `selectedSiteDomain="Español"` (nombre de panel, no dominio); `composio-options.ts` lo usaba como bloqueo y dejaba las 134 propiedades no elegibles (108 por «trabaja con español», 26 por permiso). Fix: `lockableDomain()` — el bloqueo por dominio solo aplica si el valor es un dominio real; GSC y Analytics. Sin migraciones ni cambios de datos. Rama `claude/gsc-propiedades-sin-panel`. Reservas: `lib/composio-options.ts`, `lib/composio-options.test.ts`, `lib/composio-connections.ts`, `content/manual-usuario.ts`. Pruebas 71/71, tsc limpio, build OK. Pendiente: sugerencia «por parecido» (falta definir con qué se compara).
+- **CIERRE 2026-09-26 — ARCHIVADA.** Milton confirmó en vivo, con la cuenta de Rosalia Martín (rol `user`), que desconectar, reconectar y elegir propiedad funcionan. Commits en `main`: `5ff6bc47` (PR #240, desconectar GSC/GA abierto a toda cuenta activa) y `d8183e3e` (PR #242, un nombre de panel como «Español» ya no bloquea las propiedades). Verificado por Claude en producción: opciones de GSC de Rosalia pasaron de 0 a 108 elegibles (26 bloqueadas por permiso, correcto) y `rosaliamartin.com` recomendada. El guardado y «Probar conexión» los hizo Milton. PR #241 (solo docs) cerrado sin fusionar por superado. Reservas liberadas; sin migraciones; capitanía no reclamada. Pendiente no ejecutado: sugerencia «por parecido» (falta definir con qué compara) y prueba en vivo de Google Analytics.
+
+### Cierre — Claude - REPARACION DE ADMIN — 2026-09-26
+
+```text
+IDENTIDAD: Claude - Sonnet 5 - REPARACION DE ADMIN
+PROYECTO: Administración (/dashboard/usuarios) estilo Apple + límites de difusión
+ESTADO FINAL: CULMINADA
+RAMA: claude/reparacion-admin (fusionada), claude/reparacion-admin-nombres (fusionada),
+      claude/reparacion-admin-cierre (solo documentación, PR #236)
+WORKTREE: .worktrees/reparacion-admin (a retirar tras fusionar #236)
+COMMIT BASE: 0445e0b2
+ÚLTIMO COMMIT: 6dff79e2 (código en Producción)
+ARCHIVOS MODIFICADOS: apps/web/src/app/dashboard/usuarios/page.tsx,
+  apps/web/src/app/api/admin/users/route.ts, apps/web/src/content/manual-usuario.ts,
+  COORDINACION_CLAUDE_CODEX.md, INVENTARIO_CONVERSACIONES.md, CONTROLADOR_DE_VERSIONES.md
+ARCHIVOS RESERVADOS: usuarios/page.tsx y api/admin/users/route.ts
+ARCHIVOS LIBERADOS: los mismos, 2026-09-26
+MIGRACIONES: ninguna en el código. Milton ejecutó a mano en Supabase el UPDATE de relleno de
+  socialDailyLimits (16 claves en 1); verificado: 99 cuentas, sin vacíos.
+PRUEBAS EJECUTADAS: npm test 61/61; tsc; next build; localhost (guardar límites,
+  aprobaciones, inválido, Descartar, límites de artículos/lote, confirmaciones);
+  Producción con sesión admin (5 pestañas, ficha, guardado real y restauración, regresión
+  de 9 rutas)
+PRODUCCIÓN/PREVIEW: PR #235 -> 49860952; PR #237 -> 6dff79e2; Vercel Production success
+ERRORES O BLOQUEOS: ninguno abierto
+TRABAJO PENDIENTE: no probados en Producción: «Acceder como», «Copiar credenciales»,
+  guardar en «Editar». Retirar worktree y ramas tras fusionar #236.
+SIGUIENTE ACCIÓN EXACTA: fusionar PR #236 (documentación)
+RESPONSABLE SIGUIENTE: Milton
+FECHA Y HORA DE LIBERACIÓN: 2026-09-26 (capitanía liberada con scripts/migration-coordinator.sh)
+```
+
+### Addendum (agregado por la tarea programada diaria de propagación, 2026-09-27, sin editar la Parte A ni la Parte B anteriores)
+
+Reserva activa nueva declarada en `COORDINACION_CLAUDE_CODEX.md` (sección "TRASPASO A NUEVA
+CONVERSACIÓN · REDES POR COMPOSIO · MIGRAR PINTEREST — 2026-09-26 — Claude"), verificada
+EN VIVO con `git fetch origin claude/pinterest-composio` + `git merge-base --is-ancestor`:
+
+- **Rama:** `claude/pinterest-composio`. **Confirmado activa:** `git merge-base
+  --is-ancestor origin/claude/pinterest-composio origin/main` devuelve que NO es ancestro
+  de `origin/main` — sigue sin fusionar.
+- **Commit de punta:** `63d1edec` ("wip: Pinterest por Composio — registro en shared y
+  web (NO compila todavía: faltan switch)"). El propio mensaje del commit confirma que el
+  build no pasa todavía.
+- **Worktree según Coordinación (no verificable desde este entorno remoto, sin acceso al
+  filesystem de Milton):** `/Users/miltondavila/.codex/worktrees/produccion-validacion-composio/Creador de articulos`.
+- **Tarea:** migrar Pinterest a Composio (Threads queda con conexión propia). Coordinación
+  detalla una lista larga de archivos por tocar (`packages/shared/src/composio.ts`,
+  `composio-connections.ts`, `composio-options.ts`, `composio-route.ts`,
+  `api/composio/callback/route.ts`, `ComposioConnect.tsx`, `PinterestSection.tsx`,
+  `social-opportunities/generate/route.ts`, `apps/worker/src/socialPublish.ts`) — no se
+  transcribe aquí para no duplicar; ver el detalle completo en `COORDINACION_CLAUDE_CODEX.md`.
+- **Bloqueado en varios pasos por acciones que solo puede hacer Milton** (iniciar sesión en
+  el panel de Composio, crear el auth config de Pinterest, definir la variable de repo del
+  piloto, conectar una cuenta real).
+- Ninguna acción tomada por esta tarea programada sobre esa rama ni ese worktree: solo se
+  verificó y se deja registrada la reserva.
+
+### Addendum (agregado por la tarea programada diaria de propagación, 2026-09-30, sin editar la Parte A ni la Parte B anteriores)
+
+**Parte A:** sin cambios. Se verificó contra `git ls-remote`/`git log` que todas las ramas
+del lote de categoría y del lote de MCP de esta ventana (`claude/fix-categoria-afinidad-real`,
+`claude/fix-afinidad-categoria-respaldo-codigo`, `claude/fix-categoria-reubicacion`,
+`claude/perf-categoria-paso-final`, `claude/fix-categoria-nombre-no-id`,
+`claude/fix-categoria-especifica-vs-general`, `claude/tope-dinamico-categoria`,
+`claude/mcp-token-personal-20260929`, `claude/mcp-url-articulo-20260929`,
+`claude/mcp-titulos-ia-20260930`, `claude/mcp-copy-dinamica-20260930`) quedaron como
+punteros sueltos en `origin` tras fusionarse (squash) — ninguna es una reserva activa
+ahora mismo. Detalle de despliegue de cada una en `CONTROLADOR_DE_VERSIONES.md`.
+
+**Parte B — nombres de conversación nuevos encontrados en `COORDINACION_CLAUDE_CODEX.md`**
+(todas ya cerradas y fusionadas a `main`; detalle técnico completo en Coordinación y en
+`CONTROLADOR_DE_VERSIONES.md`, no se transcribe aquí para no duplicar):
+
+- `Claude — REVISIÓN DE ALGORITMO DE SELECCIÓN — 2026-09-29` (PR #253).
+- `Claude — AUDITORIA DE CANIBALIZACION — 2026-09-29` (PR #254).
+- `Claude — TOPE DINAMICO POR CATEGORIA — 2026-09-29` (PR #255).
+- `Claude — HALLAZGO REAL EN PRODUCCION: CATEGORIA SIN RESPALDO DE CODIGO — 2026-09-29`
+  (PR #257).
+- `Claude — REUBICACIÓN DE CATEGORÍA — 2026-09-29` (PR #259).
+- `Capitanía — MCP: token personal de API + herramientas de panorama — 2026-09-29`
+  (PR #258, con migración `20260929120000_add_mcp_api_token`).
+- `Claude — PERF: REUBICACIÓN DE CATEGORÍA EN UN SOLO PASO FINAL — 2026-09-29`
+  (PR #259, push adicional + PR #260).
+- `Claude — CATEGORÍA "CHAT GPT" MAL ASIGNADA: NOMBRE EN VEZ DE ID — 2026-09-29`
+  (PR #262).
+- `Claude — AUDITORÍA COMPLETA DEL ALGORITMO (3 PASADAS) — 2026-09-29` (PR #263).
+- `Claude — CATEGORÍA ESPECÍFICA VS GENERAL: REGLA GENERALIZADA — 2026-09-29`
+  (PR #265).
+- `Capitanía — MCP: URL del artículo en estado_de_publicaciones — 2026-09-29`.
+- `Capitanía — MCP: crear_titulos_con_ia — 2026-09-30`.
+- `Capitanía — MCP: copy neutro, capacidades dinámicas y Actualizaciones pendientes —
+  2026-09-30`.

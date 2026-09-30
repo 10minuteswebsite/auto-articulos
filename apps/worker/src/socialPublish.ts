@@ -26,7 +26,9 @@ import {
   truncatePlainCaption,
   composioFacebookPost,
   composioInstagramPost,
+  composioInstagramPermalink,
   methodFor,
+  friendlyPublishError,
 } from "@auto-articulos/shared";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
@@ -54,6 +56,18 @@ async function updateSocialProgress(
   data: { progressPercent: number; progressStage: string; status?: string; startedAt?: Date; finishedAt?: Date },
 ) {
   await prisma.socialOpportunity.update({ where: { id }, data });
+}
+
+async function enforceSocialDailyLimit(userId: string, platform: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } });
+  const limits = (user?.socialDailyLimits && typeof user.socialDailyLimits === "object" && !Array.isArray(user.socialDailyLimits))
+    ? user.socialDailyLimits as Record<string, unknown> : {};
+  const raw = limits[platform];
+  const limit = typeof raw === "number" && Number.isInteger(raw) ? raw : 1;
+  if (limit < 0) throw new Error(`Límite diario inválido para ${platform}.`);
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const published = await prisma.socialOpportunity.count({ where: { userId, platform, status: "published", publishedAt: { gte: start } } });
+  if (published >= limit) throw new Error(`Límite diario alcanzado para ${platform}: ${limit} publicación(es).`);
 }
 
 function describeFetchError(err: unknown): string {
@@ -1111,7 +1125,9 @@ async function processInstagramJob(job: {
     if (!imageUrl) throw new Error("No se pudo adaptar la imagen del artículo para Instagram.");
     const caption = job.suggestedText.includes("[ENLACE]") ? job.suggestedText.replace("[ENLACE]", job.articleUrl) : job.suggestedText;
     const result = await composioInstagramPost(composio, composio.igAccountId, imageUrl, caption);
-    const postId = String(result.id ?? result.post_id ?? result.postId ?? "");
+    const mediaId = String(result.id ?? result.post_id ?? result.postId ?? "");
+    // Se guarda el enlace público cuando se puede obtener; si no, el id (el Historial lo resuelve al pulsar).
+    const postId = (await composioInstagramPermalink(composio, mediaId)) ?? mediaId;
     await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId, publishedAt: new Date(), errorLog: null, imageUrl } });
     if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Instagram mediante la conexión alternativa${composio.username ? ` (@${composio.username})` : ""}${postId ? ` - ID: ${postId}` : ""}` } });
     return true;
@@ -1399,6 +1415,8 @@ export async function processNextSocialPublish(filterUserId?: string, filterArti
       progressStage: "Validando el artículo y sus datos",
     });
 
+    await enforceSocialDailyLimit(job.userId, job.platform);
+
     await updateSocialProgress(job.id, {
       progressPercent: 55,
       progressStage: "Preparando contenido e imagen",
@@ -1452,7 +1470,7 @@ export async function processNextSocialPublish(filterUserId?: string, filterArti
       where: { id: job.id },
       data: {
         status: "error",
-        errorLog: errorMsg,
+        errorLog: friendlyPublishError(errorMsg, job.platform),
         progressStage: "La publicación terminó con error",
         finishedAt: new Date(),
       },

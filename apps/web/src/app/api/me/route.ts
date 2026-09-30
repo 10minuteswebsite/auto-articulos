@@ -9,6 +9,7 @@ import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
 } from "@/lib/modules";
+import { hasSocialPublishingApproval } from "@/lib/social-access";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -68,6 +69,22 @@ export async function GET() {
       allowBlueskyPublishing: user.allowBlueskyPublishing,
       allowDevToPublishing: user.allowDevToPublishing,
       allowBloggerPublishing: user.allowBloggerPublishing,
+      allowPinterestPublishing: user.allowPinterestPublishing,
+      allowTumblrPublishing: user.allowTumblrPublishing,
+      allowGoogleBusinessPublishing: user.allowGoogleBusinessPublishing,
+      socialPublishingApproved: Boolean(actingAdmin) || hasSocialPublishingApproval({
+        role: user.role,
+        allowInstagramPublishing: user.allowInstagramPublishing,
+        allowFacebookPublishing: user.allowFacebookPublishing,
+        allowLinkedInPublishing: user.allowLinkedInPublishing,
+        allowThreadsPublishing: user.allowThreadsPublishing,
+        allowPinterestPublishing: user.allowPinterestPublishing,
+        allowTumblrPublishing: user.allowTumblrPublishing,
+        allowBlueskyPublishing: user.allowBlueskyPublishing,
+        allowDevToPublishing: user.allowDevToPublishing,
+        allowBloggerPublishing: user.allowBloggerPublishing,
+        allowGoogleBusinessPublishing: user.allowGoogleBusinessPublishing,
+      }),
       hasImageCredits: user.hasImageCredits,
       isTrialSignup: user.isTrialSignup,
       trialStartedAt: user.trialStartedAt,
@@ -98,6 +115,7 @@ export async function PATCH(request: NextRequest) {
     clientLocations?: string | null;
     businessLocations?: string | null;
     excludedTopics?: string | null;
+    hasImageCredits?: boolean;
   } = {};
 
   if ("contentLanguage" in body) {
@@ -263,6 +281,21 @@ export async function PATCH(request: NextRequest) {
     }
   }
 
+  if ("hasImageCredits" in body) {
+    // El usuario solo puede confirmar que YA tiene créditos (true). Que se
+    // agoten sigue siendo exclusivo del worker (queue.ts), y únicamente tras
+    // una creación real de artículo que agotó los reintentos — nunca desde
+    // aquí. Antes "Ya recibí mis créditos" solo cambiaba el estado en
+    // memoria del navegador (setHasImageCredits local): al recargar la
+    // página, o en cualquier otra pestaña/dispositivo, la consulta a la base
+    // de datos seguía devolviendo hasImageCredits=false y el aviso volvía a
+    // aparecer aunque el usuario ya hubiera confirmado. Persistirlo aquí es
+    // lo que hace que la confirmación quede.
+    if (body.hasImageCredits === true) {
+      data.hasImageCredits = true;
+    }
+  }
+
   const user = await prisma.user.update({
     where: { id: userId },
     data,
@@ -276,6 +309,7 @@ export async function PATCH(request: NextRequest) {
       clientLocations: true,
       businessLocations: true,
       excludedTopics: true,
+      hasImageCredits: true,
     },
   });
 

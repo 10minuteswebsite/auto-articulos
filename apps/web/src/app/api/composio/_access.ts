@@ -1,15 +1,35 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/current-user";
+import { isMigrationApp } from "@/lib/composio-access";
 import { ConnectionError, canUseComposioModule, type ConnectingUser } from "@/lib/composio-connections";
 
 export const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" };
 
+
 /**
- * Persona con acceso al módulo «Conexión por Composio» (administradores y quien
- * tenga «Habilitado»). Comprobación del lado servidor: ocultar el menú no basta.
+ * Persona con acceso pleno al módulo Composio. Se conserva para acciones que
+ * no forman parte de la migración GSC, incluyendo desconexiones y redes Meta.
  */
 export async function getComposioUser(): Promise<ConnectingUser | null> {
   const user = await getCurrentUser();
+  return canUseComposioModule(user) ? user : null;
+}
+
+/**
+ * Estado de Conexiones: todas las cuentas activas pueden verlo para completar
+ * la migración de Google Search Console.
+ */
+export async function getComposioStatusUser(): Promise<ConnectingUser | null> {
+  return getCurrentUser();
+}
+
+/**
+ * Acciones de conexión: GSC/Analytics quedan abiertas para la migración;
+ * Facebook/Instagram conservan el opt-in y sus permisos propios.
+ */
+export async function getComposioUserForApp(app: unknown): Promise<ConnectingUser | null> {
+  const user = await getCurrentUser();
+  if (isMigrationApp(app)) return user;
   return canUseComposioModule(user) ? user : null;
 }
 
