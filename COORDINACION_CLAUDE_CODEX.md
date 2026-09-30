@@ -10461,3 +10461,50 @@ sobre lo ya construido de MCP:
 errores (worktree aislado `/private/tmp/mcp-copy-dinamica-20260930`). El
 script de Actualizaciones no se ejecutó (requiere credenciales reales que
 este entorno no tiene).
+
+## Claude (tarea programada diaria de propagación) — 2026-09-30
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-09-29
+(commit `9301401`). Se revisó el rango `9301401..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: 488 líneas agregadas (0 eliminadas, confirmado con
+`git diff --stat`), 13 entradas nuevas — toda la cadena de fixes de asignación de
+categoría en Oportunidades del 2026-09-29 (afinidad real → canibalización → tope
+dinámico → respaldo determinista → reubicación → rendimiento → nombre vs. id →
+auditoría de 3 pasadas → específica vs. general) y el trabajo de MCP del 2026-09-29/30
+(token personal de API, URL del artículo, `crear_titulos_con_ia`, copy neutro y
+catálogo dinámico).
+
+Se verificó contra `git log`/`git ls-remote` (no solo contra el texto) que **todos** los
+PR mencionados en ese rango (#253, #254, #255, #257, #258, #259, #260, #262, #263, #265,
+más los tres commits de MCP sin número de PR citado) ya están fusionados en
+`origin/main` — las ramas correspondientes quedaron como punteros sueltos post-squash,
+ninguna es una reserva activa ahora mismo.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: tres entradas nuevas — (1) "Commits — 2026-09-29 —
+  Cadena de fixes de asignación de categoría en Oportunidades" con los 9 commits/PR de
+  esa cadena y la nota de que ninguna entrada de Coordinación cierra el ciclo con una
+  verificación final tras el PR #265; (2) "Versión desplegada — 2026-09-29 — MCP: token
+  personal de API + herramientas de panorama (PR #258)", incluida la migración
+  `20260929120000_add_mcp_api_token` aplicada en producción; (3) "Commits —
+  2026-09-29/2026-09-30 — MCP: URL del artículo, crear_titulos_con_ia, copy neutro y
+  catálogo dinámico", con el pendiente de correr
+  `scripts/add-product-update-20260930-mcp.ts`.
+- `TO-DO.md`: dos ítems nuevos a "Pendientes" — falta de candado contra corridas
+  concurrentes de "Analizar contenido" (señalado fuera de alcance en la auditoría de 3
+  pasadas) y la tool `eliminar_oportunidades` que pidió Meta MUSE, no implementada por
+  quedar bloqueada por el clasificador de modo automático.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (nada activo que registrar, según
+  la verificación contra git de arriba); Parte B con un addendum listando los 13 nombres
+  de conversación nuevos de este rango, todos ya cerrados y fusionados.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. Se verificó contra el código
+  real (sección "Asistentes IA") que ya menciona `crear_titulos_con_ia` y el enlace del
+  artículo publicado — el propio PR de copy neutro (`b8a90e3`) ya lo había actualizado,
+  sin pendiente de propagación.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. No se encontró ninguna mención nueva
+  a árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
