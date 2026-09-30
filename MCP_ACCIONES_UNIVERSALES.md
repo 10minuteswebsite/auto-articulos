@@ -206,3 +206,10 @@ No implementar herramientas para:
 5. Preferencias e integraciones con consentimientos web.
 6. Adaptadores de experiencia para ChatGPT, Alexa+, Gemini y voz/teléfono,
    manteniendo el mismo servidor y las mismas reglas.
+- **Sumado 30/9/2026:** `crear_titulos_con_ia` — expone "Crear con la IA del
+  sistema" (`/dashboard/publicar`, proyecto CREACION DE PUBLICACIONES
+  PROPIAS) vía MCP: preguntas guiadas (cliente tipo, tema, deseo del
+  cliente, ubicaciones) → hasta 9 propuestas de títulos, mismo cupo de 3
+  solicitudes/día. Pedido de Milton al notar que esa función faltaba en el
+  catálogo. No publica nada por sí sola — se combina con
+  `publicar_titulos_en_categoria`.
