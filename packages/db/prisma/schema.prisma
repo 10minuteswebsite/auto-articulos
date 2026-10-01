@@ -221,6 +221,9 @@ model User {
   mcpPublishConfirmations    McpPublishConfirmation[]
   trialDomainRegistries      TrialDomainRegistry[]
   titleGenerationRequests    TitleGenerationRequest[]
+  // Derechos por producto (SEO Total Artículos / SEO Total Redes). Ver
+  // FASE_0_SEPARACION_SEO_TOTAL_PARTE_A_CLAUDE.md §2. Sin fila = comportamiento actual.
+  productEntitlements        ProductEntitlement[]
 }
 
 // Credenciales del authorization server propio para el enlace de cuentas MCP.
@@ -1090,4 +1093,74 @@ model Prompt {
   updatedAt DateTime @updatedAt
   runs      Run[]
   users     User[]
+}
+
+// ---------------------------------------------------------------------------
+// Derechos por producto (proyecto «SEPARACION DE SEO TOTAL», Lote 1)
+//
+// SEO Total se separa de cara al cliente en dos productos. Esta tabla dice qué
+// producto tiene cada usuario. Reglas de seguridad que NO se pueden perder:
+//  - Sin fila = comportamiento de hoy (nadie queda bloqueado por no tener fila).
+//  - Los administradores siempre pasan (lo decide la capa de código, no la tabla).
+//  - Nada bloquea mientras el interruptor `product_enforcement` esté en «off».
+// ---------------------------------------------------------------------------
+enum Product {
+  ARTICULOS
+  REDES
+}
+
+enum EntitlementStatus {
+  ACTIVE
+  GRACE
+  INACTIVE
+}
+
+// Quién fijó el estado actual. HUB queda reservado para la integración futura.
+enum EntitlementSource {
+  LEGACY
+  ADMIN
+  HUB
+}
+
+model ProductEntitlement {
+  id          String            @id @default(cuid())
+  userId      String
+  product     Product
+  status      EntitlementStatus
+  // Solo se usa con status = GRACE. La gracia vencida se evalúa al LEER (sin
+  // tarea programada), por eso la seguridad no depende de que algo la normalice.
+  graceUntil  DateTime?
+  source      EntitlementSource @default(LEGACY)
+  // Sube en cada cambio: permite ignorar eventos fuera de orden (idempotencia).
+  version     Int               @default(1)
+  // Id del cliente/suscripción en el sistema de facturación (futuro).
+  externalRef String?
+  note        String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  // userId del administrador que lo cambió, o «system»/«migration».
+  updatedBy   String?
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, product])
+  @@index([product, status])
+  @@index([graceUntil])
+}
+
+// Bitácora de solo añadir: cada cambio de derechos deja una fila. Nunca se
+// edita ni se borra. Sin FK a propósito: el historial sobrevive al usuario.
+model ProductEntitlementEvent {
+  id             String             @id @default(cuid())
+  userId         String
+  product        Product
+  fromStatus     EntitlementStatus?
+  toStatus       EntitlementStatus
+  fromGraceUntil DateTime?
+  toGraceUntil   DateTime?
+  source         EntitlementSource
+  actorUserId    String?
+  reason         String?
+  createdAt      DateTime           @default(now())
+
+  @@index([userId, createdAt])
 }

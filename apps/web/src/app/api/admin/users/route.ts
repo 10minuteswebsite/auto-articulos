@@ -10,6 +10,7 @@ import {
   PLATFORM_DOMAIN_VALUES,
 } from "@auto-articulos/shared";
 import { auditLog } from "@/lib/audit";
+import { ensureDefaultEntitlements } from "@/lib/product-access";
 import { getCurrentUserId, requireAdmin } from "@/lib/current-user";
 import {
   parseUserDisabledModules,
@@ -742,5 +743,7 @@ export async function POST(request: NextRequest) {
   });
 
   auditLog("user_created", adminId, { newUserId: user.id, email: normalizedEmail, role });
+  // Derechos por producto de la cuenta nueva (Artículos activo, como hoy).
+  await ensureDefaultEntitlements(user.id);
   return NextResponse.json({ user });
 }

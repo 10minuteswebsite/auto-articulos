@@ -33,3 +33,16 @@ export const MENU_NAMES_ANTERIORES = {
   ia: ["Publica contenido con ayuda de la IA avanzada", "Oportunidades SEO/AEO"],
   redes: ["Difunde tu contenido en blogs externos y redes sociales", "Oportunidades para Redes Sociales"],
 } as const;
+
+/**
+ * Nombres de los dos productos en que se separa SEO Total de cara al cliente
+ * (proyecto «SEPARACION DE SEO TOTAL», Lote 1). Misma regla que MENU_NAMES:
+ * importar de aquí, no escribir estos nombres a mano. «Redes Totales» fue un
+ * nombre provisional y NO se usa en ningún texto.
+ * Para la marca blanca tagcrush el nombre visible se decide aparte
+ * (decisión D4 de la Fase 0); cuando se decida, pasa por platformProductName().
+ */
+export const PRODUCT_NAMES = {
+  ARTICULOS: "SEO Total Artículos",
+  REDES: "SEO Total Redes",
+} as const;
