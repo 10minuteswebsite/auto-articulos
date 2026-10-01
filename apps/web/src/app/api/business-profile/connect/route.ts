@@ -1,16 +1,19 @@
 import { randomBytes } from "crypto";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
 import {
   BUSINESS_PROFILE_SCOPE,
   BUSINESS_PROFILE_STATE_COOKIE,
   businessProfileOAuthConfig,
 } from "@/lib/google-oauth";
+import { getOAuthRedirectUri } from "@/lib/oauth-redirect";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   await getCurrentUserId();
   try {
-    const { clientId, redirectUri } = businessProfileOAuthConfig();
+    const config = businessProfileOAuthConfig();
+    const { clientId } = config;
+    const redirectUri = getOAuthRedirectUri(request, "/api/business-profile/callback", config.redirectUri);
     const state = randomBytes(24).toString("base64url");
     const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
     url.search = new URLSearchParams({

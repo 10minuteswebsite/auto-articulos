@@ -6,13 +6,16 @@ import {
   GOOGLE_STATE_COOKIE,
   googleOAuthConfig,
 } from "@/lib/google-oauth";
+import { getOAuthRedirectUri } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   await getCurrentUserId();
   const returnTo = request.nextUrl.searchParams.get("returnTo") || "/dashboard";
   const selectAccount = request.nextUrl.searchParams.get("prompt") === "select_account";
   try {
-    const { clientId, redirectUri } = googleOAuthConfig();
+    const config = googleOAuthConfig();
+    const { clientId } = config;
+    const redirectUri = getOAuthRedirectUri(request, "/api/search-integrations/google/callback", config.redirectUri);
     const stateObj = { nonce: randomBytes(16).toString("base64url"), returnTo };
     const state = Buffer.from(JSON.stringify(stateObj)).toString("base64url");
     const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
