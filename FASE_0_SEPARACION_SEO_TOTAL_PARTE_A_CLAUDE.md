@@ -1,7 +1,7 @@
 # FASE 0 — PARTE A (Claude): producto, datos, interfaz
 
 Proyecto: SEPARACION DE SEO TOTAL DE REDES TOTALES · Autor: Claude (control de proyecto) · Fecha: 2026-10-01
-Estado: **v0.2 — BORRADOR PARA REVISIÓN CRUZADA (Codex) Y APROBACIÓN DE MILTON. No hay código.**
+Estado: **v0.3 — REVISIÓN CRUZADA DE CODEX RECIBIDA (X-005, sin contradicciones materiales); LISTA PARA APROBACIÓN DE MILTON. No hay código.**
 Documentos hermanos: `MASTER_BLUEPRINT_SEPARACION_SEO_TOTAL_ARTICULOS_Y_REDES.md`, `CONTROL_SEPARACION_SEO_TOTAL.md`, `TRASPASO_SEPARACION_SEO_TOTAL.md`.
 
 > Convención: **[VERIFICADO]** = lo comprobé yo en el código el 2026-10-01 (archivo citado). **[POR CONFIRMAR]** = hipótesis a verificar antes del Lote correspondiente.
@@ -147,6 +147,8 @@ Propiedades que deben cumplirse (van como pruebas unitarias):
 - `shadow`: se evalúa todo y se **registra** cada denegación que *habría* ocurrido (usuario, producto, motivo, ruta), sin bloquear.
 - `enforce`: bloquea de verdad.
 
+**Auditoría previa a `enforce` (propuesta de Codex, aceptada):** antes de encender `enforce` se revisa explícitamente la excepción «ausencia de fila = comportamiento actual»: tras el backfill se cuentan los usuarios sin fila, se explica cada uno y se decide si la excepción se mantiene o se retira. No se ocultan errores de migración.
+
 Así el Lote 3 puede subir a producción «apagado», revisar los registros de `shadow` contra la lista real de usuarios y solo entonces encenderse. El retorno es inmediato (cambiar el valor).
 
 ### 2.4 Arranque de datos (backfill) — en la misma migración que crea las tablas
@@ -214,7 +216,11 @@ Función `productOfPath(pathname)` (en `lib/modules.ts`): devuelve `ARTICULOS | 
 | **Worker** | cada trabajo de publicación de artículos y de redes | Comprueba el derecho **justo antes de ejecutar cada publicación/destino** (no solo al encolar). Si se revoca a mitad de un lote: **no inicia nuevos destinos**, registra el motivo y deja el estado visible y reintentable; **no borra** lo ya creado (propuesta de Codex, X-002; compatible con D6). Detalle: Parte B / Lote 3. |
 | **MCP** | `api/mcp` (Alexa, Claude) | Las 6 herramientas de oportunidades/publicación declaran `ARTICULOS` y pasan por el mismo helper; las 6 de cuenta quedan comunes. Hoy el MCP no tiene herramientas de Redes. |
 
+**Rutas que quedan fuera de `requireProductAccess` (acordado con Codex, X-005):** callbacks OAuth (`/api/*/callback`), `/api/mcp`, `/api/oauth2/*`, `/.well-known/*`, `/api/mcp/token-lookup`, el receptor de handoff (`/api/auth/hub-handoff`, Lote 4), `/api/auth/*` y los endpoints de salud o webhooks. La lista definitiva sale del inventario del Lote 3. **Pendiente confirmar:** llamadas internas worker→web (Codex no encontró ninguna en `apps/worker/src`; falta revisar colas/HTTP fuera de `src`).
+
 `ModuleGuard` (cliente) y el menú siguen existiendo, solo como **experiencia de usuario**; la barrera de verdad es el servidor.
+
+**Memoización:** solo dentro de una petición (y dentro de una ejecución del worker); **nunca caché entre peticiones**, porque una revocación debe verse en la siguiente petición (acordado con Codex).
 
 **Restricción técnica:** `hasProductAccess` usa Prisma, por tanto **no puede ejecutarse en el middleware (Edge)**. Es intencional: el middleware queda sin cambios en este proyecto (salvo la ruta pública del receptor del HUB, que es del Lote 4 y de Codex).
 
@@ -382,7 +388,22 @@ Criterio: un cliente con un solo producto no ve rastro del otro dentro de su pro
 
 ---
 
+### Respuestas de Codex a las 9 preguntas (X-005, 2026-10-01 22:48 UTC)
+
+| # | Resultado |
+|---|---|
+| 1 | `version`, `source`, `updatedBy`, `graceUntil` y eventos bastan; el receptor añade idempotencia atómica. **Conforme.** |
+| 2 | «Ausencia de fila» no choca con ES256: el token autentica, el acceso se evalúa local. **Conforme**, con revisión de la excepción antes de `enforce` (incorporada en 2.3). |
+| 3 | Worker: validar al iniciar cada destino; memoización solo dentro de la ejecución; la revocación no corta destinos iniciados. **Conforme** (3.4 y D6). |
+| 4 | `product_enforcement` y `legacy/dual/hub` son **ortogonales**; `shadow` antes de `enforce`, y `enforce` antes del corte a `hub`. **Conforme.** |
+| 5 | Sin llamadas internas worker→web en `apps/worker/src`; falta confirmar colas/HTTP fuera de `src`. **Pendiente (Lote 3).** |
+| 6 | Lista de rutas fuera de `requireProductAccess`. **Incorporada en 3.4.** |
+| 7 | El mapa de conexiones coincide con su B1; callbacks por host de origen. **Conforme.** |
+| 8 | Memoización por petición, sin caché entre peticiones. **Incorporada.** |
+| 9 | Sin otra contradicción material con la Parte B tras corregir B1/B4. **Conforme.** |
+
 ## 13. Bitácora de este documento
 
 - 2026-10-01 · Claude · v0.1 borrador completo, basado en lectura directa de: `DashboardNav.tsx`, `ModuleGuard.tsx`, `modules.ts`, `menu-names.ts`, `configuracion/page.tsx`, `dashboard/page.tsx`, `api/me/route.ts`, `middleware.ts`, listado de rutas de API y `schema.prisma`. Pendiente: revisión cruzada de Codex y verificación de los puntos **[POR CONFIRMAR]** antes de entregar a Milton.
 - 2026-10-01 · Claude · v0.2: verificados Historial/Progreso (mezclan ambos productos), Estadísticas (solo artículos), Conexiones (ya dividida en analíticas/difusión) y herramientas MCP (ninguna de Redes); incorporada la regla del worker de Codex (X-002) y la nota de callbacks por host (C-008). Pendiente: revisión cruzada de Codex y los [POR CONFIRMAR] restantes (`cuenta`, `contenido`, `redes-sociales`, `indexacion`, `composio`).
+- 2026-10-01 · Claude · v0.3: incorporada la revisión cruzada de Codex (X-005): auditoría previa a `enforce`, lista de rutas fuera del helper, memoización solo por petición; tabla de respuestas en §12. Estado: lista para aprobación de Milton (M2) junto con la Parte B (PR #295 en `main`, corrección B1/B4 en PR #303) y el resumen `FASE_0_SEPARACION_SEO_TOTAL_CONSOLIDADO.md`.
