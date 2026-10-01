@@ -44,6 +44,15 @@ confirmación explícita.
   `ver_integraciones`, `listar_categorias`, `listar_idiomas`,
   `ver_limites_y_creditos` (sección 1, "Panorama y diagnóstico" — agregadas
   29/9/2026, todas de solo lectura).
+- **Sumado 1/10/2026:** `ver_historial_publicaciones`,
+  `ver_detalle_publicacion`, `ver_preferencias_contenido`,
+  `ver_estado_indexacion`, `listar_propuestas_sociales`,
+  `previsualizar_publicacion_social`, `descartar_oportunidad`,
+  `descartar_categoria_oportunidades`, `eliminar_oportunidades`,
+  `cancelar_publicacion`, `reintentar_publicacion` y
+  `publicar_propuesta_social`. Las acciones que cambian o eliminan datos
+  exigen una vista previa con comprobante temporal de un solo uso, ligado al
+  usuario, la tool y los argumentos exactos.
 - **Token personal de API (29/9/2026):** cualquier asistente de IA (Claude,
   ChatGPT, Gemini, Meta MUSE u otro) puede conectarse ahora con un token que
   el usuario genera y copia desde Configuración → Asistentes IA — sin pasar
@@ -88,11 +97,12 @@ confirmación explícita.
   paso) y `diagnosticar_cuenta`. También se reestructuraron las
   descripciones de las 14 tools existentes al formato Propósito / Cuándo
   usarla / Cuándo NO usarla / Contexto necesario / Siguiente paso típico.
-- **Planificado (secciones 3-7 de este catálogo):** indexación/sitemaps,
-  gestión de ejecuciones (cancelar/reintentar), acciones de redes sociales
-  (generar/editar/publicar propuestas), preferencias de cuenta (idioma,
-  firma) e integraciones (conectar/desconectar OAuth de terceros). Todas de
-  escritura — quedan para su propia auditoría, no se tocaron en este lote.
+- **Estado 1/10/2026:** el envío manual de sitemaps a Google y Bing ya está
+  expuesto como operación externa con vista previa y confirmación. Todavía
+  quedan planificadas las acciones de escritura sobre preferencias e
+  integraciones OAuth de terceros (conectar/desconectar). Las consultas y
+  operaciones MCP reutilizan los handlers de la web y mantienen los permisos
+  de cada cuenta.
 
 ## 1. Panorama y diagnóstico
 

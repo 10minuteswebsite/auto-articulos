@@ -10700,3 +10700,42 @@ Completa la tarea abierta en el traspaso del 2026-09-26 (§4 de ese bloque). Pin
 Con esto, **las 3 redes del proyecto "Redes por Composio" (GSC/GA, Facebook/Instagram piloto, Pinterest piloto) están en producción**. Threads sigue con conexión propia (decisión de Milton, sin cambios). Pendiente de Milton: decidir el lanzamiento de Facebook/Instagram/Pinterest a todos los usuarios (fuera del piloto).
 
 - **Capitán de migración liberó el lote:** Claude. Resultado: PINTEREST por Composio completado y verificado en produccion (PR #276, Pin real publicado).
+
+## Auditoría autónoma MCP — Codex — 2026-10-01
+
+- **Capitán de migración:** Codex — revisará y aplicará el lote completo.
+  Motivo: MCP autónomo: confirmación segura, catálogo dinámico, sitemaps y
+  auditoría triple. Nadie más ejecuta Prisma hasta su liberación.
+
+Se reclamó la capitanía de migración para cerrar la auditoría triple del MCP sin
+modificar el checkout principal ni ejecutar acciones destructivas.
+
+- Se agregó confirmación server-side de un solo uso, con hash, operación exacta,
+  usuario, expiración de 10 minutos y consumo atómico para publicaciones,
+  descartes, cancelaciones, reintentos, publicación social, eliminación masiva
+  y envío de sitemaps.
+- Se amplió el catálogo con historial/detalle, preferencias e indexación,
+  propuestas sociales y gestión de ejecuciones; se agregó guardia contra
+  nombres duplicados y se corrigió `listar_idiomas` para que sea realmente de
+  solo lectura.
+- Se añadieron `enviar_sitemap_google` y `enviar_sitemap_bing`, reutilizando los
+  handlers existentes y exigiendo vista previa antes del efecto externo.
+- Se añadió migración `20261001120000_add_mcp_publish_confirmations` y se
+  actualizaron manual, catálogo universal y aviso de seguridad del token.
+
+Auditorías locales en `/private/tmp/mcp-autonomous-20261001`:
+`tsc` web/worker limpio; web 79/79 (1 integración omitida por no definir base
+de datos de prueba); worker 20/20; crypto MCP 2/2; build de producción web
+completo con `/api/mcp`, `/api/mcp/capabilities` y 84 páginas/rutas generadas.
+
+Pendiente fuera del alcance seguro: verificación E2E contra el dominio de
+producción (DNS no resolvía desde el entorno), aplicar la migración mediante el
+workflow de despliegue y validar prompts/list/get con una sesión real. Las
+escrituras de preferencias y los flujos OAuth quedan deliberadamente fuera del
+MCP hasta disponer de una UX de consentimiento adecuada.
+
+No hubo borrados, resets, cambios en el checkout principal ni deploy desde esta
+tarea.
+
+Responsable: Codex. Estado: listo para revisión/PR y prueba controlada en
+producción después de aplicar la migración.

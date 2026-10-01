@@ -11,7 +11,6 @@ import { toolText, type ToolDef } from "./shared";
  */
 import { GET as dashboardStatsRoute } from "@/app/api/dashboard-stats/route";
 import { GET as configurationStatusRoute } from "@/app/api/configuration-status/route";
-import { GET as languagesRoute } from "@/app/api/languages/route";
 
 type ConfigurationCheck = {
   id: string;
@@ -155,11 +154,10 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     handler: async () => {
       const userId = await getCurrentUserId();
-      const [data, user] = await Promise.all([
-        readJson(await languagesRoute()),
+      const [idiomas, user] = await Promise.all([
+        prisma.language.findMany({ where: { userId, platform: "10minutesWebsite" }, select: { name: true, externalId: true }, orderBy: { name: "asc" } }),
         prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { contentLanguage: true } }),
       ]);
-      const idiomas = (data.languages ?? []) as Array<{ name?: string; externalId?: string }>;
       const lineas = idiomas.length
         ? idiomas.map((l) => `- ${l.name ?? l.externalId}`).join("\n")
         : "(sin idiomas sincronizados)";
