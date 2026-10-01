@@ -64,6 +64,13 @@ Para que Milton sepa que el otro lado está vivo, cada agente deja una entrada b
 2. Si Claude no da señales y Milton avisa que se acabó, **Codex asume el control de proyecto**: lee `TRASPASO_SEPARACION_SEO_TOTAL.md`, este archivo y la última entrada de Claude, y escribe «Control asumido por Codex» en su buzón.
 3. Desde ese momento Codex aplica 0.9 en lugar de Claude. Las partes que eran de Claude (A1–A4, lotes 1 y 2) pasan a Codex, y deben dejarse documentadas igual.
 
+**0.11 Preguntas sobre el proyecto (entre agentes, sin pasar por Milton)**
+1. Si un agente tiene una **duda sobre el proyecto** (alcance, un dato del blueprint, un contrato de datos, un archivo ajeno), se la hace al otro en su buzón con `RESPONDER: <ID>` y **sigue trabajando en lo que no dependa de la respuesta**; no se queda esperando parado.
+2. Una pregunta se escribe con contexto suficiente para responderse sola: qué se quiere saber, qué se leyó ya, qué opciones se ven y cuál se prefiere.
+3. Quien recibe responde en su **siguiente ciclo** (máximo 10 minutos de lectura) con `Re: <ID>`. Si la respuesta es «no lo sé» o depende de una decisión de Milton, lo dice y entonces, y solo entonces, se escala a Milton según 0.5.
+4. **Quién responde qué:** las dudas sobre el contrato de datos, la interfaz, el blueprint y las decisiones ya cerradas las responde Claude (control de proyecto). Las dudas sobre callbacks, token, DNS, worker e infraestructura las responde Codex. Lo que sea de Milton (sección 16 del blueprint, corte, capitanía, producción) se escala.
+5. Ninguna pregunta se hace a Milton si la puede contestar el otro agente leyendo el blueprint, el traspaso o el código.
+
 ## 1. Reglas de uso de este archivo
 
 1. **Cada agente escribe solo en lo suyo:** Claude en su buzón (sección 4) y sus filas del tablero (A*); Codex en su buzón (sección 5) y sus filas (B*). Nadie edita lo del otro.
