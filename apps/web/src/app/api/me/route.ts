@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { normalizeE164Phone } from "@/lib/phone";
 import { platformBaseUrl } from "@auto-articulos/shared";
 import { getCurrentUser, getCurrentUserId, getActingAdmin, displayName } from "@/lib/current-user";
 
@@ -230,8 +231,14 @@ export async function PATCH(request: NextRequest) {
         { status: 400 },
       );
     }
-    const trimmed = typeof phone === "string" ? phone.trim() : "";
-    data.phone = trimmed || null;
+    const normalizedPhone = normalizeE164Phone(phone);
+    if (typeof phone === "string" && phone.trim() && !normalizedPhone) {
+      return NextResponse.json(
+        { error: "El teléfono debe incluir código de país, por ejemplo +14155550100." },
+        { status: 400 },
+      );
+    }
+    data.phone = normalizedPhone;
   }
 
   if ("imagePrompt" in body) {

@@ -12,6 +12,7 @@ import {
 import { auditLog } from "@/lib/audit";
 import { getCurrentUserId, requireAdmin } from "@/lib/current-user";
 import { syncUserToHubBestEffort } from "@/lib/hub-sync";
+import { normalizeE164Phone } from "@/lib/phone";
 import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
@@ -306,7 +307,14 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (typeof phone === "string") {
-    data.phone = phone.trim() || null;
+    const normalizedPhone = normalizeE164Phone(phone);
+    if (phone.trim() && !normalizedPhone) {
+      return NextResponse.json(
+        { error: "El teléfono debe incluir código de país, por ejemplo +14155550100." },
+        { status: 400 },
+      );
+    }
+    data.phone = normalizedPhone;
   }
 
   if ("monthlyArticleLimit" in body) {
@@ -628,7 +636,7 @@ export async function POST(request: NextRequest) {
     typeof firstName === "string" ? firstName.trim() : "";
   const normalizedLastName =
     typeof lastName === "string" ? lastName.trim() : "";
-  const normalizedPhone = typeof phone === "string" ? phone.trim() : "";
+  const normalizedPhone = normalizeE164Phone(phone) ?? "";
 
   if (!normalizedFirstName) {
     return NextResponse.json(
@@ -644,7 +652,7 @@ export async function POST(request: NextRequest) {
   }
   if (!normalizedPhone) {
     return NextResponse.json(
-      { error: "El teléfono es requerido" },
+      { error: "El teléfono debe incluir código de país, por ejemplo +14155550100" },
       { status: 400 },
     );
   }

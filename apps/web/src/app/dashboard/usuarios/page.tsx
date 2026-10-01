@@ -1057,6 +1057,9 @@ export default function UsuariosPage() {
               <input
                 type="tel"
                 required
+                placeholder="+1 415 555 0100"
+                pattern="^(\\+|00)[1-9][0-9 ()-]{7,20}$"
+                title="Incluye el código de país, por ejemplo +1 415 555 0100"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 style={inputStyle}
@@ -3387,11 +3390,13 @@ function UserCard({
                 placeholder="Correo"
               />
               <input
-                type="text"
+                type="tel"
                 value={editPhone}
                 onChange={(e) => setEditPhone(e.target.value)}
                 style={{ ...inputStyle, width: 140 }}
-                placeholder="Teléfono"
+                placeholder="+1 415 555 0100"
+                pattern="^(\\+|00)[1-9][0-9 ()-]{7,20}$"
+                title="Incluye el código de país, por ejemplo +1 415 555 0100"
               />
               <input
                 type="password"

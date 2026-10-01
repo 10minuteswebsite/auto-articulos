@@ -5,6 +5,7 @@ import { encryptSecret } from "@auto-articulos/shared";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { syncUserToHubBestEffort } from "@/lib/hub-sync";
+import { normalizeE164Phone } from "@/lib/phone";
 
 // Registro público desde el botón "Solicitar prueba" en Login — pedido
 // explícito del usuario, 13/8/2026. A diferencia de POST /api/admin/users
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
     typeof lastName === "string" ? lastName.trim() : "";
   const normalizedEmail =
     typeof email === "string" ? email.trim().toLowerCase() : "";
-  const normalizedPhone = typeof phone === "string" ? phone.trim() : "";
+  const normalizedPhone = normalizeE164Phone(phone) ?? "";
 
   if (!normalizedFirstName) {
     return NextResponse.json(
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
   }
   if (!normalizedPhone) {
     return NextResponse.json(
-      { error: "El teléfono es requerido." },
+      { error: "El teléfono debe incluir código de país, por ejemplo +14155550100." },
       { status: 400 },
     );
   }
