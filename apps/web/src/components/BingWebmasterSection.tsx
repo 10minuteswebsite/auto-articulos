@@ -210,7 +210,7 @@ export default function BingWebmasterSection() {
       lead="Conexión administrada desde esta tarjeta. Conecta tu cuenta de Bing y elige aquí el sitio que usará SEO TOTAL."
       note="El sistema enviará tu sitemap a Bing todas las noches y procesará cada artículo publicado para acelerar su aparición en búsquedas."
     >
-      {data !== null && !data.connected && <ConnectionGuide steps={CONNECTION_GUIDES["bing-webmaster"].steps} ifFails={CONNECTION_GUIDES["bing-webmaster"].ifFails} />}
+      {data !== null && !data.connected && <ConnectionGuide steps={CONNECTION_GUIDES["bing-webmaster"].steps} ifFails={CONNECTION_GUIDES["bing-webmaster"].ifFails} signupUrl={CONNECTION_GUIDES["bing-webmaster"].signupUrl} signupLabel={CONNECTION_GUIDES["bing-webmaster"].signupLabel} />}
 
       {data === null ? (
         <p style={{ color: "#6e6e73", fontSize: 14 }}>Cargando…</p>

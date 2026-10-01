@@ -80,7 +80,7 @@ export default function BlueskySection({ allowed = true }: { allowed?: boolean }
       id="bluesky"
       title="Bluesky"
       state={justConnected ? "success" : connected ? "connected" : "disconnected"}
-      lead="Conexión administrada desde esta tarjeta. Conecta la cuenta de Bluesky donde se publicarán tus artículos."
+      lead="En este sitio conectas tu cuenta de Bluesky para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes. Sigue las instrucciones para configurarla paso a paso."
       note="Publica un microresumen del artículo con su imagen y enlace."
     >
       {connection === null ? (
@@ -96,7 +96,7 @@ export default function BlueskySection({ allowed = true }: { allowed?: boolean }
         </>
       ) : !connected || editing ? (
         <>
-          <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} />
+          <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />
           <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
             <label style={{ color: "#1d1d1f", fontSize: 12 }}>
               Usuario de Bluesky

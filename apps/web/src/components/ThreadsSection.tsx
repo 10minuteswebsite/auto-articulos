@@ -6,7 +6,7 @@ import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSect
 const THREADS: OAuthNetworkConfig = {
   id: "threads",
   title: "Threads",
-  lead: "Conexión administrada desde esta tarjeta. Autoriza aquí la cuenta de Threads que usará SEO TOTAL.",
+  lead: "En este sitio conectas tu cuenta de Threads para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes. Sigue las instrucciones para configurarla paso a paso.",
   note: "Publica tus artículos como publicaciones de Threads. Autorizas directamente en Meta; nunca vemos tu contraseña.",
   accountKey: "threadsUsername",
   accountPrefix: "@",

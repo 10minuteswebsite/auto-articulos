@@ -85,7 +85,7 @@ export default function DevToSection({ allowed = true }: { allowed?: boolean }) 
       id="devto"
       title="DEV.to"
       state={justConnected ? "success" : connected ? "connected" : "disconnected"}
-      lead="Conexión administrada desde esta tarjeta. Conecta la cuenta de DEV.to donde se publicarán tus artículos adaptados."
+      lead="En este sitio conectas tu cuenta de DEV.to para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes. Sigue las instrucciones para configurarla paso a paso."
     >
       {connection === null ? (
         <p style={{ color: "#6e6e73", fontSize: 14 }}>Cargando…</p>
@@ -100,7 +100,7 @@ export default function DevToSection({ allowed = true }: { allowed?: boolean }) 
         </>
       ) : !connected || editing ? (
         <>
-          <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} />
+          <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />
           <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
             <label style={{ color: "#1d1d1f", fontSize: 12 }}>
               Usuario de DEV.to

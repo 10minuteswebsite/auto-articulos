@@ -449,7 +449,7 @@ export default function OportunidadesRedesPage() {
                   disabled={generatingAll || generatingNetwork !== null}
                   style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginBottom: 16 }}
                 >
-                  {generatingAll ? "Generando para todas las redes..." : "📲 Generar 1 por cada red (Todas)"}
+                  {generatingAll ? "GENERANDO PARA TODAS LAS REDES..." : "GENERAR 1 POR CADA RED ACTIVADA"}
                 </button>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
                 {([
@@ -471,8 +471,8 @@ export default function OportunidadesRedesPage() {
                     return;
                   }
                   handleGenerate(platform);
-                }} disabled={busy} className="secondary" style={disabledStyle({ ...secondaryButtonStyle, ...uniformButtonSize, width: "100%", border: "1px solid #d2d2d7", background: unavailable ? "#f5f5f7" : "#ffffff", color: unavailable ? "#86868b" : "#1d1d1f", justifyContent: "center" }, busy)}>
-                  {generatingNetwork === platform ? "Analizando..." : unavailable ? "· Configurar " + label : "✓ " + label + " · Crear oportunidad"}
+                }} disabled={busy} className="secondary" style={disabledStyle({ ...secondaryButtonStyle, ...uniformButtonSize, width: "100%", border: unavailable ? "1px solid #e5e5ea" : "1px solid #1d1d1f", background: unavailable ? "#f5f5f7" : "#1d1d1f", color: unavailable ? "#86868b" : "#ffffff", justifyContent: "center" }, busy)}>
+                  {generatingNetwork === platform ? "Analizando..." : unavailable ? "Configurar " + label : "✓ " + label + " · Crear oportunidad"}
                 </button>;
                 })}
                 </div>

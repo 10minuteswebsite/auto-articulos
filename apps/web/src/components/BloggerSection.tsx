@@ -5,7 +5,7 @@ import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSect
 const BLOGGER: OAuthNetworkConfig = {
   id: "blogger",
   title: "Blogger",
-  lead: "Conexión administrada desde esta tarjeta. Autoriza tu cuenta de Google y elige aquí el blog que usará SEO TOTAL.",
+  lead: "En este sitio conectas tu cuenta de Google para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes en el blog de Blogger que elijas. Sigue las instrucciones paso a paso.",
   note: "Publica artículos en el blog de Blogger que elijas.",
   admin: {
     title: "Credenciales de la aplicación",

@@ -199,6 +199,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
   // en dos entradas distintas del mapa y nunca se sumaban entre sí.
   const scoreByPath = new Map<string, number>();
   const queriesByPath = new Map<string, string[]>();
+  let bingRowsForRanking: Array<{ query: string; clicks: number; impressions: number }> = [];
   const addScore = (path: string, amount: number) => {
     scoreByPath.set(path, (scoreByPath.get(path) ?? 0) + amount);
   };
@@ -304,6 +305,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
     const bing = await getBingSignals(userId);
     if (bing.rows.length > 0) {
       const topBingQueries = bing.rows.slice(0, 50);
+      bingRowsForRanking = topBingQueries;
       for (const [path, queries] of queriesByPath) {
         const pathTokens = new Set(queries.flatMap((q) => [...tokenizeForMatch(q)]));
         let bingBoost = 0;
@@ -324,6 +326,25 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
     orderBy: { processedAt: "desc" },
     select: { id: true, finalTitle: true, text: true, summary: true, articleUrl: true, processedAt: true },
   });
+
+  // Si Bing está conectado pero Search Console no aporta consultas, sus
+  // señales siguen siendo útiles: se comparan directamente con el contenido
+  // de cada artículo publicado para que Bing pueda influir por sí solo en la
+  // prioridad del candidato.
+  if (bingRowsForRanking.length > 0) {
+    for (const article of articles) {
+      if (!article.articleUrl) continue;
+      const articleTokens = tokenizeForMatch(
+        [article.finalTitle, article.summary, article.text].filter(Boolean).join(" "),
+      );
+      let bingScore = 0;
+      for (const bingRow of bingRowsForRanking) {
+        const shared = [...tokenizeForMatch(bingRow.query)].filter((token) => articleTokens.has(token)).length;
+        if (shared >= 2) bingScore += bingRow.impressions + bingRow.clicks * 8;
+      }
+      if (bingScore > 0) addScore(pathnameOf(article.articleUrl), bingScore);
+    }
+  }
 
   const ranked = articles
     .map((article) => ({

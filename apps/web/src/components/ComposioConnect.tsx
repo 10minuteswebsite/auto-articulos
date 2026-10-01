@@ -52,7 +52,7 @@ interface Choices {
   picked: string | null;
 }
 
-const mutedStyle = { color: "#6e6e73", fontSize: 14, lineHeight: 1.5 } as const;
+const mutedStyle = { color: "#1d1d1f", fontSize: 14, lineHeight: 1.5 } as const;
 
 const APP_NOTES: Record<string, string> = {
   google_search_console: "Permite enviar tu sitemap, revisar la indexación y consultar tus métricas de búsqueda.",
@@ -162,6 +162,11 @@ const SUCCESS_SELECTION_LABEL: Record<string, string> = {
 
 export default function ComposioConnect({ apps, embedded = false, inline = false, activeOnly = false, showInactiveActions = false }: ComposioConnectProps = {}) {
   const [connections, setConnections] = useState<Connection[] | null>(null);
+  // Distinto de "connections: []" (de verdad no hay nada conectado, el
+  // servidor respondió bien): esto es "no sabemos el estado real" porque la
+  // llamada falló. Nunca se debe mostrar "No conectada" con la guía completa
+  // en este caso — sería engañoso para alguien que sí está conectado.
+  const [loadError, setLoadError] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [probe, setProbe] = useState<Record<string, string>>({});
@@ -176,10 +181,12 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
     const response = await fetch("/api/composio/status", { cache: "no-store" });
     if (!response.ok) {
       setMessage({ ok: false, text: "No se pudo leer el estado de tus conexiones." });
+      setLoadError(true);
       return null;
     }
     const all = ((await response.json()) as { connections: Connection[] }).connections;
     const list = all.filter((connection) => (!apps || apps.includes(connection.app)) && !(embedded && connection.hidden) && (!activeOnly || connection.status === "ACTIVE"));
+    setLoadError(false);
     setConnections(list);
     return list;
   }, [apps, embedded, activeOnly]);
@@ -343,7 +350,27 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
 
       {connections === null ? (
         <section style={sectionStyle}>
-          <p style={mutedStyle}>Cargando…</p>
+          {loadError ? (
+            <p style={{ ...mutedStyle, color: "#c62828" }}>
+              No se pudo leer el estado de tus conexiones. Actualiza la página e inténtalo de nuevo.
+            </p>
+          ) : (
+            <p style={mutedStyle}>Cargando…</p>
+          )}
+        </section>
+      ) : connections.length === 0 ? (
+        <section style={inline ? { marginTop: 16, paddingTop: 14, borderTop: "1px solid #e5e5ea" } : sectionStyle}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#1d1d1f" }}>ESTADO: No conectada</div>
+          <div role="note" style={{ marginTop: 10, padding: "10px 0", color: "#1d1d1f", fontSize: 14, lineHeight: 1.5 }}>
+            <strong>Te acompañamos para conectar tu cuenta</strong>
+            <p style={{ margin: "6px 0 0" }}>
+              No te preocupes: sigue estos pasos y podrás preparar tu cuenta antes de autorizarla. Si algo no
+              coincide, puedes detenerte antes de aceptar.
+            </p>
+            <ol style={{ margin: "6px 0 0", paddingLeft: 20 }}>
+              {(apps ?? ["instagram"]).flatMap((app) => CONNECTION_STEPS[app] ?? []).map((step) => <li key={step}>{step}</li>)}
+            </ol>
+          </div>
         </section>
       ) : (
         connections.map((connection) => {
@@ -397,7 +424,11 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                   role="note"
                   style={{ marginTop: 10, padding: "10px 0", borderTop: "1px solid #e5e5ea", color: "#1d1d1f", fontSize: 13, lineHeight: 1.5 }}
                 >
-                  <strong>Cómo hacerlo paso a paso</strong>
+                  <strong>Te acompañamos para conectar tu cuenta</strong>
+                  <p style={{ margin: "6px 0 0" }}>
+                    No te preocupes: sigue estos pasos y podrás elegir exactamente dónde quieres publicar. Si algo
+                    no coincide, puedes detenerte antes de aceptar.
+                  </p>
                   <ol style={{ margin: "6px 0 0", paddingLeft: 20 }}>
                     {CONNECTION_STEPS[connection.app].map((step) => <li key={step}>{step}</li>)}
                   </ol>

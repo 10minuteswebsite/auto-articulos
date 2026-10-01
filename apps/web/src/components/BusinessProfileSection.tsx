@@ -121,21 +121,21 @@ export default function BusinessProfileSection() {
       id="business-profile"
       title="Google Business Profile"
       state={state}
-      lead="Conexión administrada desde esta tarjeta. Conecta la cuenta de Google que administra tu Perfil de Negocio."
+      lead="En este sitio conectas la cuenta de Google que administra tu Perfil de Negocio para que SEO TOTAL pueda publicar las novedades o el contenido seleccionado por la IA que tú apruebes. Sigue las instrucciones paso a paso."
       note={`Cuando el sistema detecte una oportunidad para Google Business Profile en ${MENU_NAMES.redes}, preparará una publicación con el formato permitido por Google, imagen y enlace al artículo. No se publicará cada artículo automáticamente.`}
     >
       {data === null ? (
         <p style={{ color: "#6e6e73", fontSize: 14 }}>Cargando…</p>
       ) : !connected ? (
         <>
-          {guide && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} />}
+          {guide && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
             <a href="/api/postpeer/connect" style={linkButton}>{CONNECTION_LABELS.connect}</a>
           </div>
         </>
       ) : needsLocation ? (
         <>
-        {guide && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} />}
+        {guide && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />}
         <div style={{ marginTop: 12, padding: "10px 0", borderTop: "1px solid #e5e5ea" }}>
           {data?.locationsLoaded && data.locations && data.locations.length > 0 ? (
             <>

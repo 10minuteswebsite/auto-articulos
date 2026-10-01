@@ -8,8 +8,8 @@ import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSect
 const LINKEDIN: OAuthNetworkConfig = {
   id: "linkedin",
   title: "LinkedIn",
-  lead: "Conexión administrada desde esta tarjeta. Autoriza aquí la cuenta de LinkedIn que usará SEO TOTAL.",
-  note: "Publica tus artículos en tu perfil de LinkedIn.",
+  lead: "En este sitio conectas tu cuenta de LinkedIn para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes. Sigue las instrucciones para configurarla paso a paso.",
+  note: "Publica tus artículos seleccionados en tu perfil de LinkedIn.",
   accountKey: "linkedinUsername",
   admin: {
     title: "Credenciales de la aplicación",

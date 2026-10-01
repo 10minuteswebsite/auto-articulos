@@ -282,7 +282,7 @@ export default function ConexionesView() {
           <button key={v.id} type="button" role="tab" aria-selected={vista === v.id} onClick={() => elegir(v.id)} style={botonVista(vista === v.id)}>{v.label}</button>
         ))}
       </div>}
-      <p style={{ margin: "0 0 16px", fontSize: 13, color: "#6e6e73" }}>{VISTAS.find((v) => v.id === vista)?.ayuda}</p>
+      {conexion === null && <p style={{ margin: "0 0 16px", fontSize: 13, color: "#6e6e73" }}>{VISTAS.find((v) => v.id === vista)?.ayuda}</p>}
 
       {soloExito && conexion && <ConnectionReturnSuccess conexion={conexion} />}
 
