@@ -375,6 +375,9 @@ export default function OportunidadesRedesPage() {
         className="panel"
         style={{
           ...sectionStyle,
+          // Pedido explícito de Milton (1/10/2026): sin el rectángulo
+          // exterior del `.panel` estándar en esta pantalla en particular.
+          border: "none",
           padding: "20px 0 24px",
           marginBottom: 20,
           marginTop: 0,
