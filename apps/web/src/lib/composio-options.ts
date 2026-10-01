@@ -179,6 +179,25 @@ export function optionsForInstagram(data: unknown): SelectionOption[] {
   return options;
 }
 
+export function optionsForPinterest(data: unknown): SelectionOption[] {
+  const boards = findArray(data, (item) => typeof item.id === "string" && typeof item.name === "string") ?? [];
+  const options = boards.map((board): SelectionOption => {
+    const privacy = str(board.privacy);
+    return {
+      id: String(board.id),
+      label: String(board.name),
+      detail: [privacy === "SECRET" ? "secreto" : privacy === "PROTECTED" ? "protegido" : null, `código del tablero ${String(board.id)}`]
+        .filter(Boolean)
+        .join(" · "),
+      selectable: true,
+      reason: null,
+      recommended: false,
+    };
+  });
+  if (options.length === 1) options[0].recommended = true;
+  return options;
+}
+
 export function buildOptions(
   app: ComposioAppId,
   data: unknown,
@@ -193,6 +212,8 @@ export function buildOptions(
       return optionsForFacebook(data);
     case "instagram":
       return optionsForInstagram(data);
+    case "pinterest":
+      return optionsForPinterest(data);
   }
 }
 

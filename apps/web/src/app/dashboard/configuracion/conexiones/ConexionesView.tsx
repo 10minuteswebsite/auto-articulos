@@ -110,6 +110,7 @@ export default function ConexionesView() {
             google_analytics: "google-analytics",
             instagram: "instagram",
             facebook: "facebook",
+            pinterest: "pinterest",
           };
           for (const connection of body.connections ?? []) {
             const id = composioIds[connection.app];
@@ -282,7 +283,7 @@ export default function ConexionesView() {
             </>
           )}
           {solo("linkedin") && puede("linkedin") && <LinkedInSection allowed={puede("linkedin")} />}
-          {solo("pinterest") && puede("pinterest") && <PinterestSection allowed={puede("pinterest")} />}
+          {solo("pinterest") && puede("pinterest") && <PinterestSection />}
           {solo("bluesky") && puede("bluesky") && <BlueskySection allowed={puede("bluesky")} />}
           {solo("tumblr") && puede("tumblr") && <TumblrSection allowed={puede("tumblr")} />}
           {solo("blogger") && puede("blogger") && <BloggerSection allowed={puede("blogger")} />}
