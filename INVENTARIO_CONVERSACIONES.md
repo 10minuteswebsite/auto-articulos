@@ -1810,3 +1810,37 @@ ahora mismo. Detalle de despliegue de cada una en `CONTROLADOR_DE_VERSIONES.md`.
 - `Capitanía — MCP: crear_titulos_con_ia — 2026-09-30`.
 - `Capitanía — MCP: copy neutro, capacidades dinámicas y Actualizaciones pendientes —
   2026-09-30`.
+
+### Addendum (agregado por la tarea programada diaria de propagación, 2026-10-01, sin editar la Parte A ni la Parte B anteriores)
+
+**Parte A:** sin cambios. Se verificó contra `git ls-remote`/`git merge-base --is-ancestor`
+que las cuatro ramas nuevas de esta ventana quedaron como punteros sueltos en `origin`
+tras fusionarse — ninguna es una reserva activa ahora mismo:
+`claude/mcp-proactivo-20260930`, `claude/mcp-prompts-workflows-20260930` y
+`claude/mcp-sin-jerga-20260930` son ancestros directos de `origin/main`;
+`codex/category-panel-autodetect-20260930` (PR #273) no es ancestro directo porque se
+fusionó por squash bajo el commit `6157e3d` (mismo contenido de archivos, confirmado
+contra `git show --stat`). Detalle de despliegue de cada una en
+`CONTROLADOR_DE_VERSIONES.md`.
+
+**Parte B — nombres de conversación nuevos encontrados en `COORDINACION_CLAUDE_CODEX.md`**
+(todas ya cerradas y fusionadas a `main`; detalle técnico completo en Coordinación y en
+`CONTROLADOR_DE_VERSIONES.md`, no se transcribe aquí para no duplicar):
+
+- `Capitanía — MCP: asistente proactivo + fix real de bug de panel — 2026-09-30`
+  (PR #269, más PR #270 de registro en Actualizaciones).
+- `Capitanía — MCP: prompts/list+get y descripciones estructuradas — 2026-09-30`
+  (PR #271).
+- `Capitanía — MCP: sin jerga técnica hacia el usuario — 2026-09-30` (PR #272).
+- `Recuperación segura de sincronización por panel/idioma — Codex — 2026-09-30`
+  (PR #273, ya registrada por Codex en `CONTROLADOR_DE_VERSIONES.md`).
+
+**Nota aparte (no destructiva, queda para que Milton decida si hace falta actuar):**
+los commits `b23b9af` (`fix(opportunities): prevent production analysis timeouts`,
+2026-09-30 10:17) y `7474bd7` (`fix: reset category sync progress between attempts`,
+2026-09-30 18:38) están fusionados en `origin/main` pero no tienen ninguna entrada
+correspondiente en `COORDINACION_CLAUDE_CODEX.md` ni en `CONTROLADOR_DE_VERSIONES.md` —
+no se puede verificar auditoría, estado de Vercel ni si fueron revisados, porque no hay
+registro de ese trabajo en ninguno de los documentos maestros. Esta tarea programada no
+inventa ese registro retroactivamente (no participó del trabajo original); solo señala
+el hueco.
