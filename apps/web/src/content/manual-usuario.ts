@@ -31,7 +31,7 @@ Ruta: /dashboard
 
 Inicio es tu centro de operaciones:
 - **Para cuentas nuevas (sin artículos aún):** Muestra de forma exclusiva el Asistente de Configuración Inicial, sin menú ni accesos directos, para que completes tu puesta a punto sin distracciones.
-- **Para cuentas con artículos publicados:** Muestra el panel de métricas de rendimiento (artículos publicados hoy, en el mes, límites y gráfico de actividad), el menú superior completo y cuatro accesos directos numerados (01-04): **Cómo funciona esta aplicación** (`/dashboard/como-funciona`), **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}** y **${MENU_NAMES.redes}**.
+- **Para cuentas con artículos publicados:** Muestra el panel de métricas de rendimiento (artículos publicados hoy, en el mes, límites y gráfico de actividad), el menú superior completo y cuatro accesos directos numerados (01-04): **Cómo funciona esta aplicación** (\`/dashboard/como-funciona\`), **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}** y **${MENU_NAMES.redes}**.
 - Desde el menú superior tienes acceso a: Cómo funciona esta aplicación, Publicaciones y Configuración. Historial está dentro de Publicaciones y Actualizaciones dentro de Configuración.
 
 ## Cada módulo se explica solo
@@ -134,7 +134,7 @@ corresponde, debe consultar el manual real de SEO TOTAL antes de responder.
 
 Entre las acciones disponibles están consultar categorías, idiomas,
 integraciones, límites y oportunidades; usar **Crear con la IA del sistema**
-(`crear_titulos_con_ia`) con las mismas preguntas guiadas y el mismo límite de
+(\`crear_titulos_con_ia\`) con las mismas preguntas guiadas y el mismo límite de
 3 solicitudes diarias de **${MENU_NAMES.propios}**; publicar solo después de
 mostrar lo que hará y recibir confirmación explícita; y consultar el estado de
 las publicaciones para obtener el enlace real del artículo cuando ya se haya
