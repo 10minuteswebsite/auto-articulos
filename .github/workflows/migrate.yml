@@ -56,6 +56,11 @@ on:
         description: "Opcional: sincronizar únicamente este correo para diagnóstico o reintento"
         required: false
         default: ""
+      omit_legacy_phones:
+        description: "No importar teléfonos históricos durante la migración (se completan desde Perfil)"
+        required: false
+        default: false
+        type: boolean
       force_sync:
         description: "Forzar sincronización de BD con schema (--accept-data-loss). USAR SOLO CUANDO SE SABE QUE ESTÁ CORRECTO"
         required: false
@@ -73,6 +78,7 @@ jobs:
       AUTO_ARTICULOS_HUB_CLIENT_ID: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_ID }}
       AUTO_ARTICULOS_HUB_CLIENT_SECRET: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_SECRET }}
       HUB_SYNC_EMAIL: ${{ inputs.sync_email }}
+      HUB_OMIT_LEGACY_PHONES: ${{ inputs.omit_legacy_phones }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

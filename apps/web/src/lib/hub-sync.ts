@@ -103,7 +103,7 @@ export async function syncUserToHub(userId: string): Promise<HubSyncResult | nul
       last_name: user.lastName,
       // Hub enforces E.164. Do not guess a country code while importing legacy
       // values; an invalid legacy number remains editable in the user's profile.
-      phone: normalizeHubPhone(user.phone),
+      phone: process.env.HUB_OMIT_LEGACY_PHONES === 'true' ? null : normalizeHubPhone(user.phone),
       role: user.role,
       product_access: user.trialUnlocked,
     }),
