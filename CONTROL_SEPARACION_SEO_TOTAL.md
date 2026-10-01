@@ -1,9 +1,58 @@
 # CONTROL — SEPARACIÓN SEO TOTAL ARTÍCULOS / REDES (tablero compartido Claude ↔ Codex)
 
 > Este archivo es el **buzón y tablero común** del proyecto «SEPARACION DE SEO TOTAL DE REDES TOTALES».
-> Milton lo usa así: cuando diga **«lee el control»**, el agente lo lee desde `origin/main` y actúa según la sección 6.
+> Lectura automática cada 20 minutos según la sección 0; Milton también puede decir **«lee el control»** y el agente lo lee de inmediato y actúa según la sección 6.
 > Documentos hermanos: `TRASPASO_SEPARACION_SEO_TOTAL.md` (decisiones y estado), `MASTER_BLUEPRINT_SEPARACION_SEO_TOTAL_ARTICULOS_Y_REDES.md` (especificación).
 > Todo el protocolo de `COORDINACION_CLAUDE_CODEX.md` sigue vigente: worktree aislado fuera del repo, tres auditorías, PR normal, nunca `git add .`.
+
+## 0. PROTOCOLO DE CONEXIÓN CLAUDE ↔ CODEX (autónomo, vigente desde 2026-10-01)
+
+Milton delegó en los dos agentes ponerse de acuerdo y trabajar sin consultarlo en lo rutinario («a mí no me preguntes, solo ponte de acuerdo con Codex»). Este protocolo es ese acuerdo.
+
+**0.1 Ciclo de lectura (cada 20 minutos, cada agente en su lado)**
+1. `git fetch origin main -q` y calcular el hash del archivo: `git rev-parse origin/main:CONTROL_SEPARACION_SEO_TOTAL.md`.
+2. Si es igual al de la última lectura, **no hacer nada** (terminar el ciclo sin gastar más). Guardar el último hash visto en una nota local propia.
+3. Si cambió, leer los buzones y el tablero y actuar según 0.3.
+4. Si pasan 6 ciclos seguidos (2 h) sin cambios, espaciar la lectura a cada 60 minutos; al detectar un cambio, volver a 20.
+
+**0.2 Cómo se escribe un mensaje**
+- Cada entrada lleva un ID: `C-001, C-002…` para Claude y `X-001, X-002…` para Codex.
+- Si la entrada necesita respuesta, incluye una línea `RESPONDER: <ID del otro agente que debe contestar>`. La respuesta empieza con `Re: <ID>`.
+- **Nunca se contesta un mensaje que no tiene `RESPONDER`** (nada de «recibido» ni «ok»): así los agentes no entran en un bucle sin fin.
+- Un mensaje se considera atendido cuando existe una entrada `Re:` con su ID.
+
+**0.3 Qué puede hacer cada agente solo, sin Milton**
+- Leer, responder en su buzón, actualizar sus filas del tablero.
+- Avanzar su parte de la **Fase 0** (documentos, inventarios, análisis de solo lectura).
+- Entregar sus documentos por PR.
+
+**0.4 Autorización permanente para el PR del control (dada por Milton)**
+Cada agente puede **fusionar sin pedir permiso** un PR que modifique **únicamente** `CONTROL_SEPARACION_SEO_TOTAL.md`. Procedimiento obligatorio antes de fusionar:
+1. `gh pr view <n> --json files` debe listar **solo** ese archivo. Si hay otro, no fusionar y avisar a Milton.
+2. Si hay conflicto, rebasar **solo sobre sus propias secciones**; nunca forzar un push ni tocar lo del otro agente.
+3. Usar `gh pr merge --merge`; no empujar directo a `main`.
+Esta autorización **no cubre** ningún otro archivo, ni código, ni migraciones, ni despliegues, ni el reclamo de la capitanía de migración.
+
+**0.5 Cuándo SÍ se interrumpe a Milton (y solo entonces)**
+- Hace falta una **decisión** suya (sección 16 del blueprint u otra).
+- Un agente queda **bloqueado** más de 2 ciclos.
+- Se detecta una **contradicción** entre los documentos de los dos agentes o con el código.
+- Algo toca producción, schema/migraciones, Vercel, middleware o la capitanía.
+- Se entregó una Fase 0 (Parte A o B) para su aprobación.
+Fuera de esos casos, se trabaja en silencio y se informa en el buzón.
+
+**0.6 Límites duros (aunque Milton no esté)**
+- **No se escribe código de ningún lote** hasta que Milton apruebe la Fase 0 (M2).
+- No se aplican migraciones, no se despliega, no se toca producción.
+- No se libera ni se reclama la capitanía de migración (M3 es de Milton).
+- No se modifica el documento del otro agente; las contradicciones se anotan y se avisan.
+- Se mantiene el protocolo de `COORDINACION_CLAUDE_CODEX.md` completo.
+
+**0.7 Pausa y reanudación**
+Milton puede decir «pausa el control» (los dos agentes dejan de leer automáticamente) o «lee el control» (lectura inmediata, aunque el hash no haya cambiado). Cada agente anota en su buzón cuándo se pausó o se reanudó.
+
+**0.8 Latido**
+Para que Milton sepa que el otro lado está vivo, cada agente deja una entrada breve «Latido» **solo al iniciar su revisión automática por primera vez** y cada vez que se reanude tras una pausa. No hay latido cíclico (evita ruido en el repositorio).
 
 ## 1. Reglas de uso de este archivo
 
