@@ -1,7 +1,7 @@
 # FASE 0 — PARTE A (Claude): producto, datos, interfaz
 
 Proyecto: SEPARACION DE SEO TOTAL DE REDES TOTALES · Autor: Claude (control de proyecto) · Fecha: 2026-10-01
-Estado: **BORRADOR PARA REVISIÓN CRUZADA (Codex) Y APROBACIÓN DE MILTON. No hay código.**
+Estado: **v0.2 — BORRADOR PARA REVISIÓN CRUZADA (Codex) Y APROBACIÓN DE MILTON. No hay código.**
 Documentos hermanos: `MASTER_BLUEPRINT_SEPARACION_SEO_TOTAL_ARTICULOS_Y_REDES.md`, `CONTROL_SEPARACION_SEO_TOTAL.md`, `TRASPASO_SEPARACION_SEO_TOTAL.md`.
 
 > Convención: **[VERIFICADO]** = lo comprobé yo en el código el 2026-10-01 (archivo citado). **[POR CONFIRMAR]** = hipótesis a verificar antes del Lote correspondiente.
@@ -41,7 +41,11 @@ Documentos hermanos: `MASTER_BLUEPRINT_SEPARACION_SEO_TOTAL_ARTICULOS_Y_REDES.md
 | Las conexiones están atadas a `userId` (`SearchIntegration`, `InstagramIntegration`, `TumblrIntegration`…) | `schema.prisma` ~286–486 **[VERIFICADO]** |
 | `configuracion/page.tsx` es un índice de 6 tarjetas: Inicial, Cuenta, Contenido, Conexiones, App Móvil, Asistentes IA | `configuracion/page.tsx` 14–51 **[VERIFICADO]** |
 | Los nombres de menú viven en un único archivo `menu-names.ts`; **regla del archivo: no escribir nombres a mano en textos nuevos** | `lib/menu-names.ts` **[VERIFICADO]** |
-| Contenido interno de `historial`, `estadisticas`, `publicaciones-en-curso`, `cuenta`, `contenido`, `conexiones`, `composio` y el servidor MCP (`api/mcp`) | **[POR CONFIRMAR]** (se verifica al abrir cada pantalla en el Lote 2) |
+| **Historial** y **Progreso (publicaciones-en-curso)** son pantallas que **mezclan los dos productos**: consultan `/api/runs` (artículos) y `/api/social-opportunities` (redes) en la misma página | `historial/page.tsx` líneas 143, 660, 745; `publicaciones-en-curso/page.tsx` 77–78 **[VERIFICADO v0.2]** |
+| **Estadísticas** (`PerformanceDashboard`) se alimenta de `/api/dashboard-stats`, que cuenta solo `Title` y `OpportunityGroup` (artículos): **no incluye redes** | `dashboard-stats/route.ts` 38–78 **[VERIFICADO v0.2]** |
+| `ConexionesView` **ya está dividida en dos vistas**: `analiticas` (Google Search Console, Google Analytics, Bing) y `difusion` (Instagram, Facebook, Threads, LinkedIn, Pinterest, Tumblr, Bluesky, DEV.to, Blogger, Google Business Profile): 13 integraciones | `ConexionesView.tsx` 26–27, 151–163 **[VERIFICADO v0.2]** |
+| El servidor MCP expone 12 herramientas: de **cuenta común** (`ver_resumen_cuenta`, `ver_estado_configuracion`, `ver_integraciones`, `listar_categorias`, `listar_idiomas`, `ver_limites_y_creditos`) y de **Artículos** (`listar_oportunidades`, `crear_oportunidades`, `publicar_oportunidades_seleccionadas`, `publicar_titulos_en_categoria`, `publicar_categoria`, `estado_de_publicaciones`); **ninguna es de Redes** | `lib/mcp/tools/*.ts` **[VERIFICADO v0.2]** |
+| Contenido interno de `cuenta`, `contenido`, `redes-sociales`, `indexacion` y `composio` | **[POR CONFIRMAR]** (se verifica al abrir cada pantalla en el Lote 2) |
 
 ---
 
@@ -182,7 +186,8 @@ Cada módulo recibe un campo `product` en `SYSTEM_MODULES`:
 |---|---|
 | `publicar`, `oportunidades` | ARTICULOS |
 | `oportunidades-redes` | REDES |
-| `publicaciones-en-curso`, `historial`, `estadisticas` | **dividir por producto** [POR CONFIRMAR qué datos muestran hoy] |
+| `estadisticas` | ARTICULOS (hoy solo cuenta artículos; Redes necesitará sus propias estadísticas, fuera de este proyecto) |
+| `historial`, `publicaciones-en-curso` | **MIXTOS hoy**: se muestran por producto con un **filtro/vista por producto sobre la misma página** (cada producto ve solo su mitad); no se parten en páginas nuevas en el Lote 2 |
 | `configuracion` (y subpáginas) | ver sección 6 |
 | `conexion-composio` | COMPARTIDO (capa de conexiones) |
 | `como-funciona`, `actualizaciones` | COMPARTIDO (después, guías por producto) |
@@ -206,8 +211,8 @@ Función `productOfPath(pathname)` (en `lib/modules.ts`): devuelve `ARTICULOS | 
 |---|---|---|
 | **Servidor de página** | `app/dashboard/layout.tsx` (ya es de servidor y ya llama a `getSessionContext`) | Calcula el producto de la ruta, llama a `hasProductAccess` y, si no hay acceso, pinta la pantalla de «acceso no disponible». |
 | **API** | helper `requireProductAccess(product)` para cada ruta de `opportunities*`, `runs*`, `titles*`, `title-generation`, `categories*`, `sitemap/*`, `bing/master-index`, `pre-validation` (ARTICULOS) y para `social-opportunities*` e integraciones de red (REDES, sustituyendo el interior de `canUseSocialModule`) | Responde 403 con el motivo. En `shadow` solo registra. |
-| **Worker** | arranque de cada trabajo de publicación de artículos y de redes | Consulta el derecho antes de **iniciar** el trabajo; los trabajos ya en curso no se cortan (decisión D6). Detalle de integración: Parte B / Lote 3. |
-| **MCP** | `api/mcp` (Alexa, Claude) | Cada herramienta declara su producto y pasa por el mismo helper [POR CONFIRMAR el catálogo de herramientas]. |
+| **Worker** | cada trabajo de publicación de artículos y de redes | Comprueba el derecho **justo antes de ejecutar cada publicación/destino** (no solo al encolar). Si se revoca a mitad de un lote: **no inicia nuevos destinos**, registra el motivo y deja el estado visible y reintentable; **no borra** lo ya creado (propuesta de Codex, X-002; compatible con D6). Detalle: Parte B / Lote 3. |
+| **MCP** | `api/mcp` (Alexa, Claude) | Las 6 herramientas de oportunidades/publicación declaran `ARTICULOS` y pasan por el mismo helper; las 6 de cuenta quedan comunes. Hoy el MCP no tiene herramientas de Redes. |
 
 `ModuleGuard` (cliente) y el menú siguen existiendo, solo como **experiencia de usuario**; la barrera de verdad es el servidor.
 
@@ -266,7 +271,7 @@ Reglas de nombre: se añade `PRODUCT_NAMES` a `lib/menu-names.ts` (fuente única
 | `inicial` (asistente de 4 pasos) | ARTICULOS | Se queda en Artículos. **Ver D1 (usuario solo-Redes).** | pasos verificados en `dashboard/page.tsx` |
 | `cuenta` (credenciales de publicación, categorías, idioma) | Mixta | Credenciales y categorías → ARTICULOS; idioma → compartido; contraseña/perfil → «Mi cuenta» | **[POR CONFIRMAR]** el contenido interno |
 | `contenido` (firma, estilo, teléfono, fotos para redes) | Mixta | Firma, estilo, teléfono → ARTICULOS; fotos para redes → REDES | **[POR CONFIRMAR]** |
-| `conexiones` | COMPARTIDA | Una sola capa; cada producto filtra con el mapa de 6.2 | `ConexionesView.tsx` **[POR CONFIRMAR]** |
+| `conexiones` | COMPARTIDA | Una sola capa; **Artículos muestra la vista `analiticas`, Redes la vista `difusion`**, y Search Console aparece conectada en ambas (6.2) | `ConexionesView.tsx` **[VERIFICADO v0.2]**: ya viene dividida |
 | `redes-sociales` | REDES | Sin cambios de contenido | **[POR CONFIRMAR]** |
 | `indexacion` | ARTICULOS | Sin cambios de contenido | **[POR CONFIRMAR]** |
 | `movil` | Común | Pasa a «Mi cuenta» | índice verificado |
@@ -283,6 +288,8 @@ Reglas de nombre: se añade `PRODUCT_NAMES` a `lib/menu-names.ts` (fuente única
 | Google Business Profile | REDES | es una red (`allowGoogleBusinessPublishing`) |
 | Instagram, Facebook, Threads, LinkedIn, X, Pinterest, Tumblr, Bluesky, Mastodon, DEV.to, Blogger | REDES | |
 | Composio (conexión) | COMPARTIDA | su estado ya se lee de `/api/composio/status` |
+
+Los callbacks de conexión seguirán **por host de origen** (revisión cruzada de la Parte B, C-008): la cookie de `state` y la sesión son por host, así que conectar y volver ocurre en el mismo host. Esto no cambia el modelo de datos de conexiones.
 
 Regla: **se muestra el estado real de la cuenta**, nunca una copia por producto. Conectar desde cualquier producto escribe en la misma fila (`SearchIntegration` y equivalentes por `userId`).
 
@@ -307,7 +314,7 @@ Criterio: **ningún usuario nota diferencia**; las 47 pruebas web existentes sig
 3. `DashboardNav`: selector de producto y menús por producto (el menú sigue siendo experiencia de usuario).
 4. Inicio selector + `/dashboard/articulos` y `/dashboard/redes`.
 5. Reparto de Configuración (tabla 6.1) y capa de conexiones (6.2) en `ConexionesView`.
-6. Historial / Estadísticas / Progreso por producto (tras verificar qué datos mezclan hoy).
+6. Historial y Progreso: vista filtrada por producto sobre la misma página (hoy mezclan `/api/runs` y `/api/social-opportunities`); Estadísticas: solo Artículos.
 7. «Mi cuenta» como entrada común.
 8. Redirecciones o alias para que **ninguna ruta actual** deje de funcionar; manual actualizado.
 Criterio: un cliente con un solo producto no ve rastro del otro dentro de su producto; los enlaces guardados siguen funcionando.
@@ -378,3 +385,4 @@ Criterio: un cliente con un solo producto no ve rastro del otro dentro de su pro
 ## 13. Bitácora de este documento
 
 - 2026-10-01 · Claude · v0.1 borrador completo, basado en lectura directa de: `DashboardNav.tsx`, `ModuleGuard.tsx`, `modules.ts`, `menu-names.ts`, `configuracion/page.tsx`, `dashboard/page.tsx`, `api/me/route.ts`, `middleware.ts`, listado de rutas de API y `schema.prisma`. Pendiente: revisión cruzada de Codex y verificación de los puntos **[POR CONFIRMAR]** antes de entregar a Milton.
+- 2026-10-01 · Claude · v0.2: verificados Historial/Progreso (mezclan ambos productos), Estadísticas (solo artículos), Conexiones (ya dividida en analíticas/difusión) y herramientas MCP (ninguna de Redes); incorporada la regla del worker de Codex (X-002) y la nota de callbacks por host (C-008). Pendiente: revisión cruzada de Codex y los [POR CONFIRMAR] restantes (`cuenta`, `contenido`, `redes-sociales`, `indexacion`, `composio`).
