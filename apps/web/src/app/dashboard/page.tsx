@@ -56,7 +56,6 @@ export default function InicioPage() {
   // siguiente visita, ya completada, entra directo al panel de métricas.
   const everIncompleteRef = useRef(false);
   const [showWizard, setShowWizard] = useState<boolean | null>(null);
-  const [socialPublishingApproved, setSocialPublishingApproved] = useState(false);
   const [configurationAlerts, setConfigurationAlerts] = useState<ConfigurationAlert[]>([]);
 
   const checkWizardStatus = useCallback(async () => {
@@ -87,7 +86,6 @@ export default function InicioPage() {
         (googleData.connected && googleData.siteUrl) ||
           (searchConsoleConnection?.status === "ACTIVE" && searchConsoleConnection.selection),
       );
-      setSocialPublishingApproved(Boolean(meData?.socialPublishingApproved));
       // Solo para el localhost de desarrollo: permite revisar la interfaz
       // posterior al wizard sin fingir una conexión OAuth real de Google.
       const complete = process.env.NEXT_PUBLIC_LOCAL_DEMO === "true"
@@ -204,7 +202,10 @@ export default function InicioPage() {
         <div style={{ marginTop: 20, marginBottom: 20 }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>Acciones posibles</h2>
           <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16 }}>
-          {QUICK_LINKS.filter((link) => socialPublishingApproved || link.href !== "/dashboard/oportunidades-redes").map((l, i) => (
+          {/* Pedido explícito de Milton (1/10/2026): el botón de Redes se muestra
+             siempre, como los demás; si no está activo, el clic lleva a la
+             pantalla de bloqueo (ModuleGuard) en vez de ocultarse. */}
+          {QUICK_LINKS.map((l, i) => (
             (() => {
               return (
                 <Link key={l.href} className="inicio-action-card" href={l.href} style={{ display: "flex", minHeight: 176, padding: 22, flexDirection: "column", justifyContent: "space-between", textDecoration: "none", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}>
