@@ -218,6 +218,7 @@ model User {
   oauthAccessTokens          OAuthAccessToken[]
   oauthRefreshTokens         OAuthRefreshToken[]
   mcpApiToken                McpApiToken?
+  mcpPublishConfirmations    McpPublishConfirmation[]
   trialDomainRegistries      TrialDomainRegistry[]
   titleGenerationRequests    TitleGenerationRequest[]
 }
@@ -551,6 +552,27 @@ model McpApiToken {
   revokedAt  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Comprobante de una vista previa MCP. La publicación no puede ejecutarse
+// solo porque un cliente envíe confirmar=true: debe presentar el comprobante
+// que se generó para la misma cuenta, herramienta y operación exacta.
+// Solo se guarda el hash del comprobante; el valor real vive únicamente en
+// la respuesta de la vista previa y vence rápidamente.
+model McpPublishConfirmation {
+  id            String    @id @default(cuid())
+  userId        String
+  tokenHash     String    @unique
+  toolName      String
+  operationHash String
+  expiresAt     DateTime
+  consumedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([userId, toolName, operationHash])
 }
 
 // CREACION DE PUBLICACIONES PROPIAS — una fila por solicitud de títulos con la

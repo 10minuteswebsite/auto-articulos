@@ -327,7 +327,18 @@ Conecta cualquier asistente de inteligencia artificial (Claude, ChatGPT, Meta MU
 3. Copia también el bloque de **Prompt para tu asistente** con el botón **Copiar prompt**, y pégalo como instrucciones (o primer mensaje) de tu asistente de IA. Ese texto ya incluye la dirección del servidor, el token, la lista de herramientas disponibles y las reglas de seguridad: nunca publica nada sin mostrarte antes qué va a hacer y pedirte confirmación explícita.
 4. Pulsa **Revocar** si quieres desconectar todos los asistentes sin generar uno nuevo.
 
-Entre lo que puede hacer un asistente conectado: consultar oportunidades, categorías, idiomas, integraciones y límites; usar "Crear con la IA del sistema" (las mismas preguntas guiadas de Publicar) para proponer títulos nuevos; publicar oportunidades o títulos con tu confirmación explícita; y, al consultar el estado de tus publicaciones, darte el enlace real de cada artículo ya publicado.
+La protección de publicación no depende solo de las instrucciones del asistente:
+cada vista previa genera un comprobante temporal, ligado a tu cuenta y a la
+operación exacta. Para publicar, el asistente debe presentar ese comprobante;
+vence a los 10 minutos y solo puede usarse una vez. Las acciones de borrar,
+cancelar o reintentar siguen el mismo patrón.
+
+Entre lo que puede hacer un asistente conectado: consultar oportunidades,
+categorías, idiomas, integraciones, límites, historial, detalles de
+publicaciones, preferencias, indexación y propuestas sociales; usar "Crear con
+la IA del sistema" para proponer títulos nuevos; publicar, descartar,
+cancelar, reintentar y publicar propuestas sociales con tu confirmación
+explícita; y darte el enlace real de cada artículo ya publicado.
 
 Desde que conectas tu token, el asistente abre la conversación ofreciéndote directamente el mismo menú numerado de opciones que ves en Inicio, en vez de empezar con una pregunta abierta. Además, siempre te explica las cosas en lenguaje cotidiano: nunca te va a hablar de nombres técnicos de herramientas, tokens, APIs ni del estado interno de su conexión — si algo le falta a tu cuenta, te dice qué botón tocar en la web. Si no sabe cómo guiarte en algo puntual, consulta el manual real de la plataforma (el mismo que usa este bot de ayuda) antes de inventar una respuesta.
 

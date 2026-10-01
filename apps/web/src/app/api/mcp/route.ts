@@ -161,5 +161,8 @@ async function manejar(mensaje: JsonRpcRequest, scopes: string[]) {
  * explícitamente, que es la respuesta prevista por la spec para ese caso.
  */
 export async function GET() {
-  return new NextResponse("Este servidor MCP no ofrece stream SSE.", { status: 405 });
+  return new NextResponse("Este servidor MCP no ofrece stream SSE.", {
+    status: 405,
+    headers: { Allow: "POST", "Cache-Control": "no-store" },
+  });
 }

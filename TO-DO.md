@@ -268,16 +268,11 @@ HANDOFF, solo alimenta ideas hacia él).
   a toda la cadena de fixes de categoría de esa fecha. Señalado como fuera
   de alcance de esa auditoría; sin fecha límite ni responsable asignado
   todavía.
-- **(30/9/2026, origen: tarea programada diaria de propagación, al revisar
-  `COORDINACION_CLAUDE_CODEX.md` → "Capitanía — MCP: URL del artículo en
-  estado_de_publicaciones (2026-09-29)")** Meta MUSE (probando el MCP)
-  pidió también una tool `eliminar_oportunidades`, no implementada a
-  propósito: quedó bloqueada por el clasificador de modo automático de esa
-  sesión (categoría "Irreversible Deletion") en dos intentos previos, sin
-  reintentarse por otra vía. Pendiente si Milton decide ajustar los
-  permisos de la sesión para esa tool.
-
 ## Hecho
+
+- **(1/10/2026)** MCP: se agregó `eliminar_oportunidades` con vista previa y
+  comprobante server-side de un solo uso; también se incorporó el flujo
+  completo de envío manual de sitemaps a Google y Bing con confirmación.
 
 - **(8/9/2026, origen: conversación `CODEX - AUDITORIA A ALGORITMO DE
   PUBLICACIÓN DE ARTICULOS`)** Espacio en Configuración para región exacta.

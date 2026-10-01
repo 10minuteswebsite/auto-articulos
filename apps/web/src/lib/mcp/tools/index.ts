@@ -2,6 +2,11 @@ import { OPPORTUNITY_TOOLS } from "./opportunities";
 import { ACCOUNT_TOOLS } from "./account";
 import { CONTENT_GENERATION_TOOLS } from "./content-generation";
 import { GUIDANCE_TOOLS } from "./guidance";
+import { HISTORY_TOOLS } from "./history";
+import { PREFERENCE_TOOLS } from "./preferences";
+import { SOCIAL_TOOLS } from "./social";
+import { ACTION_TOOLS } from "./actions";
+import { INDEXING_TOOLS } from "./indexing";
 import type { ToolDef } from "./shared";
 
 /**
@@ -14,7 +19,12 @@ import type { ToolDef } from "./shared";
  * sumarlo acá abajo. Ni `app/api/mcp/route.ts` ni `middleware.ts` cambian
  * nunca por esto.
  */
-export const TOOLS: ToolDef[] = [...OPPORTUNITY_TOOLS, ...ACCOUNT_TOOLS, ...CONTENT_GENERATION_TOOLS, ...GUIDANCE_TOOLS];
+export const TOOLS: ToolDef[] = [...OPPORTUNITY_TOOLS, ...ACCOUNT_TOOLS, ...CONTENT_GENERATION_TOOLS, ...GUIDANCE_TOOLS, ...HISTORY_TOOLS, ...PREFERENCE_TOOLS, ...SOCIAL_TOOLS, ...ACTION_TOOLS, ...INDEXING_TOOLS];
+
+const duplicateNames = TOOLS.map((tool) => tool.name).filter((name, index, all) => all.indexOf(name) !== index);
+if (duplicateNames.length > 0) {
+  throw new Error(`Catálogo MCP inválido: tools duplicadas (${Array.from(new Set(duplicateNames)).join(", ")}).`);
+}
 
 export function findTool(name: string, scopes: string[]) {
   return TOOLS.find((tool) => tool.name === name && scopes.includes(tool.requiredScope));

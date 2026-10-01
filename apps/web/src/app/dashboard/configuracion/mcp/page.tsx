@@ -274,6 +274,11 @@ export default function ConfiguracionMcpPage() {
               Pega este texto completo como instrucciones (o primer mensaje) de tu
               asistente de IA para que sepa cómo conectarse y qué reglas seguir.
             </IntroP>
+            <p style={{ color: "#8a1c1c", fontSize: 13, lineHeight: 1.5, margin: "0 0 12px" }}>
+              Seguridad: este texto contiene tu token. Pégalo solo en la configuración
+              privada del asistente; no lo publiques ni lo envíes a una conversación
+              compartida. Si crees que alguien lo vio, revócalo y genera uno nuevo.
+            </p>
             <pre
               style={{
                 whiteSpace: "pre-wrap",
