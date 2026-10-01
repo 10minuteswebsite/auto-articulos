@@ -27,6 +27,11 @@ function isGroup(entry: NavEntry): entry is TabGroup {
   return "group" in entry;
 }
 
+/** Ruta de un enlace sin su query (los enlaces de producto llevan `?producto=`). */
+function hrefPath(href: string): string {
+  return href.split("?")[0];
+}
+
 // Orden del menú definido por Milton (18/8/2026). Todo lo que tiene que ver
 // con publicar e historial vive dentro de PUBLICACIONES para que la barra
 // principal quede corta. Actualizaciones vive dentro de CONFIGURACIÓN.
@@ -71,6 +76,9 @@ const BASE_ENTRIES: NavEntry[] = [
 // dos productos en la misma página (se filtrarán por producto más adelante).
 // La entrada de Redes se muestra siempre (pedido de Milton, 1/10/2026): sin
 // permiso, ModuleGuard bloquea la pantalla con un mensaje claro.
+// CONTRATO con Historial y Progreso: los enlaces llevan `?producto=articulos|redes`
+// para que esas pantallas muestren solo su mitad. Mientras no lo implementen, lo
+// ignoran y siguen mostrando todo, como hoy (ver CONTROL, C-016, punto 4b).
 const PRODUCT_ENTRIES: NavEntry[] = [
   { href: "/dashboard", label: "Inicio" },
   {
@@ -80,8 +88,8 @@ const PRODUCT_ENTRIES: NavEntry[] = [
       { href: "/dashboard/articulos", label: "Inicio de Artículos" },
       { id: "publicar", href: "/dashboard/publicar", label: MENU_NAMES.propios },
       { id: "oportunidades", href: "/dashboard/oportunidades", label: MENU_NAMES.ia },
-      { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso", label: "Progreso de las publicaciones" },
-      { id: "historial", href: "/dashboard/historial", label: "Historial" },
+      { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso?producto=articulos", label: "Progreso de las publicaciones" },
+      { id: "historial", href: "/dashboard/historial?producto=articulos", label: "Historial" },
       { id: "estadisticas", href: "/dashboard/estadisticas", label: "Estadísticas" },
     ],
   },
@@ -91,8 +99,8 @@ const PRODUCT_ENTRIES: NavEntry[] = [
     items: [
       { href: "/dashboard/redes", label: "Inicio de Redes" },
       { id: "oportunidades-redes", href: "/dashboard/oportunidades-redes", label: MENU_NAMES.redes },
-      { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso", label: "Progreso de las publicaciones" },
-      { id: "historial", href: "/dashboard/historial", label: "Historial" },
+      { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso?producto=redes", label: "Progreso de las publicaciones" },
+      { id: "historial", href: "/dashboard/historial?producto=redes", label: "Historial" },
     ],
   },
   BASE_ENTRIES[2],
@@ -271,10 +279,10 @@ export default function DashboardNav() {
     (preferredGroup
       ? entries.find(
           (entry) =>
-            isGroup(entry) && entry.group === preferredGroup && entry.items.some((item) => item.href === pathname),
+            isGroup(entry) && entry.group === preferredGroup && entry.items.some((item) => hrefPath(item.href) === pathname),
         )
       : undefined) ??
-    entries.find((entry) => isGroup(entry) && entry.items.some((item) => item.href === pathname));
+    entries.find((entry) => isGroup(entry) && entry.items.some((item) => hrefPath(item.href) === pathname));
 
   function hiddenGlobally(tab: TabItem): boolean {
     return isAdmin && Boolean(tab.id && globalDisabledModules.includes(tab.id));
@@ -411,7 +419,7 @@ export default function DashboardNav() {
                     <MobileLink
                       key={tab.href}
                       tab={tab}
-                      active={pathname === tab.href}
+                      active={pathname === hrefPath(tab.href)}
                       hidden={hiddenGlobally(tab)}
                       onNavigate={() => setOpen(false)}
                       indented
@@ -425,7 +433,7 @@ export default function DashboardNav() {
               <MobileLink
                 key={entry.href}
                 tab={entry}
-                active={pathname === entry.href}
+                active={pathname === hrefPath(entry.href)}
                 hidden={hiddenGlobally(entry)}
                 onNavigate={() => setOpen(false)}
               />
@@ -509,7 +517,7 @@ export default function DashboardNav() {
                     }}
                   >
                     {entry.items.map((tab) => {
-                      const active = pathname === tab.href;
+                      const active = pathname === hrefPath(tab.href);
                       return (
                         <Link
                           key={tab.href}
@@ -549,7 +557,7 @@ export default function DashboardNav() {
             );
           }
 
-          const active = pathname === entry.href;
+          const active = pathname === hrefPath(entry.href);
           return (
             <Link
               key={entry.href}
