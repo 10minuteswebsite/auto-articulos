@@ -27,6 +27,11 @@ export const PRODUCTS = ["ARTICULOS", "REDES"] as const;
 export type ProductKey = (typeof PRODUCTS)[number];
 
 export type EntitlementStatusKey = "ACTIVE" | "GRACE" | "INACTIVE";
+export type EnforcementMode = "off" | "shadow" | "enforce";
+
+export function parseEnforcementMode(raw: unknown): EnforcementMode {
+  return raw === "shadow" || raw === "enforce" ? raw : "off";
+}
 
 export type AccessReason =
   | "ADMIN"

@@ -3,6 +3,7 @@ import {
   decryptSecret,
   evaluateProductAccess,
   hasLegacySocialModuleAccess,
+  parseEnforcementMode,
   type EnforcementMode,
   type ProductKey,
 } from "@auto-articulos/shared";
@@ -18,7 +19,7 @@ async function getMode(): Promise<EnforcementMode> {
     if (!setting?.encryptedValue) return "off";
     let value = setting.encryptedValue;
     try { value = decryptSecret(value); } catch { /* valores antiguos podían estar sin cifrar */ }
-    return value === "shadow" || value === "enforce" ? value : "off";
+    return parseEnforcementMode(value);
   } catch (error) {
     console.error("[worker/product-access] No se pudo leer el interruptor; se usa off:", error);
     return "off";

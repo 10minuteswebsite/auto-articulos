@@ -1,4 +1,5 @@
 import { prisma } from "@auto-articulos/db";
+import { hasLegacySocialModuleAccess } from "@auto-articulos/shared";
 import { parseUserModuleOverrides } from "./modules";
 
 /** Id del módulo en SYSTEM_MODULES (ver modules.ts); DashboardNav/ModuleGuard lo tratan aparte. */
@@ -50,11 +51,11 @@ export type SocialModuleAccessUser = {
  * ya lo tenía.
  */
 export function hasSocialModuleAccess(user: SocialModuleAccessUser): boolean {
-  if (user.role === "admin") return true;
-  const override = parseUserModuleOverrides(user.disabledModules)[SOCIAL_MODULE_ID];
-  if (override === "enabled") return true;
-  if (override === "disabled") return false;
-  return hasSocialPublishingApproval(user);
+  return hasLegacySocialModuleAccess({
+    role: user.role,
+    disabledModules: user.disabledModules,
+    approvals: SOCIAL_PUBLISHING_PERMISSION_KEYS.map((key) => user[key]),
+  });
 }
 
 export type SocialPublishNetwork = "instagram" | "linkedin" | "threads" | "facebook" | "pinterest" | "tumblr" | "bluesky" | "devto" | "blogger";
