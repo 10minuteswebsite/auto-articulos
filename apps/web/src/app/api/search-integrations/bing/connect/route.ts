@@ -2,9 +2,20 @@ import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
 import { BING_SCOPE, BING_STATE_COOKIE, bingOAuthConfig } from "@/lib/bing-oauth";
-import { getOAuthRedirectUri } from "@/lib/oauth-redirect";
+import { getAllowedOAuthOrigin, getOAuthRedirectUri } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
+  // Bing solo acepta el callback canónico cuando la petición llega desde un
+  // host que no está en nuestra lista blanca; en ese caso llevamos primero la
+  // sesión al host registrado para conservar cookie, state y sesión.
+  if (!getAllowedOAuthOrigin(request)) {
+    try {
+      const canonical = new URL(bingOAuthConfig().redirectUri);
+      return NextResponse.redirect(new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", canonical.origin));
+    } catch {
+      // Sin configuración válida, el bloque principal devolverá el error habitual.
+    }
+  }
   await getCurrentUserId();
   try {
     const config = bingOAuthConfig();

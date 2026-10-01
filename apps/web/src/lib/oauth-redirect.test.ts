@@ -21,3 +21,24 @@ test("mantiene el URI configurado fuera de la lista blanca", () => {
     "https://seototal.lasolucionweb.com/api/search-integrations/google/callback",
   );
 });
+
+test("rechaza puertos, sufijos y prefijos maliciosos", () => {
+  for (const host of [
+    "seototal.lasolucionweb.com:8443",
+    "seototal.lasolucionweb.com.evil.com",
+    "evilseototal.lasolucionweb.com",
+  ]) {
+    assert.equal(getAllowedOAuthOrigin(new NextRequest(`https://${host}/dashboard`)), null);
+  }
+});
+
+test("normaliza mayúsculas, pero no acepta comodines literales ni host vacío", () => {
+  assert.equal(
+    getAllowedOAuthOrigin(new NextRequest("https://SEOTOTAL.ARTICULOS.LASOLUCIONWEB.COM/dashboard")),
+    "https://seototal.articulos.lasolucionweb.com",
+  );
+  process.env.SEO_TOTAL_OAUTH_ALLOWED_HOSTS = "*.lasolucionweb.com";
+  assert.equal(getAllowedOAuthOrigin(new NextRequest("https://foo.lasolucionweb.com/dashboard")), null);
+  assert.equal(getAllowedOAuthOrigin(new NextRequest("https:///dashboard")), null);
+  delete process.env.SEO_TOTAL_OAUTH_ALLOWED_HOSTS;
+});
