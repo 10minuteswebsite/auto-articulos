@@ -3933,3 +3933,12 @@ merge productivo pendiente de checks tras actualizar contra `main`.
 - **Auditorías reportadas:** `npx tsc --noEmit` limpio, build de producción completo sin errores (worktree aislado `/private/tmp/mcp-sin-jerga-20260930`). Cambio de solo texto en 2 archivos. Sin migración, sin cambios de schema.
 - **Manual del bot de ayuda:** `apps/web/src/content/manual-usuario.ts`, sección "Asistentes IA", actualizado por esta misma tarea programada de propagación (2026-10-01) para reflejar que el asistente explica todo en lenguaje cotidiano.
 - **Estado:** FUSIONADO A `main`. Coordinación no registra confirmación explícita de despliegue en Vercel Production para este lote.
+
+## PINTEREST POR COMPOSIO — 2026-10-01 — EN PRODUCCIÓN
+
+- **PR:** [#276](https://github.com/miltondavila-ux/auto-articulos/pull/276), fusionado a `main` (`47673ff4`). Sin migración de base de datos.
+- **Qué hace:** migra Pinterest a Composio, mismo patrón visual y de piloto que Facebook/Instagram. Tableros vía `PINTEREST_LIST_BOARDS`, publicación de Pins vía `PINTEREST_CREATE_PIN` (adaptador `composioPinterestPin`), fallback a la integración propia para usuarios fuera del piloto.
+- **Piloto:** `COMPOSIO_PILOT_USERS_PINTEREST=lorenalvarez30@gmail.com` (variable de repo, en los 3 workflows del worker).
+- **Verificado en producción con Lorena:** tablero "Seguros de Salud y Vida" conectado, "Probar conexión" en verde, y un Pin real publicado (01/10/2026, confirmado en Historial → Redes Sociales).
+- **Manual actualizado** en el mismo PR.
+- **Estado:** FUSIONADO a `main` y VERIFICADO en producción con publicación real confirmada.

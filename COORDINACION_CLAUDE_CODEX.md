@@ -10673,3 +10673,22 @@ hace falta completarlo.
 No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+### CIERRE · PINTEREST POR COMPOSIO — 2026-10-01 — Claude
+
+Completa la tarea abierta en el traspaso del 2026-09-26 (§4 de ese bloque). Pinterest queda migrado a Composio, mismo patrón que Facebook/Instagram.
+
+- **PR:** [#276](https://github.com/miltondavila-ux/auto-articulos/pull/276), fusionado a `main` (commit `47673ff4`). Sin migración de base de datos.
+- **Auth config de Pinterest en Composio:** `ac_xcne_3PHnmCM` (OAuth administrado por Composio, "Composio Managed", 10 scopes por defecto — lectura/escritura de tableros y pins). Registrado y verificado en Administración → Composio.
+- **Variable de piloto:** `COMPOSIO_PILOT_USERS_PINTEREST=lorenalvarez30@gmail.com`, creada por Milton con `gh variable set`, pasada a los 3 workflows (`worker.yml`, `worker-test.yml`, `social-worker.yml`).
+- **Permiso habilitado:** `allowPinterestPublishing` activado para Lorena en Administración → Usuarios.
+- **Conexión real verificada con Lorena** (su propia sesión, no "Acceder como"):
+  - Tablero conectado: **Seguros de Salud y Vida** (código `1132725812469460961`).
+  - "Probar conexión" → `✓ Conexión correcta con Seguros de Salud y Vida`.
+  - **Pin real publicado**, confirmado en Historial → Redes Sociales: `01/10, 07:27 a.m. — PINTEREST — "Guía completa sobre los mejores seguros de salud en Florida" — ✓ Publicado`. Disparado vía Oportunidades en Redes → Publicar, procesado por `social-worker.yml` (ejecución `36855397120`, `success`).
+- **Manual actualizado** en el mismo PR (`apps/web/src/content/manual-usuario.ts`).
+- **Capitanía liberada** al cierre de este bloque.
+
+Con esto, **las 3 redes del proyecto "Redes por Composio" (GSC/GA, Facebook/Instagram piloto, Pinterest piloto) están en producción**. Threads sigue con conexión propia (decisión de Milton, sin cambios). Pendiente de Milton: decidir el lanzamiento de Facebook/Instagram/Pinterest a todos los usuarios (fuera del piloto).
+
+- **Capitán de migración liberó el lote:** Claude. Resultado: PINTEREST por Composio completado y verificado en produccion (PR #276, Pin real publicado).
