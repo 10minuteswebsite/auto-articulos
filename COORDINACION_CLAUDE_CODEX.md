@@ -10739,3 +10739,18 @@ tarea.
 
 Responsable: Codex. Estado: listo para revisión/PR y prueba controlada en
 producción después de aplicar la migración.
+
+## Claude — PANTALLA NO CUMPLE CON DISEÑO (oportunidades-redes) — 2026-10-01
+
+- Reclamo de capitanía (sin migración): `migration-coordinator.sh claim "Claude"`.
+- Problema (Milton): `/dashboard/oportunidades-redes` tenía demasiados marcos,
+  fuera del estilo Apple aprobado (separadores finos, sin tarjetas ni cajas).
+- Arreglo, solo `oportunidades-redes/page.tsx`: se quitó la clase `.panel`
+  (borde completo) del panel superior y de cada propuesta; las redes pasan de
+  botones enmarcados a una lista con líneas de 1px y acción en azul enlace
+  (`Crear oportunidad` / `Configurar ›`, con la navegación a Conexiones intacta);
+  el progreso, los mensajes y el estado vacío pierden caja/fondo/borde; las
+  etiquetas pill de plataforma/estado pasan a una línea de texto.
+- Se conservan el textarea (campo de entrada) y los modales.
+- Verificación: `tsc` sin errores en el archivo, `git diff --check` limpio.
+  Pendiente: revisión visual de Milton en producción tras desplegar.
