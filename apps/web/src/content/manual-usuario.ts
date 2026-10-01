@@ -31,7 +31,7 @@ Ruta: /dashboard
 
 Inicio es tu centro de operaciones:
 - **Para cuentas nuevas (sin artículos aún):** Muestra de forma exclusiva el Asistente de Configuración Inicial, sin menú ni accesos directos, para que completes tu puesta a punto sin distracciones.
-- **Para cuentas con artículos publicados:** Muestra el panel de métricas de rendimiento (artículos publicados hoy, en el mes, límites y gráfico de actividad), el menú superior completo y cuatro accesos directos numerados (01-04) a **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}**, **${MENU_NAMES.redes}** y el resto de accesos disponibles en el menú.
+- **Para cuentas con artículos publicados:** Muestra el panel de métricas de rendimiento (artículos publicados hoy, en el mes, límites y gráfico de actividad), el menú superior completo y cuatro accesos directos numerados (01-04): **Cómo funciona esta aplicación** (`/dashboard/como-funciona`), **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}** y **${MENU_NAMES.redes}**.
 - Desde el menú superior tienes acceso a: Cómo funciona esta aplicación, Publicaciones y Configuración. Historial está dentro de Publicaciones y Actualizaciones dentro de Configuración.
 
 ## Cada módulo se explica solo
@@ -114,6 +114,33 @@ títulos nuevos (ej. "seguros de vida, criptomonedas, política"). Cualquier
 título que toque uno de esos temas se descarta automáticamente antes de
 mostrarse, sin importar cuánta demanda real tenga. Dejarlo vacío no cambia
 nada de tu cuenta.
+
+### Asistentes IA
+
+Ruta: /dashboard/configuracion/mcp
+
+Conecta un asistente de inteligencia artificial como Claude, ChatGPT, Meta
+MUSE u otro directamente con tu cuenta de SEO TOTAL. Desde esta pantalla puedes
+generar un token personal, copiar el prompt de conexión y consultar la lista
+actual de capacidades disponibles. El token se muestra una sola vez: usa
+**Copiar token** y, si lo pierdes, pulsa **Regenerar token**; el token anterior
+deja de funcionar inmediatamente. **Revocar** desconecta los asistentes sin
+crear uno nuevo.
+
+El asistente conectado debe comenzar ofreciendo un menú numerado, igual que el
+Inicio de la plataforma: 1) contenido propio, 2) contenido generado con IA y
+3) publicación en redes sociales y blogs. Si no sabe qué pantalla o botón
+corresponde, debe consultar el manual real de SEO TOTAL antes de responder.
+
+Entre las acciones disponibles están consultar categorías, idiomas,
+integraciones, límites y oportunidades; usar **Crear con la IA del sistema**
+(`crear_titulos_con_ia`) con las mismas preguntas guiadas y el mismo límite de
+3 solicitudes diarias de **${MENU_NAMES.propios}**; publicar solo después de
+mostrar lo que hará y recibir confirmación explícita; y consultar el estado de
+las publicaciones para obtener el enlace real del artículo cuando ya se haya
+publicado. **Crear oportunidades** analiza datos de Search Console; **Crear
+con la IA del sistema** genera títulos a partir de una descripción del negocio
+y no sustituye al análisis de Search Console.
 
 ### Buscadores
 
@@ -392,7 +419,129 @@ Comprueba en Configuración que la cuenta esté conectada. Algunas redes requier
 
 El administrador puede ocultar módulos por cuenta o temporalmente para toda la plataforma. Pregunta al administrador si necesitas acceso.
 
+## Apéndice: mapa de decisiones y casos de uso
+
+Este apéndice convierte la intención de la persona en una acción concreta. El
+asistente debe seguir esta secuencia: **intención → caso de uso → requisitos →
+workflow → herramientas o botones → validación → siguiente acción**. No debe
+presentar una lista de herramientas técnicas sin explicar para qué sirve cada
+una.
+
+### Quiero empezar a usar el sistema
+
+**Intención:** “Soy nuevo”, “no sé qué hacer” o “quiero configurar todo”.
+
+**Workflow:** Inicio → Asistente de Configuración Inicial → cuenta de la
+plataforma → sitio → categorías → idioma → Google Search Console → pantalla
+final con acceso a publicación.
+
+**Éxito:** los cuatro pasos quedan completos y se puede abrir **${MENU_NAMES.propios}**
+o **${MENU_NAMES.ia}**. Si un paso falla, se resuelve antes de publicar.
+
+### Quiero publicar mis propios títulos
+
+**Intención:** “Tengo títulos” o “quiero publicar una lista”.
+
+**Workflow:** **${MENU_NAMES.propios}** → elegir categoría → elegir idioma del lote
+→ pegar títulos o usar **Crear con la IA del sistema** → revisar y seleccionar
+→ decidir indexación → **Iniciar** → **Progreso de las publicaciones** →
+**Historial**.
+
+**Requisitos:** categorías sincronizadas, idioma, títulos y cupo disponible.
+Para la generación guiada también se requiere describir cliente, tema,
+necesidad y contexto geográfico cuando corresponda.
+
+### Quiero temas basados en búsquedas reales
+
+**Intención:** “Quiero ideas basadas en búsquedas” o “quiero posicionarme”.
+
+**Workflow:** **${MENU_NAMES.ia}** → **Analizar contenido** o **Actualizar análisis**
+→ elegir idioma y estilo → revisar propuestas, categorías, impresiones y clics
+→ publicar una propuesta o un lote → revisar Progreso e Historial.
+
+**Requisito clave:** Google Search Console conectado con la propiedad correcta.
+Este flujo no debe confundirse con **Crear con la IA del sistema**, que genera
+títulos a partir de una descripción y no necesita Search Console.
+
+### Quiero crear títulos sin Search Console
+
+**Intención:** “Dame títulos sobre mi negocio” o “crea títulos con IA”.
+
+**Workflow:** **${MENU_NAMES.propios}** → **Crear con la IA del sistema** → responder
+las preguntas guiadas → seleccionar títulos → revisar → **Iniciar**.
+
+**Reglas:** máximo 3 solicitudes diarias; los títulos no seleccionados se
+descartan; esta función no cambia la configuración general.
+
+### Quiero difundir artículos en redes y blogs
+
+**Intención:** “Publica en redes” o “difunde mi contenido”.
+
+**Workflow:** Configuración → Conexiones → conectar y aprobar las redes
+necesarias → **${MENU_NAMES.redes}** → generar/revisar propuestas → editar si hace
+falta → aprobar o descartar → publicar lote → revisar Historial.
+
+Una conexión no publica por sí sola. Nunca se debe pedir la contraseña de una
+red dentro de SEO TOTAL.
+
+### Quiero saber qué pasó con una publicación
+
+**Intención:** “¿Se publicó?”, “¿cuál es el enlace?” o “falló mi artículo”.
+
+**Decisión:** si el lote está activo, abrir **Progreso de las publicaciones**;
+si terminó, abrir **Historial**; si está publicado, usar el enlace registrado;
+si falló por configuración, corregir primero Configuración; si la categoría ya
+no existe, sincronizar categorías y reintentar.
+
+### Quiero cambiar mi configuración
+
+**Decisión:** credenciales, categorías o idioma → **Configuración → Cuenta**;
+estilo, firma, disclosure, teléfono, imágenes, ubicaciones o exclusiones →
+**Configuración → Contenido**; buscadores y redes → **Configuración →
+Conexiones**. Después de guardar, comprobar el aviso de éxito y volver al
+módulo que consume ese dato.
+
+### Quiero conectar un asistente externo
+
+**Workflow:** Configuración → **Asistentes IA** → generar token → copiarlo una
+sola vez → copiar el prompt → pegar ambos en Claude, ChatGPT, Meta MUSE u otro
+asistente → iniciar con el menú de objetivos.
+
+El asistente externo debe mapear objetivos a workflows, consultar el manual si
+no conoce una pantalla y pedir confirmación explícita antes de publicar.
+
+### Árbol resumido de decisión
+
+\`\`\`text
+¿Qué quiere lograr la persona?
+├─ Configurar o reparar → Asistente Inicial / Cuenta / Contenido / Conexiones
+├─ Crear contenido
+│  ├─ Ya tiene títulos → ${MENU_NAMES.propios} → Títulos a mano
+│  ├─ Quiere ideas guiadas → ${MENU_NAMES.propios} → Crear con la IA del sistema
+│  └─ Quiere búsquedas reales → ${MENU_NAMES.ia} → Analizar contenido
+├─ Difundir → ${MENU_NAMES.redes}
+├─ Consultar resultado → Progreso o Historial
+└─ No sabe continuar → leer este manual y Actualizaciones, luego ofrecer opciones
+\`\`\`
+
+### Acciones que requieren confirmación
+
+Publicar artículos, publicar en redes, borrar propuestas, borrar historial,
+descartar oportunidades y revocar conexiones pueden tener efectos públicos o
+irreversibles. El asistente debe mostrar el alcance exacto y pedir confirmación
+antes de ejecutarlas. Consultar el manual, analizar datos y revisar estados son
+operaciones de lectura.
+
 ## Cómo debe ayudarte el asistente
 
-El asistente debe explicar los pasos de forma breve y clara, enlazar al módulo cuando tenga una ruta confirmada y no prometer funciones que no figuren en este manual ni en el registro vivo de Actualizaciones. Debe priorizar el registro vivo cuando una novedad cambie una instrucción del manual base. Si no tiene información suficiente, debe decirlo y sugerir contactar al administrador.
+El asistente debe comenzar con opciones numeradas y guiar de forma proactiva,
+en vez de iniciar con una pregunta abierta. Debe explicar los pasos de forma
+breve y clara, enlazar al módulo cuando tenga una ruta confirmada y no prometer
+funciones que no figuren en este manual ni en el registro vivo de
+Actualizaciones. Si no sabe cómo funciona una pantalla, un botón o un módulo,
+debe consultar este manual completo antes de responder. Debe priorizar el
+registro vivo cuando una novedad cambie una instrucción del manual base. Nunca
+debe publicar ni ejecutar una acción pública sin mostrar antes exactamente qué
+hará y pedir confirmación explícita. Si no tiene información suficiente, debe
+decirlo y sugerir contactar al administrador.
 `.trim();

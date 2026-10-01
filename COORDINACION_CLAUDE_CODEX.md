@@ -4657,6 +4657,69 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## ARCHIVO — ACTUALIZACIÓN DEL MANUAL Y DESPLIEGUE NO EJECUTADO — 2026-10-01
+
+**Alcance:** corrección de la documentación de Inicio y ampliación previa del
+manual con Asistentes IA, casos de uso y árbol de decisiones.
+
+**Corrección documentada:** se verificó `apps/web/src/app/dashboard/page.tsx`.
+`QUICK_LINKS` contiene cuatro tarjetas numeradas para cuentas completas:
+
+1. Cómo funciona esta aplicación — `/dashboard/como-funciona`
+2. `${MENU_NAMES.propios}`
+3. `${MENU_NAMES.ia}`
+4. `${MENU_NAMES.redes}`
+
+El manual quedó corregido para nombrar explícitamente la cuarta tarjeta; no se
+cambió ningún otro contenido por esa auditoría.
+
+**Intento de despliegue:** solicitado por Milton el 2026-09-30. No se ejecutó
+ningún despliegue de Producción. El worktree estaba en `detached HEAD`, basado
+en `fe05f2a0`, y Vercel CLI no tenía una sesión autenticada disponible.
+Además, `git fetch` no pudo escribir `FETCH_HEAD` por las restricciones del
+worktree administrado.
+
+**Estado final:** ARCHIVADO / SIN DEPLOY. Producción permanece sin cambios y no
+se debe reportar una URL, deployment ID o estado READY para este lote.
+
+**Pendiente si se retoma:** continuar desde un checkout actualizado de `main`
+con autenticación válida de Vercel y publicar solo después de revisar el diff
+del manual y ejecutar las validaciones correspondientes.
+
+## Codex — ACTUALIZACIÓN DEL MANUAL PARA ASISTENTES IA — 2026-09-30
+
+Se revisó esta coordinación completa y se contrastó el manual base con los
+cambios recientes de MCP. El manual no describía todavía de forma suficiente
+Configuración → Asistentes IA ni el comportamiento proactivo del asistente.
+
+Se actualizó `apps/web/src/content/manual-usuario.ts` para documentar:
+
+- la ruta `/dashboard/configuracion/mcp`, generación, copia, regeneración y
+  revocación del token personal;
+- el menú numerado inicial que debe ofrecer el asistente y la consulta del
+  manual real cuando no conozca una pantalla o botón;
+- `crear_titulos_con_ia`, su relación con el límite de 3 solicitudes diarias y
+  la diferencia frente a `crear_oportunidades`/Search Console;
+- la devolución del enlace real del artículo publicado y la confirmación
+  explícita obligatoria antes de publicar;
+- la regla general de no inventar funciones y priorizar Actualizaciones.
+
+En esta continuación se amplió además el manual con un apéndice operativo de
+casos de uso: configuración inicial, publicación propia, análisis de
+oportunidades, generación guiada, difusión social, consulta de resultados,
+cambios de configuración, conexión de asistentes externos, árbol resumido de
+decisión y acciones que requieren confirmación.
+
+Esto deja el mismo `BASE_USER_MANUAL` como fuente para el manual visible, el
+robot de ayuda web y `ver_manual_seo_total`; no se creó una copia paralela. No
+se tocaron schema, migraciones, cuentas, tokens ni despliegues.
+
+Pendiente externo ya registrado: el script
+`scripts/add-product-update-20260930-mcp.ts` debe ejecutarse una vez con
+`DATABASE_URL` y `OPENAI_API_KEY` reales para poblar las entradas de
+Actualizaciones; este worktree no tiene esas credenciales y no se intentó
+forzar la ejecución.
+
 ### Continuación CONEXION POSTPEER 2 — 2026-09-22
 
 - Se confirmó el resultado de la prueba aislada de Lorena: el artículo exacto
