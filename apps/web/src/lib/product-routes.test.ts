@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { isVisibleInProduct, productOfPath, PRODUCT_ROUTES } from "./product-routes";
+import { isProductViewEnabled, isVisibleInProduct, productOfPath, PRODUCT_ROUTES } from "./product-routes";
 
 test("«oportunidades-redes» es Redes y «oportunidades» es Artículos (no se confunden por prefijo)", () => {
   assert.equal(productOfPath("/dashboard/oportunidades-redes"), "REDES");
@@ -66,4 +66,12 @@ test("visibilidad: lo compartido va en ambos productos; lo propio solo en el suy
 test("la tabla no tiene prefijos duplicados", () => {
   const prefixes = PRODUCT_ROUTES.map(([p]) => p);
   assert.equal(new Set(prefixes).size, prefixes.length);
+});
+
+test("la vista por productos solo se activa si /api/me ya llegó y el módulo no está deshabilitado", () => {
+  assert.equal(isProductViewEnabled(undefined), false); // aún sin cargar: como hoy
+  assert.equal(isProductViewEnabled(null), false);
+  assert.equal(isProductViewEnabled(["vista-productos"]), false); // opt-in sin «Habilitado»
+  assert.equal(isProductViewEnabled(["historial"]), true); // administrador o cuenta con «Habilitado»
+  assert.equal(isProductViewEnabled([]), true);
 });

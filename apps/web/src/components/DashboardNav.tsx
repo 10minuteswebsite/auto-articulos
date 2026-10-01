@@ -1,6 +1,7 @@
 "use client";
 
-import { MENU_LABELS_NUMBERED } from "@/lib/menu-names";
+import { MENU_LABELS_NUMBERED, MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
+import { isProductViewEnabled, productOfPath } from "@/lib/product-routes";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -62,6 +63,41 @@ const BASE_ENTRIES: NavEntry[] = [
   },
 ];
 
+// VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2). Cuando la
+// cuenta tiene activo el módulo opt-in «vista-productos» (hoy: administradores
+// como vista previa), el grupo único «Publicaciones» se reemplaza por UN GRUPO
+// POR PRODUCTO. Ninguna ruta cambia: son las mismas pantallas, agrupadas de
+// otra forma. Historial y Progreso aparecen en ambos porque hoy mezclan los
+// dos productos en la misma página (se filtrarán por producto más adelante).
+// La entrada de Redes se muestra siempre (pedido de Milton, 1/10/2026): sin
+// permiso, ModuleGuard bloquea la pantalla con un mensaje claro.
+const PRODUCT_ENTRIES: NavEntry[] = [
+  { href: "/dashboard", label: "Inicio" },
+  {
+    group: "articulos",
+    label: PRODUCT_NAMES.ARTICULOS,
+    items: [
+      { href: "/dashboard/articulos", label: "Inicio de Artículos" },
+      { id: "publicar", href: "/dashboard/publicar", label: MENU_NAMES.propios },
+      { id: "oportunidades", href: "/dashboard/oportunidades", label: MENU_NAMES.ia },
+      { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso", label: "Progreso de las publicaciones" },
+      { id: "historial", href: "/dashboard/historial", label: "Historial" },
+      { id: "estadisticas", href: "/dashboard/estadisticas", label: "Estadísticas" },
+    ],
+  },
+  {
+    group: "redes",
+    label: PRODUCT_NAMES.REDES,
+    items: [
+      { href: "/dashboard/redes", label: "Inicio de Redes" },
+      { id: "oportunidades-redes", href: "/dashboard/oportunidades-redes", label: MENU_NAMES.redes },
+      { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso", label: "Progreso de las publicaciones" },
+      { id: "historial", href: "/dashboard/historial", label: "Historial" },
+    ],
+  },
+  BASE_ENTRIES[2],
+];
+
 // Administración pasó de ser un solo enlace a un grupo para alojar módulos de
 // plataforma como Composio sin tocar la página de usuarios.
 const ADMIN_GROUP: TabGroup = {
@@ -79,6 +115,11 @@ export default function DashboardNav() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [disabledModules, setDisabledModules] = useState<string[]>([]);
   const [globalDisabledModules, setGlobalDisabledModules] = useState<string[]>([]);
+  // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
+  const [productView, setProductView] = useState(false);
+  // Último producto visitado: decide qué grupo se resalta en las pantallas
+  // compartidas (Historial, Progreso), que existen en los dos.
+  const [lastProduct, setLastProduct] = useState<"articulos" | "redes" | null>(null);
   const [open, setOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const groupRef = useRef<HTMLDivElement | null>(null);
@@ -134,6 +175,7 @@ export default function DashboardNav() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
+        setProductView(isProductViewEnabled(data?.disabledModules));
         if (Array.isArray(data?.disabledModules)) {
           setDisabledModules(data.disabledModules);
         }
@@ -145,8 +187,23 @@ export default function DashboardNav() {
         setIsAdmin(false);
         setDisabledModules([]);
         setGlobalDisabledModules([]);
+        setProductView(false);
       });
   }, []);
+
+  // Recuerda el último producto visitado (solo en esta pestaña). Si el
+  // navegador no deja usar sessionStorage, simplemente no se recuerda.
+  useEffect(() => {
+    try {
+      const scope = productOfPath(pathname);
+      if (scope === "ARTICULOS") window.sessionStorage.setItem("seototal_producto", "articulos");
+      else if (scope === "REDES") window.sessionStorage.setItem("seototal_producto", "redes");
+      const saved = window.sessionStorage.getItem("seototal_producto");
+      setLastProduct(saved === "articulos" || saved === "redes" ? saved : null);
+    } catch {
+      setLastProduct(null);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     setOpen(false);
@@ -185,7 +242,8 @@ export default function DashboardNav() {
     return !tab.id || !disabledModules.includes(tab.id);
   }
 
-  const rawEntries: NavEntry[] = isAdmin ? [...BASE_ENTRIES, ADMIN_GROUP] : BASE_ENTRIES;
+  const baseEntries = productView ? PRODUCT_ENTRIES : BASE_ENTRIES;
+  const rawEntries: NavEntry[] = isAdmin ? [...baseEntries, ADMIN_GROUP] : baseEntries;
 
   // Un grupo cuyos módulos están todos ocultos desaparece entero, en vez de
   // quedar como un desplegable vacío.
@@ -198,9 +256,25 @@ export default function DashboardNav() {
     .filter((entry): entry is NavEntry => entry !== null)
     .filter((entry) => (isGroup(entry) ? true : isVisible(entry)));
 
-  const activeGroup = entries.find(
-    (entry) => isGroup(entry) && entry.items.some((item) => item.href === pathname),
-  );
+  // En la vista por productos, una pantalla propia de un producto resalta SU
+  // grupo; una compartida (Historial, Progreso) resalta el último producto
+  // visitado en vez de quedarse siempre con el primero.
+  const pathProduct = productOfPath(pathname);
+  const preferredGroup = !productView
+    ? null
+    : pathProduct === "ARTICULOS"
+      ? "articulos"
+      : pathProduct === "REDES"
+        ? "redes"
+        : lastProduct;
+  const activeGroup =
+    (preferredGroup
+      ? entries.find(
+          (entry) =>
+            isGroup(entry) && entry.group === preferredGroup && entry.items.some((item) => item.href === pathname),
+        )
+      : undefined) ??
+    entries.find((entry) => isGroup(entry) && entry.items.some((item) => item.href === pathname));
 
   function hiddenGlobally(tab: TabItem): boolean {
     return isAdmin && Boolean(tab.id && globalDisabledModules.includes(tab.id));

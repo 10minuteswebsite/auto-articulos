@@ -56,6 +56,20 @@ export const PRODUCT_ROUTES: ReadonlyArray<readonly [string, ProductScope]> = [
   ["/dashboard/postpeer", "ADMIN"],
 ];
 
+/** Id del módulo opt-in que actúa como interruptor de la vista por productos (ver modules.ts). */
+export const PRODUCT_VIEW_MODULE_ID = "vista-productos";
+
+/**
+ * ¿Está activa la vista por productos para esta cuenta? Recibe la lista de
+ * módulos deshabilitados que ya entrega /api/me (`disabledModules`, que incluye
+ * los opt-in sin «Habilitado»). Mientras no se sepa (lista ausente o aún sin
+ * cargar) la respuesta es NO: ante la duda, el menú y el inicio quedan como
+ * hoy y nadie ve nada nuevo por accidente.
+ */
+export function isProductViewEnabled(disabledModules: readonly string[] | null | undefined): boolean {
+  return Array.isArray(disabledModules) && !disabledModules.includes(PRODUCT_VIEW_MODULE_ID);
+}
+
 /** Producto de una ruta. Cualquier ruta desconocida (o el inicio) es COMPARTIDO. */
 export function productOfPath(pathname: string | null | undefined): ProductScope {
   if (!pathname) return "COMPARTIDO";
