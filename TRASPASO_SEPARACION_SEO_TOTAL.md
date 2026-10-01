@@ -6,7 +6,7 @@
 > lee la sección «PROTOCOLO OBLIGATORIO DE NO DESTRUCCIÓN» y «METODOLOGÍA DE TRABAJO EN PARALELO Y CAPITÁN DE ARCHIVO»).
 > Orden de Milton: **leer el documento de coordinación y obedecerlo.**
 
-Última actualización: 2026-10-01 · Responsable de este traspaso: Claude (sesión «SEPARACION DE SEO TOTAL DE REDES TOTALES»)
+Última actualización: 2026-10-01 · Responsable de este traspaso: **Claude, control de proyecto** (sesión «SEPARACION DE SEO TOTAL DE REDES TOTALES»). **Canal vivo entre Claude y Codex: `CONTROL_SEPARACION_SEO_TOTAL.md` (tablero y buzones, lectura cada 5 min). Si hay diferencia entre este archivo y el control, manda el control.** El HUB es otro proyecto y queda **fuera de alcance** (orden de Milton): no tocar su rama ni sus archivos.
 
 ---
 
@@ -54,7 +54,7 @@ trabajo deja la app lista y define el protocolo para entregarle el control sin d
 
 | Lote | Contenido | Estado |
 |---|---|---|
-| 0 | Fase 0: arquitectura, modelo de datos, flujos, mapa de navegación, carpetas, riesgos; inventario de callbacks OAuth por proveedor; algoritmo de contraseñas; plan DNS/certificados; guion de corte con reversa | **PENDIENTE — esperando que Milton diga «arranca»** |
+| 0 | Fase 0: arquitectura, modelo de datos, flujos, mapa de navegación, carpetas, riesgos; inventario de callbacks OAuth por proveedor; algoritmo de contraseñas; plan DNS/certificados; guion de corte con reversa | **ENTREGADA PARA APROBACIÓN (M2) — 2026-10-01.** Parte A (Claude, v0.3) y consolidado en el PR #290; Parte B (Codex) en `main` (PR #295) con corrección B1/B4 en el PR #303. Revisión cruzada hecha en ambos sentidos. **Leer primero `FASE_0_SEPARACION_SEO_TOTAL_CONSOLIDADO.md`.** |
 | 1 | Base invisible: `ProductEntitlement` + backfill, activador de Artículos, control y gracia en Administración, helper único de acceso | no iniciado |
 | 2 | Separación visual por función en el host actual (inicio con dos tarjetas, menús, reparto de Configuración, conexiones compartidas, Historial/Estadísticas por app, «Mi cuenta», manual) | no iniciado |
 | 3 | Derechos exigidos en APIs **y worker**; avisos de gracia | no iniciado |
@@ -81,3 +81,4 @@ gracia que vence a mitad de un lote; host del dominio estable de callbacks y mig
 ## 8. Bitácora (añadir una línea por cada paso real, con fecha, quién y resultado)
 
 - 2026-10-01 — Claude: entrevista MAGO (6 preguntas) cerrada; blueprint escrito; **triple auditoría en 3 rondas** (hechos contra código, seguridad/arquitectura, completitud). Se corrigieron 6 defectos (el grave: redirección total del dominio rompía callbacks OAuth y MCP). Estimación de tiempo corregida a 2–4 días de sesiones de código; el calendario real lo marcan las consolas de proveedores y el HUB. Sin código.
+- 2026-10-01 — Claude: arrancó el trabajo en pareja con Codex por el archivo de control (PRs #284–#301, solo documentación). Codex entregó la Parte B (B1–B5, PR #295) y Claude la revisó (aprobada con un cambio: callbacks OAuth **por host de origen**, porque el `state` y la sesión son por host). Claude entregó la Parte A (contrato de datos, arquitectura, flujos, navegación) y Codex la revisó (X-005, sin contradicciones materiales). Hallazgo: existe una integración con el HUB en la rama `codex/hub-seo-total-migration`; Milton ordenó que el HUB queda **fuera de alcance** (C-007). Siguiente paso: aprobación de Milton (M2), resolver la capitanía de migración (M3) y empezar los Lotes 1 (Claude) y 4/5 (Codex).
