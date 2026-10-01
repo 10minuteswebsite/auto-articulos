@@ -48,6 +48,57 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
   const matchingModule = SYSTEM_MODULES.filter(
     (m) => pathname === m.href || pathname?.startsWith(`${m.href}/`),
   ).sort((a, b) => b.href.length - a.href.length)[0];
+
+  /*
+   * Redes (oportunidades-redes) se revisa primero y aparte, con un solo
+   * mensaje: no importa si la razón es que está apagado para todos, que
+   * Administración lo deshabilitó para esta cuenta en particular, o que
+   * todavía no tiene ninguna red aprobada — `socialPublishingApproved`
+   * (hasSocialModuleAccess en el servidor) ya resume las tres en un booleano.
+   * Pedido explícito de Milton (1/10/2026): el botón del Inicio se ve
+   * siempre; esta pantalla es la que explica por qué no se puede entrar.
+   */
+  if (matchingModule?.id === "oportunidades-redes") {
+    if (!socialPublishingApproved) {
+      return (
+        <div
+          style={{
+            marginTop: 24,
+            padding: "36px 24px",
+            textAlign: "center",
+            maxWidth: 600,
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          <h2 style={{ fontSize: 22, color: "#1d1d1f", margin: "0 0 10px" }}>
+            Esta sección todavía no está disponible para tu cuenta
+          </h2>
+          <p style={{ fontSize: 14, color: "#6e6e73", lineHeight: 1.5, margin: "0 0 20px" }}>
+            Puede estar en mantenimiento o que el administrador todavía no te haya dado acceso. Pídele que
+            la habilite desde Administración.
+          </p>
+          <Link
+            href="/dashboard"
+            style={{
+              display: "inline-block",
+              padding: "10px 20px",
+              background: "#1d1d1f",
+              color: "#ffffff",
+              borderRadius: 10,
+              fontSize: 14,
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            Volver a Inicio
+          </Link>
+        </div>
+      );
+    }
+    return <>{children}</>;
+  }
+
   if (matchingModule && disabledModules.includes(matchingModule.id)) {
     return (
       <div
@@ -88,46 +139,6 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
             background: "#1d1d1f",
             color: "#ffffff",
             borderRadius: 10,
-            fontSize: 14,
-            fontWeight: 600,
-            textDecoration: "none",
-          }}
-        >
-          Volver a Inicio
-        </Link>
-      </div>
-    );
-  }
-
-  if (matchingModule?.id === "oportunidades-redes" && !socialPublishingApproved) {
-    return (
-      <div
-        style={{
-          marginTop: 24,
-          padding: "36px 24px",
-          background: "#ffffff",
-          borderRadius: 6,
-          border: "1px solid #d2d2d7",
-          textAlign: "center",
-          maxWidth: 600,
-          marginLeft: "auto",
-          marginRight: "auto",
-        }}
-      >
-        <h2 style={{ fontSize: 22, color: "#1d1d1f", margin: "0 0 10px" }}>
-          Publicación en redes no habilitada
-        </h2>
-        <p style={{ fontSize: 14, color: "#6e6e73", lineHeight: 1.5, margin: "0 0 20px" }}>
-          Esta sección aparece cuando Administración aprueba al menos una red social o blog para tu cuenta.
-        </p>
-        <Link
-          href="/dashboard"
-          style={{
-            display: "inline-block",
-            padding: "10px 20px",
-            background: "#1d1d1f",
-            color: "#ffffff",
-            borderRadius: 6,
             fontSize: 14,
             fontWeight: 600,
             textDecoration: "none",

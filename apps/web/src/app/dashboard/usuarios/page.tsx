@@ -3016,6 +3016,44 @@ function UserCard({
         </Section>
 
         <Section title="Difusión: redes sociales y blogs" note="Es el control de las publicaciones en redes y blogs: aprobación de cada red y cuántas publicaciones por día puede hacer esta cuenta en cada formato. Cada red que no tenga un valor guardado permite 1 por día; 0 la bloquea.">
+          <div
+            style={{
+              padding: "14px 16px",
+              marginBottom: 10,
+              borderRadius: 10,
+              background: "#f5f5f7",
+              border: "1px solid #d2d2d7",
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <div>
+              <strong style={{ fontSize: 14 }}>Módulo de Redes (DIFUSIÓN SOCIAL)</strong>
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#6e6e73", maxWidth: 440 }}>
+                Controla si esta cuenta ve la pantalla completa, antes de elegir qué redes concretas puede usar
+                abajo. <strong>Heredar</strong> mantiene el comportamiento de siempre: la ve en cuanto tenga al menos
+                una red aprobada.
+              </p>
+            </div>
+            <select
+              value={moduleOverrides["oportunidades-redes"] ?? "inherit"}
+              onChange={(e) =>
+                setModuleOverrides((prev) => ({
+                  ...prev,
+                  "oportunidades-redes": e.target.value as "inherit" | "enabled" | "disabled",
+                }))
+              }
+              disabled={savingPermissions}
+              style={{ fontSize: 13, padding: "8px 10px", minHeight: 36, cursor: "pointer" }}
+            >
+              <option value="inherit">Heredar (según redes aprobadas)</option>
+              <option value="enabled">Habilitado para esta cuenta</option>
+              <option value="disabled">Deshabilitado para esta cuenta</option>
+            </select>
+          </div>
           {SOCIAL_GROUPS.map((group) => (
             <div key={group.title} style={{ marginTop: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 12, fontWeight: 600, color: "#6e6e73", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 2 }}>

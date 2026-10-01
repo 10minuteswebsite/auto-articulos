@@ -199,6 +199,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
   // en dos entradas distintas del mapa y nunca se sumaban entre sí.
   const scoreByPath = new Map<string, number>();
   const queriesByPath = new Map<string, string[]>();
+  let bingRowsForRanking: Array<{ query: string; clicks: number; impressions: number }> = [];
   const addScore = (path: string, amount: number) => {
     scoreByPath.set(path, (scoreByPath.get(path) ?? 0) + amount);
   };
@@ -304,6 +305,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
     const bing = await getBingSignals(userId);
     if (bing.rows.length > 0) {
       const topBingQueries = bing.rows.slice(0, 50);
+      bingRowsForRanking = topBingQueries;
       for (const [path, queries] of queriesByPath) {
         const pathTokens = new Set(queries.flatMap((q) => [...tokenizeForMatch(q)]));
         let bingBoost = 0;
@@ -324,6 +326,30 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
     orderBy: { processedAt: "desc" },
     select: { id: true, finalTitle: true, text: true, summary: true, articleUrl: true, processedAt: true },
   });
+
+  // Si Bing está conectado pero Search Console no aporta consultas, sus
+  // señales siguen siendo útiles: se comparan directamente con el contenido
+  // de cada artículo publicado para que Bing pueda influir por sí solo en la
+  // prioridad del candidato. Solo cuando GSC no aportó ninguna consulta
+  // (queriesByPath vacío): si ya aportó, Bing ya sumó su puntaje arriba por
+  // página vía esas consultas reales — sumarlo otra vez aquí lo contaba dos
+  // veces y sesgaba el ranking a favor de cualquier artículo con coincidencia
+  // de texto con Bing, sin relación con su relevancia real. Hallazgo de la
+  // auditoría del 1/10/2026.
+  if (bingRowsForRanking.length > 0 && queriesByPath.size === 0) {
+    for (const article of articles) {
+      if (!article.articleUrl) continue;
+      const articleTokens = tokenizeForMatch(
+        [article.finalTitle, article.summary, article.text].filter(Boolean).join(" "),
+      );
+      let bingScore = 0;
+      for (const bingRow of bingRowsForRanking) {
+        const shared = [...tokenizeForMatch(bingRow.query)].filter((token) => articleTokens.has(token)).length;
+        if (shared >= 2) bingScore += bingRow.impressions + bingRow.clicks * 8;
+      }
+      if (bingScore > 0) addScore(pathnameOf(article.articleUrl), bingScore);
+    }
+  }
 
   const ranked = articles
     .map((article) => ({
@@ -491,7 +517,36 @@ export async function POST(request: Request) {
       }
     }
 
-    if (integrations.length === 0) {
+    // El cupo diario (Administración → Difusión) antes solo se aplicaba al
+    // publicar en el worker: el botón de generación podía crear una
+    // propuesta pendiente igual, aunque el cupo del día ya estuviera
+    // completo — hallazgo de la auditoría del 1/10/2026. Se filtra acá
+    // también, con el mismo cálculo exacto que usa el worker
+    // (enforceSocialDailyLimit en apps/worker/src/socialPublish.ts): 1 por
+    // día si no hay valor guardado, 0 bloquea el formato.
+    const dailyLimitsRaw = (await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } }))?.socialDailyLimits;
+    const dailyLimits = (dailyLimitsRaw && typeof dailyLimitsRaw === "object" && !Array.isArray(dailyLimitsRaw))
+      ? dailyLimitsRaw as Record<string, unknown> : {};
+    const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+    const limitedOut: string[] = [];
+    const integrationsWithinLimit: string[] = [];
+    for (const platform of integrations) {
+      const raw = dailyLimits[platform];
+      const limit = typeof raw === "number" && Number.isInteger(raw) && raw >= 0 ? raw : 1;
+      const published = await prisma.socialOpportunity.count({
+        where: { userId, platform, status: "published", publishedAt: { gte: dayStart } },
+      });
+      if (published >= limit) limitedOut.push(platform);
+      else integrationsWithinLimit.push(platform);
+    }
+
+    if (integrationsWithinLimit.length === 0) {
+      if (limitedOut.length > 0) {
+        return NextResponse.json(
+          { error: `Ya alcanzaste el cupo diario de hoy para ${limitedOut.join(", ")}. Se renueva mañana, o puedes ajustarlo en Administración.` },
+          { status: 400 },
+        );
+      }
       console.warn("[social-opportunities/generate] red solicitada sin conexión efectiva", {
         requestedNetworks,
         connected,
@@ -574,7 +629,7 @@ export async function POST(request: Request) {
     const wasUsedToday = (article: ArticleCandidate) =>
       usedTodayIds.has(article.id) || (article.articleUrl ? usedTodayUrls.has(article.articleUrl) : false);
 
-    const normalizedIntegrations = integrations.map(normalizePlatform);
+    const normalizedIntegrations = integrationsWithinLimit.map(normalizePlatform);
     const availableNow = allCandidates.filter((article) =>
       normalizedIntegrations.some((platform) => !activeKeys.has(`${article.id}:${platform}`)),
     );
@@ -611,7 +666,7 @@ export async function POST(request: Request) {
     const googleAnalyticsContext = JSON.stringify(summarizeGoogleAnalyticsSignals(await getGoogleAnalyticsSignals(userId)));
 
     for (const article of candidates) {
-      for (const platform of integrations) {
+      for (const platform of integrationsWithinLimit) {
         const opportunityKey = `${article.id}:${normalizePlatform(platform)}`;
         if (activeKeys.has(opportunityKey)) continue;
 

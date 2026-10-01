@@ -1,4 +1,8 @@
 import { prisma } from "@auto-articulos/db";
+import { parseUserModuleOverrides } from "./modules";
+
+/** Id del módulo en SYSTEM_MODULES (ver modules.ts); DashboardNav/ModuleGuard lo tratan aparte. */
+export const SOCIAL_MODULE_ID = "oportunidades-redes";
 
 /**
  * ¿Puede esta cuenta usar el módulo de redes sociales?
@@ -13,6 +17,7 @@ export async function canUseSocialModule(userId: string): Promise<boolean> {
     where: { id: userId },
     select: {
       role: true,
+      disabledModules: true,
       allowInstagramPublishing: true,
       allowFacebookPublishing: true,
       allowLinkedInPublishing: true,
@@ -26,6 +31,29 @@ export async function canUseSocialModule(userId: string): Promise<boolean> {
     },
   });
   if (!user) return false;
+  return hasSocialModuleAccess(user);
+}
+
+export type SocialModuleAccessUser = {
+  role?: string | null;
+  disabledModules?: string | null;
+} & SocialPublishingPermissionUser;
+
+/**
+ * Instancia superior pedida por Milton (1/10/2026): el administrador puede
+ * aprobar o quitar el módulo entero de Redes para una cuenta, aparte de
+ * decidir luego qué redes concretas ve. Vive como override del módulo
+ * "oportunidades-redes" (mismo mecanismo que los demás módulos opt-in), con
+ * una sola diferencia: sin decisión explícita del administrador («Heredar»),
+ * se mantiene el comportamiento histórico — visible en cuanto la cuenta
+ * tenga al menos una red aprobada — para no quitarle el acceso a nadie que
+ * ya lo tenía.
+ */
+export function hasSocialModuleAccess(user: SocialModuleAccessUser): boolean {
+  if (user.role === "admin") return true;
+  const override = parseUserModuleOverrides(user.disabledModules)[SOCIAL_MODULE_ID];
+  if (override === "enabled") return true;
+  if (override === "disabled") return false;
   return hasSocialPublishingApproval(user);
 }
 

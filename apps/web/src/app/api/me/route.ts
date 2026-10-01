@@ -9,7 +9,7 @@ import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
 } from "@/lib/modules";
-import { hasSocialPublishingApproval } from "@/lib/social-access";
+import { hasSocialModuleAccess } from "@/lib/social-access";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -72,8 +72,9 @@ export async function GET() {
       allowPinterestPublishing: user.allowPinterestPublishing,
       allowTumblrPublishing: user.allowTumblrPublishing,
       allowGoogleBusinessPublishing: user.allowGoogleBusinessPublishing,
-      socialPublishingApproved: Boolean(actingAdmin) || hasSocialPublishingApproval({
+      socialPublishingApproved: Boolean(actingAdmin) || hasSocialModuleAccess({
         role: user.role,
+        disabledModules: user.disabledModules,
         allowInstagramPublishing: user.allowInstagramPublishing,
         allowFacebookPublishing: user.allowFacebookPublishing,
         allowLinkedInPublishing: user.allowLinkedInPublishing,

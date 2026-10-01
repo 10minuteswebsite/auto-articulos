@@ -198,12 +198,15 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
             />
           </>
         ) : !configured ? (
-          <p style={{ color: "#6e6e73", fontSize: 14, fontStyle: "italic" }}>Esta conexión todavía no está disponible. Avisa al administrador.</p>
+          <>
+            {guide && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />}
+            <p style={{ color: "#1d1d1f", fontSize: 14, fontStyle: "italic" }}>Esta conexión todavía no está disponible. Avisa al administrador.</p>
+          </>
         ) : connection?.forbidden ? (
-          <p style={{ color: "#6e6e73", fontSize: 14, fontStyle: "italic" }}>Tu cuenta no tiene esta red habilitada. Pídele acceso al administrador.</p>
+          <p style={{ color: "#1d1d1f", fontSize: 14, fontStyle: "italic" }}>Tu cuenta no tiene esta red habilitada. Pídele acceso al administrador.</p>
         ) : !connected ? (
           <>
-            {guide && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} />}
+            {guide && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />}
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>{connectLink}</div>
           </>
         ) : expired ? (
@@ -223,7 +226,7 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
                 rows={dest && savedDestName ? [{ label: dest.label, value: savedDestName }] : undefined}
               />
             )}
-            {guide && dest && (pendingDestination || choosing) && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} />}
+            {guide && dest && (pendingDestination || choosing) && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />}
             {dest && (pendingDestination || choosing) && (
               <div style={{ marginTop: 12, padding: "10px 0", borderTop: "1px solid #e5e5ea" }}>
                 <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px" }}>Elige {dest.noun} donde se publicará</p>

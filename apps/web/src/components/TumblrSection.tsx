@@ -5,7 +5,7 @@ import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSect
 const TUMBLR: OAuthNetworkConfig = {
   id: "tumblr",
   title: "Tumblr",
-  lead: "Conexión administrada desde esta tarjeta. Autoriza tu cuenta y elige aquí el blog que usará SEO TOTAL.",
+  lead: "En este sitio conectas tu cuenta de Tumblr para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes en el blog que elijas. Sigue las instrucciones paso a paso.",
   note: "Publica automáticamente tus artículos con imagen, texto y enlace.",
   admin: {
     title: "Credenciales de la aplicación",

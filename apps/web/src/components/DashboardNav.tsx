@@ -79,7 +79,6 @@ export default function DashboardNav() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [disabledModules, setDisabledModules] = useState<string[]>([]);
   const [globalDisabledModules, setGlobalDisabledModules] = useState<string[]>([]);
-  const [socialPublishingApproved, setSocialPublishingApproved] = useState(false);
   const [open, setOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const groupRef = useRef<HTMLDivElement | null>(null);
@@ -135,7 +134,6 @@ export default function DashboardNav() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
-        setSocialPublishingApproved(Boolean(data?.socialPublishingApproved));
         if (Array.isArray(data?.disabledModules)) {
           setDisabledModules(data.disabledModules);
         }
@@ -177,15 +175,13 @@ export default function DashboardNav() {
     };
   }, [openGroup]);
 
-  // Misma regla de visibilidad que antes, aplicada ahora también dentro de los
-  // grupos: Oportunidades Redes depende de su permiso propio y el resto de la
-  // lista de módulos deshabilitados. Los administradores lo ven todo.
-  // El acceso a cada módulo sale del permiso real de la cuenta. Antes,
-  // Oportunidades Redes estaba clavado a un correo concreto en el código, así
-  // que no había forma de dárselo a otra persona desde Administración.
+  // Pedido explícito de Milton (1/10/2026): Oportunidades Redes se muestra en
+  // el menú igual que cualquier otro módulo, aunque la cuenta no lo tenga
+  // activo todavía — ModuleGuard es quien bloquea la pantalla al entrar, con
+  // un mensaje claro de por qué. Antes se ocultaba del menú directamente, lo
+  // que generaba confusión ("¿por qué no veo el botón?").
   function isVisible(tab: TabItem): boolean {
     if (isAdmin) return true;
-    if (tab.id === "oportunidades-redes" && !socialPublishingApproved) return false;
     return !tab.id || !disabledModules.includes(tab.id);
   }
 

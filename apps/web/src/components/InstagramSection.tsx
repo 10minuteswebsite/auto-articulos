@@ -8,7 +8,7 @@ export default function InstagramSection() {
     <section style={sectionStyle}>
       <h2 style={h2Style}>Instagram</h2>
       <p className="lead-copy" style={{ margin: "0 0 16px 0" }}>
-        Conexión administrada desde esta tarjeta. Elige aquí la cuenta de Instagram que usará SEO TOTAL.
+        En este sitio conectas tu cuenta de Instagram para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes. Sigue las instrucciones para configurarla paso a paso.
       </p>
       <ComposioConnect inline apps={["instagram"]} />
     </section>

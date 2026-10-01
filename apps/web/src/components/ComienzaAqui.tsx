@@ -11,16 +11,17 @@ const MODULES = [
   { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso", icon: "⏳", label: "Progreso de las publicaciones", description: "Consulta el progreso de tus artículos y publicaciones activas." },
 ];
 
+// Pedido explícito de Milton (1/10/2026): el botón de Redes se muestra
+// siempre, como los demás; si la cuenta no tiene el módulo activo, el clic
+// la lleva a la pantalla de bloqueo (ModuleGuard) en vez de ocultarse.
 export default function ComienzaAqui() {
-  const [modules, setModules] = useState(MODULES.filter((m) => m.id !== "oportunidades-redes"));
+  const [modules, setModules] = useState(MODULES);
   useEffect(() => {
     fetch(`/api/me?_t=${Date.now()}`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const disabled = Array.isArray(data?.disabledModules) ? data.disabledModules : [];
-        setModules(MODULES.filter((m) => m.id === "oportunidades-redes"
-          ? Boolean(data?.socialPublishingApproved)
-          : !disabled.includes(m.id)));
+        setModules(MODULES.filter((m) => !disabled.includes(m.id)));
       })
       .catch(() => {});
   }, []);

@@ -2,8 +2,7 @@
 
 import { MENU_NAMES } from "@/lib/menu-names";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { EnPrueba, Modulo } from "@/components/ModuleIntro";
+import { Modulo } from "@/components/ModuleIntro";
 import MobileInstructions from "@/components/MobileInstructions";
 import { useRouter } from "next/navigation";
 import {
@@ -375,6 +374,9 @@ export default function OportunidadesRedesPage() {
         className="panel"
         style={{
           ...sectionStyle,
+          // Pedido explícito de Milton (1/10/2026): sin el rectángulo
+          // exterior del `.panel` estándar en esta pantalla en particular.
+          border: "none",
           padding: "20px 0 24px",
           marginBottom: 20,
           marginTop: 0,
@@ -404,8 +406,10 @@ export default function OportunidadesRedesPage() {
             </h1>
             <MobileInstructions>
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                <strong style={{ fontWeight: 600 }}>Este módulo está en prueba</strong>
-                <EnPrueba />. Todavía no está disponible para todas las cuentas y se está activando poco a poco. Puede que algo cambie de sitio o de comportamiento mientras se termina de ajustar.
+                <strong style={{ fontWeight: 600 }}>Ya tienes esta sección disponible.</strong> Abajo aparece un botón
+                por cada red: si ya está conectada, pulsa <strong>Crear oportunidad</strong> para generar una
+                propuesta a partir de tus artículos; si aparece en gris con <strong>Configurar</strong>, esa red
+                todavía no está activada — actívala ahí mismo y vuelves aquí solo al terminar.
               </p>
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                 Un artículo publicado en tu web solo lo encuentra quien lo busca. En redes sociales lo ve gente que todavía no te estaba buscando, y cada visita que llega desde ahí es una señal más para Google de que tu contenido interesa.
@@ -416,6 +420,13 @@ export default function OportunidadesRedesPage() {
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                 Tú revisas cada propuesta y decides cuál sale y a qué red. No se publica todo ni todo el tiempo: el sistema reparte las publicaciones a lo largo de los días para que tu presencia crezca sin parecer spam y sin que las redes te penalicen.
               </p>
+              {!connectedNetworks.threads && !connectedNetworks.x && !connectedNetworks.linkedin && !connectedNetworks.instagram && !connectedNetworks.facebookPage && !connectedNetworks.pinterest && !connectedNetworks.tumblr && !connectedNetworks.bluesky && !connectedNetworks.devto && !connectedNetworks.blogger && !connectedNetworks.googleBusiness && !loading && !connectionsLoading && (
+                <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
+                  Todavía no tienes ninguna red conectada, así que no hay dónde publicar. Pulsa cualquiera de los
+                  botones grises de abajo para configurar esa red; en cuanto conectes una, vuelves aquí solo y ya
+                  puedes crear propuestas.
+                </p>
+              )}
             </MobileInstructions>
           </div>
 
@@ -438,18 +449,30 @@ export default function OportunidadesRedesPage() {
                   disabled={generatingAll || generatingNetwork !== null}
                   style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginBottom: 16 }}
                 >
-                  {generatingAll ? "Generando para todas las redes..." : "📲 Generar 1 por cada red (Todas)"}
+                  {generatingAll ? "GENERANDO PARA TODAS LAS REDES..." : "GENERAR 1 POR CADA RED ACTIVADA"}
                 </button>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
                 {([
-                ["threads", "threads", "Threads"], ["x", "x", "X (Twitter)"], ["linkedin", "linkedin", "LinkedIn"], ["instagram", "instagram", "Instagram"], ["facebookPage", "facebook-page", "Facebook"], ["pinterest", "pinterest", "Pinterest"], ["tumblr", "tumblr", "Tumblr"], ["bluesky", "bluesky", "Bluesky"], ["devto", "devto", "DEV.to"], ["blogger", "blogger", "Blogger"], ["googleBusiness", "google-business", "Google Business Profile"],
-                ] as const).map(([key, platform, label]) => {
+                ["threads", "threads", "Threads", "threads"], ["x", "x", "X (Twitter)", null], ["linkedin", "linkedin", "LinkedIn", "linkedin"], ["instagram", "instagram", "Instagram", "instagram"], ["facebookPage", "facebook-page", "Facebook", "facebook"], ["pinterest", "pinterest", "Pinterest", "pinterest"], ["tumblr", "tumblr", "Tumblr", "tumblr"], ["bluesky", "bluesky", "Bluesky", "bluesky"], ["devto", "devto", "DEV.to", "devto"], ["blogger", "blogger", "Blogger", "blogger"], ["googleBusiness", "google-business", "Google Business Profile", "business-profile"],
+                ] as const).map(([key, platform, label, conexionId]) => {
                 if (!activeNetworks[key]) return null;
                 const connected = connectedNetworks[key];
                 const busy = Boolean(generatingNetwork);
                 const unavailable = !connected;
-                return <button key={key} type="button" onClick={() => handleGenerate(platform)} disabled={busy || unavailable} className="secondary" style={disabledStyle({ ...secondaryButtonStyle, ...uniformButtonSize, width: "100%", border: "1px solid #d2d2d7", background: unavailable ? "#f5f5f7" : "#ffffff", color: unavailable ? "#86868b" : "#1d1d1f", justifyContent: "center" }, busy || unavailable)}>
-                  {generatingNetwork === platform ? "Analizando..." : unavailable ? "· Configurar " + label : "✓ " + label + " · Crear oportunidad"}
+                return <button key={key} type="button" onClick={() => {
+                  if (unavailable) {
+                    // Pedido explícito de Milton (1/10/2026): el botón "Configurar"
+                    // ya no queda inerte — lleva a Conexiones y, al volver de ahí,
+                    // ConexionesView trae de regreso a esta pantalla sola.
+                    if (conexionId) {
+                      try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
+                      router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`);
+                    }
+                    return;
+                  }
+                  handleGenerate(platform);
+                }} disabled={busy} className="secondary" style={disabledStyle({ ...secondaryButtonStyle, ...uniformButtonSize, width: "100%", border: unavailable ? "1px solid #e5e5ea" : "1px solid #1d1d1f", background: unavailable ? "#f5f5f7" : "#1d1d1f", color: unavailable ? "#86868b" : "#ffffff", justifyContent: "center" }, busy)}>
+                  {generatingNetwork === platform ? "Analizando..." : unavailable ? "Configurar " + label : "✓ " + label + " · Crear oportunidad"}
                 </button>;
                 })}
                 </div>
@@ -479,32 +502,6 @@ export default function OportunidadesRedesPage() {
             )}
           </div>
         </div>
-
-        {!connectedNetworks.threads && !connectedNetworks.x && !connectedNetworks.linkedin && !connectedNetworks.instagram && !connectedNetworks.facebookPage && !connectedNetworks.pinterest && !connectedNetworks.tumblr && !connectedNetworks.bluesky && !connectedNetworks.devto && !connectedNetworks.blogger && !connectedNetworks.googleBusiness && !loading && !connectionsLoading && (
-          <div className="notice" style={{ marginTop: 14 }}>
-            <p style={{ margin: 0 }}>
-              Todavía no tienes ninguna red social conectada, así que no hay
-              dónde publicar. Conecta al menos una y vuelve aquí: las propuestas
-              se generan a partir de tus artículos ya publicados.
-            </p>
-            <p style={{ margin: "10px 0 0" }}>
-              <Link
-                href="/dashboard/configuracion?tab=social"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                  fontWeight: 600,
-                  color: "#0066cc",
-                  textDecoration: "none",
-                }}
-              >
-                Conectar una red social en Configuración
-                <span aria-hidden="true">›</span>
-              </Link>
-            </p>
-          </div>
-        )}
 
         {generating && (
           <div

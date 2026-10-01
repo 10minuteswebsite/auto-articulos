@@ -18,7 +18,7 @@ export const CONNECTION_LABELS = {
   disconnectConfirm: "¿Desconectar esta conexión? Tendrás que volver a conectarla para usarla.",
 } as const;
 
-const mutedStyle: CSSProperties = { color: "#6e6e73", fontSize: 14, lineHeight: 1.5 };
+const mutedStyle: CSSProperties = { color: "#1d1d1f", fontSize: 14, lineHeight: 1.5 };
 
 /** Dropdown de elegir destino: el mismo de Search Console y Analytics. */
 export const CONNECTION_SELECT_STYLE: CSSProperties = {
@@ -36,7 +36,7 @@ export type ConnectionState = "connected" | "disconnected" | "pending" | "expire
 
 const STATE_LABEL: Record<ConnectionState, { text: string; color: string }> = {
   connected: { text: "Conectada", color: "#1a7f37" },
-  disconnected: { text: "No conectada", color: "#6e6e73" },
+  disconnected: { text: "No conectada", color: "#1d1d1f" },
   pending: { text: "Falta elegir el destino", color: "#9a6700" },
   expired: { text: "Autorización vencida", color: "#c62828" },
   success: { text: "Conexión exitosa", color: "#1a7f37" },
@@ -70,7 +70,7 @@ export function ConnectionCard({
         </span>
       )}
       <h2 style={h2Style}>{title}</h2>
-      <p className="lead-copy" style={{ margin: "0 0 16px 0" }}>{lead}</p>
+      <p className="lead-copy" style={{ margin: "0 0 16px 0", color: "#1d1d1f" }}>{lead}</p>
       {notice && (
         <p role="status" style={{ fontSize: 14, margin: "8px 0 0", color: notice.ok ? "#1a7f37" : "#c62828" }}>
           {notice.text}
@@ -79,7 +79,7 @@ export function ConnectionCard({
       {/* Mismo bloque interior que Search Console y Analytics: línea separadora + estado + nota + contenido. */}
       <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #e5e5ea" }}>
         <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: state === "success" ? 700 : 600, color: status.color }}>{status.text}</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: status.color }}>ESTADO: {status.text}</span>
         </div>
         {note && state !== "success" && <p style={{ ...mutedStyle, margin: "4px 0 0" }}>{note}</p>}
         {children}
@@ -89,13 +89,15 @@ export function ConnectionCard({
 }
 
 /** «Cómo hacerlo paso a paso»: siempre la misma caja y el mismo título. */
-export function ConnectionGuide({ steps, ifFails }: { steps: string[]; ifFails?: string }) {
+export function ConnectionGuide({ steps, ifFails, signupUrl, signupLabel }: { steps: string[]; ifFails?: string; signupUrl?: string; signupLabel?: string }) {
   return (
-    <div role="note" style={{ marginTop: 10, padding: "10px 0", borderTop: "1px solid #e5e5ea", color: "#1d1d1f", fontSize: 13, lineHeight: 1.5 }}>
-      <strong>Cómo hacerlo paso a paso</strong>
+    <div role="note" style={{ marginTop: 10, padding: "10px 0", borderTop: "1px solid #e5e5ea", color: "#1d1d1f", fontSize: 14, lineHeight: 1.5 }}>
+      <strong>Te acompañamos para conectar tu cuenta</strong>
+      <p style={{ margin: "6px 0 0" }}>No te preocupes: solo necesitas tener tu cuenta abierta y seguir estos pasos. Si algo no coincide, puedes detenerte antes de aceptar.</p>
       <ol style={{ margin: "6px 0 0", paddingLeft: 20 }}>
         {steps.map((step) => <li key={step}>{step}</li>)}
       </ol>
+      {signupUrl && <p style={{ margin: "8px 0 0" }}><strong>¿No tienes cuenta?</strong> <a href={signupUrl} target="_blank" rel="noreferrer">{signupLabel ?? "Crear cuenta en la página oficial"}</a> y después vuelve aquí para continuar.</p>}
       {ifFails && <p style={{ margin: "8px 0 0" }}><strong>Si falla:</strong> {ifFails}</p>}
     </div>
   );
