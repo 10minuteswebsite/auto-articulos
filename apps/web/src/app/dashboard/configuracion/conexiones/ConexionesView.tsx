@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { MENU_NAMES } from "@/lib/menu-names";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import GoogleSearchConsoleSection from "@/components/GoogleSearchConsoleSection";
 import GoogleAnalyticsSection from "@/components/GoogleAnalyticsSection";
@@ -52,6 +53,7 @@ const columna: CSSProperties = { display: "flex", flexDirection: "column", gap: 
  */
 export default function ConexionesView() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [vista, setVista] = useState<Vista | null>(null);
   const [conexion, setConexion] = useState<ConexionId | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -60,6 +62,24 @@ export default function ConexionesView() {
   const [configuradas, setConfiguradas] = useState<Record<string, boolean>>({});
   const retorno = useConnectionReturn(conexion);
   const soloExito = retorno === "connected" && conexion !== null && LEGACY_RETURN_NETWORKS[conexion]?.choice === null;
+
+  // Pedido explícito de Milton (1/10/2026): si llegó aquí desde Difusión en
+  // Redes (botón "Configurar X" de una red sin conectar), un botón la trae
+  // de vuelta a esa pantalla, sin perder el camino aunque pase por el OAuth
+  // de la red (sessionStorage sobrevive la ida y vuelta en la misma pestaña).
+  const [volverA, setVolverA] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      setVolverA(sessionStorage.getItem("volverA"));
+    } catch {}
+  }, []);
+  function irAVolverA() {
+    if (!volverA) return;
+    try {
+      sessionStorage.removeItem("volverA");
+    } catch {}
+    router.push(volverA);
+  }
 
   useEffect(() => {
     const pedida = searchParams.get("vista");
@@ -232,6 +252,26 @@ export default function ConexionesView() {
           administrador que te dé acceso.
         </IntroP>
       </ModuleIntro>
+      {conexion && volverA && (
+        <button
+          type="button"
+          onClick={irAVolverA}
+          style={{
+            display: "block",
+            margin: "0 0 12px",
+            padding: "8px 14px",
+            borderRadius: 9,
+            border: "1px solid #1d1d1f",
+            background: "#1d1d1f",
+            color: "#ffffff",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: 600,
+          }}
+        >
+          ← Volver a {MENU_NAMES.redes}
+        </button>
+      )}
       {conexion && <button type="button" onClick={volverAConexiones} style={{ margin: "0 0 16px", padding: 0, border: 0, background: "transparent", color: "#1d1d1f", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>← Volver a Conexiones</button>}
       {!conexion && <div style={{ display: "flex", gap: 10, flexWrap: "wrap", margin: "4px 0 6px" }} role="tablist" aria-label="Tipo de conexión">
         {VISTAS.map((v) => (

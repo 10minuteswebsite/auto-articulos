@@ -442,13 +442,25 @@ export default function OportunidadesRedesPage() {
                 </button>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
                 {([
-                ["threads", "threads", "Threads"], ["x", "x", "X (Twitter)"], ["linkedin", "linkedin", "LinkedIn"], ["instagram", "instagram", "Instagram"], ["facebookPage", "facebook-page", "Facebook"], ["pinterest", "pinterest", "Pinterest"], ["tumblr", "tumblr", "Tumblr"], ["bluesky", "bluesky", "Bluesky"], ["devto", "devto", "DEV.to"], ["blogger", "blogger", "Blogger"], ["googleBusiness", "google-business", "Google Business Profile"],
-                ] as const).map(([key, platform, label]) => {
+                ["threads", "threads", "Threads", "threads"], ["x", "x", "X (Twitter)", null], ["linkedin", "linkedin", "LinkedIn", "linkedin"], ["instagram", "instagram", "Instagram", "instagram"], ["facebookPage", "facebook-page", "Facebook", "facebook"], ["pinterest", "pinterest", "Pinterest", "pinterest"], ["tumblr", "tumblr", "Tumblr", "tumblr"], ["bluesky", "bluesky", "Bluesky", "bluesky"], ["devto", "devto", "DEV.to", "devto"], ["blogger", "blogger", "Blogger", "blogger"], ["googleBusiness", "google-business", "Google Business Profile", "business-profile"],
+                ] as const).map(([key, platform, label, conexionId]) => {
                 if (!activeNetworks[key]) return null;
                 const connected = connectedNetworks[key];
                 const busy = Boolean(generatingNetwork);
                 const unavailable = !connected;
-                return <button key={key} type="button" onClick={() => handleGenerate(platform)} disabled={busy || unavailable} className="secondary" style={disabledStyle({ ...secondaryButtonStyle, ...uniformButtonSize, width: "100%", border: "1px solid #d2d2d7", background: unavailable ? "#f5f5f7" : "#ffffff", color: unavailable ? "#86868b" : "#1d1d1f", justifyContent: "center" }, busy || unavailable)}>
+                return <button key={key} type="button" onClick={() => {
+                  if (unavailable) {
+                    // Pedido explícito de Milton (1/10/2026): el botón "Configurar"
+                    // ya no queda inerte — lleva a Conexiones y, al volver de ahí,
+                    // ConexionesView trae de regreso a esta pantalla sola.
+                    if (conexionId) {
+                      try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
+                      router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`);
+                    }
+                    return;
+                  }
+                  handleGenerate(platform);
+                }} disabled={busy} className="secondary" style={disabledStyle({ ...secondaryButtonStyle, ...uniformButtonSize, width: "100%", border: "1px solid #d2d2d7", background: unavailable ? "#f5f5f7" : "#ffffff", color: unavailable ? "#86868b" : "#1d1d1f", justifyContent: "center" }, busy)}>
                   {generatingNetwork === platform ? "Analizando..." : unavailable ? "· Configurar " + label : "✓ " + label + " · Crear oportunidad"}
                 </button>;
                 })}
