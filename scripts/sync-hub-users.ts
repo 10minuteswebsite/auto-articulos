@@ -1,21 +1,24 @@
 import { prisma } from "../packages/db/src/index";
 import { syncUserToHub } from "../apps/web/src/lib/hub-sync";
 
-const users = await prisma.user.findMany({ select: { id: true, email: true } });
-let synced = 0;
-let failed = 0;
+async function main() {
+  const users = await prisma.user.findMany({ select: { id: true, email: true } });
+  let synced = 0;
+  let failed = 0;
 
-for (const user of users) {
-  try {
-    await syncUserToHub(user.id);
-    synced += 1;
-    console.log(`[HUB SYNC] OK ${user.email}`);
-  } catch (error) {
-    failed += 1;
-    console.error(`[HUB SYNC] ERROR ${user.email}`, error instanceof Error ? error.message : String(error));
+  for (const user of users) {
+    try {
+      await syncUserToHub(user.id);
+      synced += 1;
+      console.log(`[HUB SYNC] OK ${user.email}`);
+    } catch (error) {
+      failed += 1;
+      console.error(`[HUB SYNC] ERROR ${user.email}`, error instanceof Error ? error.message : String(error));
+    }
   }
+
+  console.log(`[HUB SYNC] finalizado: ${synced} sincronizados, ${failed} con error.`);
+  if (failed > 0) process.exitCode = 1;
 }
 
-await prisma.$disconnect();
-console.log(`[HUB SYNC] finalizado: ${synced} sincronizados, ${failed} con error.`);
-if (failed > 0) process.exitCode = 1;
+main().finally(() => prisma.$disconnect());
