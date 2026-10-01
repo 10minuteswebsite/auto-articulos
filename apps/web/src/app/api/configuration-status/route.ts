@@ -72,7 +72,7 @@ export async function GET() {
     // 4. Google Search Console
     prisma.searchIntegration.findFirst({
       where: { userId, provider: "google", ...(account.selectedSiteDomain ? { siteDomain: account.selectedSiteDomain } : {}) },
-      select: { siteUrl: true, sitemapUrl: true },
+      select: { siteUrl: true, sitemapUrl: true, lastAccessError: true },
     }),
     // 5. Google Analytics 4
     prisma.searchIntegration.findFirst({
@@ -358,19 +358,44 @@ export async function GET() {
   const hasLegacyGoogleSearchConsole = Boolean(googleIntegration?.siteUrl);
   const needsSearchConsoleReconnect = hasLegacyGoogleSearchConsole && !hasActiveComposioSearchConsole;
 
-  if (!showReconnectNotice) {
-    // Aviso apagado: no se agrega ninguna solicitud de reconexión.
-  } else if (needsSearchConsoleReconnect) {
+  // Mismo aviso rojo de "Reconectar Search Console", segunda causa posible
+  // (pedido de Milton, 1/10/2026: unificar protocolo): no es la migración a
+  // Composio pendiente, es que el último uso REAL de la conexión actual
+  // falló con un error concreto de Google (ver lastAccessError, grabado por
+  // POST /api/opportunities). A diferencia del aviso de migración, este no
+  // depende del interruptor piloto `showReconnectNotice`: es un estado roto
+  // real, no una campaña de migración, y debe verlo cualquier cuenta
+  // afectada.
+  const hasRealAccessError = Boolean(googleIntegration?.lastAccessError);
+
+  if (hasRealAccessError) {
     checks.push({
       id: "google-search-console-reconnect",
       label: "Reconectar Google Search Console",
       configured: false,
       required: false,
       section: "seo",
-      description: "Debes reconectar Google Search Console mediante Conexiones.",
+      description: `Google Search Console respondió con un error al usar esta conexión: ${googleIntegration!.lastAccessError}`,
       actionUrl: "/dashboard/configuracion/conexiones?conexion=google-search-console&reconectar=1",
       actionLabel: "Reconectar Search Console",
     });
+  }
+
+  if (!showReconnectNotice) {
+    // Aviso de migración a Composio apagado: no se agrega otra solicitud.
+  } else if (needsSearchConsoleReconnect) {
+    if (!hasRealAccessError) {
+      checks.push({
+        id: "google-search-console-reconnect",
+        label: "Reconectar Google Search Console",
+        configured: false,
+        required: false,
+        section: "seo",
+        description: "Debes reconectar Google Search Console mediante Conexiones.",
+        actionUrl: "/dashboard/configuracion/conexiones?conexion=google-search-console&reconectar=1",
+        actionLabel: "Reconectar Search Console",
+      });
+    }
   } else if (hasLegacyGoogleAnalytics && !hasActiveComposioAnalytics) {
     checks.push({
       id: "google-analytics-reconnect",

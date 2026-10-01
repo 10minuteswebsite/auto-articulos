@@ -128,6 +128,11 @@ export async function PATCH(request: NextRequest) {
       siteUrl: cleanSiteUrl,
       sitemapUrl: finalSitemapUrl,
       permissionLevel,
+      // Reconexión explícita: limpia cualquier error de acceso previo (ver
+      // aviso rojo unificado en configuration-status) sin esperar al
+      // próximo uso real exitoso.
+      lastAccessError: null,
+      lastAccessErrorAt: null,
     },
   });
   return NextResponse.json({ ok: true, sitemapUrl: finalSitemapUrl });

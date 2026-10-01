@@ -481,6 +481,18 @@ model SearchIntegration {
   lastSitemapSyncAt     DateTime?
   lastSitemapSyncStatus String?
   lastSitemapSyncError  String?
+  // Resultado real del último intento de USAR esta conexión para pedir
+  // datos (ej. Analizar contenido en Oportunidades) — pedido de Milton,
+  // 1/10/2026, caso real de Flor Méndez: Google puede rechazar la consulta
+  // con un error real (ej. "User does not have sufficient permission for
+  // site...", cuando el dueño de la cuenta perdió el permiso verificado
+  // sobre esa propiedad) sin que eso toque siteUrl/encryptedRefreshToken,
+  // que siguen pareciendo "conectados". Null = sin error reciente (se
+  // limpia solo en el próximo uso exitoso o al reconectar). Mismo patrón ya
+  // usado arriba para lastSitemapSyncError, aplicado ahora a cualquier uso
+  // de la conexión, no solo al envío del sitemap.
+  lastAccessErrorAt     DateTime?
+  lastAccessError       String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
