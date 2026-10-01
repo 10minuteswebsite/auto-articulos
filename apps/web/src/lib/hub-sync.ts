@@ -1,5 +1,5 @@
 import { prisma } from "@auto-articulos/db";
-import { normalizeLegacyPhone } from "@/lib/phone";
+import { normalizeLegacyPhone } from "./phone";
 
 const DEFAULT_HUB_URL = "https://hub.lasolucionweb.net";
 const ACCESS_CACHE_MS = 60_000;
