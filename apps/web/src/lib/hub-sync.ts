@@ -1,4 +1,5 @@
 import { prisma } from "@auto-articulos/db";
+import { normalizeLegacyPhone } from "@/lib/phone";
 
 const DEFAULT_HUB_URL = "https://hub.lasolucionweb.net";
 const ACCESS_CACHE_MS = 60_000;
@@ -9,11 +10,6 @@ type HubSyncResult = {
   auth0_sub: string | null;
   product_access: boolean;
 };
-
-function normalizeHubPhone(phone: string | null) {
-  const value = phone?.trim() ?? '';
-  return /^\+[1-9]\d{7,14}$/.test(value) ? value : null;
-}
 
 function getHubConfig() {
   const baseUrl = (process.env.HUB_BASE_URL || DEFAULT_HUB_URL).replace(/\/$/, "");
@@ -88,7 +84,7 @@ export async function syncUserToHub(userId: string): Promise<HubSyncResult | nul
     data: { hubSyncAttemptedAt: new Date(), hubSyncError: null },
   });
 
-  const legacyPhone = process.env.HUB_OMIT_LEGACY_PHONES === 'true' ? null : normalizeHubPhone(user.phone);
+  const legacyPhone = process.env.HUB_OMIT_LEGACY_PHONES === 'true' ? null : normalizeLegacyPhone(user.phone);
   const response = await fetch(`${config.baseUrl}/api/integrations/auto-articulos/user-sync`, {
     method: "POST",
     headers: {
