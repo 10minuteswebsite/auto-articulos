@@ -329,6 +329,8 @@ Conecta cualquier asistente de inteligencia artificial (Claude, ChatGPT, Meta MU
 
 Entre lo que puede hacer un asistente conectado: consultar oportunidades, categorías, idiomas, integraciones y límites; usar "Crear con la IA del sistema" (las mismas preguntas guiadas de Publicar) para proponer títulos nuevos; publicar oportunidades o títulos con tu confirmación explícita; y, al consultar el estado de tus publicaciones, darte el enlace real de cada artículo ya publicado.
 
+Desde que conectas tu token, el asistente abre la conversación ofreciéndote directamente el mismo menú numerado de opciones que ves en Inicio, en vez de empezar con una pregunta abierta. Además, siempre te explica las cosas en lenguaje cotidiano: nunca te va a hablar de nombres técnicos de herramientas, tokens, APIs ni del estado interno de su conexión — si algo le falta a tu cuenta, te dice qué botón tocar en la web. Si no sabe cómo guiarte en algo puntual, consulta el manual real de la plataforma (el mismo que usa este bot de ayuda) antes de inventar una respuesta.
+
 ### Estado de configuración
 
 Inicio muestra una lista de progreso con lo obligatorio y opcional. Para publicar necesitas credenciales de la plataforma, categorías sincronizadas e idioma. Google, Bing y redes sociales amplían lo que puedes hacer, pero no impiden publicar artículos.
