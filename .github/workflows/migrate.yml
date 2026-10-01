@@ -52,6 +52,10 @@ on:
         description: "Endpoint del Hub para la sincronización"
         required: false
         default: "https://staging-hub.lasolucionweb.net"
+      sync_email:
+        description: "Opcional: sincronizar únicamente este correo para diagnóstico o reintento"
+        required: false
+        default: ""
       force_sync:
         description: "Forzar sincronización de BD con schema (--accept-data-loss). USAR SOLO CUANDO SE SABE QUE ESTÁ CORRECTO"
         required: false
@@ -68,6 +72,7 @@ jobs:
       HUB_BASE_URL: ${{ inputs.hub_base_url || 'https://staging-hub.lasolucionweb.net' }}
       AUTO_ARTICULOS_HUB_CLIENT_ID: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_ID }}
       AUTO_ARTICULOS_HUB_CLIENT_SECRET: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_SECRET }}
+      HUB_SYNC_EMAIL: ${{ inputs.sync_email }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -2,7 +2,11 @@ import { prisma } from "../packages/db/src/index";
 import { syncUserToHub } from "../apps/web/src/lib/hub-sync";
 
 async function main() {
-  const users = await prisma.user.findMany({ select: { id: true, email: true } });
+  const emailFilter = process.env.HUB_SYNC_EMAIL?.trim().toLowerCase();
+  const users = await prisma.user.findMany({
+    where: emailFilter ? { email: emailFilter } : undefined,
+    select: { id: true, email: true },
+  });
   let synced = 0;
   let failed = 0;
 
