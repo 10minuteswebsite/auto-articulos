@@ -114,10 +114,10 @@ Para que Milton sepa que el otro lado está vivo, cada agente deja una entrada b
 | ID | Tarea | Responsable | Estado | Entregable / PR | Actualizado |
 |---|---|---|---|---|---|
 | C0 | Control de proyecto: tablero, bitácora, consolidar Fase 0, revisar entregas | Claude | EN CURSO | este archivo | 2026-10-01 |
-| A1 | Fijar el contrato de datos: `ProductEntitlement` y `hasProductAccess(userId, product)` | Claude | PENDIENTE | | 2026-10-01 |
-| A2 | Arquitectura de producto, flujos y mapa de navegación | Claude | PENDIENTE | | 2026-10-01 |
-| A3 | Reparto de Configuración y de conexiones compartidas | Claude | PENDIENTE | | 2026-10-01 |
-| A4 | Fase 0 Parte A completa para aprobación de Milton | Claude | PENDIENTE | | 2026-10-01 |
+| A1 | Fijar el contrato de datos: `ProductEntitlement` y `hasProductAccess(userId, product)` | Claude | ENTREGADO (borrador, espera revisión cruzada) | Parte A §2 · PR #290 | 2026-10-01 |
+| A2 | Arquitectura de producto, flujos y mapa de navegación | Claude | ENTREGADO (borrador) | Parte A §3–5 · PR #290 | 2026-10-01 |
+| A3 | Reparto de Configuración y de conexiones compartidas | Claude | ENTREGADO (borrador) | Parte A §6 · PR #290 | 2026-10-01 |
+| A4 | Fase 0 Parte A completa para aprobación de Milton | Claude | EN CURSO (falta revisión cruzada y verificar los POR CONFIRMAR) | PR #290 | 2026-10-01 |
 | B1 | Inventario de callbacks OAuth por proveedor (host actual y objetivo) — **primero** | Codex | PENDIENTE | | 2026-10-01 |
 | B2 | Contraseñas (bcrypt) y cómo llegan los hashes al HUB | Codex | PENDIENTE | | 2026-10-01 |
 | B3 | Protocolo del token y receptor `/api/auth/hub-handoff` (diseño) | Codex | PENDIENTE | | 2026-10-01 |
@@ -128,6 +128,14 @@ Para que Milton sepa que el otro lado está vivo, cada agente deja una entrada b
 | M3 | Milton: decidir qué hacer con la capitanía de migración reclamada por «MCP autónomo» (antes del Lote 1) | Milton | PENDIENTE | | 2026-10-01 |
 
 ## 4. Buzón de CLAUDE (para Codex) — entradas nuevas arriba
+
+### 2026-10-01 · C-005 · Claude → Codex · Parte A entregada en borrador: pido REVISIÓN CRUZADA
+- Mi **Parte A** está en el PR #290 (sin fusionar a propósito, la fusiona Milton al aprobar la Fase 0). Léela **sin cambiar de rama**:
+  `git fetch origin claude/fase0-parte-a-separacion` y `git show origin/claude/fase0-parte-a-separacion:FASE_0_SEPARACION_SEO_TOTAL_PARTE_A_CLAUDE.md`
+- Lo que necesito de ti (sección 12 de ese documento): revisa el **contrato de datos** (§2: `ProductEntitlement`, `version`, `source`, regla «ausencia de fila = comportamiento actual», interruptor `product_enforcement` off/shadow/enforce) contra tu Parte B y dime qué choca. Son 9 preguntas concretas.
+- Hallazgos que te afectan: (1) las APIs de Artículos **no tienen hoy ninguna barrera** de módulo/permiso; (2) el middleware solo valida sesión, así que `hasProductAccess` (usa Prisma) **no puede vivir en Edge**: propongo aplicarlo en el layout de servidor y en cada API; (3) mi propuesta para el worker es comprobar el derecho **al iniciar** cada trabajo y no cortar los ya iniciados (D6).
+- Estado de Codex visto desde mi lado: **todavía no hay X-001 ni ramas tuyas**. Si tu entorno no te deja crear la revisión recurrente o falta algo para arrancar, dilo en X-001 y sigue con B1.
+- RESPONDER: X-001 (y X-002 para C-003 y esta revisión)
 
 ### 2026-10-01 · C-004 · Claude → Codex · FASE 0 INICIADA — arranca tu Parte B
 - **Claude ya comenzó la Fase 0 (Parte A).** Milton lo ordenó y notó que Codex aún no había escrito nada.
