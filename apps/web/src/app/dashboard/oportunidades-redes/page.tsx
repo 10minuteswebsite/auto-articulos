@@ -3,7 +3,7 @@
 import { MENU_NAMES } from "@/lib/menu-names";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { EnPrueba, Modulo } from "@/components/ModuleIntro";
+import { Modulo } from "@/components/ModuleIntro";
 import MobileInstructions from "@/components/MobileInstructions";
 import { useRouter } from "next/navigation";
 import {
@@ -404,8 +404,10 @@ export default function OportunidadesRedesPage() {
             </h1>
             <MobileInstructions>
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                <strong style={{ fontWeight: 600 }}>Este módulo está en prueba</strong>
-                <EnPrueba />. Todavía no está disponible para todas las cuentas y se está activando poco a poco. Puede que algo cambie de sitio o de comportamiento mientras se termina de ajustar.
+                <strong style={{ fontWeight: 600 }}>Ya tienes esta sección disponible.</strong> Abajo aparece un botón
+                por cada red: si ya está conectada, pulsa <strong>Crear oportunidad</strong> para generar una
+                propuesta a partir de tus artículos; si aparece en gris con <strong>Configurar</strong>, esa red
+                todavía no está activada — actívala ahí mismo y vuelves aquí solo al terminar.
               </p>
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                 Un artículo publicado en tu web solo lo encuentra quien lo busca. En redes sociales lo ve gente que todavía no te estaba buscando, y cada visita que llega desde ahí es una señal más para Google de que tu contenido interesa.
