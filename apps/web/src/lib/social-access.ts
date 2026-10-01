@@ -1,6 +1,5 @@
 import { prisma } from "@auto-articulos/db";
 import { hasLegacySocialModuleAccess } from "@auto-articulos/shared";
-import { parseUserModuleOverrides } from "./modules";
 
 /** Id del módulo en SYSTEM_MODULES (ver modules.ts); DashboardNav/ModuleGuard lo tratan aparte. */
 export const SOCIAL_MODULE_ID = "oportunidades-redes";
