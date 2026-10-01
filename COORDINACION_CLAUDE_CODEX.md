@@ -10613,3 +10613,50 @@ consulta el resto y se recupera automáticamente solo si existe un único panel
 con categorías. Si hay varios, no se mezclan sitios y se devuelve un mensaje
 accionable. No cambia schema ni requiere migración. Auditorías locales: worker
 build OK, tests 20/20, fallback 3/3, web build 85/85 rutas y diff limpio.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-01
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-09-30
+(commit `48e736e`). Se revisó el rango `48e736e..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: 105 líneas agregadas (0 eliminadas, confirmado con
+`git diff --stat`), 4 entradas nuevas — las tres capitanías de MCP del 30/9 (asistente
+proactivo + fix real de bug de panel, PR #269/#270; prompts/list+get y descripciones
+estructuradas, PR #271; sin jerga técnica hacia el usuario, PR #272) y la entrada de
+Codex de recuperación segura de sincronización por panel/idioma (PR #273).
+
+Se verificó contra `git ls-remote`/`git merge-base --is-ancestor` que las cuatro ramas
+de este rango (`claude/mcp-proactivo-20260930`, `claude/mcp-prompts-workflows-20260930`,
+`claude/mcp-sin-jerga-20260930`, `codex/category-panel-autodetect-20260930`) ya están
+fusionadas en `origin/main` — las tres primeras como ancestros directos, la última por
+squash bajo el commit `6157e3d` (contenido de archivos verificado igual) — ninguna es
+una reserva activa ahora mismo.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: tres entradas nuevas, una por cada capitanía de Claude
+  (PR #269/#270, PR #271, PR #272), con commits, causa, archivos tocados, auditorías
+  reportadas y pendientes tal como constan en Coordinación. La entrada de Codex (PR #273)
+  ya estaba propagada por el propio Codex, no se duplicó.
+- `apps/web/src/content/manual-usuario.ts`: sección "Asistentes IA" ampliada con un
+  párrafo nuevo (sin tocar el texto existente) sobre el menú numerado proactivo desde el
+  primer mensaje, el lenguaje sin jerga técnica, y la nueva capacidad del asistente de
+  consultar el manual real de la plataforma (`ver_manual_seo_total`) en vez de inventar
+  respuestas — ninguno de los tres estaba reflejado todavía.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (verificación en vivo de arriba,
+  nada activo que registrar); Parte B con un addendum listando los 4 nombres de
+  conversación nuevos de este rango, todos ya cerrados y fusionados.
+- `TO-DO.md`: sin cambios — ninguna idea suelta nueva sin ejecutar en este rango (el
+  pendiente de `eliminar_oportunidades` ya estaba propagado desde la corrida anterior).
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. No se encontró ninguna mención nueva
+  a árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado.
+
+**Duda señalada, sin resolver por esta tarea** (agregada también como nota en
+`INVENTARIO_CONVERSACIONES.md`): los commits `b23b9af` y `7474bd7`, ya fusionados en
+`origin/main` el 2026-09-30, no tienen ninguna entrada correspondiente en este documento
+ni en `CONTROLADOR_DE_VERSIONES.md` — no hay registro de auditoría ni de verificación en
+producción para ese trabajo. Queda para que Milton (o quien hizo esos commits) decida si
+hace falta completarlo.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
