@@ -93,8 +93,7 @@ export default function CategorySyncProgress({
 
     const now = new Date();
     if (status === "pending") {
-      setLog((prev) => [
-        ...prev,
+      setLog(() => [
         {
           at: now,
           kind: "info",
