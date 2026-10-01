@@ -205,7 +205,12 @@ export default function ConexionesView() {
             <h2 id={`grupo-${grupo.vista}`} style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#1d1d1f" }}>{grupo.titulo}</h2>
             <p style={{ margin: "5px 0 0", color: "#6e6e73", fontSize: 13, lineHeight: 1.45 }}>{grupo.descripcion}</p>
           </div>
-          {tarjetas.filter((card) => card.view === grupo.vista && isProductViewAllowed(producto, card.view)).map((card) => (
+          {tarjetas.filter((card) => {
+            // Search Console es compartida: Redes ve la misma conexión real,
+            // sin duplicar estado ni crear una segunda cuenta OAuth.
+            const compartida = producto === "redes" && card.id === "google-search-console" && grupo.vista === "difusion";
+            return (card.view === grupo.vista && isProductViewAllowed(producto, card.view)) || compartida;
+          }).map((card) => (
           <button
             key={card.n}
             type="button"
