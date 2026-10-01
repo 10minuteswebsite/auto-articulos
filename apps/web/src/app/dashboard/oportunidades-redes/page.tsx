@@ -2,7 +2,6 @@
 
 import { MENU_NAMES } from "@/lib/menu-names";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Modulo } from "@/components/ModuleIntro";
 import MobileInstructions from "@/components/MobileInstructions";
 import { useRouter } from "next/navigation";
@@ -421,6 +420,13 @@ export default function OportunidadesRedesPage() {
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                 Tú revisas cada propuesta y decides cuál sale y a qué red. No se publica todo ni todo el tiempo: el sistema reparte las publicaciones a lo largo de los días para que tu presencia crezca sin parecer spam y sin que las redes te penalicen.
               </p>
+              {!connectedNetworks.threads && !connectedNetworks.x && !connectedNetworks.linkedin && !connectedNetworks.instagram && !connectedNetworks.facebookPage && !connectedNetworks.pinterest && !connectedNetworks.tumblr && !connectedNetworks.bluesky && !connectedNetworks.devto && !connectedNetworks.blogger && !connectedNetworks.googleBusiness && !loading && !connectionsLoading && (
+                <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
+                  Todavía no tienes ninguna red conectada, así que no hay dónde publicar. Pulsa cualquiera de los
+                  botones grises de abajo para configurar esa red; en cuanto conectes una, vuelves aquí solo y ya
+                  puedes crear propuestas.
+                </p>
+              )}
             </MobileInstructions>
           </div>
 
@@ -496,32 +502,6 @@ export default function OportunidadesRedesPage() {
             )}
           </div>
         </div>
-
-        {!connectedNetworks.threads && !connectedNetworks.x && !connectedNetworks.linkedin && !connectedNetworks.instagram && !connectedNetworks.facebookPage && !connectedNetworks.pinterest && !connectedNetworks.tumblr && !connectedNetworks.bluesky && !connectedNetworks.devto && !connectedNetworks.blogger && !connectedNetworks.googleBusiness && !loading && !connectionsLoading && (
-          <div className="notice" style={{ marginTop: 14 }}>
-            <p style={{ margin: 0 }}>
-              Todavía no tienes ninguna red social conectada, así que no hay
-              dónde publicar. Conecta al menos una y vuelve aquí: las propuestas
-              se generan a partir de tus artículos ya publicados.
-            </p>
-            <p style={{ margin: "10px 0 0" }}>
-              <Link
-                href="/dashboard/configuracion?tab=social"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                  fontWeight: 600,
-                  color: "#0066cc",
-                  textDecoration: "none",
-                }}
-              >
-                Conectar una red social en Configuración
-                <span aria-hidden="true">›</span>
-              </Link>
-            </p>
-          </div>
-        )}
 
         {generating && (
           <div
