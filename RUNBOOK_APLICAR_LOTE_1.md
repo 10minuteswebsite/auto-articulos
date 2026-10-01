@@ -22,10 +22,9 @@ DATABASE_URL="$MIGRATION_DATABASE_URL" DIRECT_URL="$MIGRATION_DATABASE_URL" \
   npx prisma db push --schema=packages/db/prisma/schema.prisma
 ```
 
-No ejecuta `prisma migrate deploy` ni lee automáticamente el SQL versionado. Por tanto, **no se debe afirmar que disparar el workflow aplica esa migración SQL**. Antes de producción, Milton debe elegir y aprobar una de estas rutas:
+No ejecuta `prisma migrate deploy` ni lee automáticamente el SQL versionado. Para este lote, la ruta aprobada del workflow debe ser la segunda alternativa: añadir/usar un input `safe_product_entitlements` que ejecute únicamente `prisma db execute --file packages/db/prisma/migrations/20261002000000_add_product_entitlements/migration.sql`, con Session pooler. **No se debe afirmar que la ruta normal de `db push` aplica esa migración SQL.**
 
-- adaptar el workflow para ejecutar `prisma migrate deploy` sobre el Session pooler, con una revisión separada; o
-- preparar una ruta SQL explícita y auditada para el contenido de `20261002000000_add_product_entitlements`, sin mezclarla con `db push`.
+- añadir la ruta `safe_product_entitlements` al workflow, siguiendo el patrón de las rutas `safe_*` existentes, y hacer que ejecute solo el SQL versionado; `migrate deploy` no es viable mientras el historial contenga la migración histórica de Tumblr que falla desde una base vacía.
 
 No activar `force_sync` ni `accept_data_loss` para este lote sin una decisión específica: la migración añade tablas, tipos, índices, FK, RLS y backfill, y el workflow actual tiene otras rutas potencialmente destructivas.
 
@@ -83,4 +82,4 @@ Esperado: ambas tablas existen; los tres enums existen; Artículos tiene backfil
 
 ## Reversa y fallo
 
-Detener el despliegue de código si falla una consulta de verificación. No borrar tablas ni ejecutar `db push --accept-data-loss` como «reversa». Restaurar desde el procedimiento de recuperación aprobado o preparar una reversa SQL revisada por el capitán y Milton. Liberar la capitanía solo después de dejar el resultado y el estado de producción documentados.
+Detener el despliegue de código si falla una consulta de verificación. Para este lote, la reversa SQL aprobada es simple: eliminar las dos tablas nuevas (`ProductEntitlementEvent`, `ProductEntitlement`) y los tres tipos nuevos (`EntitlementSource`, `EntitlementStatus`, `Product`), únicamente si la verificación confirma que no contienen datos posteriores que deban conservarse. No usar `db push --accept-data-loss` como reversa. El capitán y Milton deben revisar el orden y el resultado antes de ejecutarlo. Liberar la capitanía solo después de dejar el resultado y el estado de producción documentados.
