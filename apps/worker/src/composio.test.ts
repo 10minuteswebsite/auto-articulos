@@ -33,12 +33,16 @@ function stubFetch(replies: Array<{ status?: number; body?: unknown; headers?: R
 test("lista blanca: permite lo que se usa hoy y bloquea lo destructivo", () => {
   assert.equal(isToolAllowed("google_search_console", "GOOGLE_SEARCH_CONSOLE_SUBMIT_SITEMAP"), true);
   assert.equal(isToolAllowed("instagram", "INSTAGRAM_POST_IG_USER_MEDIA"), true);
+  assert.equal(isToolAllowed("pinterest", "PINTEREST_LIST_BOARDS"), true);
+  assert.equal(isToolAllowed("pinterest", "PINTEREST_CREATE_PIN"), true);
   for (const [app, slug] of [
     ["google_search_console", "GOOGLE_SEARCH_CONSOLE_DELETE_SITE"],
     ["google_search_console", "GOOGLE_SEARCH_CONSOLE_ADD_SITE"],
     ["google_analytics", "GOOGLE_ANALYTICS_CREATE_PROPERTY"],
     ["facebook", "FACEBOOK_GET_PAGE_CONVERSATIONS"],
     ["instagram", "INSTAGRAM_LIST_ALL_MESSAGES"],
+    ["pinterest", "PINTEREST_DELETE_BOARD"],
+    ["pinterest", "PINTEREST_DELETE_PIN"],
     ["instagram", "INSTAGRAM_POST_IG_MEDIA_COMMENTS"],
     ["facebook", "FACEBOOK_LIST_MANAGED_PAGES_X"],
     ["facebook", ""],

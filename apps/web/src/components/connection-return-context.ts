@@ -8,7 +8,6 @@ export type ReturnResult = "connected" | "error" | "forbidden";
 export const ConnectionReturnContext = createContext<{ conexion: string | null; resultado: ReturnResult | null }>({ conexion: null, resultado: null });
 
 const CHOSEN_NOUN: Record<string, string> = {
-  pinterest: "el tablero",
   tumblr: "el blog",
   blogger: "el blog",
 };

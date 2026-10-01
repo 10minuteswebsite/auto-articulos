@@ -386,7 +386,7 @@ async function getFreshTumblrExpiry(
 }
 
 async function getConnectedNetworks(userId: string) {
-  const [threads, twitter, linkedin, instagram, facebookPage, pinterest, tumblr, bluesky, devto, blogger, composioInstagram, composioFacebook, googleBusiness, user] = await Promise.all([
+  const [threads, twitter, linkedin, instagram, facebookPage, pinterest, tumblr, bluesky, devto, blogger, composioInstagram, composioFacebook, composioPinterest, googleBusiness, user] = await Promise.all([
     prisma.threadsIntegration.findUnique({ where: { userId }, select: { id: true } }),
     prisma.twitterIntegration.findUnique({ where: { userId }, select: { id: true } }),
     prisma.linkedInIntegration.findUnique({ where: { userId }, select: { id: true } }),
@@ -405,6 +405,10 @@ async function getConnectedNetworks(userId: string) {
       where: { userId, app: "facebook", status: "ACTIVE", pageId: { not: null } },
       select: { connectedAccountId: true, pageId: true, pageName: true },
     }),
+    prisma.composioConnection.findFirst({
+      where: { userId, app: "pinterest", status: "ACTIVE", pageId: { not: null } },
+      select: { connectedAccountId: true },
+    }),
     prisma.postPeerConnection.findUnique({ where: { userId }, select: { id: true, status: true } }),
     prisma.user.findUnique({ where: { id: userId }, select: { role: true, email: true, name: true, firstName: true, lastName: true, businessLocations: true, contentLanguage: true, allowInstagramPublishing: true, allowLinkedInPublishing: true, allowThreadsPublishing: true, allowFacebookPublishing: true, allowPinterestPublishing: true, allowTumblrPublishing: true, allowBlueskyPublishing: true, allowDevToPublishing: true, allowBloggerPublishing: true, allowGoogleBusinessPublishing: true } }),
   ]);
@@ -417,7 +421,7 @@ async function getConnectedNetworks(userId: string) {
   // reactivarla fácil más adelante — solo se fuerza a `false` acá, el único
   // punto de donde sale si se muestra o no en Oportunidades en Redes.
   const activeNetworks = { threads: Boolean(isAdmin || socialOverride || user?.allowThreadsPublishing), x: false, linkedin: Boolean(isAdmin || socialOverride || user?.allowLinkedInPublishing), instagram: Boolean(isAdmin || socialOverride || user?.allowInstagramPublishing), facebookPage: Boolean(isAdmin || socialOverride || user?.allowFacebookPublishing), pinterest: Boolean(isAdmin || socialOverride || user?.allowPinterestPublishing), tumblr: Boolean(isAdmin || socialOverride || user?.allowTumblrPublishing), bluesky: Boolean(isAdmin || user?.allowBlueskyPublishing), devto: Boolean(isAdmin || socialOverride || user?.allowDevToPublishing), blogger: Boolean(isAdmin || socialOverride || user?.allowBloggerPublishing), googleBusiness: Boolean(isAdmin || socialOverride || user?.allowGoogleBusinessPublishing) };
-  return { activeNetworks, hideInstagramStories: Boolean(composioInstagram?.igAccountId), hideFacebookStories: Boolean(composioFacebook?.pageId), threads: activeNetworks.threads && Boolean(threads), x: activeNetworks.x && Boolean(twitter), linkedin: activeNetworks.linkedin && Boolean(linkedin), instagram: activeNetworks.instagram && Boolean(instagram || composioInstagram?.igAccountId), facebookPage: activeNetworks.facebookPage && Boolean(facebookPage || composioFacebook?.pageId), pinterest: activeNetworks.pinterest && Boolean(pinterest && pinterest.boardId && (!pinterest.expiresAt || pinterest.expiresAt > new Date())), tumblr: activeNetworks.tumblr && Boolean(tumblr && (!tumblrExpiresAt || tumblrExpiresAt > new Date())), bluesky: activeNetworks.bluesky && Boolean(bluesky), devto: activeNetworks.devto && Boolean(devto), blogger: activeNetworks.blogger && Boolean(blogger), googleBusiness: activeNetworks.googleBusiness && googleBusiness?.status === "ACTIVE" };
+  return { activeNetworks, hideInstagramStories: Boolean(composioInstagram?.igAccountId), hideFacebookStories: Boolean(composioFacebook?.pageId), threads: activeNetworks.threads && Boolean(threads), x: activeNetworks.x && Boolean(twitter), linkedin: activeNetworks.linkedin && Boolean(linkedin), instagram: activeNetworks.instagram && Boolean(instagram || composioInstagram?.igAccountId), facebookPage: activeNetworks.facebookPage && Boolean(facebookPage || composioFacebook?.pageId), pinterest: activeNetworks.pinterest && Boolean(composioPinterest || (pinterest && pinterest.boardId && (!pinterest.expiresAt || pinterest.expiresAt > new Date()))), tumblr: activeNetworks.tumblr && Boolean(tumblr && (!tumblrExpiresAt || tumblrExpiresAt > new Date())), bluesky: activeNetworks.bluesky && Boolean(bluesky), devto: activeNetworks.devto && Boolean(devto), blogger: activeNetworks.blogger && Boolean(blogger), googleBusiness: activeNetworks.googleBusiness && googleBusiness?.status === "ACTIVE" };
 }
 
 export async function GET() {

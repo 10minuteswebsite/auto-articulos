@@ -149,3 +149,16 @@ test("un nombre de panel («Español») no bloquea propiedades; un dominio real 
   assert.deepEqual(conBloqueo.map((o) => o.selectable), [true, false, false]);
   assert.equal(conBloqueo[0].recommended, true);
 });
+
+// Forma REAL de PINTEREST_LIST_BOARDS (esquema del panel, 2026-09-26): data.items[{id,name,privacy}].
+test("Pinterest: lista los tableros con su privacidad y recomienda el único", () => {
+  const data = { items: [{ id: "111", name: "Recetas", privacy: "PUBLIC" }], next_cursor: null };
+  const options = buildOptions("pinterest", data, { confirmedDomain: null });
+  assert.equal(options.length, 1);
+  assert.equal(options[0].id, "111");
+  assert.equal(options[0].label, "Recetas");
+  assert.equal(options[0].recommended, true);
+  const two = buildOptions("pinterest", { items: [{ id: "1", name: "A", privacy: "SECRET" }, { id: "2", name: "B", privacy: "PUBLIC" }] }, { confirmedDomain: null });
+  assert.equal(two.some((o) => o.recommended), false);
+  assert.match(two[0].detail ?? "", /secreto/);
+});

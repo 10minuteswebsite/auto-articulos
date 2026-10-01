@@ -161,6 +161,12 @@ async function ownUserIds(app: ComposioAppId): Promise<Set<string>> {
           (row) => row.userId,
         ),
       );
+    case "pinterest":
+      return new Set(
+        (await prisma.pinterestIntegration.findMany({ select: { userId: true } })).map(
+          (row) => row.userId,
+        ),
+      );
   }
 }
 

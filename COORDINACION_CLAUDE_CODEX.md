@@ -1,5 +1,19 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## CONEXION COMPOSIO PROBLEMA PEPE — Claude — 2026-09-28/10-01 — PR #249 — CERRADO
+
+- Síntoma: GSC de Pepe (`pepegomez.net`) quedaba en INITIATED al conectar actuando como él.
+- Evidencia (logs de producción 09:43–09:44 del 2026-09-28): `connect_started` con el userId
+  del cliente y `connect_completed` con el userId del admin, outcome `invalid`, dos veces. La
+  cookie de suplantación era `SameSite=strict` y no viaja al volver de Google/Composio.
+- `.site` descartado: el código de conexión Composio no distingue servidor.
+- Corrección: `sameSite: "lax"` en `apps/web/src/app/api/admin/impersonate/route.ts` (PR #249,
+  `647b7d96`, desplegado 2026-09-28). Sin schema ni migraciones. No se hizo typecheck completo
+  (worktree sin node_modules).
+- Verificación: Milton reprodujo la conexión actuando como Pepe el 2026-09-28 tras el despliegue
+  y confirmó el 2026-10-01 que el caso quedó resuelto.
+- Capitanía reclamada y liberada por Claude. Estado: CERRADO Y ARCHIVADO.
+
 ## Claude — CIERRE fix «Conectar GSC», estado de GSC y conteo de categorías en Oportunidades — 2026-09-28
 
 - Reclamo de capitanía (sin migración): `migration-coordinator.sh claim "Claude"`.
@@ -22,7 +36,6 @@
 - Pendiente, fuera de alcance: los pasos 1-3 del guard aún envían al asistente
   genérico `/dashboard/configuracion?tab=wizard`.
 - Capitanía liberada. Estado: CERRADO Y ARCHIVADO.
-
 
 ## Despliegue verificado — 2026-09-23 — PR #220
 
@@ -10613,3 +10626,69 @@ consulta el resto y se recupera automáticamente solo si existe un único panel
 con categorías. Si hay varios, no se mezclan sitios y se devuelve un mensaje
 accionable. No cambia schema ni requiere migración. Auditorías locales: worker
 build OK, tests 20/20, fallback 3/3, web build 85/85 rutas y diff limpio.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-01
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-09-30
+(commit `48e736e`). Se revisó el rango `48e736e..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: 105 líneas agregadas (0 eliminadas, confirmado con
+`git diff --stat`), 4 entradas nuevas — las tres capitanías de MCP del 30/9 (asistente
+proactivo + fix real de bug de panel, PR #269/#270; prompts/list+get y descripciones
+estructuradas, PR #271; sin jerga técnica hacia el usuario, PR #272) y la entrada de
+Codex de recuperación segura de sincronización por panel/idioma (PR #273).
+
+Se verificó contra `git ls-remote`/`git merge-base --is-ancestor` que las cuatro ramas
+de este rango (`claude/mcp-proactivo-20260930`, `claude/mcp-prompts-workflows-20260930`,
+`claude/mcp-sin-jerga-20260930`, `codex/category-panel-autodetect-20260930`) ya están
+fusionadas en `origin/main` — las tres primeras como ancestros directos, la última por
+squash bajo el commit `6157e3d` (contenido de archivos verificado igual) — ninguna es
+una reserva activa ahora mismo.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: tres entradas nuevas, una por cada capitanía de Claude
+  (PR #269/#270, PR #271, PR #272), con commits, causa, archivos tocados, auditorías
+  reportadas y pendientes tal como constan en Coordinación. La entrada de Codex (PR #273)
+  ya estaba propagada por el propio Codex, no se duplicó.
+- `apps/web/src/content/manual-usuario.ts`: sección "Asistentes IA" ampliada con un
+  párrafo nuevo (sin tocar el texto existente) sobre el menú numerado proactivo desde el
+  primer mensaje, el lenguaje sin jerga técnica, y la nueva capacidad del asistente de
+  consultar el manual real de la plataforma (`ver_manual_seo_total`) en vez de inventar
+  respuestas — ninguno de los tres estaba reflejado todavía.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (verificación en vivo de arriba,
+  nada activo que registrar); Parte B con un addendum listando los 4 nombres de
+  conversación nuevos de este rango, todos ya cerrados y fusionados.
+- `TO-DO.md`: sin cambios — ninguna idea suelta nueva sin ejecutar en este rango (el
+  pendiente de `eliminar_oportunidades` ya estaba propagado desde la corrida anterior).
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. No se encontró ninguna mención nueva
+  a árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado.
+
+**Duda señalada, sin resolver por esta tarea** (agregada también como nota en
+`INVENTARIO_CONVERSACIONES.md`): los commits `b23b9af` y `7474bd7`, ya fusionados en
+`origin/main` el 2026-09-30, no tienen ninguna entrada correspondiente en este documento
+ni en `CONTROLADOR_DE_VERSIONES.md` — no hay registro de auditoría ni de verificación en
+producción para ese trabajo. Queda para que Milton (o quien hizo esos commits) decida si
+hace falta completarlo.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
+
+### CIERRE · PINTEREST POR COMPOSIO — 2026-10-01 — Claude
+
+Completa la tarea abierta en el traspaso del 2026-09-26 (§4 de ese bloque). Pinterest queda migrado a Composio, mismo patrón que Facebook/Instagram.
+
+- **PR:** [#276](https://github.com/miltondavila-ux/auto-articulos/pull/276), fusionado a `main` (commit `47673ff4`). Sin migración de base de datos.
+- **Auth config de Pinterest en Composio:** `ac_xcne_3PHnmCM` (OAuth administrado por Composio, "Composio Managed", 10 scopes por defecto — lectura/escritura de tableros y pins). Registrado y verificado en Administración → Composio.
+- **Variable de piloto:** `COMPOSIO_PILOT_USERS_PINTEREST=lorenalvarez30@gmail.com`, creada por Milton con `gh variable set`, pasada a los 3 workflows (`worker.yml`, `worker-test.yml`, `social-worker.yml`).
+- **Permiso habilitado:** `allowPinterestPublishing` activado para Lorena en Administración → Usuarios.
+- **Conexión real verificada con Lorena** (su propia sesión, no "Acceder como"):
+  - Tablero conectado: **Seguros de Salud y Vida** (código `1132725812469460961`).
+  - "Probar conexión" → `✓ Conexión correcta con Seguros de Salud y Vida`.
+  - **Pin real publicado**, confirmado en Historial → Redes Sociales: `01/10, 07:27 a.m. — PINTEREST — "Guía completa sobre los mejores seguros de salud en Florida" — ✓ Publicado`. Disparado vía Oportunidades en Redes → Publicar, procesado por `social-worker.yml` (ejecución `36855397120`, `success`).
+- **Manual actualizado** en el mismo PR (`apps/web/src/content/manual-usuario.ts`).
+- **Capitanía liberada** al cierre de este bloque.
+
+Con esto, **las 3 redes del proyecto "Redes por Composio" (GSC/GA, Facebook/Instagram piloto, Pinterest piloto) están en producción**. Threads sigue con conexión propia (decisión de Milton, sin cambios). Pendiente de Milton: decidir el lanzamiento de Facebook/Instagram/Pinterest a todos los usuarios (fuera del piloto).
+
+- **Capitán de migración liberó el lote:** Claude. Resultado: PINTEREST por Composio completado y verificado en produccion (PR #276, Pin real publicado).
