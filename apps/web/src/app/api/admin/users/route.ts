@@ -74,6 +74,7 @@ export async function GET() {
         role: true,
         monthlyArticleLimit: true,
         dailyArticleLimit: true,
+        socialDailyLimits: true,
         maxTitlesPerBatch: true,
         platformDomain: true,
         contentLanguage: true,
@@ -120,6 +121,22 @@ export async function GET() {
       GROUP BY r."userId"
     `,
   ]);
+
+  // Publicaciones de difusión ya hechas hoy, por usuario y plataforma, con el
+  // mismo corte de día que usa el worker (enforceSocialDailyLimit).
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const socialToday = await prisma.socialOpportunity.groupBy({
+    by: ["userId", "platform"],
+    where: { status: "published", publishedAt: { gte: startOfDay } },
+    _count: { _all: true },
+  });
+  const socialTodayByUser = new Map<string, Record<string, number>>();
+  for (const row of socialToday) {
+    const acc = socialTodayByUser.get(row.userId) ?? {};
+    acc[row.platform] = row._count._all;
+    socialTodayByUser.set(row.userId, acc);
+  }
 
   const publishedByUser = new Map(
     publishedCounts.map((row) => [row.userId, Number(row.count)]),
@@ -168,6 +185,7 @@ export async function GET() {
         tenMinutesUsername,
         connectedDomain,
         articlesPublished: publishedByUser.get(u.id) ?? 0,
+        socialPublishedToday: socialTodayByUser.get(u.id) ?? {},
       };
     }),
   });
@@ -186,6 +204,7 @@ export async function PATCH(request: NextRequest) {
     userId,
     monthlyArticleLimit,
     dailyArticleLimit,
+    socialDailyLimits,
     maxTitlesPerBatch,
     platformDomain,
     email,
@@ -220,6 +239,7 @@ export async function PATCH(request: NextRequest) {
   const data: {
     monthlyArticleLimit?: number | null;
     dailyArticleLimit?: number | null;
+    socialDailyLimits?: Record<string, number>;
     maxTitlesPerBatch?: number;
     platformDomain?: string;
     email?: string;
@@ -318,6 +338,22 @@ export async function PATCH(request: NextRequest) {
       );
     }
     data.dailyArticleLimit = dailyArticleLimit;
+  }
+
+  if ("socialDailyLimits" in body) {
+    if (!socialDailyLimits || typeof socialDailyLimits !== "object" || Array.isArray(socialDailyLimits)) {
+      return NextResponse.json({ error: "socialDailyLimits debe ser un objeto" }, { status: 400 });
+    }
+    const entries = Object.entries(socialDailyLimits);
+    const invalid = entries.find(([platform, limit]) =>
+      !/^[a-z0-9-]+$/.test(platform) || typeof limit !== "number" || !Number.isInteger(limit) || limit < 0 || limit > MAX_POSTGRES_INT);
+    if (invalid) {
+      return NextResponse.json(
+        { error: `El límite de "${invalid[0]}" debe ser un número entero mayor o igual a 0.` },
+        { status: 400 },
+      );
+    }
+    data.socialDailyLimits = Object.fromEntries(entries) as Record<string, number>;
   }
 
   if ("maxTitlesPerBatch" in body) {

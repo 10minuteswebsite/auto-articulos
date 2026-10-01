@@ -122,10 +122,24 @@ export async function GET() {
     }),
   ]);
 
-  const resolvedSearchConsole = await resolveSearchConsoleForUser(userId, account.selectedSiteDomain ?? "");
+  const [resolvedSearchConsole, analyticsComposioConnection] = await Promise.all([
+    resolveSearchConsoleForUser(userId, account.selectedSiteDomain ?? ""),
+    prisma.composioConnection.findFirst({
+      where: {
+        userId,
+        app: "google_analytics",
+        status: "ACTIVE",
+        ...(account.selectedSiteDomain ? { OR: [{ siteDomain: account.selectedSiteDomain }, { siteDomain: "" }] } : {}),
+      },
+      orderBy: { updatedAt: "desc" },
+      select: { propertyId: true, siteUrl: true },
+    }),
+  ]);
   const searchConsoleConfigured = Boolean(googleIntegration?.siteUrl) || (
     resolvedSearchConsole.source === "COMPOSIO" && Boolean(resolvedSearchConsole.state.composio?.siteUrl)
   );
+  const hasLegacyGoogleAnalytics = Boolean(googleAnalyticsIntegration?.siteUrl && googleAnalyticsIntegration.encryptedRefreshToken);
+  const hasActiveComposioAnalytics = Boolean(analyticsComposioConnection?.propertyId || analyticsComposioConnection?.siteUrl);
 
   const checks: ConfigurationCheck[] = [
     // ━━━ MÍNIMO PARA PUBLICAR ━━━
@@ -178,17 +192,17 @@ export async function GET() {
       required: false,
       section: "seo",
       description: "Conecta tu sitio a Google Search Console para indexar artículos y enviar sitemaps automáticamente.",
-      actionUrl: "/dashboard/configuracion?tab=integrations#google",
-      actionLabel: "Conectar Google",
+      actionUrl: "/dashboard/configuracion/conexiones?conexion=google-search-console",
+      actionLabel: "Conectar Search Console",
     },
     {
       id: "google-analytics",
       label: "Google Analytics",
-      configured: Boolean(googleAnalyticsIntegration?.siteUrl && googleAnalyticsIntegration.encryptedRefreshToken),
+      configured: Boolean((googleAnalyticsIntegration?.siteUrl && googleAnalyticsIntegration.encryptedRefreshToken) || hasActiveComposioAnalytics),
       required: false,
       section: "seo",
       description: "Conecta Google Analytics para que SEO TOTAL use datos reales de visitas al proponer contenidos.",
-      actionUrl: "/dashboard/configuracion?tab=integrations#analytics",
+      actionUrl: "/dashboard/configuracion/conexiones?conexion=google-analytics",
       actionLabel: "Configurar Google Analytics",
     },
     {
@@ -327,16 +341,46 @@ export async function GET() {
     },
   ];
 
-  if (resolvedSearchConsole.needsReconnect) {
+  const hasActiveComposioSearchConsole = Boolean(
+    resolvedSearchConsole.state.composio?.status === "ACTIVE" &&
+      resolvedSearchConsole.state.composio.hasSelection,
+  );
+
+  // Interruptor del aviso rojo de reconexión: apagado por defecto. "all" lo muestra a todos;
+  // una lista de IDs separada por comas lo limita a un piloto. Se apaga quitando la variable.
+  const reconnectNotice = (process.env.COMPOSIO_RECONNECT_NOTICE ?? "").trim();
+  const showReconnectNotice =
+    reconnectNotice === "all" ||
+    reconnectNotice.split(",").map((id) => id.trim()).filter(Boolean).includes(userId);
+
+  // El aviso es solo para quien YA tenía Search Console por la vía anterior; una cuenta nueva,
+  // en su arranque inicial, conecta por el asistente y no debe ver «reconectar».
+  const hasLegacyGoogleSearchConsole = Boolean(googleIntegration?.siteUrl);
+  const needsSearchConsoleReconnect = hasLegacyGoogleSearchConsole && !hasActiveComposioSearchConsole;
+
+  if (!showReconnectNotice) {
+    // Aviso apagado: no se agrega ninguna solicitud de reconexión.
+  } else if (needsSearchConsoleReconnect) {
     checks.push({
       id: "google-search-console-reconnect",
-      label: "Reconectar Google Search Console por Composio",
+      label: "Reconectar Google Search Console",
       configured: false,
       required: false,
       section: "seo",
-      description: "Tu conexión principal de Google Search Console está conservada, pero debes reconectar la conexión adicional por Composio.",
-      actionUrl: "/dashboard/configuracion/conexiones?vista=analiticas",
+      description: "Debes reconectar Google Search Console mediante Conexiones.",
+      actionUrl: "/dashboard/configuracion/conexiones?conexion=google-search-console&reconectar=1",
       actionLabel: "Reconectar Search Console",
+    });
+  } else if (hasLegacyGoogleAnalytics && !hasActiveComposioAnalytics) {
+    checks.push({
+      id: "google-analytics-reconnect",
+      label: "Reconectar Google Analytics",
+      configured: false,
+      required: false,
+      section: "seo",
+      description: "Debes reconectar Google Analytics mediante Conexiones.",
+      actionUrl: "/dashboard/configuracion/conexiones?conexion=google-analytics&reconectar=1",
+      actionLabel: "Reconectar Analytics",
     });
   }
 

@@ -1130,6 +1130,72 @@ de que Tumblr rechazó también la renovación silenciosa y hace falta
 reconectar por OAuth.
 Estado: VERIFICADA
 
+## Versión desplegada y verificada — 2026-09-24 — corrección de retornos OAuth
+
+Fecha y hora: 2026-09-24
+Versión/commit: `67547d5bc60574dc4b15567b6fa7c86dd0b8c975`
+Rama: `main`
+Cambios: retornos canónicos de Bing Webmaster, Google Search Console y Google Analytics hacia Conexiones.
+Auditoría: 4 archivos modificados; sin archivos eliminados, schema, migraciones, secretos ni configuración de Vercel.
+Build: aprobado; `git diff --check`: aprobado.
+Deployment/Vercel: `dpl_EWEEyzv8ZpK3ZTvR4fMnSDuUqrtn`, producción READY.
+Dominio: `https://seototal.lasolucionweb.com`.
+Estado: VERIFICADA / CERRADA.
+Siguiente acción: ninguna pendiente para esta entrega.
+Responsable: Codex - GPT-5.
+
+## Versión desplegada y verificada — 2026-09-23 — PR #220
+
+Fecha y hora: 2026-09-23 17:16 EDT
+Versión/commit: `8d2cd7062ae4bb755356bd0d41acd6b308585559` (merge de PR #220)
+Rama: `main`
+Cambios incluidos: interfaz responsive, separación de Historial y Estadísticas,
+mejoras de Progreso y Actualizaciones, y guía de uso simplificada y modular.
+Migraciones creadas: ninguna.
+Migraciones aplicadas: ninguna.
+Auditorías: 47 pruebas web, typecheck, build web con 85 rutas y
+`git diff --check`, todo correcto.
+Deployment/Vercel: `dpl_J5LbK5K2eM4qppiTMDtJwqAaaRBv`, estado READY.
+Dominio: `https://seototal.lasolucionweb.com`.
+Producción verificada: `/login` 200; rutas protegidas redirigen a login sin
+sesión, como corresponde.
+Estado: VERIFICADA.
+
+## Versión preparada — 2026-09-23 16:10 EDT — permiso condicional de difusión social/blog
+
+Se corrigió el caso reportado en producción donde la tarjeta `03 PUBLICA EN REDES
+SOCIALES Y EN BLOGS PÚBLICOS` podía aparecer sin una aprobación explícita de
+Administración. La regla queda centralizada en servidor: administradores (o un
+administrador actuando como otra cuenta) conservan acceso; las cuentas normales
+solo lo reciben cuando al menos una red o blog está marcado en `Permisos y estado
+de cuenta`. La misma regla se usa para la tarjeta de Inicio, el menú, el bloque
+`Comienza Aquí`, el guard de ruta y las API de difusión. Se eliminó la excepción
+por correo fijo y se añadieron a `/api/me` todas las aprobaciones necesarias,
+incluidas Blogger, Google Business, Pinterest y Tumblr.
+
+Archivos modificados: `apps/web/src/app/api/me/route.ts`,
+`apps/web/src/app/dashboard/page.tsx`, `apps/web/src/components/ComienzaAqui.tsx`,
+`apps/web/src/components/DashboardNav.tsx`, `apps/web/src/components/ModuleGuard.tsx`,
+`apps/web/src/lib/current-user.ts`, `apps/web/src/lib/social-access.ts` y su prueba.
+Archivos eliminados: ninguno.
+Migraciones creadas: ninguna.
+Migraciones aplicadas: ninguna.
+Auditoría 1: APROBADA — `git diff --check`, sin schema, migraciones, workflows,
+secretos ni archivos eliminados.
+Auditoría 2: APROBADA — typecheck web y 47 pruebas (la integración opcional de
+generación de títulos permanece omitida por no tener `TITLE_GENERATION_TEST_DATABASE_URL`).
+Auditoría 3: APROBADA — build web completo con 85 rutas.
+Deployment/Vercel: `dpl_5t33hR8ELrWDkXxutUzGim8tZEfC`, estado `READY` / completado;
+alias `https://seototal.lasolucionweb.com` activo.
+Producción verificada: sí — `/login` 200, `/privacidad` 200, `/api/me` 401 sin
+sesión y `/dashboard` 307 hacia autenticación. La pestaña productiva abierta se
+recargó; para Rafael Zuzolo la tarjeta sigue visible porque su cuenta aún tiene
+al menos una aprobación social/blog persistida, que es el comportamiento correcto
+de la regla nueva.
+Commit de producción: `3ed548bcf66700dd782c225ee4e623778f85084e` (merge de PR #218).
+Responsable: Codex - GPT-5.
+Estado: DESPLEGADA / VERIFICADA.
+
 ## Versión preparada — 2026-09-04 — instrucciones de Oportunidades / migración a Claude
 
 Fecha y hora: 2026-09-04
@@ -3305,3 +3371,574 @@ segunda vez. Deployment válido informado por CONEXION POSTPEER: `dpl_HKDYsh3jkF
 hubo merge, deploy, migración ni reset adicional por esta reconciliación. Ver hallazgo técnico
 relacionado en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Responsable: Codex (CONEXION POSTPEER). Estado:
 RECONCILIADO, SIN ACCIÓN DE DESPLIEGUE ADICIONAL.
+
+## Versión desplegada — 2026-09-22 — CONEXION POSTPEER 2, corrección de imagen de GBP vía og:image (PR #211)
+
+PR #211 fusionado a `main` mediante el commit `9afbdd3` ("fix(gbp): use article og image fallback
+(#211)"). Registra el resultado de la entrada "Continuación CONEXION POSTPEER 2 — 2026-09-22" de
+Coordinación (que no se reescribe): `apps/worker/src/businessProfilePublish.ts` ahora usa primero
+`SocialOpportunity.imageUrl` y, si falta, obtiene la `og:image` pública del artículo exacto mediante
+`getArticleOpenGraphImage`; si tampoco existe, falla antes de publicar, así GBP nunca publica sin
+foto. Auditoría registrada en Coordinación: TypeScript del worker OK, `git diff --check` OK. Verificado
+en vivo contra `origin/main` (esta corrida, 2026-09-23): el commit ya está fusionado, aunque
+Coordinación todavía lo describía como "sin merge" al momento de escribirse. **No hay en Coordinación
+ninguna confirmación explícita de que el deployment de Vercel Production ya corrió con este cambio, ni
+de que se haya ejecutado la prueba productiva autorizada de Lorena** — se deja así, sin inventar un
+estado no confirmado por escrito. Responsable: Codex. Estado: EN `origin/main`, DESPLIEGUE NO
+CONFIRMADO POR ESCRITO.
+
+## Versión desplegada — 2026-09-22 — Ajustes responsive, tarjetas de Inicio y menú de Configuración (Codex)
+
+Conjunto de cambios de interfaz de Codex documentados en Coordinación bajo las entradas "OPERACIÓN
+LOCALHOST", "Despliegue de interfaz móvil", "Responsive móvil — instrucciones plegables", "Responsive
+móvil — segunda revisión completa", "Márgenes y paddings estandarizados", "Radio uniforme de
+esquinas", "Textos de tarjetas de Inicio", "Nombres dinámicos de módulos", "Preferencia de trabajo
+vigente", "Auditoría triple responsive" y "Menú de configuración" (todas 2026-09-22). Incluye:
+instrucciones plegables en móvil manteniendo los controles de ejecución visibles, unificación de
+`sectionStyle` (espaciado y esquinas a 6px), nuevas tarjetas y textos de Inicio usando los nombres
+dinámicos de `MENU_NAMES` (`CONTENIDO PROPIO`, `CONTENIDO GENERADO POR IA`, `PUBLICA EN REDES SOCIALES
+Y EN BLOGS PÚBLICOS`), y el traslado de "Cómo funciona esta aplicación" al menú de Configuración
+(escritorio y hamburguesa móvil). Coordinación registra, para cada paso, build OK con 85 rutas y
+deployments Vercel Production en estado **READY** con alias `https://seototal.lasolucionweb.com`
+verificado en HTTP 200: `dpl_5L4rSNUBbu2sj1XizLAW4bWSY6hx`, `dpl_HTZyWZZUmMe6c9mAfH1ThogW2Dcd`,
+`dpl_F86AZPRzMnuWgHwyRfrtFcF7Zuye`, `dpl_CPZPSqQVnv1snkAWdQn4Zj3aFLFW`,
+`dpl_ABN5tEMRrgSBMbMR1AhdRiwD2iHi`, `dpl_FwSf6f97R8JanPmFLKsBSjxwv51X`,
+`dpl_7G65JoYiwtBsWPAtrNBZ9J3WaCzj` y `dpl_6CE59HWgdmvdu45QJJvJWQT3yC7m`. Sin cambios de schema ni
+migraciones en ninguno de estos pasos, según Coordinación. Verificado en vivo (esta corrida,
+2026-09-23): todo este trabajo quedó consolidado en un único commit directo a `origin/main`,
+`92d5737` ("fix: avisar limites de texto antes de guardar"), que además incluye cambios de lógica no
+descritos en estas entradas (por ejemplo, avisos de límite de texto antes de guardar) — fuera del
+alcance de esta propagación porque Coordinación no tiene una entrada propia que los describa. **No hay
+en Coordinación confirmación explícita de que el commit final `92d5737` en `origin/main` haya sido
+redesplegado a Production con ese SHA exacto** (los `dpl_` listados corresponden a pasos intermedios
+anteriores al commit final) — se deja anotado así, sin inventar un estado no confirmado por escrito.
+Responsable: Codex. Estado: EN `origin/main`, DESPLIEGUE DEL COMMIT FINAL NO CONFIRMADO POR ESCRITO.
+
+## Versión preparada — 2026-09-23 15:39 EDT — sincronización visual localhost → producción
+
+Fecha y hora: 2026-09-23 15:39 EDT
+Versión/commit: `ab56a946` (`feat: sincroniza interfaz responsive con produccion`, rebaseado sobre `origin/main`)
+Rama: `codex/sincronizacion-produccion-20260923`
+Worktree: `/Users/miltondavila/.codex/worktrees/1140/Creador de articulos`
+Conversación/proyecto: actualización autorizada de producción desde localhost
+Cambios incluidos: sincronización responsive y monocromática, márgenes,
+paddings y esquinas de 6px, Inicio, menú móvil, Configuración, Conexiones,
+Historial, Estadísticas y Progreso; permiso condicional de la tercera acción;
+manual del asistente y coordinación.
+Archivos modificados: 35 en el commit original; la rama se rebasó sobre el
+`main` actual para conservar sus cambios posteriores.
+Archivos eliminados: ninguno.
+Migraciones creadas: ninguna.
+Migraciones aplicadas: ninguna.
+Auditoría 1: APROBADA — diff sin schema, migraciones, workflows, configuración
+de Vercel, secretos ni archivos eliminados.
+Auditoría 2: APROBADA — typecheck web, build del worker y 44 pruebas web.
+Auditoría 3: APROBADA para entrega — build web completo con 85 rutas y
+`git diff --check`.
+Diff revisado: sí; el PR #216 tenía Preview y checks Vercel en verde antes del
+rebase; GitHub reportó conflicto por avance de `main` y se resolvió mediante
+rebase conservador, conservando la base vigente.
+Deployment/Vercel: Preview `4Be1DddBAoNmWrF82961Hdamidxi` correcto; producción
+pendiente de fusión.
+Estado de Vercel: Preview READY; Producción pendiente.
+Dominio verificado: pendiente.
+Logs verificados: pendiente.
+Producción verificada: pendiente.
+Problemas conocidos: la integración de generación de títulos requiere
+`TITLE_GENERATION_TEST_DATABASE_URL`; no bloquea el build ni las pruebas
+unitarias pasadas.
+Responsable: Codex - GPT-5.
+Siguiente acción: actualizar PR #216, esperar checks,
+fusionar a `main` y verificar Vercel, dominio y rutas críticas.
+Estado: PREPARADA
+
+## Versión desplegada y verificada — 2026-09-23 15:56 EDT — sincronización visual localhost → producción
+
+Fecha y hora: 2026-09-23 15:56 EDT
+Versión/commit: `e5b9efeb746f873d32b33497187d8cc37b700355` (merge de PR #216)
+Rama: `main`
+Worktree: `/Users/miltondavila/.codex/worktrees/1140/Creador de articulos`
+Conversación/proyecto: actualización autorizada de producción desde localhost
+Cambios incluidos: interfaz responsive y monocromática, márgenes y paddings
+uniformes, esquinas de 6px, Inicio y menú móvil, Configuración, Conexiones,
+Historial, Estadísticas y Progreso; permiso condicional de la tercera acción;
+manual del asistente y coordinación.
+Archivos modificados: 35 en la rama de entrega; sin archivos eliminados.
+Migraciones creadas: ninguna.
+Migraciones aplicadas: ninguna.
+Auditoría 1: APROBADA — sin schema, migraciones, workflows, configuración de
+Vercel, secretos ni archivos eliminados.
+Auditoría 2: APROBADA — typecheck web, build del worker y 44 pruebas web; la
+integración opcional de generación de títulos no tiene base configurada.
+Auditoría 3: APROBADA — build web completo con 85 rutas, Preview Vercel en
+verde y `git diff --check` limpio.
+Diff revisado: sí; PR #216 rebasado sobre `main`, Preview verificado y merge
+confirmado en GitHub.
+Deployment/Vercel: `5yzerDfhob5fAANmXyCBGJxzCDcg`, estado `success` / completado.
+Estado de Vercel: producción READY/verificada.
+Dominio verificado: sí — `https://seototal.lasolucionweb.com`.
+Logs verificados: no se solicitó acceso adicional a logs; checks de Vercel y
+respuestas HTTP públicas correctos.
+Producción verificada: sí — `/login` 200, `/privacidad` 200, `/api/me` 401 sin
+sesión y `/dashboard` 307 hacia autenticación; pestaña productiva recargada.
+Problemas conocidos: la prueba de integración de generación de títulos requiere
+`TITLE_GENERATION_TEST_DATABASE_URL`; no bloquea la entrega verificada.
+Responsable: Codex - GPT-5.
+Siguiente acción: ninguna pendiente para esta entrega; mantener localhost y
+producción abiertas para la siguiente revisión.
+Estado: VERIFICADA
+
+## Versión preparada — 2026-09-24 — lote MANAGER DE COMMITS
+
+Fecha y hora: 2026-09-24
+Versión/commit: rama `codex/manager-commits-20260924`, basada en `origin/main@290fc0ab`; commits `057f4449`, `1b342fa6`, `d6b61dd4`, `0c938371`.
+Rama: `codex/manager-commits-20260924`
+Worktree: `/Users/miltondavila/.codex/worktrees/30cf/Creador de articulos`
+Conversación/proyecto: MANAGER DE COMMITS — limpieza y preparación de lote
+Cambios incluidos: marca SEO TOTAL en cabecera; borrado total de oportunidades
+con el mismo alcance que la lista visible; comprobación de login del wizard en
+5 segundos, detección paralela de servidores y cierre de onboarding con tres
+acciones; ajuste visual de `DashboardNav`; actualización del manual de usuario.
+Archivos eliminados: ninguno
+Migraciones creadas: ninguna
+Migraciones aplicadas: ninguna
+Auditoría 1: APROBADA — diff revisado; sin schema, migraciones, secretos,
+workflows ni archivos eliminados.
+Auditoría 2: APROBADA — Prisma generate correcto; build web de 85 rutas; suite
+worker 20/20; typecheck web y build worker ejecutados correctamente tras
+regenerar Prisma; `git diff --check` limpio.
+Auditoría 3: PENDIENTE — falta push, Preview, merge, deployment y verificación
+de Producción.
+Diff revisado: sí
+Deployment/Vercel: pendiente
+Estado de Vercel: pendiente
+Dominio verificado: pendiente
+Logs verificados: pendiente
+Producción verificada: pendiente
+Problemas conocidos: `npm ci` reportó 4 vulnerabilidades altas preexistentes;
+no se ejecutó `npm audit fix`. El entorno no tenía dependencias al inicio.
+Responsable: MANAGER DE COMMITS
+Siguiente acción: push de la rama, abrir/actualizar PR, esperar checks de
+Preview y verificar Producción antes de declarar el lote estable.
+Estado: PREPARADA
+
+## Versión desplegada y verificada — 2026-09-24 — lote MANAGER DE COMMITS
+
+Fecha y hora: 2026-09-24
+Versión/commit: `0556a384` (squash del PR #222)
+Rama: `main`
+Worktree: `/Users/miltondavila/.codex/worktrees/30cf/Creador de articulos`
+Conversación/proyecto: MANAGER DE COMMITS — limpieza y preparación de lote
+Cambios incluidos: SEO TOTAL en cabecera; borrado total de oportunidades con
+alcance visible; mejoras del asistente de conexión y cierre de onboarding;
+ajuste visual de `DashboardNav`; manual, coordinación y controlador actualizados.
+Archivos eliminados: ninguno
+Migraciones creadas: ninguna
+Migraciones aplicadas: ninguna
+Auditoría 1: APROBADA — PR #222 revisado; sin schema, migraciones, secretos,
+workflows ni archivos eliminados.
+Auditoría 2: APROBADA — Prisma generate correcto; build web de 85 rutas; suite
+worker 20/20; typecheck web y build worker correctos; `git diff --check` limpio.
+Auditoría 3: APROBADA — Preview Vercel y Production success; rutas críticas
+verificadas.
+Diff revisado: sí
+Deployment/Vercel: `C33s7P7sRW2kDYnwDhpJnAzomBPT`, success
+Estado de Vercel: READY/success
+Dominio verificado: sí — `https://seototal.lasolucionweb.com`
+Logs verificados: deployment success; no se solicitó acceso adicional a logs
+de runtime.
+Producción verificada: sí — `/login` 200, `/privacidad` 200, `/api/me` 401 y
+`/dashboard` 307 hacia login.
+Problemas conocidos: `DATABASE_URL` no está configurada en este worktree, por
+lo que el hook local no pudo registrar ProductUpdate; no afecta el deployment.
+Responsable: MANAGER DE COMMITS
+Siguiente acción: ninguna pendiente de este lote.
+Estado: VERIFICADA
+
+## Versión desplegada y verificada — 2026-09-25 — CONEXION COMPOSIO (avisos de reconexión GSC/GA)
+
+Fecha y hora: 2026-09-25
+Versión/commit: `abb687dd` (squash del PR #224)
+Rama: `main`
+Worktree: `/Users/miltondavila/.codex/worktrees/produccion-validacion-composio/Creador de articulos`
+Conversación/proyecto: CONEXION COMPOSIO — avisos GSC→GA, pantallas dedicadas y éxito estático
+Cambios incluidos: aviso rojo secuencial en Inicio para reconectar Google
+Search Console y, solo si aplica, Google Analytics vía Composio (uno a la
+vez); pantallas dedicadas de Conexiones con estado "Conexión activa" y
+pantalla estática de "Conexión exitosa" con botón único "Volver al Inicio";
+Facebook/Instagram por Composio sin ofrecer Stories; interruptor de entorno
+`COMPOSIO_RECONNECT_NOTICE` (apagado por defecto) para controlar el aviso.
+Archivos eliminados: ninguno, según lo descrito en Coordinación
+Migraciones creadas: ninguna
+Migraciones aplicadas: ninguna
+Auditoría 1/2/3: Coordinación no usa ese formato exacto para este lote; en su
+lugar registra varias auditorías propias (validación local de la transición
+GSC/GA, auditoría del camino de usuario, aclaratoria de UI wizard vs.
+Conexiones, triple auditoría final de localhost activo, auditoría de redes
+sociales bajo Composio) — ver `COORDINACION_CLAUDE_CODEX.md`, bloque
+"TRASPASO A CLAUDE · CONEXIÓN COMPOSIO · ESTADO VIGENTE — 2026-09-25" y las
+secciones inmediatamente anteriores.
+Diff revisado: sí, según Coordinación
+Deployment/Vercel: éxito, según Coordinación ("Vercel Production `success`;
+rutas responden sin 5xx")
+Estado de Vercel: READY/success
+Dominio verificado: sí — `https://seototal.lasolucionweb.com`
+Logs verificados: Coordinación no detalla acceso a logs de runtime para este
+lote
+Producción verificada: sí — prueba real en producción con el usuario Rafael
+Zuzolo: flujo completo aviso GSC → reconexión → éxito → aviso GA →
+reconexión → éxito → Inicio limpio, calificada por Milton como "Prueba muy
+exitosa".
+Problemas conocidos: banderas `COMPOSIO_CONSUMER_READY.*` y
+`COMPOSIO_ROUTING_ENABLED` siguen en `false`; variable
+`COMPOSIO_RECONNECT_NOTICE=all` definida en Vercel Production (piloto
+abierto a todos los usuarios) y redesplegado.
+Responsable: Codex (implementación y auditorías) / Claude (revisión,
+liberación y prueba con Milton).
+Siguiente acción: 8 mejoras de UX pedidas por Milton tras la prueba real (ver
+`COORDINACION_CLAUDE_CODEX.md`, bloque "TRASPASO A NUEVA CONVERSACIÓN ·
+CONEXIÓN COMPOSIO · 8 MEJORAS UX — 2026-09-25"). Las mejoras 1, 2 y 5 ya
+están fusionadas en `main` (commit `36ecd08`, PR #225: botón "Reconectar
+ahora" en el aviso, etiquetas "PASO 1 DE 2"/"PASO 2 DE 2" y mensaje "Debes
+reconectar ahora" en la pantalla de reconexión), pero Coordinación no
+registra para ese commit una confirmación explícita de deployment/Producción
+con el mismo detalle que el PR #224 — queda para una próxima corrida
+verificar y completar esa confirmación si aparece. Las mejoras 3, 4, 6, 7, 8
+y 9 siguen pendientes de codificar.
+Estado: VERIFICADA (PR #224, `abb687dd`). PR #225 (`36ecd08`, mejoras 1, 2 y
+5): FUSIONADA A `main`, DEPLOYMENT/PRODUCCIÓN SIN CONFIRMACIÓN EXPLÍCITA EN
+COORDINACIÓN A LA FECHA DE ESTA ENTRADA.
+
+## Claude — CONEXION DE GSC NO SE DESCONECTA — cierre — 2026-09-26
+
+- **Commits en `main`:** `5ff6bc47` (PR #240) y `d8183e3e` (PR #242). Sin migraciones ni cambios de schema; sin datos modificados.
+- **#240:** `POST /api/composio/disconnect` usa `getComposioUserForApp`; GSC y GA abiertos a toda cuenta activa. Regresión de `479ca92f` (2026-09-23).
+- **#242:** `lockableDomain()` en `composio-options.ts`; el bloqueo de «un dominio por cuenta» solo aplica si `selectedSiteDomain` es un dominio real. Causa: la cuenta de Rosalia guarda `selectedSiteDomain="Español"` (nombre de panel).
+- **Auditorías:** integridad (diffs completos revisados), funcional (`npm test` 71/71, `tsc` limpio, `next build` OK), regresión (Preview de Vercel OK en ambos PR; solo cambian la ruta de desconexión y la regla de bloqueo).
+- **Producción:** Vercel `success` en ambos commits; `/login` 200; opciones de GSC de Rosalia 0 → 108 elegibles, 26 bloqueadas por permiso, 1 recomendada. Desconectar/reconectar/guardar/probar: confirmado por Milton en vivo.
+- **Efecto:** cuentas con nombre de panel en lugar de dominio dejan de tener todas las propiedades bloqueadas (GSC y Analytics).
+- **Pendientes:** prueba en vivo de Analytics; `scripts/generate-product-update.ts` no corrió en los commits (sin `DATABASE_URL` local).
+- **Estado:** VERIFICADA Y ARCHIVADA.
+
+## Versión desplegada — 2026-09-26 — REPARACION DE ADMIN
+
+- **Commit:** `49860952` (PR #235, squash). Deployment de Producción de Vercel
+  `6680201412` en estado `success` para ese commit.
+- **Contenido:** rediseño de Administración (`/dashboard/usuarios`) estilo Apple;
+  guardado único por ficha; límites diarios de difusión por red y formato con
+  «hoy N»; validación 400 en `PATCH /api/admin/users`; manual actualizado.
+- **Migraciones:** ninguna. La columna `User.socialDailyLimits` (migración
+  `20260921140000`) ya existía en Producción: Milton ejecutó la consulta en
+  `information_schema` y devolvió fila.
+- **Triple auditoría en Producción:**
+  1. Integridad: `origin/main` = `49860952`; el diff contra `0445e0b2` son solo
+     `usuarios/page.tsx`, `api/admin/users/route.ts`, manual y 2 documentos.
+  2. Regresión: `/login` 200; sin sesión `/api/admin/users` 401; con sesión de usuario
+     normal (Lorena) `/dashboard` 200 y `/api/admin/users` 403 (control de acceso
+     intacto).
+  3. Funcional (con sesión de administrador, cuenta de pruebas Lorena Álvarez, 99
+     usuarios): las 5 pestañas cargan sin errores; la ficha muestra las 7 secciones,
+     16 formatos con límite y «hoy N»; `GET /api/admin/users` devuelve
+     `socialPublishedToday`; valor inválido → error claro sin llegar al servidor;
+     «Descartar» restaura; Editar/Eliminar llegan a su confirmación y se cancelan;
+     guardado real de `threads=2` → «Cambios guardados.» y confirmado en el servidor;
+     restaurado a `{}` (HTTP 200). El JavaScript servido contiene el texto nuevo y no
+     el antiguo «(JSON)». Regresión con sesión admin: `/dashboard`, `/publicar`,
+     `/oportunidades`, `/oportunidades-redes`, `/historial`, `/configuracion`,
+     `/publicaciones-en-curso`, `/como-funciona`, `/login` → 200.
+     **No probado:** «Acceder como», «Copiar credenciales» y guardar en «Editar»
+     (efectos sobre sesión/portapapeles/datos de una cuenta).
+  Nota: en Producción Lorena tenía `socialDailyLimits = {}` (sin backfill); el worker lo
+  interpreta como 1 por día, igual que la interfaz.
+- **Capitanía de migración:** liberada 2026-09-26.
+
+### Relleno de límites de difusión en Producción — 2026-09-26
+
+- La migración `20260921140000` solo se había aplicado en su parte de columna: las 99
+  cuentas tenían `socialDailyLimits = {}`. Milton ejecutó a mano en Supabase el `UPDATE`
+  de relleno (16 claves en 1, incluida `instagram-infografia`), acotado a filas en `{}`.
+- Verificado por Claude con `GET /api/admin/users` en Producción: 99 cuentas, 16 claves
+  cada una, ninguna con valor distinto de 1, ninguna vacía. Sin cambio de comportamiento
+  (el worker ya trataba «sin valor» como 1).
+
+### Renombrado de controles — 2026-09-26 — REPARACION DE ADMIN
+
+- **Commit:** `6dff79e2` (PR #237). Deployment de Producción `success`. Solo textos.
+- La ficha separa dos controles de cantidad: **«Límites de artículos»** (mes/día/lote de
+  creación) y **«Difusión: redes sociales y blogs»** (aprobaciones + publicaciones por
+  día). Renombrado también en el formulario de crear usuario y en el manual.
+- Verificado en Producción (sesión admin, cuenta de pruebas Lorena): secciones Cuenta,
+  Acceso, Difusión, Imágenes con IA, Límites de artículos, Acciones e Historial; 16
+  formatos de difusión; sin títulos antiguos. Sin migraciones. Capitanía liberada.
+
+## Versión desplegada — 2026-09-26 — CONEXION COMPOSIO mejoras UX 3/4/6/7/8/9/10 + piloto Facebook/Instagram
+
+- **Commits/PRs (fusionados en ese orden sobre `main`, `d8c2adfd`):** PR #226 (errores de
+  conexión en español claro, mejora 10; traductor `friendlyConnectionError`, nunca JSON ni
+  inglés); PR #228 (mejoras 3, 6, 7, 8, 9: dropdown ordenado con selección única, éxito con
+  nombre y código, «Probar conexión» corta sin listar otras cuentas, botón «Volver al menú
+  de Conexiones», sin pasos si ya está activa); PR #229 (mejora 4: sitemap al guardar la
+  propiedad de Search Console — «ya estaba en Google» / «Enviamos tu sitemap», sin
+  migración; manual de usuario actualizado); PR #227 (workflows: pasan
+  `COMPOSIO_PILOT_USERS_FACEBOOK/INSTAGRAM` al worker, independiente, sin variables no
+  cambia el comportamiento).
+- **Verificado en localhost:3001** (cuenta de Lorena): dropdown, éxito con nombre+código,
+  sitemap en éxito, prueba con error claro, botón de volver, pasos ocultos. `tsx --test`:
+  10 en verde. `tsc` web limpio. La llamada real a Google/Composio del sitemap solo se
+  probó después en producción con una cuenta real.
+- **Piloto habilitado:** variables de repo `COMPOSIO_PILOT_USERS_FACEBOOK` y
+  `COMPOSIO_PILOT_USERS_INSTAGRAM` = `lorenalvarez30@gmail.com`; módulo «Conexión por
+  Composio» habilitado para Lorena. Sin tocar `COMPOSIO_CONSUMER_READY.*` ni
+  `COMPOSIO_ROUTING_ENABLED`.
+- **Pendientes abiertos al cierre de este lote:** #11 (aviso rojo «PASO 1 DE 2» salía
+  también a usuarios nuevos), #12 (el cliente no debe ver la palabra «Composio»), #13
+  (enlace roto de Facebook en Historial).
+- **Responsable:** Claude. **Estado:** DESPLEGADA.
+
+## Versión desplegada y verificada — 2026-09-26 — Piloto Facebook/Instagram por Composio en producción
+
+- **Piloto:** Lorena Álvarez (`lorenalvarez30@gmail.com`, userId
+  `cms8cv2f40000x3xauyqqeenc`).
+- **Producción verificada con los Logs de Composio** (proyecto
+  `10minuteswebsite_workspace_first_project`): Facebook Page
+  `FACEBOOK_CREATE_PHOTO_POST` Success 08:40:23 hora local Milton (el post apareció en la
+  Página); Instagram `INSTAGRAM_POST_IG_USER_MEDIA` 08:47:43 e
+  `INSTAGRAM_POST_IG_USER_MEDIA_PUBLISH` 08:47:47, ambos Success.
+- Generación limitada a `facebook-page` e `instagram-post`, sin Stories. El worker normal
+  (cada 5 min) tomó las publicaciones antes que `worker-test.yml`; para confirmar la vía se
+  usaron los Logs de Composio.
+- **Pendientes:** #11, #12, #13 (ver entrada anterior); mensaje en Historial que indique la
+  vía usada; ampliar a más usuarios o cambiar `COMPOSIO_CONSUMER_READY.facebook/instagram`
+  solo con autorización de Milton.
+- **Responsable:** Claude. **Estado:** VERIFICADA EN PRODUCCIÓN (piloto acotado a Lorena).
+
+## Versión desplegada — 2026-09-26 — Lote pendientes 11/12/13 + paridad Facebook/Instagram por Composio
+
+- **Commit:** `0445e0b2` (PR #230, squash). Vercel Production `success`. Verificado en
+  pantalla real de Lorena.
+- **#11:** el aviso rojo solo sale ahora a cuentas que ya tenían Search Console conectado
+  por la vía anterior.
+- **#12:** el cliente ya no ve la palabra «Composio» en interfaz, errores ni manual
+  (permanecen el menú y el módulo de Administración).
+- **#13:** Historial usa el enlace real de Facebook; sin enlace conocido no se muestra el
+  botón (Instagram queda sin enlace en este lote: el permalink exige una operación nueva de
+  Composio fuera de la lista permitida).
+- Facebook e Instagram pasan al mismo patrón visual y de UX que GSC/GA (tarjeta propia, 5
+  pasos, notas al elegir, mensajes de retorno, dropdown, éxito con nombre y código, probar
+  conexión, volver al menú). Manual actualizado.
+- **Pendiente:** permalink de Instagram; mensaje en historial de la vía usada; lanzamiento
+  a todos los usuarios (decisión de Milton; para el lanzamiento a todos considerar aviso de
+  reconexión para quienes tengan Facebook/Instagram por la vía anterior).
+- **Responsable:** Claude. **Estado:** DESPLEGADA Y VERIFICADA.
+
+## Versión desplegada y verificada — 2026-09-26 — Redes: estandarización completa (patrón GSC/GA en todas las conexiones)
+
+- **Commits:** PR #231 (retorno de autorizaciones y errores claros) y PR #234
+  (componentes estándar + Threads/LinkedIn/Pinterest/Tumblr/Blogger/Bluesky/DEV.to/Google
+  Business Profile/Bing con el patrón de GSC/GA; incluye el trabajo de los PR #232 y #233,
+  cerrados sin fusión propia) fusionados en `main` (`a23f532d`). Vercel Production
+  `success`. Sin migración ni cambio de banderas.
+- **Verificado en producción con las conexiones reales de Lorena Álvarez:** las 10
+  tarjetas de Difusión en el patrón estándar; «Probar conexión» real OK en Tumblr, Blogger,
+  Bluesky, DEV.to, LinkedIn y Google Business Profile. Threads responde 403 en la prueba
+  porque a esa cuenta no se le activó «Publicar en Threads» en Administración (dato, no
+  error; su tarjeta se muestra por la regla general del módulo).
+- **Auditoría visual medida** (estilos y distancias) contra GSC/GA: tres auditorías
+  consecutivas sin diferencias en estado conectado y sin conectar.
+- **Pendiente menor al cierre:** DEV.to mostraba «@» delante de un usuario que ya es un
+  correo; permalink de Instagram en Historial; retirar la página antigua «Redes Sociales»
+  (los tres se resolvieron después, ver la entrada siguiente, PR #244).
+- **Responsable:** Claude. **Estado:** DESPLEGADA Y VERIFICADA.
+
+## Commits — 2026-09-26 — ajustes finales de redes y Bing (Coordinación no detalla el formato completo de auditoría/producción para estos tres)
+
+- PR #239 (`c07425e3`): Bing vuelve a mostrar el motivo técnico de una reconexión fallida
+  (solo administradores) y no ofrece «Nueva conexión» mientras carga.
+- PR #244 (`7efe035`): enlace real de Instagram en Historial (guarda el permalink al
+  publicarse vía `INSTAGRAM_GET_IG_MEDIA`, de solo lectura, y lo consulta para
+  publicaciones antiguas al pulsar «Ver en la red social»), corrige el «@» de más delante
+  de un usuario que ya es un correo en DEV.to, y retira la página antigua «Redes Sociales»
+  (la URL antigua redirige a Configuración → Conexiones → Difusión).
+- PR #245 (`9e187a8`): la conexión de Bing siempre empieza en el dominio registrado
+  (`https://seototal.lasolucionweb.com`), evitando que se rompa por cookies/sesión al pasar
+  por el dominio de Vercel.
+- Coordinación no registra para estos tres PR el mismo detalle de auditoría/producción que
+  otros lotes (Fecha y hora exacta, Auditoría 1/2/3, Logs verificados, etc.); esta entrada
+  transcribe lo que sí consta en la sección "Dónde estamos" del traspaso de Pinterest
+  (2026-09-26) y en el propio mensaje de cada commit. Quien retome debe completar el
+  detalle si hiciera falta.
+- **Estado:** FUSIONADOS A `main` según Coordinación; confirmación de despliegue detallada
+  pendiente.
+
+## Versión desplegada y verificada — 2026-09-28 — Fix «Conectar GSC» y conteo de categorías en Oportunidades (PR #251)
+
+- **Commits:** `50095a0d` (fix, PR #251) y `bd0b7a1` (cierre documental, PR #252),
+  fusionados en `main`. Vercel Production `success`; sin migraciones.
+- **Causa:** `/dashboard/oportunidades` solo leía la conexión antigua de Google
+  (`/api/search-integrations/google`), mientras la tarjeta de Conexiones usa Composio,
+  lo que mostraba «Falta conectar» junto a «Conexión activa». Además, Oportunidades no
+  pasaba `categoriesCount` al guard (Publicar sí lo pasaba), mostrando «0 categorías».
+- **Arreglo:** Oportunidades también consulta `/api/composio/status` (mismo criterio que
+  el panel de Inicio); el botón «Conectar GSC» apunta a
+  `/dashboard/configuracion/conexiones?conexion=google-search-console`; se corrige el
+  paso de `categoriesCount` al guard.
+- **Archivos:** `oportunidades/page.tsx`, `PreValidationGuard.tsx`, `manual-usuario.ts`
+  (manual ya actualizado en el propio PR #251, sin pendiente de propagación).
+- **Auditorías:** tsc sin errores en los archivos tocados, `git diff --check` OK.
+- **Verificado en producción** con la cuenta de jose antonio gomez velasco: entra directo
+  a Oportunidades, sin «Falta conectar» ni aviso de configuración.
+- **Pendiente, fuera de alcance:** los pasos 1-3 del guard aún envían al asistente
+  genérico `/dashboard/configuracion?tab=wizard` (ver TO-DO.md).
+- **Responsable:** Claude. **Estado:** DESPLEGADA Y VERIFICADA. Capitanía liberada;
+  CERRADO Y ARCHIVADO en Coordinación.
+
+## Commits — 2026-09-29 — Cadena de fixes de asignación de categoría en Oportunidades (afinidad real → canibalización → tope dinámico → respaldo determinista → reubicación → rendimiento → nombre vs. id → auditoría de 3 pasadas → específica vs. general)
+
+- **Commits (todos sobre `apps/web/src/lib/opportunity-analysis.ts` y archivos
+  relacionados de Oportunidades, ya en `origin/main`):**
+  - `39128fc` — PR #253: exige afinidad temática real al asignar categoría (ya no fuerza
+    la categoría "más cercana" sin relación real).
+  - `4f6ca4a` — PR #254: cierra zona ciega de canibalización (`findAmbiguousIntentMatches`
+    + `reasonAboutAmbiguousCollisions`, razonamiento corto de OpenAI para firmas cortas de
+    <3 tokens).
+  - `6712459` — PR #255: tope dinámico de títulos por categoría = `dailyArticleLimit` del
+    usuario (antes no había tope; se retiró uno fijo el 2/9/2026).
+  - `65b896a` — PR #257: respaldo determinista de afinidad de categoría
+    (`reasonAboutCategoryFit`) tras hallazgo real con la cuenta de Guillermo Martínez
+    (títulos de alquiler quedando en "Compra"; el PR #253 solo había tocado el prompt, sin
+    guardarraíl en código).
+  - `da93477` — PR #259: reubica el título en la categoría correcta (de las 26 reales de
+    la cuenta) en vez de solo rechazarlo.
+  - `d4c3a98` — PR #260: mueve la reubicación de categoría a un solo paso final (antes se
+    llamaba una vez por lote, ~20+ veces por corrida; el análisis había pasado de ~1 min a
+    ~2:30-3 min).
+  - `0ee7f72` — PR #262: el prompt pide el nombre exacto de la categoría en vez del id
+    opaco (cuid), tras otro hallazgo real: un título de bienes raíces quedó en la
+    categoría "Chat GPT".
+  - `944e42b` — PR #263: cierra dos huecos encontrados en una auditoría completa de 3
+    pasadas pedida por Milton (comparación de año como substring literal sin límites de
+    dígito; colisión silenciosa de nombre de categoría duplicado en el Map nombre→id).
+  - `075c125` — PR #265: generaliza la regla "categoría específica vs. general" (antes
+    solo tenía el ejemplo puntual "Flow House"; el mismo patrón de falla se repitió con
+    "As Is Contract Florida" quedando en "Venta").
+- **Patrón repetido en todo el lote, documentado en `COORDINACION_CLAUDE_CODEX.md`:**
+  cada fix se probó en vivo con la cuenta real de Guillermo Martínez y encontró un bug
+  nuevo de categoría, que motivó el siguiente PR de la misma cadena (afinidad real →
+  respaldo determinista → reubicación → nombre vs. id → específica vs. general). Ninguna
+  de las entradas de Coordinación revisadas en este rango cierra la cadena con una
+  verificación final de "ya no hay más casos" — la última (PR #265) queda "pendiente
+  reverificar en producción con Guillermo Martínez".
+- **Auditorías reportadas por commit:** `tsc --noEmit --strict` (y en el PR #263,
+  `--noUnusedLocals --noUnusedParameters`) limpio en cada uno. Ninguno tiene test
+  dedicado (no existían antes tampoco). Ninguno es 100% verificable en local por depender
+  de una llamada real a OpenAI.
+- **Cero cambios, en todo el lote, a:** evidencia GSC/GA/Bing, `needKey`, selección de
+  títulos, longtail, geolocalización.
+- **Sin migración en ningún commit de este lote** (schema sin cambios).
+- **Estado:** FUSIONADOS A `main` (confirmado contra `git log`/`origin/main` por esta
+  misma tarea programada). Coordinación no registra confirmación explícita de despliegue
+  en Vercel Production para este lote (a diferencia de otros lotes de este mismo
+  documento) ni una verificación final en producción posterior al PR #265 — queda para
+  quien retome confirmar Vercel y cerrar el ciclo de pruebas con Guillermo Martínez.
+
+## Versión desplegada — 2026-09-29 — MCP: token personal de API + herramientas de panorama (PR #258)
+
+- **Commit:** `a2c8272` (PR #258, `feat(mcp): token personal de API + herramientas de
+  panorama para cualquier asistente de IA`), fusionado en `main`.
+- **Qué habilita:** que cualquier asistente de IA (Milton quiere probar primero con Meta
+  MUSE) opere la cuenta del usuario autenticándose con un token personal generado desde
+  Configuración → Asistentes IA (`/dashboard/configuracion/mcp`), sin registro de cliente
+  OAuth. Suma 6 tools nuevas de solo lectura (`ver_resumen_cuenta`,
+  `ver_estado_configuracion`, `ver_integraciones`, `listar_categorias`, `listar_idiomas`,
+  `ver_limites_y_creditos`) que reusan los route handlers existentes de la web.
+- **Modelo nuevo:** `McpApiToken` (un token activo por usuario, se guarda solo el hash,
+  mismo esquema que `OAuthAccessToken`) + migración `20260929120000_add_mcp_api_token`.
+- **Migración aplicada en producción** vía el workflow "Migración manual de base de
+  datos" (corrida `36641257935`, disparada por Milton): `db push` + refuerzo de RLS en
+  verde, según registra `COORDINACION_CLAUDE_CODEX.md`.
+- **Auditorías reportadas:** `npx tsc --noEmit` limpio en `apps/web` y `apps/worker`;
+  build de producción de `apps/web` completo sin errores (incluye la nueva pantalla);
+  suite del worker 20/20 en verde (sin cambios ahí); `git diff --check` limpio. Todo
+  corrido en worktree aislado sin credenciales reales.
+- **Manual del bot de ayuda:** `apps/web/src/content/manual-usuario.ts` ya tiene la
+  sección "Asistentes IA" (verificado por esta misma tarea programada contra el código
+  real vigente al 2026-09-30).
+- **Pendiente, no confirmado en el rango revisado de Coordinación:** que Milton (o
+  Lorena Álvarez) genere el token real y lo pruebe en vivo con Meta MUSE.
+- **Responsable:** Claude. **Estado:** DESPLEGADA (migración aplicada y verificada);
+  prueba end-to-end con un asistente de IA real pendiente.
+
+## Commits — 2026-09-29/2026-09-30 — MCP: URL del artículo publicado, crear_titulos_con_ia, copy neutro y catálogo dinámico
+
+- **Commits (ya en `origin/main`, sin migración en ninguno):**
+  - `7d3a5f5` — amplía `estado_de_publicaciones` del MCP para devolver, por título, el
+    `articleUrl` real cuando la publicación tuvo éxito (o el mensaje de error si falló);
+    la publicación es asíncrona, así que no había URL disponible al confirmar.
+  - `ea9c1c9` — nueva tool `crear_titulos_con_ia`
+    (`apps/web/src/lib/mcp/tools/content-generation.ts`), expone "Crear con la IA del
+    sistema" (preguntas guiadas de Publicar) al MCP, reusando `POST
+    /api/title-generation` sin reimplementar cupo ni filtro de repetidos.
+  - `b8a90e3` — copy de Configuración → Asistentes IA pasado de "vos" rioplatense a "tú"
+    (español neutro); nuevo endpoint público `GET /api/mcp/capabilities` que lee el
+    array `TOOLS` real, así la pantalla y el prompt copiable listan las herramientas
+    disponibles sin mantenimiento manual; script
+    `scripts/add-product-update-20260930-mcp.ts` agregado para registrar en
+    `ProductUpdate` (Actualizaciones + manual del bot de ayuda) el trabajo de MCP que el
+    hook automático (`generate-product-update.ts`) no pudo generar solo porque los
+    worktrees aislados de estos commits no tienen `OPENAI_API_KEY`/`DATABASE_URL`
+    reales.
+- **Auditorías reportadas por commit:** `npx tsc --noEmit` limpio, build de producción
+  de `apps/web` completo sin errores, cada uno en su propio worktree aislado
+  (`/private/tmp/mcp-url-articulo-20260929`, `/private/tmp/mcp-titulos-ia-20260930`,
+  `/private/tmp/mcp-copy-dinamica-20260930`).
+- **Pendiente, no ejecutado todavía (requiere credenciales reales que este entorno no
+  tiene):** correr `npx tsx scripts/add-product-update-20260930-mcp.ts` para que
+  Actualizaciones y el bot de ayuda reflejen el trabajo de MCP — Milton u otra sesión con
+  las credenciales de producción debe correrlo una vez.
+- **Pedido de MUSE explícitamente NO implementado:** `eliminar_oportunidades`, bloqueado
+  por el clasificador de modo automático de esa sesión (categoría "Irreversible
+  Deletion"); ver ítem correspondiente en `TO-DO.md`.
+- **Estado:** FUSIONADOS A `main`. Coordinación no registra confirmación explícita de
+  despliegue en Vercel Production para este lote ni prueba en vivo con un asistente de
+  IA real todavía.
+\n+## Versión — 2026-09-30 — recuperación segura de categorías por panel
+\n+Commits: `470a08b7` y merge con `origin/main` `55019c9f`. Rama:
+`codex/category-panel-autodetect-20260930`. Sin migraciones propias ni
+archivos eliminados. Worker build OK, tests 20/20, fallback tests 3/3, web
+build 85/85 rutas y `git diff --check` OK. PR #273: Preview Vercel OK;
+merge productivo pendiente de checks tras actualizar contra `main`.
+
+## Versión desplegada — 2026-09-30 — MCP: asistente proactivo + fix real de bug de panel (PR #269)
+
+- **Commits:** `85aa8de` (PR #269, `feat(mcp): asistente proactivo con menú numerado + fix real de bug de panel`, fusionado vía `3f0dc8e`) y `a884e06` (PR #270, `docs(actualizaciones): registrar lote asistente proactivo del MCP`, fusionado vía `f9c8edc`).
+- **Bug real corregido:** `crear_oportunidades` nunca enviaba `panel` a `POST /api/opportunities` (`apps/web/src/app/api/opportunities/route.ts:139`), que filtra categorías por ese campo. En cuentas con un solo panel no se notaba; en cuentas multi-panel (caso real con 5 categorías con paneles propios) la consulta no encontraba ninguna categoría, mostrando "Sincroniza tus categorías primero" pese a estar ya sincronizadas — inconsistencia detectada porque `listar_categorias` (sin filtro de panel) sí las mostraba bien. Fix: la tool ahora resuelve el panel igual que ya lo hace `oportunidades/page.tsx` (primer panel real disponible entre las categorías del usuario, si no hay uno fijado en la cuenta).
+- **Otros cambios del mismo lote:** descripciones de `crear_oportunidades` vs. `crear_titulos_con_ia` reescritas para desambiguar (confusión real detectada en una transcripción con Meta MUSE); el asistente ahora ofrece proactivamente el mismo menú numerado de Inicio desde el primer mensaje, en vez de abrir con una pregunta abierta (reforzado en `instructions` del `initialize`, `apps/web/src/app/api/mcp/route.ts`, y en el prompt copiable de Configuración → Asistentes IA); nueva tool de solo lectura `ver_manual_seo_total` (`apps/web/src/lib/mcp/tools/guidance.ts`) que devuelve el manual real de la plataforma (el mismo `BASE_USER_MANUAL` que ya alimenta al bot de ayuda web) con índice o filtro por tema.
+- **Auditorías reportadas:** `npx tsc --noEmit` limpio, build de producción completo sin errores (worktree aislado `/private/tmp/mcp-proactivo-20260930`). La función de búsqueda del manual se probó aparte con un script real contra `BASE_USER_MANUAL` (encontró un bug propio — buscaba solo en el título de cada sección, no en el contenido — corregido y reverificado antes de subir). Sin migración, sin cambios de schema.
+- **Manual del bot de ayuda:** `apps/web/src/content/manual-usuario.ts`, sección "Asistentes IA", no mencionaba el menú proactivo ni `ver_manual_seo_total` — actualizado por esta misma tarea programada de propagación (2026-10-01).
+- **Estado:** FUSIONADOS A `main`. Coordinación no registra confirmación explícita de despliegue en Vercel Production para este lote.
+
+## Versión desplegada — 2026-09-30 — MCP: prompts/list+get y descripciones estructuradas (PR #271)
+
+- **Commit:** `ebebbfc` (PR #271, `feat(mcp): prompts/list+get (workflows con nombre) y descripciones estructuradas`), fusionado vía `27f3530`.
+- **Qué agrega:** capacidad `prompts` del protocolo MCP, antes nunca implementada por el servidor. Publica 3 "recetas" con nombre (`apps/web/src/lib/mcp/prompts.ts`, integrado en `apps/web/src/app/api/mcp/route.ts`): `empezar` (menú numerado inicial, mismo texto que ya vive en `instructions`), `publicar_contenido` (el flujo completo que resuelve la ambigüedad crear_oportunidades vs. crear_titulos_con_ia) y `diagnosticar_cuenta`. `initialize.capabilities` ahora anuncia `prompts`, y las `instructions` le dicen al asistente que revise `prompts/list` antes de improvisar. Además, las 14 tools existentes pasan a descripciones estructuradas (Propósito / Cuándo usarla / Cuándo NO usarla / Contexto necesario / Siguiente paso típico).
+- **Auditorías reportadas:** `npx tsc --noEmit` limpio, build de producción completo sin errores (worktree aislado `/private/tmp/mcp-prompts-workflows-20260930`). Sin migración, sin cambios de schema.
+- **Pendiente, no ejecutado todavía según Coordinación:** prueba real por `curl` de `prompts/list` y `prompts/get` contra producción (mismo patrón usado al lanzar el token personal del PR #258).
+- **Estado:** FUSIONADO A `main`. Coordinación no registra confirmación explícita de despliegue en Vercel Production para este lote.
+
+## Versión desplegada — 2026-09-30 — MCP: sin jerga técnica hacia el usuario (PR #272)
+
+- **Commit:** `ec18b65` (PR #272, `feat(mcp): el asistente nunca debe hablarle al usuario en jerga técnica`), fusionado vía `68ba7e2`.
+- **Qué corrige:** en una transcripción real con Meta MUSE, el asistente le habló al usuario en términos técnicos ("listar_categorías necesita la conexión, aún no configurada de mi lado", mencionando tokens/conectores directamente) — lenguaje que una persona normal no entiende. Se agregó una regla explícita a `instructions` del `initialize` (`apps/web/src/app/api/mcp/route.ts`) y al prompt copiable de Configuración → Asistentes IA: nunca mencionar nombres técnicos de herramientas, tokens, APIs, conectores ni el estado interno de la conexión del asistente — traducir siempre a lenguaje cotidiano.
+- **Nota aparte registrada en Coordinación:** al reclamar este lote se encontró que la capitanía del lote anterior (`prompts/list+get`, PR #271) había quedado sin liberar por error; se liberó recién en ese momento, retroactivamente, ya verificado en producción.
+- **Auditorías reportadas:** `npx tsc --noEmit` limpio, build de producción completo sin errores (worktree aislado `/private/tmp/mcp-sin-jerga-20260930`). Cambio de solo texto en 2 archivos. Sin migración, sin cambios de schema.
+- **Manual del bot de ayuda:** `apps/web/src/content/manual-usuario.ts`, sección "Asistentes IA", actualizado por esta misma tarea programada de propagación (2026-10-01) para reflejar que el asistente explica todo en lenguaje cotidiano.
+- **Estado:** FUSIONADO A `main`. Coordinación no registra confirmación explícita de despliegue en Vercel Production para este lote.
+
+## PINTEREST POR COMPOSIO — 2026-10-01 — EN PRODUCCIÓN
+
+- **PR:** [#276](https://github.com/miltondavila-ux/auto-articulos/pull/276), fusionado a `main` (`47673ff4`). Sin migración de base de datos.
+- **Qué hace:** migra Pinterest a Composio, mismo patrón visual y de piloto que Facebook/Instagram. Tableros vía `PINTEREST_LIST_BOARDS`, publicación de Pins vía `PINTEREST_CREATE_PIN` (adaptador `composioPinterestPin`), fallback a la integración propia para usuarios fuera del piloto.
+- **Piloto:** `COMPOSIO_PILOT_USERS_PINTEREST=lorenalvarez30@gmail.com` (variable de repo, en los 3 workflows del worker).
+- **Verificado en producción con Lorena:** tablero "Seguros de Salud y Vida" conectado, "Probar conexión" en verde, y un Pin real publicado (01/10/2026, confirmado en Historial → Redes Sociales).
+- **Manual actualizado** en el mismo PR.
+- **Estado:** FUSIONADO a `main` y VERIFICADO en producción con publicación real confirmada.

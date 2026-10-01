@@ -36,14 +36,63 @@ confirmación explícita.
 
 ## Estado de implementación
 
-- **Disponible hoy en ChatGPT:** `listar_oportunidades`,
-  `estado_de_publicaciones` (solo lectura).
-- **Implementado localmente, pendiente de validar/desplegar:** publicación de
-  oportunidades seleccionadas y publicación de títulos manuales dentro de una
-  categoría, ambas con previsualización y confirmación.
-- **Planificado:** las acciones de este catálogo. Cada una debe reutilizar las
-  reglas y handlers existentes de la aplicación; no duplicar lógica de cupos,
-  créditos, idioma, integraciones o permisos.
+- **Disponible hoy vía OAuth (Alexa+/ChatGPT) o token personal:**
+  `listar_oportunidades`, `crear_oportunidades`,
+  `publicar_oportunidades_seleccionadas`, `publicar_titulos_en_categoria`,
+  `publicar_categoria`, `estado_de_publicaciones` (sección 1 y 2 de este
+  catálogo), más `ver_resumen_cuenta`, `ver_estado_configuracion`,
+  `ver_integraciones`, `listar_categorias`, `listar_idiomas`,
+  `ver_limites_y_creditos` (sección 1, "Panorama y diagnóstico" — agregadas
+  29/9/2026, todas de solo lectura).
+- **Token personal de API (29/9/2026):** cualquier asistente de IA (Claude,
+  ChatGPT, Gemini, Meta MUSE u otro) puede conectarse ahora con un token que
+  el usuario genera y copia desde Configuración → Asistentes IA — sin pasar
+  por el registro de cliente OAuth que exige Alexa+. Detalle técnico e
+  infraestructura en `apps/web/src/lib/mcp/api-token.ts` y
+  `apps/web/src/app/api/mcp/token-lookup/route.ts` (la verificación por hash
+  no puede correr en el Edge Runtime del middleware — se resuelve con un
+  fetch interno a una ruta nodejs, documentado en ese archivo).
+- **Cómo sumar una función nueva:** crear o editar un archivo de dominio en
+  `apps/web/src/lib/mcp/tools/` (uno por sección de este catálogo, ej.
+  `social.ts` para la sección 5) que exporte un array de tools reusando el
+  route handler existente de la web, y sumarlo en
+  `apps/web/src/lib/mcp/tools/index.ts`. El servidor
+  (`apps/web/src/app/api/mcp/route.ts`) y el middleware no cambian nunca por
+  esto — así es como este catálogo queda "vivo" sin rediseñar nada cada vez.
+- **Sumado 30/9/2026, comportamiento proactivo:** evidencia real de una
+  conversación con Meta MUSE mostró que el asistente esperaba preguntas
+  abiertas en vez de guiar como el Home real (menú numerado). Se reforzó
+  `instructions` del `initialize` (`apps/web/src/app/api/mcp/route.ts`) y el
+  prompt copiable de Configuración → Asistentes IA para que el asistente
+  ofrezca proactivamente el mismo menú numerado del Home (Contenido propio /
+  Contenido generado por IA / Redes y blogs) desde el primer mensaje, y
+  llame a la nueva tool `ver_manual_seo_total` (solo lectura, devuelve el
+  manual real de la plataforma — el mismo que ya alimenta al robot de ayuda
+  web, `apps/web/src/content/manual-usuario.ts` — con filtro opcional por
+  tema) cuando no sepa cómo guiar. También se corrigió un bug real
+  encontrado en esa misma conversación: `crear_oportunidades` no enviaba
+  `panel` a `/api/opportunities`, así que en cuentas con varios paneles
+  reales devolvía "Sincroniza tus categorías primero" aunque ya estuvieran
+  sincronizadas — la tool ahora resuelve el panel igual que ya lo hace la
+  página web (primer panel real disponible). Se desambiguaron además las
+  descripciones de `crear_oportunidades` (análisis de Search Console) vs
+  `crear_titulos_con_ia` (a partir de una descripción del negocio), que el
+  asistente confundía.
+- **Sumado 30/9/2026, `prompts/list` y `prompts/get`:** a partir de un
+  documento de buenas prácticas de MCP que Milton compartió, se implementó
+  la capacidad de "prompts" del propio protocolo (`apps/web/src/lib/mcp/prompts.ts`),
+  distinta de `tools/list` — en vez de que el asistente improvise el orden
+  de llamadas, el servidor publica "recetas" con nombre que ya traen el
+  flujo completo: `empezar` (menú numerado inicial), `publicar_contenido`
+  (resuelve la ambigüedad crear_oportunidades vs crear_titulos_con_ia paso a
+  paso) y `diagnosticar_cuenta`. También se reestructuraron las
+  descripciones de las 14 tools existentes al formato Propósito / Cuándo
+  usarla / Cuándo NO usarla / Contexto necesario / Siguiente paso típico.
+- **Planificado (secciones 3-7 de este catálogo):** indexación/sitemaps,
+  gestión de ejecuciones (cancelar/reintentar), acciones de redes sociales
+  (generar/editar/publicar propuestas), preferencias de cuenta (idioma,
+  firma) e integraciones (conectar/desconectar OAuth de terceros). Todas de
+  escritura — quedan para su propia auditoría, no se tocaron en este lote.
 
 ## 1. Panorama y diagnóstico
 
@@ -186,3 +235,10 @@ No implementar herramientas para:
 5. Preferencias e integraciones con consentimientos web.
 6. Adaptadores de experiencia para ChatGPT, Alexa+, Gemini y voz/teléfono,
    manteniendo el mismo servidor y las mismas reglas.
+- **Sumado 30/9/2026:** `crear_titulos_con_ia` — expone "Crear con la IA del
+  sistema" (`/dashboard/publicar`, proyecto CREACION DE PUBLICACIONES
+  PROPIAS) vía MCP: preguntas guiadas (cliente tipo, tema, deseo del
+  cliente, ubicaciones) → hasta 9 propuestas de títulos, mismo cupo de 3
+  solicitudes/día. Pedido de Milton al notar que esa función faltaba en el
+  catálogo. No publica nada por sí sola — se combina con
+  `publicar_titulos_en_categoria`.

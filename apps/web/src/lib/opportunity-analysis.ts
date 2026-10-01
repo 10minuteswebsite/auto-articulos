@@ -231,6 +231,291 @@ function collidesWithIntent(
   return false;
 }
 
+// Hallazgo real 2026-09-29: el respaldo de arriba (tokenSetsOverlap) exige al
+// menos 3 tokens sustantivos en AMBOS lados para poder comparar por
+// solapamiento. Cuando el needKey o el título visible quedan con menos de 3
+// tokens tras filtrar palabras de relleno del dominio (ej. "seguro_salud_
+// inmigrante_miami" queda en solo "seguro"+"miami"), el respaldo se abstiene
+// por completo (ni compara) en vez de exigir un umbral más estricto — y no
+// existe ningún umbral numérico que separe ahí un duplicado real
+// (needKey con un sinónimo, ej. "seguro" vs "poliza") de una necesidad
+// genuinamente distinta que solo comparte una ciudad (ej. "seguro" vs
+// "trabajo" en la misma ciudad): ambos casos dan la MISMA proporción de
+// solapamiento. Probar con un umbral distinto no distingue uno del otro,
+// solo cambia cuál de los dos se rompe. La única manera correcta de decidir
+// eso es razonar el significado, no contar palabras — así que en vez de una
+// tabla de sinónimos o un umbral más agresivo, estos casos se le preguntan
+// directamente al modelo (ver reasonAboutAmbiguousCollisions más abajo).
+// Esta función solo detecta DETERMINÍSTICAMENTE cuáles pares están en esa
+// zona ciega (comparten al menos un token pero uno de los dos lados no llega
+// a 3), sin decidir nada por sí sola.
+function findAmbiguousIntentMatches(
+  candidate: IntentSignature,
+  existing: IntentSignature[],
+): IntentSignature[] {
+  const MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON = 3;
+  const matches: IntentSignature[] = [];
+  for (const signature of existing) {
+    // Mismo criterio de exclusión que collidesWithIntent: dos combos
+    // geolocalizados solo difieren por diseño en la ubicación declarada, no
+    // hace falta preguntarle nada al modelo sobre ese caso.
+    if (candidate.isGeoLocationCombo && signature.isGeoLocationCombo) continue;
+    // Si el needKey ya coincidió exacto, collidesWithIntent ya lo habría
+    // marcado como colisión antes de llegar aquí; no hace falta preguntar.
+    if (
+      candidate.needKeyNormalized &&
+      signature.needKeyNormalized &&
+      candidate.needKeyNormalized === signature.needKeyNormalized
+    ) {
+      continue;
+    }
+    const needKeySharedTokens = [...candidate.tokens].filter((token) =>
+      signature.tokens.has(token),
+    ).length;
+    const needKeyInBlindSpot =
+      needKeySharedTokens > 0 &&
+      (candidate.tokens.size < MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON ||
+        signature.tokens.size < MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON);
+
+    const titleSharedTokens = [...candidate.titleTokens].filter((token) =>
+      signature.titleTokens.has(token),
+    ).length;
+    const titleInBlindSpot =
+      titleSharedTokens > 0 &&
+      (candidate.titleTokens.size < MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON ||
+        signature.titleTokens.size < MIN_TOKENS_FOR_DETERMINISTIC_COMPARISON);
+
+    if (needKeyInBlindSpot || titleInBlindSpot) {
+      matches.push(signature);
+    }
+  }
+  return matches;
+}
+
+// Llamada corta y aparte a OpenAI (no la principal de análisis) para
+// resolver, con juicio real, los casos que caen en la zona ciega de arriba.
+// Solo se dispara cuando de verdad hay ambigüedad (pocos casos por corrida);
+// si falla o no se puede interpretar, se asume que NO colisiona (mismo
+// criterio "no bloquear de más" que ya rige el resto del archivo) en vez de
+// descartar un título real por un error de red.
+async function reasonAboutAmbiguousCollisions(
+  candidate: { text: string; needKey?: string },
+  ambiguous: IntentSignature[],
+  apiKey: string,
+): Promise<Set<number>> {
+  if (ambiguous.length === 0) return new Set();
+  const prompt = `Eres un editor SEO experto. Decide, para cada titulo de la LISTA, si representa REALMENTE LA MISMA necesidad de busqueda que el TITULO NUEVO (mismo objeto + contexto + perfil + ubicacion real que busca el usuario), aunque usen palabras distintas o sinonimos — o si es una necesidad genuinamente distinta aunque comparta alguna palabra suelta (como una misma ciudad).
+
+Ejemplo de MISMA necesidad (colisiona) aunque cambien las palabras: "mejor seguro de salud para inmigrantes en Miami" y "mejor poliza de salud para inmigrantes en Miami" — seguro y poliza son el mismo producto para el mismo perfil y ciudad.
+Ejemplo de necesidad DISTINTA (no colisiona) aunque compartan una palabra: "seguro de salud en Florida" y "trabajos en el sector salud en Florida" — uno busca un seguro, el otro un empleo; comparten la ubicacion pero no la necesidad.
+
+TITULO NUEVO:
+texto: "${candidate.text}"
+needKey declarado: ${candidate.needKey ?? "(no declarado)"}
+
+LISTA (titulos ya aceptados en esta corrida):
+${JSON.stringify(ambiguous.map((item, index) => ({ indice: index, texto: item.source, needKey: item.needKeyNormalized })))}
+
+Responde SOLO JSON valido: {"mismaNecesidadIndices": [indices de la LISTA que son la MISMA necesidad que el TITULO NUEVO; lista vacia si ninguno]}`;
+
+  try {
+    const response = await fetch(OPENAI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0,
+        max_tokens: 500,
+        response_format: { type: "json_object" },
+      }),
+    });
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    if (!response.ok) return new Set();
+    const raw = data.choices?.[0]?.message?.content ?? "";
+    const parsed = JSON.parse(raw) as { mismaNecesidadIndices?: unknown };
+    if (!Array.isArray(parsed.mismaNecesidadIndices)) return new Set();
+    return new Set(
+      parsed.mismaNecesidadIndices.filter(
+        (value): value is number =>
+          typeof value === "number" && value >= 0 && value < ambiguous.length,
+      ),
+    );
+  } catch (err) {
+    console.error(
+      "reasonAboutAmbiguousCollisions: fallo la consulta de juicio, se asume que no colisiona:",
+      err,
+    );
+    return new Set();
+  }
+}
+
+// Hallazgo real 2026-09-29 (cuenta de Guillermo Martinez, diagnostico en
+// vivo): la regla de asignacion de categoria (ver REGLA DE ASIGNACION DE
+// CATEGORIA en PROMPT_HEADER, corregida ese mismo dia para exigir afinidad
+// tematica real) solo vivia en el TEXTO del prompt, sin ningun respaldo en
+// codigo. Ese es exactamente el mismo patron de bug que ya se corrigio
+// muchas veces antes en este archivo para otras reglas (cita de evidencia,
+// combo de geolocalizacion, temas excluidos, anios recientes): una
+// instruccion que compite contra ~15 reglas obligatorias mas en la misma
+// llamada, el modelo la ignora tarde o temprano. Resultado real observado:
+// titulos sobre ALQUILAR una propiedad y hasta uno sobre el uso de un
+// microondas quedaron en la categoria "Compra" (compra de propiedades) de
+// esa cuenta.
+//
+// Primera version de este respaldo (retirada el mismo dia): solo
+// aceptaba/rechazaba la categoria que el modelo ya habia elegido, sin
+// reubicar. En una cuenta con 26 categorias (incluida "Rentas", que SI
+// existe) eso perdia oportunidades legitimas en vez de archivarlas donde
+// corresponde: un titulo de alquiler propuesto en "Compra" se rechazaba
+// entero en lugar de aparecer en "Rentas". Version actual: UNA sola llamada
+// por lote (no una por categoria — mas barata y mas rapida) que reclasifica
+// cada titulo del lote contra la lista COMPLETA de categorias reales de la
+// cuenta, devolviendo la categoria correcta (que puede ser la misma que
+// propuso el modelo, u otra) o ninguna si de verdad no hay una categoria
+// real para ese tema. Igual que con la canibalizacion, la solucion NO es
+// una lista de palabras prohibidas (eso ya fallo antes, ver
+// titleFitsCategory retirado el 16/9/2026) sino preguntarle al modelo, con
+// juicio real, a que categoria pertenece cada titulo.
+async function reasonAboutCategoryAssignment(
+  categories: Array<{ id: string; name: string; publishedExamples?: string[] }>,
+  titles: string[],
+  apiKey: string,
+): Promise<Array<string | null>> {
+  if (titles.length === 0) return [];
+  const prompt = `Eres un editor SEO. Para cada titulo de la lista, decide a CUAL de las categorias permitidas pertenece de verdad su TEMA REAL (a juzgar por el nombre de la categoria y sus ejemplos ya publicados) — sin importar en que categoria fue propuesto originalmente por otro proceso. Si genuinamente NINGUNA categoria permitida trata ese tema, responde categoryId null para ese indice.
+
+Ejemplo de reubicacion correcta: un titulo sobre ALQUILAR o ARRENDAR una propiedad pertenece a una categoria de alquiler/renta si existe una en la lista (aunque otro proceso lo haya propuesto en una categoria de compra) — comprar y alquilar son transacciones distintas. Un titulo sobre el uso de un electrodomestico no pertenece a ninguna categoria de bienes raices (responde null).
+
+Ejemplo de que NO rechazar solo por redaccion: si el titulo usa "poliza" en vez de "seguro", o "cobertura medica" en vez de "seguro de salud", y el tema real es el mismo que los ejemplos de una categoria de seguros, SI pertenece a esa categoria — no rechaces ni reubiques solo porque la palabra exacta no coincide con el nombre de la categoria o sus ejemplos.
+
+REGLA GENERAL cuando DOS categorias permitidas podrian aplicar, una mas ESPECIFICA (dedicada a un subtema exacto) y otra mas GENERAL (un tema amplio que lo incluye): si el titulo trata de verdad ese subtema exacto, va en la categoria ESPECIFICA, no en la general, aunque la general tambien sea tematicamente valida. Usa la categoria general solo cuando el titulo es realmente sobre el tema amplio y no sobre el subtema de la categoria especifica.
+
+Ejemplo real: si existen "As Is Contract Florida" (especifica, dedicada al contrato 'as is') y "Venta" (general, venta de propiedades), un titulo sobre errores al firmar un contrato 'as is', sus clausulas, o su negociacion va en "As Is Contract Florida" — no en "Venta" solo porque vender con contrato 'as is' tambien sea, en sentido amplio, una venta. En cambio, un titulo sobre gastos de cierre en general (sin mencionar 'as is') SI va en "Venta", porque ese es su tema real, no el contrato especifico.
+
+Ejemplo de desarrollo/proyecto ESPECIFICO vs area/ciudad GENERAL (mismo principio, otro caso real): si una categoria se llama como un desarrollo o edificio especifico (ej. "Flow House", un proyecto en construccion), un titulo pertenece ahi SOLO si trata directamente sobre ESE desarrollo (unidades, precios, amenidades, proceso de compra en ese proyecto). Contenido general del area donde esta ubicado (mejores escuelas, playas cercanas, vida en esa ciudad) pertenece a la categoria de esa CIUDAD si existe una, no a la del desarrollo especifico, aunque esten en la misma zona.
+
+CATEGORIAS PERMITIDAS (usa el "nombre" EXACTO, letra por letra, en tu respuesta — NO un id):
+${JSON.stringify(
+  categories.map((c) => ({
+    nombre: c.name,
+    ejemplos: (c.publishedExamples ?? []).slice(0, 15),
+  })),
+)}
+
+TITULOS A CLASIFICAR:
+${JSON.stringify(titles.map((text, index) => ({ indice: index, texto: text })))}
+
+Responde SOLO JSON valido: {"asignaciones": [{"indice": 0, "categoryName": "nombre-exacto-de-la-lista-o-null"}, ...]} — un elemento por cada indice de la lista de arriba. El "categoryName" debe copiarse letra por letra de la lista CATEGORIAS PERMITIDAS, nunca inventado ni resumido.`;
+
+  // Reintento (2 intentos, igual que callOpenAiWithRetry): desde el
+  // rediseño 2026-09-29 esta funcion se llama UNA sola vez por corrida
+  // completa (antes se llamaba por lote), asi que si falla ahora arrastra
+  // TODO el resultado en vez de solo un lote — vale la pena un reintento
+  // antes de rendirse y rechazar todo.
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const response = await fetch(OPENAI_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0,
+          max_tokens: 4000,
+          response_format: { type: "json_object" },
+        }),
+      });
+      const data = (await response.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      if (!response.ok) {
+        lastError = new Error("OpenAI respondio con error al clasificar categorias.");
+        continue;
+      }
+      const raw = data.choices?.[0]?.message?.content ?? "";
+      const parsed = JSON.parse(raw) as { asignaciones?: unknown };
+      // Fallo abierto vs cerrado, a proposito DISTINTO del resto del
+      // archivo (ver reasonAboutAmbiguousCollisions, que si falla abierto):
+      // un titulo mal archivado es visible para el cliente en su blog; un
+      // titulo perdido por una falla de red o un JSON invalido es invisible
+      // y no tiene otra oportunidad de aparecer (esta es la unica llamada
+      // de reubicacion de toda la corrida). Por defecto TODOS los indices
+      // quedan en null (rechazo) y solo se llenan los que la respuesta
+      // confirma explicitamente.
+      const result: Array<string | null> = new Array(titles.length).fill(null);
+      if (!Array.isArray(parsed.asignaciones)) {
+        lastError = new Error("La respuesta de clasificacion de categorias no trajo 'asignaciones'.");
+        continue;
+      }
+      // Traduccion nombre -> id en CODIGO, no confiando en que el modelo
+      // devuelva el id correcto (ver nota arriba): comparacion EXACTA de
+      // texto contra los nombres reales de input.categories. Hallazgo real
+      // 2026-09-29 (cuenta de Guillermo Martinez): pedirle al modelo que
+      // devuelva directamente el id (una cadena opaca tipo cuid) entre 26
+      // categorias en una sola respuesta produjo al menos un caso real de
+      // titulo asignado a una categoria ("Chat GPT") que ni por nombre ni
+      // por ejemplos publicados tenia relacion alguna con el tema — nunca
+      // se habia usado esa categoria en el historial real de la cuenta. La
+      // hipotesis mas probable es confusion de indice/id en una lista larga
+      // (error conocido de LLMs), no un mal juicio del tema. Pedir el
+      // NOMBRE (lo que el modelo esta razonando de verdad, visible y legible)
+      // y mapearlo a id en codigo elimina esa clase de error por completo,
+      // en vez de solo mitigarla.
+      // Hallazgo de auditoria 2026-09-29: si dos categorias reales de la
+      // cuenta compartieran el mismo nombre exacto (el schema no exige
+      // nombre unico), un Map simple se quedaria solo con la ULTIMA y un
+      // titulo podria terminar en la categoria equivocada de las dos, en
+      // silencio. Se detecta el caso y se deja constancia en el log; se
+      // conserva la PRIMERA coincidencia (orden estable de input.categories)
+      // en vez de la ultima, para que el resultado sea al menos
+      // predecible.
+      const categoryIdByExactName = new Map<string, string>();
+      for (const category of categories) {
+        if (categoryIdByExactName.has(category.name)) {
+          console.error(
+            `reasonAboutCategoryAssignment: dos categorias reales comparten el nombre "${category.name}" — se usara la primera (id ${categoryIdByExactName.get(category.name)}), ignorando id ${category.id}.`,
+          );
+          continue;
+        }
+        categoryIdByExactName.set(category.name, category.id);
+      }
+      for (const entry of parsed.asignaciones) {
+        if (!entry || typeof entry !== "object") continue;
+        const record = entry as Record<string, unknown>;
+        const index = record.indice;
+        const categoryName = record.categoryName;
+        if (
+          typeof index === "number" &&
+          index >= 0 &&
+          index < titles.length &&
+          typeof categoryName === "string"
+        ) {
+          const matchedId = categoryIdByExactName.get(categoryName);
+          if (matchedId) result[index] = matchedId;
+        }
+      }
+      return result;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  console.error(
+    "reasonAboutCategoryAssignment: fallo la consulta de juicio tras reintentar, se rechaza por seguridad (categoria visible para el cliente):",
+    lastError,
+  );
+  return new Array(titles.length).fill(null);
+}
+
 // Garantía determinista 2026-09-16 (hallazgo real: se coló un título -
 // "Relación entre seguros de vida y salud en Miami" - cuyo rationale no
 // citaba ninguna consulta, página o cluster real, solo decía "una necesidad
@@ -281,9 +566,16 @@ function hasContextualEvidenceForYear(
   rows: GoogleSearchAnalyticsRow[],
 ): boolean {
   const titleTokens = intentTokens(title);
+  // El año debe aparecer como numero propio (con limites que no sean otro
+  // digito a los lados), no como substring de cualquier otro numero de la
+  // fila (ej. impressions:120260 o position:2.02609 "contienen" 2026 sin que
+  // el año aparezca de verdad). Hallazgo de auditoria 2026-09-29: el chequeo
+  // anterior (String.includes) podia dar un falso positivo con cualquier
+  // cifra coincidente, debilitando la garantia de "prohibido inventar años".
+  const yearBoundaryPattern = new RegExp(`(?<!\\d)${year}(?!\\d)`);
   return rows.some((row) => {
     const serialized = JSON.stringify(row);
-    if (!serialized.includes(year)) return false;
+    if (!yearBoundaryPattern.test(serialized)) return false;
     const evidenceTokens = intentTokens(serialized);
     const shared = [...titleTokens].filter((token) => evidenceTokens.has(token));
     return shared.length >= 2;
@@ -300,10 +592,11 @@ const PROMPT_HEADER = [
   "- Piensa como un usuario real: que mas buscaria alguien que ya busco esto?",
   "- La meta es VOLUMEN de oportunidades reales, no solo las mas faciles",
   "",
-  "REGLA DE ASIGNACION DE CATEGORIA (organizativa, NO es un filtro de negocio):",
-  "- La categoria es UNICAMENTE el lugar del blog donde el articulo queda archivado. NUNCA es el criterio para decidir SI un tema se escribe: esa decision depende exclusivamente de que exista evidencia real (Search Console, Google Analytics o Bing) y de que no canibalice una necesidad ya cubierta (ver regla de cero canibalizacion mas abajo).",
-  "- PROHIBIDO descartar una consulta, pagina o tendencia real con evidencia solo porque no calza perfecto con el nombre o los ejemplos de ninguna categoria existente: asignala a la categoria PERMITIDA cuyo tema sea el MAS CERCANO. Si de verdad ninguna categoria es remotamente afin (tema completamente ajeno al negocio del usuario), puedes omitirla, pero la falta de coincidencia de palabras con el nombre de la categoria NUNCA es motivo de descarte por si sola.",
-  "- Evita mezclar en un mismo titulo dos temas completamente distintos; esto es una regla de claridad editorial del titulo, no una excusa para descartar la consulta.",
+  "REGLA DE ASIGNACION DE CATEGORIA (ESTRICTA, exige afinidad tematica real):",
+  "- La categoria es el lugar del blog donde el articulo queda archivado. La decision de SI un tema se escribe depende de que exista evidencia real (Search Console, Google Analytics o Bing) y de que no canibalice una necesidad ya cubierta (ver regla de cero canibalizacion mas abajo) — pero la categoria elegida debe tratar de VERDAD el mismo tema que el titulo, no ser simplemente 'la menos lejana' de las disponibles.",
+  "- PROHIBIDO descartar una consulta, pagina o tendencia real con evidencia solo por una diferencia de REDACCION o de PALABRAS EXACTAS frente al nombre de la categoria (ej: un titulo sobre deducibles va en 'Deducibles' aunque no repita esa palabra literal). Esa flexibilidad es solo de vocabulario, nunca de tema.",
+  "- PROHIBIDO forzar un titulo en una categoria cuyo TEMA real es otro solo porque es la 'mas parecida' disponible (ej: una consulta real sobre propiedades en Orlando NO va en una categoria de 'Casas en Miami' — son ciudades y mercados distintos, aunque ambas sean bienes raices). Si ninguna categoria permitida trata de verdad el mismo tema/ciudad/producto que la evidencia, DESCARTA esa consulta: no existe una categoria de 'archivo general' donde meter lo que no encaja.",
+  "- Evita mezclar en un mismo titulo dos temas completamente distintos; esto es una regla de claridad editorial del titulo, ademas de la regla de afinidad de arriba.",
   "- PROHIBIDO inventar un titulo que no se pueda justificar con evidencia real presente en RENDIMIENTO ACTUAL (Search Console), SEÑALES DE GOOGLE ANALYTICS o SEÑALES DE BING que se te dan mas abajo. El 'rationale' de cada titulo debe CITAR TEXTUALMENTE entre comillas la consulta o pagina real que lo respalda (ej: la consulta 'seguros de salud en miami'); si el titulo es una rama inferida que no tiene una consulta exacta propia, cita en cambio la consulta o cluster real del que se deriva (ej: 'se deriva del cluster de consultas sobre seguros de salud en Miami'). Un rationale sin ninguna cita textual entre comillas de un dato real NO es valido.",
   "",
   "REGLA OBLIGATORIA DE CERO CANIBALIZACION (ESTRICTA, sin excepciones):",
@@ -353,7 +646,7 @@ const PROMPT_HEADER = [
   "- Crear nuevas tematicas long tail derivadas de consultas exitosas, no solo variaciones de redaccion",
   "- Identificar nichos no explotados basados en datos reales",
   "- Usar ubicaciones y perfiles de cliente que aparezcan en las consultas, paginas o titulos existentes",
-  "- Proponer intenciones de busqueda nuevas que se infieran de los patrones de las consultas existentes, asignandolas luego a la categoria mas afin (ver REGLA DE ASIGNACION DE CATEGORIA arriba)",
+  "- Proponer intenciones de busqueda nuevas que se infieran de los patrones de las consultas existentes, asignandolas luego a la categoria que trate de verdad ese tema (ver REGLA DE ASIGNACION DE CATEGORIA arriba)",
   "",
   "PRECAUCIONES (no restricciones):",
   "- Si no tienes evidencia directa para un detalle muy especifico (precio exacto, cifra concreta), mantenlo generico pero relevante",
@@ -390,7 +683,7 @@ const PROMPT_HEADER = [
   "- SE SOSPECHOSAMENTE POCO CONSERVADOR cuando la evidencia es abundante: si este lote trae docenas de consultas reales distintas, un resultado de 1 o 2 categorias es casi siempre una señal de que te quedaste corto, no de que falte evidencia — revisa de nuevo cada consulta del lote, una por una, antes de decidir que no hay mas oportunidades. Una consulta con pocas impresiones sigue siendo evidencia real valida; no exijas volumen alto para animarte a proponer un titulo.",
   "- Cada titulo debe tener una justificacion basada en datos reales que nombre la intencion de busqueda distinta que cubre",
   "- No inventes años, nacionalidades, ciudades, precios, estadísticas ni perfiles. Un modificador solo puede aparecer en un titulo si está respaldado por una consulta, página o señal real entregada.",
-  "- Si la consulta o rama no encaja claramente en la categoria asignada, descártala; nunca la coloques en la categoria más parecida por una palabra compartida.",
+  "- Si la consulta o rama no encaja claramente en la categoria asignada, descártala; nunca la coloques en la categoria más parecida solo porque no hay otra mejor (ver REGLA DE ASIGNACION DE CATEGORIA arriba).",
   "- CERO canibalizacion, ni dentro del mismo grupo ni contra TITULOS YA EXISTENTES ni contra OPORTUNIDADES YA CREADAS EN ESTA CORRIDA (ver REGLA OBLIGATORIA DE CERO CANIBALIZACION)",
   "- Usa unicamente categoryId existentes en la lista permitida",
   "- impressions y clicks del grupo deben ser representativos de la evidencia usada",
@@ -563,21 +856,28 @@ export async function analyzeSeoOpportunities(input: {
   // evidencia para que GA4 o Bing puedan iniciar el análisis cuando GSC no
   // esté conectado, sin perder la procedencia en la consulta entregada a IA.
   externalEvidenceRows?: ExternalEvidenceRow[];
+  // Tope dinamico de titulos ACEPTADOS por categoria en esta corrida, pedido
+  // de Milton 29/9/2026: en vez de un numero fijo en codigo (como el viejo
+  // MAX_TITLES_PER_CATEGORY que existio y se retiro el 2/9/2026), el tope lo
+  // dicta el mismo limite diario que el usuario ya tiene configurado en
+  // Administracion (User.dailyArticleLimit). undefined/null = ese usuario no
+  // tiene limite diario configurado -> tampoco hay tope por categoria (mismo
+  // criterio "sin valor = sin limite" que ya usa el resto del sistema). No
+  // cambia la evidencia exigida, needKey, cero canibalizacion ni la
+  // asignacion de categoria: solo corta cuantos de los titulos YA VALIDADOS
+  // se aceptan por categoria.
+  categoryTitleCap?: number | null;
 }): Promise<OpportunityAnalysisResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY no esta configurada.");
 
-  // Bajado de 250 a 100 (7/9/2026, pedido de Milton: al menos 10 títulos por
-  // corrida cuando hay evidencia real, como confirmó el diagnóstico de
-  // producción con 262 consultas distintas disponibles). Con 250, una cuenta
-  // con ~450 filas de Search Console solo generaba 2 lotes — 2 oportunidades
-  // reales de que el modelo cubriera 10 categorías distintas. Con 100 filas
-  // por lote, la misma evidencia produce más pasadas (más llamadas a OpenAI,
-  // mismo techo de MAX_BATCHES), dando más intentos de cubrir categorías que
-  // quedaron sin título en un lote anterior — sin bajar el listón de
-  // evidencia real exigido a cada título.
-  const BATCH_SIZE = 100;
-  const MAX_BATCHES = 20;
+  // Mantener lotes de tamaño moderado evita que una cuenta con mucha
+  // evidencia convierta una ejecución en decenas de llamadas secuenciales a
+  // OpenAI. En producción eso agotaba el tiempo de la función y el navegador
+  // lo mostraba como "Load failed". Se conservan hasta 8 lotes, suficiente
+  // para cubrir cientos de filas sin dejar la petición abierta indefinidamente.
+  const BATCH_SIZE = 150;
+  const MAX_BATCHES = 8;
   const externalRows: GoogleSearchAnalyticsRow[] = (input.externalEvidenceRows ?? [])
     .filter((row) => (row.query ?? row.page ?? "").trim().length > 0)
     .map((row) => ({
@@ -625,6 +925,10 @@ export async function analyzeSeoOpportunities(input: {
     rejectedExcludedTopic: 0,
     rejectedBadYear: 0,
     rejectedCollision: 0,
+    rejectedCollisionByReasoning: 0,
+    ambiguousCollisionChecks: 0,
+    rejectedCategoryCapReached: 0,
+    rejectedCategoryMismatch: 0,
     accepted: 0,
   };
 
@@ -639,6 +943,15 @@ export async function analyzeSeoOpportunities(input: {
   const groupsByCategory = new Map<string, OpportunityAnalysisGroup>();
   const allResult: OpportunityAnalysisGroup[] = [];
   const validCategoryIds = new Set(input.categories.map((item) => item.id));
+  // Tope dinamico por categoria (ver categoryTitleCap arriba): null/undefined
+  // o un numero invalido (<1, no finito) se tratan como "sin tope", igual que
+  // el resto del sistema trata dailyArticleLimit nulo como "sin limite".
+  const categoryTitleCap =
+    typeof input.categoryTitleCap === "number" &&
+    Number.isFinite(input.categoryTitleCap) &&
+    input.categoryTitleCap >= 1
+      ? input.categoryTitleCap
+      : null;
   const evidenceRows = [
     ...allCurrentRows,
     ...input.previousRows,
@@ -646,14 +959,24 @@ export async function analyzeSeoOpportunities(input: {
   ];
 
   // 2026-09-16: se retiró aquí el veto determinista "titleFitsCategory"
-  // (vocabulario distintivo de la categoría contra el título). La categoría
-  // es solo el lugar de archivo del artículo; decidir SI se escribe un
-  // título depende de la demanda real (GSC/GA/Bing, ya inyectada arriba en
-  // el prompt) y de no-canibalización (needKey más abajo), no del nombre de
-  // la categoría. Motivo del retiro: el propio veto había descartado antes
-  // títulos con demanda real por no compartir raíz de palabra con el nombre
-  // de su categoría (caso real: título sin "deducible" en categoría
-  // "Deducibles"). Ver registro en COORDINACION_CLAUDE_CODEX.md.
+  // (vocabulario distintivo de la categoría contra el título) porque
+  // descartaba títulos con demanda real solo por no compartir raíz de
+  // palabra con el nombre de su categoría (caso real: título sin
+  // "deducible" en categoría "Deducibles"). Decidir SI se escribe un título
+  // sigue dependiendo únicamente de la demanda real (GSC/GA/Bing) y de
+  // no-canibalización (needKey más abajo), nunca del nombre de la
+  // categoría — pero A QUÉ categoría se asigna sigue exigiendo afinidad
+  // TEMÁTICA real (ver REGLA DE ASIGNACION DE CATEGORIA en el prompt).
+  // 2026-09-29: la regla del prompt había quedado, sin querer, ordenando
+  // "asigna a la categoría más cercana aunque no calce" — eso producía
+  // justo lo que este veto evitaba por otra vía: títulos sobre un tema/
+  // ciudad ajenos (ej. evidencia real de Orlando) forzados dentro de una
+  // categoría de otro tema/ciudad (ej. "Casas en Miami") solo por ser la
+  // menos lejana disponible. Se corrigió la regla del prompt para exigir
+  // afinidad temática real y permitir descartar si ninguna categoría
+  // encaja de verdad, sin volver a comparar por vocabulario/palabra
+  // compartida (el fallo original que motivó este retiro). Ver
+  // COORDINACION_CLAUDE_CODEX.md.
 
   // Palabras clave de temas excluidos, parseadas desde input.excludedTopics
   const excludedKeywords = new Set<string>();
@@ -775,7 +1098,7 @@ ${JSON.stringify(alreadyProposedByCategory)}`;
         `[OPPORTUNITY_DEBUG] Lote ${batchIndex + 1}/${batchesToProcess.length}: ${batch.length} filas de evidencia, modelo devolvio ${opportunities.length} categorias.`,
       );
     }
-    applyOpportunityItems(opportunities, "evidence");
+    await applyOpportunityItems(opportunities, "evidence");
   }
 
   // PASO DEDICADO DE GEOLOCALIZACION (7/9/2026, pedido explicito de Milton:
@@ -818,7 +1141,7 @@ Si genuinamente ninguna combinacion tiene sentido real para este negocio, respon
     try {
       const parsedGeo = await callOpenAiWithRetry(geoPrompt, apiKey);
       const geoOpportunities = parsedGeo.opportunities;
-      if (Array.isArray(geoOpportunities)) applyOpportunityItems(geoOpportunities, "geo");
+      if (Array.isArray(geoOpportunities)) await applyOpportunityItems(geoOpportunities, "geo");
     } catch (err) {
       console.error("Paso dedicado de geolocalizacion fallo (no bloquea el resto del analisis):", err);
     }
@@ -847,11 +1170,77 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
     try {
       const recovered = await callOpenAiWithRetry(recoveryPrompt, apiKey);
       if (Array.isArray(recovered.opportunities)) {
-        applyOpportunityItems(recovered.opportunities, "evidence");
+        await applyOpportunityItems(recovered.opportunities, "evidence");
       }
     } catch (err) {
       console.error("Pasada de recuperación de oportunidades falló:", err);
     }
+  }
+
+  // Paso final UNICO de reubicacion de categoria + tope dinamico (rediseño
+  // 2026-09-29 por lentitud, confirmado por Milton probando en vivo: antes
+  // se llamaba una vez POR LOTE, hasta 20+ veces por corrida, lo que
+  // triplico el tiempo total de ~1 min a ~2:30-3 min). Ninguna otra
+  // validacion (duplicado exacto, evidencia citada/combo geo, tema
+  // excluido, anio reciente, needKey/colision de intencion) depende de a
+  // que categoria termina un titulo — ya se aplicaron todas dentro de
+  // applyOpportunityItems, usando la categoria ORIGINAL solo para el
+  // feedback cruzado entre lotes. Aqui, una sola vez, sobre el resultado ya
+  // completo, se reclasifica cada titulo contra la lista COMPLETA de
+  // categorias reales de la cuenta (puede ser la misma que propuso el
+  // modelo, u otra) y se aplica el tope dinamico por categoria
+  // (categoryTitleCap) sobre el resultado final ya reubicado.
+  if (allResult.length > 0) {
+    const flatSourceTitles: Array<{ group: OpportunityAnalysisGroup; index: number }> = [];
+    const flatTexts: string[] = [];
+    for (const group of allResult) {
+      group.titles.forEach((_title, index) => {
+        flatSourceTitles.push({ group, index });
+        flatTexts.push(group.titles[index].text);
+      });
+    }
+    const correctedCategoryIds = await reasonAboutCategoryAssignment(
+      input.categories,
+      flatTexts,
+      apiKey,
+    );
+    const finalGroupsByCategory = new Map<string, OpportunityAnalysisGroup>();
+    const finalResult: OpportunityAnalysisGroup[] = [];
+    for (let i = 0; i < flatSourceTitles.length; i++) {
+      const { group: sourceGroup, index } = flatSourceTitles[i];
+      const correctedCategoryId = correctedCategoryIds[i];
+      if (!correctedCategoryId || !validCategoryIds.has(correctedCategoryId)) {
+        if (debugEnabled) {
+          debugCounters.rejectedCategoryMismatch++;
+          console.log(
+            `[OPPORTUNITY_DEBUG] Rechazado en paso final: ninguna categoria real le corresponde (propuesta original: "${sourceGroup.categoryId}"). Titulo: "${sourceGroup.titles[index].text}"`,
+          );
+        }
+        continue;
+      }
+      let destGroup = finalGroupsByCategory.get(correctedCategoryId);
+      if (!destGroup) {
+        destGroup = {
+          categoryId: correctedCategoryId,
+          rationale: sourceGroup.rationale,
+          impressions: sourceGroup.impressions,
+          clicks: sourceGroup.clicks,
+          titles: [],
+        };
+        finalGroupsByCategory.set(correctedCategoryId, destGroup);
+        finalResult.push(destGroup);
+      }
+      if (categoryTitleCap !== null && destGroup.titles.length >= categoryTitleCap) {
+        if (debugEnabled) debugCounters.rejectedCategoryCapReached++;
+        continue;
+      }
+      destGroup.titles.push(sourceGroup.titles[index]);
+    }
+    // finalResult puede tener grupos vacios si TODOS sus titulos se
+    // rechazaron por tope o por no tener categoria real: se filtran antes
+    // de devolver, igual que el resto del archivo nunca deja grupos vacios.
+    allResult.length = 0;
+    allResult.push(...finalResult.filter((group) => group.titles.length > 0));
   }
 
   if (debugEnabled) {
@@ -875,7 +1264,23 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
   // titulo use de verdad una ubicacion de cliente y una de negocio ya
   // declaradas, porque esos titulos nunca tienen (ni deben tener) una cita
   // de busqueda real detras.
-  function applyOpportunityItems(opportunities: unknown[], source: "evidence" | "geo") {
+  // NOTA 2026-09-29 (rediseño por lentitud, mismo dia): la reubicacion de
+  // categoria (reasonAboutCategoryAssignment) YA NO se llama aqui, por
+  // lote — se movia hasta 20+ veces por corrida (una por lote), lo que
+  // triplico el tiempo total (de ~1 min a ~2:30-3 min, confirmado por
+  // Milton probando en vivo con la cuenta de Guillermo Martinez). Ninguna
+  // otra validacion de esta funcion (duplicado exacto, evidencia citada/
+  // combo geo, tema excluido, anio reciente, needKey/colision de intencion
+  // incluido el razonamiento de canibalizacion) depende de a que categoria
+  // termina un titulo, asi que esta funcion sigue usando la categoria
+  // ORIGINAL que propuso el modelo (solo para agrupar/mostrar el feedback
+  // cruzado entre lotes, ver alreadyProposedByCategory mas abajo en el
+  // prompt — no necesita ser la categoria final correcta para eso). La
+  // reubicacion real a la categoria correcta (y el tope dinamico por
+  // categoria, que depende de ella) se aplica UNA sola vez al final de
+  // analyzeSeoOpportunities, sobre el resultado ya completo — ver el paso
+  // final despues del bucle de lotes/geo/recuperacion.
+  async function applyOpportunityItems(opportunities: unknown[], source: "evidence" | "geo") {
     for (const item of opportunities) {
       if (!item || typeof item !== "object") continue;
       const group = item as Record<string, unknown>;
@@ -885,9 +1290,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         !Array.isArray(group.titles)
       )
         continue;
-
       const existingGroup = groupsByCategory.get(group.categoryId);
-
       const newTitles: OpportunityAnalysisGroup["titles"] = [];
       for (const candidate of group.titles) {
         if (!candidate || typeof candidate !== "object") continue;
@@ -895,9 +1298,10 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         if (typeof value.text !== "string") continue;
         const text = value.text.trim();
         if (debugEnabled && text) debugCounters.modelProposedTitles++;
+        if (!text) continue;
         const normalized = normalizeTitle(text);
-        if (!text || seen.has(normalized)) {
-          if (debugEnabled && text) debugCounters.rejectedEmptyOrDuplicateExact++;
+        if (seen.has(normalized)) {
+          if (debugEnabled) debugCounters.rejectedEmptyOrDuplicateExact++;
           continue;
         }
         const rationale =
@@ -967,6 +1371,32 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
           if (debugEnabled) debugCounters.rejectedCollision++;
           continue;
         }
+        // Zona ciega del chequeo determinista de arriba (ver
+        // findAmbiguousIntentMatches y reasonAboutAmbiguousCollisions): solo
+        // se activa cuando de verdad hay un caso corto/ambiguo que comparte
+        // al menos una palabra. Se le pregunta al modelo, con juicio real,
+        // si es la misma necesidad — no se decide por conteo de palabras.
+        const ambiguousMatches = findAmbiguousIntentMatches(signature, intentSignatures);
+        if (ambiguousMatches.length > 0) {
+          if (debugEnabled) debugCounters.ambiguousCollisionChecks++;
+          const collidingIndices = await reasonAboutAmbiguousCollisions(
+            { text, needKey },
+            ambiguousMatches,
+            // apiKey ya se validó como no vacío al inicio de la funcion
+            // exportada; TypeScript no propaga esa validacion dentro de esta
+            // funcion anidada aunque la variable sea const.
+            apiKey as string,
+          );
+          if (collidingIndices.size > 0) {
+            if (debugEnabled) {
+              debugCounters.rejectedCollisionByReasoning++;
+              console.log(
+                `[OPPORTUNITY_DEBUG] Rechazado por razonamiento de colision ambigua. Titulo: "${text}" | colisiona con: ${JSON.stringify([...collidingIndices].map((i) => ambiguousMatches[i]?.source))}`,
+              );
+            }
+            continue;
+          }
+        }
         seen.add(normalized);
         intentSignatures.push(signature);
         if (needKey) needKeyByTitle.set(text, needKey);
@@ -975,7 +1405,6 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
       }
 
       if (newTitles.length === 0) continue;
-
       if (existingGroup) {
         existingGroup.titles.push(...newTitles);
       } else {

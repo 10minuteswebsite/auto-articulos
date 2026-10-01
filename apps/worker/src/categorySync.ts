@@ -12,6 +12,7 @@ import {
   type RemoteCategory,
 } from "./automation/10minutesWebsite";
 import { tryReserveUser, releaseUser } from "./reservation";
+import { chooseUnambiguousCategoryPanel } from "./categoryPanelFallback";
 
 /**
  * Prueba primero el servidor configurado y, si falla, el resto de
@@ -28,15 +29,25 @@ async function withServerDetection<T>(
     ...PLATFORM_DOMAIN_VALUES.filter((d) => d !== configured),
   ];
 
-  let firstError: unknown = null;
-  for (const platformDomain of candidates) {
-    try {
-      const result = await attempt(platformDomain);
-      return { result, platformDomain };
-    } catch (err) {
-      if (firstError === null) firstError = err;
-    }
-  }
+  // Los servidores son independientes. Probarlos en serie hacía que una
+  // contraseña inválida tardara 5s por dominio (y el wizard parecía colgado)
+  // en vez de resolver el acceso en los primeros 5s.
+  const attempts = await Promise.all(
+    candidates.map(async (platformDomain) => {
+      try {
+        return { platformDomain, result: await attempt(platformDomain) } as const;
+      } catch (error) {
+        return { platformDomain, error } as const;
+      }
+    }),
+  );
+  const successful = attempts.find(
+    (attemptResult): attemptResult is Extract<(typeof attempts)[number], { result: T }> =>
+      "result" in attemptResult,
+  );
+  if (successful) return successful;
+
+  const firstError = attempts[0] && "error" in attempts[0] ? attempts[0].error : null;
 
   const intentados = candidates.map((d) => PLATFORM_SERVERS[d].label).join(", ");
   const detalle =
@@ -156,13 +167,43 @@ export async function processNextCategorySync(filterUserId?: string): Promise<bo
 
     const username = decryptSecret(credential.encryptedUsername);
     const password = decryptSecret(credential.encryptedPassword);
-    const { categories: remoteCategories, platformDomain: workingDomain } =
+    let { categories: remoteCategories, platformDomain: workingDomain } =
       await fetchCategoriesDetectingServer(
         username,
         password,
         user?.platformDomain,
         user?.selectedSitePanel,
       );
+
+    // A stale panel selection can survive a platform language/site change.
+    // Re-read all panels only when the selected one is empty. Auto-recover
+    // only when exactly one panel has categories; with several candidates we
+    // must not mix sites or guess where future articles should be published.
+    if (remoteCategories.length === 0 && user?.selectedSitePanel) {
+      const fallback = await fetchCategoriesDetectingServer(
+        username,
+        password,
+        workingDomain,
+        null,
+      );
+      const recovered = chooseUnambiguousCategoryPanel(fallback.categories);
+      if (recovered) {
+        remoteCategories = recovered;
+        workingDomain = fallback.platformDomain;
+        const recoveredPanel = recovered[0]?.panel ?? "";
+        await prisma.user.update({
+          where: { id: job.userId },
+          data: { selectedSitePanel: recoveredPanel },
+        });
+        console.log(
+          `Usuario ${job.userId}: el panel "${user.selectedSitePanel}" no tenía categorías; se recuperó automáticamente el panel "${recoveredPanel}".`,
+        );
+      } else if (fallback.categories.length > 0) {
+        throw new Error(
+          `El panel seleccionado "${user.selectedSitePanel}" no tiene categorías y se encontraron categorías en varios paneles. Selecciona el sitio correcto antes de sincronizar para no mezclar webs.`,
+        );
+      }
+    }
 
     // Si la cuenta resultó vivir en otro servidor, se recuerda: publicar y
     // sincronizar idiomas después usan User.platformDomain directamente, así

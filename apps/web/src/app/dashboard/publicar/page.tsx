@@ -17,6 +17,7 @@ import PreValidationGuard from "@/components/PreValidationGuard";
 import AiTitleGenerator from "@/components/AiTitleGenerator";
 import { normalizeTitle } from "@/lib/title-generation-core";
 import type { CategoryRow } from "@/types/dashboard";
+import MobileInstructions from "@/components/MobileInstructions";
 
 export default function PublicarPage() {
   const router = useRouter();
@@ -99,12 +100,26 @@ export default function PublicarPage() {
       ? "Tu límite mensual se renovará al comenzar el próximo mes."
       : "Puedes intentarlo en otro lote cuando tengas cupo disponible.";
 
-  const confirmImageCredits = useCallback(() => {
+  const confirmImageCredits = useCallback(async () => {
+    // Persistir en la base de datos, no solo en el estado local: si solo
+    // cambiara el estado del navegador, el aviso volvía a aparecer en la
+    // próxima recarga (o en otra pestaña) porque la consulta al servidor
+    // seguía devolviendo hasImageCredits=false.
     setHasImageCredits(true);
     setBanner({
       type: "info",
       text: "Has indicado que ya recibiste créditos. Puedes intentar publicar; si aún no están activos, vuelve aquí y solicítalos.",
     });
+    try {
+      await fetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hasImageCredits: true }),
+      });
+    } catch {
+      // Si falla la persistencia, el estado local ya deja reintentar de
+      // inmediato; en la próxima carga se revalidará contra el servidor.
+    }
   }, []);
 
   const loadLanguages = useCallback(async () => {
@@ -278,30 +293,25 @@ export default function PublicarPage() {
         }}
       >
         <section
-          aria-labelledby="publicar-instrucciones"
           style={{
             ...sectionStyle,
             marginTop: 0,
             marginBottom: 20,
-            padding: "clamp(18px, 3vw, 28px)",
+            padding: "20px 0 24px",
             background: "#ffffff",
           }}
         >
-          <p style={{ margin: 0, color: "#1d1d1f", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Leer antes de ejecutar
-          </p>
-          <h1 id="publicar-instrucciones" style={{ ...h2Style, marginTop: 8, marginBottom: 10 }}>
-            {MENU_NAMES.propios}
-          </h1>
-          <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "#1d1d1f" }}>
-            El objetivo de este módulo es convertir tus ideas o títulos en artículos completos para atraer visitas, responder las preguntas de tus clientes y fortalecer el posicionamiento de tu web en Google. Puedes colocar títulos creados por otra inteligencia artificial o escritos por ti: SEO TOTAL desarrollará cada título, redactará el contenido, añadirá una imagen y publicará el artículo directamente en tu página web.
-          </p>
-          <ol style={{ margin: "12px 0 0", paddingLeft: 22, color: "#1d1d1f", fontSize: 14, lineHeight: 1.65 }}>
-            <li><strong>Elige una categoría:</strong> indica el tema o servicio del artículo.</li>
-            <li><strong>Elige el idioma y el estilo:</strong> define cómo redactará la inteligencia artificial.</li>
-            <li><strong>Escribe o pega los títulos:</strong> coloca un título por línea; cada uno será un artículo independiente.</li>
-            <li><strong>Revisa y pulsa “Iniciar”:</strong> el sistema procesará los artículos uno por uno y mostrará el resultado en <strong>Progreso de las publicaciones</strong>.</li>
-          </ol>
+          <MobileInstructions>
+            <p style={{ margin: 0, color: "#1d1d1f", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Leer antes de ejecutar</p>
+            <h1 style={{ ...h2Style, marginTop: 8, marginBottom: 10 }}>{MENU_NAMES.propios}</h1>
+            <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "#1d1d1f" }}>El objetivo de este módulo es convertir tus ideas o títulos en artículos completos para atraer visitas, responder las preguntas de tus clientes y fortalecer el posicionamiento de tu web en Google. Puedes colocar títulos creados por otra inteligencia artificial o escritos por ti: SEO TOTAL desarrollará cada título, redactará el contenido, añadirá una imagen y publicará el artículo directamente en tu página web.</p>
+            <ol style={{ margin: "12px 0 0", paddingLeft: 22, color: "#1d1d1f", fontSize: 14, lineHeight: 1.65 }}>
+              <li><strong>Elige una categoría:</strong> indica el tema o servicio del artículo.</li>
+              <li><strong>Elige el idioma y el estilo:</strong> define cómo redactará la inteligencia artificial.</li>
+              <li><strong>Escribe o pega los títulos:</strong> coloca un título por línea; cada uno será un artículo independiente.</li>
+              <li><strong>Revisa y pulsa “Iniciar”:</strong> el sistema procesará los artículos uno por uno y mostrará el resultado en <strong>Progreso de las publicaciones</strong>.</li>
+            </ol>
+          </MobileInstructions>
         </section>
         {!hasImageCredits && (
           <div
@@ -342,7 +352,7 @@ export default function PublicarPage() {
                   padding: "7px 14px",
                   minWidth: 170,
                   height: 36,
-                  borderRadius: 18,
+                  borderRadius: 6,
                   fontSize: 12,
                   fontWeight: 600,
                   lineHeight: "20px",
@@ -362,7 +372,7 @@ export default function PublicarPage() {
                   padding: "7px 14px",
                   minWidth: 170,
                   height: 36,
-                  borderRadius: 18,
+                  borderRadius: 6,
                   fontSize: 12,
                   fontWeight: 600,
                   lineHeight: "20px",
@@ -508,7 +518,7 @@ export default function PublicarPage() {
                 onClick={() => setTitlesMode(mode)}
                 style={{
                   padding: "8px 16px",
-                  borderRadius: 18,
+                  borderRadius: 6,
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: "pointer",

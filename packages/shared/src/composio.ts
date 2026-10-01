@@ -22,7 +22,8 @@ export type ComposioAppId =
   | "google_search_console"
   | "google_analytics"
   | "facebook"
-  | "instagram";
+  | "instagram"
+  | "pinterest";
 
 export class ComposioApiError extends Error {
   constructor(
@@ -129,6 +130,14 @@ export const COMPOSIO_TOOL_ALLOWLIST: Record<ComposioAppId, readonly AllowedTool
     { slug: "INSTAGRAM_POST_IG_USER_MEDIA", kind: "write" },
     { slug: "INSTAGRAM_CREATE_CAROUSEL_CONTAINER", kind: "write" },
     { slug: "INSTAGRAM_POST_IG_USER_MEDIA_PUBLISH", kind: "write" },
+    // Solo lectura: devuelve el enlace público (permalink) de una publicación ya publicada
+    // (parámetros verificados en la definición en vivo el 2026-09-26: ig_media_id, fields).
+    { slug: "INSTAGRAM_GET_IG_MEDIA", kind: "read" },
+  ],
+  pinterest: [
+    // Listar los tableros de la cuenta (elegir destino y «Probar conexión») y publicar el Pin.
+    { slug: "PINTEREST_LIST_BOARDS", kind: "read" },
+    { slug: "PINTEREST_CREATE_PIN", kind: "write" },
   ],
 };
 
@@ -138,6 +147,7 @@ export const COMPOSIO_TEST_TOOL: Record<ComposioAppId, string> = {
   google_analytics: "GOOGLE_ANALYTICS_LIST_ACCOUNT_SUMMARIES",
   facebook: "FACEBOOK_LIST_MANAGED_PAGES",
   instagram: "INSTAGRAM_GET_USER_INFO",
+  pinterest: "PINTEREST_LIST_BOARDS",
 };
 
 export function isToolAllowed(app: ComposioAppId, toolSlug: string): boolean {
@@ -218,6 +228,7 @@ const APP_TOOLKIT: Record<ComposioAppId, string> = {
   google_analytics: "google_analytics",
   facebook: "facebook",
   instagram: "instagram",
+  pinterest: "pinterest",
 };
 
 export interface ToolResult {

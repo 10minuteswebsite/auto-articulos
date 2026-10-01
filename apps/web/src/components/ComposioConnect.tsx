@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { friendlyConnectionError } from "@/lib/composio-error-message";
+import { sitemapMessage, type SitemapOutcome } from "@/lib/composio-sitemap";
 import {
   sectionStyle,
   h2Style,
   buttonStyle,
   secondaryButtonStyle,
+  ConnectionSuccess,
 } from "@/components/dashboard-ui";
 
 interface Connection {
@@ -33,14 +36,6 @@ interface ComposioConnectProps {
   showInactiveActions?: boolean;
 }
 
-/**
- * Parámetros de la URL leídos UNA vez al cargar el módulo: la pantalla puede tener
- * varias instancias de este componente y cada una debe ver el resultado del retorno
- * de Composio aunque otra ya haya limpiado la dirección.
- */
-const INITIAL_PARAMS: URLSearchParams | null =
-  typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
-
 interface Option {
   id: string;
   label: string;
@@ -65,7 +60,8 @@ const APP_NOTES: Record<string, string> = {
   facebook:
     "Permite publicar en tu Página de Facebook desde SEO TOTAL. Las Stories no se ofrecen cuando esta conexión está activa.",
   instagram:
-    "Permite publicar imágenes, carruseles y Reels en tu cuenta Business o Creator. Las Stories no se ofrecen cuando esta conexión está activa.",
+    "Permite publicar imágenes con texto en tu cuenta Business o Creator de Instagram. Las Stories no se ofrecen cuando esta conexión está activa.",
+  pinterest: "Permite publicar tus artículos como Pins con imagen y enlace en el tablero de Pinterest que elijas.",
 };
 
 const CHOOSE_TITLE: Record<string, string> = {
@@ -73,11 +69,19 @@ const CHOOSE_TITLE: Record<string, string> = {
   google_analytics: "Elige la propiedad que usarás",
   facebook: "Elige la Página que usarás",
   instagram: "Elige la cuenta de Instagram que usarás",
+  pinterest: "Elige el tablero que usarás",
 };
 
 const CHOOSE_NOTE: Record<string, string> = {
   google_search_console:
     "Tu cuenta de SEO TOTAL trabaja con un solo dominio. Si tu cuenta de Google tiene varios sitios, elige el de esta cuenta; los demás no se usarán.",
+  google_analytics:
+    "Elige la propiedad que corresponde al sitio de esta cuenta; las demás no se usarán.",
+  facebook:
+    "Elige la Página de tu negocio, no tu perfil personal. SEO TOTAL publicará solo en la Página que elijas; las demás no se usarán.",
+  instagram:
+    "Solo aparecen las cuentas Business o Creator vinculadas a una Página de Facebook. SEO TOTAL publicará solo en la que elijas.",
+  pinterest: "Elige el tablero de esta cuenta donde se publicarán los Pins; los demás no se usarán.",
 };
 
 const CONNECTION_STEPS: Record<string, string[]> = {
@@ -96,16 +100,25 @@ const CONNECTION_STEPS: Record<string, string[]> = {
     "Pulsa Probar conexión y comprueba el mensaje verde.",
   ],
   facebook: [
-    "Abre Facebook en otra pestaña y confirma que es tu cuenta personal administradora.",
-    "Pulsa Nueva conexión y autoriza el acceso.",
-    "Elige la Página de Facebook correcta, no tu perfil personal.",
-    "Pulsa Aprobar y guardar y después Probar conexión.",
+    "Abre Facebook en otra pestaña del mismo navegador.",
+    "Confirma que estás dentro de la cuenta personal que administra tu Página de negocio.",
+    "Pulsa Nueva conexión y autoriza el acceso solicitado.",
+    "Elige la Página correcta, no tu perfil personal, y pulsa Aprobar y guardar.",
+    "Pulsa Probar conexión y comprueba el mensaje verde.",
   ],
   instagram: [
-    "Abre Instagram en otra pestaña y confirma la cuenta Business o Creator correcta.",
-    "Pulsa Nueva conexión y autoriza el acceso desde Facebook si se solicita.",
-    "Elige la cuenta de Instagram correcta.",
-    "Pulsa Aprobar y guardar y después Probar conexión.",
+    "Abre Instagram y Facebook en otra pestaña del mismo navegador.",
+    "Confirma que tu cuenta de Instagram es Business o Creator y está vinculada a tu Página de Facebook.",
+    "Pulsa Nueva conexión y autoriza el acceso solicitado.",
+    "Elige la cuenta de Instagram correcta y pulsa Aprobar y guardar.",
+    "Pulsa Probar conexión y comprueba el mensaje verde.",
+  ],
+  pinterest: [
+    "Abre Pinterest en otra pestaña del mismo navegador.",
+    "Confirma que estás dentro de la cuenta de Pinterest que quieres usar.",
+    "Pulsa Nueva conexión y autoriza el acceso solicitado.",
+    "Elige el tablero correcto y pulsa Aprobar y guardar.",
+    "Pulsa Probar conexión y comprueba el mensaje verde.",
   ],
 };
 
@@ -118,9 +131,33 @@ const STATUS_LABEL: Record<Connection["status"], { text: string; color: string }
 };
 
 const RESULT_MESSAGE: Record<string, { ok: boolean; text: string }> = {
-  connected: { ok: true, text: "Conexión completada y verificada. Ahora elige y aprueba lo que usarás." },
+  connected: { ok: true, text: "Autorización completada. Ahora elige y aprueba lo que usará SEO TOTAL." },
   failed: { ok: false, text: "No se pudo completar la conexión. Inténtalo de nuevo." },
   invalid: { ok: false, text: "No se encontró esa conexión. Inicia la conexión desde aquí." },
+};
+
+const CHOSEN_NOUN: Record<string, string> = {
+  google_search_console: "el sitio",
+  google_analytics: "la propiedad",
+  facebook: "la Página",
+  instagram: "la cuenta de Instagram",
+  pinterest: "el tablero",
+};
+
+const SUCCESS_TITLE: Record<string, string> = {
+  google_search_console: "Google Search Console quedó conectado correctamente",
+  google_analytics: "Google Analytics quedó conectado correctamente",
+  facebook: "Facebook quedó conectado correctamente",
+  instagram: "Instagram quedó conectado correctamente",
+  pinterest: "Pinterest quedó conectado correctamente",
+};
+
+const SUCCESS_SELECTION_LABEL: Record<string, string> = {
+  google_search_console: "Propiedad conectada",
+  google_analytics: "Propiedad conectada",
+  facebook: "Página conectada",
+  instagram: "Cuenta conectada",
+  pinterest: "Tablero conectado",
 };
 
 export default function ComposioConnect({ apps, embedded = false, inline = false, activeOnly = false, showInactiveActions = false }: ComposioConnectProps = {}) {
@@ -128,8 +165,12 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [probe, setProbe] = useState<Record<string, string>>({});
-  const [found, setFound] = useState<Record<string, Array<{ label: string; detail: string | null }>>>({});
+  const [sitemapNote, setSitemapNote] = useState<Record<string, string>>({});
+  const [savedSelection, setSavedSelection] = useState<Record<string, string>>({});
   const [choices, setChoices] = useState<Record<string, Choices>>({});
+  const [justSaved, setJustSaved] = useState<Record<string, boolean>>({});
+  const [justCompleted, setJustCompleted] = useState<Record<string, boolean>>({});
+  const [fromNotice, setFromNotice] = useState(false);
 
   const load = useCallback(async () => {
     const response = await fetch("/api/composio/status", { cache: "no-store" });
@@ -150,7 +191,7 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
     if (!response.ok) {
       setChoices((current) => ({
         ...current,
-        [app]: { loading: false, error: body.error ?? "No se pudieron leer las opciones.", options: [], picked: null },
+        [app]: { loading: false, error: friendlyConnectionError(body.error, "No se pudieron leer las opciones. Inténtalo de nuevo."), options: [], picked: null },
       }));
       return;
     }
@@ -167,10 +208,19 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
       // Una app conectada sin elección todavía pide elegir de inmediato.
       list?.filter((c) => c.status === "ACTIVE" && !c.selection && c.available).forEach((c) => void openChoices(c.app));
     });
-    const resultado = INITIAL_PARAMS?.get("resultado") ?? null;
-    const appDeVuelta = INITIAL_PARAMS?.get("app") ?? null;
+    const paramsFromCurrentUrl = new URLSearchParams(window.location.search);
+    if (paramsFromCurrentUrl.get("reconectar") === "1") setFromNotice(true);
+    const resultado = paramsFromCurrentUrl.get("resultado") ?? null;
+    const appDeVuelta = paramsFromCurrentUrl.get("app") ?? null;
     if (resultado && RESULT_MESSAGE[resultado] && (!apps || !appDeVuelta || apps.includes(appDeVuelta))) {
-      setMessage(RESULT_MESSAGE[resultado]);
+      setMessage(
+        resultado === "connected" && appDeVuelta && CHOSEN_NOUN[appDeVuelta]
+          ? { ok: true, text: `Autorización completada. Ahora elige y aprueba ${CHOSEN_NOUN[appDeVuelta]} que usará SEO TOTAL.` }
+          : RESULT_MESSAGE[resultado],
+      );
+      if (resultado === "connected" && appDeVuelta) {
+        setJustCompleted((current) => ({ ...current, [appDeVuelta]: true }));
+      }
       // Se limpia solo lo del retorno; la pestaña elegida (vista) se conserva.
       const params = new URLSearchParams(window.location.search);
       params.delete("resultado");
@@ -195,7 +245,7 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
     try {
       const { ok, body } = await post("/api/composio/connect", { app });
       if (!ok || !body.redirectUrl) {
-        setMessage({ ok: false, text: body.error ?? "No se pudo iniciar la conexión." });
+        setMessage({ ok: false, text: friendlyConnectionError(body.error, "No se pudo iniciar la conexión. Inténtalo de nuevo.") });
         return;
       }
       window.location.href = body.redirectUrl as string;
@@ -207,15 +257,11 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
   async function test(app: string) {
     setBusy(app);
     setProbe((current) => ({ ...current, [app]: "" }));
-    setFound((current) => ({ ...current, [app]: [] }));
     try {
       const { ok, body } = await post("/api/composio/test", { app });
-      if (ok && Array.isArray(body.found)) setFound((current) => ({ ...current, [app]: body.found }));
       const text = ok
-        ? body.items !== null && body.items !== undefined
-          ? `La conexión respondió correctamente (${body.items} elemento${body.items === 1 ? "" : "s"}).`
-          : "La conexión respondió correctamente."
-        : (body.error ?? "La prueba falló.");
+        ? `Conexión correcta${connections?.find((c) => c.app === app)?.selection ? ` con ${connections.find((c) => c.app === app)?.selection}` : ""}.`
+        : friendlyConnectionError(body.error, "La prueba no funcionó. Inténtalo de nuevo.");
       setProbe((current) => ({ ...current, [app]: `${ok ? "✓" : "✗"} ${text}` }));
     } finally {
       setBusy(null);
@@ -225,18 +271,26 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
   async function approve(app: string) {
     const picked = choices[app]?.picked;
     if (!picked) return;
+    const pickedOption = choices[app]?.options.find((option) => option.id === picked);
     setBusy(app);
     setMessage(null);
     try {
       const { ok, body } = await post("/api/composio/select", { app, optionId: picked });
       if (!ok) {
-        setMessage({ ok: false, text: body.error ?? "No se pudo guardar tu elección." });
+        setMessage({ ok: false, text: friendlyConnectionError(body.error, "No se pudo guardar tu elección. Inténtalo de nuevo.") });
         return;
       }
       setChoices((current) => {
         const { [app]: _closed, ...rest } = current;
         return rest;
       });
+      setJustSaved((current) => ({ ...current, [app]: true }));
+      const note = sitemapMessage(body.sitemap as SitemapOutcome | null | undefined);
+      if (note) setSitemapNote((current) => ({ ...current, [app]: note }));
+      if (pickedOption) {
+        const code = pickedOption.detail ? ` (${pickedOption.detail})` : "";
+        setSavedSelection((current) => ({ ...current, [app]: `${pickedOption.label}${code}` }));
+      }
       setMessage({ ok: true, text: "Elección aprobada y guardada." });
       await load();
     } finally {
@@ -245,12 +299,12 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
   }
 
   async function disconnect(app: string) {
-    if (!window.confirm("¿Desconectar esta app? Se elimina la conexión en Composio.")) return;
+    if (!window.confirm("¿Desconectar esta conexión? Tendrás que volver a conectarla para usarla.")) return;
     setBusy(app);
     setMessage(null);
     try {
       const { ok, body } = await post("/api/composio/disconnect", { app });
-      if (!ok) setMessage({ ok: false, text: body.error ?? "No se pudo desconectar." });
+      if (!ok) setMessage({ ok: false, text: friendlyConnectionError(body.error, "No se pudo desconectar. Inténtalo de nuevo.") });
       setProbe((current) => ({ ...current, [app]: "" }));
       setChoices((current) => {
         const { [app]: _closed, ...rest } = current;
@@ -264,6 +318,7 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
 
   return (
     <div>
+      <style>{`@keyframes composio-pulse{0%,100%{box-shadow:0 0 0 0 rgba(215,0,21,.45)}50%{box-shadow:0 0 0 10px rgba(215,0,21,0)}}.composio-pulse{animation:composio-pulse 1.8s ease-in-out infinite}@media (prefers-reduced-motion:reduce){.composio-pulse{animation:none}}`}</style>
       {!embedded && !inline && (
       <section style={sectionStyle}>
         <h2 style={h2Style}>Conexión por Composio</h2>
@@ -273,14 +328,14 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
           normal. Después de conectar, eliges y apruebas qué sitio, propiedad, Página o cuenta usarás.
           Tus conexiones actuales siguen funcionando igual mientras pruebas esta.
         </p>
-        {message && (
+        {message && !(message.ok && connections?.some((connection) => connection.status === "ACTIVE" && connection.selection)) && (
           <p role="status" style={{ fontSize: 14, marginTop: 12, color: message.ok ? "#1a7f37" : "#c62828" }}>
             {message.text}
           </p>
         )}
       </section>
       )}
-      {(embedded || inline) && message && (
+      {(embedded || inline) && message && !(message.ok && connections?.some((connection) => connection.status === "ACTIVE" && connection.selection)) && (
         <p role="status" style={{ fontSize: 14, margin: "8px 0 0", color: message.ok ? "#1a7f37" : "#c62828" }}>
           {message.text}
         </p>
@@ -298,8 +353,28 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
           if (inline && showInactiveActions && connection.status !== "ACTIVE") {
             return (
               <button key={connection.app} type="button" onClick={() => connect(connection.app)} disabled={busy !== null} style={{ ...secondaryButtonStyle, marginTop: 12 }}>
-                {isBusy ? "Abriendo…" : `Nueva conexión de ${connection.app === "facebook" ? "Facebook" : "Instagram"}`}
+                {isBusy ? "Abriendo…" : `Nueva conexión de ${connection.app === "facebook" ? "Facebook" : connection.app === "pinterest" ? "Pinterest" : "Instagram"}`}
               </button>
+            );
+          }
+          const isSuccessful = connection.status === "ACTIVE" && Boolean(connection.selection) && !choice;
+          const successJustCompleted =
+            justSaved[connection.app] === true ||
+            justCompleted[connection.app] === true;
+          if (isSuccessful && successJustCompleted) {
+            return (
+              <section key={connection.app} style={inline ? { marginTop: 16, paddingTop: 14, borderTop: "1px solid #e5e5ea" } : sectionStyle}>
+                <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                  {!inline && <h2 style={{ ...h2Style, marginBottom: 6 }}>{embedded ? `${connection.label} · nueva conexión` : connection.label}</h2>}
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#1a7f37" }}>Conexión exitosa</span>
+                </div>
+                <ConnectionSuccess
+                  title={SUCCESS_TITLE[connection.app] ?? "La conexión quedó lista"}
+                  label={SUCCESS_SELECTION_LABEL[connection.app] ?? "Conectado con"}
+                  value={savedSelection[connection.app] ?? connection.selection}
+                  description={`La configuración terminó correctamente. SEO TOTAL usará esta conexión desde ahora.${sitemapNote[connection.app] ? ` ${sitemapNote[connection.app]}` : ""}`}
+                />
+              </section>
             );
           }
           return (
@@ -309,7 +384,15 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                 <span style={{ fontSize: 13, fontWeight: 600, color: status.color }}>{status.text}</span>
               </div>
               <p style={{ ...mutedStyle, margin: "4px 0 0" }}>{APP_NOTES[connection.app]}</p>
-              {CONNECTION_STEPS[connection.app] && (
+              {fromNotice && connection.status !== "ACTIVE" && connection.available && (
+                <p
+                  role="alert"
+                  style={{ margin: "12px 0 0", padding: "12px 14px", borderRadius: 8, background: "#fff1f1", border: "2px solid #d70015", color: "#b00020", fontSize: 15, fontWeight: 800 }}
+                >
+                  Debes reconectar ahora. Pulsa «Nueva conexión» y autoriza el acceso.
+                </p>
+              )}
+              {CONNECTION_STEPS[connection.app] && !(connection.status === "ACTIVE" && connection.selection && !choice) && (
                 <div
                   role="note"
                   style={{ marginTop: 10, padding: "10px 0", borderTop: "1px solid #e5e5ea", color: "#1d1d1f", fontSize: 13, lineHeight: 1.5 }}
@@ -328,17 +411,22 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
               )}
 
               {connection.status === "ACTIVE" && connection.selection && !choice && (
-                <p style={{ fontSize: 14, margin: "8px 0" }}>
-                  <strong>
-                    {inline
-                      ? connection.app === "facebook"
-                        ? "Página de Facebook seleccionada:"
-                        : connection.app === "instagram"
-                          ? "Cuenta de Instagram seleccionada:"
-                          : "Propiedad seleccionada:"
-                      : "Usando:"}
-                  </strong>{" "}{connection.selection}
-                </p>
+                <div style={{ marginTop: 10, padding: 14, borderRadius: 12, border: "1px solid rgba(26, 127, 55, 0.25)", background: "#f7fff9" }}>
+                  <strong style={{ display: "block", color: "#1a7f37", fontSize: 15 }}>✓ Conexión activa</strong>
+                  <p style={{ fontSize: 14, margin: "6px 0 0" }}>
+                    <strong>
+                      {inline
+                        ? connection.app === "facebook"
+                          ? "Página de Facebook conectada:"
+                          : connection.app === "instagram"
+                            ? "Cuenta de Instagram conectada:"
+                            : connection.app === "pinterest"
+                              ? "Tablero de Pinterest conectado:"
+                              : "Propiedad conectada:"
+                        : "Conectado con:"}
+                    </strong>{" "}{connection.selection}
+                  </p>
+                </div>
               )}
 
               {choice && (
@@ -350,40 +438,42 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                   {!choice.loading && !choice.error && choice.options.length === 0 && (
                     <p style={mutedStyle}>No se encontró nada para elegir en esta cuenta. Comprueba que sea la cuenta correcta.</p>
                   )}
-                  {choice.options.map((option) => (
-                    <label
-                      key={option.id}
-                      style={{
-                        display: "flex",
-                        gap: 10,
-                        alignItems: "flex-start",
-                        padding: "8px 0",
-                        opacity: option.selectable ? 1 : 0.55,
-                        cursor: option.selectable ? "pointer" : "not-allowed",
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        name={`choice-${connection.app}`}
-                        checked={choice.picked === option.id}
-                        disabled={!option.selectable || busy !== null}
-                        onChange={() =>
-                          setChoices((current) => ({ ...current, [connection.app]: { ...choice, picked: option.id } }))
-                        }
-                        style={{ marginTop: 3 }}
-                      />
-                      <span style={{ fontSize: 14 }}>
-                        <strong>{option.label}</strong>
-                        {option.recommended && <span style={{ color: "#1a7f37", fontSize: 12 }}> · recomendado</span>}
-                        {option.detail && (
-                          <span style={{ display: "block", fontSize: 12, color: "#6e6e73", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", marginTop: 2 }}>
-                            {option.detail}
+                  {choice.options.length > 0 && (() => {
+                    const sorted = [...choice.options].sort(
+                      (x, y) =>
+                        Number(y.selectable) - Number(x.selectable) ||
+                        Number(Boolean(y.recommended)) - Number(Boolean(x.recommended)) ||
+                        x.label.localeCompare(y.label, "es"),
+                    );
+                    const pickedOption = choice.options.find((option) => option.id === choice.picked);
+                    return (
+                      <div>
+                        <select
+                          aria-label={CHOOSE_TITLE[connection.app]}
+                          value={choice.picked ?? ""}
+                          disabled={busy !== null}
+                          onChange={(event) =>
+                            setChoices((current) => ({ ...current, [connection.app]: { ...choice, picked: event.target.value || null } }))
+                          }
+                          style={{ width: "100%", maxWidth: 520, padding: "10px 12px", borderRadius: 10, border: "1px solid #d2d2d7", fontSize: 14, background: "#fff", color: "#1d1d1f" }}
+                        >
+                          <option value="">Elige una opción…</option>
+                          {sorted.map((option) => (
+                            <option key={option.id} value={option.id} disabled={!option.selectable}>
+                              {option.label}
+                              {option.recommended ? " · recomendado" : ""}
+                              {!option.selectable && option.reason ? ` — ${option.reason}` : ""}
+                            </option>
+                          ))}
+                        </select>
+                        {pickedOption?.detail && (
+                          <span style={{ display: "block", fontSize: 12, color: "#6e6e73", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", marginTop: 6 }}>
+                            {pickedOption.detail}
                           </span>
                         )}
-                        {option.reason && <span style={{ display: "block", fontSize: 12, color: "#9a6700" }}>{option.reason}</span>}
-                      </span>
-                    </label>
-                  ))}
+                      </div>
+                    );
+                  })()}
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 8 }}>
                     <button
                       type="button"
@@ -420,6 +510,7 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                       type="button"
                       onClick={() => connect(connection.app)}
                       disabled={busy !== null}
+                      className={fromNotice ? "composio-pulse" : undefined}
                       style={{ ...buttonStyle, marginTop: 0, opacity: busy !== null ? 0.5 : 1 }}
                     >
                       {isBusy ? "Abriendo…" : connection.status === "NOT_CONNECTED" ? "Nueva conexión" : "Reintentar conexión"}
@@ -446,16 +537,6 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                     </button>
                   )}
                 </div>
-              )}
-              {(found[connection.app] ?? []).length > 0 && (
-                <ul style={{ margin: "6px 0 0", paddingLeft: 18, fontSize: 12, color: "#6e6e73", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                  {found[connection.app].map((item, index) => (
-                    <li key={index}>
-                      <strong style={{ fontFamily: "inherit", color: "#1d1d1f" }}>{item.label}</strong>
-                      {item.detail ? ` — ${item.detail}` : ""}
-                    </li>
-                  ))}
-                </ul>
               )}
               {probe[connection.app] && (
                 <p

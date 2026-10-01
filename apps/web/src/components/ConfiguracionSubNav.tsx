@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 
 const SECCIONES = [
@@ -10,11 +9,9 @@ const SECCIONES = [
   { href: "/dashboard/configuracion/inicial", label: "Configuración Inicial" },
   { href: "/dashboard/configuracion/cuenta", label: "Cuenta" },
   { href: "/dashboard/configuracion/contenido", label: "Contenido" },
-  { href: "/dashboard/configuracion/redes-sociales", label: "Redes Sociales" },
   { href: "/dashboard/configuracion/movil", label: "App Móvil" },
 ] as const;
 
-/** Módulo opt-in (ver SYSTEM_MODULES): solo aparece para quien lo tenga «Habilitado». */
 const COMPOSIO_SECCION = { href: "/dashboard/configuracion/conexiones", label: "Conexiones" } as const;
 
 /**
@@ -29,24 +26,7 @@ const COMPOSIO_SECCION = { href: "/dashboard/configuracion/conexiones", label: "
  */
 export default function ConfiguracionSubNav() {
   const pathname = usePathname();
-  const [verComposio, setVerComposio] = useState(false);
-
-  useEffect(() => {
-    let vivo = true;
-    fetch("/api/me", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (vivo && data && Array.isArray(data.disabledModules)) {
-          setVerComposio(!data.disabledModules.includes("conexion-composio"));
-        }
-      })
-      .catch(() => undefined);
-    return () => {
-      vivo = false;
-    };
-  }, []);
-
-  const secciones = verComposio ? [...SECCIONES, COMPOSIO_SECCION] : SECCIONES;
+  const secciones = [...SECCIONES, COMPOSIO_SECCION];
 
   const linkStyle = (active: boolean): CSSProperties => ({
     padding: "8px 14px",

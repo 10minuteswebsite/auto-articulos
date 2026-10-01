@@ -17,6 +17,13 @@ import {
 } from "@/lib/opportunity-evidence-cache";
 import { platformProductNameOrNeutral } from "@auto-articulos/shared";
 
+// El análisis puede consultar varias fuentes y procesar hasta 20 lotes de
+// evidencia contra el modelo. Sin este límite explícito Vercel aplica el
+// timeout corto de la función y Safari lo muestra al usuario como "Load
+// failed", aunque el resto del dashboard sí haya cargado correctamente.
+export const maxDuration = 300;
+export const dynamic = "force-dynamic";
+
 
 function isoDate(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -80,23 +87,21 @@ export async function GET() {
   });
 }
 
-// Borra TODAS las oportunidades pendientes del panel/dominio actual del
-// usuario de una sola vez — pedido explícito de Milton (7/9/2026, anotado en
-// TO-DO.md): antes solo existía borrado uno por uno o por categoría. Mismo
-// alcance por panel/siteDomain que ya usa el análisis (POST) para no tocar
-// oportunidades de otro panel (ej. una cuenta con English/Español).
+// Borra TODAS las oportunidades que la pantalla muestra de una sola vez.
+// La lista GET está acotada por usuario y dominio, pero no por panel; mantener
+// aquí ese mismo alcance evita que el botón parezca no funcionar cuando la
+// cuenta tiene paneles y selectedSitePanel no coincide con los grupos visibles.
 export async function DELETE() {
   const userId = await getCurrentUserId();
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    select: { selectedSiteDomain: true, selectedSitePanel: true },
+    select: { selectedSiteDomain: true },
   });
   const selectedSiteDomain = user.selectedSiteDomain;
-  const selectedPanel = user.selectedSitePanel || "";
   await prisma.opportunityGroup.deleteMany({
     where: {
       userId,
-      category: { panel: selectedPanel, ...(selectedSiteDomain ? { siteDomain: selectedSiteDomain } : {}) },
+      category: selectedSiteDomain ? { siteDomain: selectedSiteDomain } : undefined,
     },
   });
   return NextResponse.json({ ok: true });
@@ -126,7 +131,7 @@ export async function POST(request: Request) {
     .catch(() => ({ force: false, panel: "" }));
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    select: { lastOpportunityAnalysisAt: true, selectedSiteDomain: true, selectedSitePanel: true, platformDomain: true, clientLocations: true, businessLocations: true, excludedTopics: true },
+    select: { lastOpportunityAnalysisAt: true, selectedSiteDomain: true, selectedSitePanel: true, platformDomain: true, clientLocations: true, businessLocations: true, excludedTopics: true, dailyArticleLimit: true },
   });
   const selectedSiteDomain = user.selectedSiteDomain;
   // Ubicaciones REALES declaradas por el dueño de la cuenta (Configuración →
@@ -188,10 +193,10 @@ export async function POST(request: Request) {
     let countryRows = cachedGsc?.countryRows ?? [];
     // Nunca congelar una respuesta vacía de Search Console durante el TTL.
     const hasCachedGscRows = currentRows.length > 0 || previousRows.length > 0;
-    const resolved = integration ? await resolveSearchConsoleForUser(userId, integration.siteDomain) : null;
-    const hasSearchConsole = Boolean(integration?.siteUrl) || resolved?.source === "COMPOSIO";
+    const resolved = await resolveSearchConsoleForUser(userId, selectedSiteDomain ?? "");
+    const hasSearchConsole = Boolean(integration?.siteUrl) || resolved.source === "COMPOSIO";
     if ((!cachedGsc || !hasCachedGscRows) && hasSearchConsole) {
-      if (resolved?.source === "COMPOSIO") {
+      if (resolved.source === "COMPOSIO") {
         if (!resolved.apiKey || !resolved.state.composio?.connectedAccountId || !resolved.state.composio.siteUrl) {
           throw new Error("Search Console requiere reconectar la cuenta por Composio y seleccionar un sitio.");
         }
@@ -205,9 +210,12 @@ export async function POST(request: Request) {
           query(isoDate(currentStart), isoDate(end), ["country"]),
         ]);
       } else {
+        if (!integration?.encryptedRefreshToken || !integration.siteUrl) {
+          throw new Error("Conecta Google Search Console y selecciona un sitio primero.");
+        }
         const collected = await collectDeepGoogleEvidence(
-          await getGoogleAccessToken(decryptSecret(integration!.encryptedRefreshToken)),
-          integration!.siteUrl!, isoDate(currentStart), isoDate(end), isoDate(previousStart), isoDate(previousEnd),
+          await getGoogleAccessToken(decryptSecret(integration.encryptedRefreshToken)),
+          integration.siteUrl, isoDate(currentStart), isoDate(end), isoDate(previousStart), isoDate(previousEnd),
         );
         currentRows = collected.currentRows;
         previousRows = collected.previousRows;
@@ -301,6 +309,13 @@ export async function POST(request: Request) {
       businessLocations,
       excludedTopics: user.excludedTopics ?? undefined,
       externalEvidenceRows,
+      // Tope de titulos por categoria, pedido de Milton 29/9/2026: dinamico,
+      // dictado por el mismo tope diario que ya configura en Administracion
+      // para cada usuario (User.dailyArticleLimit). null = sin limite diario
+      // configurado -> sin tope por categoria tampoco (mismo criterio
+      // "null significa sin limite" que ya usa el resto del sistema, ver
+      // dailyArticleLimit en apps/web/src/app/dashboard/usuarios/page.tsx).
+      categoryTitleCap: user.dailyArticleLimit,
     });
 
     const now = new Date();

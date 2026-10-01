@@ -12,16 +12,16 @@ Este manual explica cómo usar la plataforma desde la perspectiva de una persona
 
 ## Antes de empezar (Asistente de Configuración Inicial)
 
-Cuando ingresas a tu cuenta por primera vez o aún no tienes artículos publicados, Inicio te muestra únicamente el **Asistente de Configuración Inicial Paso a Paso**: el banner de bienvenida con los días de prueba que te quedan, una explicación de los 4 pasos en orden y la guía paso a paso. Mientras esto no esté completo, el menú superior y los cuatro accesos directos (01-04) permanecen ocultos a propósito, para que no te distraigas con secciones que todavía están bloqueadas.
+Cuando ingresas a tu cuenta por primera vez y la configuración aún no está completa, Inicio te muestra únicamente el **Asistente de Configuración Inicial Paso a Paso**: el banner de bienvenida, los 4 pasos en orden y la guía paso a paso. Mientras esto no esté completo, el menú y las acciones principales permanecen ocultos para que no te distraigas con secciones que todavía están bloqueadas.
 
 1. **Paso 1 (Cuenta de la plataforma):** Guarda tu usuario y contraseña de la plataforma. Puedes mostrar u ocultar la contraseña que escribes con el ícono de ojo dentro del campo. Si no recuerdas esa clave, puedes restablecerla o crear una nueva en segundos desde el enlace directo de recuperación de la plataforma incluido en el asistente. Al guardar, el paso queda en **"Pendiente de verificar"**: tus datos se guardan cifrados, pero todavía no se ha comprobado que sirvan para entrar. Se pone verde en cuanto un login real funciona — ya sea porque la detección de tu sitio lo confirma, o porque la sincronización del Paso 2 logra entrar de verdad a tu cuenta. Si el login falla en cualquiera de los dos casos, el sistema nunca te deja con un error sin explicación: siempre te dice que debes resetear tu contraseña de la plataforma y te da el enlace exacto para hacerlo.
-2. **Confirmar el sitio:** Si tu cuenta de la plataforma da acceso a más de un sitio, se detecta en vivo cuál eliges — esta cuenta trabajará únicamente con ese sitio para siempre; para el otro, se crea otra cuenta. La detección puede tardar varios minutos: no cierres la pantalla mientras se completa.
+2. **Confirmar el sitio:** Si tu cuenta de la plataforma da acceso a más de un sitio, se detecta en vivo cuál eliges — esta cuenta trabajará únicamente con ese sitio para siempre; para el otro, se crea otra cuenta. La comprobación de acceso debe responder en unos 5 segundos. Si no responde, cambia o restablece la contraseña de la plataforma y vuelve a guardarla en SEO TOTAL.
 3. **Paso 2 (Sincronizar categorías):** Descarga en vivo las categorías reales de tu web para clasificar tus artículos. Mientras corre verás una **barra de progreso con las etapas** (En cola → Entrando a tu plataforma → Guardando categorías), un cronómetro y un **Detalle del proceso** desplegable que registra con hora exacta qué fue pasando: cuándo se envió la solicitud, cuándo un procesador la tomó y cómo terminó. Si algo falla, ahí aparece el motivo real. Puede tardar varios minutos según la cola de trabajo; la pantalla se actualiza sola y no hace falta recargar ni volver a pulsar. Verás lo mismo si sincronizas desde Configuración.
 4. **Paso 3 (Idioma de redacción):** Confirma el idioma principal en el que la Inteligencia Artificial redactará tus contenidos.
 5. **Paso 4 (Google Search Console):** Google Search Console le dice a la plataforma qué está buscando de verdad la gente que llega a tu sitio en Google, para que la Inteligencia Artificial elija y escriba sobre esos temas reales en vez de adivinar — es obligatorio, sin esta conexión no se pueden posicionar tus artículos. Abre Search Console en una pestaña contigua de tu navegador para comprobar que esté activo con la cuenta de Google dueña de tu web, y luego conéctalo mediante Google OAuth seleccionando tu sitio.
-6. **Meta final:** Al completar los 4 pasos ves una pantalla de "¡Felicitaciones!" con acceso directo a **${MENU_NAMES.ia}** o a **${MENU_NAMES.propios}**. Esa pantalla se queda visible durante toda esa visita — no desaparece de golpe apenas terminas el último paso. En tu siguiente visita a Inicio, ya con todo listo, entras directo al panel de métricas de rendimiento.
+6. **Meta final:** Al completar los 4 pasos ves una pantalla de "¡Felicitaciones!" con tres caminos: **Cómo funciona**, **${MENU_NAMES.ia}** y **${MENU_NAMES.propios}**. Se recomienda revisar primero Cómo funciona. Esa pantalla se queda visible durante toda esa visita — no desaparece de golpe apenas terminas el último paso. En la siguiente visita a Inicio, ya con todo listo, entras directamente a las tres acciones principales.
 
-Después del Paso 4, el Asistente te confirma que ya estás listo para publicar y muestra dos opciones: **${MENU_NAMES.propios}** o **${MENU_NAMES.ia}**. Bing Webmaster Tools es opcional y se conecta, si lo deseas, desde Configuración → Indexación; no forma parte del Asistente.
+Después del Paso 4, el Asistente te confirma que ya estás listo para publicar y muestra tres opciones: **Cómo funciona**, **${MENU_NAMES.ia}** y **${MENU_NAMES.propios}**. Bing Webmaster Tools es opcional y se conecta, si lo deseas, desde Configuración → Indexación; no forma parte del Asistente.
 
 También puedes volver a abrir el Asistente en cualquier momento desde **Configuración** (/dashboard/configuracion/inicial); si ya completaste los 4 pasos, esa pantalla no vuelve a mostrar el asistente, solo una confirmación corta con acceso directo a **${MENU_NAMES.ia}**.
 
@@ -31,7 +31,9 @@ Ruta: /dashboard
 
 Inicio es tu centro de operaciones:
 - **Para cuentas nuevas (sin artículos aún):** Muestra de forma exclusiva el Asistente de Configuración Inicial, sin menú ni accesos directos, para que completes tu puesta a punto sin distracciones.
-- **Para cuentas con artículos publicados:** Muestra el panel de métricas de rendimiento (artículos publicados hoy, en el mes, límites y gráfico de actividad), el menú superior completo y cuatro accesos directos numerados (01-04): **Cómo funciona esta aplicación** (\`/dashboard/como-funciona\`), **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}** y **${MENU_NAMES.redes}**.
+- **Para cuentas ya configuradas:** Muestra únicamente el título **Acciones posibles** y tres tarjetas: **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}** y **${MENU_NAMES.redes}**. En móvil se muestran en una sola columna para que cada acción sea fácil de pulsar.
+- La tarjeta de **${MENU_NAMES.redes}** solo aparece, tanto en Inicio como en el menú y en **Comienza Aquí**, si tu cuenta tiene marcada en Administración al menos una aprobación de red social o blog; sin ninguna aprobación, esa tercera acción no se muestra. Los administradores, y los administradores que están usando una cuenta ajena para dar soporte, siempre la ven.
+- Las estadísticas no ocupan espacio en Inicio: se consultan desde **Publicaciones → Estadísticas**, junto al historial.
 - Desde el menú superior tienes acceso a: Cómo funciona esta aplicación, Publicaciones y Configuración. Historial está dentro de Publicaciones y Actualizaciones dentro de Configuración.
 
 ## Cada módulo se explica solo
@@ -39,6 +41,8 @@ Inicio es tu centro de operaciones:
 Al principio de cada pantalla hay un recuadro que empieza con "Antes de avanzar, lee esto". Ahí se explica en pocas líneas qué sucede en ese módulo, para qué sirve y qué se espera de ti, en lenguaje llano y sin dar por supuesto ningún conocimiento previo.
 
 Dentro de esas explicaciones, el nombre de cualquier módulo aparece en MAYÚSCULAS y en negrita, y además es un enlace: al pulsarlo vas directo a esa pantalla. Así, si un texto te manda a otro módulo, no tienes que buscarlo en el menú.
+
+En el teléfono, ese recuadro de explicación aparece plegado por defecto en las pantallas operativas (por ejemplo Actualizaciones, Difusión Social y los módulos de publicar): primero ves los controles para trabajar, y pulsando "Ver instrucciones" despliegas el texto completo cuando lo necesites. En computadora, la explicación se ve siempre completa, sin necesidad de pulsar nada.
 
 ## El menú
 
@@ -52,7 +56,7 @@ El menú superior tiene, en este orden: **Inicio**, **Cómo funciona esta aplica
 - **Progreso de las publicaciones** (/dashboard/publicaciones-en-curso): consulta qué artículos se están generando, publicando o esperando. Este acceso permanece en el menú.
 - **Historial** (/dashboard/historial): revisa las publicaciones anteriores, sus resultados, errores e intentos.
 
-En computadora, Publicaciones se abre al pulsarlo y se cierra al elegir una opción, al pulsar fuera o con la tecla Escape. En teléfono y tableta no se despliega: las cinco opciones aparecen listadas debajo del título Publicaciones.
+En computadora, Publicaciones se abre al pulsarlo y se cierra al elegir una opción, al pulsar fuera o con la tecla Escape. En teléfono y tableta se abre desde el menú de hamburguesa situado arriba a la derecha; ahí aparecen las opciones de publicación, progreso, historial y estadísticas. El menú también contiene Configuración y Cerrar sesión.
 
 En el menú, los tres primeros accesos aparecen numerados como «1) ${MENU_NAMES.propios}», «2) ${MENU_NAMES.ia}» y «3) ${MENU_NAMES.redes}», para reflejar el orden recomendado del flujo de trabajo.
 
@@ -64,9 +68,10 @@ Si el administrador te oculta algún módulo, simplemente no aparece en el menú
 
 Ruta: /dashboard/configuracion
 
-Configuración ya no es una sola pantalla con pestañas: es un índice con 6
-tarjetas, cada una con su propia página. Elige la que corresponda a lo que
-quieres cambiar.
+Configuración es un índice con tarjetas, cada una con su propia página. Elige
+la que corresponda a lo que quieres cambiar. **Cómo funciona esta aplicación**
+se encuentra dentro de Configuración y no debe aparecer como una barra de
+pestañas dentro de las páginas de configuración.
 
 ### Configuración Inicial (Asistente Paso a Paso)
 
@@ -115,36 +120,9 @@ título que toque uno de esos temas se descarta automáticamente antes de
 mostrarse, sin importar cuánta demanda real tenga. Dejarlo vacío no cambia
 nada de tu cuenta.
 
-### Asistentes IA
-
-Ruta: /dashboard/configuracion/mcp
-
-Conecta un asistente de inteligencia artificial como Claude, ChatGPT, Meta
-MUSE u otro directamente con tu cuenta de SEO TOTAL. Desde esta pantalla puedes
-generar un token personal, copiar el prompt de conexión y consultar la lista
-actual de capacidades disponibles. El token se muestra una sola vez: usa
-**Copiar token** y, si lo pierdes, pulsa **Regenerar token**; el token anterior
-deja de funcionar inmediatamente. **Revocar** desconecta los asistentes sin
-crear uno nuevo.
-
-El asistente conectado debe comenzar ofreciendo un menú numerado, igual que el
-Inicio de la plataforma: 1) contenido propio, 2) contenido generado con IA y
-3) publicación en redes sociales y blogs. Si no sabe qué pantalla o botón
-corresponde, debe consultar el manual real de SEO TOTAL antes de responder.
-
-Entre las acciones disponibles están consultar categorías, idiomas,
-integraciones, límites y oportunidades; usar **Crear con la IA del sistema**
-(\`crear_titulos_con_ia\`) con las mismas preguntas guiadas y el mismo límite de
-3 solicitudes diarias de **${MENU_NAMES.propios}**; publicar solo después de
-mostrar lo que hará y recibir confirmación explícita; y consultar el estado de
-las publicaciones para obtener el enlace real del artículo cuando ya se haya
-publicado. **Crear oportunidades** analiza datos de Search Console; **Crear
-con la IA del sistema** genera títulos a partir de una descripción del negocio
-y no sustituye al análisis de Search Console.
-
 ### Buscadores
 
-Puedes conectar Google Search Console y Bing Webmaster. Selecciona la propiedad o sitio correcto después de conectar la cuenta. Estas conexiones permiten analizar contenido inteligente y, cuando la indexación está activada, enviar artículos a buscadores según la configuración disponible.
+Puedes conectar Google Search Console y Bing Webmaster. Selecciona la propiedad o sitio correcto después de conectar la cuenta. Si Oportunidades te muestra «Falta conectar» en Google Search Console, el botón **Conectar GSC** te lleva directo a esa tarjeta en Conexiones. Estas conexiones permiten analizar contenido inteligente y, cuando la indexación está activada, enviar artículos a buscadores según la configuración disponible.
 
 ### Redes sociales
 
@@ -154,7 +132,7 @@ Desde Configuración puedes vincular los servicios disponibles, como Google Busi
 
 Si una red no aparece, primero pide al administrador que active el permiso correspondiente para tu usuario. Después sigue únicamente las instrucciones de esa red. Nunca escribas aquí tu contraseña de la red: cuando una conexión use OAuth, se abrirá la red para que autorices; cuando use una credencial manual, debes copiar solo el dato que se indica.
 
-**Threads, Instagram, Facebook, LinkedIn, Pinterest y Tumblr:** abre la red en otra pestaña con la cuenta correcta iniciada, vuelve a SEO TOTAL y pulsa el botón de conexión. Sigue las pantallas de autorización y acepta los permisos. Si hay varias cuentas abiertas, cierra las que no quieras conectar. Pinterest puede pedirte elegir un tablero; Tumblr puede pedirte elegir un blog. LinkedIn conecta el perfil que autorices. Instagram debe ser una cuenta profesional asociada a Facebook.
+**Threads, Instagram, Facebook, LinkedIn, Pinterest y Tumblr:** abre la red en otra pestaña con la cuenta correcta iniciada, vuelve a SEO TOTAL y pulsa el botón de conexión. Sigue las pantallas de autorización y acepta los permisos. Si hay varias cuentas abiertas, cierra las que no quieras conectar. Pinterest te pide elegir el tablero donde se publicarán tus Pins (con imagen y enlace al artículo) y luego pulsar Aprobar y guardar; Tumblr puede pedirte elegir un blog. LinkedIn conecta el perfil que autorices. Instagram debe ser una cuenta profesional asociada a Facebook.
 
 **X (Twitter):** el administrador configura primero el Client ID y Client Secret de la aplicación de X. Luego abre X con la cuenta correcta iniciada, vuelve a SEO TOTAL y pulsa “Conectar X (Twitter)”. Acepta los permisos y espera a volver a SEO TOTAL. No copies aquí tu contraseña.
 
@@ -247,7 +225,7 @@ Si un artículo muestra un error, lee el mensaje antes de repetir la acción. Si
 
 Ruta: /dashboard/como-funciona
 
-Explica en texto, sin gráficas, para qué sirve la plataforma y en qué orden ocurre todo.
+Explica en texto, sin gráficas, para qué sirve la plataforma y en qué orden ocurre todo. Sus instrucciones son informativas y no sustituyen las tres acciones principales de Inicio.
 
 El objetivo es que te encuentren: en Google, en Bing y dentro de la inteligencia artificial, en tiempo récord.
 
@@ -257,9 +235,9 @@ También explica por qué las redes sociales cuentan para el posicionamiento: qu
 
 Lo explica en tres pasos:
 
-1. **Configura tu cuenta.** Es lo primero y lo único que no se puede saltar. Si no estás seguro de haberlo dejado todo listo, entra en Configuración y revísalo. Si algo no queda claro, la burbuja de ayuda está en la esquina de todas las pantallas.
-2. **Publica tus artículos.** Hay dos caminos y puedes usar los dos: publicar tus propios títulos dentro del cupo dinámico de tu cuenta, o dejar que el sistema decida por ti desde **${MENU_NAMES.ia}**, donde consulta Google Search Console y Bing. Cuando la inteligencia artificial haya decidido, publicas de uno en uno o por lotes según el saldo diario, mensual y por lote disponible.
-3. **Lleva lo publicado a las redes.** Desde ${MENU_NAMES.redes}, los artículos más relevantes pasan a tus redes de forma repartida y equilibrada, sin parecer spam.
+1. **Configura tu cuenta.** Es lo primero y lo único que no se puede saltar. Si no estás seguro de haberlo dejado todo listo, entra en Configuración y revísalo. Si algo no queda claro, la burbuja de ayuda está en la esquina de las pantallas.
+2. **Usa una de las tres acciones de Inicio.** Desde **${MENU_NAMES.propios}** publicas tus propios títulos; desde **${MENU_NAMES.ia}** dejas que la IA proponga contenido basado en oportunidades de búsqueda; y desde **${MENU_NAMES.redes}** preparas publicaciones para redes sociales y blogs públicos.
+3. **Revisa el resultado.** El progreso se consulta en Publicaciones → Progreso de las publicaciones, los artículos terminados en Historial y las métricas en Estadísticas.
 
 Cierra explicando para qué sirve todo esto: posicionarte con autoridad en internet. Aparecer en los resultados de la inteligencia artificial, de Google y de Bing es lo más importante que le puede pasar a tu negocio en internet.
 
@@ -275,11 +253,12 @@ Esta sección se actualiza con los cambios visibles para usuarios y es parte del
 
 Ruta: /dashboard/configuracion
 
-Configuración es un índice de 6 páginas independientes. Una barra de
+Configuración es un índice de páginas independientes. Una barra de
 navegación visible en todo momento, con la sección actual resaltada, te
-permite moverte entre las 6 páginas sin volver primero al índice. Si una
-opción no aparece en Redes Sociales, puede estar deshabilitada para tu
-cuenta por el administrador.
+permite moverte entre ellas sin volver primero al índice. Las redes sociales
+y Google Business Profile se conectan en **Conexiones** (pestaña Difusión);
+si una red no aparece allí, puede estar deshabilitada para tu cuenta por el
+administrador.
 
 ### Configuración inicial
 
@@ -302,13 +281,11 @@ Google Search Console permite usar ${MENU_NAMES.ia}, consultar el estado de inde
 
 Ruta: /dashboard/configuracion/indexacion
 
-Abre Bing Webmaster Tools con tu sesión iniciada, vuelve a SEO TOTAL y pulsa **Conectar Bing Webmaster Tools**. Acepta los permisos y elige o guarda el sitio correcto. Al terminar de aceptar los permisos, Bing te devuelve automáticamente a esta misma pantalla (Configuración → Indexación). Si la conexión venció, usa **Reconectar Bing** una sola vez y espera la redirección. Desde esta sección también puedes enviar el sitemap y enviar a Bing los artículos publicados que todavía estén pendientes de indexación.
+Abre Bing Webmaster Tools con tu sesión iniciada, vuelve a SEO TOTAL y pulsa **Nueva conexión**. Acepta los permisos y elige o guarda el sitio correcto. Al terminar de aceptar los permisos, Bing te devuelve automáticamente a esta misma pantalla (Configuración → Indexación). Si la conexión venció, usa **Nueva conexión** una sola vez y espera la redirección. Desde esta sección también puedes enviar el sitemap y enviar a Bing los artículos publicados que todavía estén pendientes de indexación.
 
 ### Redes sociales
 
-Ruta: /dashboard/configuracion/redes-sociales
-
-Aquí conectas Google Business Profile y las redes sociales. Las redes son opcionales: solo conéctalas si quieres publicar allí. Cada tarjeta te explica los pasos antes de pedirte datos. Instagram necesita una cuenta profesional vinculada a una página de Facebook. Algunas redes requieren que el administrador active tu permiso; si ves un aviso de que no está disponible, pide acceso al administrador. Puedes desconectar una red desde el mismo lugar.
+Esta página se retiró: si entras a la dirección antigua (/dashboard/configuracion/redes-sociales) te lleva automáticamente a **Configuración → Conexiones → Difusión**. Allí conectas Google Business Profile y todas las redes, cada una con su tarjeta, sus pasos y las mismas acciones (Nueva conexión, Probar conexión, Desconectar). Las redes son opcionales: solo conéctalas si quieres publicar allí. Instagram necesita una cuenta profesional vinculada a una página de Facebook. Algunas redes requieren que el administrador active tu permiso; si ves un aviso de que no está disponible, pide acceso al administrador.
 
 ### Cuenta
 
@@ -338,6 +315,21 @@ Paso a paso para usarlo:
 Si dejás cualquiera de los dos campos vacío, esta combinación no se genera — necesita ambas listas llenas. Cuantas más ubicaciones pongas en cada campo, más combinaciones intenta cubrir el sistema (por ejemplo, 4 ciudades de clientes × 3 de negocio = hasta 12 combinaciones), siempre que tengan sentido real para tus categorías.
 
 **Segmento de No Publicar:** en el campo "Temas a excluir" escribe, separados por comas, los temas o palabras que no quieres que la publicación inteligente tome en cuenta al proponer títulos (ej. "seguros de vida, criptomonedas, política") y presiona "Guardar segmento de no publicar". Cualquier título nuevo que toque uno de esos temas se descarta automáticamente antes de mostrarse en el contenido inteligente, sin importar cuánta demanda real tenga. Dejarlo vacío no cambia nada de tu cuenta.
+
+### Asistentes IA
+
+Ruta: /dashboard/configuracion/mcp
+
+Conecta cualquier asistente de inteligencia artificial (Claude, ChatGPT, Meta MUSE, u otro) directamente a tu cuenta, para consultar tu información, crear títulos con IA y publicar artículos hablando o escribiendo con él. La pantalla muestra la lista actualizada de todo lo que el asistente puede hacer hoy.
+
+1. Pulsa **Generar token** (o **Regenerar token** si ya tenías uno; el anterior deja de funcionar de inmediato).
+2. El valor del token solo se muestra una vez, en el momento de generarlo — cópialo con el botón **Copiar token**. Si lo pierdes, genera uno nuevo.
+3. Copia también el bloque de **Prompt para tu asistente** con el botón **Copiar prompt**, y pégalo como instrucciones (o primer mensaje) de tu asistente de IA. Ese texto ya incluye la dirección del servidor, el token, la lista de herramientas disponibles y las reglas de seguridad: nunca publica nada sin mostrarte antes qué va a hacer y pedirte confirmación explícita.
+4. Pulsa **Revocar** si quieres desconectar todos los asistentes sin generar uno nuevo.
+
+Entre lo que puede hacer un asistente conectado: consultar oportunidades, categorías, idiomas, integraciones y límites; usar "Crear con la IA del sistema" (las mismas preguntas guiadas de Publicar) para proponer títulos nuevos; publicar oportunidades o títulos con tu confirmación explícita; y, al consultar el estado de tus publicaciones, darte el enlace real de cada artículo ya publicado.
+
+Desde que conectas tu token, el asistente abre la conversación ofreciéndote directamente el mismo menú numerado de opciones que ves en Inicio, en vez de empezar con una pregunta abierta. Además, siempre te explica las cosas en lenguaje cotidiano: nunca te va a hablar de nombres técnicos de herramientas, tokens, APIs ni del estado interno de su conexión — si algo le falta a tu cuenta, te dice qué botón tocar en la web. Si no sabe cómo guiarte en algo puntual, consulta el manual real de la plataforma (el mismo que usa este bot de ayuda) antes de inventar una respuesta.
 
 ### Estado de configuración
 
@@ -378,7 +370,7 @@ La plataforma cuenta con un diseño minimalista y limpio en blanco impecable, si
 
 Tanto en **${MENU_NAMES.propios}** (/dashboard/publicar) como en **${MENU_NAMES.ia}** (/dashboard/oportunidades), el sistema cuenta con un panel de protección preventiva (**PreValidationGuard**):
 - Si falta algún requisito previo (credenciales de la plataforma, categorías sincronizadas, idioma de redacción o Search Console), la plataforma te muestra una tarjeta clara con un checklist interactivo indicando exactamente qué falta y un botón directo para resolverlo.
-- **Créditos de imagen:** Si ya recibiste créditos, pulsa **Ya recibí mis créditos** para intentar publicar de inmediato. Esa confirmación es solo para el intento actual: si refrescas la pantalla o vuelves más tarde, el aviso puede reaparecer hasta que una publicación real confirme que ya hay créditos disponibles. El estado real de tu cuenta solo cambia automáticamente cuando una creación de artículo comprueba, tras agotar los reintentos, que 10minutesWebsite realmente se quedó sin créditos — nunca por errores pasajeros o visitas a la pantalla.
+- **Créditos de imagen:** Si ya recibiste créditos, pulsa **Ya recibí mis créditos** para intentar publicar de inmediato y para que el sistema deje de mostrarte el aviso. Esa confirmación queda guardada en tu cuenta (no solo en la pantalla actual), así que no debería reaparecer al refrescar, ni en otra pestaña o dispositivo. El aviso solo vuelve a aparecer cuando una creación de artículo comprueba, tras agotar los reintentos, que 10minutesWebsite realmente se quedó sin créditos — nunca por errores pasajeros o visitas a la pantalla.
 
 ## Administración
 
@@ -390,8 +382,95 @@ Solo los administradores tienen acceso a este módulo:
 - **Visibilidad de Módulos:** Permite ocultar o activar módulos específicos de forma individual por usuario o de manera global para mantenimiento.
 - **Prompts:** además de los estilos de redacción de artículos, incluye el prompt del generador de imágenes con IA para redes sociales — es global (aplica a todas las cuentas), se edita ahí mismo y no necesita ningún cambio de código para actualizarse.
 - **PROMPT PUBLICACIONES PROPIAS:** en la misma pestaña Prompts está el prompt maestro con el que la IA crea títulos cuando un usuario elige "Crear con la IA del sistema" en **${MENU_NAMES.propios}**. Solo el administrador lo ve y lo edita; los usuarios no. Mientras esté vacío, esa opción aparece desactivada. Debajo de la caja se listan las variables que se pueden usar (por ejemplo, la del cliente tipo, el tema o las ubicaciones) y, al guardar, se avisa si escribiste alguna que no existe.
-- **Tarjetas de resumen clicables:** en la pestaña "Accesos", las 5 tarjetas de arriba (Usuarios totales, En prueba, Activos, Conectados ahora, Publicaciones totales) no son solo informativas: al hacer clic en cualquiera, la lista de abajo se filtra automáticamente por ese criterio.
-- **Composio (/dashboard/composio):** conecta la plataforma con Composio, un servicio que más adelante permitirá a los clientes conectar sus cuentas de Google y Meta sin las restricciones de una app en prueba. Por ahora el módulo solo prepara la conexión: se pega la clave de API de proyecto de Composio (se comprueba con Composio antes de guardarse, se guarda cifrada y nunca se vuelve a mostrar completa), se registra el "auth config" de cada app (Search Console, Analytics, Facebook e Instagram, cada uno se comprueba antes de guardarse) y se pueden consultar las cuentas conectadas en el proyecto. Todavía no cambia la forma en que se conectan los clientes: sus conexiones actuales siguen funcionando igual. Al eliminar la clave también se eliminan los auth configs. También muestra **Vía de conexión por app**: una tabla con Search Console, Analytics, Facebook e Instagram, el interruptor Propia / Composio de cada una y cuántos clientes están conectados por cada vía. Por ahora el interruptor está bloqueado en «Propia» y no cambia nada para los clientes; el cambio de vía se activará en una fase posterior. La pantalla **Conexiones** (Configuración → Conexiones, /dashboard/configuracion/conexiones) reúne en un solo lugar todas las conexiones, con dos botones: **ANALÍTICAS** (Search Console, Analytics y Bing) y **DIFUSIÓN** (Business Profile, Facebook, Instagram, Threads, LinkedIn, Pinterest, Bluesky, Tumblr, Blogger y Dev.to). Es opt-in: aparece solo para los administradores y para las personas a las que se les ponga «Habilitado» en Administración → Usuarios → módulos («Conexión por Composio»); las demás siguen con «Indexación y SEO» y «Redes Sociales» sin cambios. Dentro de cada red conectable por Composio (Search Console, Analytics, Facebook e Instagram) se puede conectar, elegir y aprobar el sitio, la propiedad, la Página o la cuenta, probar la conexión y desconectarla; sus conexiones actuales no cambian. Composio no publica Stories de Facebook; las de Instagram están en prueba.
+- **Cifras clicables:** debajo del título hay una fila con 5 cifras (Usuarios totales, En prueba, Activos, Conectados ahora, Publicaciones totales). Al hacer clic en cualquiera, la lista de la pestaña "Accesos a usuarios" se filtra automáticamente por ese criterio.
+- **Pestañas:** Accesos a usuarios, Creación de usuarios, Uso de la base de datos, Visibilidad de módulos y Prompts.
+- **Ficha de cada usuario:** al abrir una cuenta se ve en secciones: *Cuenta* (teléfono, dominio, servidor, credenciales, foto y logo), *Acceso* (rol, prueba gratuita y módulos), *Difusión: redes sociales y blogs*, *Imágenes con IA*, *Límites de artículos*, *Acciones de la cuenta* (Acceder como, Copiar credenciales, Editar, Eliminar) e *Historial*.
+- **Guardar cambios:** los permisos, la prueba gratuita, los créditos de imagen, los módulos y los límites de las redes se guardan juntos con la barra **Guardar cambios** que aparece abajo de la ficha cuando hay algo sin guardar. **Descartar** devuelve todo a como estaba. Los límites de artículos, el rol y el servidor tienen su propio botón Guardar junto al campo.
+- **Dos controles de cantidad, separados:** *Límites de artículos* (cuántos artículos puede crear la cuenta: por mes, por día y por lote) y *Difusión* (cuántas publicaciones por día en cada red y blog).
+- **Límites diarios de difusión (redes sociales y blogs):** en la sección *Difusión: redes sociales y blogs* cada red tiene su aprobación y, por cada formato (por ejemplo Instagram: Publicación, Carrusel, Reel, Story e Infografía), cuántas publicaciones puede hacer la cuenta por día. Si no hay un valor guardado, el límite es 1 por día; 0 bloquea ese formato. Junto a cada número se ve cuántas se han publicado hoy y avisa cuando el cupo del día está completo.
+- **Composio (/dashboard/composio):** conecta la plataforma con Composio, un servicio que más adelante permitirá a los clientes conectar sus cuentas de Google y Meta sin las restricciones de una app en prueba. Por ahora el módulo solo prepara la conexión: se pega la clave de API de proyecto de Composio (se comprueba con Composio antes de guardarse, se guarda cifrada y nunca se vuelve a mostrar completa), se registra el "auth config" de cada app (Search Console, Analytics, Facebook, Instagram y Pinterest, cada uno se comprueba antes de guardarse) y se pueden consultar las cuentas conectadas en el proyecto. Todavía no cambia la forma en que se conectan los clientes: sus conexiones actuales siguen funcionando igual. Al eliminar la clave también se eliminan los auth configs. También muestra **Vía de conexión por app**: una tabla con Search Console, Analytics, Facebook e Instagram, el interruptor Propia / Composio de cada una y cuántos clientes están conectados por cada vía. Por ahora el interruptor está bloqueado en «Propia» y no cambia nada para los clientes; el cambio de vía se activará en una fase posterior. La pantalla **Conexiones** (Configuración → Conexiones, /dashboard/configuracion/conexiones) reúne en un solo lugar todas las conexiones, con dos botones: **ANALÍTICAS** (Search Console, Analytics y Bing) y **DIFUSIÓN** (Business Profile, Facebook, Instagram, Threads, LinkedIn, Pinterest, Bluesky, Tumblr, Blogger y Dev.to). Es opt-in: aparece solo para los administradores y para las personas a las que se les ponga «Habilitado» en Administración → Usuarios → módulos («Conexión por Composio»); las demás siguen con «Indexación y SEO» y «Redes Sociales» sin cambios. Dentro de cada red conectable por Composio (Search Console, Analytics, Facebook, Instagram y Pinterest; Pinterest se prueba solo con las personas del piloto hasta abrirla a todos) se puede conectar, elegir y aprobar el sitio, la propiedad, la Página o la cuenta, probar la conexión y desconectarla; sus conexiones actuales no cambian. Composio no publica Stories de Facebook; las de Instagram están en prueba.
+
+Actualización (2026-09-25): si una cuenta ya tenía conectados Google Search
+Console o Google Analytics por la vía anterior (no por la nueva conexión), en Inicio
+puede aparecer un aviso rojo pidiendo reconectar: primero «PASO 1 DE 2 ·
+Google Search Console» («SOLICITUD DE ACTUALIZACIÓN: Debes reconectar Google
+Search Console mediante Conexiones») y, solo si esa cuenta también tenía
+Google Analytics conectado por la vía anterior, después «PASO 2 DE 2 ·
+Google Analytics» con el mismo tipo de aviso. El aviso incluye un botón
+**Reconectar ahora** que lleva directo a la pantalla de esa conexión dentro
+de Conexiones, donde además se indica «Debes reconectar ahora. Pulsa «Nueva
+conexión» y autoriza el acceso.». Mientras no se complete la reconexión, la
+conexión anterior sigue funcionando como respaldo. Al terminar la
+reconexión aparece una pantalla estática de **Conexión exitosa** con un
+único botón **Volver al Inicio**; una vez reconectada esa red, su aviso
+desaparece de Inicio. Además, ni Facebook ni Instagram con la nueva conexión generan
+o muestran Stories (ya no es solo Instagram "en prueba": ninguna de las dos
+las ofrece por esta vía, para evitar errores de publicación).
+
+Actualización (2026-09-26): en las pantallas de conexión de Search Console,
+Analytics, Facebook e Instagram, cuando hay que elegir el sitio, la propiedad,
+la Página o la cuenta, ahora se elige de una lista desplegable ordenada (solo
+se puede elegir una; la recomendada aparece primero y las que no se pueden
+elegir aparecen al final con el motivo). La pantalla de **Conexión exitosa**
+muestra el nombre y el código de lo que elegiste. En Search Console, al
+guardar, SEO TOTAL revisa si Google ya tiene el sitemap de tu sitio: si ya
+está, te lo indica; si no, lo envía y te lo confirma en esa misma pantalla (si
+no se pudo enviar en ese momento, se enviará en el envío diario). Con una
+conexión ya activa se ocultan los pasos de "Cómo hacerlo" y **Probar conexión**
+responde con un mensaje corto con tu propiedad, sin mostrar otras cuentas.
+Todas las pantallas de una conexión tienen el botón **Volver al menú de
+Conexiones**. Si algo falla, los mensajes se muestran en español y explican qué
+hacer; por ejemplo, si al conectar Google desmarcaste un permiso, se te pide
+volver a conectar y dejar marcadas todas las casillas.
+
+Actualización (2026-09-26, 2): las pantallas de Facebook e Instagram dentro de
+Conexiones funcionan igual que las de Search Console y Analytics: una tarjeta
+con los pasos para conectar, la elección de la Página o de la cuenta en una
+lista desplegable, la pantalla de **Conexión exitosa** con el nombre y el
+código de lo que elegiste, **Probar conexión** y **Volver al menú de
+Conexiones**. Instagram publica imágenes con texto y Facebook publica en la
+Página que elijas; ninguna de las dos publica Stories. En **Historial**, el
+enlace **Ver en la red social** solo aparece cuando la publicación tiene un
+enlace público; si no lo tiene, no se muestra. En Instagram, las publicaciones
+nuevas guardan su enlace al publicarse y las antiguas lo consultan la primera
+vez que pulsas **Ver en la red social**. El aviso rojo de reconexión
+solo aparece para cuentas que ya tenían Search Console o Analytics conectados
+por la vía anterior; una cuenta nueva conecta desde el asistente inicial.
+
+Actualización (2026-09-26, 3): al volver de autorizar Threads, LinkedIn,
+Pinterest, Tumblr o Blogger, ahora regresas a la pantalla de esa conexión
+dentro de Conexiones. Si salió bien, en Threads y LinkedIn verás la pantalla
+de **Conexión exitosa** con el botón **Volver al Inicio**; en Pinterest,
+Tumblr y Blogger verás un aviso para elegir dónde se publicará. Si algo falla,
+aparece un aviso claro que te dice qué hacer. Los errores de publicación en
+**Historial** también se muestran en español y explican el paso a seguir (por
+ejemplo, volver a conectar la red cuando la autorización venció).
+
+Actualización (2026-09-26, 4): Bluesky y DEV.to ahora siguen el mismo patrón
+que Search Console y Analytics: una tarjeta con los pasos de **Cómo hacerlo
+paso a paso**, el botón **Conectar**, la pantalla de **Conexión exitosa** al
+terminar y, cuando ya están conectadas, los botones **Cambiar**, **Probar
+conexión** y **Desconectar**. **Probar conexión** comprueba en el momento que
+la cuenta sigue funcionando y te responde con un mensaje corto; si algo falla,
+te dice qué hacer (por ejemplo, volver a conectar).
+
+Actualización (2026-09-26, 5): Threads, LinkedIn, Pinterest, Tumblr y Blogger
+siguen ahora el mismo patrón que Search Console y Analytics. Cada una tiene su
+tarjeta con **Cómo hacerlo paso a paso**, el botón **Nueva conexión**, la
+elección de dónde se publicará (tablero en Pinterest, blog en Tumblr y
+Blogger) con **Aprobar y guardar**, la pantalla de **Conexión exitosa** y, ya
+conectadas, los botones **Cambiar**, **Probar conexión** y **Desconectar**. Si
+la autorización venció, la tarjeta te lo dice y te pide pulsar **Nueva
+conexión** para renovarla. **Google Search Console** y **Google Analytics** se pueden conectar, cambiar y **Desconectar** desde cualquier cuenta activa, sin permiso especial del administrador. Si tu cuenta tiene guardado el nombre de un panel (por ejemplo «Español») en lugar de un dominio, la lista de Search Console y de Analytics muestra todas tus propiedades con permiso de propietario o usuario completo, y tú eliges la tuya; si tiene un dominio real, solo se puede elegir el sitio que coincide con él. Los datos técnicos de la aplicación (claves) los ve
+y edita solo el administrador, en un bloque aparte.
+
+Actualización (2026-09-26, 6): **Google Business Profile** ahora tiene su propia
+tarjeta en Conexiones (Difusión) con el mismo patrón que las demás: **Cómo
+hacerlo paso a paso**, **Nueva conexión**, la pantalla de **Conexión exitosa**,
+**Probar conexión** y **Desconectar**. **Bing Webmaster Tools** también usa las
+mismas etiquetas y guía (**Nueva conexión**, **Aprobar y guardar**, **Probar
+conexión**, **Desconectar**); su envío nocturno de sitemap y su indexación no
+cambian.
 
 ## Problemas frecuentes
 
@@ -419,129 +498,7 @@ Comprueba en Configuración que la cuenta esté conectada. Algunas redes requier
 
 El administrador puede ocultar módulos por cuenta o temporalmente para toda la plataforma. Pregunta al administrador si necesitas acceso.
 
-## Apéndice: mapa de decisiones y casos de uso
-
-Este apéndice convierte la intención de la persona en una acción concreta. El
-asistente debe seguir esta secuencia: **intención → caso de uso → requisitos →
-workflow → herramientas o botones → validación → siguiente acción**. No debe
-presentar una lista de herramientas técnicas sin explicar para qué sirve cada
-una.
-
-### Quiero empezar a usar el sistema
-
-**Intención:** “Soy nuevo”, “no sé qué hacer” o “quiero configurar todo”.
-
-**Workflow:** Inicio → Asistente de Configuración Inicial → cuenta de la
-plataforma → sitio → categorías → idioma → Google Search Console → pantalla
-final con acceso a publicación.
-
-**Éxito:** los cuatro pasos quedan completos y se puede abrir **${MENU_NAMES.propios}**
-o **${MENU_NAMES.ia}**. Si un paso falla, se resuelve antes de publicar.
-
-### Quiero publicar mis propios títulos
-
-**Intención:** “Tengo títulos” o “quiero publicar una lista”.
-
-**Workflow:** **${MENU_NAMES.propios}** → elegir categoría → elegir idioma del lote
-→ pegar títulos o usar **Crear con la IA del sistema** → revisar y seleccionar
-→ decidir indexación → **Iniciar** → **Progreso de las publicaciones** →
-**Historial**.
-
-**Requisitos:** categorías sincronizadas, idioma, títulos y cupo disponible.
-Para la generación guiada también se requiere describir cliente, tema,
-necesidad y contexto geográfico cuando corresponda.
-
-### Quiero temas basados en búsquedas reales
-
-**Intención:** “Quiero ideas basadas en búsquedas” o “quiero posicionarme”.
-
-**Workflow:** **${MENU_NAMES.ia}** → **Analizar contenido** o **Actualizar análisis**
-→ elegir idioma y estilo → revisar propuestas, categorías, impresiones y clics
-→ publicar una propuesta o un lote → revisar Progreso e Historial.
-
-**Requisito clave:** Google Search Console conectado con la propiedad correcta.
-Este flujo no debe confundirse con **Crear con la IA del sistema**, que genera
-títulos a partir de una descripción y no necesita Search Console.
-
-### Quiero crear títulos sin Search Console
-
-**Intención:** “Dame títulos sobre mi negocio” o “crea títulos con IA”.
-
-**Workflow:** **${MENU_NAMES.propios}** → **Crear con la IA del sistema** → responder
-las preguntas guiadas → seleccionar títulos → revisar → **Iniciar**.
-
-**Reglas:** máximo 3 solicitudes diarias; los títulos no seleccionados se
-descartan; esta función no cambia la configuración general.
-
-### Quiero difundir artículos en redes y blogs
-
-**Intención:** “Publica en redes” o “difunde mi contenido”.
-
-**Workflow:** Configuración → Conexiones → conectar y aprobar las redes
-necesarias → **${MENU_NAMES.redes}** → generar/revisar propuestas → editar si hace
-falta → aprobar o descartar → publicar lote → revisar Historial.
-
-Una conexión no publica por sí sola. Nunca se debe pedir la contraseña de una
-red dentro de SEO TOTAL.
-
-### Quiero saber qué pasó con una publicación
-
-**Intención:** “¿Se publicó?”, “¿cuál es el enlace?” o “falló mi artículo”.
-
-**Decisión:** si el lote está activo, abrir **Progreso de las publicaciones**;
-si terminó, abrir **Historial**; si está publicado, usar el enlace registrado;
-si falló por configuración, corregir primero Configuración; si la categoría ya
-no existe, sincronizar categorías y reintentar.
-
-### Quiero cambiar mi configuración
-
-**Decisión:** credenciales, categorías o idioma → **Configuración → Cuenta**;
-estilo, firma, disclosure, teléfono, imágenes, ubicaciones o exclusiones →
-**Configuración → Contenido**; buscadores y redes → **Configuración →
-Conexiones**. Después de guardar, comprobar el aviso de éxito y volver al
-módulo que consume ese dato.
-
-### Quiero conectar un asistente externo
-
-**Workflow:** Configuración → **Asistentes IA** → generar token → copiarlo una
-sola vez → copiar el prompt → pegar ambos en Claude, ChatGPT, Meta MUSE u otro
-asistente → iniciar con el menú de objetivos.
-
-El asistente externo debe mapear objetivos a workflows, consultar el manual si
-no conoce una pantalla y pedir confirmación explícita antes de publicar.
-
-### Árbol resumido de decisión
-
-\`\`\`text
-¿Qué quiere lograr la persona?
-├─ Configurar o reparar → Asistente Inicial / Cuenta / Contenido / Conexiones
-├─ Crear contenido
-│  ├─ Ya tiene títulos → ${MENU_NAMES.propios} → Títulos a mano
-│  ├─ Quiere ideas guiadas → ${MENU_NAMES.propios} → Crear con la IA del sistema
-│  └─ Quiere búsquedas reales → ${MENU_NAMES.ia} → Analizar contenido
-├─ Difundir → ${MENU_NAMES.redes}
-├─ Consultar resultado → Progreso o Historial
-└─ No sabe continuar → leer este manual y Actualizaciones, luego ofrecer opciones
-\`\`\`
-
-### Acciones que requieren confirmación
-
-Publicar artículos, publicar en redes, borrar propuestas, borrar historial,
-descartar oportunidades y revocar conexiones pueden tener efectos públicos o
-irreversibles. El asistente debe mostrar el alcance exacto y pedir confirmación
-antes de ejecutarlas. Consultar el manual, analizar datos y revisar estados son
-operaciones de lectura.
-
 ## Cómo debe ayudarte el asistente
 
-El asistente debe comenzar con opciones numeradas y guiar de forma proactiva,
-en vez de iniciar con una pregunta abierta. Debe explicar los pasos de forma
-breve y clara, enlazar al módulo cuando tenga una ruta confirmada y no prometer
-funciones que no figuren en este manual ni en el registro vivo de
-Actualizaciones. Si no sabe cómo funciona una pantalla, un botón o un módulo,
-debe consultar este manual completo antes de responder. Debe priorizar el
-registro vivo cuando una novedad cambie una instrucción del manual base. Nunca
-debe publicar ni ejecutar una acción pública sin mostrar antes exactamente qué
-hará y pedir confirmación explícita. Si no tiene información suficiente, debe
-decirlo y sugerir contactar al administrador.
+El asistente debe explicar los pasos de forma breve y clara, enlazar al módulo cuando tenga una ruta confirmada y no prometer funciones que no figuren en este manual ni en el registro vivo de Actualizaciones. Debe priorizar el registro vivo cuando una novedad cambie una instrucción del manual base. Si no tiene información suficiente, debe decirlo y sugerir contactar al administrador.
 `.trim();

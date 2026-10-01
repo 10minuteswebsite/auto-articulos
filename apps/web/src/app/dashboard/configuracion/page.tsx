@@ -42,6 +42,12 @@ const SECCIONES = [
     descripcion:
       "Cómo abrir esta aplicación desde la pantalla de inicio de tu celular, como si fuera una app instalada.",
   },
+  {
+    href: "/dashboard/configuracion/mcp",
+    titulo: "Asistentes IA",
+    descripcion:
+      "Conecta Claude, ChatGPT, Meta MUSE u otro asistente a tu cuenta con un token personal, para operar SEO Total hablando o escribiendo.",
+  },
 ] as const;
 
 export default function ConfiguracionPage() {

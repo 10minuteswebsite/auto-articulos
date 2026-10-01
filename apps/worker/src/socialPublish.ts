@@ -26,7 +26,10 @@ import {
   truncatePlainCaption,
   composioFacebookPost,
   composioInstagramPost,
+  composioInstagramPermalink,
+  composioPinterestPin,
   methodFor,
+  friendlyPublishError,
 } from "@auto-articulos/shared";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
@@ -37,7 +40,7 @@ import { deriveDevToEditorialTags, isDevToEligible } from "./devtoEditorial";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_IMAGE_URL = "https://api.openai.com/v1/images/generations";
 
-async function getComposioSocialAccount(userId: string, app: "facebook" | "instagram") {
+async function getComposioSocialAccount(userId: string, app: "facebook" | "instagram" | "pinterest") {
   const [user, connection, setting] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId }, select: { email: true, role: true, disabledModules: true } }),
     prisma.composioConnection.findFirst({ where: { userId, app, status: "ACTIVE" }, orderBy: { updatedAt: "desc" }, select: { connectedAccountId: true, pageId: true, igAccountId: true, pageName: true, username: true } }),
@@ -54,6 +57,18 @@ async function updateSocialProgress(
   data: { progressPercent: number; progressStage: string; status?: string; startedAt?: Date; finishedAt?: Date },
 ) {
   await prisma.socialOpportunity.update({ where: { id }, data });
+}
+
+async function enforceSocialDailyLimit(userId: string, platform: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } });
+  const limits = (user?.socialDailyLimits && typeof user.socialDailyLimits === "object" && !Array.isArray(user.socialDailyLimits))
+    ? user.socialDailyLimits as Record<string, unknown> : {};
+  const raw = limits[platform];
+  const limit = typeof raw === "number" && Number.isInteger(raw) ? raw : 1;
+  if (limit < 0) throw new Error(`Límite diario inválido para ${platform}.`);
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const published = await prisma.socialOpportunity.count({ where: { userId, platform, status: "published", publishedAt: { gte: start } } });
+  if (published >= limit) throw new Error(`Límite diario alcanzado para ${platform}: ${limit} publicación(es).`);
 }
 
 function describeFetchError(err: unknown): string {
@@ -720,6 +735,25 @@ async function processPinterestJob(job: {
   articleTitle: string;
   suggestedText: string;
 }): Promise<boolean> {
+  const composio = await getComposioSocialAccount(job.userId, "pinterest");
+  if (composio?.pageId) {
+    await validateArticleUrl(job.articleUrl);
+    const composioImage = await getArticleOpenGraphImage(job.articleUrl);
+    if (!composioImage) throw new Error("El artículo no tiene una imagen OG pública para Pinterest.");
+    const pin = await composioPinterestPin(composio, {
+      boardId: composio.pageId,
+      title: job.articleTitle,
+      description: truncatePlainCaption(job.suggestedText.replace("[ENLACE]", "").trim(), 500),
+      link: job.articleUrl,
+      imageUrl: composioImage,
+    });
+    await prisma.socialOpportunity.update({
+      where: { id: job.id },
+      data: { status: "published", postId: pin.link ?? pin.id ?? "", publishedAt: new Date(), errorLog: null },
+    });
+    if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Pinterest (${composio.pageName ?? composio.pageId})${pin.id ? ` - ID: ${pin.id}` : ""}` } });
+    return true;
+  }
   const integration = await prisma.pinterestIntegration.findUnique({ where: { userId: job.userId } });
   if (!integration) throw new Error("Pinterest no está configurado en tu cuenta.");
   if (!integration.boardId) throw new Error("Pinterest está conectado, pero todavía no has seleccionado un tablero.");
@@ -1111,7 +1145,9 @@ async function processInstagramJob(job: {
     if (!imageUrl) throw new Error("No se pudo adaptar la imagen del artículo para Instagram.");
     const caption = job.suggestedText.includes("[ENLACE]") ? job.suggestedText.replace("[ENLACE]", job.articleUrl) : job.suggestedText;
     const result = await composioInstagramPost(composio, composio.igAccountId, imageUrl, caption);
-    const postId = String(result.id ?? result.post_id ?? result.postId ?? "");
+    const mediaId = String(result.id ?? result.post_id ?? result.postId ?? "");
+    // Se guarda el enlace público cuando se puede obtener; si no, el id (el Historial lo resuelve al pulsar).
+    const postId = (await composioInstagramPermalink(composio, mediaId)) ?? mediaId;
     await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId, publishedAt: new Date(), errorLog: null, imageUrl } });
     if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Instagram mediante la conexión alternativa${composio.username ? ` (@${composio.username})` : ""}${postId ? ` - ID: ${postId}` : ""}` } });
     return true;
@@ -1399,6 +1435,8 @@ export async function processNextSocialPublish(filterUserId?: string, filterArti
       progressStage: "Validando el artículo y sus datos",
     });
 
+    await enforceSocialDailyLimit(job.userId, job.platform);
+
     await updateSocialProgress(job.id, {
       progressPercent: 55,
       progressStage: "Preparando contenido e imagen",
@@ -1452,7 +1490,7 @@ export async function processNextSocialPublish(filterUserId?: string, filterArti
       where: { id: job.id },
       data: {
         status: "error",
-        errorLog: errorMsg,
+        errorLog: friendlyPublishError(errorMsg, job.platform),
         progressStage: "La publicación terminó con error",
         finishedAt: new Date(),
       },

@@ -55,6 +55,16 @@ function findArray(data: unknown, test: (item: Json) => boolean, depth = 0): Jso
   return null;
 }
 
+/**
+ * El dominio confirmado de la cuenta solo bloquea otros sitios cuando de verdad es un
+ * dominio. En algunas cuentas `selectedSiteDomain` guarda el nombre del panel de la
+ * plataforma (p. ej. «Español»): tratarlo como dominio bloquearía todas las propiedades.
+ */
+export function lockableDomain(value: string | null | undefined): string | null {
+  const domain = normalizeDomain(value ?? "");
+  return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(domain) ? domain : null;
+}
+
 export function optionsForSearchConsole(data: unknown, confirmedDomain: string | null): SelectionOption[] {
   const sites = findArray(data, (item) => typeof item.siteUrl === "string") ?? [];
   const options = sites.map((site): SelectionOption => {
@@ -169,6 +179,25 @@ export function optionsForInstagram(data: unknown): SelectionOption[] {
   return options;
 }
 
+export function optionsForPinterest(data: unknown): SelectionOption[] {
+  const boards = findArray(data, (item) => typeof item.id === "string" && typeof item.name === "string") ?? [];
+  const options = boards.map((board): SelectionOption => {
+    const privacy = str(board.privacy);
+    return {
+      id: String(board.id),
+      label: String(board.name),
+      detail: [privacy === "SECRET" ? "secreto" : privacy === "PROTECTED" ? "protegido" : null, `código del tablero ${String(board.id)}`]
+        .filter(Boolean)
+        .join(" · "),
+      selectable: true,
+      reason: null,
+      recommended: false,
+    };
+  });
+  if (options.length === 1) options[0].recommended = true;
+  return options;
+}
+
 export function buildOptions(
   app: ComposioAppId,
   data: unknown,
@@ -183,6 +212,8 @@ export function buildOptions(
       return optionsForFacebook(data);
     case "instagram":
       return optionsForInstagram(data);
+    case "pinterest":
+      return optionsForPinterest(data);
   }
 }
 

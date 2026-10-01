@@ -1,5 +1,7 @@
 import { prisma } from "@auto-articulos/db";
 import {
+  composioListSitemaps,
+  composioSubmitSitemap,
   COMPOSIO_TEST_TOOL,
   ComposioApiError,
   createConnectLink,
@@ -15,8 +17,9 @@ import {
   type ComposioAppId,
 } from "./composio";
 import { hasOptInModuleAccess } from "./modules";
-import { applyAnalyticsTraffic, applySearchConsoleStats, buildOptions, markCurrentSelection, summarizeAnalyticsReport, summarizeSearchConsoleQuery, type AnalyticsTraffic, type SearchConsoleStats, type SelectionOption } from "./composio-options";
-import { normalizeDomain, validateAndRegisterTrialDomain } from "./domain-validation";
+import { defaultSitemapUrl, isSitemapListed, type SitemapOutcome } from "./composio-sitemap";
+import { lockableDomain, applyAnalyticsTraffic, applySearchConsoleStats, buildOptions, markCurrentSelection, summarizeAnalyticsReport, summarizeSearchConsoleQuery, type AnalyticsTraffic, type SearchConsoleStats, type SelectionOption } from "./composio-options";
+import { validateAndRegisterTrialDomain } from "./domain-validation";
 
 /**
  * Conexión de un cliente a una app por Composio (CONEXION COMPOSIO, Fase 2b-1).
@@ -42,6 +45,7 @@ export interface ConnectingUser {
   disabledModules?: string | null;
   allowFacebookPublishing?: boolean;
   allowInstagramPublishing?: boolean;
+  allowPinterestPublishing?: boolean;
 }
 
 /** Acceso al módulo: administradores y quien tenga «Habilitado». */
@@ -53,6 +57,7 @@ export function canUseComposioModule(user: ConnectingUser): boolean {
 export function userMayConnectApp(user: ConnectingUser, app: ComposioAppId): boolean {
   if (app === "facebook") return user.allowFacebookPublishing === true;
   if (app === "instagram") return user.allowInstagramPublishing === true;
+  if (app === "pinterest") return user.allowPinterestPublishing === true;
   return true;
 }
 
@@ -69,7 +74,7 @@ async function requireSetup(app: ComposioAppId): Promise<{ apiKey: string; authC
   const [apiKey, authConfigs] = await Promise.all([getStoredComposioApiKey(), getStoredAuthConfigIds()]);
   const authConfigId = authConfigs[app];
   if (!apiKey || !authConfigId) {
-    throw new ConnectionError("La conexión por Composio aún no está configurada. Avisa al administrador.", 409);
+    throw new ConnectionError("Esta conexión aún no está configurada. Avisa al administrador.", 409);
   }
   return { apiKey, authConfigId };
 }
@@ -78,7 +83,7 @@ function toConnectionError(error: unknown): never {
   if (error instanceof ConnectionError) throw error;
   if (error instanceof ComposioApiError) {
     if (error.status === 403 || error.status === 401) {
-      throw new ConnectionError("Composio rechazó la operación: la clave del sistema no tiene los permisos necesarios.", 502);
+      throw new ConnectionError("El proveedor de conexiones rechazó la operación. Avisa al administrador.", 502);
     }
     throw new ConnectionError(error.message, error.status === 429 ? 429 : 502);
   }
@@ -117,6 +122,8 @@ function selectionLabel(app: ComposioAppId, row: SelectionFields): string | null
       return row.pageId ? (row.pageName ?? row.pageId) : null;
     case "instagram":
       return row.igAccountId ? (row.username ? `@${row.username}` : row.igAccountId) : null;
+    case "pinterest":
+      return row.pageId ? (row.pageName ?? row.pageId) : null;
   }
 }
 
@@ -291,8 +298,7 @@ async function activeRowFor(user: ConnectingUser, app: ComposioAppId) {
 
 async function confirmedDomainOf(userId: string): Promise<string | null> {
   const found = await prisma.user.findUnique({ where: { id: userId }, select: { selectedSiteDomain: true } });
-  const domain = found?.selectedSiteDomain ? normalizeDomain(found.selectedSiteDomain) : "";
-  return domain || null;
+  return lockableDomain(found?.selectedSiteDomain);
 }
 
 /** Opciones REALES de la cuenta conectada (lectura en vivo). Nunca devuelve tokens. */
@@ -382,7 +388,7 @@ export async function getSelectionOptions(
  * Guarda lo que la persona aprobó. La elección se vuelve a validar contra la
  * lectura en vivo de Google/Meta: solo vale una opción real y elegible.
  */
-export async function saveSelection(user: ConnectingUser, appId: unknown, optionId: unknown): Promise<void> {
+export async function saveSelection(user: ConnectingUser, appId: unknown, optionId: unknown): Promise<{ sitemap: SitemapOutcome | null }> {
   const app = requireApp(appId, user);
   if (typeof optionId !== "string" || optionId === "") throw new ConnectionError("Elige una opción.", 400);
   const { options } = await getSelectionOptions(user, app);
@@ -409,6 +415,48 @@ export async function saveSelection(user: ConnectingUser, appId: unknown, option
     case "instagram":
       data = { igAccountId: chosen.id, username: chosen.label.replace(/^@/, "") };
       break;
+    case "pinterest":
+      // El tablero reutiliza pageId/pageName (sin migración).
+      data = { pageId: chosen.id, pageName: chosen.label };
+      break;
   }
   await prisma.composioConnection.update({ where: { id: row.id }, data });
+  if (app !== "google_search_console") return { sitemap: null };
+  return { sitemap: await syncSitemapAfterSelection(user, row.id, row.connectedAccountId, chosen.id) };
+}
+
+/**
+ * Tras elegir la propiedad de Search Console: si Google ya tiene el sitemap no se reenvía; si no,
+ * se envía. Nunca rompe el guardado: si falla, queda registrado y el envío diario lo reintenta.
+ */
+async function syncSitemapAfterSelection(
+  user: ConnectingUser,
+  rowId: string,
+  connectedAccountId: string,
+  siteUrl: string,
+): Promise<SitemapOutcome> {
+  const sitemapUrl = defaultSitemapUrl(siteUrl);
+  try {
+    const { apiKey } = await requireSetup("google_search_console");
+    const account = { apiKey, userId: user.id, connectedAccountId };
+    const listed = await composioListSitemaps(account, siteUrl).catch(() => [] as string[]);
+    let status: SitemapOutcome["status"] = "ALREADY";
+    if (!isSitemapListed(listed, sitemapUrl)) {
+      await composioSubmitSitemap(account, siteUrl, sitemapUrl);
+      status = "SENT";
+    }
+    await prisma.composioConnection.update({
+      where: { id: rowId },
+      data: { sitemapUrl, lastSitemapSyncAt: new Date(), lastSitemapSyncStatus: "success", lastSitemapSyncError: null },
+    });
+    return { status, url: sitemapUrl };
+  } catch (error) {
+    await prisma.composioConnection
+      .update({
+        where: { id: rowId },
+        data: { sitemapUrl, lastSitemapSyncAt: new Date(), lastSitemapSyncStatus: "error", lastSitemapSyncError: error instanceof Error ? error.message.slice(0, 500) : "error" },
+      })
+      .catch(() => undefined);
+    return { status: "FAILED", url: sitemapUrl };
+  }
 }

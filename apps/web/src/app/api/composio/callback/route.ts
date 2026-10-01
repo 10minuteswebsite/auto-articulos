@@ -5,6 +5,14 @@ import { getCurrentUser } from "@/lib/current-user";
 
 export const dynamic = "force-dynamic";
 
+const CONNECTION_SLUG: Record<string, string> = {
+  google_search_console: "google-search-console",
+  google_analytics: "google-analytics",
+  facebook: "facebook",
+  instagram: "instagram",
+  pinterest: "pinterest",
+};
+
 /**
  * Vuelta desde Composio tras autorizar. `status` y `connected_account_id` vienen
  * por la URL y pueden falsificarse: completeConnection() los verifica contra
@@ -13,16 +21,21 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
   const back = new URL("/dashboard/configuracion/conexiones", request.nextUrl.origin);
-  if (!canUseComposioModule(user)) {
+  const app = request.nextUrl.searchParams.get("app");
+  const isMigrationApp = app === "google_search_console" || app === "google_analytics";
+  if (!isMigrationApp && !canUseComposioModule(user)) {
     return NextResponse.redirect(new URL("/dashboard", request.nextUrl.origin));
   }
 
-  const app = request.nextUrl.searchParams.get("app");
   const outcome = await completeConnection(user, app, request.nextUrl.searchParams.get("connected_account_id"));
   auditLog("composio.connect_completed", user.id, { app, outcome });
   back.searchParams.set("resultado", outcome);
-  if (app) back.searchParams.set("app", app);
+  if (app) {
+    back.searchParams.set("app", app);
+    const conexion = CONNECTION_SLUG[app];
+    if (conexion) back.searchParams.set("conexion", conexion);
+  }
   // ANALÍTICAS lee datos (Google); DIFUSIÓN publica (Facebook, Instagram).
-  back.searchParams.set("vista", app === "facebook" || app === "instagram" ? "difusion" : "analiticas");
+  back.searchParams.set("vista", app === "facebook" || app === "instagram" || app === "pinterest" ? "difusion" : "analiticas");
   return NextResponse.redirect(back);
 }
