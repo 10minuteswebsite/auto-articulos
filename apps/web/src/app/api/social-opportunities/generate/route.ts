@@ -512,7 +512,36 @@ export async function POST(request: Request) {
       }
     }
 
-    if (integrations.length === 0) {
+    // El cupo diario (Administración → Difusión) antes solo se aplicaba al
+    // publicar en el worker: el botón de generación podía crear una
+    // propuesta pendiente igual, aunque el cupo del día ya estuviera
+    // completo — hallazgo de la auditoría del 1/10/2026. Se filtra acá
+    // también, con el mismo cálculo exacto que usa el worker
+    // (enforceSocialDailyLimit en apps/worker/src/socialPublish.ts): 1 por
+    // día si no hay valor guardado, 0 bloquea el formato.
+    const dailyLimitsRaw = (await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } }))?.socialDailyLimits;
+    const dailyLimits = (dailyLimitsRaw && typeof dailyLimitsRaw === "object" && !Array.isArray(dailyLimitsRaw))
+      ? dailyLimitsRaw as Record<string, unknown> : {};
+    const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+    const limitedOut: string[] = [];
+    const integrationsWithinLimit: string[] = [];
+    for (const platform of integrations) {
+      const raw = dailyLimits[platform];
+      const limit = typeof raw === "number" && Number.isInteger(raw) && raw >= 0 ? raw : 1;
+      const published = await prisma.socialOpportunity.count({
+        where: { userId, platform, status: "published", publishedAt: { gte: dayStart } },
+      });
+      if (published >= limit) limitedOut.push(platform);
+      else integrationsWithinLimit.push(platform);
+    }
+
+    if (integrationsWithinLimit.length === 0) {
+      if (limitedOut.length > 0) {
+        return NextResponse.json(
+          { error: `Ya alcanzaste el cupo diario de hoy para ${limitedOut.join(", ")}. Se renueva mañana, o puedes ajustarlo en Administración.` },
+          { status: 400 },
+        );
+      }
       console.warn("[social-opportunities/generate] red solicitada sin conexión efectiva", {
         requestedNetworks,
         connected,
@@ -595,7 +624,7 @@ export async function POST(request: Request) {
     const wasUsedToday = (article: ArticleCandidate) =>
       usedTodayIds.has(article.id) || (article.articleUrl ? usedTodayUrls.has(article.articleUrl) : false);
 
-    const normalizedIntegrations = integrations.map(normalizePlatform);
+    const normalizedIntegrations = integrationsWithinLimit.map(normalizePlatform);
     const availableNow = allCandidates.filter((article) =>
       normalizedIntegrations.some((platform) => !activeKeys.has(`${article.id}:${platform}`)),
     );
@@ -632,7 +661,7 @@ export async function POST(request: Request) {
     const googleAnalyticsContext = JSON.stringify(summarizeGoogleAnalyticsSignals(await getGoogleAnalyticsSignals(userId)));
 
     for (const article of candidates) {
-      for (const platform of integrations) {
+      for (const platform of integrationsWithinLimit) {
         const opportunityKey = `${article.id}:${normalizePlatform(platform)}`;
         if (activeKeys.has(opportunityKey)) continue;
 
