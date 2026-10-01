@@ -330,8 +330,13 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
   // Si Bing está conectado pero Search Console no aporta consultas, sus
   // señales siguen siendo útiles: se comparan directamente con el contenido
   // de cada artículo publicado para que Bing pueda influir por sí solo en la
-  // prioridad del candidato.
-  if (bingRowsForRanking.length > 0) {
+  // prioridad del candidato. Solo cuando GSC no aportó ninguna consulta
+  // (queriesByPath vacío): si ya aportó, Bing ya sumó su puntaje arriba por
+  // página vía esas consultas reales — sumarlo otra vez aquí lo contaba dos
+  // veces y sesgaba el ranking a favor de cualquier artículo con coincidencia
+  // de texto con Bing, sin relación con su relevancia real. Hallazgo de la
+  // auditoría del 1/10/2026.
+  if (bingRowsForRanking.length > 0 && queriesByPath.size === 0) {
     for (const article of articles) {
       if (!article.articleUrl) continue;
       const articleTokens = tokenizeForMatch(
