@@ -88,6 +88,7 @@ export async function syncUserToHub(userId: string): Promise<HubSyncResult | nul
     data: { hubSyncAttemptedAt: new Date(), hubSyncError: null },
   });
 
+  const legacyPhone = process.env.HUB_OMIT_LEGACY_PHONES === 'true' ? null : normalizeHubPhone(user.phone);
   const response = await fetch(`${config.baseUrl}/api/integrations/auto-articulos/user-sync`, {
     method: "POST",
     headers: {
@@ -103,7 +104,7 @@ export async function syncUserToHub(userId: string): Promise<HubSyncResult | nul
       last_name: user.lastName,
       // Hub enforces E.164. Do not guess a country code while importing legacy
       // values; an invalid legacy number remains editable in the user's profile.
-      phone: process.env.HUB_OMIT_LEGACY_PHONES === 'true' ? null : normalizeHubPhone(user.phone),
+      ...(legacyPhone ? { phone: legacyPhone } : {}),
       role: user.role,
       product_access: user.trialUnlocked,
     }),
