@@ -1,5 +1,19 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## CONEXION COMPOSIO PROBLEMA PEPE — Claude — 2026-09-28/10-01 — PR #249 — CERRADO
+
+- Síntoma: GSC de Pepe (`pepegomez.net`) quedaba en INITIATED al conectar actuando como él.
+- Evidencia (logs de producción 09:43–09:44 del 2026-09-28): `connect_started` con el userId
+  del cliente y `connect_completed` con el userId del admin, outcome `invalid`, dos veces. La
+  cookie de suplantación era `SameSite=strict` y no viaja al volver de Google/Composio.
+- `.site` descartado: el código de conexión Composio no distingue servidor.
+- Corrección: `sameSite: "lax"` en `apps/web/src/app/api/admin/impersonate/route.ts` (PR #249,
+  `647b7d96`, desplegado 2026-09-28). Sin schema ni migraciones. No se hizo typecheck completo
+  (worktree sin node_modules).
+- Verificación: Milton reprodujo la conexión actuando como Pepe el 2026-09-28 tras el despliegue
+  y confirmó el 2026-10-01 que el caso quedó resuelto.
+- Capitanía reclamada y liberada por Claude. Estado: CERRADO Y ARCHIVADO.
+
 ## Claude — CIERRE fix «Conectar GSC», estado de GSC y conteo de categorías en Oportunidades — 2026-09-28
 
 - Reclamo de capitanía (sin migración): `migration-coordinator.sh claim "Claude"`.
@@ -22,7 +36,6 @@
 - Pendiente, fuera de alcance: los pasos 1-3 del guard aún envían al asistente
   genérico `/dashboard/configuracion?tab=wizard`.
 - Capitanía liberada. Estado: CERRADO Y ARCHIVADO.
-
 
 ## Despliegue verificado — 2026-09-23 — PR #220
 
