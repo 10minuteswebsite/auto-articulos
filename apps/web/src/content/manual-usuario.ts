@@ -485,6 +485,15 @@ mismas etiquetas y guía (**Nueva conexión**, **Aprobar y guardar**, **Probar
 conexión**, **Desconectar**); su envío nocturno de sitemap y su indexación no
 cambian.
 
+Actualización (2026-10-01): el aviso rojo «Reconectar Google Search Console»
+de Inicio ahora también aparece en un segundo caso, distinto al de arriba:
+cuando la conexión actual sigue activa pero Google rechazó el último uso
+real (por ejemplo al pulsar "Analizar contenido" en ${MENU_NAMES.ia}) con un
+error concreto, como haber perdido el permiso de propietario verificado
+sobre esa propiedad. En ese caso la descripción del aviso incluye el motivo
+exacto que devolvió Google, y desaparece sola en cuanto se reconecta esa
+propiedad desde Conexiones.
+
 ## Problemas frecuentes
 
 ### No puedo publicar

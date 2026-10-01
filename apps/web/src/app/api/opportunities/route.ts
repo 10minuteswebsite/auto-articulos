@@ -244,9 +244,34 @@ export async function POST(request: Request) {
             end,
           );
         }
+        // Uso real exitoso: limpia cualquier error previo marcado en esta
+        // conexión (ver aviso rojo unificado en configuration-status).
+        if (resolved.source !== "COMPOSIO" && integration?.lastAccessError) {
+          await prisma.searchIntegration.update({
+            where: { id: integration.id },
+            data: { lastAccessError: null, lastAccessErrorAt: null },
+          });
+        }
       } catch (err) {
         gscError = err instanceof Error ? err.message : String(err);
         console.error("POST /api/opportunities: Search Console falló, se continua sin su evidencia:", err);
+        // Se guarda el motivo real en la conexión (solo la vía propia/OWN;
+        // Composio tiene su propio estado de conexión aparte) para que el
+        // aviso rojo de "Reconectar" del dashboard lo muestre sin esperar a
+        // que alguien vuelva a presionar "Analizar contenido" — pedido de
+        // Milton, 1/10/2026: el mismo protocolo de aviso debe cubrir
+        // cualquier caso en que haya que reconectar, no solo la migración a
+        // Composio.
+        if (resolved.source !== "COMPOSIO" && integration?.id) {
+          await prisma.searchIntegration
+            .update({
+              where: { id: integration.id },
+              data: { lastAccessError: gscError, lastAccessErrorAt: new Date() },
+            })
+            .catch((updateErr) => {
+              console.error("POST /api/opportunities: no se pudo guardar lastAccessError:", updateErr);
+            });
+        }
         currentRows = [];
         previousRows = [];
         countryRows = [];
