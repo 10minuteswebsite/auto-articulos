@@ -43,6 +43,15 @@ on:
         required: false
         default: false
         type: boolean
+      sync_hub_users:
+        description: "Sincronizar todos los usuarios existentes con el Hub sin modificar datos operativos"
+        required: false
+        default: false
+        type: boolean
+      hub_base_url:
+        description: "Endpoint del Hub para la sincronización"
+        required: false
+        default: "https://staging-hub.lasolucionweb.net"
       force_sync:
         description: "Forzar sincronización de BD con schema (--accept-data-loss). USAR SOLO CUANDO SE SABE QUE ESTÁ CORRECTO"
         required: false
@@ -56,6 +65,9 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DATABASE_URL }}
+      HUB_BASE_URL: ${{ inputs.hub_base_url || 'https://staging-hub.lasolucionweb.net' }}
+      AUTO_ARTICULOS_HUB_CLIENT_ID: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_ID }}
+      AUTO_ARTICULOS_HUB_CLIENT_SECRET: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -128,6 +140,9 @@ jobs:
           npx prisma db execute \
             --url "$MIGRATION_DATABASE_URL" \
             --file packages/db/prisma/migrations/20261001200000_add_hub_identity_mapping/migration.sql
+      - name: Sincronizar usuarios existentes con el Hub
+        if: ${{ inputs.sync_hub_users }}
+        run: npm run sync:hub-users
       - name: Forzar sincronización (--accept-data-loss)
         if: ${{ inputs.force_sync }}
         shell: bash
@@ -138,7 +153,7 @@ jobs:
             npx prisma db push --schema=packages/db/prisma/schema.prisma \
             --accept-data-loss
       - name: Aplicar migraciones con Session pooler
-        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_blogger_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.safe_hub_identity_mapping && !inputs.force_sync }}
+        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_blogger_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.safe_hub_identity_mapping && !inputs.sync_hub_users && !inputs.force_sync }}
         shell: bash
         run: |
           MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"
