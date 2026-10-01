@@ -10,34 +10,36 @@ Estado: B1 en curso; B2–B5 pendientes de completar y revisión cruzada.
 
 - **Host actual fijo:** `https://seototal.lasolucionweb.com`.
 - **Host actual dinámico:** el host de la petición que inicia la conexión.
-- **Host objetivo propuesto:** `https://callbacks.lasolucionweb.com`. Es una propuesta, no una decisión aprobada; debe cerrarse en la Fase 0.
+- **Hosts de producto objetivo:** `https://seototal.articulos.lasolucionweb.com` y `https://seototal.redes.lasolucionweb.com`. Los callbacks OAuth deben permanecer en el host de origen para conservar cookie de sesión y cookie `state`.
+- **Host estable propuesto:** `https://callbacks.lasolucionweb.com`, reservado para rutas de máquina (MCP, OAuth2, `.well-known`) y el puente del dominio viejo; no se usa como callback OAuth de usuario sin rediseñar `state` y sesión.
 
 | Proveedor / integración | Callback actual verificado | Host actual | Callback que debe registrarse antes del corte | Estado |
 |---|---|---|---|---|
-| Google Search Console | `/api/search-integrations/google/callback` | Fijo en `seototal.lasolucionweb.com` desde `apps/web/src/lib/google-oauth.ts`; permite override por variable de entorno | `https://callbacks.lasolucionweb.com/api/search-integrations/google/callback` (propuesto) | Registrar ambos tras aprobar dominio |
-| Google Analytics | `/api/google-analytics/callback` | Fijo en `seototal.lasolucionweb.com` desde `apps/web/src/lib/google-analytics-oauth.ts`; permite override | `https://callbacks.lasolucionweb.com/api/google-analytics/callback` (propuesto) | Registrar ambos tras aprobar dominio |
-| Google Business Profile | `/api/business-profile/callback` | Fijo en `seototal.lasolucionweb.com` desde `apps/web/src/lib/google-oauth.ts`; permite override | `https://callbacks.lasolucionweb.com/api/business-profile/callback` (propuesto) | Confirmar canal y registrar ambos |
-| Bing Webmaster | `/api/search-integrations/bing/callback` | Fijo en `seototal.lasolucionweb.com` desde `apps/web/src/lib/bing-oauth.ts`; permite override | `https://callbacks.lasolucionweb.com/api/search-integrations/bing/callback` (propuesto) | Registrar ambos tras aprobar dominio |
-| Meta / Instagram | `/api/search-integrations/instagram/callback` | Dinámico: `protocol://host` de la petición | `https://callbacks.lasolucionweb.com/api/search-integrations/instagram/callback` (propuesto) | Registrar actual y objetivo; validar Meta |
-| Meta / Threads | `/api/search-integrations/threads/callback` | Dinámico por host de la petición | `https://callbacks.lasolucionweb.com/api/search-integrations/threads/callback` (propuesto) | Registrar actual y objetivo |
-| Facebook / Instagram vía Composio | `/api/composio/callback?app=facebook` o `?app=instagram` | Dinámico: `${origin}/api/composio/callback?...` | `https://callbacks.lasolucionweb.com/api/composio/callback?app=<app>` (propuesto) | Confirmar contrato y apps |
-| LinkedIn | `/api/search-integrations/linkedin/callback` | Dinámico por `request.nextUrl.protocol` + `host` | `https://callbacks.lasolucionweb.com/api/search-integrations/linkedin/callback` (propuesto) | Registrar actual y objetivo |
-| Pinterest | `/api/search-integrations/pinterest/callback` | Dinámico por URL de la petición | `https://callbacks.lasolucionweb.com/api/search-integrations/pinterest/callback` (propuesto) | Registrar actual y objetivo |
-| Tumblr | `/api/search-integrations/tumblr/callback` | Dinámico por URL de la petición | `https://callbacks.lasolucionweb.com/api/search-integrations/tumblr/callback` (propuesto) | Registrar actual y objetivo |
-| X (Twitter) | `/api/search-integrations/twitter/callback` | Dinámico por URL de la petición | `https://callbacks.lasolucionweb.com/api/search-integrations/twitter/callback` (propuesto) | Registrar actual y objetivo |
-| Blogger | `/api/search-integrations/blogger/callback` | Dinámico por URL de la petición | `https://callbacks.lasolucionweb.com/api/search-integrations/blogger/callback` (propuesto) | Registrar actual y objetivo |
-| Composio | `/api/composio/callback?app=<app>` | Dinámico: `startConnection(..., request.nextUrl.origin)` | `https://callbacks.lasolucionweb.com/api/composio/callback?app=<app>` (propuesto), con `state` firmado para volver al origen | Confirmar contrato y lista de apps |
+| Google Search Console | `/api/search-integrations/google/callback` | Fijo hoy en `seototal.lasolucionweb.com` desde `apps/web/src/lib/google-oauth.ts` | Registrar actual + la misma ruta en `seototal.articulos...` y `seototal.redes...`; derivar por host permitido, sin comodines | Requiere cambio de configuración y pruebas |
+| Google Analytics | `/api/google-analytics/callback` | Fijo hoy en `seototal.lasolucionweb.com` desde `apps/web/src/lib/google-analytics-oauth.ts` | Registrar actual + ambos hosts de producto; derivar por allowlist | Requiere cambio de configuración y pruebas |
+| Google Business Profile | `/api/business-profile/callback` | Fijo hoy en `seototal.lasolucionweb.com` desde `apps/web/src/lib/google-oauth.ts` | Registrar actual + ambos hosts de producto; derivar por allowlist | Confirmar canal y probar sesión |
+| Bing Webmaster | `/api/search-integrations/bing/callback` | Fijo hoy/canónico; `bing/connect` fuerza el URI configurado | Registrar actual + ambos hosts de producto; `bing/connect` necesita tratamiento especial para elegir el host permitido y usar exactamente el mismo URI al canjear el código | Requiere diseño específico |
+| Meta / Instagram | `/api/search-integrations/instagram/callback` | Dinámico: `protocol://host` de la petición | Registrar actual + la misma ruta en ambos hosts de producto | Mantener cookie y sesión del host |
+| Meta / Threads | `/api/search-integrations/threads/callback` | Dinámico por host de la petición | Registrar actual + la misma ruta en ambos hosts de producto | Mantener cookie y sesión del host |
+| Facebook / Instagram vía Composio | `/api/composio/callback?app=facebook` o `?app=instagram` | Dinámico: `${origin}/api/composio/callback?...` | Registrar actual + ambos hosts de producto; `state` conserva el origen | Confirmar lista de apps |
+| LinkedIn | `/api/search-integrations/linkedin/callback` | Dinámico por protocolo + host | Registrar actual + la misma ruta en ambos hosts de producto | Mantener cookie y sesión del host |
+| Pinterest | `/api/search-integrations/pinterest/callback` | Dinámico por URL de la petición | Registrar actual + la misma ruta en ambos hosts de producto | Mantener cookie y sesión del host |
+| Tumblr | `/api/search-integrations/tumblr/callback` | Dinámico por URL de la petición | Registrar actual + la misma ruta en ambos hosts de producto | Mantener cookie y sesión del host |
+| X (Twitter) | `/api/search-integrations/twitter/callback` | Dinámico por URL de la petición | Registrar actual + la misma ruta en ambos hosts de producto | Mantener cookie y sesión del host |
+| Blogger | `/api/search-integrations/blogger/callback` | Dinámico por URL de la petición | Registrar actual + la misma ruta en ambos hosts de producto | Mantener cookie y sesión del host |
+| Composio | `/api/composio/callback?app=<app>` | Dinámico: `startConnection(..., request.nextUrl.origin)` | Registrar actual + ambos hosts de producto; no mover a host estable sin rediseñar `state`/sesión | Confirmar contrato y apps |
 
 ### Verificación realizada
 
 - Confirmados como fijos: `google-oauth.ts`, `google-analytics-oauth.ts` y `bing-oauth.ts`.
 - Confirmados como dinámicos: rutas `connect`/`callback` de Instagram, Threads, LinkedIn, Pinterest, Tumblr, X y Blogger.
 - Confirmado Composio: `apps/web/src/lib/composio-connections.ts` construye el callback con el `origin` recibido y `/api/composio/callback?app=...`.
-- La tabla no convierte el host estable en una decisión: debe aprobarse y probarse en preproducción.
+- Los callbacks OAuth de usuario deben seguir el host de origen porque `connect` exige sesión y cada callback valida `state` contra una cookie `httpOnly`, `path=/`, sin `domain` compartido.
+- El host estable queda para `/api/mcp`, `/api/oauth2/*`, `/.well-known/*` y el puente del dominio viejo; no debe usarse como callback OAuth de usuario en este diseño.
 
 ### Ruta crítica para Milton
 
-Después de aprobarse el host objetivo, Milton debe registrar los callbacks nuevos en Google, Meta, LinkedIn, Pinterest, Tumblr, X, Bing y Composio, manteniendo los actuales durante la transición. Google y Meta pueden tardar días en aprobar dominios nuevos.
+Después de aprobarse los subdominios, Milton debe registrar los callbacks nuevos por host en Google, Meta, LinkedIn, Pinterest, Tumblr, X, Bing y Composio, manteniendo los actuales durante la transición. Google y Meta pueden tardar días en aprobar dominios nuevos.
 
 ### Riesgo detectado
 
@@ -84,5 +86,5 @@ No es seguro registrar un único callback estable y asumir que el flujo funciona
 ### Revisión de riesgos y contradicciones
 
 - No se detecta una contradicción con las decisiones cerradas: el host estable, el mecanismo exacto de transferencia de hashes y la base compartida/sincronizada siguen marcados como decisiones de Fase 0.
-- El riesgo principal de B1/B4 es que un callback estable no conserva automáticamente cookies ni sesión del host de origen; el diseño debe firmar el destino en `state` y completar el flujo de retorno de forma explícita.
+- El riesgo principal de B1/B4 es registrar un callback estable que no conserva cookies ni sesión del host de origen; por eso la propuesta corregida usa callbacks por host y deja el host estable para rutas de máquina.
 - La propuesta no autoriza todavía registro de dominios, cambios DNS, middleware, migraciones ni despliegues.
