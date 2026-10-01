@@ -10,6 +10,11 @@ type HubSyncResult = {
   product_access: boolean;
 };
 
+function normalizeHubPhone(phone: string | null) {
+  const value = phone?.trim() ?? '';
+  return /^\+[1-9]\d{7,14}$/.test(value) ? value : null;
+}
+
 function getHubConfig() {
   const baseUrl = (process.env.HUB_BASE_URL || DEFAULT_HUB_URL).replace(/\/$/, "");
   const clientId = process.env.AUTO_ARTICULOS_HUB_CLIENT_ID;
@@ -96,7 +101,9 @@ export async function syncUserToHub(userId: string): Promise<HubSyncResult | nul
       name: user.name,
       first_name: user.firstName,
       last_name: user.lastName,
-      phone: user.phone,
+      // Hub enforces E.164. Do not guess a country code while importing legacy
+      // values; an invalid legacy number remains editable in the user's profile.
+      phone: normalizeHubPhone(user.phone),
       role: user.role,
       product_access: user.trialUnlocked,
     }),
