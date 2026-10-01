@@ -65,9 +65,6 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
           style={{
             marginTop: 24,
             padding: "36px 24px",
-            background: "#ffffff",
-            borderRadius: 22,
-            border: "1px solid rgba(0, 0, 0, 0.07)",
             textAlign: "center",
             maxWidth: 600,
             marginLeft: "auto",
