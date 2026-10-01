@@ -232,26 +232,30 @@ export default function ConexionesView() {
     </div>;
   }
 
-  const nombres: Record<ConexionId, string> = {
-    "google-search-console": "Google Search Console", "google-analytics": "Google Analytics", "bing-webmaster": "Bing Webmaster Tools",
-    instagram: "Instagram", facebook: "Facebook", threads: "Threads", linkedin: "LinkedIn", pinterest: "Pinterest", tumblr: "Tumblr", bluesky: "Bluesky", devto: "DEV.to", blogger: "Blogger", "business-profile": "Google Business Profile",
-  };
   const solo = (id: ConexionId) => conexion === null || conexion === id;
 
   return (
     <ConnectionReturnContext.Provider value={{ conexion, resultado: retorno }}>
     <div>
-      <ModuleIntro titulo={conexion ? nombres[conexion] : "Conexiones"}>
-        <IntroP>
-          Aquí conectas todo lo que usa SEO TOTAL, en un solo lugar. <strong>ANALÍTICAS</strong> reúne lo que lee datos
-          de tu sitio y ayuda a que aparezcas en Google y Bing. <strong>DIFUSIÓN</strong> reúne lo que publica tu contenido
-          en redes sociales, microblogs y blogs.
-        </IntroP>
-        <IntroP>
-          Solo aparecen las conexiones que tu cuenta tiene habilitadas. Si falta alguna que necesitas, pídele al
-          administrador que te dé acceso.
-        </IntroP>
-      </ModuleIntro>
+      {/* Pedido explícito de Milton (1/10/2026): dentro de una red concreta no
+         repetimos la explicación general del hub (ANALÍTICAS/DIFUSIÓN) — cada
+         tarjeta ya trae su propio título, su «lead» y su «Cómo hacerlo paso a
+         paso» estandarizado (CONNECTION_GUIDES / ComposioConnect). El texto
+         general confundía: hablaba de todo el hub cuando la persona ya estaba
+         resolviendo una red concreta. */}
+      {conexion === null && (
+        <ModuleIntro titulo="Conexiones">
+          <IntroP>
+            Aquí conectas todo lo que usa SEO TOTAL, en un solo lugar. <strong>ANALÍTICAS</strong> reúne lo que lee datos
+            de tu sitio y ayuda a que aparezcas en Google y Bing. <strong>DIFUSIÓN</strong> reúne lo que publica tu contenido
+            en redes sociales, microblogs y blogs.
+          </IntroP>
+          <IntroP>
+            Solo aparecen las conexiones que tu cuenta tiene habilitadas. Si falta alguna que necesitas, pídele al
+            administrador que te dé acceso.
+          </IntroP>
+        </ModuleIntro>
+      )}
       {conexion && volverA && (
         <button
           type="button"
