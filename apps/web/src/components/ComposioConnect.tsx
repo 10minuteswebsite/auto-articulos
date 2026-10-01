@@ -342,7 +342,10 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
         )}
       </section>
       )}
-      {(embedded || inline) && message && !(message.ok && connections?.some((connection) => connection.status === "ACTIVE" && connection.selection)) && (
+      {/* Si connections sigue en null y hubo error, ese caso ya tiene su
+         propio mensaje más abajo (con más contexto) — evita repetir el
+         mismo texto dos veces en la misma pantalla. */}
+      {(embedded || inline) && message && !(connections === null && loadError) && !(message.ok && connections?.some((connection) => connection.status === "ACTIVE" && connection.selection)) && (
         <p role="status" style={{ fontSize: 14, margin: "8px 0 0", color: message.ok ? "#1a7f37" : "#c62828" }}>
           {message.text}
         </p>
