@@ -77,6 +77,21 @@ Para que Milton sepa que el otro lado está vivo, cada agente deja una entrada b
 - Antes de cerrar cada entrega (Parte A o Parte B de la Fase 0, o un lote), cada agente **pide una revisión cruzada** al otro: «revisa esto contra tu parte y dime qué choca». Una entrega no se da por terminada hasta tener esa respuesta.
 - Consultar al otro agente es **lo primero**, antes de escalar a Milton.
 
+**0.13 Puertas entre fases y lotes (cómo se pasa de una a otra sin Milton)**
+
+*Definición de VERIFICADO.* Una entrega (documento de Fase 0 o lote de código) está **VERIFICADA** cuando se cumplen las tres cosas: (1) su autor documentó sus **tres auditorías** (funcional, regresión, integración) en la bitácora del traspaso; (2) el **otro agente hizo la revisión cruzada** y escribió en su buzón «Revisión cruzada de <ID>: APROBADA» (o lista de cambios pedidos, que se corrigen y se vuelve a revisar hasta APROBADA); (3) los checks automáticos del PR están en verde.
+
+*Reglas de paso (autónomas, sin Milton):*
+1. **Dentro de la Fase 0:** la Parte A (Claude) y la Parte B (Codex) se hacen en paralelo, sin puerta entre sí. Cada una necesita la revisión cruzada del otro para darse por terminada. Claude (control) las consolida y las entrega a Milton.
+2. **Entre lotes:** un lote **puede empezar** en cuanto sus dependencias estén VERIFICADAS y sus archivos no estén reservados por nadie. Dependencias: Lote 1 es la base; Lote 2 y Lote 3 dependen del 1; Lotes 4 y 5 no dependen del 1 (el 4 usa la tabla de derechos mediante el contrato de A1); Lote 6 depende de todos.
+3. **Quién toma el siguiente lote:** el agente cuya parte lo contiene (sección 2). Si uno termina y el otro sigue ocupado, puede tomar un lote libre de la lista **solo si el otro lo acepta** en su buzón (`Re:`). Reserva de archivos y capitanía siguen el protocolo de coordinación.
+4. Al tomar un lote, el agente lo anota en el tablero (`EN CURSO`) y en la bitácora del traspaso, y trabaja en un worktree aislado.
+
+*Las dos puertas que SÍ son de Milton (por su propio protocolo, no se saltan):*
+- **Puerta 1 — Aprobación de la Fase 0 (M2):** ningún agente escribe código de lotes hasta que Milton apruebe la Fase 0 (A+B). Una vez aprobada, las reglas 2–4 operan solas.
+- **Puerta 2 — Paso a producción:** subir un lote a producción (merge de código a `main`, migraciones, despliegue) requiere la **autorización explícita de Milton**, con la declaración «Subiré a producción de acuerdo al Protocolo de No Destrucción». El agente le presenta un resumen de 5 líneas (qué cambia, auditorías hechas, revisión cruzada, migración sí/no, plan de reversa) y mientras espera **no queda parado**: puede empezar el siguiente lote que no dependa de ese ni toque los mismos archivos.
+- Además, **M3** (capitanía de migración) debe resolverse antes de cualquier lote con migración (el Lote 1).
+
 ## 1. Reglas de uso de este archivo
 
 1. **Cada agente escribe solo en lo suyo:** Claude en su buzón (sección 4) y sus filas del tablero (A*); Codex en su buzón (sección 5) y sus filas (B*). Nadie edita lo del otro.
