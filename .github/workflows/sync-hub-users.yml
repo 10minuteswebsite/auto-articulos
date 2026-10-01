@@ -3,7 +3,12 @@ name: Sincronizar usuarios con el Hub
 on:
   schedule:
     - cron: "*/10 * * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      hub_base_url:
+        description: "Hub endpoint to use for this synchronization"
+        required: false
+        default: "https://staging-hub.lasolucionweb.net"
 
 concurrency:
   group: auto-articulos-hub-sync
@@ -16,7 +21,7 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DATABASE_URL }}
-      HUB_BASE_URL: https://hub.lasolucionweb.net
+      HUB_BASE_URL: ${{ inputs.hub_base_url || 'https://staging-hub.lasolucionweb.net' }}
       AUTO_ARTICULOS_HUB_CLIENT_ID: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_ID }}
       AUTO_ARTICULOS_HUB_CLIENT_SECRET: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_SECRET }}
     steps:
