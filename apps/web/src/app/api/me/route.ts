@@ -10,6 +10,7 @@ import {
   parseUserModuleOverrides,
 } from "@/lib/modules";
 import { hasSocialModuleAccess } from "@/lib/social-access";
+import { syncUserToHubBestEffort } from "@/lib/hub-sync";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -313,6 +314,8 @@ export async function PATCH(request: NextRequest) {
       hasImageCredits: true,
     },
   });
+
+  await syncUserToHubBestEffort(userId);
 
   return NextResponse.json(user);
 }

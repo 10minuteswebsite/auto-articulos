@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { prisma } from "@auto-articulos/db";
+import { refreshHubAccessForUser } from "@/lib/hub-sync";
 
 /** Solo válido dentro de rutas protegidas por proxy.ts */
 export async function getCurrentUserId(): Promise<string> {
@@ -8,6 +9,11 @@ export async function getCurrentUserId(): Promise<string> {
   if (!userId) {
     throw new Error("getCurrentUserId() llamado fuera de una ruta protegida.");
   }
+  await refreshHubAccessForUser(userId).catch((error) => {
+    // During migration, a transient Hub outage must not interrupt Auto
+    // Artículos. Successful Hub revocations are still enforced above.
+    console.error("[HUB ACCESS] No se pudo revalidar el acceso", userId, error);
+  });
   return userId;
 }
 

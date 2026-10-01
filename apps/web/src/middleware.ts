@@ -17,6 +17,7 @@ const PUBLIC_PATHS = [
   "/terminos",
   "/api/auth/login",
   "/api/auth/trial-signup",
+  "/auth/hub",
   "/api/debug/instagram-errors",
   "/api/debug/activate-instagram",
   "/api/oauth2/authorize",

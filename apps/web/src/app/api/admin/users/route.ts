@@ -11,6 +11,7 @@ import {
 } from "@auto-articulos/shared";
 import { auditLog } from "@/lib/audit";
 import { getCurrentUserId, requireAdmin } from "@/lib/current-user";
+import { syncUserToHubBestEffort } from "@/lib/hub-sync";
 import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
@@ -538,6 +539,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   auditLog("user_updated", currentUserId, { targetUserId: userId, changes: Object.keys(data) });
+  await syncUserToHubBestEffort(userId);
   return NextResponse.json(
     {
       user: {
@@ -742,5 +744,6 @@ export async function POST(request: NextRequest) {
   });
 
   auditLog("user_created", adminId, { newUserId: user.id, email: normalizedEmail, role });
+  await syncUserToHubBestEffort(user.id);
   return NextResponse.json({ user });
 }
