@@ -5,8 +5,7 @@
  * `appToProduct`; ningún appId del HUB se codifica en esta función. La
  * ausencia de un producto en la respuesta no revoca nada.
  */
-export type ProductKey = "articulos" | "redes";
-export type EntitlementStatus = "ACTIVE" | "INACTIVE";
+export type EntitlementStatus = "ACTIVE" | "GRACE" | "INACTIVE";
 
 export type LocalEntitlement = {
   product: ProductKey;
@@ -43,7 +42,7 @@ function desiredStatus(item: HubEntitlement): EntitlementStatus | null {
   return null;
 }
 
-export function computeNextEntitlement(
+export function planHubTransition(
   current: LocalEntitlement | undefined,
   product: ProductKey,
   desired: EntitlementStatus,
@@ -73,13 +72,15 @@ export function applyHubEntitlements(
     return Object.entries(item.products).map(([product, value]) => ({ product, ...value }));
   });
   for (const item of expanded) {
-    const product = item.product as ProductKey | undefined ?? (item.appId ? appToProduct[item.appId] : undefined);
+    const rawProduct = item.product ?? (item.appId ? appToProduct[item.appId] : undefined);
+    const product = rawProduct?.toUpperCase() as ProductKey | undefined;
     const status = desiredStatus(item);
     if ((product !== "articulos" && product !== "redes") || !status) {
       unknown.push(item);
       continue;
     }
-    transitions.push(computeNextEntitlement(byProduct.get(product), product, status));
+    transitions.push(planHubTransition(byProduct.get(product), product, status));
   }
   return { transitions, unknown };
 }
+import type { ProductKey } from "@auto-articulos/shared";
