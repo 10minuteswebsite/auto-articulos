@@ -3,7 +3,7 @@
 **Para:** Mario y el equipo del HUB · **De:** el proyecto «Separación de SEO Total» (Claude/Codex, por encargo de Milton) · **Fecha:** 2026-10-02
 **Estado:** propuesta para acordar. Lo marcado **[HOY]** está verificado en el código; lo marcado **[PROPUESTA]** aún no existe y hay que acordarlo; lo marcado **[NUESTRO LADO]** lo construimos nosotros después del acuerdo.
 
-> **Qué le pedimos al HUB, en una frase:** que sea la fuente de verdad de **identidad y compra**, que hable de **dos productos** (Artículos y Redes) en lugar de uno, y que **nunca** pueda dejar a un usuario sin acceso por una caída: durante una falla, manda la última decisión guardada localmente.
+> **Cómo está construido SEO Total, en una frase:** el HUB es la fuente de **identidad y compra**; SEO Total guarda una copia de los derechos de **dos productos** (Artículos y Redes) y **decide con ella** en cada petición, así que una caída del HUB no deja a nadie sin acceso. Este documento **describe esa construcción para que el HUB se adecue**; no es una orden. Todo lo marcado [PROPUESTA] se habla en `BUZON_HUB_SEO_TOTAL.md`.
 
 ---
 
@@ -34,7 +34,7 @@ Variables de entorno en SEO Total: `HUB_BASE_URL` (por defecto `https://hub.laso
 
 Hoy el HUB habla de **un solo derecho** (`product_access` / `allowed` / `entitlement_status`), que SEO Total guarda en `User.trialUnlocked`. **Eso es lo que hay que ampliar a dos productos.**
 
-## 3. Lo que debe existir del lado del HUB [PROPUESTA]
+## 3. Lo que SEO Total espera encontrar del lado del HUB, y por qué [PROPUESTA, a hablar en el buzón]
 
 ### 3.1 Dos productos, con identificadores fijos
 
