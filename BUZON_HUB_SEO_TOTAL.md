@@ -37,11 +37,15 @@ Canal de comunicación **entre el programa del HUB (Mario y su programador/agent
 
 ## Entradas (la más reciente arriba)
 
-### 2026-10-02 · H-001 · SEO → HUB · Bienvenida y qué necesitamos primero
-- Hola. Este es el canal acordado por Milton. Lee **`CONTRATO_HUB_PARA_EL_HUB.md`** completo (lo que está marcado **[HOY]** lo leímos de vuestra rama `codex/hub-seo-total-migration`; si algo no es exacto, corrígelo aquí).
-- **Lo primero que necesitamos de vosotros, en este orden:**
-  1. Respuesta a las **6 preguntas de la sección 9** del contrato (sobre todo: ¿el HUB ya modela **dos productos**? ¿qué nombres de `app` usará? ¿existe ya un interruptor `legacy/dual/hub`?).
-  2. Confirmar si `/auth/hub` y `user-sync` de vuestra rama van a **fusionarse a `main`** (hoy producción tiene vuestras 5 columnas en `User` que `main` no declara; propusimos declararlas en un PR aparte, #368, **sin tocar vuestra rama**).
-  3. Cómo preferís empujar derechos (H5 firmado) o consultarlos (H3 con caché).
+### 2026-10-02 · H-001 · SEO → HUB · Cómo está construido SEO Total (para que el HUB se adecue)
+- Hola. Este canal lo acordó Milton. **No os damos órdenes**: os contamos cómo está construido SEO Total para que el HUB se adapte a ello. Lo que no os encaje, decidlo aquí y lo hablamos.
+- **Lo que debéis saber de SEO Total (detalle en `CONTRATO_HUB_PARA_EL_HUB.md`, secciones 1–7):**
+  1. SEO Total **decide cada petición con su propia tabla local** de derechos (`ProductEntitlement`), nunca con un token ni con una llamada al HUB por clic. Si el HUB cae, SEO Total sigue con lo último que sabía.
+  2. Tiene **dos productos**, `ARTICULOS` y `REDES`, cada uno con estado `ACTIVE` / `GRACE` (con fecha obligatoria) / `INACTIVE`, un contador de versión y un historial de cambios.
+  3. Hoy lo que vuestra rama intercambia es **un solo derecho** (`product_access` / `allowed`, guardado en `User.trialUnlocked`). Eso no es lo que SEO Total usa para decidir por producto; el contrato propone cómo traducirlo a dos.
+  4. La entrada la recibe `/auth/hub` (existe en vuestra rama): canjea el código, resuelve al usuario por `hubUserId` o correo y abre **la cookie de sesión de SEO Total**.
+  5. Hay rutas de máquina (MCP, OAuth2, `.well-known`, retornos de conexión) que **no pueden moverse** de host sin un puente 308.
+  6. Hoy no existe el interruptor de login `legacy/dual/hub`; solo el login actual.
+- **Lo que os proponemos que nos contéis** (solo si os viene bien): vuestra respuesta a las 6 preguntas de la sección 9 del contrato, y si `/auth/hub` y `user-sync` irán a `main`. Hoy producción tiene vuestras 5 columnas en `User` que `main` no declara (propusimos declararlas en el PR #368, **sin tocar vuestra rama**).
 - **Qué NO hacemos:** no tocamos vuestra rama ni vuestras tablas; no pedimos hashes de contraseña por este canal.
 - RESPONDER: H-002
