@@ -377,9 +377,21 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
         </section>
       ) : (
         connections.map((connection) => {
-          const status = STATUS_LABEL[connection.status];
-          const isBusy = busy === connection.app;
           const choice = choices[connection.app];
+          const noOptionsAvailable = Boolean(
+            connection.status === "ACTIVE" &&
+              choice &&
+              !choice.loading &&
+              !choice.error &&
+              choice.options.length === 0,
+          );
+          const status =
+            noOptionsAvailable
+              ? { text: "No conectada · sin propiedades disponibles", color: "#c62828" }
+              : connection.status === "ACTIVE" && !connection.selection
+                ? { text: "Configuración incompleta · falta elegir", color: "#9a6700" }
+              : STATUS_LABEL[connection.status];
+          const isBusy = busy === connection.app;
           if (inline && showInactiveActions && connection.status !== "ACTIVE") {
             return (
               <button key={connection.app} type="button" onClick={() => connect(connection.app)} disabled={busy !== null} style={{ ...secondaryButtonStyle, marginTop: 12 }}>
@@ -463,6 +475,20 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                 </div>
               )}
 
+              {connection.status === "ACTIVE" && !connection.selection && !choice && (
+                <p
+                  role="status"
+                  style={{
+                    fontSize: 14,
+                    margin: "8px 0",
+                    color: "#9a6700",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  La autorización quedó incompleta: todavía no hay {connection.app === "google_search_console" ? "una propiedad de Search Console" : connection.app === "google_analytics" ? "una propiedad de Analytics" : connection.app === "facebook" ? "una Página de Facebook" : "una cuenta de Instagram"} disponible para SEO TOTAL.
+                </p>
+              )}
+
               {choice && (
                 <div style={{ marginTop: 12, padding: "10px 0", borderTop: "1px solid #e5e5ea" }}>
                   <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px" }}>{CHOOSE_TITLE[connection.app]}</p>
@@ -470,7 +496,9 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                   {choice.loading && <p style={mutedStyle}>Leyendo tu cuenta…</p>}
                   {choice.error && <p style={{ fontSize: 13, color: "#c62828" }}>{choice.error}</p>}
                   {!choice.loading && !choice.error && choice.options.length === 0 && (
-                    <p style={mutedStyle}>No se encontró nada para elegir en esta cuenta. Comprueba que sea la cuenta correcta.</p>
+                    <p style={{ ...mutedStyle, color: "#c62828" }}>
+                      No se encontró ninguna propiedad disponible en esta cuenta de Google. Comprueba que sea la cuenta correcta y que tenga acceso de propietario o usuario completo a Search Console. Si el sitio sí aparece en Search Console, desconecta esta conexión y vuelve a conectarla con esa cuenta.
+                    </p>
                   )}
                   {choice.options.length > 0 && (() => {
                     const sorted = [...choice.options].sort(

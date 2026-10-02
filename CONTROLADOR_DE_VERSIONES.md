@@ -3374,6 +3374,7 @@ RECONCILIADO, SIN ACCIÓN DE DESPLIEGUE ADICIONAL.
 
 ## Versión desplegada — 2026-09-22 — CONEXION POSTPEER 2, corrección de imagen de GBP vía og:image (PR #211)
 
+<<<<<<< HEAD
 PR #211 fusionado a `main` mediante el commit `9afbdd3` ("fix(gbp): use article og image fallback
 (#211)"). Registra el resultado de la entrada "Continuación CONEXION POSTPEER 2 — 2026-09-22" de
 Coordinación (que no se reescribe): `apps/worker/src/businessProfilePublish.ts` ahora usa primero
@@ -4022,3 +4023,26 @@ DESPLEGADO EN PRODUCCIÓN — 2026-10-02") por la tarea programada diaria de pro
   aplicación sigue APAGADO (sin efecto visible para ningún usuario todavía). Capitanía de
   migración reclamada y liberada por Claude el 2026-10-02; hoy no hay capitán activo sobre este
   lote.
+
+## Versión — 2026-10-02 — estado de conexión GSC sin propiedad seleccionada
+
+Fecha y hora: 2026-10-02 (EDT)
+Versión/commit: `189379b1` (código y configuración final; rebaseado sobre `origin/main`)
+Rama: HEAD separado en worktree administrado
+Worktree: `/Users/miltondavila/.codex/worktrees/6fdf/Creador de articulos`
+Conversación/proyecto: CARMEN AGUILAR CONEXION GSC
+Cambios incluidos: una conexión Composio ACTIVE sin propiedad aprobada ahora se muestra como “Conectada · falta elegir” y explica la acción requerida; `vercel.json` configura el build del monorepo y genera Prisma antes de compilar web.
+Archivos modificados: `apps/web/src/components/ComposioConnect.tsx`, `apps/web/package.json`, `vercel.json`
+Archivos eliminados: ninguno
+Migraciones creadas/aplicadas: ninguna
+Auditoría 1: APROBADA — typecheck web, build web (84 rutas en el main actualizado) y build worker OK.
+Auditoría 2: APROBADA — 20/20 pruebas del worker y `git diff --check` OK.
+Auditoría 3: APROBADA — deployment productivo READY; dominio productivo `/login` HTTP 200; alias Vercel `/login` HTTP 302 esperado por redirección.
+Diff revisado: sí; sin schema ni migraciones. Rebase conservador sobre `origin/main` actualizado.
+Deployment/Vercel: `dpl_8jVGZnVKJzYqYvDrySu58ahVNKet`, estado `READY`.
+Estado de Vercel: READY; logs de build completos, Prisma 5.22.0 generado y Next 84 rutas compiladas.
+Dominio/logs/producción verificados: `https://seototal.lasolucionweb.com/login` HTTP 200; alias Vercel HTTP 302 esperado.
+Problemas conocidos: el hook de actualizaciones no pudo registrar el cambio por falta de `DATABASE_URL`; no afecta el commit ni el build. Vercel debe usar la configuración raíz para incluir los paquetes workspace.
+Responsable: Codex.
+Siguiente acción: ninguna; queda pendiente únicamente la comprobación visual de Carmen en la pantalla de Conexiones.
+Estado: VERIFICADA
