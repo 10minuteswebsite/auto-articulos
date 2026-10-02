@@ -4,15 +4,16 @@ import { routeAfterLogin } from "./access-router";
 
 const config = { articulosHost: "articulos.lasolucionweb.com", redesHost: "redes.lasolucionweb.com", canonicalHost: "seototal.lasolucionweb.com", hubUrl: "https://hub.example.test" };
 const active = (product: "ARTICULOS" | "REDES") => ({ product, status: "ACTIVE" as const });
+const inactive = (product: "ARTICULOS" | "REDES") => ({ product, status: "INACTIVE" as const });
 
 test("canonical with one product redirects to its host; both stay", () => {
-  assert.deepEqual(routeAfterLogin({ entitlements: [active("ARTICULOS")], host: config.canonicalHost, role: "user", now: new Date(), config }), { kind: "redirect", url: config.articulosHost });
+  assert.deepEqual(routeAfterLogin({ entitlements: [active("ARTICULOS"), inactive("REDES")], host: config.canonicalHost, role: "user", now: new Date(), config }), { kind: "redirect", url: config.articulosHost });
   assert.deepEqual(routeAfterLogin({ entitlements: [active("ARTICULOS"), active("REDES")], host: config.canonicalHost, role: "user", now: new Date(), config }), { kind: "stay" });
 });
 
 test("expired grace goes to HUB; current product absence goes to other product", () => {
-  assert.deepEqual(routeAfterLogin({ entitlements: [{ product: "REDES", status: "GRACE", graceUntil: new Date(Date.now() - 1) }], host: config.canonicalHost, role: "user", now: new Date(), config }), { kind: "redirect", url: config.hubUrl });
-  assert.deepEqual(routeAfterLogin({ entitlements: [active("REDES")], host: config.articulosHost, role: "user", now: new Date(), config }), { kind: "redirect", url: config.redesHost });
+  assert.deepEqual(routeAfterLogin({ entitlements: [inactive("ARTICULOS"), { product: "REDES", status: "GRACE", graceUntil: new Date(Date.now() - 1) }], host: config.canonicalHost, role: "user", now: new Date(), config }), { kind: "redirect", url: config.hubUrl });
+  assert.deepEqual(routeAfterLogin({ entitlements: [inactive("ARTICULOS"), active("REDES")], host: config.articulosHost, role: "user", now: new Date(), config }), { kind: "redirect", url: config.redesHost });
 });
 
 test("admins, unknown hosts, and empty legacy records never loop", () => {

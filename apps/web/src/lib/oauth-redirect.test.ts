@@ -114,6 +114,7 @@ test("rememberOAuthOrigin/clearOAuthOrigin escriben la cookie solo con el retorn
   const clr = mk();
   clearOAuthOrigin(clr, { DIA_CERO: "on" });
   assert.equal(clr.headers.getSetCookie().length, 2); // las dos variantes
+});
 
 test("acepta los dos subdominios de producto y el principal", () => {
   for (const host of ["seototal.lasolucionweb.com", "articulos.lasolucionweb.com", "redes.lasolucionweb.com"]) {
