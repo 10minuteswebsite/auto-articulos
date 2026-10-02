@@ -29,9 +29,20 @@ interface Effective {
   graceDaysLeft: number | null;
 }
 
+interface EntitlementEvent {
+  id: string;
+  product: ProductKey;
+  fromStatus: Status | null;
+  toStatus: Status;
+  actorUserId: string | null;
+  reason: string | null;
+  createdAt: string;
+}
+
 interface Payload {
   entitlements: EntitlementRow[];
   effective: { articulos: Effective; redes: Effective };
+  events: EntitlementEvent[];
 }
 
 const DEFAULT_GRACE_DAYS = 5;
@@ -73,6 +84,7 @@ export default function UserProductsPanel({ userId }: { userId: string }) {
     ARTICULOS: String(DEFAULT_GRACE_DAYS),
     REDES: String(DEFAULT_GRACE_DAYS),
   });
+  const [showHistory, setShowHistory] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -221,6 +233,22 @@ export default function UserProductsPanel({ userId }: { userId: string }) {
         <>
           {renderProduct("ARTICULOS")}
           {renderProduct("REDES")}
+          <details open={showHistory} onToggle={(event) => setShowHistory(event.currentTarget.open)} style={{ marginTop: 12 }}>
+            <summary style={{ cursor: "pointer", fontSize: 13, fontWeight: 600 }}>Historial ({data.events.length})</summary>
+            {data.events.length === 0 ? (
+              <p style={{ margin: "10px 0 0", fontSize: 13, color: "#6e6e73" }}>Todavía no hay cambios registrados.</p>
+            ) : (
+              <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+                {data.events.map((event) => (
+                  <div key={event.id} style={{ padding: "8px 10px", borderRadius: 8, background: "#f5f5f7", fontSize: 12, color: "#515154" }}>
+                    <strong>{PRODUCT_NAMES[event.product]}</strong> · {formatDate(event.createdAt)} · {event.fromStatus ?? "sin registro"} → {event.toStatus}
+                    <br />
+                    Quién: {event.actorUserId ?? "sistema"}{event.reason ? ` · Motivo: ${event.reason}` : ""}
+                  </div>
+                ))}
+              </div>
+            )}
+          </details>
         </>
       )}
     </div>
