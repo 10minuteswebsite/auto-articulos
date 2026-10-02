@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { redesProfile } from "@/lib/redes-profile";
 import {
   decryptSecret,
   encryptSecret,
@@ -709,6 +710,7 @@ export async function POST(request: NextRequest) {
   const initialPasswordEncrypted = encryptSecret(password);
   const user = await prisma.user.create({
     data: {
+      ...(role === "admin" ? {} : redesProfile()),
       email: normalizedEmail,
       name:
         typeof name === "string" && name.trim()
