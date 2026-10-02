@@ -21,8 +21,8 @@ Para Milton. Este manual no ejecuta nada: describe una ventana reversible para s
 
 1. Congelar cambios de la ventana y registrar hora.
 2. Confirmar ambos subdominios con candado.
-3. Escribir `DIA CERO` y pulsar Activar Día Cero. El botón enciende los permisos de Redes con respaldo reversible.
-4. En Vercel crear `DIA_CERO=on` y hacer Redeploy.
+3. En Vercel crear `DIA_CERO=on` y hacer Redeploy. Esta variable debe estar activa antes del botón para que las cookies funcionen en las tres direcciones.
+4. Escribir `DIA CERO` y pulsar Activar Día Cero. El botón enciende los permisos de Redes con respaldo reversible.
 5. Mantener `product_enforcement` apagado.
 6. Probar las tres direcciones, el router y una conexión OAuth desde cada subdominio. No tocar consolas.
 7. Smoke test final y bitácora.
