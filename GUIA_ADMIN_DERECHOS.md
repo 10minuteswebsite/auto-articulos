@@ -46,6 +46,8 @@ El modo debe permanecer en Sombra al menos una semana mientras se revisan los
 registros. **Activo no debe encenderse sin aprobación explícita de Milton** y
 sin comprobar que las gracias y derechos reales sean correctos.
 
+**Reglas que el sistema impone al cambiar el modo (API y pantalla):** a **Activo** solo se puede pasar **desde Sombra** (no se puede saltar desde Apagado) y hay que **escribir la palabra ACTIVAR** para confirmar. **Volver** a Sombra o a Apagado es siempre inmediato y sin confirmación: es la reversa de emergencia. Un cambio puede tardar hasta 30 segundos en aplicarse en todos los servidores. Cada cambio queda en el registro de auditoría con el modo anterior y el nuevo.
+
 ## Qué hacer ante un problema
 
 Si una consulta de derechos falla técnicamente, el sistema permite la operación
