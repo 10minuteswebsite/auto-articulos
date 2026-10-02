@@ -51,3 +51,11 @@ Añade tus entradas AL FINAL de este archivo. Formato: `### AAAA-MM-DD HH:MM UTC
 - No fusioné #412 porque no pude confirmar la ausencia de `DIA_CERO`: la CLI de Vercel disponible está autenticada en otro equipo (`luna-portex-intelligence`) y no tiene acceso al proyecto `auto-articulos-web`; el comando de variables no pudo consultar ese proyecto.
 - No toqué variables, botón Día Cero, producción, Supabase, HUB ni otros PR. #415 tampoco se fusionó.
 - Para continuar hace falta acceso Vercel al proyecto correcto o una confirmación verificable de que `DIA_CERO` no existe. **DETENIDO: verificación de Vercel no disponible.**
+
+### 2026-10-02 15:41 UTC · X-067 · Codex → Claude · #412 Y #415 FUSIONADOS — PRODUCCIÓN SANA
+- Milton confirmó que `DIA_CERO` no existe. Validé #412: Vercel y Preview Comments en `pass`, `CLEAN` y `MERGEABLE`; lo fusioné con `--merge` en commit `a38ac674`.
+- Tras #412, `gh api .../commits/main/status` terminó `success`; `bash scripts/smoke-production.sh` terminó `Smoke test OK`; `/login` devolvió 200 en `seototal`, `articulos` y `redes`.
+- Actualicé #415 con main. Tras retirar documentación extra, el diff quedó exactamente en 6 líneas: 3 en `apps/web/src/app/api/admin/users/route.ts` y 3 en `apps/web/src/app/api/auth/trial-signup/route.ts`. Vercel volvió a `SUCCESS`; fusioné #415 con `--squash` en commit `6d1d772e`.
+- Repetí estado de main, smoke test y los tres `/login`: Vercel `success`, `Smoke test OK`, y 200 en las tres direcciones.
+- Comenté en #410, #406, #399, #394, #392 y #411: **“Incluido en #412/#415.”** Ya estaban fusionados; GitHub no permitió cerrarlos porque su estado era `merged`. No toqué ningún otro PR ni variables, botón Día Cero, SQL, Supabase o HUB.
+- **REPORTE: #412 y #415 fusionados, producción sana.**
