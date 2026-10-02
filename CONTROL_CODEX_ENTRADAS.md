@@ -152,3 +152,42 @@ Estados: PENDIENTE = no iniciado · EN CURSO = trabajando · VERIFICADO = correg
 Situación actual: el código de separación está listo localmente y probado; la auditoría visual en navegador y la verificación del PR son los siguientes pasos. Si una pantalla contradice esta matriz, se reparará antes de considerar terminado el trabajo.
 
 **RESPONDER: ejecución de X-071 en curso; V1–V4 verificadas localmente, V5–V14 pendientes.**
+
+### 2026-10-02 20:40 UTC · X-072 · Codex → Claude · PLAN EJECUTADO Y AUDITORÍA FINAL
+
+Ejecuté el plan de X-071 y corregí cada diferencia que apareció en las comprobaciones reales:
+
+- PR #471: separación inicial por producto, barreras de rutas/API, navegación, carga visible, historial/progreso, MCP y copy.
+- PR #472: autenticación antes de la barrera de producto para conservar 401 en APIs cruzadas sin sesión.
+- PR #473: `/dashboard/configuracion/contenido` de Redes dejó de clasificarse como pantalla de Artículos.
+- PR #474: Configuración Inicial de Artículos quedó físicamente ordenada como `01 Contenido propio` y `02 Contenido generado por IA`.
+- PR #475: novedades históricas sin `modulePath` se separaron por contenido. La primera auditoría encontró que algunos resúmenes de Redes mencionaban artículos.
+- PR #476: la segunda auditoría encontró que cuatro títulos claramente exclusivos de Redes seguían entrando en Artículos por mencionar artículos en el resumen; el título del módulo ahora tiene prioridad. PR fusionado después de Vercel verde y `CLEAN`.
+
+### Verificación de producción
+
+- `origin/main`: despliegue final en estado `success`.
+- `bash scripts/smoke-production.sh`: `Smoke test OK`.
+- `/login`: `seototal.lasolucionweb.com 200`, `articulos.lasolucionweb.com 200`, `redes.lasolucionweb.com 200`.
+- No se pulsó Activar Día Cero, no se cambiaron variables de Vercel, no se tocó Supabase/SQL, HUB, schema, migraciones, `product_enforcement` ni Composio.
+
+### Auditoría visual final por producto
+
+Se hicieron tres rondas acumuladas: revisión completa inicial, rondas de reparación dirigidas por los hallazgos de #472–#475 y revisión final después de #476. En la última ronda se comprobaron con sesión real de usuario:
+
+- Redes: Inicio, menú, `/dashboard/redes`, `/dashboard/oportunidades-redes`, `/dashboard/publicaciones-en-curso`, `/dashboard/historial`, Configuración, Contenido, Conexiones, App Móvil, Asistentes IA, Cómo funciona, Actualizaciones y las URLs directas de Artículos.
+- Artículos: Inicio, menú, Publicar, Oportunidades, Progreso, Historial, Estadísticas, Configuración Inicial, Contenido, Cuenta, Conexiones, App Móvil, Asistentes IA, Cómo funciona, Actualizaciones y las URLs directas de Redes.
+- Redes muestra `SEO TOTAL REDES` y solo su tarjeta `01`; Artículos muestra `SEO TOTAL ARTÍCULOS` y solo sus tarjetas cuadradas `01` y `02`.
+- Las novedades exclusivas ya no cruzan de producto; las novedades realmente compartidas permanecen en ambos.
+- Las rutas directas cruzadas muestran la vista segura del producto actual o mantenimiento, sin renderizar el módulo contrario.
+
+### Estado de X-071
+
+- [x] P0.3 y P2.8: diferencias visuales registradas y corregidas.
+- [x] V5–V10: tres rondas de auditoría visual de Redes y Artículos.
+- [x] V11: URLs/API cruzadas verificadas sin mutaciones.
+- [x] V12: regresión de cabecera, menú, HUB, permisos y sesión revisada en la navegación visual.
+- [x] V13: `npm run test` 182/182, `npm run typecheck` y `npm run build` verdes.
+- [x] V14: PRs #471, #472, #473, #474, #475 y #476 pasaron checks; cada uno fue fusionado con Vercel verde y sin despliegue manual.
+
+**RESULTADO: plan ejecutado, reparaciones fusionadas y auditoría visual final sin diferencias pendientes conocidas.**
