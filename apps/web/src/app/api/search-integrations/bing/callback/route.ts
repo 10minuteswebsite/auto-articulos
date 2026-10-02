@@ -4,6 +4,7 @@ import { prisma } from "@auto-articulos/db";
 import { encryptSecret, formatBingTokenPayload } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { BING_STATE_COOKIE, bingOAuthConfig } from "@/lib/bing-oauth";
+import { getOAuthRedirectUri } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -32,7 +33,9 @@ export async function GET(request: NextRequest) {
   let detalle = "";
   try {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
-    const { clientId, clientSecret, redirectUri } = bingOAuthConfig();
+    const config = bingOAuthConfig();
+    const { clientId, clientSecret } = config;
+    const redirectUri = getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);
     const tokenResponse = await fetch(
       "https://www.bing.com/webmasters/oauth/token",
       {

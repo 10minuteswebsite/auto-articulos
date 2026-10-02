@@ -307,3 +307,27 @@ nuevo, no conserva el historial original), pero no representa trabajo en riesgo 
 No se borró la rama en esta corrida (borrar ramas remotas no es una acción que esta tarea programada
 esté autorizada a tomar por su cuenta); queda para que Milton decida si vale la pena limpiarla, igual
 que las señaladas el 2026-09-09.
+
+### `schema.prisma` de `main` no declara columnas del HUB que ya existen en producción — riesgo de borrado por `migrate.yml` — 2026-10-02 (señalado, sin acción del Reparador)
+
+Agregado por la tarea programada diaria de propagación (2026-10-02) a partir de
+`COORDINACION_CLAUDE_CODEX.md` ("Claude — LOTE 1 «SEPARACION SEO TOTAL»: DESPLEGADO EN
+PRODUCCIÓN — 2026-10-02").
+
+Al aplicar a mano en Supabase la migración aditiva del Lote 1 de «SEPARACION SEO TOTAL»
+(derechos por producto, PR #313), se detectó que la base de producción ya tiene las columnas
+del HUB (`hubUserId`, `hubAuth0Sub`, `hubSyncedAt`, `hubSyncAttemptedAt`, `hubSyncError`) en la
+tabla `User`, pero el `schema.prisma` que vive en `main` **no las declara**. Esto significa que
+la ruta por defecto del workflow `migrate.yml` (`prisma db push`) intentaría **borrar esas
+columnas**, con datos de 106 usuarios. Según consta en Coordinación, los runs #74 y #75 de ese
+workflow ya abortaron sin aplicar cambios — probablemente por esta misma discrepancia, aunque no
+hay confirmación explícita del motivo del aborto en el registro revisado.
+
+Mismo tipo de patrón que los ya señalados en este documento (esquema de `main` desalineado con
+el estado real de producción), pero con un agravante: acá existe una ruta de ejecución
+(`migrate.yml` con `accept_data_loss`/`force_sync`) que, si se usa sin corregir primero el
+`schema.prisma`, borraría datos reales en producción. El Reparador no tocó el schema ni el
+workflow — esto es solo la señal, aditiva, para que quede visible junto al resto. **Mientras
+esto no se resuelva (declarando las columnas del HUB en `schema.prisma` de `main`, consistente
+con lo que la base real ya tiene), nadie debería correr `migrate.yml` con `accept_data_loss` o
+`force_sync` activados.** Queda para que Milton decida cómo y cuándo reconciliar el schema.

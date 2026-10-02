@@ -6,7 +6,7 @@
 > lee la sección «PROTOCOLO OBLIGATORIO DE NO DESTRUCCIÓN» y «METODOLOGÍA DE TRABAJO EN PARALELO Y CAPITÁN DE ARCHIVO»).
 > Orden de Milton: **leer el documento de coordinación y obedecerlo.**
 
-Última actualización: 2026-10-01 · Responsable de este traspaso: Claude (sesión «SEPARACION DE SEO TOTAL DE REDES TOTALES»)
+Última actualización: 2026-10-01 · Responsable de este traspaso: **Claude, control de proyecto** (sesión «SEPARACION DE SEO TOTAL DE REDES TOTALES»). **Canal vivo entre Claude y Codex: `CONTROL_SEPARACION_SEO_TOTAL.md` (tablero y buzones, lectura cada 5 min). Si hay diferencia entre este archivo y el control, manda el control.** El HUB es otro proyecto y queda **fuera de alcance** (orden de Milton): no tocar su rama ni sus archivos.
 
 ---
 
@@ -54,12 +54,12 @@ trabajo deja la app lista y define el protocolo para entregarle el control sin d
 
 | Lote | Contenido | Estado |
 |---|---|---|
-| 0 | Fase 0: arquitectura, modelo de datos, flujos, mapa de navegación, carpetas, riesgos; inventario de callbacks OAuth por proveedor; algoritmo de contraseñas; plan DNS/certificados; guion de corte con reversa | **PENDIENTE — esperando que Milton diga «arranca»** |
-| 1 | Base invisible: `ProductEntitlement` + backfill, activador de Artículos, control y gracia en Administración, helper único de acceso | no iniciado |
+| 0 | Fase 0: arquitectura, modelo de datos, flujos, mapa de navegación, carpetas, riesgos; inventario de callbacks OAuth por proveedor; algoritmo de contraseñas; plan DNS/certificados; guion de corte con reversa | **ENTREGADA PARA APROBACIÓN (M2) — 2026-10-01.** Parte A (Claude, v0.3) y consolidado en el PR #290; Parte B (Codex) en `main` (PR #295) con corrección B1/B4 en el PR #303. Revisión cruzada hecha en ambos sentidos. **Leer primero `FASE_0_SEPARACION_SEO_TOTAL_CONSOLIDADO.md`.** |
+| 1 | Base invisible: `ProductEntitlement` + backfill, activador de Artículos, control y gracia en Administración, helper único de acceso | **DESPLEGADO EN PRODUCCIÓN el 2026-10-02** (PR #313 fusionado, migración aplicada a mano en Supabase). Interruptor `product_enforcement` apagado: ningún usuario nota diferencia. Verificado: 106 usuarios, 106 filas de Artículos, 9 de Redes, RLS activo, 106 datos HUB intactos |
 | 2 | Separación visual por función en el host actual (inicio con dos tarjetas, menús, reparto de Configuración, conexiones compartidas, Historial/Estadísticas por app, «Mi cuenta», manual) | no iniciado |
-| 3 | Derechos exigidos en APIs **y worker**; avisos de gracia | no iniciado |
+| 3 | Derechos exigidos en APIs **y worker**; avisos de gracia | **Codex: diseño del worker en modo sombra** (usa `evaluateProductAccess` de `packages/shared`); depende de que el Lote 1 esté verificado |
 | 4 | Receptor del HUB: `/api/auth/hub-handoff`, claves, interruptor `legacy`/`dual`/`hub` (en `legacy`), HUB simulado | no iniciado |
-| 5 | Subdominios en privado, dominio estable de callbacks/MCP, callbacks únicos por entorno, doble registro en proveedores | no iniciado |
+| 5 | Subdominios en privado, dominio estable de callbacks/MCP, callbacks únicos por entorno, doble registro en proveedores | **EN PR #311 (Codex), sin fusionar.** Verificado por Claude: typecheck, 85/85 pruebas, build y casos hostiles OK; **2 cambios pedidos** (redirección canónica de Bing para hosts no permitidos y pruebas hostiles en el repo). Checklist de callbacks para Milton en el PR #309 |
 | 6 | Ensayo general del corte en preproducción, con reversa | no iniciado |
 | Corte | Guion 9.4 del blueprint, con Milton presente | no iniciado |
 
@@ -81,3 +81,27 @@ gracia que vence a mitad de un lote; host del dominio estable de callbacks y mig
 ## 8. Bitácora (añadir una línea por cada paso real, con fecha, quién y resultado)
 
 - 2026-10-01 — Claude: entrevista MAGO (6 preguntas) cerrada; blueprint escrito; **triple auditoría en 3 rondas** (hechos contra código, seguridad/arquitectura, completitud). Se corrigieron 6 defectos (el grave: redirección total del dominio rompía callbacks OAuth y MCP). Estimación de tiempo corregida a 2–4 días de sesiones de código; el calendario real lo marcan las consolas de proveedores y el HUB. Sin código.
+- 2026-10-01 — Claude: arrancó el trabajo en pareja con Codex por el archivo de control (PRs #284–#301, solo documentación). Codex entregó la Parte B (B1–B5, PR #295) y Claude la revisó (aprobada con un cambio: callbacks OAuth **por host de origen**, porque el `state` y la sesión son por host). Claude entregó la Parte A (contrato de datos, arquitectura, flujos, navegación) y Codex la revisó (X-005, sin contradicciones materiales). Hallazgo: existe una integración con el HUB en la rama `codex/hub-seo-total-migration`; Milton ordenó que el HUB queda **fuera de alcance** (C-007). Siguiente paso: aprobación de Milton (M2), resolver la capitanía de migración (M3) y empezar los Lotes 1 (Claude) y 4/5 (Codex).
+- 2026-10-01 — Claude: **Lote 1 programado y auditado (PR #313).** Núcleo puro de acceso en `packages/shared/src/product-access-core.ts` (lo usarán web y worker); lectura con base en `apps/web/src/lib/product-access.ts`; interruptor `product_enforcement` (off por defecto, sin pantalla hasta el Lote 3); API `api/admin/users/[id]/entitlements` y panel «Productos». Migración `20261002000000_add_product_entitlements` probada en Postgres 16 desechable sobre el esquema real de `main` (backfill: Mastodon no cuenta, igual que `SOCIAL_PUBLISHING_PERMISSION_KEYS`). **Regla de Redes que ya existía = `hasSocialModuleAccess`** (interruptor maestro + redes aprobadas), no solo las aprobaciones. Hallazgos corregidos en la auditoría: carga perezosa del panel (16→0 peticiones al abrir) y cálculo de días de gracia desde la fecha. Hallazgo ajeno: `migrate deploy` desde base vacía falla en `20260823150000_add_tumblr_integration`.
+- 2026-10-01 — Claude: **revisión cruzada del Lote 5 de Codex (PR #311):** aprobada con 2 cambios (C-015). Se instituye el **servicio de verificación**: el entorno de Codex no puede ejecutar `tsx`/Prisma/typecheck, así que sus auditorías no ejecutables se marcan «NO EJECUTADA» y Claude las corre en su entorno.
+- Pendiente que depende de Milton: aprobar la Fase 0 de forma explícita y fusionar #290/#303/#309; autorizar la migración y el despliegue del Lote 1 (con capitanía); registrar los callbacks (checklist #309); decidir cómo se conecta con el HUB (Lote 4 en espera).
+- 2026-10-02 — Claude: **LOTE 1 DESPLEGADO EN PRODUCCIÓN.** Camino real: el workflow `migrate.yml` por defecto usa `prisma db push`, que desde `main` o desde mi rama **intenta borrar las columnas del HUB** (`hubUserId`, `hubAuth0Sub`, `hubSyncedAt`, `hubSyncAttemptedAt`) porque producción las tiene (se aplicaron desde `codex/hub-seo-total-migration`, run #73) y `main` no las declara. Los runs #74 (main) y #75 (mi rama) **abortaron sin cambiar nada** porque no se marcó `accept_data_loss`. **NUNCA marcar `accept_data_loss` ni `force_sync` mientras `schema.prisma` de `main` no declare esas columnas.** El Lote 1 se aplicó ejecutando a mano en el SQL Editor de Supabase el archivo `packages/db/prisma/migrations/20261002000000_add_product_entitlements/migration.sql` (aditivo e idempotente), después de fusionar el PR #313 (el código tolera que las tablas no existan). Verificación leída de la pantalla de Supabase: `usuarios=106 | filas_ARTICULOS=106 | filas_REDES=9 | RLS=ProductEntitlement:true, ProductEntitlementEvent:true | usuarios_con_datos_HUB=106`. Producción sana (`/login` 200, rutas protegidas 307/401). La ruta `safe_product_entitlements` del workflow quedó **sin publicar** (bloqueada por el sistema) y ya no hace falta para este lote.
+- Pendiente de Milton: registrar callbacks (checklist #309); autorizar y fusionar el Lote 5 (#311, solo código, sin migración), el Lote 3 (#322) y el Lote 2 (#317, #324, #326); decidir cómo alinear `schema.prisma` con las columnas HUB de producción (chip «Alinear schema.prisma de main con columnas HUB»).
+
+### 2026-10-02 (noche) — ESTADO, PRÓXIMAS FUSIONES Y ORDEN
+**Ya en producción y sano (verificado con `/login` 200, rutas protegidas 307/401, Vercel «success»):** Lote 1 (tablas de derechos, migración aplicada a mano en Supabase), Lote 5 (callbacks por host), Lote 3 (worker en modo sombra), Lote 2 (vista por productos, solo administradores), Lote 3c (puerta visual y aviso de gracia, inertes con el interruptor apagado). El interruptor `product_enforcement` sigue **apagado**.
+
+**Verificados y listos, SIN fusionar** (el sistema de seguridad bloquea los despliegues a producción cuando Milton no está; todos pasan juntos sobre `main`: `tsc` limpio, **151/151** pruebas, `npm run build` exit 0, 84/84):
+| Orden | PR | Qué es | Notas |
+|---|---|---|---|
+| 1 | **#343** (Codex) | Barreras de derechos en 24 rutas de API, modo sombra | Con el interruptor apagado no cambia nada |
+| 2 | **#345** (Claude) | Caché de 30 s del modo + pruebas explícitas de `requireProductAccess` | Apilado sobre #343 (se reorienta a `main` solo al fusionar #343) |
+| 3 | **#348** (Codex) | Pantalla de control del interruptor en Administración | **No fusionar sin #349** |
+| 4 | **#349** (Claude) | Seguridad del interruptor: a «Activo» solo desde «Sombra» y con la palabra ACTIVAR; panel sin estado inventado; auditoría con `from`/`to` | Apilado sobre #348 |
+| — | #328, #331, #334 (Codex) | Runbook del Lote 1, script de verificación de callbacks, contrato del Lote 4 y nota de Tumblr | Solo documentos/herramientas; verificados |
+
+**Después de fusionar, siempre:** esperar el despliegue de Vercel y comprobar `/login` 200, rutas protegidas 307 y `/api/me` 401. **El interruptor NO se enciende** sin decisión explícita de Milton: primero «Sombra» durante al menos una semana revisando los registros (`[product-access] product access denied`), y solo entonces «Activo».
+
+**Alertas vigentes:** (1) producción tiene las columnas del HUB en `User` que `schema.prisma` de `main` no declara; **nunca** marcar `accept_data_loss` ni `force_sync` en `migrate.yml`; el esquema se aplica **a mano en Supabase** con el SQL de cada lote. (2) El proyecto del HUB (`codex/hub-seo-total-migration`) está **fuera de alcance**.
+
+**Pendiente de Milton:** registrar los callbacks en las consolas de Google, Meta, LinkedIn, Pinterest, Tumblr, X, Bing y Composio (`CHECKLIST_CALLBACKS_MILTON.md`; Google y Meta tardan días); autorizar y fusionar los PR de la tabla; decidir cómo alinear `schema.prisma` con las columnas del HUB; decidir el modo y la fecha de paso a «Sombra».

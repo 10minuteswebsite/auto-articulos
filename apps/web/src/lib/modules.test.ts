@@ -40,6 +40,23 @@ test("los administradores lo ven siempre (lista vacía)", () => {
   assert.deepEqual(getEffectiveDisabledModules({ role: "admin", disabledModules: null }, ["historial", "conexion-composio"]), []);
 });
 
-test("no hay módulos opt-in por ahora", () => {
-  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), []);
+// Único módulo opt-in: el interruptor de la vista por productos (proyecto
+// «SEPARACION DE SEO TOTAL», Lote 2). Este test fija que no se cuele ningún otro
+// por descuido: un módulo opt-in nuevo debe añadirse aquí a propósito.
+test("el único módulo opt-in es la vista por productos", () => {
+  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), ["vista-productos"]);
+});
+
+test("la vista por productos NO la ve un usuario normal, ni con el ocultar global vacío", () => {
+  assert.ok(getEffectiveDisabledModules({ role: "user", disabledModules: null }, []).includes("vista-productos"));
+  assert.ok(getEffectiveDisabledModules({ role: "user", disabledModules: "{}" }, []).includes("vista-productos"));
+  assert.ok(getEffectiveDisabledModules({ role: "user", disabledModules: JSON.stringify({ "vista-productos": "inherit" }) }, []).includes("vista-productos"));
+});
+
+test("la vista por productos la ve un administrador y quien tenga «Habilitado»", () => {
+  assert.equal(getEffectiveDisabledModules({ role: "admin", disabledModules: null }, []).includes("vista-productos"), false);
+  assert.equal(
+    getEffectiveDisabledModules({ role: "user", disabledModules: JSON.stringify({ "vista-productos": "enabled" }) }, []).includes("vista-productos"),
+    false,
+  );
 });

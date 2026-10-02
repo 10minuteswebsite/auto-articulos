@@ -26,6 +26,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import type { CSSProperties } from "react";
 import { IntroP, Modulo } from "@/components/ModuleIntro";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   h2Style,
   thStyle,
@@ -90,6 +91,10 @@ function countText(count: number, singular: string, plural: string) {
 }
 
 export default function HistorialPage() {
+  const searchParams = useSearchParams();
+  const producto = searchParams.get("producto");
+  const soloArticulos = producto === "articulos";
+  const soloRedes = producto === "redes";
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
       <section style={{ ...flatSectionStyle, borderTop: "none", paddingTop: 0 }}>
@@ -127,8 +132,8 @@ export default function HistorialPage() {
         </div>
         </details>
       </section>
-      <HistorialEjecuciones />
-      <HistorialRedes />
+      {!soloRedes && <HistorialEjecuciones />}
+      {!soloArticulos && <HistorialRedes />}
     </div>
   );
 }

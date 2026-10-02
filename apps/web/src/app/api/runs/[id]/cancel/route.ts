@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 
 /**
  * Cancela una ejecución en curso. El título que ya esté "processing" en ese
@@ -14,6 +15,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/runs/[id]/cancel");
+  if (denied) return denied;
   const { id } = await params;
 
   const run = await prisma.run.findFirst({ where: { id, userId } });

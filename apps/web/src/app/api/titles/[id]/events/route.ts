@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 
 /**
  * Log completo de un título (incluye capturas de diagnóstico en base64), a
@@ -13,6 +14,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/titles/[id]/events");
+  if (denied) return denied;
   const { id } = await params;
 
   const title = await prisma.title.findFirst({

@@ -3942,3 +3942,83 @@ merge productivo pendiente de checks tras actualizar contra `main`.
 - **Verificado en producción con Lorena:** tablero "Seguros de Salud y Vida" conectado, "Probar conexión" en verde, y un Pin real publicado (01/10/2026, confirmado en Historial → Redes Sociales).
 - **Manual actualizado** en el mismo PR.
 - **Estado:** FUSIONADO a `main` y VERIFICADO en producción con publicación real confirmada.
+
+## Fix "Load failed" en Oportunidades — Rafael Zuzolo — 2026-09-30 — EN PRODUCCIÓN
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("Incidente `Load failed` en oportunidades —
+Rafael Zuzolo — 2026-10-01") por la tarea programada diaria de propagación (2026-10-02). Este
+commit era uno de los dos señalados como "sin registro" en la corrida anterior (2026-10-01);
+el otro (`7474bd7`, "fix: reset category sync progress between attempts") sigue sin ninguna
+entrada en Coordinación ni aquí.
+
+- **Síntoma:** en producción, la cuenta de Rafael Zuzolo mostraba `Load failed` al ejecutar
+  "Analizar contenido"; la carga inicial sí funcionaba.
+- **Causa:** `POST /api/opportunities` podía procesar hasta 20 lotes y decenas de llamadas
+  secuenciales a OpenAI, además de GSC/Analytics/Bing, agotando el tiempo de la función.
+- **Corrección:** análisis limitado a 8 lotes de 150 filas; la ruta declara `maxDuration = 300`
+  y ejecución dinámica.
+- **Commit:** `b23b9af9` (`fix(opportunities): prevent production analysis timeouts`), enviado
+  directo a `main`. Sin migración de base de datos.
+- **Auditorías reportadas:** `git diff --check` correcto; el build local quedó impedido por
+  fallo de red al resolver `registry.npmjs.org` (sin verificación de build/tsc registrada en
+  Coordinación para este commit).
+- **Estado:** RESUELTO Y ARCHIVADO. Desplegado en producción el 2026-09-30.
+
+## CONEXION COMPOSIO PROBLEMA PEPE — PR #249 — 2026-09-28 — EN PRODUCCIÓN
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("CONEXION COMPOSIO PROBLEMA PEPE — Claude —
+2026-09-28/10-01 — PR #249 — CERRADO") por la tarea programada diaria de propagación
+(2026-10-02).
+
+- **Síntoma:** el GSC de Pepe (`pepegomez.net`) quedaba en `INITIATED` al conectarlo actuando
+  como él (impersonación de administrador).
+- **Evidencia (logs de producción, 2026-09-28 09:43–09:44):** `connect_started` con el userId
+  del cliente y `connect_completed` con el userId del admin, outcome `invalid`, dos veces.
+- **Causa:** la cookie de impersonación era `SameSite=strict` y no viajaba al volver de
+  Google/Composio.
+- **Corrección:** `sameSite: "lax"` en `apps/web/src/app/api/admin/impersonate/route.ts`.
+- **Commit:** `647b7d96` (PR #249), desplegado el 2026-09-28. Sin schema ni migraciones. No se
+  hizo typecheck completo (worktree sin `node_modules`, según consta en Coordinación).
+- **Verificación:** Milton reprodujo la conexión actuando como Pepe el 2026-09-28 tras el
+  despliegue y confirmó el 2026-10-01 que el caso quedó resuelto.
+- **Estado:** CERRADO Y ARCHIVADO. Capitanía reclamada y liberada por Claude.
+
+## LOTE 1 «SEPARACION SEO TOTAL»: derechos por producto — PR #313 — 2026-10-02 — EN PRODUCCIÓN
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("Claude — LOTE 1 «SEPARACION SEO TOTAL»:
+derechos por producto (base invisible) — 2026-10-01" y "Claude — LOTE 1 «SEPARACION SEO TOTAL»:
+DESPLEGADO EN PRODUCCIÓN — 2026-10-02") por la tarea programada diaria de propagación
+(2026-10-02).
+
+- **Proyecto:** «SEPARACION DE SEO TOTAL DE REDES TOTALES» (canal vivo:
+  `CONTROL_SEPARACION_SEO_TOTAL.md`; documentos en `TRASPASO_SEPARACION_SEO_TOTAL.md`).
+- **Qué habilita:** tablas de derechos por producto con interruptor de aplicación
+  (`product_enforcement`) **apagado por defecto** (nada bloquea a nadie), panel «Productos» en
+  Administración → Usuarios y bloque `products` en `/api/me`. Ningún guard existente cambia de
+  comportamiento mientras el interruptor siga apagado.
+- **PR:** [#313](https://github.com/miltondavila-ux/auto-articulos/pull/313)
+  (`claude/lote1-product-entitlements`), fusionado a `main`.
+- **Migración aplicada:**
+  `packages/db/prisma/migrations/20261002000000_add_product_entitlements/migration.sql`
+  (tablas, enums, CHECK, RLS y backfill, aditiva e idempotente). **Aplicada a mano por Milton
+  directamente en Supabase**, no vía `prisma migrate deploy` ni el workflow de migración.
+- **⚠️ Alerta crítica de arriesgo vigente (ver también `REPARADOR_DEL_ARBOL_PRINCIPAL.md`):**
+  producción ya tiene las columnas del HUB (`hubUserId`, `hubAuth0Sub`, `hubSyncedAt`,
+  `hubSyncAttemptedAt`, `hubSyncError`) en la tabla `User`, pero `schema.prisma` de `main` **no
+  las declara**. El workflow `migrate.yml` en su ruta por defecto (`prisma db push`) intentaría
+  **borrarlas** (106 usuarios con datos HUB). Los runs #74 y #75 de ese workflow abortaron sin
+  cambios. **No marcar `accept_data_loss` ni `force_sync` en ese workflow mientras esto no se
+  resuelva.**
+- **Auditorías reportadas:** tres rondas documentadas en
+  `AUDITORIAS_LOTE_1_SEPARACION_SEO_TOTAL.md` (21 pruebas nuevas; suite web 105/105; typecheck
+  web y worker limpios; migración probada en un Postgres desechable sobre el esquema real de
+  `main`; build de `apps/web` OK).
+- **Verificado en Supabase tras aplicar:** 106 usuarios, 106 filas de Artículos, 9 de Redes, RLS
+  activo, los 106 registros de datos HUB intactos. Producción responde con normalidad.
+- **Manual del bot de ayuda:** `apps/web/src/content/manual-usuario.ts` ya documenta el panel
+  «Productos», el interruptor (Apagado/Sombra/Activo) y "Mi acceso" — verificado por esta misma
+  tarea programada contra el texto real vigente al 2026-10-02, sin cambios necesarios.
+- **Estado:** FUSIONADO y la migración aditiva está APLICADA en producción; el interruptor de
+  aplicación sigue APAGADO (sin efecto visible para ningún usuario todavía). Capitanía de
+  migración reclamada y liberada por Claude el 2026-10-02; hoy no hay capitán activo sobre este
+  lote.

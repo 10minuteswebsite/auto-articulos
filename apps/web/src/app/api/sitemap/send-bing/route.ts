@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { submitBingSitemap } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { getBingTokenForIntegration } from "@/lib/bing-token";
 
 /**
@@ -11,6 +12,8 @@ import { getBingTokenForIntegration } from "@/lib/bing-token";
  */
 export async function POST() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/sitemap/send-bing");
+  if (denied) return denied;
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const integration = await prisma.searchIntegration.findFirst({ where: { userId, provider: "bing", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) } });
   if (!integration?.siteUrl || !integration.sitemapUrl) {

@@ -4,6 +4,7 @@ import { prisma } from "@auto-articulos/db";
 import { encryptSecret } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { GOOGLE_ANALYTICS_STATE_COOKIE, googleAnalyticsOAuthConfig } from "@/lib/google-analytics-oauth";
+import { getOAuthRedirectUri } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -17,7 +18,9 @@ export async function GET(request: NextRequest) {
   }
   try {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
-    const { clientId, clientSecret, redirectUri } = googleAnalyticsOAuthConfig();
+    const config = googleAnalyticsOAuthConfig();
+    const { clientId, clientSecret } = config;
+    const redirectUri = getOAuthRedirectUri(request, "/api/google-analytics/callback", config.redirectUri);
     const result = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, code, grant_type: "authorization_code", redirect_uri: redirectUri }) });
     const token = (await result.json()) as { refresh_token?: string };
     if (!result.ok || !token.refresh_token) throw new Error("Google no entregó refresh token.");

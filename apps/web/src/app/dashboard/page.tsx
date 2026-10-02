@@ -1,6 +1,7 @@
 "use client";
 
-import { MENU_NAMES } from "@/lib/menu-names";
+import { MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
+import { isProductViewEnabled } from "@/lib/product-routes";
 import { useEffect, useState, useCallback, useRef } from "react";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import Link from "next/link";
@@ -21,6 +22,24 @@ const QUICK_LINKS = [
     href: "/dashboard/oportunidades-redes",
     label: MENU_NAMES.redes,
     description: "Crea con ayuda de la IA publicaciones automáticas para internet y difunde tu mensaje.",
+  },
+];
+
+// VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2): con el
+// módulo opt-in «vista-productos» activo (hoy, solo administradores como vista
+// previa) el inicio muestra DOS tarjetas, una por producto, en vez de las tres
+// acciones. La de Redes se muestra siempre (pedido de Milton, 1/10/2026): sin
+// permiso, el clic lleva a la pantalla de bloqueo de su sección.
+const PRODUCT_CARDS = [
+  {
+    href: "/dashboard/articulos",
+    label: PRODUCT_NAMES.ARTICULOS,
+    description: "Crea artículos con tus propios títulos o con la IA, publícalos en tu página web y sigue su progreso, historial y estadísticas.",
+  },
+  {
+    href: "/dashboard/redes",
+    label: PRODUCT_NAMES.REDES,
+    description: "Lleva tu contenido a redes sociales y blogs públicos con ayuda de la IA y conecta tus cuentas en un solo lugar.",
   },
 ];
 
@@ -57,6 +76,8 @@ export default function InicioPage() {
   const everIncompleteRef = useRef(false);
   const [showWizard, setShowWizard] = useState<boolean | null>(null);
   const [configurationAlerts, setConfigurationAlerts] = useState<ConfigurationAlert[]>([]);
+  // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
+  const [productView, setProductView] = useState(false);
 
   const checkWizardStatus = useCallback(async () => {
     try {
@@ -81,6 +102,7 @@ export default function InicioPage() {
 
       const step1 = Boolean(credData.configured);
       const step2 = Array.isArray(catData.categories) && catData.categories.length > 0;
+      setProductView(isProductViewEnabled(meData?.disabledModules));
       const step3 = typeof meData.contentLanguage === "string" && meData.contentLanguage.trim().length > 0;
       const step4 = Boolean(
         (googleData.connected && googleData.siteUrl) ||
@@ -200,12 +222,12 @@ export default function InicioPage() {
       </div>
       {showWizard === false && (
         <div style={{ marginTop: 20, marginBottom: 20 }}>
-          <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>Acciones posibles</h2>
-          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16 }}>
+          <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>{productView ? "Elige un producto" : "Acciones posibles"}</h2>
+          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: `repeat(${productView ? PRODUCT_CARDS.length : QUICK_LINKS.length}, minmax(0, 1fr))`, gap: 16 }}>
           {/* Pedido explícito de Milton (1/10/2026): el botón de Redes se muestra
              siempre, como los demás; si no está activo, el clic lleva a la
              pantalla de bloqueo (ModuleGuard) en vez de ocultarse. */}
-          {QUICK_LINKS.map((l, i) => (
+          {(productView ? PRODUCT_CARDS : QUICK_LINKS).map((l, i) => (
             (() => {
               return (
                 <Link key={l.href} className="inicio-action-card" href={l.href} style={{ display: "flex", minHeight: 176, padding: 22, flexDirection: "column", justifyContent: "space-between", textDecoration: "none", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}>
