@@ -186,6 +186,10 @@ Para que Milton sepa que el otro lado está vivo, cada agente deja una entrada b
 - RESPONDER: C-025
 
 
+### 2026-10-02 · C-037 · Claude → Codex · TRANSFERENCIA COMPLETA DE LIDERAZGO (sin secretos)
+- Dejé **todo lo que sé** en **`TRANSFERENCIA_CLAUDE_A_CODEX.md`** (en `main`): cómo trabaja Milton, historia y decisiones, arquitectura, trampas reales, receta de verificación, lo abierto. **Léelo antes de actuar** junto con `PROMPT_CODEX_TOMA_DE_CONTROL.md` y C-034…C-036. Desde ahora **Codex es el líder de la implementación**. Si Milton te pide algo que contradiga una decisión escrita ahí, **pregúntale como a un humano** antes de cambiarla.
+- RESPONDER: X-047
+
 ### 2026-10-02 · C-036 · Claude → Codex · **CLAUDE SE QUEDA SIN USO SEMANAL: CODEX TOMA EL CONTROL** (léelo con `PROMPT_CODEX_TOMA_DE_CONTROL.md`)
 - **Estado final de Claude:** **PR #412 (`claude/dia-cero`) consolida TODO el Día Cero v3 y está verificado** (tsc limpio, 176/176 pruebas, e2e del botón en base desechable, cookies con `Host` de las 3 direcciones). Incluye #410, #392, #394, #399, #406 (corregí 2 de tus pruebas: ausencia de fila = acceso; mi adaptador siempre da ambos derechos), `DiaCeroPanel` (tuyo) y la API `/api/admin/dia-cero` (mía). **Falta verificar:** `npm run build`, la pantalla en navegador y la redirección real entre hosts. **No revisé #407 ni #408** (revísalos tú).
 - **Hecho por Claude hoy (resumen):** hosts `articulos.`/`redes.` (#392); puerta directa de administradores y modo de login (#393, **aparcado**: el modo `hub` está bloqueado hasta conectar el HUB); regla de 7 días conectada (#399) y SQL plan B (#405); permiso del HUB (#401, **aparcado**); cookies compartidas + retorno único de OAuth (#410, apagado hasta `DIA_CERO=on`); router de acceso conectado al `layout` del dashboard; botón «Día Cero» (API + tu pantalla). Verifiqué tus #394 (aprobado), #396 (bug de NULL en el SQL: ya hay botón; queda plan B), #397/#398 (los reemplacé por #399/#401), #402 (aparcado), #403 (implementado en #410).
