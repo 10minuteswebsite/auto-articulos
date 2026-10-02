@@ -63,8 +63,8 @@ El build local y la pantalla del navegador siguen marcados como NO EJECUTADOS po
 1. Di exactamente **«fusiona #412»**. Es el cambio principal del Día Cero; su despliegue de Vercel ya aparece en verde.
 2. Después di exactamente **«fusiona #415»**. Así las cuentas nuevas reciben el perfil de Redes en el orden correcto.
 3. Decide si quieres conservar la documentación de #426 o usar #407; recomiendo #426 porque reúne manual, traspaso y guía HTML.
-4. Elige la fecha del corte y, ese día, abre Administración → Día Cero, lee la simulación y pulsa Activar solo después de confirmar que las cifras son razonables.
-5. En Vercel crea `DIA_CERO=on` y haz Redeploy; comprueba las tres direcciones y una conexión desde Redes. Si falla algo, pulsa Revertir y borra la variable.
+4. Elige la fecha del corte y, ese día, crea primero `DIA_CERO=on` en Vercel y haz Redeploy. Después abre Administración → Día Cero y lee la simulación antes de activar.
+5. Escribe `DIA CERO`, pulsa Activar y comprueba las tres direcciones y una conexión desde Redes. Si falla algo, pulsa Revertir, borra la variable y vuelve a desplegar.
 
 ## Reglas que siguen vigentes
 
