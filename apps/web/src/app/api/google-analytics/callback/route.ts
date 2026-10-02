@@ -4,14 +4,15 @@ import { prisma } from "@auto-articulos/db";
 import { encryptSecret } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { GOOGLE_ANALYTICS_STATE_COOKIE, googleAnalyticsOAuthConfig } from "@/lib/google-analytics-oauth";
-import { getOAuthRedirectUri } from "@/lib/oauth-redirect";
+import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
   const store = await cookies();
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
-  const target = new URL("/dashboard/configuracion", request.url);
+  const target = new URL("/dashboard/configuracion", oauthReturnBase(request));
   if (!state || state !== store.get(GOOGLE_ANALYTICS_STATE_COOKIE)?.value || !code) {
     target.searchParams.set("googleAnalytics", "error");
     return NextResponse.redirect(target);
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
     target.searchParams.set("googleAnalytics", "error");
   }
   const response = NextResponse.redirect(target);
-  response.cookies.delete(GOOGLE_ANALYTICS_STATE_COOKIE);
+  clearCookie(response, GOOGLE_ANALYTICS_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
   return response;
 }

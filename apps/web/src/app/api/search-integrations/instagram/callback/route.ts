@@ -7,6 +7,8 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredInstagramAppCredentials } from "@/lib/instagram-app-config";
 import { canUseSocialModule } from "@/lib/social-access";
 import { INSTAGRAM_STATE_COOKIE } from "../connect/constants";
+import { clearCookie } from "@/lib/shared-cookies";
+import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -16,13 +18,13 @@ export async function GET(request: NextRequest) {
 
   if (!state || state !== cookieStore.get(INSTAGRAM_STATE_COOKIE)?.value || !code) {
     return NextResponse.redirect(
-      new URL(connectionReturnPath("instagram", "error"), request.url)
+      new URL(connectionReturnPath("instagram", "error"), oauthReturnBase(request))
     );
   }
 
   try {
     const appCreds = await getStoredInstagramAppCredentials();
-    const redirectUri = `${request.nextUrl.protocol}//${request.nextUrl.host}/api/search-integrations/instagram/callback`;
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/instagram/callback");
     const tokens = await exchangeCodeForInstagramTokens(code, redirectUri, appCreds);
 
     const expiresAt = new Date(Date.now() + tokens.expiresInSeconds * 1000);
@@ -62,14 +64,15 @@ export async function GET(request: NextRequest) {
     });
 
     const response = NextResponse.redirect(
-      new URL(connectionReturnPath("instagram", "connected"), request.url)
+      new URL(connectionReturnPath("instagram", "connected"), oauthReturnBase(request))
     );
-    response.cookies.delete(INSTAGRAM_STATE_COOKIE);
+    clearCookie(response, INSTAGRAM_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch (error: any) {
     console.error("Error en Instagram OAuth callback:", error);
     return NextResponse.redirect(
-      new URL(connectionReturnPath("instagram", "error"), request.url)
+      new URL(connectionReturnPath("instagram", "error"), oauthReturnBase(request))
     );
   }
 }

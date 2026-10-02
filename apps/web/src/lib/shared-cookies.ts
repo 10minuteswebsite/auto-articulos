@@ -7,8 +7,9 @@
  * el retorno de una conexión OAuth, que llega siempre a la dirección de siempre,
  * reconozca al usuario), la cookie de sesión debe valer para todo el `.com`.
  *
- * INTERRUPTOR: la variable de entorno SHARED_COOKIE_DOMAIN (p. ej. «.lasolucionweb.com»).
- * Sin ella (o con un valor inválido) TODO funciona exactamente como antes: cookie
+ * INTERRUPTOR ÚNICO DEL DÍA CERO: la variable de entorno DIA_CERO=on (activa el
+ * dominio «.lasolucionweb.com»). También vale SHARED_COOKIE_DOMAIN explícito.
+ * Sin ninguna (o con un valor inválido) TODO funciona exactamente como antes: cookie
  * ligada al host. Es lógica pura y válida para el runtime Edge (middleware).
  *
  * Problema que resuelve el doble Set-Cookie: una cookie con Domain y otra
@@ -27,10 +28,23 @@ export interface SharedCookieOptions {
 
 type Env = Record<string, string | undefined>;
 
-/** Dominio compartido válido (empieza por punto y tiene al menos dos etiquetas) o undefined. */
+/** Dominio por defecto del Día Cero (los tres subdominios de SEO Total viven bajo él). */
+export const DIA_CERO_COOKIE_DOMAIN = ".lasolucionweb.com";
+
+/** ¿Está activo el interruptor único del Día Cero (variable DIA_CERO=on)? */
+export function diaCeroActive(env: Env = process.env): boolean {
+  const raw = env.DIA_CERO?.trim().toLowerCase();
+  return raw === "on" || raw === "1" || raw === "true";
+}
+
+/**
+ * Dominio compartido válido (empieza por punto y tiene al menos dos etiquetas) o undefined.
+ * Prioridad: SHARED_COOKIE_DOMAIN explícito; si no, DIA_CERO=on usa el dominio por defecto.
+ */
 export function sharedCookieDomain(env: Env = process.env): string | undefined {
   const raw = env.SHARED_COOKIE_DOMAIN?.trim().toLowerCase();
-  return raw && /^\.[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(raw) ? raw : undefined;
+  if (raw && /^\.[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(raw)) return raw;
+  return diaCeroActive(env) ? DIA_CERO_COOKIE_DOMAIN : undefined;
 }
 
 export function serializeCookie(
@@ -83,4 +97,42 @@ export function clearCookieHeaders(
 /** Añade varias cabeceras Set-Cookie a una respuesta (sin pisar las existentes). */
 export function appendCookieHeaders(response: { headers: Headers }, headers: string[]): void {
   for (const header of headers) response.headers.append("Set-Cookie", header);
+}
+
+interface CookieResponse {
+  headers: Headers;
+  cookies: { set(name: string, value: string, options?: SharedCookieOptions): unknown };
+}
+
+/**
+ * Fija una cookie en una respuesta. SIN dominio compartido hace EXACTAMENTE lo de
+ * siempre (`response.cookies.set`), así que apagar la variable de entorno deja el
+ * comportamiento idéntico al anterior. Con dominio compartido escribe las cabeceras.
+ */
+export function applyCookie(
+  response: CookieResponse,
+  name: string,
+  value: string,
+  options: SharedCookieOptions = {},
+  env: Env = process.env,
+): void {
+  if (!sharedCookieDomain(env)) {
+    response.cookies.set(name, value, options);
+    return;
+  }
+  appendCookieHeaders(response, setCookieHeaders(name, value, options, env));
+}
+
+/** Borra una cookie (en sus dos variantes si hay dominio compartido). */
+export function clearCookie(
+  response: CookieResponse,
+  name: string,
+  options: SharedCookieOptions = {},
+  env: Env = process.env,
+): void {
+  if (!sharedCookieDomain(env)) {
+    response.cookies.set(name, "", { ...options, maxAge: 0 });
+    return;
+  }
+  appendCookieHeaders(response, clearCookieHeaders(name, options, env));
 }

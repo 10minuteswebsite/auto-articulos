@@ -6,6 +6,8 @@ import { getStoredPinterestAppCredentials } from "@/lib/pinterest-app-config";
 import { canPublishToNetwork } from "@/lib/social-access";
 
 import { PINTEREST_STATE_COOKIE } from "./constants";
+import { applyCookie } from "@/lib/shared-cookies";
+import { oauthCallbackUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
 
 export async function GET(request: Request) {
   const userId = await getCurrentUserId();
@@ -14,11 +16,11 @@ export async function GET(request: Request) {
   }
   try {
     const credentials = await getStoredPinterestAppCredentials();
-    const url = new URL(request.url);
-    const redirectUri = `${url.protocol}//${url.host}/api/search-integrations/pinterest/callback`;
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/pinterest/callback");
     const state = randomBytes(24).toString("base64url");
     const response = NextResponse.redirect(getPinterestAuthUrl(state, redirectUri, credentials));
-    response.cookies.set(PINTEREST_STATE_COOKIE, state, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 });
+    applyCookie(response, PINTEREST_STATE_COOKIE, state, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 });
+    rememberOAuthOrigin(response, request);
     return response;
   } catch {
     return NextResponse.redirect(new URL("/dashboard/configuracion?pinterest=needs_config", request.url));

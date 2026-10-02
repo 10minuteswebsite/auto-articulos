@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCredentials } from "@/lib/auth";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
+import { applyCookie } from "@/lib/shared-cookies";
 
 export async function POST(request: NextRequest) {
   const contentType = request.headers.get("content-type") ?? "";
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ ok: true });
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
     response.headers.set("Pragma", "no-cache");
-    response.cookies.set(SESSION_COOKIE, token, {
+    applyCookie(response, SESSION_COOKIE, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
     });
     if (nativeForm) {
       const redirect = NextResponse.redirect(new URL("/dashboard", request.url), 303);
-      redirect.cookies.set(SESSION_COOKIE, token, {
+      applyCookie(redirect, SESSION_COOKIE, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",

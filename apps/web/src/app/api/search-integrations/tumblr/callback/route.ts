@@ -7,6 +7,8 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { canPublishToNetwork } from "@/lib/social-access";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 import { TUMBLR_STATE_COOKIE } from "../connect/constants";
+import { clearCookie } from "@/lib/shared-cookies";
+import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -14,11 +16,11 @@ export async function GET(request: NextRequest) {
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
   if (!(await canPublishToNetwork(userId, "tumblr")) || !state || state !== cookieStore.get(TUMBLR_STATE_COOKIE)?.value || !code) {
-    return NextResponse.redirect(new URL(connectionReturnPath("tumblr", "error"), request.url));
+    return NextResponse.redirect(new URL(connectionReturnPath("tumblr", "error"), oauthReturnBase(request)));
   }
   try {
     const credentials = await getStoredTumblrAppCredentials();
-    const redirectUri = `${request.nextUrl.protocol}//${request.nextUrl.host}/api/search-integrations/tumblr/callback`;
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/tumblr/callback");
     const tokens = await exchangeCodeForTumblrToken(code, redirectUri, credentials);
     const blogs = await getTumblrBlogs(tokens.access_token);
     const firstBlog = blogs[0];
@@ -32,11 +34,12 @@ export async function GET(request: NextRequest) {
       create: { userId, blogIdentifier: firstBlog.identifier, blogTitle: firstBlog.title, accessTokenEncrypted: encryptSecret(tokens.access_token), refreshTokenEncrypted: tokens.refresh_token ? encryptSecret(tokens.refresh_token) : null, expiresAt: tokens.expires_in ? new Date(Date.now() + tokens.expires_in * 1000) : null },
       update: { blogIdentifier: firstBlog.identifier, blogTitle: firstBlog.title, accessTokenEncrypted: encryptSecret(tokens.access_token), refreshTokenEncrypted: tokens.refresh_token ? encryptSecret(tokens.refresh_token) : (previous?.refreshTokenEncrypted ?? null), expiresAt: tokens.expires_in ? new Date(Date.now() + tokens.expires_in * 1000) : null },
     });
-    const response = NextResponse.redirect(new URL(connectionReturnPath("tumblr", "connected"), request.url));
-    response.cookies.delete(TUMBLR_STATE_COOKIE);
+    const response = NextResponse.redirect(new URL(connectionReturnPath("tumblr", "connected"), oauthReturnBase(request)));
+    clearCookie(response, TUMBLR_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch (error) {
     console.error("Error en Tumblr OAuth callback:", error);
-    return NextResponse.redirect(new URL(connectionReturnPath("tumblr", "error"), request.url));
+    return NextResponse.redirect(new URL(connectionReturnPath("tumblr", "error"), oauthReturnBase(request)));
   }
 }

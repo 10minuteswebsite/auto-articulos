@@ -6,6 +6,8 @@ import { encryptSecret, exchangeCodeForLinkedInTokens } from "@auto-articulos/sh
 import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredLinkedInAppCredentials } from "@/lib/linkedin-app-config";
 import { LINKEDIN_STATE_COOKIE } from "../connect/constants";
+import { clearCookie } from "@/lib/shared-cookies";
+import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -15,13 +17,13 @@ export async function GET(request: NextRequest) {
 
   if (!state || state !== cookieStore.get(LINKEDIN_STATE_COOKIE)?.value || !code) {
     return NextResponse.redirect(
-      new URL(connectionReturnPath("linkedin", "error"), request.url)
+      new URL(connectionReturnPath("linkedin", "error"), oauthReturnBase(request))
     );
   }
 
   try {
     const appCreds = await getStoredLinkedInAppCredentials();
-    const redirectUri = `${request.nextUrl.protocol}//${request.nextUrl.host}/api/search-integrations/linkedin/callback`;
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/linkedin/callback");
     const tokens = await exchangeCodeForLinkedInTokens(code, redirectUri, appCreds);
 
     const expiresAt = new Date(Date.now() + tokens.expiresIn * 1000);
@@ -44,14 +46,15 @@ export async function GET(request: NextRequest) {
     });
 
     const response = NextResponse.redirect(
-      new URL(connectionReturnPath("linkedin", "connected"), request.url)
+      new URL(connectionReturnPath("linkedin", "connected"), oauthReturnBase(request))
     );
-    response.cookies.delete(LINKEDIN_STATE_COOKIE);
+    clearCookie(response, LINKEDIN_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch (error) {
     console.error("Error en LinkedIn OAuth callback:", error);
     return NextResponse.redirect(
-      new URL(connectionReturnPath("linkedin", "error"), request.url)
+      new URL(connectionReturnPath("linkedin", "error"), oauthReturnBase(request))
     );
   }
 }

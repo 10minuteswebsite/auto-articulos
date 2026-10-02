@@ -6,7 +6,8 @@ import {
   BUSINESS_PROFILE_STATE_COOKIE,
   businessProfileOAuthConfig,
 } from "@/lib/google-oauth";
-import { getOAuthRedirectUri } from "@/lib/oauth-redirect";
+import { getOAuthRedirectUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
+import { applyCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
   await getCurrentUserId();
@@ -27,13 +28,14 @@ export async function GET(request: NextRequest) {
       state,
     }).toString();
     const response = NextResponse.redirect(url);
-    response.cookies.set(BUSINESS_PROFILE_STATE_COOKIE, state, {
+    applyCookie(response, BUSINESS_PROFILE_STATE_COOKIE, state, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
       path: "/",
       maxAge: 600,
     });
+    rememberOAuthOrigin(response, request);
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
