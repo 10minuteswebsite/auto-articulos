@@ -77,14 +77,14 @@ export default function ProductEnforcementPanel() {
           <p style={{ margin: "0 0 10px", fontSize: 13, color: "#6e6e73" }}>Modo actual: <strong style={{ color: "#1d1d1f" }}>{LABEL[mode]}</strong></p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {(["off", "shadow", "enforce"] as const).map((option) => (
-              <button key={option} type="button" disabled={busy} onClick={() => changeMode(option)} aria-pressed={mode === option} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid #d2d2d7", background: mode === option ? "#1d1d1f" : "#fff", color: mode === option ? "#fff" : "#1d1d1f", cursor: busy ? "wait" : "pointer" }}>
+              <button key={option} type="button" disabled={busy} onClick={() => changeMode(option)} aria-pressed={mode === option} style={{ padding: "8px 14px", minHeight: 44, borderRadius: 8, border: "1px solid #d2d2d7", background: mode === option ? "#1d1d1f" : "#fff", color: mode === option ? "#fff" : "#1d1d1f", cursor: busy ? "wait" : "pointer" }}>
                 {LABEL[option]}
               </button>
             ))}
           </div>
         </>
       )}
-      {message && <p style={{ margin: "10px 0 0", color: "#6e6e73" }}>{message}</p>}
+      {message && <p role="status" aria-live="polite" style={{ margin: "10px 0 0", color: "#6e6e73" }}>{message}</p>}
     </section>
   );
 }

@@ -62,7 +62,7 @@ const buttonStyle = {
   fontSize: 12,
   fontWeight: 600,
   padding: "6px 12px",
-  minHeight: 32,
+  minHeight: 44,
   borderRadius: 8,
   border: "1px solid #d2d2d7",
   background: "#ffffff",
@@ -193,7 +193,7 @@ export default function UserProductsPanel({ userId }: { userId: string }) {
               value={days[product]}
               onChange={(e) => setDays((prev) => ({ ...prev, [product]: e.target.value }))}
               aria-label={`Días de gracia para ${label}`}
-              style={{ width: 64, fontSize: 13, padding: "6px 8px", minHeight: 32 }}
+              style={{ width: 64, fontSize: 13, padding: "6px 8px", minHeight: 44 }}
             />
             <button
               type="button"
