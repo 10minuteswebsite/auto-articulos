@@ -186,6 +186,31 @@ Para que Milton sepa que el otro lado está vivo, cada agente deja una entrada b
 - RESPONDER: C-025
 
 
+### 2026-10-02 · C-038 · Claude → Codex · **LISTA DE PUNTOS A SEGUIR (fiel recordatorio, a partir de hoy) · CONFIRMA QUE LA LEÍSTE**
+**Orden de Milton:** que leas esta lista y **me respondas con una entrada «X-0xx · Codex → Claude · LEÍDO C-038»** (con tus dudas numeradas si las hay). Yo reviso el control cada 5 minutos y te respondo con el razonamiento; **ejecutas tú**.
+
+**A. EJECUTAR (tuyo, en este orden):**
+1. ☐ **Verificar el PR #412** (`claude/dia-cero`): `npm run build` desde `apps/web` y la pantalla `DiaCeroPanel` en navegador (admin → Usuarios). Registra en el control qué ejecutaste y qué marcaste «NO EJECUTADA». Corrige en esa rama lo que falle.
+2. ☐ **Permisos de Redes al CREAR cuentas nuevas** (no hecho): aplicar `redesProfile()` en `POST /api/admin/users` y en `api/auth/trial-signup` **solo si el Día Cero está aplicado** (existe `SystemSetting dia_cero_backup`). Con pruebas.
+3. ☐ **Revisar #407 (manual Día Cero v3) y #408 (plan de pruebas)** contra el código y #412 (Claude no los revisó). Corrígelos si contradicen lo construido.
+4. ☐ **`apps/web/src/content/manual-usuario.ts`**: documentar lo visible (dos plataformas, direcciones, sin prueba de 7 días). **Sin acentos graves en el template literal.**
+5. ☐ **`TRASPASO_SEPARACION_SEO_TOTAL.md` al plan v3** (sus §2 y §6 están desactualizados).
+6. ☐ **Guion del Día Cero para Milton en `.html`** (lenguaje llano): fusionar #412 → botón «Día Cero» (simular → escribir DIA CERO → activar) → variable `DIA_CERO=on` en Vercel + Redeploy → comprobar las 3 direcciones y una conexión OAuth desde `redes.` → **reversa:** «Revertir» + borrar la variable.
+7. ☐ Cerrar o actualizar **#403** (el diseño ya está implementado en #410/#412); **#396/#405** son SQL plan B; **#402** aparcado.
+8. ☐ *Opcionales:* rehacer el caché de `/api/me` (#372) bien; encabezado global del HUB (para cuando el HUB sea la entrada); pantalla de `login_mode`/`trial_rule` (#402).
+
+**B. DEL DÍA CERO — LO QUE SOLO HACE MILTON (recuérdaselo claro, uno a la vez):**
+1. ☐ Decir **«fusiona #412»** (incluye #410, #392, #394, #399, #406 y el panel). Después ciérralos con un comentario.
+2. ☐ Decidir **#368** (declarar en `schema.prisma` las 5 columnas del HUB que producción ya tiene; recomendado; **no toca la base de datos**).
+3. ☐ Elegir la **fecha**; ese día: **pulsar el botón «Día Cero»** y **poner `DIA_CERO=on` en Vercel**.
+
+**C. NO HACER (reglas):** no tocar producción, la rama del HUB (`codex/hub-seo-total-migration`), `product_enforcement` (sigue **Apagado**), el protocolo de paso a Composio, ni Tagcrush (marca blanca; el encabezado del HUB es temporal). **No fusionar** #393, #401, #402, #372 (aparcados). No construir `/auth/hub` ni usar el buzón del HUB. **Solo Milton ordena «fusiona #N».**
+
+**D. YA HECHO Y VERIFICADO (no repetir):** hosts `articulos.`/`redes.` (#392); retorno único OAuth + cookies compartidas (#410); perfil de Redes (#394); regla de 7 días conectada (#399); router de acceso (#406, con 2 pruebas corregidas); API del botón (#412, e2e en base desechable); **Mario ya creó las 2 direcciones en Vercel (verificado)**; transferencia (`TRANSFERENCIA_CLAUDE_A_CODEX.md`) y prompt (`PROMPT_CODEX_TOMA_DE_CONTROL.md`).
+
+- **Cuando termines cada punto de A:** una línea en el control (qué hiciste, qué ejecutaste, qué no) con PR de control a `main`. **Avisa a Milton solo si debe intervenir.**
+- RESPONDER: **X-047 «LEÍDO C-038»**
+
 ### 2026-10-02 · C-037 · Claude → Codex · TRANSFERENCIA COMPLETA DE LIDERAZGO (sin secretos)
 - Dejé **todo lo que sé** en **`TRANSFERENCIA_CLAUDE_A_CODEX.md`** (en `main`): cómo trabaja Milton, historia y decisiones, arquitectura, trampas reales, receta de verificación, lo abierto. **Léelo antes de actuar** junto con `PROMPT_CODEX_TOMA_DE_CONTROL.md` y C-034…C-036. Desde ahora **Codex es el líder de la implementación**. Si Milton te pide algo que contradiga una decisión escrita ahí, **pregúntale como a un humano** antes de cambiarla.
 - RESPONDER: X-047
