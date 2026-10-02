@@ -8,6 +8,7 @@ import Link from "next/link";
 import { sectionStyle, h2Style, buttonStyle } from "@/components/dashboard-ui";
 import type { RunRow } from "@/types/dashboard";
 import LiveProgress from "@/components/LiveRunProgress";
+import { productOfHost, type HostProductScope } from "@/lib/product-routes";
 
 type SocialRun = {
   id: string;
@@ -23,7 +24,14 @@ type SocialRun = {
 
 export default function PublicacionesEnCursoPage() {
   const searchParams = useSearchParams();
-  const producto = searchParams.get("producto");
+  const requestedProduct = searchParams.get("producto");
+  const [hostProduct, setHostProduct] = useState<HostProductScope | null>(null);
+  useEffect(() => setHostProduct(productOfHost(window.location.hostname)), []);
+  const producto = hostProduct === "ARTICULOS"
+    ? "articulos"
+    : hostProduct === "REDES"
+      ? "redes"
+      : requestedProduct;
   const soloArticulos = producto === "articulos";
   const soloRedes = producto === "redes";
   const [runs, setRuns] = useState<RunRow[]>([]);
@@ -100,7 +108,7 @@ export default function PublicacionesEnCursoPage() {
     return () => clearInterval(interval);
   }, [activeRuns.length, socialRuns.length, loadRuns]);
 
-  if (loading) {
+  if (hostProduct === null || loading) {
     return (
       <div>
         <ModuleIntro titulo="Progreso de las publicaciones" instruccionesColapsadas>
@@ -117,7 +125,11 @@ export default function PublicacionesEnCursoPage() {
     <div>
       <ModuleIntro titulo="Progreso de las publicaciones" instruccionesColapsadas>
         <IntroP>
-          Esta pantalla es la sala de espera. Aquí ves lo que se está publicando ahora mismo, tanto artículos como publicaciones en redes sociales, con su avance y la etapa concreta en la que va cada uno.
+          {soloRedes
+            ? "Esta pantalla es la sala de espera de Redes. Aquí ves tus publicaciones sociales en curso y su avance."
+            : soloArticulos
+              ? "Esta pantalla es la sala de espera de Artículos. Aquí ves tus artículos en curso y su avance."
+              : "Esta pantalla es la sala de espera. Aquí ves lo que se está publicando ahora mismo, tanto artículos como publicaciones en redes sociales."}
         </IntroP>
         <IntroP>
           No hace falta que te sientes a ver lo que va pasando. Puedes cerrar la aplicación e irte: todo va a seguir funcionando igual, aunque apagues el ordenador o cierres el celular. Si algo se queda atascado o te arrepientes, puedes cancelarlo desde aquí sin que afecte a lo demás.
@@ -196,11 +208,14 @@ export default function PublicacionesEnCursoPage() {
         >
           <h2 style={h2Style}>No hay ninguna ejecución en curso</h2>
           <p style={{ fontSize: 13, color: "#6e6e73" }}>
-            Ve a "{MENU_NAMES.propios}" para elegir una categoría, pegar títulos e iniciar
-            una nueva tanda.
+            {soloRedes
+              ? "Ve a Publica en Redes para preparar una nueva publicación."
+              : soloArticulos
+                ? `Ve a "${MENU_NAMES.propios}" para elegir una categoría, pegar títulos e iniciar una nueva tanda.`
+                : `Ve a "${MENU_NAMES.propios}" para elegir una categoría, pegar títulos e iniciar una nueva tanda.`}
           </p>
-          <Link href="/dashboard/publicar" className="button" style={{ ...buttonStyle, textDecoration: "none" }}>
-            Ir a Publicar
+          <Link href={soloRedes ? "/dashboard/oportunidades-redes" : "/dashboard/publicar"} className="button" style={{ ...buttonStyle, textDecoration: "none" }}>
+            {soloRedes ? "Ir a Redes" : "Ir a Publicar"}
           </Link>
         </section>
       )}

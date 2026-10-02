@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, PRODUCT_ROUTES } from "./product-routes";
+import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfApiPath, productOfHost, productOfPath, PRODUCT_ROUTES } from "./product-routes";
 
 test("el enlace de salida apunta al HUB oficial", () => {
   assert.equal(HUB_URL, "https://hub.lasolucionweb.net");
@@ -28,6 +28,14 @@ test("las pantallas de cada producto se reconocen", () => {
   assert.equal(productOfPath("/dashboard/configuracion/redes-sociales"), "REDES");
   assert.equal(productOfPath("/dashboard/articulos"), "ARTICULOS");
   assert.equal(productOfPath("/dashboard/redes"), "REDES");
+});
+
+test("las APIs de cada producto también tienen una frontera explícita", () => {
+  assert.equal(productOfApiPath("/api/runs"), "ARTICULOS");
+  assert.equal(productOfApiPath("/api/opportunities/execute"), "ARTICULOS");
+  assert.equal(productOfApiPath("/api/social-opportunities"), "REDES");
+  assert.equal(productOfApiPath("/api/search-integrations/instagram/callback"), "REDES");
+  assert.equal(productOfApiPath("/api/me"), "COMPARTIDO");
 });
 
 test("la coincidencia más específica gana dentro de Configuración", () => {

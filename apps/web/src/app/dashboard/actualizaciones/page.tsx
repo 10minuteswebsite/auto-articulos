@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { prisma } from "@auto-articulos/db";
 import { h2Style } from "@/components/dashboard-ui";
+import { isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
 
 type Categoria = "nuevas-herramientas" | "arreglos";
 
@@ -32,15 +34,17 @@ export default async function ActualizacionesPage({
   const filtroCategoria: "todas" | Categoria = categoria === "arreglos" || categoria === "nuevas-herramientas"
     ? categoria
     : "todas";
+  const hostProduct = productOfHost((await headers()).get("host"));
 
-  const [actualizaciones, totalNuevas, totalArreglos] = await Promise.all([
+  const [candidatas] = await Promise.all([
     prisma.productUpdate.findMany({
       where: filtroCategoria === "todas" ? undefined : { category: filtroCategoria },
       orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     }),
-    prisma.productUpdate.count({ where: { category: "nuevas-herramientas" } }),
-    prisma.productUpdate.count({ where: { category: "arreglos" } }),
   ]);
+  const actualizaciones = candidatas.filter((item) => visibleInHost(item.modulePath, hostProduct));
+  const totalNuevas = actualizaciones.filter((item) => item.category === "nuevas-herramientas").length;
+  const totalArreglos = actualizaciones.filter((item) => item.category === "arreglos").length;
   const total = totalNuevas + totalArreglos;
 
   return (
@@ -74,6 +78,11 @@ export default async function ActualizacionesPage({
       </div>
     </div>
   );
+}
+
+function visibleInHost(modulePath: string | null | undefined, hostProduct: HostProductScope): boolean {
+  if (hostProduct === "COMPARTIDO" || !modulePath) return true;
+  return isVisibleInProduct(productOfPath(modulePath), hostProduct);
 }
 
 function TarjetaActualizacion({ item }: { item: { date: Date; title: string; category: string; summary: string; example: string; modulePath?: string | null } }) {

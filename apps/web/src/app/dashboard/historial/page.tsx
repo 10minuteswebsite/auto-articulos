@@ -43,6 +43,7 @@ import type {
   TitleRow,
 } from "@/types/dashboard";
 import GoogleIndexingStatus from "@/components/GoogleIndexingStatus";
+import { productOfHost, type HostProductScope } from "@/lib/product-routes";
 
 const flatSectionStyle: CSSProperties = {
   background: "transparent",
@@ -92,7 +93,17 @@ function countText(count: number, singular: string, plural: string) {
 
 export default function HistorialPage() {
   const searchParams = useSearchParams();
-  const producto = searchParams.get("producto");
+  const requestedProduct = searchParams.get("producto");
+  const [hostProduct, setHostProduct] = useState<HostProductScope | null>(null);
+  useEffect(() => setHostProduct(productOfHost(window.location.hostname)), []);
+  if (hostProduct === null) {
+    return <p className="muted" style={{ margin: 0 }}>Cargando historial...</p>;
+  }
+  const producto = hostProduct === "ARTICULOS"
+    ? "articulos"
+    : hostProduct === "REDES"
+      ? "redes"
+      : requestedProduct;
   const soloArticulos = producto === "articulos";
   const soloRedes = producto === "redes";
   return (
@@ -121,10 +132,18 @@ export default function HistorialPage() {
             Antes de avanzar, lee esto
           </p>
           <IntroP>
-            Todo lo que la plataforma ha publicado por ti queda registrado aquí: artículos y publicaciones en redes, con su fecha, su estado y el enlace a lo que se publicó.
+            {soloRedes
+              ? "Aquí quedan tus publicaciones en redes y blogs, con su fecha, estado y enlace."
+              : soloArticulos
+                ? "Aquí quedan tus artículos publicados, con su fecha, estado y enlace."
+                : "Todo lo que la plataforma ha publicado por ti queda registrado aquí: artículos y publicaciones en redes, con su fecha, estado y enlace."}
           </IntroP>
           <IntroP>
-            Sirve para dos cosas muy concretas: comprobar que algo salió bien de verdad, y encontrar rápido un artículo cuando lo necesitas para compartirlo o revisarlo.
+            {soloRedes
+              ? "Sirve para comprobar que una publicación salió bien y volver a abrirla cuando la necesites."
+              : soloArticulos
+                ? "Sirve para comprobar que un artículo salió bien y volver a abrirlo cuando lo necesites."
+                : "Sirve para comprobar que algo salió bien de verdad y encontrarlo rápido cuando lo necesitas."}
           </IntroP>
           <IntroP>
             Si un trabajo todavía no aparece aquí, es que sigue en marcha: míralo en <Modulo id="publicaciones-en-curso" />.

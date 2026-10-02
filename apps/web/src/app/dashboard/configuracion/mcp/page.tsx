@@ -8,6 +8,7 @@ import {
   buttonStyle,
   secondaryButtonStyle,
 } from "@/components/dashboard-ui";
+import { productOfHost, type HostProductScope } from "@/lib/product-routes";
 
 type TokenStatus =
   | { active: false }
@@ -21,12 +22,17 @@ type Capability = { name: string; title: string; description: string; soloLectur
  * `/api/mcp`), no con una copia escrita a mano — así, cuando se agrega una
  * herramienta nueva al MCP, esta pantalla y el prompt se actualizan solos.
  */
-function buildPrompt(serverUrl: string, token: string, capabilities: Capability[]) {
+function buildPrompt(serverUrl: string, token: string, capabilities: Capability[], product: HostProductScope) {
   const listaHerramientas = capabilities.length
     ? capabilities.map((c) => `- ${c.name}: ${c.title}`).join("\n")
     : "(no se pudo cargar la lista de herramientas; usa tools/list del servidor)";
 
-  return `Eres el asistente conectado a SEO Total, la plataforma que genera y publica artículos SEO y publicaciones en redes sociales para mi negocio. SEO Total está diseñada para que nunca tenga que adivinar qué escribir: todo se navega por opciones numeradas, como en mi panel web. Compórtate igual: proactivo, nunca reactivo.
+  const menu = product === "REDES"
+    ? "1) Publicar en redes sociales y blogs públicos."
+    : product === "ARTICULOS"
+      ? "1) Contenido propio — escribir y publicar mis propios títulos.\n2) Contenido generado por IA — que la IA proponga y publique artículos."
+      : "1) Contenido propio — escribir y publicar mis propios títulos.\n2) Contenido generado por IA — que la IA proponga y publique artículos.\n3) Publicar en redes sociales y blogs públicos.";
+  return `Eres el asistente conectado a SEO Total, la plataforma que genera y publica contenido para mi negocio. SEO Total está diseñada para que nunca tenga que adivinar qué escribir: todo se navega por opciones numeradas, como en mi panel web. Compórtate igual: proactivo, nunca reactivo.
 
 Servidor MCP: ${serverUrl}
 Autenticación: cabecera "Authorization: Bearer ${token}"
@@ -36,9 +42,7 @@ ${listaHerramientas}
 
 Cómo empezar esta conversación:
 No me preguntes "¿en qué te ayudo?". En tu primer mensaje, saluda brevemente y ofréceme este menú (el mismo de mi Inicio):
-1) Contenido propio — escribir y publicar mis propios títulos.
-2) Contenido generado por IA — que la IA proponga y publique artículos.
-3) Publicar en redes sociales y blogs públicos.
+${menu}
 Sigue ofreciendo opciones numeradas en cada paso siguiente, no preguntas abiertas.
 
 Si en algún momento no sabes cómo guiarme o necesitas explicar cómo funciona algo, usa la herramienta ver_manual_seo_total (es el manual real y actualizado de la plataforma) en vez de inventar o adivinar.
@@ -65,6 +69,11 @@ export default function ConfiguracionMcpPage() {
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [serverUrl, setServerUrl] = useState("");
   const [capabilities, setCapabilities] = useState<Capability[]>([]);
+  const [hostProduct, setHostProduct] = useState<HostProductScope | null>(null);
+
+  useEffect(() => {
+    setHostProduct(productOfHost(window.location.hostname));
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -140,19 +149,25 @@ export default function ConfiguracionMcpPage() {
     setTimeout(() => mark(false), 2000);
   }
 
-  const prompt = freshToken ? buildPrompt(serverUrl, freshToken, capabilities) : null;
-  const soloLectura = capabilities.filter((c) => c.soloLectura);
-  const conAccion = capabilities.filter((c) => !c.soloLectura);
+  const visibleCapabilities = hostProduct === "REDES"
+    ? capabilities.filter((c) => c.name.includes("social") || c.name.includes("publicacion_social") || c.name.includes("historial") || c.name.includes("cuenta") || c.name.includes("manual"))
+    : hostProduct === "ARTICULOS"
+      ? capabilities.filter((c) => !c.name.includes("social") && !c.name.includes("publicacion_social"))
+      : capabilities;
+  const prompt = freshToken && hostProduct ? buildPrompt(serverUrl, freshToken, visibleCapabilities, hostProduct) : null;
+  const soloLectura = visibleCapabilities.filter((c) => c.soloLectura);
+  const conAccion = visibleCapabilities.filter((c) => !c.soloLectura);
+  const productTitle = hostProduct === "REDES" ? "SEO Total Redes" : hostProduct === "ARTICULOS" ? "SEO Total Artículos" : "SEO Total";
 
   return (
     <div>
       <ModuleIntro titulo="Asistentes IA">
         <IntroP>
           Conecta cualquier asistente de inteligencia artificial —Claude, ChatGPT,
-          Meta MUSE o el que uses— directamente a tu cuenta de SEO Total. Con un
-          token personal, el asistente puede consultar tu información y publicar
-          artículos por ti, siempre pidiéndote confirmación antes de publicar algo
-          real.
+          Meta MUSE o el que uses— directamente a tu cuenta de {productTitle}. Con
+          un token personal, el asistente puede consultar tu información y ayudarte
+          con las funciones disponibles en este producto, siempre pidiéndote
+          confirmación antes de publicar algo real.
         </IntroP>
         <IntroP>
           Genera el token una sola vez, copia el prompt de abajo y pégalo como
@@ -163,7 +178,7 @@ export default function ConfiguracionMcpPage() {
       </ModuleIntro>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {capabilities.length > 0 && (
+        {visibleCapabilities.length > 0 && (
           <section style={sectionStyle}>
             <h2 style={h2Style}>Qué puede hacer hoy un asistente conectado</h2>
             {conAccion.length > 0 && (

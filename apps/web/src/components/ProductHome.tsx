@@ -50,7 +50,13 @@ export default function ProductHome({
       .catch(() => setState("disabled"));
   }, []);
 
-  if (state === "loading") return null;
+  if (state === "loading") {
+    return (
+      <p role="status" style={{ marginTop: 24, color: "#6e6e73", fontSize: 15 }}>
+        Cargando esta sección…
+      </p>
+    );
+  }
 
   if (state === "disabled") {
     return (

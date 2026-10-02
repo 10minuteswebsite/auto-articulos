@@ -66,6 +66,41 @@ export const PRODUCT_ROUTES: ReadonlyArray<readonly [string, ProductScope]> = [
   ["/dashboard/postpeer", "ADMIN"],
 ];
 
+/**
+ * Producto de una API cuyo resultado pertenece a una sola pantalla.
+ *
+ * Las APIs compartidas (sesión, cuenta, conexiones generales y MCP) no
+ * aparecen aquí. Esta tabla solo evita que una URL de un subdominio entregue
+ * datos del producto contrario cuando alguien la escribe directamente.
+ */
+const PRODUCT_API_ROUTES: ReadonlyArray<readonly [string, HostProductScope]> = [
+  ["/api/runs", "ARTICULOS"],
+  ["/api/opportunities", "ARTICULOS"],
+  ["/api/title-generation", "ARTICULOS"],
+  ["/api/titles", "ARTICULOS"],
+  ["/api/sitemap", "ARTICULOS"],
+  ["/api/pre-validation", "ARTICULOS"],
+  ["/api/dashboard-stats", "ARTICULOS"],
+  ["/api/credentials", "ARTICULOS"],
+  ["/api/categories", "ARTICULOS"],
+  ["/api/languages", "ARTICULOS"],
+  ["/api/google-analytics", "ARTICULOS"],
+  ["/api/business-profile", "ARTICULOS"],
+  ["/api/search-integrations/google", "ARTICULOS"],
+  ["/api/search-integrations/bing", "ARTICULOS"],
+  ["/api/social-opportunities", "REDES"],
+  ["/api/search-integrations/instagram", "REDES"],
+  ["/api/search-integrations/facebook-pages", "REDES"],
+  ["/api/search-integrations/threads", "REDES"],
+  ["/api/search-integrations/linkedin", "REDES"],
+  ["/api/search-integrations/pinterest", "REDES"],
+  ["/api/search-integrations/tumblr", "REDES"],
+  ["/api/search-integrations/twitter", "REDES"],
+  ["/api/search-integrations/bluesky", "REDES"],
+  ["/api/search-integrations/devto", "REDES"],
+  ["/api/search-integrations/blogger", "REDES"],
+];
+
 /** Id del módulo opt-in que actúa como interruptor de la vista por productos (ver modules.ts). */
 export const PRODUCT_VIEW_MODULE_ID = "vista-productos";
 
@@ -87,6 +122,20 @@ export function productOfPath(pathname: string | null | undefined): ProductScope
   const clean = pathname.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
   let best: readonly [string, ProductScope] | null = null;
   for (const entry of PRODUCT_ROUTES) {
+    const [prefix] = entry;
+    if (clean === prefix || clean.startsWith(`${prefix}/`)) {
+      if (!best || prefix.length > best[0].length) best = entry;
+    }
+  }
+  return best ? best[1] : "COMPARTIDO";
+}
+
+/** Producto de una API; lo desconocido queda compartido por seguridad. */
+export function productOfApiPath(pathname: string | null | undefined): HostProductScope | "COMPARTIDO" {
+  if (!pathname) return "COMPARTIDO";
+  const clean = pathname.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
+  let best: readonly [string, HostProductScope] | null = null;
+  for (const entry of PRODUCT_API_ROUTES) {
     const [prefix] = entry;
     if (clean === prefix || clean.startsWith(`${prefix}/`)) {
       if (!best || prefix.length > best[0].length) best = entry;
