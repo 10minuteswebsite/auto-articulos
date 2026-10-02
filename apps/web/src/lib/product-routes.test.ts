@@ -1,5 +1,7 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
+import { test } from "node:test";
 import { isProductViewEnabled, isVisibleInProduct, productOfPath, PRODUCT_ROUTES } from "./product-routes";
 
 test("«oportunidades-redes» es Redes y «oportunidades» es Artículos (no se confunden por prefijo)", () => {
@@ -74,4 +76,19 @@ test("la vista por productos solo se activa si /api/me ya llegó y el módulo no
   assert.equal(isProductViewEnabled(["vista-productos"]), false); // opt-in sin «Habilitado»
   assert.equal(isProductViewEnabled(["historial"]), true); // administrador o cuenta con «Habilitado»
   assert.equal(isProductViewEnabled([]), true);
+});
+
+test("cada carpeta de dashboard tiene una decisión explícita de producto", () => {
+  const expected = new Map<string, string>([
+    ["actualizaciones", "COMPARTIDO"], ["articulos", "ARTICULOS"], ["como-funciona", "COMPARTIDO"],
+    ["composio", "ADMIN"], ["configuracion", "COMPARTIDO"], ["estadisticas", "ARTICULOS"],
+    ["historial", "COMPARTIDO"], ["mi-acceso", "COMPARTIDO"], ["oportunidades", "ARTICULOS"],
+    ["oportunidades-redes", "REDES"], ["postpeer", "ADMIN"], ["publicaciones-en-curso", "COMPARTIDO"],
+    ["publicar", "ARTICULOS"], ["redes", "REDES"], ["usuarios", "ADMIN"],
+    ["vista-previa-bloqueo", "COMPARTIDO"],
+  ]);
+  const folders = readdirSync(join(process.cwd(), "src/app/dashboard"), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
+  assert.deepEqual(folders.filter((folder) => !expected.has(folder)), []);
+  for (const folder of folders) assert.equal(productOfPath(`/dashboard/${folder}`), expected.get(folder), folder);
 });
