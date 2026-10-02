@@ -7,6 +7,7 @@ import {
   queryGoogleSearchAnalytics,
 } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 import { analyzeSeoOpportunities } from "@/lib/opportunity-analysis";
 import { getGoogleAnalyticsSignals, summarizeGoogleAnalyticsSignals } from "@/lib/google-analytics-signals";
@@ -77,6 +78,8 @@ async function list(userId: string, siteDomain?: string | null) {
 
 export async function GET() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities");
+  if (denied) return denied;
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: { lastOpportunityAnalysisAt: true, selectedSiteDomain: true, selectedSitePanel: true, platformDomain: true },
@@ -93,6 +96,8 @@ export async function GET() {
 // cuenta tiene paneles y selectedSitePanel no coincide con los grupos visibles.
 export async function DELETE() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities");
+  if (denied) return denied;
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: { selectedSiteDomain: true },
@@ -109,6 +114,8 @@ export async function DELETE() {
 
 export async function POST(request: Request) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities");
+  if (denied) return denied;
   const pendingCount = await prisma.opportunityTitle.count({
     where: { group: { userId } },
   });

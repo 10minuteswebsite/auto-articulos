@@ -7,6 +7,7 @@ import {
   inspectGoogleUrl,
 } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 
 async function contextFor(userId: string, titleId: string) {
@@ -33,6 +34,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/titles/[id]/google-inspection");
+  if (denied) return denied;
   const { id } = await params;
   const { title, integration, selectedSiteDomain } = await contextFor(userId, id);
   const resolved = await resolveSearchConsoleForUser(userId, integration?.siteDomain ?? selectedSiteDomain);
@@ -52,6 +55,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/titles/[id]/google-inspection");
+  if (denied) return denied;
   const { id } = await params;
   const { title, integration, selectedSiteDomain } = await contextFor(userId, id);
   if (!title?.articleUrl) {

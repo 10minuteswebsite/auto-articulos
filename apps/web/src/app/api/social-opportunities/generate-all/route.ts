@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
 import { canUseSocialModule } from "@/lib/social-access";
+import { requireProductAccess } from "@/lib/require-product-access";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -8,6 +9,8 @@ export const revalidate = 0;
 export async function POST(request: Request) {
   try {
     const userId = await getCurrentUserId();
+    const denied = await requireProductAccess(userId, "REDES", "/api/social-opportunities/generate-all");
+    if (denied) return denied;
     if (!(await canUseSocialModule(userId))) {
       return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
     }

@@ -7,6 +7,7 @@ import {
   submitGoogleSitemap,
 } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 
 function defaultSitemapUrl(siteUrl: string): string {
@@ -27,6 +28,8 @@ function defaultSitemapUrl(siteUrl: string): string {
  */
 export async function POST() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/sitemap/send");
+  if (denied) return denied;
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const integration = await prisma.searchIntegration.findFirst({
     where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) },
