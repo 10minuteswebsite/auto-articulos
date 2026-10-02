@@ -19,6 +19,16 @@
  */
 
 export type ProductScope = "ARTICULOS" | "REDES" | "COMPARTIDO" | "ADMIN";
+export type HostProductScope = Exclude<ProductScope, "ADMIN">;
+export const HUB_URL = "https://hub.lasolucionweb.net";
+
+/** Producto de la dirección pública desde la que el usuario está trabajando. */
+export function productOfHost(hostname: string | null | undefined): HostProductScope {
+  const host = (hostname ?? "").toLowerCase().split(":")[0];
+  if (host === "articulos.lasolucionweb.com") return "ARTICULOS";
+  if (host === "redes.lasolucionweb.com") return "REDES";
+  return "COMPARTIDO";
+}
 
 /** [prefijo de ruta, producto]. El orden no importa: gana el prefijo más largo. */
 export const PRODUCT_ROUTES: ReadonlyArray<readonly [string, ProductScope]> = [

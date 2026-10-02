@@ -1,7 +1,7 @@
 "use client";
 
 import { MENU_LABELS_NUMBERED, MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
-import { isProductViewEnabled, productOfPath } from "@/lib/product-routes";
+import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -69,6 +69,8 @@ const BASE_ENTRIES: NavEntry[] = [
   },
 ];
 
+const HUB_ENTRY: TabItem = { href: HUB_URL, label: "Volver al HUB" };
+
 // VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2). Cuando la
 // cuenta tiene activo el módulo opt-in «vista-productos» (hoy: administradores
 // como vista previa), el grupo único «Publicaciones» se reemplaza por UN GRUPO
@@ -129,6 +131,7 @@ export default function DashboardNav() {
   const [disabledModules, setDisabledModules] = useState<string[]>([]);
   const [globalDisabledModules, setGlobalDisabledModules] = useState<string[]>([]);
   const [products, setProducts] = useState<ProductsInfo | null>(null);
+  const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
   const [productView, setProductView] = useState(false);
   // Último producto visitado: decide qué grupo se resalta en las pantallas
@@ -143,6 +146,10 @@ export default function DashboardNav() {
   // verse sola, sin navegación a secciones que todavía están bloqueadas.
   // Solo aplica en /dashboard, que es donde vive el asistente.
   const [hideForSetup, setHideForSetup] = useState(false);
+  useEffect(() => {
+    setHostProduct(productOfHost(window.location.hostname));
+  }, []);
+
   useEffect(() => {
     if (pathname !== "/dashboard") {
       setHideForSetup(false);
@@ -251,6 +258,7 @@ export default function DashboardNav() {
   function isVisible(tab: TabItem): boolean {
     if (isAdmin) return true;
     if (tab.id && disabledModules.includes(tab.id)) return false;
+    if (hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(hrefPath(tab.href)), hostProduct)) return false;
     if (!products) return true;
     const scope = productOfPath(hrefPath(tab.href));
     if (scope === "ARTICULOS") return products.articulos?.allowed !== false;
@@ -264,8 +272,8 @@ export default function DashboardNav() {
     if (
       tab.id === "oportunidades-redes" &&
       !isAdmin &&
-      products?.articulos?.allowed === false &&
-      (products.redes?.allowed !== false || products.redes?.reason === "NO_NETWORK_APPROVED")
+      (hostProduct === "REDES" || products?.articulos?.allowed === false) &&
+      (products?.redes?.allowed !== false || products?.redes?.reason === "NO_NETWORK_APPROVED")
     ) {
       return tab.label.replace(/^3\)/, "1)");
     }
@@ -273,7 +281,7 @@ export default function DashboardNav() {
   }
 
   const baseEntries = productView ? PRODUCT_ENTRIES : BASE_ENTRIES;
-  const rawEntries: NavEntry[] = isAdmin ? [...baseEntries, ADMIN_GROUP] : baseEntries;
+  const rawEntries: NavEntry[] = isAdmin ? [...baseEntries, ADMIN_GROUP, HUB_ENTRY] : [...baseEntries, HUB_ENTRY];
 
   // Un grupo cuyos módulos están todos ocultos desaparece entero, en vez de
   // quedar como un desplegable vacío.

@@ -20,6 +20,7 @@ import InstagramSection from "@/components/InstagramSection";
 import { ConnectionReturnSuccess, LEGACY_RETURN_NETWORKS, useConnectionReturn } from "@/components/ConnectionReturn";
 import { ConnectionReturnContext } from "@/components/connection-return-context";
 import { isConnectionVisible, isProductViewAllowed } from "@/lib/product-view-filter";
+import { productOfHost, type HostProductScope } from "@/lib/product-routes";
 
 type Vista = "analiticas" | "difusion";
 type Producto = "articulos" | "redes";
@@ -63,6 +64,8 @@ export default function ConexionesView() {
   const [modulosDeshabilitados, setModulosDeshabilitados] = useState<string[]>([]);
   const [permisos, setPermisos] = useState<Record<string, boolean>>({});
   const [configuradas, setConfiguradas] = useState<Record<string, boolean>>({});
+  const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
+  const [hostReady, setHostReady] = useState(false);
   const retorno = useConnectionReturn(conexion);
   const soloExito = retorno === "connected" && conexion !== null && LEGACY_RETURN_NETWORKS[conexion]?.choice === null;
 
@@ -151,6 +154,39 @@ export default function ConexionesView() {
       .catch(() => {});
   }, [searchParams]);
 
+  useEffect(() => {
+    const host = productOfHost(window.location.hostname);
+    setHostProduct(host);
+    setHostReady(true);
+    if (host !== "ARTICULOS" && host !== "REDES") return;
+
+    const forcedProducto: Producto = host === "ARTICULOS" ? "articulos" : "redes";
+    const requestedVista = searchParams.get("vista");
+    const requestedConexion = searchParams.get("conexion") as ConexionId | null;
+    const requestedIsAnalytics = requestedConexion
+      ? ["google-search-console", "google-analytics", "bing-webmaster"].includes(requestedConexion)
+      : false;
+    const compatible = requestedConexion
+      ? (forcedProducto === "articulos" ? requestedIsAnalytics : !requestedIsAnalytics)
+      : true;
+
+    setProducto(forcedProducto);
+    if (!compatible) {
+      setConexion(null);
+      setVista(forcedProducto === "articulos" ? "analiticas" : "difusion");
+      window.history.replaceState(null, "", window.location.pathname);
+    } else if (requestedConexion) {
+      setConexion(requestedConexion);
+      setVista(requestedIsAnalytics ? "analiticas" : "difusion");
+    } else if (requestedVista === "analiticas" || requestedVista === "difusion") {
+      setConexion(null);
+      setVista(forcedProducto === "articulos" ? "analiticas" : "difusion");
+    } else {
+      setConexion(null);
+      setVista(null);
+    }
+  }, [searchParams]);
+
   function elegir(siguiente: Vista) {
     if (!isProductViewAllowed(producto, siguiente)) return;
     setVista(siguiente);
@@ -177,37 +213,45 @@ export default function ConexionesView() {
   const tieneModuloRedes = !modulosDeshabilitados.includes("oportunidades-redes");
   const puede = (red: string) => isAdmin || tieneModuloRedes || Boolean(permisos[red]);
 
+  if (!hostReady) return null;
+
   if (vista === null) {
     const tarjetas = [
-      { id: "google-search-console", n: "01", title: "Google Search Console", text: "Conecta tu sitio para enviar el sitemap y revisar la indexación.", view: "analiticas" as Vista },
-      { id: "google-analytics", n: "02", title: "Google Analytics", text: "Consulta las visitas y el rendimiento real de tus contenidos.", view: "analiticas" as Vista },
-      { id: "bing-webmaster", n: "03", title: "Bing Webmaster Tools", text: "Ayuda a que tus artículos aparezcan también en Bing.", view: "analiticas" as Vista },
-      { id: "instagram", n: "04", title: "Instagram", text: "Publica imágenes y contenido en tu cuenta profesional de Instagram.", view: "difusion" as Vista },
-      { id: "facebook", n: "05", title: "Facebook", text: "Publica en la Página de Facebook que elijas.", view: "difusion" as Vista },
-      { id: "threads", n: "06", title: "Threads", text: "Publica tus artículos en tu cuenta de Threads.", view: "difusion" as Vista },
-      { id: "linkedin", n: "07", title: "LinkedIn", text: "Publica artículos en tu perfil o página de LinkedIn.", view: "difusion" as Vista },
-      { id: "pinterest", n: "08", title: "Pinterest", text: "Publica contenido visual en tus tableros de Pinterest.", view: "difusion" as Vista },
-      { id: "tumblr", n: "09", title: "Tumblr", text: "Publica artículos y contenido en tu blog de Tumblr.", view: "difusion" as Vista },
-      { id: "bluesky", n: "10", title: "Bluesky", text: "Comparte tus publicaciones en Bluesky.", view: "difusion" as Vista },
-      { id: "devto", n: "11", title: "DEV.to", text: "Publica artículos técnicos en tu cuenta de DEV.to.", view: "difusion" as Vista },
-      { id: "blogger", n: "12", title: "Blogger", text: "Publica artículos en tu blog de Blogger.", view: "difusion" as Vista },
-      { id: "business-profile", n: "13", title: "Google Business Profile", text: "Publica novedades en la ficha de tu negocio en Google.", view: "difusion" as Vista },
+      { id: "google-search-console", title: "Google Search Console", text: "Conecta tu sitio para enviar el sitemap y revisar la indexación.", view: "analiticas" as Vista },
+      { id: "google-analytics", title: "Google Analytics", text: "Consulta las visitas y el rendimiento real de tus contenidos.", view: "analiticas" as Vista },
+      { id: "bing-webmaster", title: "Bing Webmaster Tools", text: "Ayuda a que tus artículos aparezcan también en Bing.", view: "analiticas" as Vista },
+      { id: "instagram", title: "Instagram", text: "Publica imágenes y contenido en tu cuenta profesional de Instagram.", view: "difusion" as Vista },
+      { id: "facebook", title: "Facebook", text: "Publica en la Página de Facebook que elijas.", view: "difusion" as Vista },
+      { id: "threads", title: "Threads", text: "Publica tus artículos en tu cuenta de Threads.", view: "difusion" as Vista },
+      { id: "linkedin", title: "LinkedIn", text: "Publica artículos en tu perfil o página de LinkedIn.", view: "difusion" as Vista },
+      { id: "pinterest", title: "Pinterest", text: "Publica contenido visual en tus tableros de Pinterest.", view: "difusion" as Vista },
+      { id: "tumblr", title: "Tumblr", text: "Publica artículos y contenido en tu blog de Tumblr.", view: "difusion" as Vista },
+      { id: "bluesky", title: "Bluesky", text: "Comparte tus publicaciones en Bluesky.", view: "difusion" as Vista },
+      { id: "devto", title: "DEV.to", text: "Publica artículos técnicos en tu cuenta de DEV.to.", view: "difusion" as Vista },
+      { id: "blogger", title: "Blogger", text: "Publica artículos en tu blog de Blogger.", view: "difusion" as Vista },
+      { id: "business-profile", title: "Google Business Profile", text: "Publica novedades en la ficha de tu negocio en Google.", view: "difusion" as Vista },
     ];
+    const esHostProducto = hostProduct === "ARTICULOS" || hostProduct === "REDES";
+    const tarjetasVisibles = tarjetas.filter((card) => esHostProducto
+      ? (hostProduct === "ARTICULOS" ? card.view === "analiticas" : card.view === "difusion")
+      : isConnectionVisible(producto, card.view, card.id));
+    const numeroPorId = new Map(tarjetasVisibles.map((card, index) => [card.id, String(index + 1).padStart(2, "0")]));
     const grupos: { vista: Vista; titulo: string; descripcion: string }[] = [
       { vista: "analiticas", titulo: "Analíticas", descripcion: "Conexiones que leen datos y ayudan a posicionar tu sitio." },
       { vista: "difusion", titulo: "Difusión", descripcion: "Conexiones que publican tu contenido en redes, microblogs y blogs." },
     ];
+    const gruposVisibles = esHostProducto ? grupos.filter((grupo) => grupo.vista === (hostProduct === "ARTICULOS" ? "analiticas" : "difusion")) : grupos;
     return <div>
       <ModuleIntro titulo="Conexiones"><IntroP>Elige qué quieres configurar. Cada opción abre su espacio dedicado, con instrucciones y acciones solo de ese segmento.</IntroP></ModuleIntro>
       <div style={{ marginTop: 24 }}>
-        {grupos.map((grupo) => <section key={grupo.vista} style={{ marginBottom: 36 }} aria-labelledby={`grupo-${grupo.vista}`}>
+        {gruposVisibles.map((grupo) => <section key={grupo.vista} style={{ marginBottom: 36 }} aria-labelledby={`grupo-${grupo.vista}`}>
           <div style={{ padding: "0 4px 12px", borderBottom: "1px solid #d2d2d7" }}>
             <h2 id={`grupo-${grupo.vista}`} style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#1d1d1f" }}>{grupo.titulo}</h2>
             <p style={{ margin: "5px 0 0", color: "#6e6e73", fontSize: 13, lineHeight: 1.45 }}>{grupo.descripcion}</p>
           </div>
-          {tarjetas.filter((card) => isConnectionVisible(producto, grupo.vista, card.id) && (card.view === grupo.vista || (producto === "redes" && card.id === "google-search-console"))).map((card) => (
+          {tarjetasVisibles.filter((card) => card.view === grupo.vista).map((card) => (
           <button
-            key={card.n}
+            key={card.id}
             type="button"
             onClick={() => elegirConexion(card.id as ConexionId, card.view)}
             style={{
@@ -226,7 +270,7 @@ export default function ConexionesView() {
               fontFamily: "inherit",
             }}
           >
-            <span style={{ color: "#8e8e93", fontSize: 12, letterSpacing: "0.06em" }}>{card.n}</span>
+            <span style={{ color: "#8e8e93", fontSize: 12, letterSpacing: "0.06em" }}>{numeroPorId.get(card.id)}</span>
             <span>
               <strong style={{ display: "block", fontSize: 17, fontWeight: 600, lineHeight: 1.3 }}>{card.title}</strong>
               <span style={{ display: "block", marginTop: 5, color: "#6e6e73", fontSize: 13, lineHeight: 1.45 }}>{card.text}</span>

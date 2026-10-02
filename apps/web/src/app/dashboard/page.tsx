@@ -1,7 +1,7 @@
 "use client";
 
 import { MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
-import { isProductViewEnabled } from "@/lib/product-routes";
+import { isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
 import { useEffect, useState, useCallback, useRef } from "react";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import Link from "next/link";
@@ -78,6 +78,8 @@ export default function InicioPage() {
   const [showWizard, setShowWizard] = useState<boolean | null>(null);
   const [configurationAlerts, setConfigurationAlerts] = useState<ConfigurationAlert[]>([]);
   const [products, setProducts] = useState<ProductsInfo | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
   const [productView, setProductView] = useState(false);
 
@@ -106,6 +108,7 @@ export default function InicioPage() {
       const step2 = Array.isArray(catData.categories) && catData.categories.length > 0;
       setProductView(isProductViewEnabled(meData?.disabledModules));
       setProducts(meData?.products ?? null);
+      setIsAdmin(meData?.role === "admin" || Boolean(meData?.isActingAdmin));
       const step3 = typeof meData.contentLanguage === "string" && meData.contentLanguage.trim().length > 0;
       const step4 = Boolean(
         (googleData.connected && googleData.siteUrl) ||
@@ -135,6 +138,9 @@ export default function InicioPage() {
   }, []);
 
   function hasProductFor(href: string): boolean {
+    if (!isAdmin && hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(href), hostProduct)) {
+      return false;
+    }
     if (!products) return true;
     if (href === "/dashboard/oportunidades-redes") {
       return products.redes?.allowed !== false || products.redes?.reason === "NO_NETWORK_APPROVED";
@@ -153,6 +159,7 @@ export default function InicioPage() {
   const visibleProductCards = PRODUCT_CARDS.filter((card) => hasProductFor(card.href));
 
   useEffect(() => {
+    setHostProduct(productOfHost(window.location.hostname));
     checkWizardStatus();
   }, [checkWizardStatus]);
 
