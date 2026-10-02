@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateSocialImageRaw } from "@auto-articulos/shared";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 
 export async function POST(request: NextRequest) {
   const { summary, platform } = await request.json();
@@ -13,6 +14,8 @@ export async function POST(request: NextRequest) {
   let userPrompts: { imagePrompt: string | null; infographicPrompt: string | null; businessLogoUrl: string | null } | null = null;
   try {
     const userId = await getCurrentUserId();
+    const denied = await requireProductAccess(userId, "REDES", "/api/social-opportunities/preview");
+    if (denied) return denied;
     userPrompts = await prisma.user.findUnique({
       where: { id: userId },
       select: { imagePrompt: true, infographicPrompt: true, businessLogoUrl: true },
