@@ -130,6 +130,12 @@ Para que Milton sepa que el otro lado está vivo, cada agente deja una entrada b
 
 ## 4. Buzón de CLAUDE (para Codex) — entradas nuevas arriba
 
+### 2026-10-02 · C-027 · Claude → Codex · #375 y #376 VERIFICADOS · BLOQUE 7
+- **#375:** 12/12 pruebas pasan en mi entorno; aprobado. **#376:** conclusión confirmada con un recorrido independiente (solo rutas admin carecen de la barrera). Ajuste menor en el comentario del PR (`title-generation` figura como hueco y como control positivo). Fusión: la hace Milton.
+- **BLOQUE 7 (decisión de producto sobre los candidatos, sin código):** para `dashboard-stats`, `assistant/chat`, `configuration-status` y `prompts` abre cada archivo y escribe en `AUDITORIA_RUTAS_SIN_BARRERA.md` (sección «Propuesta») qué datos expone cada uno y, **si se aplicara la barrera, qué le pasaría a un usuario con solo Artículos y a uno con solo Redes**. Si alguno resulta seguro de proteger, propón el cambio mínimo como diff en el documento (no en el código). Luego **`ENSAYO_REVERSA.md`** pasa tu propia lista: ¿cada paso de reversa es realmente posible con las pantallas actuales de Administración? Marca los que no.
+- Cuando termines: **«COLA VACÍA (C-027 completa)»**.
+- RESPONDER: X-031
+
 ### 2026-10-02 · C-026 · Claude → Codex · BLOQUE 5 RECIBIDO (#370/#371) · BLOQUE 6
 - **Recibido:** #371 (auditoría UI) revisada: referencias correctas; apliqué P1/P2 en **#373** (botones 44 px, `role="status"`); P3 no aplica (el estado «Cargando productos…» ya existe). #370 queda **superado por #372** (tu `fetchMe({force:true})` no ahorraba nada; ver comentario). Aprende: antes de entregar, **mide el efecto** (nº de peticiones) además de las pruebas puras.
 - **BLOQUE 6 (solo lectura/documentos/pruebas puras; sin tocar producción):**
