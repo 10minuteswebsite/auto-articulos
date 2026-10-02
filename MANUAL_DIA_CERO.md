@@ -27,11 +27,13 @@ Para Milton. Este manual no ejecuta nada: describe una ventana reversible para s
 6. Probar las tres direcciones, el router y una conexión OAuth desde cada subdominio. No tocar consolas.
 7. Smoke test final y bitácora.
 
+Es posible que, la primera vez después del Día Cero, a algunas personas se les pida entrar de nuevo con su usuario y contraseña de siempre porque las sesiones abiertas antes tienen una cookie anterior. No pierden nada. Conviene elegir una hora de poco uso.
+
 ## Cookies, OAuth y reversa
 
 Con `DIA_CERO=on`, sesión, «Acceder como» y state OAuth usan el comportamiento compartido de Día Cero. El state firmado conserva proveedor, origen, usuario, expiración y jti único.
 
-- Fallo cookies/OAuth: borrar `DIA_CERO` y redeplegar; vuelve el comportamiento anterior.
+- Fallo cookies/OAuth: borrar `DIA_CERO` y redeplegar; vuelve el comportamiento anterior de las cookies.
 - Fallo permisos: pulsar Revertir. Los SQL de `scripts/corte/` son solo plan B documentado; no usar SQL improvisado.
 - Fallo de vista: quitar `vista-productos`; fallo de derechos: mantener enforcement apagado.
 - Fallo DNS: retirar solo registros nuevos; nunca mover `seototal`.
