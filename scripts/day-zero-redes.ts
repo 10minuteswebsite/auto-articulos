@@ -19,6 +19,7 @@ export const REDES_FIELDS = [
 type Field = (typeof REDES_FIELDS)[number];
 type UserRow = { id: string; role: string; } & Record<Field, boolean>;
 export type RedesChange = { id: string; oldValues: Record<Field, boolean> };
+export type RedesChangeWithModule = RedesChange & { oldDisabledModules: string | null; moduleDisabled: boolean };
 
 export function planRedesChanges(users: UserRow[]): RedesChange[] {
   return users
@@ -28,6 +29,21 @@ export function planRedesChanges(users: UserRow[]): RedesChange[] {
       id: user.id,
       oldValues: Object.fromEntries(REDES_FIELDS.map((field) => [field, user[field]])) as Record<Field, boolean>,
     }));
+}
+
+export function planRedesChangesWithModule(users: Array<UserRow & { disabledModules: string | null }>): RedesChangeWithModule[] {
+  return users
+    .filter((user) => user.role !== "admin")
+    .map((user) => {
+      let moduleDisabled = false;
+      try {
+        const parsed = user.disabledModules ? JSON.parse(user.disabledModules) : null;
+        moduleDisabled = Array.isArray(parsed) ? parsed.includes("oportunidades-redes") : parsed?.["oportunidades-redes"] === "disabled";
+      } catch { /* se conserva el dato; no se interpreta como un bloqueo explícito */ }
+      return { id: user.id, oldDisabledModules: user.disabledModules, moduleDisabled,
+        oldValues: Object.fromEntries(REDES_FIELDS.map((field) => [field, user[field]])) as Record<Field, boolean> };
+    })
+    .filter((change) => !change.moduleDisabled && REDES_FIELDS.some((field) => change.oldValues[field] !== true));
 }
 
 function assertLocalOnly(): void {
