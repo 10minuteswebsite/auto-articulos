@@ -18,7 +18,11 @@ export default function DiaCeroPanel() {
     if (!state?.applied || checks) return;
     let cancelled = false;
     setChecks([null, null, null]);
-    void Promise.all(HOSTS.map(async (host) => { const controller = new AbortController(); const timeout = window.setTimeout(() => controller.abort(), CHECK_TIMEOUT_MS); try { await fetch(`${host}/login`, { cache: "no-store", mode: "no-cors", signal: controller.signal }); return true; } catch { return false; } finally { window.clearTimeout(timeout); } }))
+    void Promise.all(HOSTS.map(async (host) => {
+      const timeout = new Promise<false>((resolve) => window.setTimeout(() => resolve(false), CHECK_TIMEOUT_MS));
+      const request = fetch(`${host}/login`, { cache: "no-store", mode: "no-cors" }).then(() => true).catch(() => false);
+      return Promise.race([request, timeout]);
+    }))
       .then((results) => { if (!cancelled) setChecks(results); });
     return () => { cancelled = true; };
   }, [state?.applied, checks]);
