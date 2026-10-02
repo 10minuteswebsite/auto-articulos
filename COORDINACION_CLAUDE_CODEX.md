@@ -10756,3 +10756,52 @@ tarea.
 
 Responsable: Codex. Estado: listo para revisión/PR y prueba controlada en
 producción después de aplicar la migración.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-02
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-01
+(commit `59f7ae7`). Se revisó el rango `59f7ae7..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: 97 líneas agregadas (1 línea en blanco eliminada por una
+edición ajena, sin pérdida de contenido — confirmado con `git diff --stat` y revisando el
+diff completo), 6 entradas nuevas: el incidente `Load failed` de Rafael Zuzolo (commit
+`b23b9af9`), el cierre de CONEXION COMPOSIO PROBLEMA PEPE (PR #249), el reclamo de
+capitanía del Lote 1 «SEPARACION SEO TOTAL» — derechos por producto (PR #313, sin fusionar
+en ese momento), el cierre de ese mismo lote ya DESPLEGADO EN PRODUCCIÓN con la migración
+aplicada a mano por Milton en Supabase, el cierre de PINTEREST POR COMPOSIO (PR #276, ya
+propagado por la corrida anterior) y la auditoría autónoma MCP de Codex (capitanía de
+migración activa, PR sin fusionar).
+
+Se verificó contra `git ls-remote`/`git fetch`/`git merge-base --is-ancestor` que
+`claude/lote1-product-entitlements` (PR #313) ya está fusionada en `origin/main` (merge
+commit `9ba0170`, no es una reserva activa) y que `codex/mcp-autonomous-20261001` **sigue
+sin fusionar** (reserva activa de Codex, capitanía de migración sin liberar).
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: tres entradas nuevas — el fix de Rafael Zuzolo, el cierre
+  de PEPE (PR #249) y el Lote 1 de derechos por producto ya desplegado (PR #313, con la
+  alerta crítica del desalineamiento de `schema.prisma` con las columnas del HUB). La
+  entrada de Pinterest ya estaba propagada desde la corrida anterior, no se duplicó.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A con la verificación en vivo de las dos ramas
+  mencionadas arriba (Lote 1 fusionada, MCP autónomo de Codex sigue activa); Parte B con un
+  addendum listando los 4 nombres de conversación nuevos de este rango.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: nota nueva sobre el riesgo de que `migrate.yml` en su
+  ruta por defecto borre las columnas del HUB en producción porque `schema.prisma` de `main`
+  no las declara — señalado, sin tocar el schema ni el workflow.
+- `TO-DO.md`: sin cambios — ninguna idea suelta nueva sin ejecutar en este rango.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios — se verificó que la sección del
+  panel «Productos», el interruptor de derechos (Apagado/Sombra/Activo) y "Mi acceso" ya
+  documentan el Lote 1; el interruptor sigue apagado, así que no hay comportamiento visible
+  nuevo que reflejar. Las tools nuevas de la auditoría MCP de Codex (sitemaps, historial,
+  preferencias) no se propagan todavía porque esa PR no está fusionada.
+
+**Duda señalada, sin resolver por esta tarea** (ya estaba parcialmente señalada desde la
+corrida anterior, se repite en `CONTROLADOR_DE_VERSIONES.md` e
+`INVENTARIO_CONVERSACIONES.md` para que no se pierda): el commit `7474bd7` ("fix: reset
+category sync progress between attempts", fusionado en `origin/main` el 2026-09-30) sigue
+sin ninguna entrada correspondiente en este documento ni en `CONTROLADOR_DE_VERSIONES.md`.
+Queda para que Milton (o quien hizo ese commit) decida si hace falta completarlo.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
