@@ -377,7 +377,10 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
         </section>
       ) : (
         connections.map((connection) => {
-          const status = STATUS_LABEL[connection.status];
+          const status =
+            connection.status === "ACTIVE" && !connection.selection
+              ? { text: "Conectada · falta elegir", color: "#9a6700" }
+              : STATUS_LABEL[connection.status];
           const isBusy = busy === connection.app;
           const choice = choices[connection.app];
           if (inline && showInactiveActions && connection.status !== "ACTIVE") {
@@ -461,6 +464,20 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                     </strong>{" "}{connection.selection}
                   </p>
                 </div>
+              )}
+
+              {connection.status === "ACTIVE" && !connection.selection && !choice && (
+                <p
+                  role="status"
+                  style={{
+                    fontSize: 14,
+                    margin: "8px 0",
+                    color: "#9a6700",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  La cuenta está conectada, pero todavía no has elegido {connection.app === "google_search_console" ? "la propiedad de Search Console" : connection.app === "google_analytics" ? "la propiedad de Analytics" : connection.app === "facebook" ? "la Página de Facebook" : "la cuenta de Instagram"} que usará SEO TOTAL.
+                </p>
               )}
 
               {choice && (
