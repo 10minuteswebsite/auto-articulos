@@ -2,6 +2,7 @@
 
 import { MENU_NAMES } from "@/lib/menu-names";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import ModuleIntro, { IntroP, Modulo } from "@/components/ModuleIntro";
 import Link from "next/link";
 import { sectionStyle, h2Style, buttonStyle } from "@/components/dashboard-ui";
@@ -21,6 +22,10 @@ type SocialRun = {
 };
 
 export default function PublicacionesEnCursoPage() {
+  const searchParams = useSearchParams();
+  const producto = searchParams.get("producto");
+  const soloArticulos = producto === "articulos";
+  const soloRedes = producto === "redes";
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [socialRuns, setSocialRuns] = useState<SocialRun[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,9 +132,9 @@ export default function PublicacionesEnCursoPage() {
           <p style={{ margin: "6px 0 0", fontSize: 13 }}>{workerWarning}</p>
         </section>
       )}
-      {activeRuns.length > 0 || socialRuns.length > 0 ? (
+      {(!soloRedes && activeRuns.length > 0) || (!soloArticulos && socialRuns.length > 0) ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {activeRuns.map((run) => (
+          {!soloRedes && activeRuns.map((run) => (
             <LiveProgress
               key={run.id}
               run={run}
@@ -137,7 +142,7 @@ export default function PublicacionesEnCursoPage() {
               platformDomain={platformDomain}
             />
           ))}
-          {socialRuns.length > 0 && (
+          {!soloArticulos && socialRuns.length > 0 && (
             <section
               style={{
                 borderTop: "1px solid #d2d2d7",

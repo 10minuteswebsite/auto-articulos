@@ -70,6 +70,19 @@ export const SYSTEM_MODULES: SystemModule[] = [
     description: "Ajustes de cuenta, idioma, integraciones y llaves del sistema.",
   },
   {
+    // INTERRUPTOR de la vista por productos (proyecto «SEPARACION DE SEO TOTAL»,
+    // Lote 2). Es un módulo «opt-in»: lo ven los administradores (vista previa)
+    // y SOLO las cuentas con «Habilitado» en Administración. Mientras tanto,
+    // nadie más nota ningún cambio. Para abrirlo a todos se quita `optIn`, que
+    // es exactamente lo que pide la regla de los módulos opt-in.
+    id: "vista-productos",
+    label: "Vista por productos (SEO Total Artículos / SEO Total Redes)",
+    href: "/dashboard/articulos",
+    description:
+      "Organiza el menú y el inicio en dos productos: SEO Total Artículos y SEO Total Redes. Vista previa para administradores hasta que se abra a todos.",
+    optIn: true,
+  },
+  {
     id: "conexion-composio",
     label: "Conexión por Composio",
     href: "/dashboard/configuracion/conexiones",

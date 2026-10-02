@@ -19,8 +19,10 @@ import FacebookSection from "@/components/FacebookSection";
 import InstagramSection from "@/components/InstagramSection";
 import { ConnectionReturnSuccess, LEGACY_RETURN_NETWORKS, useConnectionReturn } from "@/components/ConnectionReturn";
 import { ConnectionReturnContext } from "@/components/connection-return-context";
+import { isConnectionVisible, isProductViewAllowed } from "@/lib/product-view-filter";
 
 type Vista = "analiticas" | "difusion";
+type Producto = "articulos" | "redes";
 type ConexionId = "google-search-console" | "google-analytics" | "bing-webmaster" | "instagram" | "facebook" | "threads" | "linkedin" | "pinterest" | "tumblr" | "bluesky" | "devto" | "blogger" | "business-profile";
 
 const VISTAS: { id: Vista; label: string; ayuda: string }[] = [
@@ -55,6 +57,7 @@ export default function ConexionesView() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [vista, setVista] = useState<Vista | null>(null);
+  const [producto, setProducto] = useState<Producto | null>(null);
   const [conexion, setConexion] = useState<ConexionId | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [modulosDeshabilitados, setModulosDeshabilitados] = useState<string[]>([]);
@@ -83,10 +86,16 @@ export default function ConexionesView() {
 
   useEffect(() => {
     const pedida = searchParams.get("vista");
+    const productoPedido = searchParams.get("producto");
+    const productoValido = productoPedido === "articulos" || productoPedido === "redes" ? productoPedido : null;
+    setProducto(productoValido);
     const conexionPedida = searchParams.get("conexion") as ConexionId | null;
     if (conexionPedida) {
       setConexion(conexionPedida);
       setVista(["google-search-console", "google-analytics", "bing-webmaster"].includes(conexionPedida) ? "analiticas" : "difusion");
+    } else if (productoValido) {
+      setConexion(null);
+      setVista(productoValido === "articulos" ? "analiticas" : "difusion");
     } else if (pedida === "difusion" || pedida === "analiticas") {
       setConexion(null);
       setVista(pedida);
@@ -143,6 +152,7 @@ export default function ConexionesView() {
   }, [searchParams]);
 
   function elegir(siguiente: Vista) {
+    if (!isProductViewAllowed(producto, siguiente)) return;
     setVista(siguiente);
     const params = new URLSearchParams(window.location.search);
     params.set("vista", siguiente);
@@ -195,7 +205,7 @@ export default function ConexionesView() {
             <h2 id={`grupo-${grupo.vista}`} style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#1d1d1f" }}>{grupo.titulo}</h2>
             <p style={{ margin: "5px 0 0", color: "#6e6e73", fontSize: 13, lineHeight: 1.45 }}>{grupo.descripcion}</p>
           </div>
-          {tarjetas.filter((card) => card.view === grupo.vista).map((card) => (
+          {tarjetas.filter((card) => isConnectionVisible(producto, grupo.vista, card.id) && (card.view === grupo.vista || (producto === "redes" && card.id === "google-search-console"))).map((card) => (
           <button
             key={card.n}
             type="button"
@@ -277,7 +287,7 @@ export default function ConexionesView() {
         </button>
       )}
       {conexion && <button type="button" onClick={volverAConexiones} style={{ margin: "0 0 16px", padding: 0, border: 0, background: "transparent", color: "#1d1d1f", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>← Volver a Conexiones</button>}
-      {!conexion && <div style={{ display: "flex", gap: 10, flexWrap: "wrap", margin: "4px 0 6px" }} role="tablist" aria-label="Tipo de conexión">
+      {!conexion && !producto && <div style={{ display: "flex", gap: 10, flexWrap: "wrap", margin: "4px 0 6px" }} role="tablist" aria-label="Tipo de conexión">
         {VISTAS.map((v) => (
           <button key={v.id} type="button" role="tab" aria-selected={vista === v.id} onClick={() => elegir(v.id)} style={botonVista(vista === v.id)}>{v.label}</button>
         ))}
