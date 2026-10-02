@@ -39,6 +39,7 @@ test("las APIs de cada producto también tienen una frontera explícita", () => 
 
 test("las actualizaciones históricas sin ruta se separan por su contenido", () => {
   assert.equal(productOfUpdate({ modulePath: null, title: "Guías de redes sociales", summary: "Conecta Instagram y LinkedIn", example: "" }), "REDES");
+  assert.equal(productOfUpdate({ modulePath: null, title: "Sincronización automática de publicaciones con redes sociales (Threads, X y LinkedIn)", summary: "Cada artículo publicado puede crear una publicación", example: "" }), "REDES");
   assert.equal(productOfUpdate({ modulePath: null, title: "Sugerencias de oportunidades de contenido SEO", summary: "Analiza Google Search Console y crea títulos", example: "" }), "ARTICULOS");
   assert.equal(productOfUpdate({ modulePath: null, title: "Nuevo estilo visual", summary: "La plataforma se ve más clara", example: "" }), "COMPARTIDO");
 });

@@ -155,9 +155,12 @@ export function productOfUpdate(update: {
   const routeProduct = productOfPath(update.modulePath);
   if (routeProduct !== "COMPARTIDO") return routeProduct;
 
-  const text = `${update.title} ${update.summary} ${update.example ?? ""}`.toLocaleLowerCase("es");
+  const title = update.title.toLocaleLowerCase("es");
+  const text = `${title} ${update.summary} ${update.example ?? ""}`.toLocaleLowerCase("es");
   const hablaDeRedes = /redes sociales|blogs públicos|instagram|facebook|threads|linkedin|pinterest|tumblr|bluesky|business profile|difusión social|publicaciones en redes|carruseles|reels/.test(text);
   const hablaDeArticulos = /artículos|artículo|títulos|categorías|google search console|google analytics|bing webmaster|oportunidades de contenido|redacción|blog de tu página/.test(text);
+  const tituloExclusivoDeRedes = /redes sociales|nuevas redes|publicar en redes|publicaciones en redes|blogs públicos/.test(title);
+  if (tituloExclusivoDeRedes) return "REDES";
   if (hablaDeRedes && !hablaDeArticulos) return "REDES";
   if (hablaDeArticulos && !hablaDeRedes) return "ARTICULOS";
   return "COMPARTIDO";
