@@ -23,3 +23,11 @@ test("no revoca por omisión y reporta entradas desconocidas", () => {
   assert.deepEqual(result.transitions, []);
   assert.deepEqual(result.unknown, [{ appId: "other", allowed: true }]);
 });
+
+test("acepta el formato agrupado por productos", () => {
+  const result = applyHubEntitlements([], [{ products: { ARTICULOS: { status: "trialing" }, REDES: { status: "revoked" } } }], {});
+  assert.deepEqual(result.transitions.map(({ product, to }) => ({ product, to })), [
+    { product: "articulos", to: "ACTIVE" },
+    { product: "redes", to: "INACTIVE" },
+  ]);
+});

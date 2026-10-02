@@ -19,6 +19,7 @@ export type HubEntitlement = {
   product?: string;
   allowed?: boolean;
   status?: string;
+  products?: Record<string, { allowed?: boolean; status?: string }>;
 };
 
 export type EntitlementTransition = {
@@ -37,8 +38,8 @@ export type ApplyHubResult = {
 
 function desiredStatus(item: HubEntitlement): EntitlementStatus | null {
   if (typeof item.allowed === "boolean") return item.allowed ? "ACTIVE" : "INACTIVE";
-  if (item.status === "active" || item.status === "ACTIVE") return "ACTIVE";
-  if (item.status === "inactive" || item.status === "INACTIVE" || item.status === "denied") return "INACTIVE";
+  if (["active", "ACTIVE", "trialing", "granted", "concession"].includes(item.status ?? "")) return "ACTIVE";
+  if (["inactive", "INACTIVE", "denied", "cancelled", "expired", "revoked", "blocked"].includes(item.status ?? "")) return "INACTIVE";
   return null;
 }
 
@@ -67,7 +68,11 @@ export function applyHubEntitlements(
   const byProduct = new Map(current.map((item) => [item.product, item]));
   const transitions: EntitlementTransition[] = [];
   const unknown: HubEntitlement[] = [];
-  for (const item of incoming) {
+  const expanded = incoming.flatMap((item) => {
+    if (!item.products) return [item];
+    return Object.entries(item.products).map(([product, value]) => ({ product, ...value }));
+  });
+  for (const item of expanded) {
     const product = item.product as ProductKey | undefined ?? (item.appId ? appToProduct[item.appId] : undefined);
     const status = desiredStatus(item);
     if ((product !== "articulos" && product !== "redes") || !status) {
