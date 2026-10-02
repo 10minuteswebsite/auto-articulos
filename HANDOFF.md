@@ -2002,3 +2002,8 @@ de una decisión aparte de Milton sobre si borrarlos.
 - Producción verificada: `/login` respondió HTTP 200.
 
 Estado: CERRADO, DESPLEGADO Y SIN PENDIENTES.
+## Cierre y archivo — Carmen Aguilar / Google Search Console — 2026-10-02
+
+El incidente quedó resuelto en producción. La interfaz ya no afirma que GSC está conectado cuando Composio no devuelve ninguna propiedad utilizable; muestra configuración incompleta o conexión sin propiedades y orienta a revisar permisos/cuenta o reconectar. Deployment verificado: `dpl_vMF5BV3DBZagVoEj3VCorCbFmMRD` (`READY`), dominio `/login` HTTP 200. Sin migraciones ni cambios destructivos.
+
+Estado: CERRADO Y ARCHIVADO.

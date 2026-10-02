@@ -1130,6 +1130,14 @@ de que Tumblr rechazó también la renovación silenciosa y hace falta
 reconectar por OAuth.
 Estado: VERIFICADA
 
+## Cierre y archivo — 2026-10-02 — CARMEN AGUILAR CONEXION GSC
+
+Incidente cerrado y archivado. Se corrigió el estado engañoso de Composio para que una autorización sin propiedades utilizables no se muestre como conectada: la interfaz muestra “No conectada · sin propiedades disponibles” o “Configuración incompleta · falta elegir” y explica que se debe revisar la cuenta/permisos o reconectar.
+
+Commits finales publicados en `main`: `f5d1b6b2` (comportamiento) y `189379b1` (configuración Vercel; rebaseado posteriormente). Deployment final verificado: `dpl_vMF5BV3DBZagVoEj3VCorCbFmMRD`, estado `READY`; `https://seototal.lasolucionweb.com/login` respondió HTTP 200. Sin schema, migraciones ni acciones destructivas. Pendiente operativa para Carmen: reconectar la cuenta de Google que sí tenga una propiedad de Search Console accesible.
+
+Estado: CERRADO Y ARCHIVADO.
+
 ## Versión desplegada y verificada — 2026-09-24 — corrección de retornos OAuth
 
 Fecha y hora: 2026-09-24
