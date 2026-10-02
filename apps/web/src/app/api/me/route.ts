@@ -10,6 +10,7 @@ import {
   parseUserModuleOverrides,
 } from "@/lib/modules";
 import { hasSocialModuleAccess } from "@/lib/social-access";
+import { getProductsSummary } from "@/lib/product-access";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -29,6 +30,10 @@ export async function GET() {
   const disabledModules = getEffectiveDisabledModules(user, globalDisabledModules);
   const userDisabledModules = parseUserDisabledModules(user.disabledModules);
   const moduleOverrides = parseUserModuleOverrides(user.disabledModules);
+  // Derechos por producto (proyecto «SEPARACION DE SEO TOTAL», Lote 1). Es solo
+  // informativo y A PRUEBA DE FALLOS: si la tabla aún no existe devuelve null y
+  // el resto de la respuesta no cambia. Ningún campo anterior se modifica.
+  const products = await getProductsSummary(user.id);
 
   return NextResponse.json(
     {
@@ -94,6 +99,7 @@ export async function GET() {
       userDisabledModules,
       moduleOverrides,
       globalDisabledModules,
+      products,
     },
     {
       headers: {

@@ -1,4 +1,4 @@
-import { MENU_NAMES, MENU_NAMES_ANTERIORES as ANTES } from "../lib/menu-names";
+import { MENU_NAMES, MENU_NAMES_ANTERIORES as ANTES, PRODUCT_NAMES } from "../lib/menu-names";
 
 /**
  * Manual base de uso. Se revisa cuando cambia una función estable del sistema.
@@ -46,7 +46,7 @@ En el teléfono, ese recuadro de explicación aparece plegado por defecto en las
 
 ## El menú
 
-El menú superior tiene, en este orden: **Inicio**, **Cómo funciona esta aplicación**, **Publicaciones** y **Configuración**. Dentro de **Publicaciones** están **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}**, **${MENU_NAMES.redes}**, el progreso y el historial. Dentro de **Configuración** están la configuración general y las actualizaciones. Los administradores ven además **Administración**, que también se despliega y contiene **Usuarios** (/dashboard/usuarios) y **Composio** (/dashboard/composio).
+El menú superior tiene, en este orden: **Inicio**, **Cómo funciona esta aplicación**, **Publicaciones** y **Configuración**. Dentro de **Publicaciones** están **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}**, **${MENU_NAMES.redes}**, el progreso y el historial. Dentro de **Configuración** están la configuración general y las actualizaciones. Los administradores ven además **Administración**, que también se despliega y contiene **Usuarios** (/dashboard/usuarios) y **Composio** (/dashboard/composio). En la ficha de cada usuario, los administradores tienen la sección **Productos**: ahí ven los dos productos en que se separa SEO TOTAL (**${PRODUCT_NAMES.ARTICULOS}** y **${PRODUCT_NAMES.REDES}**), pueden activarlos o desactivarlos y dar o quitar días de gracia. Por ahora ese control solo prepara los datos: no cambia lo que ve ningún usuario.
 
 **Publicaciones** no es una pantalla: es un grupo que se despliega. Dentro están cinco accesos relacionados con publicar y revisar tus resultados:
 

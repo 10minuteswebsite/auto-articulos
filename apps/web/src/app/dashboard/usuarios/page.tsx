@@ -31,6 +31,7 @@ import {
 } from "@auto-articulos/shared";
 import { trialDaysRemaining } from "@/lib/trial";
 import { SYSTEM_MODULES } from "@/lib/modules";
+import UserProductsPanel from "./UserProductsPanel";
 
 interface UserRow {
   id: string;
@@ -3013,6 +3014,13 @@ function UserCard({
               )}
             </div>
           </Row>
+        </Section>
+
+        <Section
+          title="Productos"
+          note="Qué productos de SEO Total tiene esta cuenta y su tiempo de gracia. Mientras el interruptor de aplicación esté apagado, estos cambios solo preparan los datos y no bloquean a nadie."
+        >
+          <UserProductsPanel userId={user.id} />
         </Section>
 
         <Section title="Difusión: redes sociales y blogs" note="Es el control de las publicaciones en redes y blogs: aprobación de cada red y cuántas publicaciones por día puede hacer esta cuenta en cada formato. Cada red que no tenga un valor guardado permite 1 por día; 0 la bloquea.">

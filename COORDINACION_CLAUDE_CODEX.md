@@ -22,6 +22,16 @@
   y confirmó el 2026-10-01 que el caso quedó resuelto.
 - Capitanía reclamada y liberada por Claude. Estado: CERRADO Y ARCHIVADO.
 
+## Claude — LOTE 1 «SEPARACION SEO TOTAL»: derechos por producto (base invisible) — 2026-10-01
+
+- Proyecto: «SEPARACION DE SEO TOTAL DE REDES TOTALES» (canal vivo: `CONTROL_SEPARACION_SEO_TOTAL.md`; documentos en `TRASPASO_SEPARACION_SEO_TOTAL.md`). Capitán del lote: Claude. Rama `claude/lote1-product-entitlements`, worktree `/private/tmp/separacion-lote1`.
+- Reclamo de capitanía de migración: `migration-coordinator.sh claim "Claude" "Lote 1 SEPARACION SEO TOTAL: tablas ProductEntitlement (migración aditiva)"` — solo para empujar la rama y abrir el PR; **la migración NO se aplica** sin la autorización de Milton.
+- Archivos reservados: `packages/db/prisma/schema.prisma`, `packages/db/prisma/migrations/20261002000000_add_product_entitlements/`, `packages/shared/src/index.ts`, `packages/shared/src/product-access-core.ts`, `apps/web/src/lib/product-access.ts`, `product-enforcement.ts` (+ pruebas), `menu-names.ts`, `apps/web/src/app/api/admin/users/[id]/entitlements/route.ts`, `apps/web/src/app/api/admin/users/route.ts`, `apps/web/src/app/api/auth/trial-signup/route.ts`, `apps/web/src/app/api/me/route.ts`, `apps/web/src/app/dashboard/usuarios/page.tsx` y `UserProductsPanel.tsx`, `apps/web/src/content/manual-usuario.ts`.
+- Qué es: tablas de derechos por producto con interruptor de aplicación **apagado por defecto** (nada bloquea a nadie), panel «Productos» en Administración y bloque `products` en `/api/me`. Ningún guard existente cambia.
+- Auditorías: tres, documentadas en `AUDITORIAS_LOTE_1_SEPARACION_SEO_TOTAL.md` (21 pruebas nuevas; suite web 105/105; typecheck web y worker limpios; migración probada en un Postgres desechable sobre el esquema real de `main`; build de `apps/web` OK).
+- Estado: **PR abierto, sin fusionar; migración sin aplicar; sin despliegue.** Pendiente: revisión cruzada de Codex y autorización de Milton (Protocolo de No Destrucción). Para aplicar la migración hay que reclamar de nuevo la capitanía.
+- Hallazgo ajeno: `migrate deploy` desde base vacía falla en `20260823150000_add_tumblr_integration` (no se tocó).
+
 ## Claude — CIERRE fix «Conectar GSC», estado de GSC y conteo de categorías en Oportunidades — 2026-09-28
 
 - Reclamo de capitanía (sin migración): `migration-coordinator.sh claim "Claude"`.

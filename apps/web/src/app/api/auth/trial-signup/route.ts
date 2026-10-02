@@ -4,6 +4,7 @@ import { prisma } from "@auto-articulos/db";
 import { encryptSecret } from "@auto-articulos/shared";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
 import { TRIAL_DAYS } from "@/lib/trial";
+import { ensureDefaultEntitlements } from "@/lib/product-access";
 
 // Registro público desde el botón "Solicitar prueba" en Login — pedido
 // explícito del usuario, 13/8/2026. A diferencia de POST /api/admin/users
@@ -102,6 +103,9 @@ export async function POST(request: NextRequest) {
       trialUnlocked: false,
     },
   });
+
+  // Derechos por producto de la cuenta nueva (Artículos activo, como hoy).
+  await ensureDefaultEntitlements(user.id);
 
   const token = await createSessionToken(user.id);
   const response = NextResponse.json({ ok: true, trialDays: TRIAL_DAYS });
