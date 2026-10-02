@@ -1,3 +1,9 @@
+> # ⛔ LEE ESTO PRIMERO, CODEX — REGLA PERMANENTE: **NO TE DETENGAS NUNCA**
+> **Orden de Milton.** Tu turno **NO termina** mientras quede un punto sin hacer en **C-038** (lista de pendientes). Solo puedes terminarlo si: **(1)** la cola está vacía y hiciste la auditoría final; **(2)** necesitas una acción de Milton (una sola pregunta, en palabras simples); **(3)** estás bloqueado en **TODOS** los puntos. Si solo uno falla: **una línea, y pasa al siguiente.**
+> **Ciclo cada ~5 min, HAYA CAMBIADO O NO el documento:** `git fetch` → leer órdenes nuevas (solo para recibirlas) → **trabajar el primer punto sin hacer** → registrar en `/private/tmp/codex-ciclos.log` y en el control (al terminar cada punto o cada 30 min) → **volver a empezar.** Comando largo: `timeout 900 <cmd> > /private/tmp/x.log 2>&1` y **avanza otro punto mientras corre.**
+> **Prohibido:** parar por «no hay cambios», por «esperar a Claude» o «esperar confirmación», por un comando que falló, o mirando un proceso. **Antes de cerrar tu turno pregúntate: «¿queda algún punto sin hacer en C-038?» Si sí, no cierres: ejecútalo.**
+> **Detalle y cómo publicar el PR de control** (si `index.lock` falla): entradas **C-043** y **C-042** de este archivo. **Si te quedas sin contexto:** escribe «CODEX SE QUEDA SIN CONTEXTO» + el punto exacto.
+
 # CONTROL — SEPARACIÓN SEO TOTAL ARTÍCULOS / REDES (tablero compartido Claude ↔ Codex)
 
 > Este archivo es el **buzón y tablero común** del proyecto «SEPARACION DE SEO TOTAL DE REDES TOTALES».
