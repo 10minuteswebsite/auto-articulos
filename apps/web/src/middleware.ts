@@ -10,6 +10,7 @@ import {
 } from "./lib/session";
 import { applyCookie } from "./lib/shared-cookies";
 import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
+import { productOfApiPath, productOfHost, productOfPath, type HostProductScope } from "./lib/product-routes";
 
 const PUBLIC_PATHS = [
   "/login",
@@ -53,6 +54,9 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.next();
   }
+
+  const productBoundary = productBoundaryResponse(request);
+  if (productBoundary) return productBoundary;
 
   // El servidor MCP lo consumen clientes sin navegador (Alexa+, Claude), que
   // no tienen cookies: mandan `Authorization: Bearer`. Se resuelve acá y no
@@ -129,6 +133,32 @@ export async function middleware(request: NextRequest) {
   }
 
   return response;
+}
+
+/** Bloquea fugas por URL directa entre los dos subdominios de producto. */
+function productBoundaryResponse(request: NextRequest): NextResponse | null {
+  const hostProduct = productOfHost(request.headers.get("host"));
+  if (hostProduct === "COMPARTIDO") return null;
+
+  const scope = request.nextUrl.pathname.startsWith("/api/")
+    ? productOfApiPath(request.nextUrl.pathname)
+    : productOfPath(request.nextUrl.pathname);
+  if (scope === "COMPARTIDO" || scope === "ADMIN" || scope === hostProduct) return null;
+
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.json(
+      { error: "Esta ruta pertenece al otro producto." },
+      { status: 404, headers: NO_CACHE_HEADERS },
+    );
+  }
+
+  const target = new URL(hostProductDashboard(hostProduct), request.url);
+  target.search = "";
+  return NextResponse.redirect(target);
+}
+
+function hostProductDashboard(product: HostProductScope): string {
+  return product === "REDES" ? "/dashboard/redes" : "/dashboard/articulos";
 }
 
 /**
