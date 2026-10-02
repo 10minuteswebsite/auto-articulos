@@ -4,7 +4,7 @@ Cruce de las decisiones del traspaso, blueprint y Fase 0 con el código actual d
 
 | Decisión | Implementación comprobada | Estado |
 |---|---|---|
-| Login `legacy`, `dual`, `hub`; hoy `legacy` | `apps/web/src/middleware.ts` y sesión existente | Hecho / legacy activo |
+| Login `legacy`, `dual`, `hub`; hoy `legacy` | `apps/web/src/middleware.ts` y sesión existente; no existe implementación dual/HUB en este proyecto | Parcial / legacy activo |
 | No redirigir todo el dominio viejo al HUB | Hosts y rutas de máquina separados; callbacks por host | Hecho |
 | Derechos desde base local, no token | `product-access.ts`, `product-access-core.ts`, `/api/me` | Hecho |
 | Dos productos Artículos/Redes | schema, `PRODUCT_NAMES`, `PRODUCT_ROUTES`, paneles | Hecho |
@@ -19,7 +19,7 @@ Cruce de las decisiones del traspaso, blueprint y Fase 0 con el código actual d
 | Mi acceso solo lectura | `dashboard/mi-acceso/page.tsx`, `/api/me` | Hecho |
 | Administración y eventos | endpoint de entitlements, `UserProductsPanel.tsx` | Hecho |
 | Callbacks OAuth por host de origen | helpers OAuth y pruebas hostiles | Hecho; consolas pendientes |
-| Host estable solo MCP/OAuth2/.well-known | `middleware.ts` y rutas de máquina | Hecho |
+| Host estable solo MCP/OAuth2/.well-known | Diseño documentado; no hay un host estable implementado en este proyecto | Pendiente / diseño |
 | Contrato externo con versión/jti/idempotencia | documento de Lote 4 | Documentado; receptor fuera de alcance |
 | Capitanía única y no destrucción | runbook/control/coordinación | Hecho como protocolo |
 | Schema HUB alineado con main | `schema.prisma` omite cinco columnas existentes | **Pendiente / alerta crítica** |

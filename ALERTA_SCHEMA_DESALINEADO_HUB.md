@@ -11,6 +11,7 @@ Producción contiene en `User` las columnas `hubUserId`, `hubAuth0Sub`, `hubSync
 - Las columnas llegaron desde `codex/hub-seo-total-migration`, run #73 del workflow, el 2026-10-01 21:11Z.
 - Los runs #74 (main) y #75 (rama de verificación) abortaron sin cambios al detectar la divergencia.
 - El `schema.prisma` actual de `main` no contiene esas cinco columnas.
+- La reproducción en base desechable documentada por Claude confirma que `db push` produce el mismo error; al declarar las cinco columnas, Prisma informa «already in sync» sin tocar los datos.
 
 Para repetir la comprobación sin mutar nada:
 
