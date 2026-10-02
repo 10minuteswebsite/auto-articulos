@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/current-user";
 import { auditLog } from "@/lib/audit";
 import { getEnforcementMode, parseEnforcementMode, setEnforcementMode } from "@/lib/product-enforcement";
+import { checkModeTransition } from "@/lib/product-enforcement-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +28,15 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "mode debe ser off, shadow o enforce" }, { status: 400 });
     }
     const mode = parseEnforcementMode(body.mode);
+    // Reglas de seguridad del cambio: a «Activo» solo desde «Sombra» y con
+    // confirmación escrita. Volver atrás siempre es libre.
+    const previous = await getEnforcementMode();
+    const check = checkModeTransition({ current: previous, next: mode, confirmation: body.confirm });
+    if (!check.ok) {
+      return NextResponse.json({ error: check.error }, { status: 409 });
+    }
     await setEnforcementMode(mode);
-    auditLog("product_enforcement_updated", adminId, { mode });
+    auditLog("product_enforcement_updated", adminId, { from: previous, to: mode });
     return NextResponse.json({ mode });
   } catch (error) {
     console.error("[admin/product-enforcement] PUT error:", error);
