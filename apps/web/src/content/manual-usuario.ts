@@ -29,6 +29,10 @@ También puedes volver a abrir el Asistente en cualquier momento desde **Configu
 
 Ruta: /dashboard
 
+### Las dos plataformas de SEO TOTAL
+
+SEO TOTAL está separado en dos entradas del mismo servicio: **SEO Total Artículos** en https://articulos.lasolucionweb.com y **SEO Total Redes** en https://redes.lasolucionweb.com. Usa la dirección que corresponda a lo que quieres hacer. Tu usuario y contraseña siguen siendo los mismos; la separación no te quita el acceso. El sistema ya no muestra una prueba automática de 7 días: el acceso lo administra la cuenta y las reglas vigentes del servicio.
+
 Inicio es tu centro de operaciones. **Si tu cuenta tiene activa la vista por productos** (ver «El menú»), Inicio muestra en cambio dos tarjetas, **${PRODUCT_NAMES.ARTICULOS}** y **${PRODUCT_NAMES.REDES}**; lo que sigue describe el Inicio estándar:
 - **Para cuentas nuevas (sin artículos aún):** Muestra de forma exclusiva el Asistente de Configuración Inicial, sin menú ni accesos directos, para que completes tu puesta a punto sin distracciones.
 - **Para cuentas ya configuradas:** Muestra únicamente el título **Acciones posibles** y tres tarjetas: **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}** y **${MENU_NAMES.redes}**. En móvil se muestran en una sola columna para que cada acción sea fácil de pulsar.
