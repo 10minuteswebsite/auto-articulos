@@ -5,6 +5,7 @@ import { encryptSecret } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { GOOGLE_ANALYTICS_STATE_COOKIE, googleAnalyticsOAuthConfig } from "@/lib/google-analytics-oauth";
 import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
   const target = new URL("/dashboard/configuracion", oauthReturnBase(request));
   if (!state || state !== store.get(GOOGLE_ANALYTICS_STATE_COOKIE)?.value || !code) {
     target.searchParams.set("googleAnalytics", "error");
-    return NextResponse.redirect(target);
+    return oauthErrorRedirect(request, "/dashboard/configuracion", [GOOGLE_ANALYTICS_STATE_COOKIE]);
   }
   try {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });

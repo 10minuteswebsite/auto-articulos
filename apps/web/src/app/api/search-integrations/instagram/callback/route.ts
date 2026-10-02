@@ -9,6 +9,7 @@ import { canUseSocialModule } from "@/lib/social-access";
 import { INSTAGRAM_STATE_COOKIE } from "../connect/constants";
 import { clearCookie } from "@/lib/shared-cookies";
 import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -17,9 +18,7 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
 
   if (!state || state !== cookieStore.get(INSTAGRAM_STATE_COOKIE)?.value || !code) {
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("instagram", "error"), oauthReturnBase(request))
-    );
+    return oauthErrorRedirect(request, connectionReturnPath("instagram", "error"), [INSTAGRAM_STATE_COOKIE]);
   }
 
   try {
@@ -71,8 +70,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error: any) {
     console.error("Error en Instagram OAuth callback:", error);
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("instagram", "error"), oauthReturnBase(request))
-    );
+    return oauthErrorRedirect(request, connectionReturnPath("instagram", "error"), [INSTAGRAM_STATE_COOKIE]);
   }
 }

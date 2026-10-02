@@ -9,17 +9,18 @@ import { canPublishToNetwork } from "@/lib/social-access";
 import { PINTEREST_STATE_COOKIE } from "../connect/constants";
 import { clearCookie } from "@/lib/shared-cookies";
 import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
   if (!(await canPublishToNetwork(userId, "pinterest"))) {
-    return NextResponse.redirect(new URL(connectionReturnPath("pinterest", "forbidden"), oauthReturnBase(request)));
+    return oauthErrorRedirect(request, connectionReturnPath("pinterest", "forbidden"), [PINTEREST_STATE_COOKIE]);
   }
   const cookieStore = await cookies();
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
   if (!state || state !== cookieStore.get(PINTEREST_STATE_COOKIE)?.value || !code) {
-    return NextResponse.redirect(new URL(connectionReturnPath("pinterest", "error"), oauthReturnBase(request)));
+    return oauthErrorRedirect(request, connectionReturnPath("pinterest", "error"), [PINTEREST_STATE_COOKIE]);
   }
   try {
     const credentials = await getStoredPinterestAppCredentials();
@@ -36,6 +37,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Error en Pinterest OAuth callback:", error);
-    return NextResponse.redirect(new URL(connectionReturnPath("pinterest", "error"), oauthReturnBase(request)));
+    return oauthErrorRedirect(request, connectionReturnPath("pinterest", "error"), [PINTEREST_STATE_COOKIE]);
   }
 }

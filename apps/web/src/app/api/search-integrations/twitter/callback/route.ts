@@ -7,6 +7,7 @@ import { getStoredTwitterAppCredentials } from "@/lib/twitter-app-config";
 import { TWITTER_STATE_COOKIE, TWITTER_VERIFIER_COOKIE } from "../connect/constants";
 import { clearCookie } from "@/lib/shared-cookies";
 import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -15,16 +16,12 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
 
   if (!state || state !== cookieStore.get(TWITTER_STATE_COOKIE)?.value || !code) {
-    return NextResponse.redirect(
-      new URL("/dashboard/configuracion?twitter=error", oauthReturnBase(request))
-    );
+    return oauthErrorRedirect(request, "/dashboard/configuracion?twitter=error", [TWITTER_STATE_COOKIE, TWITTER_VERIFIER_COOKIE]);
   }
 
   const codeVerifier = cookieStore.get(TWITTER_VERIFIER_COOKIE)?.value;
   if (!codeVerifier) {
-    return NextResponse.redirect(
-      new URL("/dashboard/configuracion?twitter=error", oauthReturnBase(request))
-    );
+    return oauthErrorRedirect(request, "/dashboard/configuracion?twitter=error", [TWITTER_STATE_COOKIE, TWITTER_VERIFIER_COOKIE]);
   }
 
   try {
@@ -62,8 +59,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Error en Twitter OAuth callback:", error);
-    return NextResponse.redirect(
-      new URL("/dashboard/configuracion?twitter=error", oauthReturnBase(request))
-    );
+    return oauthErrorRedirect(request, "/dashboard/configuracion?twitter=error", [TWITTER_STATE_COOKIE, TWITTER_VERIFIER_COOKIE]);
   }
 }

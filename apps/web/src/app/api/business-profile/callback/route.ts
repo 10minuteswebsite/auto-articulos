@@ -9,6 +9,7 @@ import {
   businessProfileOAuthConfig,
 } from "@/lib/google-oauth";
 import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
@@ -21,9 +22,7 @@ export async function GET(request: NextRequest) {
     state !== cookieStore.get(BUSINESS_PROFILE_STATE_COOKIE)?.value ||
     !code
   ) {
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("business-profile", "error"), oauthReturnBase(request)),
-    );
+    return oauthErrorRedirect(request, connectionReturnPath("business-profile", "error"), [BUSINESS_PROFILE_STATE_COOKIE]);
   }
   try {
     const config = businessProfileOAuthConfig();
@@ -65,8 +64,6 @@ export async function GET(request: NextRequest) {
     clearOAuthOrigin(response);
     return response;
   } catch {
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("business-profile", "error"), oauthReturnBase(request)),
-    );
+    return oauthErrorRedirect(request, connectionReturnPath("business-profile", "error"), [BUSINESS_PROFILE_STATE_COOKIE]);
   }
 }

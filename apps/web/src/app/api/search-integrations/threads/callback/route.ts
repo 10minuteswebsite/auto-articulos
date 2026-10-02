@@ -9,6 +9,7 @@ import { canPublishToNetwork } from "@/lib/social-access";
 import { THREADS_STATE_COOKIE } from "../connect/constants";
 import { clearCookie } from "@/lib/shared-cookies";
 import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -17,9 +18,7 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
 
   if (!(await canPublishToNetwork(userId, "threads")) || !state || state !== cookieStore.get(THREADS_STATE_COOKIE)?.value || !code) {
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("threads", "error"), oauthReturnBase(request))
-    );
+    return oauthErrorRedirect(request, connectionReturnPath("threads", "error"), [THREADS_STATE_COOKIE]);
   }
 
   try {
@@ -54,8 +53,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Error en Threads OAuth callback:", error);
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("threads", "error"), oauthReturnBase(request))
-    );
+    return oauthErrorRedirect(request, connectionReturnPath("threads", "error"), [THREADS_STATE_COOKIE]);
   }
 }
