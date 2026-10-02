@@ -1,7 +1,7 @@
 "use client";
 
 import { MENU_LABELS_NUMBERED, MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
-import { isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
+import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -68,6 +68,8 @@ const BASE_ENTRIES: NavEntry[] = [
     ],
   },
 ];
+
+const HUB_ENTRY: TabItem = { href: HUB_URL, label: "Volver al HUB" };
 
 // VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2). Cuando la
 // cuenta tiene activo el módulo opt-in «vista-productos» (hoy: administradores
@@ -279,7 +281,7 @@ export default function DashboardNav() {
   }
 
   const baseEntries = productView ? PRODUCT_ENTRIES : BASE_ENTRIES;
-  const rawEntries: NavEntry[] = isAdmin ? [...baseEntries, ADMIN_GROUP] : baseEntries;
+  const rawEntries: NavEntry[] = isAdmin ? [...baseEntries, ADMIN_GROUP, HUB_ENTRY] : [...baseEntries, HUB_ENTRY];
 
   // Un grupo cuyos módulos están todos ocultos desaparece entero, en vez de
   // quedar como un desplegable vacío.

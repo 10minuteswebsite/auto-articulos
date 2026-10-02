@@ -13,6 +13,7 @@ import { displayName, getSessionContext } from "@/lib/current-user";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { resolveAccessRedirect } from "@/lib/access-router-adapter";
 import { getMaintenanceMode } from "@/lib/maintenance";
+import { productOfHost } from "@/lib/product-routes";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -23,10 +24,17 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const { user, actingAdmin } = await getSessionContext();
+  const requestHeaders = await headers();
+  const hostProduct = productOfHost(requestHeaders.get("host"));
+  const productTitle = hostProduct === "ARTICULOS"
+    ? "SEO TOTAL ARTÍCULOS"
+    : hostProduct === "REDES"
+      ? "SEO TOTAL REDES"
+      : "SEO TOTAL";
   const blocked = !actingAdmin && user.role !== "admin" && !(await checkTrialAccess(user));
   // Router de acceso (Día Cero): apagado por defecto. Nunca para administradores ni al «Acceder como».
   if (!actingAdmin && user.role !== "admin") {
-    const target = await resolveAccessRedirect(user, (await headers()).get("host"));
+    const target = await resolveAccessRedirect(user, requestHeaders.get("host"));
     if (target) redirect(target);
   }
   const maintenance = await getMaintenanceMode();
@@ -152,7 +160,7 @@ export default async function DashboardLayout({
             LA SOLUCIÓN IA
           </h1>
           <p className="eyebrow" style={{ margin: "4px 0 0" }}>
-            SEO TOTAL
+            {productTitle}
           </p>
         </div>
         <div

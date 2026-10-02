@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, PRODUCT_ROUTES } from "./product-routes";
+import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, PRODUCT_ROUTES } from "./product-routes";
+
+test("el enlace de salida apunta al HUB oficial", () => {
+  assert.equal(HUB_URL, "https://hub.lasolucionweb.net");
+});
 
 test("las direcciones de producto limitan la pantalla al producto correspondiente", () => {
   assert.equal(productOfHost("articulos.lasolucionweb.com"), "ARTICULOS");

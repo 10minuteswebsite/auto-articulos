@@ -20,6 +20,7 @@
 
 export type ProductScope = "ARTICULOS" | "REDES" | "COMPARTIDO" | "ADMIN";
 export type HostProductScope = Exclude<ProductScope, "ADMIN">;
+export const HUB_URL = "https://hub.lasolucionweb.net";
 
 /** Producto de la dirección pública desde la que el usuario está trabajando. */
 export function productOfHost(hostname: string | null | undefined): HostProductScope {
