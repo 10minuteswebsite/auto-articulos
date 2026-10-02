@@ -66,6 +66,10 @@ Si el administrador te oculta algún módulo, simplemente no aparece en el menú
 
 ## Configuración
 
+### Día Cero
+
+En Administración, el botón Día Cero muestra primero una simulación. Si todo es correcto, escribe DIA CERO y pulsa Activar Día Cero. Después crea la variable DIA_CERO con valor on en Vercel y vuelve a desplegar. Si algo sale mal, pulsa Revertir y borra la variable.
+
 Ruta: /dashboard/configuracion
 
 Configuración es un índice con tarjetas, cada una con su propia página. Elige
