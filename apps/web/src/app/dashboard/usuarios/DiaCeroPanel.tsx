@@ -17,14 +17,18 @@ export default function DiaCeroPanel() {
   useEffect(() => {
     if (!state?.applied || checks) return;
     let cancelled = false;
+    const fallback = window.setTimeout(() => {
+      if (!cancelled) setChecks([false, false, false]);
+    }, CHECK_TIMEOUT_MS + 1000);
     setChecks([null, null, null]);
     void Promise.all(HOSTS.map(async (host) => {
       const timeout = new Promise<false>((resolve) => window.setTimeout(() => resolve(false), CHECK_TIMEOUT_MS));
       const request = fetch(`${host}/login`, { cache: "no-store", mode: "no-cors" }).then(() => true).catch(() => false);
       return Promise.race([request, timeout]);
     }))
-      .then((results) => { if (!cancelled) setChecks(results); });
-    return () => { cancelled = true; };
+      .then((results) => { if (!cancelled) setChecks(results); })
+      .finally(() => window.clearTimeout(fallback));
+    return () => { cancelled = true; window.clearTimeout(fallback); };
   }, [state?.applied, checks]);
   async function action(actionName: "apply" | "revert") {
     setBusy(true); setMessage(null);
