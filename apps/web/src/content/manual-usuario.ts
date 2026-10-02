@@ -66,6 +66,10 @@ Si el administrador te oculta algún módulo, simplemente no aparece en el menú
 
 ## Configuración
 
+### Interruptores de Administración
+
+En Administración encontrarás dos controles adicionales. **Modo de entrada** conserva la entrada actual o permite pasar a **Solo HUB**; esta última opción solo se habilita cuando el HUB está conectado y exige escribir SOLO HUB. **Regla de prueba de 7 días** mantiene la regla actual o evita que una cuenta pierda acceso por el paso de los días. El cambio puede tardar hasta 30 segundos. La puerta directa de administradores se conserva.
+
 Ruta: /dashboard/configuracion
 
 Configuración es un índice con tarjetas, cada una con su propia página. Elige
