@@ -24,7 +24,7 @@
 2. **SEO Total convierte los derechos a «gracia» de 5 días** (fecha de corte + 5) para quien no ha comprado; administradores y gracias puestas a mano no cambian. → **El HUB recibe el resultado y lo adopta como estado vigente** (no lo pisa).
 3. **Se habilita la vista por productos** y se pasa el interruptor de aplicación a **Activo** (desde ahí los derechos se exigen; con todos en Activo o Gracia no se bloquea a nadie).
 4. **El login pasa de `legacy` a `dual` y luego a `hub`.** → **Aquí empieza el papel central del HUB:** los usuarios inician sesión en el HUB, pulsan Artículos o Redes y entran a SEO Total por `/auth/hub` con un código de un solo uso. **Desde este paso el HUB es la puerta de entrada.** Los administradores conservan un acceso de emergencia directo en SEO Total.
-5. **El dominio viejo (`seototal.lasolucionweb.com`): PARA MILTON, hay dos opciones.** *Opción A:* pasa al proyecto del HUB solo para personas (`/`, `/login`, interfaz) y el HUB reenvía las rutas de máquina (MCP, OAuth2, `.well-known`, retornos de conexión de LinkedIn, Pinterest, Tumblr, X, Blogger y Bing) con redirección **308** al dominio estable de SEO Total. *Opción B (recomendada por SEO Total):* el dominio **se queda en SEO Total**; solo la entrada de personas redirige al HUB desde SEO Total y **no se mueve nada de lo que usan las máquinas**, así el HUB no mantiene ningún puente. Los subdominios nuevos los crea Mario, apuntando al proyecto de SEO Total.
+5. **ÚLTIMO PASO: el dominio viejo (`seototal.lasolucionweb.com`) se apunta al HUB** (decisión de Milton) para que los usuarios que entren por la dirección de siempre lleguen al HUB y nadie se pierda. **Condición obligatoria:** un dominio de Vercel solo pertenece a un proyecto, así que al moverlo dejan de responder en él las **rutas de máquina** (servidor MCP/OAuth2 de Alexa y Claude, `/.well-known/*` y retornos de conexión de LinkedIn, Pinterest, Tumblr, X, Blogger y Bing). **El HUB debe reenviarlas con redirección 308** (conserva método y parámetros) al **dominio estable de SEO Total** y mantener ese puente hasta comprobar con registros que nadie usa ya el host viejo. Solo se mueve cuando el dominio estable ya responde y el reenvío está probado. Los subdominios nuevos los crea Mario, apuntando al proyecto de SEO Total.
 6. **Verificación con cuentas reales** (solo Artículos, solo Redes, ambos, administrador) y reconexión de una integración por proveedor.
 
 ### Después del Día Cero (5 días de gracia y más allá)
@@ -36,7 +36,7 @@
 | Si el HUB cae | SEO Total sigue con lo último que sabía; administradores entran por emergencia; las altas pendientes se reintentan |
 | Más adelante | Se retiran los retornos antiguos y el puente de rutas, solo cuando Milton lo ordene |
 
-**Resumen del papel del HUB:** (1) ser la **puerta de entrada** y la fuente de **identidad**; (2) ser la fuente de verdad de **qué compró cada usuario**, comunicándolo **por producto**; (3) solo si Milton elige la opción A del paso 5, mantener el **puente de rutas de máquina** mientras haga falta; (4) **no estar nunca en el camino de un clic** (SEO Total decide con su tabla local).
+**Resumen del papel del HUB:** (1) ser la **puerta de entrada** y la fuente de **identidad**; (2) ser la fuente de verdad de **qué compró cada usuario**, comunicándolo **por producto**; (3) mantener el **puente de rutas de máquina** (redirección 308 al dominio estable de SEO Total) mientras haga falta; (4) **no estar nunca en el camino de un clic** (SEO Total decide con su tabla local).
 
 ---
 

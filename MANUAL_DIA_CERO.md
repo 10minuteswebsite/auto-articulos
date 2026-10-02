@@ -40,6 +40,7 @@ Para: Milton · Escrito el 2026-10-02 por Claude (control del proyecto) · Estad
 | P7 | **Acceso de emergencia de administradores** y «Acceder como» funcionan con el login del HUB activo | 🤖 | Entrar como admin por la ruta de emergencia; probar «Acceder como» a Lorena |
 | P8 | **Plan de reversa ensayado** (sección 6) | 🤖 | `ENSAYO_REVERSA.md` recorrido con una cuenta de prueba, cada paso confirmado |
 | P9 | **Cuenta de prueba (Lorena Álvarez) verificada** en producción justo antes | 🤖 | Smoke test + recorrido de Lorena |
+| P11 | **Dominio estable para máquinas funcionando** (un host que NO pasa al HUB y sirve MCP/OAuth2, `.well-known` y retornos de conexión desde el proyecto de SEO Total), y **reenvío 308 del HUB listo y probado** | 🤖 + 👤 Mario | `/api/mcp` responde por el host estable; el reenvío desde un host de prueba conserva método y parámetros; conector de Alexa/Claude reapuntado y probado |
 | P10 | **Fecha y hora decididas** por Milton, con él presente y sin despliegues de otros programas ese día | 🧑 | — |
 
 > **Si una puerta no está en verde, no hay Día Cero.** No es un fracaso: es el sistema funcionando.
@@ -99,9 +100,13 @@ Para: Milton · Escrito el 2026-10-02 por Claude (control del proyecto) · Estad
  8.7 Si cualquier sub-paso falla: **reversa 6.D** y no continúes.
 **PENDIENTE DE CONFIRMAR CON MARIO:** el interruptor `legacy/dual/hub` **hoy no está construido** en SEO Total (solo existe el login actual). Ver `CONTRATO_HUB_PARA_EL_HUB.md`, sección 4: lo construimos nosotros tras el acuerdo. **Este paso no puede hacerse hasta entonces.**
 
-**Paso 9 — Dominio viejo (PARA MILTON: elegir A o B antes del Día Cero).**
- *Opción B (recomendada):* el dominio `seototal.lasolucionweb.com` **se queda en SEO Total**. 🤖 hace que `/` y `/login` redirijan a las personas al HUB y deja intactas las rutas de máquina (`/api/*`, `/.well-known/*`, MCP/OAuth2, retornos de conexión). *Bien:* una persona que abre el dominio viejo llega al HUB; `/api/mcp` y los retornos siguen respondiendo. *Mal:* quitar la redirección (reversa 6.D).
- *Opción A:* 👤/🤖 mueven el dominio al proyecto del HUB con el TTL ya bajado y el HUB reenvía las rutas de máquina con redirección 308. **Es el paso de mayor riesgo del Día Cero:** si el puente falla, Alexa/Claude y las conexiones OAuth dejan de funcionar. *Mal:* reversa 6.E de inmediato.
+**Paso 9 — ÚLTIMO PASO: apuntar `seototal.lasolucionweb.com` al HUB (decisión de Milton: opción A).** Así los usuarios que entren por la dirección de siempre llegan al HUB y nadie se pierde.
+ **Solo se hace si TODO lo anterior está en verde y si la puerta P11 está cumplida.**
+ 9.1 🤖 Confirmar que el dominio estable de máquinas ya responde (P11) y que el TTL del DNS ya está bajo.
+ 9.2 👤 Mario deja listo en el HUB el **reenvío con redirección 308** de `/api/*`, `/.well-known/*`, MCP/OAuth2 y retornos de conexión hacia el dominio estable (sin esto, Alexa/Claude y las conexiones OAuth dejan de funcionar al mover el dominio).
+ 9.3 🧑 Da la orden «mueve el dominio». 👤/🤖 lo quitan del proyecto de SEO Total en Vercel y lo añaden al del HUB.
+ 9.4 🤖 Comprobar de inmediato: `/` y `/login` llevan al HUB; `/api/mcp` responde; un retorno de conexión (p. ej. Tumblr) funciona; Alexa/Claude conectan.
+ *Mal en cualquiera de 9.4:* **reversa 6.E de inmediato** (devolver el dominio a SEO Total; con el TTL bajo tarda minutos).
 
 **Paso 10 — Verificar en producción con cuentas reales.** 🤖 + 🧑
 - Una cuenta de **solo Artículos**, una de **solo Redes**, una con ambos y un **administrador**.
@@ -150,5 +155,5 @@ Para: Milton · Escrito el 2026-10-02 por Claude (control del proyecto) · Estad
 
 ## 10. Lista de verificación de una página (para imprimir)
 
-☐ P1 esquema HUB declarado · ☐ P2 Sombra ≥7 días · ☐ P3 callbacks · ☐ P4 subdominios · ☐ P5 HUB con dos productos · ☐ P6 entrada HUB probada · ☐ P7 emergencia y «Acceder como» · ☐ P8 reversa ensayada · ☐ P9 Lorena OK · ☐ P10 fecha decidida
+☐ P1 esquema HUB declarado · ☐ P2 Sombra ≥7 días · ☐ P3 callbacks · ☐ P4 subdominios · ☐ P5 HUB con dos productos · ☐ P6 entrada HUB probada · ☐ P7 emergencia y «Acceder como» · ☐ P8 reversa ensayada · ☐ P9 Lorena OK · ☐ P11 dominio estable y reenvío 308 · ☐ P10 fecha decidida
 Día Cero: ☐1 Congelar · ☐2 Estado · ☐3 Subdominios · ☐4 Emergencia · ☐5 Gracia (SQL a mano) · ☐6 Vista productos · ☐7 Interruptor Activo (ACTIVAR) · ☐8 Login HUB · ☐9 Dominio viejo · ☐10 Verificar · ☐11 Cierre
