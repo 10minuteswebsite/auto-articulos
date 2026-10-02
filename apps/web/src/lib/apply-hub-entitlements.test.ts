@@ -4,19 +4,19 @@ import { applyHubEntitlements } from "./apply-hub-entitlements";
 
 test("aplica formatos allowed/status y mapea appId desde configuración", () => {
   const result = applyHubEntitlements(
-    [{ product: "articulos", status: "INACTIVE", version: 4 }],
+    [{ product: "ARTICULOS", status: "INACTIVE", version: 4 }],
     [{ appId: "hub-a", allowed: true }, { appId: "hub-r", status: "denied" }],
     { "hub-a": "ARTICULOS", "hub-r": "REDES" },
   );
   assert.deepEqual(result.transitions, [
-    { product: "articulos", from: "INACTIVE", to: "ACTIVE", source: "HUB", version: 5, event: "activated" },
-    { product: "redes", from: null, to: "INACTIVE", source: "HUB", version: 1, event: "deactivated" },
+    { product: "ARTICULOS", from: "INACTIVE", to: "ACTIVE", source: "HUB", version: 5, event: "activated" },
+    { product: "REDES", from: null, to: "INACTIVE", source: "HUB", version: 1, event: "deactivated" },
   ]);
 });
 
 test("no revoca por omisión y reporta entradas desconocidas", () => {
   const result = applyHubEntitlements(
-    [{ product: "redes", status: "ACTIVE", version: 2 }],
+    [{ product: "REDES", status: "ACTIVE", version: 2 }],
     [{ appId: "other", allowed: true }],
     {},
   );
@@ -27,8 +27,8 @@ test("no revoca por omisión y reporta entradas desconocidas", () => {
 test("acepta el formato agrupado por productos", () => {
   const result = applyHubEntitlements([], [{ products: { ARTICULOS: { status: "trialing" }, REDES: { status: "revoked" } } }], {});
   assert.deepEqual(result.transitions.map(({ product, to }) => ({ product, to })), [
-    { product: "articulos", to: "ACTIVE" },
-    { product: "redes", to: "INACTIVE" },
+    { product: "ARTICULOS", to: "ACTIVE" },
+    { product: "REDES", to: "INACTIVE" },
   ]);
 });
 

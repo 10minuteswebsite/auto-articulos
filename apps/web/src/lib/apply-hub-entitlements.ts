@@ -5,6 +5,8 @@
  * `appToProduct`; ningún appId del HUB se codifica en esta función. La
  * ausencia de un producto en la respuesta no revoca nada.
  */
+import { PRODUCTS, type ProductKey } from "@auto-articulos/shared";
+
 export type EntitlementStatus = "ACTIVE" | "GRACE" | "INACTIVE";
 
 export type LocalEntitlement = {
@@ -75,7 +77,7 @@ export function applyHubEntitlements(
     const rawProduct = item.product ?? (item.appId ? appToProduct[item.appId] : undefined);
     const product = rawProduct?.toUpperCase() as ProductKey | undefined;
     const status = desiredStatus(item);
-    if ((product !== "articulos" && product !== "redes") || !status) {
+    if (!product || !(PRODUCTS as readonly string[]).includes(product) || !status) {
       unknown.push(item);
       continue;
     }
@@ -83,4 +85,3 @@ export function applyHubEntitlements(
   }
   return { transitions, unknown };
 }
-import type { ProductKey } from "@auto-articulos/shared";
