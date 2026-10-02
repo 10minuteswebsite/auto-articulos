@@ -4,7 +4,7 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { platformProductNameOrNeutral } from "@auto-articulos/shared";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
-import { hasTrialAccess } from "@/lib/trial";
+import { checkTrialAccess } from "@/lib/trial-rule-setting";
 
 export async function POST(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       },
     }),
   ]);
-  if (!hasTrialAccess(user)) {
+  if (!(await checkTrialAccess(user))) {
     return NextResponse.json(
       {
         error:

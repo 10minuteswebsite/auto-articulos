@@ -1,5 +1,5 @@
 import { prisma } from "@auto-articulos/db";
-import { hasTrialAccess } from "@/lib/trial";
+import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { getTitleGenerationPrompt } from "@/lib/title-generation-prompt";
 import {
   MAX_REQUESTS_PER_DAY,
@@ -250,7 +250,7 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
   });
 
   // Mismas barreras que POST /api/runs, ANTES de gastar una solicitud de IA.
-  if (!hasTrialAccess(user)) {
+  if (!(await checkTrialAccess(user))) {
     throw new TitleGenerationError(
       403,
       "TRIAL_EXPIRED",

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
-import { hasTrialAccess } from "@/lib/trial";
+import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { isStuckSyncJob, STUCK_SYNC_JOB_MESSAGE } from "@/lib/sync-jobs";
 
 export async function POST() {
@@ -18,7 +18,7 @@ export async function POST() {
     },
   });
 
-  if (user && !hasTrialAccess(user)) {
+  if (user && !(await checkTrialAccess(user))) {
     return NextResponse.json(
       {
         error:
