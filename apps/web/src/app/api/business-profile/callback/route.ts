@@ -8,6 +8,7 @@ import {
   BUSINESS_PROFILE_STATE_COOKIE,
   businessProfileOAuthConfig,
 } from "@/lib/google-oauth";
+import { getOAuthRedirectUri } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -24,7 +25,9 @@ export async function GET(request: NextRequest) {
     );
   }
   try {
-    const { clientId, clientSecret, redirectUri } = businessProfileOAuthConfig();
+    const config = businessProfileOAuthConfig();
+    const { clientId, clientSecret } = config;
+    const redirectUri = getOAuthRedirectUri(request, "/api/business-profile/callback", config.redirectUri);
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
