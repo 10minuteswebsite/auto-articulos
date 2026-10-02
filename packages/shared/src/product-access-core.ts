@@ -27,6 +27,11 @@ export const PRODUCTS = ["ARTICULOS", "REDES"] as const;
 export type ProductKey = (typeof PRODUCTS)[number];
 
 export type EntitlementStatusKey = "ACTIVE" | "GRACE" | "INACTIVE";
+export type EnforcementMode = "off" | "shadow" | "enforce";
+
+export function parseEnforcementMode(raw: unknown): EnforcementMode {
+  return raw === "shadow" || raw === "enforce" ? raw : "off";
+}
 
 export type AccessReason =
   | "ADMIN"
@@ -64,6 +69,33 @@ export interface EvaluateInput {
    */
   legacyAllowsRedes: boolean;
   now: Date;
+}
+
+/**
+ * Regla legacy de Redes compartida por web y worker. El formato histórico de
+ * `disabledModules` acepta tanto un array de ids (apagados) como el objeto de
+ * overrides; mantener este parser aquí evita que el worker invente una regla.
+ */
+export function hasLegacySocialModuleAccess(input: {
+  role?: string | null;
+  disabledModules?: string | null;
+  approvals: readonly (boolean | null | undefined)[];
+}): boolean {
+  if (input.role === "admin") return true;
+  let override: unknown;
+  try {
+    const parsed = input.disabledModules ? JSON.parse(input.disabledModules) : null;
+    if (Array.isArray(parsed)) {
+      override = parsed.includes("oportunidades-redes") ? "disabled" : undefined;
+    } else if (parsed && typeof parsed === "object") {
+      override = (parsed as Record<string, unknown>)["oportunidades-redes"];
+    }
+  } catch {
+    override = undefined;
+  }
+  if (override === "enabled") return true;
+  if (override === "disabled") return false;
+  return input.approvals.some((approved) => approved === true);
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;

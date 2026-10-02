@@ -36,6 +36,7 @@ import sharp from "sharp";
 import { generateAiSocialImage } from "./aiImageGenerator";
 import { formatBloggerSummary } from "./bloggerContent";
 import { deriveDevToEditorialTags, isDevToEligible } from "./devtoEditorial";
+import { checkSocialProductAccess } from "./product-access";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_IMAGE_URL = "https://api.openai.com/v1/images/generations";
@@ -1434,6 +1435,13 @@ export async function processNextSocialPublish(filterUserId?: string, filterArti
       progressPercent: 25,
       progressStage: "Validando el artículo y sus datos",
     });
+
+    // La comprobación ocurre después de reclamar el trabajo y justo antes de
+    // preparar/publicar el destino. En `shadow` solo registra; en `enforce`
+    // evita iniciar destinos nuevos y deja el trabajo visible como error.
+    if (!(await checkSocialProductAccess(job.userId, job.platform))) {
+      throw new Error("Publicación detenida: la cuenta no tiene acceso vigente a Redes.");
+    }
 
     await enforceSocialDailyLimit(job.userId, job.platform);
 
