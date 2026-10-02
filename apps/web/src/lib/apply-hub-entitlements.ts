@@ -1,0 +1,80 @@
+/**
+ * Traduce una respuesta de derechos del HUB a transiciones locales.
+ *
+ * Es deliberadamente pura: el adaptador que lee SystemSetting debe entregar
+ * `appToProduct`; ningún appId del HUB se codifica en esta función. La
+ * ausencia de un producto en la respuesta no revoca nada.
+ */
+export type ProductKey = "articulos" | "redes";
+export type EntitlementStatus = "ACTIVE" | "INACTIVE";
+
+export type LocalEntitlement = {
+  product: ProductKey;
+  status: EntitlementStatus;
+  version: number;
+};
+
+export type HubEntitlement = {
+  appId?: string;
+  product?: string;
+  allowed?: boolean;
+  status?: string;
+};
+
+export type EntitlementTransition = {
+  product: ProductKey;
+  from: EntitlementStatus | null;
+  to: EntitlementStatus;
+  source: "HUB";
+  version: number;
+  event: "activated" | "deactivated" | "unchanged";
+};
+
+export type ApplyHubResult = {
+  transitions: EntitlementTransition[];
+  unknown: HubEntitlement[];
+};
+
+function desiredStatus(item: HubEntitlement): EntitlementStatus | null {
+  if (typeof item.allowed === "boolean") return item.allowed ? "ACTIVE" : "INACTIVE";
+  if (item.status === "active" || item.status === "ACTIVE") return "ACTIVE";
+  if (item.status === "inactive" || item.status === "INACTIVE" || item.status === "denied") return "INACTIVE";
+  return null;
+}
+
+export function computeNextEntitlement(
+  current: LocalEntitlement | undefined,
+  product: ProductKey,
+  desired: EntitlementStatus,
+): EntitlementTransition {
+  const from = current?.status ?? null;
+  const changed = from !== desired;
+  return {
+    product,
+    from,
+    to: desired,
+    source: "HUB",
+    version: (current?.version ?? 0) + 1,
+    event: changed ? (desired === "ACTIVE" ? "activated" : "deactivated") : "unchanged",
+  };
+}
+
+export function applyHubEntitlements(
+  current: LocalEntitlement[],
+  incoming: HubEntitlement[],
+  appToProduct: Record<string, ProductKey>,
+): ApplyHubResult {
+  const byProduct = new Map(current.map((item) => [item.product, item]));
+  const transitions: EntitlementTransition[] = [];
+  const unknown: HubEntitlement[] = [];
+  for (const item of incoming) {
+    const product = item.product as ProductKey | undefined ?? (item.appId ? appToProduct[item.appId] : undefined);
+    const status = desiredStatus(item);
+    if ((product !== "articulos" && product !== "redes") || !status) {
+      unknown.push(item);
+      continue;
+    }
+    transitions.push(computeNextEntitlement(byProduct.get(product), product, status));
+  }
+  return { transitions, unknown };
+}
