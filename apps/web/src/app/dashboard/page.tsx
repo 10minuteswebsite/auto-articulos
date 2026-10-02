@@ -176,7 +176,7 @@ export default function InicioPage() {
 
   return (
     <div>
-      <style>{`@media (max-width: 700px) { .inicio-actions-grid { grid-template-columns: 1fr !important; } .dashboard-main:has(.inicio-actions-grid) .floating-assistant { display: none !important; } }`}</style>
+      <style>{`@media (max-width: 700px) { .inicio-actions-grid { grid-template-columns: 320px !important; justify-content: center !important; } .dashboard-main:has(.inicio-actions-grid) .floating-assistant { display: none !important; } }`}</style>
       <ModuleIntro titulo="Inicio" showEyebrow={showWizard !== false} compact={showWizard === false}>
         {showWizard === true ? (
           <>
@@ -262,12 +262,12 @@ export default function InicioPage() {
       {showWizard === false && (
         <div style={{ marginTop: 20, marginBottom: 20 }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>{productView ? "Elige un producto" : "Acciones posibles"}</h2>
-          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: `repeat(${productView ? visibleProductCards.length : visibleQuickLinks.length}, minmax(0, 1fr))`, gap: 16 }}>
+          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, 320px)", gap: 16, justifyContent: "start" }}>
           {/* Solo mostramos acciones del producto que la cuenta puede usar. */}
           {(productView ? visibleProductCards : visibleQuickLinks).map((l, i) => (
             (() => {
               return (
-                <Link key={l.href} className="inicio-action-card" href={l.href} style={{ display: "flex", minHeight: 176, padding: 22, flexDirection: "column", justifyContent: "space-between", textDecoration: "none", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}>
+                <Link key={l.href} className="inicio-action-card" href={l.href} style={{ display: "flex", width: 320, height: 320, boxSizing: "border-box", padding: 22, flexDirection: "column", justifyContent: "space-between", textDecoration: "none", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}>
               <div
                 style={{
                   display: "flex", flexDirection: "column", height: "100%",
