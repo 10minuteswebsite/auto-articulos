@@ -66,6 +66,7 @@ export default async function ConfiguracionPage() {
     (seccion) => product === "COMPARTIDO" || seccion.producto === "COMPARTIDO" || seccion.producto === product,
   );
   const esRedes = product === "REDES";
+  const esArticulos = product === "ARTICULOS";
 
   return (
     <div>
@@ -109,6 +110,10 @@ export default async function ConfiguracionPage() {
                   ? "Sube las fotos y los logos que usarás al crear publicaciones para tus redes sociales."
                   : esRedes && s.href === "/dashboard/configuracion/conexiones"
                     ? "Conecta Instagram, Facebook, Threads, LinkedIn y tus demás canales de difusión."
+                    : esArticulos && s.href === "/dashboard/configuracion/contenido"
+                      ? "Define el estilo, la firma, las ubicaciones y el teléfono de tus artículos."
+                      : esArticulos && s.href === "/dashboard/configuracion/conexiones"
+                        ? "Conecta Search Console, Analytics y Bing para medir y mejorar tus artículos."
                     : s.descripcion}
               </span>
             </span>
