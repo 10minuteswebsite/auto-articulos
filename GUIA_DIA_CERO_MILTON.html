@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guía del Día Cero</title>
+  <style>
+    body { max-width: 820px; margin: 2rem auto; padding: 0 1rem; font: 18px/1.55 system-ui, sans-serif; color: #172033; }
+    h1, h2 { color: #123c72; }
+    li { margin: .7rem 0; }
+    .warning { padding: 1rem; border-left: 5px solid #c62828; background: #fff1f1; }
+  </style>
+</head>
+<body>
+  <h1>Guía del Día Cero</h1>
+  <p>Esta guía separa SEO Total en dos direcciones conservando el login actual.</p>
+  <h2>Lo que harás</h2>
+  <ol>
+    <li>Fusiona el PR <strong>#412</strong> cuando decidas hacerlo.</li>
+    <li>En Vercel entra en Settings → Environment Variables. Crea <strong>DIA_CERO</strong> con valor <strong>on</strong> y haz Redeploy. Este paso va antes de activar el botón.</li>
+    <li>Vuelve a Administración → Usuarios → <strong>Día Cero</strong>, pulsa <strong>Simular</strong> y revisa las cifras.</li>
+    <li>Escribe exactamente <strong>DIA CERO</strong> en el campo y pulsa <strong>Activar Día Cero</strong>. La variable ya debe estar activa para que las cookies funcionen en las tres direcciones.</li>
+    <li>Comprueba que puedes entrar por <strong>articulos.lasolucionweb.com</strong>, por <strong>redes.lasolucionweb.com</strong> y por <strong>seototal.lasolucionweb.com</strong>.</li>
+    <li>Desde redes, conecta una red y confirma que vuelve a la pantalla correcta. No cambies las consolas de los proveedores.</li>
+  </ol>
+  <h2>Si algo sale mal</h2>
+  <p class="warning">Pulsa <strong>Revertir</strong> en el panel Día Cero y borra la variable <strong>DIA_CERO</strong> de Vercel. Después vuelve a desplegar. No pegues SQL ni ejecutes migraciones.</p>
+  <p>Es posible que, la primera vez después del Día Cero, a algunas personas se les pida entrar de nuevo con su usuario y contraseña de siempre porque las sesiones abiertas antes tienen una cookie anterior. No pierden nada. Conviene elegir una hora de poco uso.</p>
+</body>
+</html>
