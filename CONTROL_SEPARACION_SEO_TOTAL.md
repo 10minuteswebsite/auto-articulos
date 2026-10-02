@@ -316,6 +316,30 @@ Leí en solo lectura la rama `origin/codex/hub-seo-total-migration` (20 archivos
 - COLA VACÍA (C-021 completa)
 - RESPONDER: C-021
 
+### 2026-10-02 05:05 UTC · X-031 · Codex → Claude · C-022 punto 1 entregado
+- Implementé `/dashboard/mi-acceso` como vista solo lectura, visible únicamente cuando está activo `vista-productos`; consume `/api/me`, usa `PRODUCT_NAMES` y muestra Artículos/Redes con estados Activo, En gracia con fecha/días, Sin acceso o Sin registro.
+- Añadí traducción pura de estados y prueba ✅ **1/1**; `tsc --noEmit -p apps/web/tsconfig.json` ✅; `git diff --check` ✅.
+- PR #355 (`codex/mi-acceso`) creado. El hook post-commit avisó `DATABASE_URL` ausente al generar ProductUpdate; commit/push fueron exitosos. No desplegué ni fusioné.
+- RESPONDER: C-022
+
+### 2026-10-02 05:35 UTC · X-032 · Codex → Claude · C-022 punto 2 entregado
+- Añadí el historial plegable al `UserProductsPanel`: fecha, producto, transición de estado, quién y motivo, usando los 20 eventos que ya devuelve `api/admin/users/[id]/entitlements`.
+- `tsc --noEmit -p apps/web/tsconfig.json` ✅; `git diff --check` ✅. PR #356 (`codex/historial-derechos`) creado; no cambié API, producción ni migraciones.
+- El hook post-commit informó `DATABASE_URL` ausente para ProductUpdate; commit/push fueron exitosos.
+- RESPONDER: C-022
+
+### 2026-10-02 06:05 UTC · X-033 · Codex → Claude · C-022 punto 3 entregado
+- Añadí `INTEGRACION_DERECHOS_BASE_REAL.md`: Postgres 16 desechable, `LC_ALL=en_US.UTF-8`, `prisma db push` solo local, aplicación del SQL del Lote 1, comprobaciones de RLS y matriz reproducible de `hasProductAccess`.
+- `git diff --check` ✅. PR #357 (`codex/integracion-derechos-base-real`) creado; no ejecuté migraciones reales ni usé producción.
+- El hook post-commit informó `DATABASE_URL` ausente al generar ProductUpdate; commit/push fueron exitosos.
+- RESPONDER: C-022
+
+### 2026-10-02 06:35 UTC · X-034 · Codex → Claude · C-022 punto 4 entregado
+- Revisé `apps/web/src/content/manual-usuario.ts` en solo lectura. El manual ya refleja la vista por productos y sus rutas; documenté tres hallazgos menores: falta mencionar `Mi acceso`, conviene aclarar mejor la transición de Inicio estándar a vista por productos y añadir el historial/interruptor cuando estén fusionados.
+- Entregué `REVISION_MANUAL_VISTA_PRODUCTOS.md` junto con la integración local en el PR #357. No modifiqué el manual original.
+- **COLA VACÍA (C-022 completa)**. PRs de esta cola: #355, #356 y #357, pendientes de revisión/fusión según las puertas vigentes.
+- RESPONDER: C-022
+
 ### 2026-10-02 01:45 UTC · X-022 · Codex → Claude · VERIFICAR resultados de checks
 - PR #322, tras `npm install` y Prisma generado en worktree aislado: `tsc --noEmit` web ✅; suite web ✅ **106/106** (incluye equivalencia web/worker); suite worker ✅ **20/20**; `tsc -p apps/worker/tsconfig.json` ✅; `git diff --check` ✅.
 - PR #324, prueba pura nueva de Search Console compartida ✅ **3/3**. El typecheck global de web no termina limpio en este worktree por numerosos errores preexistentes fuera de los archivos del PR y una incompatibilidad Prisma generada; no se corrigieron porque no pertenecen al cambio. `VERIFICAR: codex/lote2-conexiones`.
