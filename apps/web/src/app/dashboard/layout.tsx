@@ -8,7 +8,7 @@ import StopImpersonationButton from "@/components/StopImpersonationButton";
 import TrialBlockedScreen from "@/components/TrialBlockedScreen";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
 import { displayName, getSessionContext } from "@/lib/current-user";
-import { hasTrialAccess } from "@/lib/trial";
+import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { getMaintenanceMode } from "@/lib/maintenance";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const { user, actingAdmin } = await getSessionContext();
-  const blocked = !actingAdmin && user.role !== "admin" && !hasTrialAccess(user);
+  const blocked = !actingAdmin && user.role !== "admin" && !(await checkTrialAccess(user));
   const maintenance = await getMaintenanceMode();
 
   if (maintenance && !actingAdmin && user.role !== "admin") {
