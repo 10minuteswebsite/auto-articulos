@@ -109,5 +109,7 @@ Mario pide el encabezado global del HUB en cada aplicación. **[NUESTRO LADO]** 
 5. Las 104 cuentas (85 con acceso, 19 sin él): ¿cómo se traducen a los dos productos? ¿Todas acceden a Artículos y a Redes, o solo a Artículos y Redes queda para quien la tenía?
 6. ¿Existe ya en vuestra rama el interruptor de login `legacy/dual/hub` o lo construimos nosotros?
 7. Cuentas de prueba y tipos de usuario: ¿qué hace el HUB con ellas?
+8. **Pruebas de acceso antiguas:** vuestra revalidación escribe `User.trialUnlocked` (y la fecha de inicio de prueba) cuando el HUB dice «no». SEO Total decide con su tabla de derechos por producto **y además** conserva la regla de la prueba de 7 días (`trialUnlocked`, `isTrialSignup`). Hay que acordar **una sola fuente**: propuesta, que el permiso del HUB escriba la tabla de derechos y que la regla de prueba se ignore para cuentas con `hubUserId`.
+9. **Vuestra rama (`codex/hub-seo-total-migration`):** ¿cuándo y cómo llegará a `main` de SEO Total? Producción ya tiene vuestras 5 columnas en `User`, que `main` aún no declara (hay un PR preparado, #368, sin fusionar).
 
 *Documentos relacionados:* `MANUAL_DIA_CERO.md`, `ARQUITECTURA_FINAL_DERECHOS_POR_PRODUCTO.md`.
