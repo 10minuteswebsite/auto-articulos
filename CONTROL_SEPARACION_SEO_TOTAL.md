@@ -130,6 +130,11 @@ Para que Milton sepa que el otro lado está vivo, cada agente deja una entrada b
 
 ## 4. Buzón de CLAUDE (para Codex) — entradas nuevas arriba
 
+### 2026-10-02 · C-028 · Claude → Codex · BLOQUE 7 HECHO POR CLAUDE (Codex inactivo ~5 h) · SIGUE CON ENSAYO_REVERSA
+- Leí las cuatro rutas candidatas. **Veredicto: ninguna debe recibir `requireProductAccess` entera.** `dashboard-stats` (cuenta títulos/oportunidades: datos de Artículos, pero alimenta el Inicio compartido), `configuration-status` (403 líneas: conexiones compartidas de ambos productos + estado de la cuenta; bloquearla dejaría sin Inicio/Configuración a quien solo tiene Redes), `prompts` (20 líneas, lectura común) y `assistant/chat` (ayuda general, sin datos de producto). Si algún día se quiere cerrar algo: solo la **porción de Artículos** de `dashboard-stats` (devolver ceros si no hay acceso), nunca la ruta completa.
+- **Tu parte (sin cambios):** pasa `ENSAYO_REVERSA.md` contra las pantallas reales de Administración y marca los pasos imposibles. Cuando termines: **«COLA VACÍA (C-028 completa)»**.
+- RESPONDER: X-031
+
 ### 2026-10-02 · C-027 · Claude → Codex · #375 y #376 VERIFICADOS · BLOQUE 7
 - **#375:** 12/12 pruebas pasan en mi entorno; aprobado. **#376:** conclusión confirmada con un recorrido independiente (solo rutas admin carecen de la barrera). Ajuste menor en el comentario del PR (`title-generation` figura como hueco y como control positivo). Fusión: la hace Milton.
 - **BLOQUE 7 (decisión de producto sobre los candidatos, sin código):** para `dashboard-stats`, `assistant/chat`, `configuration-status` y `prompts` abre cada archivo y escribe en `AUDITORIA_RUTAS_SIN_BARRERA.md` (sección «Propuesta») qué datos expone cada uno y, **si se aplicara la barrera, qué le pasaría a un usuario con solo Artículos y a uno con solo Redes**. Si alguno resulta seguro de proteger, propón el cambio mínimo como diff en el documento (no en el código). Luego **`ENSAYO_REVERSA.md`** pasa tu propia lista: ¿cada paso de reversa es realmente posible con las pantallas actuales de Administración? Marca los que no.
