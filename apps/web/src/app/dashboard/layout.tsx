@@ -3,6 +3,7 @@ import DashboardNav from "@/components/DashboardNav";
 import FloatingAssistant from "@/components/FloatingAssistant";
 import LogoutButton from "@/components/LogoutButton";
 import ModuleGuard from "@/components/ModuleGuard";
+import ProductAccessGuard from "@/components/ProductAccessGuard";
 import StopImpersonationButton from "@/components/StopImpersonationButton";
 import TrialBlockedScreen from "@/components/TrialBlockedScreen";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
@@ -210,7 +211,9 @@ export default async function DashboardLayout({
       ) : (
         <>
           <DashboardNav />
-          <ModuleGuard>{children}</ModuleGuard>
+          <ProductAccessGuard>
+            <ModuleGuard>{children}</ModuleGuard>
+          </ProductAccessGuard>
           <FloatingAssistant />
         </>
       )}
