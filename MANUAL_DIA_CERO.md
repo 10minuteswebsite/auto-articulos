@@ -99,8 +99,9 @@ Para: Milton · Escrito el 2026-10-02 por Claude (control del proyecto) · Estad
  8.7 Si cualquier sub-paso falla: **reversa 6.D** y no continúes.
 **PENDIENTE DE CONFIRMAR CON MARIO:** el interruptor `legacy/dual/hub` **hoy no está construido** en SEO Total (solo existe el login actual). Ver `CONTRATO_HUB_PARA_EL_HUB.md`, sección 4: lo construimos nosotros tras el acuerdo. **Este paso no puede hacerse hasta entonces.**
 
-**Paso 9 — Mover el dominio viejo (solo si el plan lo exige).** 👤/🤖 Con el TTL ya bajado, mover `seototal.lasolucionweb.com` al proyecto del HUB **manteniendo vivas las rutas de máquina** (`/api/*`, `/.well-known/*`, MCP/OAuth2 para Alexa y Claude) con redirección 308 al dominio estable. **Este es el paso de mayor riesgo del Día Cero**: si no hay puente de rutas, Alexa/Claude y las conexiones OAuth dejan de funcionar.
-*Bien:* `/api/mcp` y los retornos de conexión siguen respondiendo. *Mal:* reversa 6.E de inmediato.
+**Paso 9 — Dominio viejo (PARA MILTON: elegir A o B antes del Día Cero).**
+ *Opción B (recomendada):* el dominio `seototal.lasolucionweb.com` **se queda en SEO Total**. 🤖 hace que `/` y `/login` redirijan a las personas al HUB y deja intactas las rutas de máquina (`/api/*`, `/.well-known/*`, MCP/OAuth2, retornos de conexión). *Bien:* una persona que abre el dominio viejo llega al HUB; `/api/mcp` y los retornos siguen respondiendo. *Mal:* quitar la redirección (reversa 6.D).
+ *Opción A:* 👤/🤖 mueven el dominio al proyecto del HUB con el TTL ya bajado y el HUB reenvía las rutas de máquina con redirección 308. **Es el paso de mayor riesgo del Día Cero:** si el puente falla, Alexa/Claude y las conexiones OAuth dejan de funcionar. *Mal:* reversa 6.E de inmediato.
 
 **Paso 10 — Verificar en producción con cuentas reales.** 🤖 + 🧑
 - Una cuenta de **solo Artículos**, una de **solo Redes**, una con ambos y un **administrador**.
