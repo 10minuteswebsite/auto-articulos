@@ -25,6 +25,17 @@ Guion documental. No se ejecutó contra producción ni se cambió ningún interr
 3. Abrir una ruta antigua de cada producto: la vista visual puede desaparecer, pero la barrera real sigue dependiendo de los permisos del servidor.
 4. Confirmar que no se modificaron derechos ni conexiones: la reversa de la vista es independiente de `ProductEntitlement`.
 
+## 4. ¿Qué pasos son realmente posibles hoy?
+
+| Paso | ¿Es posible con las pantallas actuales? | Comprobación |
+|---|---|---|
+| Enforce → Sombra → Apagado | Sí. `ProductEnforcementPanel` ofrece los tres botones; la API exige transición segura para subir a Enforce y permite bajar. | El panel muestra el modo nuevo y una petición de producto deja de bloquear en Sombra/Apagado. |
+| Corregir una gracia desde Productos | Sí, para un administrador. `UserProductsPanel` ofrece Activar, Desactivar, Dar gracia y Quitar gracia; el historial permite comprobar el evento. | El estado, fecha/días y evento correctivo coinciden en la ficha del usuario. |
+| Deshabilitar `vista-productos` globalmente | Sí, si el administrador tiene acceso a Administración → Módulos: el panel global permite editar módulos. | `/api/me` devuelve `vista-productos` en `disabledModules` y las portadas muestran el aviso anterior. |
+| Deshabilitar `vista-productos` solo para una cuenta | Sí, si la ficha de usuario expone el control de módulos por cuenta; debe comprobarse en la pantalla antes de prometerlo. | La ficha guarda el override y solo esa cuenta vuelve al Inicio clásico. |
+| Revertir una conversión masiva incorrecta con un botón | No. No hay botón de deshacer masivo; hay que corregir por usuario/producto desde Productos o usar un procedimiento revisado y aprobado. | No ejecutar SQL improvisado; verificar eventos y versión por cada corrección. |
+| Confirmar toda la reversa desde una sola pantalla | No. El interruptor, módulos y derechos viven en paneles separados. | Comprobar cada panel y luego `/api/me`/una ruta de prueba. |
+
 ## Criterio de éxito
 
 La reversa funciona cuando el panel muestra el modo esperado, una cuenta de prueba puede recorrer las rutas que debe conservar, los registros dejan de mostrar bloqueos inesperados y el historial conserva el evento correctivo. Si no se cumple, mantener Apagado y escalar antes de tocar schema, migraciones o producción.

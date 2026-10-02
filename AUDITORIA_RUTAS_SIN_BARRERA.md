@@ -26,3 +26,14 @@ La protección está presente en las familias de artículos `opportunities`, `ti
 ## Conclusión
 
 No encontré una ausencia inequívoca en las rutas de ejecución principales: las familias que crean, ejecutan, publican, reintentan, cancelan o inspeccionan trabajo ya llaman a `requireProductAccess`. Los candidatos de la tabla necesitan decisión de producto/semántica antes de modificar código, especialmente `dashboard-stats`, `assistant/chat`, `configuration-status` y `prompts`. Recomiendo no implementar ninguno desde esta auditoría documental.
+
+## Propuesta C-027: efecto por cuenta y diff mínimo (sin aplicarlo)
+
+La revisión directa de los cuatro archivos muestra lo siguiente:
+
+- `dashboard-stats/route.ts` devuelve límites y contadores de artículos (`title`, `opportunityGroup`, Search Console) y alimenta estadísticas de `/dashboard/estadisticas`. Un usuario con solo Artículos debe conservarlo; uno con solo Redes debería recibir un resumen vacío o una ruta de Redes distinta. El diff mínimo seguro sería `requireProductAccess(userId, "ARTICULOS", "/api/dashboard-stats")` antes de consultar la base, pero solo después de confirmar que Redes no consume este endpoint.
+- `assistant/chat/route.ts` autentica la sesión y responde usando el manual general; no crea, publica ni consulta datos de producto. Ambos tipos de cuenta (solo Artículos y solo Redes) necesitan ayuda general. No propongo barrera.
+- `configuration-status/route.ts` mezcla credenciales, categorías, contenido, Search Console, Analytics, Bing y las diez redes en un único resumen. Una cuenta solo Artículos necesita sus checks SEO/contenido; una solo Redes necesita sus checks sociales. Una barrera única perdería información válida para la otra cuenta; el diff mínimo correcto no es proteger toda la ruta, sino particionar la respuesta por producto o dejarla común mientras el cliente siga consumiéndola como resumen mixto.
+- `prompts/route.ts` solo autentica y lee la tabla global de prompts; no recibe producto y no modifica datos. Ambos tipos de cuenta pueden necesitar el mismo catálogo. No propongo barrera de producto; mantener sesión y, si procede, una autorización administrativa para futuros cambios.
+
+Por tanto, el único cambio candidato es `dashboard-stats` con Artículos, condicionado a confirmar consumidores; los otros tres no deben recibir `requireProductAccess` genérico.
