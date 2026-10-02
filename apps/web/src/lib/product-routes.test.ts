@@ -24,7 +24,6 @@ test("«oportunidades-redes» es Redes y «oportunidades» es Artículos (no se 
 test("las pantallas de cada producto se reconocen", () => {
   assert.equal(productOfPath("/dashboard/publicar"), "ARTICULOS");
   assert.equal(productOfPath("/dashboard/estadisticas"), "ARTICULOS");
-  assert.equal(productOfPath("/dashboard/configuracion/contenido"), "ARTICULOS");
   assert.equal(productOfPath("/dashboard/configuracion/redes-sociales"), "REDES");
   assert.equal(productOfPath("/dashboard/articulos"), "ARTICULOS");
   assert.equal(productOfPath("/dashboard/redes"), "REDES");
@@ -41,7 +40,8 @@ test("las APIs de cada producto también tienen una frontera explícita", () => 
 test("la coincidencia más específica gana dentro de Configuración", () => {
   assert.equal(productOfPath("/dashboard/configuracion"), "COMPARTIDO");
   assert.equal(productOfPath("/dashboard/configuracion/conexiones"), "COMPARTIDO");
-  assert.equal(productOfPath("/dashboard/configuracion/cuenta"), "COMPARTIDO");
+  assert.equal(productOfPath("/dashboard/configuracion/cuenta"), "ARTICULOS");
+  assert.equal(productOfPath("/dashboard/configuracion/contenido"), "COMPARTIDO");
   assert.equal(productOfPath("/dashboard/configuracion/inicial"), "ARTICULOS");
 });
 
