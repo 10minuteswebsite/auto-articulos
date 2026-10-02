@@ -35,7 +35,7 @@ Para: Milton · Escrito el 2026-10-02 por Claude (control del proyecto) · Estad
 | P2 | **Interruptor en Sombra al menos 7 días** y registros revisados sin bloqueos inesperados | 🧑 enciende, 🤖 revisa | Administración → Productos muestra «Sombra»; la búsqueda `[product-access] product access denied` en los registros de Vercel no muestra casos legítimos |
 | P3 | **Callbacks registrados** en LinkedIn, Pinterest, Tumblr, X, Blogger y Bing (Google y Meta van por Composio y no hacen falta; Composio solo si lo exige) — ver `CHECKLIST_CALLBACKS_MILTON.md` | 🧑 (con 🤖 en el navegador si quieres) | Cada consola muestra las dos direcciones nuevas **además** de la actual |
 | P4 | **Subdominios creados**: `seototal.articulos.lasolucionweb.com` y `seototal.redes.lasolucionweb.com` añadidos en Vercel, DNS apuntando y certificado emitido, **en privado** | 🧑 / 🤖 | Abrir cada dirección muestra la pantalla de login con candado |
-| P5 | **El HUB de Mario entiende dos productos.** Hoy su integración describe un solo derecho gratuito «SEO Total». Hace falta que el HUB emita **dos** (Artículos y Redes) para que se escriban en `ProductEntitlement` con `source = HUB` | 👤 Mario + 🛠 Codex | **PENDIENTE DE CONFIRMAR CON MARIO.** Sin esto el HUB no puede decidir por producto |
+| P5 | **El HUB de Mario entiende dos productos.** Hoy su integración describe un solo derecho gratuito «SEO Total». Hace falta que el HUB emita **dos** (Artículos y Redes) para que se escriban en `ProductEntitlement` con `source = HUB` | 👤 Mario + 🛠 Codex | **PENDIENTE DE CONFIRMAR CON MARIO.** Contrato completo en `CONTRATO_HUB_PARA_EL_HUB.md` (secciones 3 y 9). Sin esto el HUB no puede decidir por producto |
 | P6 | **Entrada desde el HUB probada** (`/auth/hub`, que ya existe en la rama de Mario) con una cuenta de prueba, y los 106 usuarios sincronizados (conteo y muestreo) | 👤 Mario + 🤖 | Una cuenta de prueba entra por el HUB y llega a su cuenta local con sus mismos datos |
 | P7 | **Acceso de emergencia de administradores** y «Acceder como» funcionan con el login del HUB activo | 🤖 | Entrar como admin por la ruta de emergencia; probar «Acceder como» a Lorena |
 | P8 | **Plan de reversa ensayado** (sección 6) | 🤖 | `ENSAYO_REVERSA.md` recorrido con una cuenta de prueba, cada paso confirmado |
@@ -89,7 +89,15 @@ Para: Milton · Escrito el 2026-10-02 por Claude (control del proyecto) · Estad
 
 **Paso 8 — Dar autoridad de login al HUB.** 👤 Mario (con 🤖 mirando). Se pasa de `legacy` a `dual` (conviven los dos logins), se prueba con la cuenta de prueba, y **solo si todo va bien** a `hub`.
 *Bien:* la cuenta de prueba entra por el HUB, y también por el login antiguo mientras esté en `dual`. *Mal:* reversa 6.D.
-**PENDIENTE DE CONFIRMAR CON MARIO:** cómo se llama y dónde está ese interruptor en su implementación.
+**Sub-pasos (uno a la vez):**
+ 8.1 👤 Mario confirma por escrito que el HUB tiene los dos productos y que la prueba de P6 pasó hoy.
+ 8.2 🤖 Entra por el login antiguo con la cuenta de prueba (debe funcionar).
+ 8.3 👤 Cambia el interruptor a `dual`. 🤖 entra por el HUB con la cuenta de prueba y por el login antiguo: **ambas entradas deben funcionar**.
+ 8.4 🤖 Prueba una cuenta de **solo Artículos** y una de **solo Redes** entrando por el HUB: cada una ve solo lo suyo.
+ 8.5 🤖 Prueba el acceso de emergencia de administrador y «Acceder como».
+ 8.6 🧑 Da la orden «pasa a hub». 👤 cambia el interruptor a `hub`. 🤖 comprueba que el login antiguo redirige al HUB y que el administrador sigue entrando por la ruta de emergencia.
+ 8.7 Si cualquier sub-paso falla: **reversa 6.D** y no continúes.
+**PENDIENTE DE CONFIRMAR CON MARIO:** el interruptor `legacy/dual/hub` **hoy no está construido** en SEO Total (solo existe el login actual). Ver `CONTRATO_HUB_PARA_EL_HUB.md`, sección 4: lo construimos nosotros tras el acuerdo. **Este paso no puede hacerse hasta entonces.**
 
 **Paso 9 — Mover el dominio viejo (solo si el plan lo exige).** 👤/🤖 Con el TTL ya bajado, mover `seototal.lasolucionweb.com` al proyecto del HUB **manteniendo vivas las rutas de máquina** (`/api/*`, `/.well-known/*`, MCP/OAuth2 para Alexa y Claude) con redirección 308 al dominio estable. **Este es el paso de mayor riesgo del Día Cero**: si no hay puente de rutas, Alexa/Claude y las conexiones OAuth dejan de funcionar.
 *Bien:* `/api/mcp` y los retornos de conexión siguen respondiendo. *Mal:* reversa 6.E de inmediato.
@@ -127,7 +135,19 @@ Para: Milton · Escrito el 2026-10-02 por Claude (control del proyecto) · Estad
 3. **Cómo se llama el interruptor de login del HUB y cómo emite dos derechos** (P5, P6, Paso 8).
 4. **Si se avisa a los usuarios** y con qué texto.
 
-## 9. Lista de verificación de una página (para imprimir)
+## 9. Qué debe existir del lado del HUB (resumen; el detalle está en `CONTRATO_HUB_PARA_EL_HUB.md`)
+
+1. **Dos productos** (`ARTICULOS`, `REDES`) con derechos `ACTIVE` / `GRACE` (con fecha) / `INACTIVE`.
+2. **Entrada por código de un solo uso** hacia `https://<subdominio>/auth/hub?code=...`, ≤ 60 s.
+3. **Respuestas con `entitlements`** en el canje del código y en la verificación de acceso; **nunca revocar por omisión**.
+4. **Mensajes firmados y repetibles sin daño** (`event_id`) para cambios instantáneos.
+5. **Tolerancia a caídas:** si el HUB cae, SEO Total conserva lo último y los administradores entran por emergencia.
+6. **Puente de rutas de máquina** (MCP, OAuth2, `.well-known`, retornos de conexión) con redirección 308 si se mueve el dominio.
+7. Acuerdo sobre **contraseñas**, **«han comprado»** y **tipos de usuario**.
+
+**Cómo se hablan:** el HUB → SEO Total entra por `/auth/hub` y (si se acuerda) empuja cambios firmados; SEO Total → HUB canjea el código, verifica acceso y sincroniza perfiles. SEO Total **decide cada petición con su tabla local**; el HUB nunca está en el camino de un clic.
+
+## 10. Lista de verificación de una página (para imprimir)
 
 ☐ P1 esquema HUB declarado · ☐ P2 Sombra ≥7 días · ☐ P3 callbacks · ☐ P4 subdominios · ☐ P5 HUB con dos productos · ☐ P6 entrada HUB probada · ☐ P7 emergencia y «Acceder como» · ☐ P8 reversa ensayada · ☐ P9 Lorena OK · ☐ P10 fecha decidida
 Día Cero: ☐1 Congelar · ☐2 Estado · ☐3 Subdominios · ☐4 Emergencia · ☐5 Gracia (SQL a mano) · ☐6 Vista productos · ☐7 Interruptor Activo (ACTIVAR) · ☐8 Login HUB · ☐9 Dominio viejo · ☐10 Verificar · ☐11 Cierre
