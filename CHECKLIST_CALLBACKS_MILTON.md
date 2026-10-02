@@ -13,6 +13,14 @@ Hosts nuevos:
 - `https://seototal.articulos.lasolucionweb.com`
 - `https://seototal.redes.lasolucionweb.com`
 
+## ACTUALIZACIÓN 2026-10-02 (decisión de Milton) — la lista se acorta
+
+Milton confirmó que **todas las conexiones de Google (Search Console, Analytics, Business Profile) y de Meta (Instagram, Threads) pasan por Composio**. Para esas conexiones la dirección de retorno que ve el proveedor es la de Composio, no la nuestra, así que **no hace falta registrarlas** (las filas de Google y Meta de la tabla de abajo quedan **fuera de la lista de trabajo**, salvo que quede alguna cuenta con conexión directa antigua). Mastodon ya no existe.
+
+**Lista de trabajo vigente:** LinkedIn, Pinterest, Tumblr, X, Blogger, Bing y, solo si Composio lo exige, la fila de Composio.
+
+**Protocolo de paso a Composio (PROTEGIDO, no tocar):** existe un procedimiento para las cuentas que se conectaron al estilo antiguo y pasan a Composio (`isMigrationApp`, `resolveRoute` y el selector de ruta en `apps/web/src/lib/composio*.ts`). Ningún lote de esta separación puede modificarlo ni dañarlo. Las rutas de conexión directa de Google/Bing siguen en el código a propósito: **no retirarlas** hasta que Milton lo ordene.
+
 ## URLs exactas
 
 | Consola / proveedor | Callback actual | Añadir — Artículos | Añadir — Redes | Solicitud |
