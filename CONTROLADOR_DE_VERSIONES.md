@@ -4023,3 +4023,26 @@ DESPLEGADO EN PRODUCCIÓN — 2026-10-02") por la tarea programada diaria de pro
   aplicación sigue APAGADO (sin efecto visible para ningún usuario todavía). Capitanía de
   migración reclamada y liberada por Claude el 2026-10-02; hoy no hay capitán activo sobre este
   lote.
+
+## Versión — 2026-10-02 — estado de conexión GSC sin propiedad seleccionada
+
+Fecha y hora: 2026-10-02 (EDT)
+Versión/commit: `afdb1d79` código; `c442102f` registro
+Rama: HEAD separado en worktree administrado
+Worktree: `/Users/miltondavila/.codex/worktrees/6fdf/Creador de articulos`
+Conversación/proyecto: CARMEN AGUILAR CONEXION GSC
+Cambios incluidos: una conexión Composio ACTIVE sin propiedad aprobada ahora se muestra como “Conectada · falta elegir” y explica la acción requerida.
+Archivos modificados: `apps/web/src/components/ComposioConnect.tsx`
+Archivos eliminados: ninguno
+Migraciones creadas/aplicadas: ninguna
+Auditoría 1: APROBADA — typecheck web, build web (85 rutas) y build worker OK.
+Auditoría 2: APROBADA — 20/20 pruebas del worker y `git diff --check` OK.
+Auditoría 3: pendiente de deployment y verificación productiva.
+Diff revisado: sí; sin schema ni migraciones. Rebase conservador sobre `origin/main` actualizado.
+Deployment/Vercel: pendiente.
+Estado de Vercel: pendiente.
+Dominio/logs/producción verificados: pendiente.
+Problemas conocidos: el hook de actualizaciones no pudo registrar el cambio por falta de `DATABASE_URL`; no afecta el commit ni el build.
+Responsable: Codex.
+Siguiente acción: subir a `main`, desplegar con `vercel --prod --yes` y verificar dominio/logs.
+Estado: PREPARADA
