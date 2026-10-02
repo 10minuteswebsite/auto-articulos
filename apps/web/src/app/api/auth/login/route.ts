@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCredentials } from "@/lib/auth";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
+import { getLoginMode } from "@/lib/login-mode";
+import { createLoginLimiter, decidePasswordLogin } from "@/lib/login-policy";
+
+// Límite de intentos solo cuando el login está en modo «hub» (puerta directa de
+// administradores). En «legacy» (hoy) nada de esto se aplica.
+const loginLimiter = createLoginLimiter();
 
 export async function POST(request: NextRequest) {
   const contentType = request.headers.get("content-type") ?? "";
@@ -15,7 +21,19 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const mode = await getLoginMode();
+    const limiterKey = `${request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "ip"}|${email.trim().toLowerCase()}`;
+    if (mode === "hub" && loginLimiter.isBlocked(limiterKey)) {
+      return NextResponse.json({ error: "Demasiados intentos. Espera unos minutos." }, { status: 429 });
+    }
     const user = await verifyCredentials(email, password);
+    if (mode === "hub" && !user) loginLimiter.recordFailure(limiterKey);
+    if (user && !decidePasswordLogin({ mode, role: user.role }).allow) {
+      // Usuario normal con el login en modo «hub»: debe entrar por el HUB.
+      if (nativeForm) return NextResponse.redirect(new URL("/login?error=hub", request.url), 303);
+      return NextResponse.json({ error: "Entra por el HUB de La Solución IA." }, { status: 403 });
+    }
+    if (mode === "hub" && user) loginLimiter.reset(limiterKey);
     if (!user) {
       if (nativeForm) return NextResponse.redirect(new URL("/login?error=1", request.url), 303);
       const response = NextResponse.json({ error: "Correo o contraseña incorrectos" }, { status: 401 });
