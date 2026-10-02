@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
 import LogoutButton from "@/components/LogoutButton";
+import { fetchMe } from "@/lib/me-client";
 
 interface TabItem {
   id?: string;
@@ -150,23 +151,23 @@ export default function DashboardNav() {
     Promise.all([
       fetch("/api/credentials", { cache: "no-store" }),
       fetch("/api/categories", { cache: "no-store" }),
-      fetch("/api/me", { cache: "no-store" }),
+      fetchMe(),
       fetch("/api/search-integrations/google", { cache: "no-store" }),
     ])
-      .then(async ([credRes, catRes, meRes, googleRes]) => {
+      .then(async ([credRes, catRes, meData, googleRes]) => {
         const credData = credRes.ok ? await credRes.json() : {};
         const catData = catRes.ok ? await catRes.json() : {};
-        const meData = meRes.ok ? await meRes.json() : {};
+        const resolvedMeData = meData ?? {};
         const googleData = googleRes.ok ? await googleRes.json() : {};
         const step1 = Boolean(credData.configured);
         const step2 = Array.isArray(catData.categories) && catData.categories.length > 0;
         const step3 =
-          typeof meData.contentLanguage === "string" && meData.contentLanguage.trim().length > 0;
+          typeof resolvedMeData.contentLanguage === "string" && resolvedMeData.contentLanguage.trim().length > 0;
         const step4 = Boolean(googleData.connected && googleData.siteUrl);
         if (!cancelled) {
           // Los administradores necesitan conservar el menú para supervisar y
           // configurar el sistema aunque su propia cuenta esté incompleta.
-          setIsAdmin(meData?.role === "admin" || Boolean(meData?.isActingAdmin));
+          setIsAdmin(resolvedMeData?.role === "admin" || Boolean(resolvedMeData?.isActingAdmin));
           const localDemo = process.env.NEXT_PUBLIC_LOCAL_DEMO === "true";
           setHideForSetup(!localDemo && !(step1 && step2 && step3 && step4));
         }
@@ -180,19 +181,15 @@ export default function DashboardNav() {
   }, [pathname]);
 
   useEffect(() => {
-    fetch(`/api/me?_t=${Date.now()}`, {
-      cache: "no-store",
-      headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
-    })
-      .then((res) => (res.ok ? res.json() : null))
+    fetchMe({ force: true })
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
-        setProductView(isProductViewEnabled(data?.disabledModules));
+        setProductView(isProductViewEnabled(data?.disabledModules as string[] | null | undefined));
         if (Array.isArray(data?.disabledModules)) {
-          setDisabledModules(data.disabledModules);
+          setDisabledModules(data.disabledModules as string[]);
         }
         if (Array.isArray(data?.globalDisabledModules)) {
-          setGlobalDisabledModules(data.globalDisabledModules);
+          setGlobalDisabledModules(data.globalDisabledModules as string[]);
         }
       })
       .catch(() => {

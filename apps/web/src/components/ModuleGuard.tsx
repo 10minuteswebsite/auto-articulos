@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SYSTEM_MODULES } from "@/lib/modules";
+import { fetchMe } from "@/lib/me-client";
 
 export default function ModuleGuard({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -13,11 +14,7 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/me?_t=${Date.now()}`, {
-      cache: "no-store",
-      headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
-    })
-      .then((res) => (res.ok ? res.json() : null))
+    fetchMe({ force: true })
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
         setSocialPublishingApproved(Boolean(data?.socialPublishingApproved));

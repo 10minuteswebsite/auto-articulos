@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PRODUCT_NAMES } from "@/lib/menu-names";
 import { productOfPath } from "@/lib/product-routes";
+import { fetchMe } from "@/lib/me-client";
 import {
   evaluatePageGate,
   graceNotices,
@@ -26,8 +27,7 @@ export default function ProductAccessGuard({ children }: { children: ReactNode }
   const [products, setProducts] = useState<ProductsInfo | null>(null);
 
   useEffect(() => {
-    fetch(`/api/me?_t=${Date.now()}`, { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
+    fetchMe({ force: true })
       .then((data) => {
         setMode(typeof data?.productEnforcement === "string" ? data.productEnforcement : null);
         setProducts(data?.products ?? null);
