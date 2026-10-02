@@ -55,9 +55,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const productBoundary = productBoundaryResponse(request);
-  if (productBoundary) return productBoundary;
-
   // El servidor MCP lo consumen clientes sin navegador (Alexa+, Claude), que
   // no tienen cookies: mandan `Authorization: Bearer`. Se resuelve acá y no
   // dentro de la ruta para que la ruta reciba `x-user-id` igual que cualquier
@@ -88,6 +85,13 @@ export async function middleware(request: NextRequest) {
     Object.entries(NO_CACHE_HEADERS).forEach(([key, value]) => response.headers.set(key, value));
     return response;
   }
+
+  // Primero se autentica la petición. Sin sesión, una URL cruzada conserva la
+  // respuesta 401 esperada por los clientes y por el smoke test; con sesión,
+  // la frontera devuelve 404/redirección antes de que pueda leer o mutar datos
+  // del otro producto.
+  const productBoundary = productBoundaryResponse(request);
+  if (productBoundary) return productBoundary;
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", userId);
