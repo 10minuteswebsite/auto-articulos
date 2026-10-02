@@ -136,6 +136,9 @@ export async function POST(request: NextRequest) {
     const backup = await readBackup();
 
     if (body?.action === "apply") {
+      if (!diaCeroActive()) {
+        return NextResponse.json({ error: "Primero pon la variable DIA_CERO=on en Vercel y espera el Redeploy; después vuelve a pulsar Activar." }, { status: 409 });
+      }
       if (typeof body.confirm !== "string" || body.confirm.trim().toUpperCase() !== CONFIRM_WORD) {
         return NextResponse.json({ error: `Para activar el Día Cero escribe «${CONFIRM_WORD}».` }, { status: 409 });
       }

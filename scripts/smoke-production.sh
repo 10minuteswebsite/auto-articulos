@@ -14,6 +14,11 @@ set -euo pipefail
 
 BASE_URL="${1:-${BASE_URL:-https://seototal.lasolucionweb.com}}"
 BASE_URL="${BASE_URL%/}"
+BASE_URLS=(
+  "$BASE_URL"
+  "https://articulos.lasolucionweb.com"
+  "https://redes.lasolucionweb.com"
+)
 
 check_status() {
   local path="$1"
@@ -31,14 +36,16 @@ check_status() {
   return 1
 }
 
-echo "Smoke test: $BASE_URL"
-check_status /login 200
-check_status /dashboard 307 401
-check_status /dashboard/articulos 307 401
-check_status /dashboard/redes 307 401
-check_status /dashboard/usuarios 307 401
-check_status /api/me 401
-check_status /api/admin/product-enforcement 401 403
-check_status /api/opportunities 401 403
-check_status /api/social-opportunities 401 403
+for BASE_URL in "${BASE_URLS[@]}"; do
+  echo "Smoke test: $BASE_URL"
+  check_status /login 200
+  check_status /dashboard 307 401
+  check_status /dashboard/articulos 307 401
+  check_status /dashboard/redes 307 401
+  check_status /dashboard/usuarios 307 401
+  check_status /api/me 401
+  check_status /api/admin/product-enforcement 401 403
+  check_status /api/opportunities 401 403
+  check_status /api/social-opportunities 401 403
+done
 echo "Smoke test OK"
