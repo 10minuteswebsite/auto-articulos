@@ -6,6 +6,7 @@ import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { ensureDefaultEntitlements } from "@/lib/product-access";
 import { applyCookie } from "@/lib/shared-cookies";
+import { redesProfile } from "@/lib/redes-profile";
 
 // Registro público desde el botón "Solicitar prueba" en Login — pedido
 // explícito del usuario, 13/8/2026. A diferencia de POST /api/admin/users
@@ -89,8 +90,10 @@ export async function POST(request: NextRequest) {
 
   const passwordHash = await bcrypt.hash(password, 12);
   const initialPasswordEncrypted = encryptSecret(password);
+  const diaCeroApplied = Boolean(await prisma.systemSetting.findUnique({ where: { key: "dia_cero_backup" }, select: { key: true } }));
   const user = await prisma.user.create({
     data: {
+      ...(diaCeroApplied ? redesProfile() : {}),
       email: normalizedEmail,
       name: `${normalizedFirstName} ${normalizedLastName}`,
       firstName: normalizedFirstName,
