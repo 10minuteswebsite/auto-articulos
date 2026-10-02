@@ -1,5 +1,7 @@
 # BUZÓN HUB ↔ SEO TOTAL
 
+> **ESTADO: SIN USO (decisión de Milton, 2026-10-02).** Mario y su programador no participan; SEO Total se adapta al contrato del HUB. Se conserva por si la situación cambia. Ver `TRASPASO_SEPARACION_SEO_TOTAL.md` §6.
+
 Canal de comunicación **entre el programa del HUB (Mario y su programador/agente)** y **el proyecto «Separación de SEO Total»** (Claude y Codex). Es el mismo método que ya usan Claude y Codex en `CONTROL_SEPARACION_SEO_TOTAL.md`, para que **nadie tenga que hacer de mensajero**.
 
 **Documento base que se está negociando:** `CONTRATO_HUB_PARA_EL_HUB.md` (sección 9: 6 preguntas abiertas).

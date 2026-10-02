@@ -44,11 +44,14 @@ Ya fusionados hoy: #367, #371, #373, #375, #376 (documentos, prueba de completit
 8. Rehacer `me-client` bien (opcional).
 **Lo que NO hay que construir:** conversión a gracia (`scripts/corte/conversion-a-gracia.sql` ya no se usa), desvío 308, mover el dominio, dominio estable nuevo.
 
-## 6. Comunicación con el HUB (Mario) — sin que Milton sea mensajero
-- Canal: **`BUZON_HUB_SEO_TOTAL.md`** (entradas `H-001`…`H-003` ya publicadas; esperamos **`H-004`** del programador del HUB con las 9 preguntas de `CONTRATO_HUB_PARA_EL_HUB.md` §12). Se responde con PR que toque **solo ese archivo**. **No des órdenes al HUB: cuéntale cómo está construido SEO Total** (decisión de Milton). **No toques `codex/hub-seo-total-migration`** (rama de Mario; solo lectura).
-- Su documento (leído): HUB en `https://hub.lasolucionweb.net`; `/auth/hub?code=` (código de un solo uso, 5 min), `POST /api/product-launch`, `POST /api/integrations/auto-articulos/{access,user-sync}`; secretos solo como variables protegidas. Discrepancias abiertas con nuestro diseño: producto único `seo-total` (nosotros dos), `trialUnlocked` que su revalidación escribe, cuentas 104/85/19, y que su `/auth/hub` crea cuentas locales **vacías**.
-- Preguntas aún abiertas: contrato §12 (9 preguntas). Respuesta de Mario y su programador esperada en el buzón.
-- Página privada para Mario (Artifact): `https://claude.ai/artifact/5cx6foBsG8CLZMhb13d2UE` (Milton debe compartirla).
+## 6. Relación con el HUB (Mario) — DECISIÓN DE MILTON DEL 2026-10-02: el HUB NO participa
+**Mario y su programador NO usarán el buzón ni se meterán en este tema: para ellos todo lo que haga SEO Total es transparente.** Por tanto:
+- **SEO Total se adapta al HUB tal como está documentado**; no esperes respuestas del HUB. `BUZON_HUB_SEO_TOTAL.md`, la carta a Mario y el prompt para su programador **quedan sin uso** (se conservan por si cambia la situación). Las «preguntas abiertas» de `CONTRATO_HUB_PARA_EL_HUB.md` §12 pasan a ser **decisiones de SEO Total** salvo las que solo Milton pueda aclarar con Mario (se las pides a Milton **como a un humano**, una sola pregunta, sin jerga).
+- **Su contrato (leído; HUB en `https://hub.lasolucionweb.net`):** `GET /auth/hub?code=` (código opaco de un solo uso, 5 min); `POST /api/product-launch` `{app, code}` → `platform_user_id`, `auth0_sub`, `email`, `platform_role`, `entitlement_status`, `expires_at`; `POST /api/integrations/auto-articulos/access` `{hub_user_id}` → `{allowed, status}`; `POST /api/integrations/auto-articulos/user-sync`. Cabeceras: `x-platform-client-id` y `Authorization: Bearer <secreto>`. Secretos solo como variables protegidas. Estados que dan acceso: `active`, `trialing` y concesiones administrativas activas sin vencimiento.
+- **Diseña SEO Total de forma defensiva y configurable**, sin depender de que el HUB cambie: (a) el identificador `app`/producto del HUB que corresponde a Artículos y a Redes va en **configuración** (variable o `SystemSetting`), **no en el código**; Milton hablará con Mario **una sola vez** para saber los dos valores; (b) aceptar tanto el formato antiguo (`seo-total`, un solo permiso) como uno por producto; (c) **ignorar `trialUnlocked`** como fuente de acceso desde el Día Cero (tu revalidación del HUB lo escribe; la barrera real es `ProductEntitlement`); (d) la cuenta que crea `/auth/hub` nace vacía: **aplicarle el perfil inicial** (sección 5.2); (e) fail-open durante la coexistencia, fail-closed al cerrar el acceso legado.
+- **No toques `codex/hub-seo-total-migration`** (rama de Mario; solo lectura). Producción tiene sus 5 columnas en `User`; el PR **#368** las declara sin tocar su rama (decisión de Milton pendiente).
+- Discrepancias entre su documento y lo acordado por Milton, ya resueltas **de nuestro lado**: producto único `seo-total` (son dos), dominio principal `.net` (se queda `.com`), 104/85/19 cuentas (asunto de Mario), `/auth/hub` crea cuentas vacías (lo arreglamos nosotros).
+- Página privada con el contrato (informativa, `https://claude.ai/artifact/5cx6foBsG8CLZMhb13d2UE`): solo si Milton quiere enseñársela a Mario.
 
 ## 7. Cómo se verifica (servicio de verificación; tu entorno de Codex no puede ejecutar `tsx`/Prisma/`tsc`)
 Cuando Claude no esté, **tú debes poder verificar tú mismo** o marcar «NO EJECUTADA»:
@@ -77,7 +80,7 @@ Cuenta real de pruebas: ver memoria «Cuenta de pruebas: Lorena Álvarez» (todo
 
 ## 11. Pendientes que SOLO puede hacer Milton
 1. Decir «fusiona #381» (documentos) y decidir **#368** (columnas del HUB).
-2. Compartir la página de Mario y darle al programador del HUB **acceso de escritura a ramas** del repositorio para el buzón.
+2. (Opcional) Compartir la página informativa con Mario. **Ya no hace falta dar acceso al repositorio al programador del HUB.**
 3. Pasar el interruptor a **Sombra** cuando quiera (reloj de ≥ 7 días).
 4. Registrar retornos en LinkedIn, Pinterest, Tumblr, X, Blogger y Bing **solo si se descarta el callback único**.
 5. Decir «adelante» para empezar a construir la sección 5, y elegir el orden.
@@ -92,4 +95,5 @@ Cuenta real de pruebas: ver memoria «Cuenta de pruebas: Lorena Álvarez» (todo
 
 ## 13. Bitácora
 - 2026-10-01 — Entrevista MAGO, blueprint triple-auditado, Fase 0, Lote 1 en producción.
+- 2026-10-02 (tarde) — **Milton decide que el HUB no participa**: SEO Total se adapta al contrato documentado de Mario; el buzón queda sin uso.
 - 2026-10-02 — Lotes 2, 3, 3b, 3c y 5, paneles y botones de 44 px en producción (interruptor Apagado). Contrato v2, manual v2, buzón con el HUB, carta y prompt para Mario. Seis puntos de decisión cerrados con Milton (sección 2). Traspaso v2 (este archivo).
