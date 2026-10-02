@@ -2,7 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { prisma } from "@auto-articulos/db";
 import { h2Style } from "@/components/dashboard-ui";
-import { isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
+import { isVisibleInProduct, productOfHost, productOfUpdate, type HostProductScope } from "@/lib/product-routes";
 
 type Categoria = "nuevas-herramientas" | "arreglos";
 
@@ -42,7 +42,7 @@ export default async function ActualizacionesPage({
       orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     }),
   ]);
-  const actualizaciones = candidatas.filter((item) => visibleInHost(item.modulePath, hostProduct));
+  const actualizaciones = candidatas.filter((item) => visibleInHost(item, hostProduct));
   const totalNuevas = actualizaciones.filter((item) => item.category === "nuevas-herramientas").length;
   const totalArreglos = actualizaciones.filter((item) => item.category === "arreglos").length;
   const total = totalNuevas + totalArreglos;
@@ -80,9 +80,12 @@ export default async function ActualizacionesPage({
   );
 }
 
-function visibleInHost(modulePath: string | null | undefined, hostProduct: HostProductScope): boolean {
-  if (hostProduct === "COMPARTIDO" || !modulePath) return true;
-  return isVisibleInProduct(productOfPath(modulePath), hostProduct);
+function visibleInHost(
+  item: { modulePath: string | null; title: string; summary: string; example: string },
+  hostProduct: HostProductScope,
+): boolean {
+  if (hostProduct === "COMPARTIDO") return true;
+  return isVisibleInProduct(productOfUpdate(item), hostProduct);
 }
 
 function TarjetaActualizacion({ item }: { item: { date: Date; title: string; category: string; summary: string; example: string; modulePath?: string | null } }) {

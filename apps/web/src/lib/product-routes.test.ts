@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfApiPath, productOfHost, productOfPath, PRODUCT_ROUTES } from "./product-routes";
+import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfApiPath, productOfHost, productOfPath, productOfUpdate, PRODUCT_ROUTES } from "./product-routes";
 
 test("el enlace de salida apunta al HUB oficial", () => {
   assert.equal(HUB_URL, "https://hub.lasolucionweb.net");
@@ -35,6 +35,12 @@ test("las APIs de cada producto también tienen una frontera explícita", () => 
   assert.equal(productOfApiPath("/api/social-opportunities"), "REDES");
   assert.equal(productOfApiPath("/api/search-integrations/instagram/callback"), "REDES");
   assert.equal(productOfApiPath("/api/me"), "COMPARTIDO");
+});
+
+test("las actualizaciones históricas sin ruta se separan por su contenido", () => {
+  assert.equal(productOfUpdate({ modulePath: null, title: "Guías de redes sociales", summary: "Conecta Instagram y LinkedIn", example: "" }), "REDES");
+  assert.equal(productOfUpdate({ modulePath: null, title: "Sugerencias de oportunidades de contenido SEO", summary: "Analiza Google Search Console y crea títulos", example: "" }), "ARTICULOS");
+  assert.equal(productOfUpdate({ modulePath: null, title: "Nuevo estilo visual", summary: "La plataforma se ve más clara", example: "" }), "COMPARTIDO");
 });
 
 test("la coincidencia más específica gana dentro de Configuración", () => {

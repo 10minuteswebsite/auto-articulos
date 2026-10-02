@@ -145,6 +145,24 @@ export function productOfApiPath(pathname: string | null | undefined): HostProdu
   return best ? best[1] : "COMPARTIDO";
 }
 
+/** Clasifica novedades antiguas que no guardaban modulePath. */
+export function productOfUpdate(update: {
+  modulePath?: string | null;
+  title: string;
+  summary: string;
+  example?: string | null;
+}): ProductScope {
+  const routeProduct = productOfPath(update.modulePath);
+  if (routeProduct !== "COMPARTIDO") return routeProduct;
+
+  const text = `${update.title} ${update.summary} ${update.example ?? ""}`.toLocaleLowerCase("es");
+  const hablaDeRedes = /redes sociales|blogs públicos|instagram|facebook|threads|linkedin|pinterest|tumblr|bluesky|business profile|difusión social|publicaciones en redes|carruseles|reels/.test(text);
+  const hablaDeArticulos = /artículos|artículo|títulos|categorías|google search console|google analytics|bing webmaster|oportunidades de contenido|redacción|blog de tu página/.test(text);
+  if (hablaDeRedes && !hablaDeArticulos) return "REDES";
+  if (hablaDeArticulos && !hablaDeRedes) return "ARTICULOS";
+  return "COMPARTIDO";
+}
+
 /** ¿Debe mostrarse una pantalla dentro de este producto? Lo compartido va en ambos. */
 export function isVisibleInProduct(
   screen: ProductScope,
