@@ -4027,22 +4027,22 @@ DESPLEGADO EN PRODUCCIÓN — 2026-10-02") por la tarea programada diaria de pro
 ## Versión — 2026-10-02 — estado de conexión GSC sin propiedad seleccionada
 
 Fecha y hora: 2026-10-02 (EDT)
-Versión/commit: `afdb1d79` código; `c442102f` registro
+Versión/commit: `189379b1` (código y configuración final; rebaseado sobre `origin/main`)
 Rama: HEAD separado en worktree administrado
 Worktree: `/Users/miltondavila/.codex/worktrees/6fdf/Creador de articulos`
 Conversación/proyecto: CARMEN AGUILAR CONEXION GSC
-Cambios incluidos: una conexión Composio ACTIVE sin propiedad aprobada ahora se muestra como “Conectada · falta elegir” y explica la acción requerida; la configuración de Vercel usa la raíz del monorepo y ejecuta el build del workspace web.
+Cambios incluidos: una conexión Composio ACTIVE sin propiedad aprobada ahora se muestra como “Conectada · falta elegir” y explica la acción requerida; `vercel.json` configura el build del monorepo y genera Prisma antes de compilar web.
 Archivos modificados: `apps/web/src/components/ComposioConnect.tsx`, `apps/web/package.json`, `vercel.json`
 Archivos eliminados: ninguno
 Migraciones creadas/aplicadas: ninguna
 Auditoría 1: APROBADA — typecheck web, build web (84 rutas en el main actualizado) y build worker OK.
 Auditoría 2: APROBADA — 20/20 pruebas del worker y `git diff --check` OK.
-Auditoría 3: deployments previos fallaron por raíz/configuración de Vercel; configuración raíz preparada y deployment pendiente.
+Auditoría 3: APROBADA — deployment productivo READY; dominio productivo `/login` HTTP 200; alias Vercel `/login` HTTP 302 esperado por redirección.
 Diff revisado: sí; sin schema ni migraciones. Rebase conservador sobre `origin/main` actualizado.
-Deployment/Vercel: pendiente.
-Estado de Vercel: pendiente.
-Dominio/logs/producción verificados: pendiente.
+Deployment/Vercel: `dpl_8jVGZnVKJzYqYvDrySu58ahVNKet`, estado `READY`.
+Estado de Vercel: READY; logs de build completos, Prisma 5.22.0 generado y Next 84 rutas compiladas.
+Dominio/logs/producción verificados: `https://seototal.lasolucionweb.com/login` HTTP 200; alias Vercel HTTP 302 esperado.
 Problemas conocidos: el hook de actualizaciones no pudo registrar el cambio por falta de `DATABASE_URL`; no afecta el commit ni el build. Vercel debe usar la configuración raíz para incluir los paquetes workspace.
 Responsable: Codex.
-Siguiente acción: subir a `main`, desplegar con `vercel --prod --yes` y verificar dominio/logs.
-Estado: PREPARADA
+Siguiente acción: ninguna; queda pendiente únicamente la comprobación visual de Carmen en la pantalla de Conexiones.
+Estado: VERIFICADA
