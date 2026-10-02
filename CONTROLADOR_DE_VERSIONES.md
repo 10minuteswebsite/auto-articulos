@@ -4031,18 +4031,18 @@ Versión/commit: `afdb1d79` código; `c442102f` registro
 Rama: HEAD separado en worktree administrado
 Worktree: `/Users/miltondavila/.codex/worktrees/6fdf/Creador de articulos`
 Conversación/proyecto: CARMEN AGUILAR CONEXION GSC
-Cambios incluidos: una conexión Composio ACTIVE sin propiedad aprobada ahora se muestra como “Conectada · falta elegir” y explica la acción requerida.
-Archivos modificados: `apps/web/src/components/ComposioConnect.tsx`
+Cambios incluidos: una conexión Composio ACTIVE sin propiedad aprobada ahora se muestra como “Conectada · falta elegir” y explica la acción requerida; el build fija Prisma 5.22.0 para evitar que Vercel descargue Prisma 8 RC.
+Archivos modificados: `apps/web/src/components/ComposioConnect.tsx`, `apps/web/package.json`
 Archivos eliminados: ninguno
 Migraciones creadas/aplicadas: ninguna
-Auditoría 1: APROBADA — typecheck web, build web (85 rutas) y build worker OK.
+Auditoría 1: APROBADA — typecheck web, build web (84 rutas en el main actualizado) y build worker OK.
 Auditoría 2: APROBADA — 20/20 pruebas del worker y `git diff --check` OK.
-Auditoría 3: pendiente de deployment y verificación productiva.
+Auditoría 3: primer deployment falló en Vercel por Prisma 8 RC; corrección preparada y segundo deployment pendiente.
 Diff revisado: sí; sin schema ni migraciones. Rebase conservador sobre `origin/main` actualizado.
 Deployment/Vercel: pendiente.
 Estado de Vercel: pendiente.
 Dominio/logs/producción verificados: pendiente.
-Problemas conocidos: el hook de actualizaciones no pudo registrar el cambio por falta de `DATABASE_URL`; no afecta el commit ni el build.
+Problemas conocidos: el hook de actualizaciones no pudo registrar el cambio por falta de `DATABASE_URL`; no afecta el commit ni el build. Primer deployment falló antes de compilar por Prisma 8 RC.
 Responsable: Codex.
 Siguiente acción: subir a `main`, desplegar con `vercel --prod --yes` y verificar dominio/logs.
 Estado: PREPARADA
