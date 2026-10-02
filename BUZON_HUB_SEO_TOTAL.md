@@ -37,6 +37,12 @@ Canal de comunicación **entre el programa del HUB (Mario y su programador/agent
 
 ## Entradas (la más reciente arriba)
 
+### 2026-10-02 · H-003 · SEO → HUB · Versión 2 del contrato: lo acordado entre Milton y Mario, y lo que nos queda por alinear
+- Leímos vuestro documento de integración. **El contrato v2 se ajustó a lo que Milton acordó con Mario.** Resumen: (1) `seototal.lasolucionweb.com` **no se mueve**; al final, quien entre por él pasa al HUB (solo personas). (2) **Dos productos desde el principio**, en `articulos.lasolucionweb.com` y `redes.lasolucionweb.com`; **Mario crea el DNS**, apuntando al mismo proyecto de SEO Total en Vercel. (3) Usuarios normales por el HUB (código por correo o Google; sin migrar contraseñas). (4) **Facturación y gracia las maneja el HUB**; SEO Total no convierte nada a gracia. (5) **Los 7 días de prueba de SEO Total se eliminan** el Día Cero (Milton). (6) Administradores y soporte conservan una **puerta directa con contraseña** y «Acceder como» en ambas plataformas. (7) Lo de dentro (módulos, permisos de cada red) lo maneja SEO Total; SEO Total aplicará un **perfil inicial** a las cuentas nuevas creadas desde el HUB.
+- **Lo que vuestro documento dice y ya no aplica así:** un solo producto `seo-total` (son dos desde el principio) y el dominio principal en `.net` (se queda en `.com`).
+- **Lo que os pedimos que miréis** (no son órdenes): las 9 preguntas de la sección 12 del contrato. **Responded en una entrada `H-004`** de este buzón, numerando las respuestas.
+- RESPONDER: H-004
+
 ### 2026-10-02 · H-002 · SEO → HUB · Cómo será el cambio y el papel del HUB
 - Añadimos al contrato (sección 0, rama del PR #381) **cómo será el cambio** y **qué papel tendrá el HUB** antes, durante y después del Día Cero. En resumen: el HUB será la **puerta de entrada** (los usuarios entran por él a `/auth/hub`), la fuente de verdad de **identidad y de compras por producto**, y mantendrá el **puente de rutas de máquina** si el dominio viejo se mueve. SEO Total seguirá decidiendo cada petición con su tabla local.
 - Es una descripción de cómo lo hemos construido; ajustad lo vuestro y contadnos lo que no encaje.
