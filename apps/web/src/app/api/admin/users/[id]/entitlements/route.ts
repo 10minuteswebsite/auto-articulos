@@ -3,6 +3,7 @@ import { prisma } from "@auto-articulos/db";
 import { auditLog } from "@/lib/audit";
 import { requireAdmin } from "@/lib/current-user";
 import { hasProductAccess, PRODUCTS, type ProductKey } from "@/lib/product-access";
+import { computeNextEntitlement } from "@/lib/product-entitlement-transition";
 
 /*
  * ADMINISTRACIÓN DE DERECHOS POR PRODUCTO (proyecto «SEPARACION DE SEO TOTAL»,
@@ -22,8 +23,6 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" };
-const DAY_MS = 24 * 60 * 60 * 1000;
-const MAX_GRACE_DAYS = 365;
 const MAX_REASON_LEN = 300;
 
 function isProduct(value: unknown): value is ProductKey {
@@ -111,39 +110,15 @@ export async function PUT(
       where: { userId_product: { userId: id, product } },
     });
 
-    // Se calcula el estado nuevo según la acción.
-    let nextStatus: "ACTIVE" | "GRACE" | "INACTIVE";
-    let nextGraceUntil: Date | null = null;
-
-    if (action === "set_status") {
-      const status: unknown = body?.status;
-      if (status !== "ACTIVE" && status !== "INACTIVE") {
-        return NextResponse.json(
-          { error: "status debe ser ACTIVE o INACTIVE (para dar gracia use grant_grace)" },
-          { status: 400, headers: NO_STORE },
-        );
-      }
-      nextStatus = status;
-    } else if (action === "grant_grace") {
-      const days: unknown = body?.days;
-      if (typeof days !== "number" || !Number.isInteger(days) || days < 1 || days > MAX_GRACE_DAYS) {
-        return NextResponse.json(
-          { error: `days debe ser un entero entre 1 y ${MAX_GRACE_DAYS}` },
-          { status: 400, headers: NO_STORE },
-        );
-      }
-      nextStatus = "GRACE";
-      nextGraceUntil = new Date(Date.now() + days * DAY_MS);
-    } else {
-      // remove_grace: quitar el tiempo de gracia deja la cuenta sin derecho.
-      if (current?.status !== "GRACE") {
-        return NextResponse.json(
-          { error: "Este producto no está en gracia: no hay nada que quitar" },
-          { status: 400, headers: NO_STORE },
-        );
-      }
-      nextStatus = "INACTIVE";
-    }
+    const transition = computeNextEntitlement(
+      current ? { status: current.status, graceUntil: current.graceUntil } : null,
+      action,
+      { status: body?.status, days: body?.days },
+      new Date(),
+    );
+    if (!transition.ok) return NextResponse.json({ error: transition.error }, { status: 400, headers: NO_STORE });
+    const nextStatus = transition.status;
+    const nextGraceUntil = transition.graceUntil;
 
     // Cambio + bitácora en una sola transacción: nunca uno sin el otro.
     const [entitlement] = await prisma.$transaction([
