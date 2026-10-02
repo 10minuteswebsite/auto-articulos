@@ -708,9 +708,10 @@ export async function POST(request: NextRequest) {
 
   const passwordHash = await bcrypt.hash(password, 12);
   const initialPasswordEncrypted = encryptSecret(password);
+  const diaCeroApplied = Boolean(await prisma.systemSetting.findUnique({ where: { key: "dia_cero_backup" }, select: { key: true } }));
   const user = await prisma.user.create({
     data: {
-      ...(role === "admin" ? {} : redesProfile()),
+      ...(diaCeroApplied && role !== "admin" ? redesProfile() : {}),
       email: normalizedEmail,
       name:
         typeof name === "string" && name.trim()
