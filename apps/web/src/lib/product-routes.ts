@@ -41,7 +41,7 @@ export const PRODUCT_ROUTES: ReadonlyArray<readonly [string, ProductScope]> = [
   ["/dashboard/oportunidades", "ARTICULOS"],
   ["/dashboard/estadisticas", "ARTICULOS"], // hoy solo cuenta artículos (dashboard-stats)
   ["/dashboard/configuracion/inicial", "ARTICULOS"],
-  ["/dashboard/configuracion/contenido", "ARTICULOS"],
+  ["/dashboard/configuracion/cuenta", "ARTICULOS"],
   ["/dashboard/configuracion/indexacion", "ARTICULOS"],
 
   // Redes.
@@ -56,6 +56,7 @@ export const PRODUCT_ROUTES: ReadonlyArray<readonly [string, ProductScope]> = [
 
   // Compartidas: conexiones por cuenta, cuenta, app móvil, asistentes IA, ayuda.
   ["/dashboard/configuracion", "COMPARTIDO"],
+  ["/dashboard/configuracion/contenido", "COMPARTIDO"],
   ["/dashboard/como-funciona", "COMPARTIDO"],
   ["/dashboard/actualizaciones", "COMPARTIDO"],
   ["/dashboard/vista-previa-bloqueo", "COMPARTIDO"],
