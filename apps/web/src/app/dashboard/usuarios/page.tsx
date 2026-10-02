@@ -33,6 +33,7 @@ import { trialDaysRemaining } from "@/lib/trial";
 import { SYSTEM_MODULES } from "@/lib/modules";
 import UserProductsPanel from "./UserProductsPanel";
 import ProductEnforcementPanel from "./ProductEnforcementPanel";
+import DiaCeroPanel from "./DiaCeroPanel";
 
 interface UserRow {
   id: string;
@@ -955,6 +956,7 @@ export default function UsuariosPage() {
       </header>
 
       <ProductEnforcementPanel />
+      <DiaCeroPanel />
 
       <div
         style={{
