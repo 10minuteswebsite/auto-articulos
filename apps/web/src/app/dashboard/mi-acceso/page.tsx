@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PRODUCT_NAMES } from "@/lib/menu-names";
 import { isProductViewEnabled } from "@/lib/product-routes";
+import { fetchMe } from "@/lib/me-client";
 import { accessStatusText, type AccessStatus } from "@/lib/mi-acceso-status";
 
 type Products = { articulos?: AccessStatus | null; redes?: AccessStatus | null } | null;
@@ -13,14 +14,14 @@ export default function MiAccesoPage() {
   const [products, setProducts] = useState<Products>(null);
 
   useEffect(() => {
-    fetch("/api/me?_t=" + Date.now(), { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
+    // Petición compartida con el menú y los guardas (una sola por carga de página).
+    fetchMe()
       .then((data) => {
-        if (!isProductViewEnabled(data?.disabledModules)) {
+        if (!isProductViewEnabled(data?.disabledModules as string[] | null | undefined)) {
           setState("hidden");
           return;
         }
-        setProducts(data?.products ?? null);
+        setProducts((data?.products as Products) ?? null);
         setState("ready");
       })
       .catch(() => setState("hidden"));

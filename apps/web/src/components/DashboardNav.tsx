@@ -181,7 +181,7 @@ export default function DashboardNav() {
   }, [pathname]);
 
   useEffect(() => {
-    fetchMe({ force: true })
+    fetchMe()
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
         setProductView(isProductViewEnabled(data?.disabledModules as string[] | null | undefined));

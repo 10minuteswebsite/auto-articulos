@@ -14,7 +14,7 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    fetchMe({ force: true })
+    fetchMe()
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
         setSocialPublishingApproved(Boolean(data?.socialPublishingApproved));

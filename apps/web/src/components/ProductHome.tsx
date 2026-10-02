@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import { isProductViewEnabled } from "@/lib/product-routes";
+import { fetchMe } from "@/lib/me-client";
 
 /*
  * INICIO DE UN PRODUCTO (proyecto «SEPARACION DE SEO TOTAL», Lote 2): la
@@ -40,12 +41,11 @@ export default function ProductHome({
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/me?_t=${Date.now()}`, { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
+    fetchMe()
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
-        setDisabledModules(Array.isArray(data?.disabledModules) ? data.disabledModules : []);
-        setState(isProductViewEnabled(data?.disabledModules) ? "enabled" : "disabled");
+        setDisabledModules(Array.isArray(data?.disabledModules) ? (data.disabledModules as string[]) : []);
+        setState(isProductViewEnabled(data?.disabledModules as string[] | null | undefined) ? "enabled" : "disabled");
       })
       .catch(() => setState("disabled"));
   }, []);

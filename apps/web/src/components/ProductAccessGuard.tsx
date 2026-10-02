@@ -27,7 +27,7 @@ export default function ProductAccessGuard({ children }: { children: ReactNode }
   const [products, setProducts] = useState<ProductsInfo | null>(null);
 
   useEffect(() => {
-    fetchMe({ force: true })
+    fetchMe()
       .then((data) => {
         setMode(typeof data?.productEnforcement === "string" ? data.productEnforcement : null);
         setProducts(data?.products ?? null);
