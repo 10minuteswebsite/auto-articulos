@@ -5,10 +5,14 @@ set -euo pipefail
 # Usage: ./scripts/smoke-production.sh [BASE_URL]
 # Example: ./scripts/smoke-production.sh https://auto-articulos-web.vercel.app
 #
+# NO se siguen redirecciones a propósito: una pantalla protegida debe responder
+# 307 (redirige al login). Si se siguiera la redirección, el estado final sería
+# el 200 del login y el script fallaría siempre (falso fallo).
+#
 # The script sends unauthenticated GET requests only. It never needs secrets,
 # credentials, cookies, a database connection, or a write-capable endpoint.
 
-BASE_URL="${1:-${BASE_URL:-https://auto-articulos-web.vercel.app}}"
+BASE_URL="${1:-${BASE_URL:-https://seototal.lasolucionweb.com}}"
 BASE_URL="${BASE_URL%/}"
 
 check_status() {
@@ -16,7 +20,7 @@ check_status() {
   shift
   local expected="$*"
   local status
-  status="$(curl --silent --show-error --location --max-time 20 --output /dev/null --write-out '%{http_code}' "$BASE_URL$path")"
+  status="$(curl --silent --show-error --max-redirs 0 --max-time 20 --output /dev/null --write-out '%{http_code}' "$BASE_URL$path")"
   for allowed in $expected; do
     if [[ "$status" == "$allowed" ]]; then
       printf 'OK  %-36s %s\n' "$path" "$status"

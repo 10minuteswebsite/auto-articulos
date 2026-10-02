@@ -69,8 +69,10 @@ editarse para eliminar columnas del HUB ni incluir `db push`.
 1. Mantener `product_enforcement = off` durante el despliegue.
 2. Tras verificar logs y derechos reales, Milton puede cambiarlo a `shadow`.
 3. Mantener Sombra al menos una semana y revisar falsos positivos.
-4. Solo Milton puede decidir `enforce`; la pantalla administrativa muestra una
-   advertencia y no debe activarse como parte de este runbook.
+4. Solo Milton puede decidir `enforce`. La API y la pantalla administrativa lo
+   **impiden** salvo que el modo actual sea Sombra y se escriba la palabra
+   ACTIVAR; volver a Sombra o Apagado es siempre libre. No debe activarse como
+   parte de este runbook.
 
 ## 5. Reversión segura del Lote 1
 
