@@ -387,9 +387,9 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
           );
           const status =
             noOptionsAvailable
-              ? { text: "Conectada · sin propiedades disponibles", color: "#c62828" }
+              ? { text: "No conectada · sin propiedades disponibles", color: "#c62828" }
               : connection.status === "ACTIVE" && !connection.selection
-                ? { text: "Conectada · falta elegir", color: "#9a6700" }
+                ? { text: "Configuración incompleta · falta elegir", color: "#9a6700" }
               : STATUS_LABEL[connection.status];
           const isBusy = busy === connection.app;
           if (inline && showInactiveActions && connection.status !== "ACTIVE") {
@@ -485,7 +485,7 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                     lineHeight: 1.45,
                   }}
                 >
-                  La cuenta está conectada, pero todavía no has elegido {connection.app === "google_search_console" ? "la propiedad de Search Console" : connection.app === "google_analytics" ? "la propiedad de Analytics" : connection.app === "facebook" ? "la Página de Facebook" : "la cuenta de Instagram"} que usará SEO TOTAL.
+                  La autorización quedó incompleta: todavía no hay {connection.app === "google_search_console" ? "una propiedad de Search Console" : connection.app === "google_analytics" ? "una propiedad de Analytics" : connection.app === "facebook" ? "una Página de Facebook" : "una cuenta de Instagram"} disponible para SEO TOTAL.
                 </p>
               )}
 
