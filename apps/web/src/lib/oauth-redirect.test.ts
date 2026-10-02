@@ -5,8 +5,8 @@ import { getAllowedOAuthOrigin, getOAuthRedirectUri } from "./oauth-redirect";
 
 test("acepta solo los hosts OAuth explícitos del proyecto", () => {
   assert.equal(
-    getAllowedOAuthOrigin(new NextRequest("https://seototal.articulos.lasolucionweb.com/dashboard")),
-    "https://seototal.articulos.lasolucionweb.com",
+    getAllowedOAuthOrigin(new NextRequest("https://articulos.lasolucionweb.com/dashboard")),
+    "https://articulos.lasolucionweb.com",
   );
   assert.equal(getAllowedOAuthOrigin(new NextRequest("https://evil.example/dashboard")), null);
 });
@@ -27,6 +27,10 @@ test("rechaza puertos, sufijos y prefijos maliciosos", () => {
     "seototal.lasolucionweb.com:8443",
     "seototal.lasolucionweb.com.evil.com",
     "evilseototal.lasolucionweb.com",
+    "articulos.lasolucionweb.com.evil.com",
+    "redes.lasolucionweb.com.evil.com",
+    "evilarticulos.lasolucionweb.com",
+    "seototal.articulos.lasolucionweb.com", // nombre antiguo ya descartado
   ]) {
     assert.equal(getAllowedOAuthOrigin(new NextRequest(`https://${host}/dashboard`)), null);
   }
@@ -34,11 +38,17 @@ test("rechaza puertos, sufijos y prefijos maliciosos", () => {
 
 test("normaliza mayúsculas, pero no acepta comodines literales ni host vacío", () => {
   assert.equal(
-    getAllowedOAuthOrigin(new NextRequest("https://SEOTOTAL.ARTICULOS.LASOLUCIONWEB.COM/dashboard")),
-    "https://seototal.articulos.lasolucionweb.com",
+    getAllowedOAuthOrigin(new NextRequest("https://ARTICULOS.LASOLUCIONWEB.COM/dashboard")),
+    "https://articulos.lasolucionweb.com",
   );
   process.env.SEO_TOTAL_OAUTH_ALLOWED_HOSTS = "*.lasolucionweb.com";
   assert.equal(getAllowedOAuthOrigin(new NextRequest("https://foo.lasolucionweb.com/dashboard")), null);
   assert.equal(getAllowedOAuthOrigin(new NextRequest("https:///dashboard")), null);
   delete process.env.SEO_TOTAL_OAUTH_ALLOWED_HOSTS;
+});
+
+test("acepta los dos subdominios de producto y el principal", () => {
+  for (const host of ["seototal.lasolucionweb.com", "articulos.lasolucionweb.com", "redes.lasolucionweb.com"]) {
+    assert.equal(getAllowedOAuthOrigin(new NextRequest(`https://${host}/dashboard`)), `https://${host}`);
+  }
 });

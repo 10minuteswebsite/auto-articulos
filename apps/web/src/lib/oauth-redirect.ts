@@ -1,9 +1,11 @@
 import type { NextRequest } from "next/server";
 
+// Hosts de SEO Total: el principal y los dos productos (decisión de Milton
+// 2026-10-02: subdominios en el .com, sin «seototal.»; Mario crea el DNS).
 const DEFAULT_ALLOWED_HOSTS = [
   "seototal.lasolucionweb.com",
-  "seototal.articulos.lasolucionweb.com",
-  "seototal.redes.lasolucionweb.com",
+  "articulos.lasolucionweb.com",
+  "redes.lasolucionweb.com",
 ];
 
 /**
