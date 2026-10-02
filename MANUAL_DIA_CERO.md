@@ -28,7 +28,7 @@ Derechos por producto y paneles de Administración; vista por productos (solo ad
 | P4 | **DNS creado por Mario:** `articulos.lasolucionweb.com` y `redes.lasolucionweb.com` apuntando al proyecto de SEO Total en Vercel, con candado, **en privado** | 👤 Mario (🤖 verifica) | Cada dirección carga la pantalla de login con candado |
 | P5 | **Una sola fuente de acceso:** la regla de prueba de 7 días queda **desactivada con un interruptor** (decisión de Milton) y el permiso del HUB escribe nuestra tabla de derechos | 🤖 + 👤 | Prueba con 4 cuentas: ambos, solo Artículos, solo Redes, ninguno; una cuenta antigua de prueba vencida con permiso del HUB entra |
 | P6 | **Entrada desde el HUB probada** en cada producto con cuentas de prueba | 👤 + 🤖 | `/auth/hub` en `articulos` y en `redes` abre sesión y deja los datos intactos |
-| P7 | **Perfil inicial de usuario nuevo** (permisos de redes encendidos; cada usuario conecta las suyas) | 🛠/🤖 | Cuenta nueva desde el HUB entra a Redes y ve dónde conectar |
+| P7 | **Permisos de Redes encendidos** para cuentas nuevas (al crearse desde el HUB) **y para todos los usuarios actuales** (el Día Cero, con simulación previa); cada usuario conecta las suyas | 🛠/🤖 | Cuenta nueva y cuenta antigua entran a Redes y ven dónde conectar; la simulación mostró cuántos cambian |
 | P8 | **Puerta de administradores y «Acceder como»** funcionan en `articulos` y en `redes` | 🤖 | Entrar por la ruta directa; «Acceder como» a Lorena |
 | P9 | **«Callback único»** (si se decide construir): una conexión de prueba empezada en `redes` vuelve bien por el callback de siempre | 🛠/🤖 | Conectar Tumblr de prueba desde `redes` |
 | P10 | **Reversa ensayada** (sección 6) | 🤖 | `ENSAYO_REVERSA.md` recorrido |
@@ -58,6 +58,8 @@ Derechos por producto y paneles de Administración; vista por productos (solo ad
 
 **Paso 4 — Puerta de administradores.** 🤖 Entrar como administrador por la ruta directa en cada producto y probar «Acceder como». *Mal:* no seguir; sin esto un fallo del HUB deja a soporte sin entrada.
 
+**Paso 4b — Encender los permisos de Redes a todos.** 🤖 Primero **simulación** (cuántos usuarios cambian), se la muestro a Milton; con su visto bueno se aplica a todos los usuarios actuales (módulo de Oportunidades de Redes y permiso de cada red de publicación). *Bien:* una cuenta antigua entra a Redes y ve dónde conectar. *Mal:* reversa 7.G.
+
 **Paso 5 — Habilitar la vista por productos.** 🤖 En Administración → Módulos, `vista-productos` en «Habilitado» para todos (o un grupo de prueba primero). *Bien:* una cuenta de prueba ve el Inicio con las dos tarjetas y «Mi acceso». *Mal:* reversa 7.C.
 
 **Paso 6 — Interruptor a Activo.** 🧑 Administración → Productos → **Activo** + escribir **ACTIVAR** (solo desde Sombra). *Bien:* el panel muestra «Activo» (hasta 30 s en todos los servidores). *Mal:* reversa 7.A.
@@ -79,6 +81,7 @@ Derechos por producto y paneles de Administración; vista por productos (solo ad
 | **7.C** | La vista por productos confunde | Administración → Módulos → quitar «Habilitado» a `vista-productos` | segundos |
 | **7.D** | La entrada por el HUB falla | 👤 Mario desactiva el lanzamiento desde el HUB; los usuarios vuelven al login actual (sigue activo en la coexistencia); administradores por la puerta directa | segundos |
 | **7.E** | La redirección de personas falla | 🤖 Quitar la redirección de `/` y `/login`; el dominio nunca se movió | segundos |
+| **7.G** | Los permisos de Redes se encendieron mal | Se apagan por usuario desde Administración; la simulación guardó la lista de quiénes cambiaron para poder revertir | por usuario |
 | **7.F** | Algo raro en la base | **No tocar.** Mantener Apagado y avisar. Nunca `accept_data_loss`, `force_sync` ni `db push` | — |
 
 ## 8. Después del Día Cero

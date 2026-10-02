@@ -55,7 +55,11 @@ El HUB ya describe **un** producto (`seo-total`). Como los productos son **dos**
 4. **Nunca revocar por omisión:** un producto que no aparece en un mensaje significa «sin cambios».
 5. **Si el HUB cae** durante la coexistencia: se conserva el último estado (fail-open); al cerrarse el acceso legado, las operaciones nuevas fallan cerradas (como Mario describió).
 
-## 5. Usuario nuevo creado desde el HUB [NUESTRO LADO]
+## 5. Permisos de Redes: usuarios nuevos y actuales [ACORDADO, NUESTRO LADO]
+
+Milton decidió que **todos** los usuarios (actuales y nuevos) podrán usar **Artículos y Redes gratis** al pasar al HUB; el HUB cerrará o abrirá cada aplicación por usuario después. El Día Cero SEO Total **enciende los permisos de Redes a todos los usuarios actuales** (con simulación previa).
+
+### Usuario nuevo creado desde el HUB
 
 Hoy `/auth/hub` crea la cuenta local **vacía** (sin permisos de redes ni módulos). Para Redes eso la haría inútil. **SEO Total aplicará un perfil inicial** al crearla:
 - **Redes:** módulo de Oportunidades de Redes y el permiso de **todas** las redes de publicación activos. **Cada usuario conecta sus propias redes.**
