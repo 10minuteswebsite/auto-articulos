@@ -8,6 +8,7 @@ import {
   verifyImpersonationToken,
   verifySessionToken,
 } from "./lib/session";
+import { applyCookie } from "./lib/shared-cookies";
 import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
 
 const PUBLIC_PATHS = [
@@ -113,7 +114,7 @@ export async function middleware(request: NextRequest) {
         const remaining = Number(expiresStr) - Date.now();
         if (remaining > 0 && remaining < SESSION_TTL_MS / 2) {
           const newToken = await createSessionToken(userId);
-          response.cookies.set(SESSION_COOKIE, newToken, {
+          applyCookie(response, SESSION_COOKIE, newToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",

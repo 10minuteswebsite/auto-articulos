@@ -5,6 +5,8 @@ import { encryptSecret, exchangeCodeForTwitterTokens } from "@auto-articulos/sha
 import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredTwitterAppCredentials } from "@/lib/twitter-app-config";
 import { TWITTER_STATE_COOKIE, TWITTER_VERIFIER_COOKIE } from "../connect/constants";
+import { clearCookie } from "@/lib/shared-cookies";
+import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -14,20 +16,20 @@ export async function GET(request: NextRequest) {
 
   if (!state || state !== cookieStore.get(TWITTER_STATE_COOKIE)?.value || !code) {
     return NextResponse.redirect(
-      new URL("/dashboard/configuracion?twitter=error", request.url)
+      new URL("/dashboard/configuracion?twitter=error", oauthReturnBase(request))
     );
   }
 
   const codeVerifier = cookieStore.get(TWITTER_VERIFIER_COOKIE)?.value;
   if (!codeVerifier) {
     return NextResponse.redirect(
-      new URL("/dashboard/configuracion?twitter=error", request.url)
+      new URL("/dashboard/configuracion?twitter=error", oauthReturnBase(request))
     );
   }
 
   try {
     const appCreds = await getStoredTwitterAppCredentials();
-    const redirectUri = `${request.nextUrl.protocol}//${request.nextUrl.host}/api/search-integrations/twitter/callback`;
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/twitter/callback");
     const tokens = await exchangeCodeForTwitterTokens(code, codeVerifier, redirectUri, appCreds);
 
     const expiresAt = new Date(Date.now() + tokens.expiresInSeconds * 1000);
@@ -52,15 +54,16 @@ export async function GET(request: NextRequest) {
     });
 
     const response = NextResponse.redirect(
-      new URL("/dashboard/configuracion?twitter=connected", request.url)
+      new URL("/dashboard/configuracion?twitter=connected", oauthReturnBase(request))
     );
-    response.cookies.delete(TWITTER_STATE_COOKIE);
-    response.cookies.delete(TWITTER_VERIFIER_COOKIE);
+    clearCookie(response, TWITTER_STATE_COOKIE, { path: "/" });
+    clearCookie(response, TWITTER_VERIFIER_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch (error) {
     console.error("Error en Twitter OAuth callback:", error);
     return NextResponse.redirect(
-      new URL("/dashboard/configuracion?twitter=error", request.url)
+      new URL("/dashboard/configuracion?twitter=error", oauthReturnBase(request))
     );
   }
 }

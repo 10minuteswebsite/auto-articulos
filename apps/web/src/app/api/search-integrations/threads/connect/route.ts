@@ -5,25 +5,28 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredThreadsAppCredentials } from "@/lib/threads-app-config";
 
 import { THREADS_STATE_COOKIE } from "./constants";
+import { applyCookie } from "@/lib/shared-cookies";
+import { oauthCallbackUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
 
 export async function GET(request: Request) {
   await getCurrentUserId();
 
   try {
     const appCreds = await getStoredThreadsAppCredentials();
-    const reqUrl = new URL(request.url);
-    const redirectUri = `${reqUrl.protocol}//${reqUrl.host}/api/search-integrations/threads/callback`;
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/threads/callback");
     const state = randomBytes(24).toString("base64url");
     const authUrl = getThreadsAuthUrl(state, redirectUri, appCreds);
 
     const response = NextResponse.redirect(authUrl);
-    response.cookies.set(THREADS_STATE_COOKIE, state, {
+    applyCookie(response, THREADS_STATE_COOKIE, state, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
       path: "/",
       maxAge: 600,
     });
+
+    rememberOAuthOrigin(response, request);
 
     return response;
   } catch {

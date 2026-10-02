@@ -5,6 +5,7 @@ import { encryptSecret } from "@auto-articulos/shared";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { ensureDefaultEntitlements } from "@/lib/product-access";
+import { applyCookie } from "@/lib/shared-cookies";
 
 // Registro público desde el botón "Solicitar prueba" en Login — pedido
 // explícito del usuario, 13/8/2026. A diferencia de POST /api/admin/users
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
 
   const token = await createSessionToken(user.id);
   const response = NextResponse.json({ ok: true, trialDays: TRIAL_DAYS });
-  response.cookies.set(SESSION_COOKIE, token, {
+  applyCookie(response, SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

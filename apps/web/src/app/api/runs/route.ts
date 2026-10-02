@@ -3,7 +3,7 @@ import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
-import { hasTrialAccess } from "@/lib/trial";
+import { checkTrialAccess } from "@/lib/trial-rule-setting";
 
 // Bug de consumo de datos encontrado el 30/7/2026: este endpoint se
 // consulta con polling frecuente (Inicio) y en cada visita al Historial, y
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  if (!hasTrialAccess(user)) {
+  if (!(await checkTrialAccess(user))) {
     return NextResponse.json(
       {
         error:

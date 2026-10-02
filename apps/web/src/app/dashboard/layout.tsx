@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import DashboardNav from "@/components/DashboardNav";
 import FloatingAssistant from "@/components/FloatingAssistant";
 import LogoutButton from "@/components/LogoutButton";
@@ -8,7 +10,8 @@ import StopImpersonationButton from "@/components/StopImpersonationButton";
 import TrialBlockedScreen from "@/components/TrialBlockedScreen";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
 import { displayName, getSessionContext } from "@/lib/current-user";
-import { hasTrialAccess } from "@/lib/trial";
+import { checkTrialAccess } from "@/lib/trial-rule-setting";
+import { resolveAccessRedirect } from "@/lib/access-router-adapter";
 import { getMaintenanceMode } from "@/lib/maintenance";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +23,12 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const { user, actingAdmin } = await getSessionContext();
-  const blocked = !actingAdmin && user.role !== "admin" && !hasTrialAccess(user);
+  const blocked = !actingAdmin && user.role !== "admin" && !(await checkTrialAccess(user));
+  // Router de acceso (Día Cero): apagado por defecto. Nunca para administradores ni al «Acceder como».
+  if (!actingAdmin && user.role !== "admin") {
+    const target = await resolveAccessRedirect(user, (await headers()).get("host"));
+    if (target) redirect(target);
+  }
   const maintenance = await getMaintenanceMode();
 
   if (maintenance && !actingAdmin && user.role !== "admin") {

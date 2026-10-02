@@ -8,7 +8,8 @@ import {
   BUSINESS_PROFILE_STATE_COOKIE,
   businessProfileOAuthConfig,
 } from "@/lib/google-oauth";
-import { getOAuthRedirectUri } from "@/lib/oauth-redirect";
+import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
     !code
   ) {
     return NextResponse.redirect(
-      new URL(connectionReturnPath("business-profile", "error"), request.url),
+      new URL(connectionReturnPath("business-profile", "error"), oauthReturnBase(request)),
     );
   }
   try {
@@ -58,13 +59,14 @@ export async function GET(request: NextRequest) {
       },
     });
     const response = NextResponse.redirect(
-      new URL("/dashboard/configuracion/conexiones?conexion=business-profile&vista=difusion", request.url),
+      new URL("/dashboard/configuracion/conexiones?conexion=business-profile&vista=difusion", oauthReturnBase(request)),
     );
-    response.cookies.delete(BUSINESS_PROFILE_STATE_COOKIE);
+    clearCookie(response, BUSINESS_PROFILE_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch {
     return NextResponse.redirect(
-      new URL(connectionReturnPath("business-profile", "error"), request.url),
+      new URL(connectionReturnPath("business-profile", "error"), oauthReturnBase(request)),
     );
   }
 }
