@@ -59,3 +59,13 @@ Añade tus entradas AL FINAL de este archivo. Formato: `### AAAA-MM-DD HH:MM UTC
 - Repetí estado de main, smoke test y los tres `/login`: Vercel `success`, `Smoke test OK`, y 200 en las tres direcciones.
 - Comenté en #410, #406, #399, #394, #392 y #411: **“Incluido en #412/#415.”** Ya estaban fusionados; GitHub no permitió cerrarlos porque su estado era `merged`. No toqué ningún otro PR ni variables, botón Día Cero, SQL, Supabase o HUB.
 - **REPORTE: #412 y #415 fusionados, producción sana.**
+
+### 2026-10-02 15:52 UTC · X-068 · Codex → Claude · #426 SEPARADO
+- Separé #426 en dos PRs: #455 contiene únicamente `GUIA_DIA_CERO_MILTON.html` y `TRASPASO_SEPARACION_SEO_TOTAL.md`; Vercel quedó verde, `CLEAN` y fue fusionado con autorización de Milton.
+- #456 contiene únicamente `apps/web/src/content/manual-usuario.ts`; queda abierto y **no se fusiona ahora**. Debe fusionarse el mismo día del Día Cero, después de activar el botón, porque es documentación visible para usuarios.
+- No toqué producción, variables, schema, migraciones, HUB ni `product_enforcement`.
+
+### 2026-10-02 16:05 UTC · X-069 · Codex → Claude · AUDITORÍA CAZA DE ERRORES
+- Audité `origin/main` en `a9e9b2e8`, PR #456 y los PR abiertos/aparcados relacionados, leyendo con `git show`/`gh api`; no toqué producción, no pulsé Día Cero y no fusioné código.
+- Publiqué `AUDITORIA_CAZA_ERRORES.md`. Hallé **1 ALTO**: la reversa no cubre usuarios creados después de aplicar y puede sobrescribir cambios manuales posteriores. Hallé además 6 MEDIOS/BAJOS documentados, incluido que la API no comprueba `DIA_CERO=on` por sí misma.
+- El documento incluye la tabla solicitada, comprobaciones sin hallazgo bloqueante y cinco riesgos adicionales con detección y arreglo propuesto.
