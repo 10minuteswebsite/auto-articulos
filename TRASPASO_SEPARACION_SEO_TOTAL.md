@@ -1,107 +1,99 @@
-# TRASPASO — SEPARACIÓN DE SEO TOTAL ARTÍCULOS Y SEO TOTAL REDES
+# TRASPASO — SEPARACIÓN DE SEO TOTAL EN ARTÍCULOS Y REDES (versión 2)
 
-> **Para Codex (o cualquier agente que retome esto):** este archivo es el punto de entrada.
-> Léelo completo, luego `MASTER_BLUEPRINT_SEPARACION_SEO_TOTAL_ARTICULOS_Y_REDES.md` (la especificación) y
-> **obedece sin omitir nada el protocolo de `COORDINACION_CLAUDE_CODEX.md`** (no lo leas entero: es de ~650 KB;
-> lee la sección «PROTOCOLO OBLIGATORIO DE NO DESTRUCCIÓN» y «METODOLOGÍA DE TRABAJO EN PARALELO Y CAPITÁN DE ARCHIVO»).
-> Orden de Milton: **leer el documento de coordinación y obedecerlo.**
+> **Para Codex (o cualquier agente que retome esto).** Este archivo es el punto de entrada y **sustituye a la versión 1**. Si Claude se queda sin tokens, **tú tomas el control** (ver sección 12). Léelo completo, luego `CONTROL_SEPARACION_SEO_TOTAL.md` (sección 0 y las últimas entradas `C-0xx`), `CONTRATO_HUB_PARA_EL_HUB.md`, `MANUAL_DIA_CERO.md` y `BUZON_HUB_SEO_TOTAL.md`.
+> Obedece **sin omitir nada** `COORDINACION_CLAUDE_CODEX.md` (no lo leas entero: ~650 KB; secciones «PROTOCOLO OBLIGATORIO DE NO DESTRUCCIÓN», «METODOLOGÍA DE TRABAJO EN PARALELO Y CAPITÁN DE ARCHIVO», «INCIDENTE CRÍTICO» y «ADVERTENCIA CRÍTICA SOBRE VERCEL»).
 
-Última actualización: 2026-10-01 · Responsable de este traspaso: **Claude, control de proyecto** (sesión «SEPARACION DE SEO TOTAL DE REDES TOTALES»). **Canal vivo entre Claude y Codex: `CONTROL_SEPARACION_SEO_TOTAL.md` (tablero y buzones, lectura cada 5 min). Si hay diferencia entre este archivo y el control, manda el control.** El HUB es otro proyecto y queda **fuera de alcance** (orden de Milton): no tocar su rama ni sus archivos.
+Actualizado: 2026-10-02 · Responsable: Claude (control del proyecto) · Dueño: Milton (hispanohablante; **no puede abrir `.md`**: entrégale `.html` o un Artifact).
 
----
+## 1. Qué se construye
+SEO Total se divide, de cara al cliente, en **SEO Total Artículos** y **SEO Total Redes** (**nunca «Redes Totales»**). Un **HUB** (otro proyecto, de **Mario**) será dueño del login, la facturación y el sí/no por producto. SEO Total conserva todo lo operativo (módulos, permisos de cada red, datos).
 
-## 1. Qué se está construyendo (en tres frases)
+## 2. Decisiones cerradas de Milton (no reabrir sin preguntarle)
+1. **Dominios.** `seototal.lasolucionweb.com` **no se mueve ni cambia a `.net`**. Dos subdominios nuevos en el `.com`: **`articulos.lasolucionweb.com`** y **`redes.lasolucionweb.com`** (sin «seototal.» ni acento). **Mario crea el DNS** y los apunta al **mismo proyecto de SEO Total en Vercel**. Al final, lo que entre por el dominio actual se lleva al HUB **solo si es persona** (`/`, `/login`); Alexa, Claude/MCP y retornos OAuth siguen en el `.com`.
+2. **Reparto.** El HUB: identidad, login de usuarios normales (código por correo o Google; **no se migran contraseñas**), **permiso sí/no por producto**, facturación y gracia. SEO Total: módulos, submódulos, permisos de cada red, datos. **SEO Total no convierte a gracia ni cobra.**
+3. **Dos productos desde el principio**, cada uno a su subdominio.
+4. **Todos los usuarios pasan gratis** al HUB (Artículos y Redes); Milton cierra/abre por usuario desde el HUB y pone las reglas de pago después.
+5. **El Día Cero se encienden los permisos de Redes a TODOS los usuarios actuales** (módulo `oportunidades-redes` + los 10 `allow*Publishing`), **con simulación previa y lista guardada para revertir**; y a los nuevos al crearse desde el HUB. Cada usuario conecta sus propias redes.
+6. **Administradores y soporte**: **puerta directa con contraseña** (ruta no enlazada, solo cuentas `admin`, con límite de intentos), sin pasar por el HUB, en `articulos` y `redes`; «Acceder como» como hoy. **No hay rol nuevo por producto.** Riesgo conocido: si el HUB cae, los usuarios normales no entran.
+7. **Los 7 días de prueba de SEO Total se eliminan** el Día Cero (interruptor, **sin borrar código**: `hasTrialAccess` en `apps/web/src/lib/trial.ts`, `trialUnlocked`, `isTrialSignup`, «Solicitar prueba»). El HUB es la única fuente de acceso.
+8. **Callback único** (aprobado en principio, **NO construido; Milton aún no dio «adelante»**): todos los proveedores (LinkedIn, Pinterest, Tumblr, X, Blogger, Bing) conservan **un solo callback** en `seototal.lasolucionweb.com`; la conexión se inicia en `articulos` o `redes`, el origen viaja en el `state` firmado y el callback devuelve al usuario a su pantalla. Requiere cookie de sesión con `Domain=.lasolucionweb.com`. Google y Meta van por **Composio** (no dependen de nuestros callbacks). **El protocolo de paso a Composio es INTOCABLE.**
+9. **Encabezado global del HUB** obligatorio (marca «LA SOLUCIÓN IA», Aplicaciones, Facturación, Perfil, Administración, Salir). **Decisión temporal:** por ahora lo ve todo el mundo, incluido **Tagcrush** (marca blanca; contradice su regla; depurar después).
+10. Interruptor de aplicación `product_enforcement`: **sigue APAGADO**. Pasar a Sombra lo decide Milton (≥ 7 días antes de Activo); Activo solo desde Sombra y escribiendo **ACTIVAR**.
 
-Hoy SEO Total es una sola app (`seototal.lasolucionweb.com`). Se separa **de cara al cliente** en dos productos:
-**SEO Total Artículos** y **SEO Total Redes** (el nombre «Redes Totales» está descartado). Una interfaz superior, el **HUB**
-(otro proyecto, aún no existe), será dueña del login, la facturación y el encendido/apagado de cada producto; este
-trabajo deja la app lista y define el protocolo para entregarle el control sin dejar fuera a nadie.
+## 3. Estado de producción (verificado el 2026-10-02 con `scripts/smoke-production.sh`: «Smoke test OK»)
+Desplegado y **apagado** (nadie lo nota): tabla `ProductEntitlement` + `ProductEntitlementEvent` (106 usuarios con Artículos; 9 con Redes; RLS activo); paneles de Administración (derechos por usuario, gracia, interruptor); vista por productos (módulo opt-in `vista-productos`, solo administradores o «Habilitado»); `requireProductAccess` en 24 rutas y worker en sombra; hosts permitidos de retorno OAuth; botones de 44 px (#373).
+**Migraciones se aplican a mano en Supabase.** El botón normal de migraciones (`db push`) es **peligroso**: producción tiene 5 columnas del HUB en `User` (`hubUserId`, `hubAuth0Sub`, `hubSyncedAt`, `hubSyncAttemptedAt`, `hubSyncError`) que `schema.prisma` de `main` no declara; los runs #74 y #75 abortaron sin cambios. **Nunca** `accept_data_loss`, `force_sync` ni `db push` contra producción.
 
-## 2. Decisiones de Milton (cerradas, no reabrir sin preguntarle)
-
-1. Subdominios: `seototal.articulos.lasolucionweb.com` y `seototal.redes.lasolucionweb.com`.
-   **Nacen al público el día del corte**; antes se preparan en privado.
-2. **Hoy no se programa nada que le quite autoridad al login actual.** Manda hasta el día de corte que Milton decida. Nadie queda fuera antes.
-3. El día del corte: la autoridad del login pasa al HUB; nacen los subdominios; el dominio viejo lleva al HUB **solo a las personas** (no se redirige a ciegas: ver blueprint 9.5). Los usuarios entran al HUB **con las mismas credenciales** (hoy bcrypt en `User.passwordHash`).
-4. Entrada HUB→app: **token firmado de un solo uso** (ES256, POST autoenviado, verificado en route handler Node).
-5. Gracia de **5 días** por app, editable o quitable por Milton por usuario en Administración. Artículos: todos los usuarios actuales. Redes: solo quien ya tenga alguna red aprobada.
-6. Se crea **ya** un activador de Artículos (encendido para todos por defecto) y se hace la separación visual y **por función** desde el inicio, dentro de la app actual.
-7. Conexiones (Google Search Console, Composio, redes): **por cuenta, nunca por app**. Conectada en una = conectada en la otra.
-8. El HUB debe ver los tipos de usuario. Hoy nadie paga; al pasar al HUB pagarán.
-
-## 3. Hallazgos de auditoría que cambian el diseño (no olvidar)
-
-- Callbacks de Google (GSC, Analytics, Business Profile) y Bing están **escritos a mano** en `seototal.lasolucionweb.com` (`apps/web/src/lib/google-oauth.ts`, `google-analytics-oauth.ts`, `bing-oauth.ts`). Otras redes usan el host de la petición.
-- El servidor MCP/OAuth2 (`/api/mcp`, `/api/oauth2/*`, `/.well-known/*`) vive en ese host y lo usan Alexa+/Claude. **Mover el dominio al HUB sin puente los rompe.**
-- El **worker no revisa** los permisos de Redes (`allow*Publishing`); solo la web.
-- Derechos: **nunca** decidir acceso con lo que trae el token; leer `ProductEntitlement` local en cada petición.
-- Debe existir acceso de emergencia de administradores y «Acceder como» en los tres modos de login (`legacy`/`dual`/`hub`).
-- El middleware (`apps/web/src/middleware.ts`) es zona protegida: aplicar la **ADVERTENCIA CRÍTICA SOBRE VERCEL** antes de tocarlo.
-
-## 4. Reglas que no se negocian (resumen; el original manda)
-
-- Worktree aislado **fuera** del checkout principal (p. ej. `/private/tmp/<nombre>`); **prohibido** anidarlo en `.worktrees/` dentro del repo.
-- Antes de cualquier push: `bash scripts/migration-coordinator.sh status` → `claim "<agente>" "motivo"` → … → `release`. Anotarlo en `COORDINACION_CLAUDE_CODEX.md`.
-- Nunca `git add .` ni `-A`; revisar `git status`, diff y diff staged.
-- **Schema + migración en el mismo commit; migración antes o junto con el merge** (incidente 2026-09-08 tumbó `/dashboard`).
-- **Tres auditorías documentadas** antes de producción; declarar «Subiré a producción de acuerdo al Protocolo de No Destrucción.»
-- PR normal (`gh pr create` + merge); el push directo a `main` lo bloquea el clasificador.
-- Actualizar `manual-usuario.ts` en el mismo lote que cada cambio visible.
-- Tagcrush es marca blanca: nada visible que diga «10minutesWebsite» (`platformProductName()` en `packages/shared/src/platform-servers.ts`).
-- Cuenta de pruebas y verificación directa en producción: ver memoria «Cuenta de pruebas: Lorena Álvarez».
-
-## 5. Plan por lotes y estado
-
-| Lote | Contenido | Estado |
+## 4. PR abiertos y su estado (esperan a Milton; **solo él ordena fusionar código**)
+| PR | Qué es | Nota |
 |---|---|---|
-| 0 | Fase 0: arquitectura, modelo de datos, flujos, mapa de navegación, carpetas, riesgos; inventario de callbacks OAuth por proveedor; algoritmo de contraseñas; plan DNS/certificados; guion de corte con reversa | **ENTREGADA PARA APROBACIÓN (M2) — 2026-10-01.** Parte A (Claude, v0.3) y consolidado en el PR #290; Parte B (Codex) en `main` (PR #295) con corrección B1/B4 en el PR #303. Revisión cruzada hecha en ambos sentidos. **Leer primero `FASE_0_SEPARACION_SEO_TOTAL_CONSOLIDADO.md`.** |
-| 1 | Base invisible: `ProductEntitlement` + backfill, activador de Artículos, control y gracia en Administración, helper único de acceso | **DESPLEGADO EN PRODUCCIÓN el 2026-10-02** (PR #313 fusionado, migración aplicada a mano en Supabase). Interruptor `product_enforcement` apagado: ningún usuario nota diferencia. Verificado: 106 usuarios, 106 filas de Artículos, 9 de Redes, RLS activo, 106 datos HUB intactos |
-| 2 | Separación visual por función en el host actual (inicio con dos tarjetas, menús, reparto de Configuración, conexiones compartidas, Historial/Estadísticas por app, «Mi cuenta», manual) | no iniciado |
-| 3 | Derechos exigidos en APIs **y worker**; avisos de gracia | **Codex: diseño del worker en modo sombra** (usa `evaluateProductAccess` de `packages/shared`); depende de que el Lote 1 esté verificado |
-| 4 | Receptor del HUB: `/api/auth/hub-handoff`, claves, interruptor `legacy`/`dual`/`hub` (en `legacy`), HUB simulado | no iniciado |
-| 5 | Subdominios en privado, dominio estable de callbacks/MCP, callbacks únicos por entorno, doble registro en proveedores | **EN PR #311 (Codex), sin fusionar.** Verificado por Claude: typecheck, 85/85 pruebas, build y casos hostiles OK; **2 cambios pedidos** (redirección canónica de Bing para hosts no permitidos y pruebas hostiles en el repo). Checklist de callbacks para Milton en el PR #309 |
-| 6 | Ensayo general del corte en preproducción, con reversa | no iniciado |
-| Corte | Guion 9.4 del blueprint, con Milton presente | no iniciado |
+| **#381** | `MANUAL_DIA_CERO.md`, `CONTRATO_HUB_PARA_EL_HUB.md` (v2) y carta/prompt para Mario | Rama `claude/manual-dia-cero`. Pendiente «fusiona #381» |
+| **#368** | Declara en `schema.prisma` las 5 columnas del HUB (opción B, **recomendada**; sin migración) | Milton aún no decide |
+| **#372** | `me-client` (caché de `/api/me` de 3 s) | **No fusionar**: no cumple su objetivo (siguen 5 llamadas) y añade riesgo de datos viejos. Rehacer con invalidación al guardar |
+| **#380** | Checklist de callbacks acortado (Google/Meta por Composio) | Solo documento |
+Ya fusionados hoy: #367, #371, #373, #375, #376 (documentos, prueba de completitud, botones 44 px). #370 cerrado.
 
-Pendiente que corre en paralelo y que **hace Milton**: registrar los callbacks nuevos en las consolas de Google, Meta, LinkedIn, Pinterest, Tumblr, X, Bing y Composio (Google/Meta pueden tardar días en aprobar dominios nuevos). La Fase 0 debe entregarle la lista exacta primero.
+## 5. Qué falta construir (nada de esto está iniciado; **Milton debe decir «adelante»** y el orden de menor a mayor riesgo es el siguiente)
+1. **Hosts permitidos:** en `apps/web/src/lib/oauth-redirect.ts` (`DEFAULT_ALLOWED_HOSTS`) cambiar `seototal.articulos.lasolucionweb.com` / `seototal.redes.lasolucionweb.com` por **`articulos.lasolucionweb.com`** / **`redes.lasolucionweb.com`**; actualizar `oauth-redirect.test.ts`.
+2. **Perfil inicial y encendido de permisos de Redes:** función pura `redesProfile` (módulo `oportunidades-redes` + los 10 `allow*Publishing`; ver `hasLegacySocialModuleAccess` en `packages/shared/src/product-access-core.ts` y `apps/web/src/lib/modules.ts`) usada (a) al crear cuenta desde el HUB y (b) en un script de Día Cero que **simula primero** (cuántos cambian), guarda la lista de afectados y solo aplica con confirmación explícita (patrón de `scripts/corte/conversion-a-gracia.sql`: seguro por defecto, `-v apply=yes`).
+3. **Puerta directa de administradores:** ruta no enlazada, solo `role = admin`, con límite de intentos, en ambos hosts. «Acceder como» debe seguir funcionando en los dos.
+4. **Desactivar la prueba de 7 días** con un interruptor (`SystemSetting`), sin borrar código; con permiso del HUB la regla antigua se ignora.
+5. **Aplicar el permiso del HUB:** función `applyHubEntitlements(userId, {product, allowed, grace_until?}, source=HUB)` que escribe `ProductEntitlement` (sube `version`, inserta evento). Reutiliza `computeNextEntitlement` (`apps/web/src/lib/product-entitlement-transition.ts`). Nunca revoca por omisión.
+6. **Encabezado global del HUB** (UI; estilo Apple de Milton, ver memoria «Estilo Apple»; Tagcrush: temporal).
+7. **Callback único + cookie `.lasolucionweb.com`** (lo más delicado: cambia la sesión de todos; probar con pruebas puras y navegador, apagado hasta el Día Cero, con reversa). Hoy cada callback usa cookie de sesión y de `state` ligadas al host y arma `redirectUri` con el host de la petición (ver `app/api/search-integrations/tumblr/callback/route.ts` y `lib/session.ts`).
+8. Rehacer `me-client` bien (opcional).
+**Lo que NO hay que construir:** conversión a gracia (`scripts/corte/conversion-a-gracia.sql` ya no se usa), desvío 308, mover el dominio, dominio estable nuevo.
 
-## 6. Decisiones abiertas (Fase 0, ver blueprint sección 16)
+## 6. Relación con el HUB (Mario) — DECISIÓN DE MILTON DEL 2026-10-02: el HUB NO participa
+**Mario y su programador NO usarán el buzón ni se meterán en este tema: para ellos todo lo que haga SEO Total es transparente.** Por tanto:
+- **SEO Total se adapta al HUB tal como está documentado**; no esperes respuestas del HUB. `BUZON_HUB_SEO_TOTAL.md`, la carta a Mario y el prompt para su programador **quedan sin uso** (se conservan por si cambia la situación). Las «preguntas abiertas» de `CONTRATO_HUB_PARA_EL_HUB.md` §12 pasan a ser **decisiones de SEO Total** salvo las que solo Milton pueda aclarar con Mario (se las pides a Milton **como a un humano**, una sola pregunta, sin jerga).
+- **Su contrato (leído; HUB en `https://hub.lasolucionweb.net`):** `GET /auth/hub?code=` (código opaco de un solo uso, 5 min); `POST /api/product-launch` `{app, code}` → `platform_user_id`, `auth0_sub`, `email`, `platform_role`, `entitlement_status`, `expires_at`; `POST /api/integrations/auto-articulos/access` `{hub_user_id}` → `{allowed, status}`; `POST /api/integrations/auto-articulos/user-sync`. Cabeceras: `x-platform-client-id` y `Authorization: Bearer <secreto>`. Secretos solo como variables protegidas. Estados que dan acceso: `active`, `trialing` y concesiones administrativas activas sin vencimiento.
+- **Diseña SEO Total de forma defensiva y configurable**, sin depender de que el HUB cambie: (a) el identificador `app`/producto del HUB que corresponde a Artículos y a Redes va en **configuración** (variable o `SystemSetting`), **no en el código**; Milton hablará con Mario **una sola vez** para saber los dos valores; (b) aceptar tanto el formato antiguo (`seo-total`, un solo permiso) como uno por producto; (c) **ignorar `trialUnlocked`** como fuente de acceso desde el Día Cero (tu revalidación del HUB lo escribe; la barrera real es `ProductEntitlement`); (d) la cuenta que crea `/auth/hub` nace vacía: **aplicarle el perfil inicial** (sección 5.2); (e) fail-open durante la coexistencia, fail-closed al cerrar el acceso legado.
+- **No toques `codex/hub-seo-total-migration`** (rama de Mario; solo lectura). Producción tiene sus 5 columnas en `User`; el PR **#368** las declara sin tocar su rama (decisión de Milton pendiente).
+- Discrepancias entre su documento y lo acordado por Milton, ya resueltas **de nuestro lado**: producto único `seo-total` (son dos), dominio principal `.net` (se queda `.com`), 104/85/19 cuentas (asunto de Mario), `/auth/hub` crea cuentas vacías (lo arreglamos nosotros).
+- Página privada con el contrato (informativa, `https://claude.ai/artifact/5cx6foBsG8CLZMhb13d2UE`): solo si Milton quiere enseñársela a Mario.
 
-Clasificación de `movil`/`mcp`/`composio`/`postpeer`; tarjeta bloqueada visible u oculta; nombre visible para tagcrush;
-transferencia de hashes al HUB; base compartida o sincronizada; tipos de usuario (incluido «PRUEBAS» de `TO-DO.md`);
-gracia que vence a mitad de un lote; host del dominio estable de callbacks y migración de conectores Alexa/Claude; precios (los define el HUB).
+## 7. Cómo se verifica (servicio de verificación; tu entorno de Codex no puede ejecutar `tsx`/Prisma/`tsc`)
+Cuando Claude no esté, **tú debes poder verificar tú mismo** o marcar «NO EJECUTADA»:
+1. Worktree **fuera** del repo (`/private/tmp/<nombre>`), nunca en `.worktrees/`. `node_modules`: copia con `cp -cR` desde otro worktree que ya los tenga (p. ej. `/private/tmp/separacion-lote1`); `prisma generate` con `DATABASE_URL=postgresql://x:x@localhost:1/x`.
+2. `cd apps/web && npx tsc --noEmit` y `npx tsx --test src/lib/*.test.ts` (hoy 153/153); `npm run build` desde `apps/web` (lo que usa Vercel).
+3. Navegador/API de prueba: Postgres local desechable en el puerto **54329** (BD `lote2`, usuarios `admin@t`, `normal@t`, `blogger@t`, `solo-mastodon@t`, `maestro-habilitado@t`); inicializar con `LC_ALL=en_US.UTF-8`; `.env.local` en `apps/web` con `DATABASE_URL`, `DIRECT_URL`, `SESSION_SECRET`, `CREDENTIALS_ENCRYPTION_KEY` (copia de `/private/tmp/separacion-lote1/apps/web/.env.local`). **Nunca contra producción.** `migrate deploy` desde vacío falla (migración histórica de Tumblr): para pruebas usa `db push` en la base desechable.
+4. Producción: solo lectura con `scripts/smoke-production.sh` (9 comprobaciones; debe terminar «Smoke test OK»).
 
-## 7. Estado del repositorio al escribir esto
+## 8. Reglas de colaboración y trampas conocidas
+- **Capitán de archivo:** `bash scripts/migration-coordinator.sh claim "<agente>" "motivo"` antes de empujar; es un candado local a cada copia. Anotar en `COORDINACION_CLAUDE_CODEX.md`.
+- **PR normal** (`gh pr create` + merge). **El clasificador de seguridad bloquea** fusionar PR de código sin orden literal de Milton («fusiona #N»), despliegues a producción, y pegar SQL/credenciales de producción. **Solo los PR que tocan únicamente documentos de control se han podido fusionar sin él.** No pidas a Milton acciones que el sistema bloqueará; **nunca reintentes por otro camino**.
+- Nunca `git add .` / `-A`. Schema + migración en el mismo commit. **Migración antes o junto con el merge** (incidente 2026-09-08 tumbó `/dashboard`).
+- Actualizar `apps/web/src/content/manual-usuario.ts` en el **mismo lote** que cada cambio visible (**no uses acentos graves/backticks dentro de ese template literal**).
+- **Tagcrush** es marca blanca: nada visible que diga «10minutesWebsite» (`platformProductName()` en `packages/shared/src/platform-servers.ts`); hoy la excepción temporal del encabezado del HUB (ver 2.9).
+- **zsh en macOS:** `$B:ruta` se interpreta como modificador `:a` (usa `${B}:ruta` o la ruta literal); `echo ======` falla; `sed -i ''`.
+- **Hooks de commit** (`.githooks/post-commit`) avisan «falta `tsx`/DATABASE_URL»: no es fallo del cambio.
+- **Un PR cuya base es otra rama** se fusiona en esa rama, no en `main`: verifica `--base main` antes de fusionar.
+- Para tus entradas del control: **abre PR de control a `main`** (si no, nadie las ve).
+- Milton cree que Codex «está parado» cuando está callado: **mira git (ramas, PR, control) antes de responderle**.
 
-- Rama de la sesión: `claude/fix-categoria-especifica-vs-general`. Árbol con cambios ajenos sin commitear (`COORDINACION_CLAUDE_CODEX.md` modificado por otra sesión, `.worktrees/`, `docs/`): **no tocar ni commitear**.
-- Archivos de este proyecto, **sin commit todavía**: `MASTER_BLUEPRINT_SEPARACION_SEO_TOTAL_ARTICULOS_Y_REDES.md` y este traspaso.
-- No hay código, migraciones ni cambios en producción de este proyecto.
-- Pendiente de decidir con Milton: anotar este proyecto en `COORDINACION_CLAUDE_CODEX.md` cuando ese archivo esté limpio.
+## 9. Cuenta de pruebas y producción
+Cuenta real de pruebas: ver memoria «Cuenta de pruebas: Lorena Álvarez» (todo se verifica directo en producción, solo lectura salvo orden). Administradores siempre pasan los derechos. Redes se ve siempre como tarjeta (sin permiso, el clic lleva a un aviso claro).
 
-## 8. Bitácora (añadir una línea por cada paso real, con fecha, quién y resultado)
+## 10. Mapa de archivos clave
+`packages/shared/src/product-access-core.ts` (`evaluateProductAccess`, `PRODUCTS`, `parseEnforcementMode`) · `apps/web/src/lib/{product-access,product-enforcement,product-enforcement-transition,require-product-access,product-routes,product-page-gate,product-entitlement-transition,oauth-redirect,session,trial,modules}.ts` · `apps/web/src/components/{ProductAccessGuard,ProductHome,DashboardNav,ModuleGuard}.tsx` · `apps/web/src/app/dashboard/{articulos,redes,mi-acceso,usuarios}/…` · `apps/web/src/app/api/admin/{product-enforcement,users/[id]/entitlements}/route.ts` · migración `packages/db/prisma/migrations/20261002000000_add_product_entitlements/`. Documentación: `ARQUITECTURA_FINAL_DERECHOS_POR_PRODUCTO.md`, `GUIA_ADMIN_DERECHOS.md`, `ENSAYO_REVERSA.md`, `AUDITORIA_RUTAS_SIN_BARRERA.md`, `MATRIZ_DECISIONES_VS_IMPLEMENTACION.md`, `CHECKLIST_CALLBACKS_MILTON.md`, `CHECKLIST_MILTON_AL_DESPERTAR.md`, `RUNBOOK_CORTE.md` (anterior; sustituido por `MANUAL_DIA_CERO.md`).
 
-- 2026-10-01 — Claude: entrevista MAGO (6 preguntas) cerrada; blueprint escrito; **triple auditoría en 3 rondas** (hechos contra código, seguridad/arquitectura, completitud). Se corrigieron 6 defectos (el grave: redirección total del dominio rompía callbacks OAuth y MCP). Estimación de tiempo corregida a 2–4 días de sesiones de código; el calendario real lo marcan las consolas de proveedores y el HUB. Sin código.
-- 2026-10-01 — Claude: arrancó el trabajo en pareja con Codex por el archivo de control (PRs #284–#301, solo documentación). Codex entregó la Parte B (B1–B5, PR #295) y Claude la revisó (aprobada con un cambio: callbacks OAuth **por host de origen**, porque el `state` y la sesión son por host). Claude entregó la Parte A (contrato de datos, arquitectura, flujos, navegación) y Codex la revisó (X-005, sin contradicciones materiales). Hallazgo: existe una integración con el HUB en la rama `codex/hub-seo-total-migration`; Milton ordenó que el HUB queda **fuera de alcance** (C-007). Siguiente paso: aprobación de Milton (M2), resolver la capitanía de migración (M3) y empezar los Lotes 1 (Claude) y 4/5 (Codex).
-- 2026-10-01 — Claude: **Lote 1 programado y auditado (PR #313).** Núcleo puro de acceso en `packages/shared/src/product-access-core.ts` (lo usarán web y worker); lectura con base en `apps/web/src/lib/product-access.ts`; interruptor `product_enforcement` (off por defecto, sin pantalla hasta el Lote 3); API `api/admin/users/[id]/entitlements` y panel «Productos». Migración `20261002000000_add_product_entitlements` probada en Postgres 16 desechable sobre el esquema real de `main` (backfill: Mastodon no cuenta, igual que `SOCIAL_PUBLISHING_PERMISSION_KEYS`). **Regla de Redes que ya existía = `hasSocialModuleAccess`** (interruptor maestro + redes aprobadas), no solo las aprobaciones. Hallazgos corregidos en la auditoría: carga perezosa del panel (16→0 peticiones al abrir) y cálculo de días de gracia desde la fecha. Hallazgo ajeno: `migrate deploy` desde base vacía falla en `20260823150000_add_tumblr_integration`.
-- 2026-10-01 — Claude: **revisión cruzada del Lote 5 de Codex (PR #311):** aprobada con 2 cambios (C-015). Se instituye el **servicio de verificación**: el entorno de Codex no puede ejecutar `tsx`/Prisma/typecheck, así que sus auditorías no ejecutables se marcan «NO EJECUTADA» y Claude las corre en su entorno.
-- Pendiente que depende de Milton: aprobar la Fase 0 de forma explícita y fusionar #290/#303/#309; autorizar la migración y el despliegue del Lote 1 (con capitanía); registrar los callbacks (checklist #309); decidir cómo se conecta con el HUB (Lote 4 en espera).
-- 2026-10-02 — Claude: **LOTE 1 DESPLEGADO EN PRODUCCIÓN.** Camino real: el workflow `migrate.yml` por defecto usa `prisma db push`, que desde `main` o desde mi rama **intenta borrar las columnas del HUB** (`hubUserId`, `hubAuth0Sub`, `hubSyncedAt`, `hubSyncAttemptedAt`) porque producción las tiene (se aplicaron desde `codex/hub-seo-total-migration`, run #73) y `main` no las declara. Los runs #74 (main) y #75 (mi rama) **abortaron sin cambiar nada** porque no se marcó `accept_data_loss`. **NUNCA marcar `accept_data_loss` ni `force_sync` mientras `schema.prisma` de `main` no declare esas columnas.** El Lote 1 se aplicó ejecutando a mano en el SQL Editor de Supabase el archivo `packages/db/prisma/migrations/20261002000000_add_product_entitlements/migration.sql` (aditivo e idempotente), después de fusionar el PR #313 (el código tolera que las tablas no existan). Verificación leída de la pantalla de Supabase: `usuarios=106 | filas_ARTICULOS=106 | filas_REDES=9 | RLS=ProductEntitlement:true, ProductEntitlementEvent:true | usuarios_con_datos_HUB=106`. Producción sana (`/login` 200, rutas protegidas 307/401). La ruta `safe_product_entitlements` del workflow quedó **sin publicar** (bloqueada por el sistema) y ya no hace falta para este lote.
-- Pendiente de Milton: registrar callbacks (checklist #309); autorizar y fusionar el Lote 5 (#311, solo código, sin migración), el Lote 3 (#322) y el Lote 2 (#317, #324, #326); decidir cómo alinear `schema.prisma` con las columnas HUB de producción (chip «Alinear schema.prisma de main con columnas HUB»).
+## 11. Pendientes que SOLO puede hacer Milton
+1. Decir «fusiona #381» (documentos) y decidir **#368** (columnas del HUB).
+2. (Opcional) Compartir la página informativa con Mario. **Ya no hace falta dar acceso al repositorio al programador del HUB.**
+3. Pasar el interruptor a **Sombra** cuando quiera (reloj de ≥ 7 días).
+4. Registrar retornos en LinkedIn, Pinterest, Tumblr, X, Blogger y Bing **solo si se descarta el callback único**.
+5. Decir «adelante» para empezar a construir la sección 5, y elegir el orden.
+6. Decidir la fecha del Día Cero cuando las puertas del manual estén en verde.
 
-### 2026-10-02 (noche) — ESTADO, PRÓXIMAS FUSIONES Y ORDEN
-**Ya en producción y sano (verificado con `/login` 200, rutas protegidas 307/401, Vercel «success»):** Lote 1 (tablas de derechos, migración aplicada a mano en Supabase), Lote 5 (callbacks por host), Lote 3 (worker en modo sombra), Lote 2 (vista por productos, solo administradores), Lote 3c (puerta visual y aviso de gracia, inertes con el interruptor apagado). El interruptor `product_enforcement` sigue **apagado**.
+## 12. Si Claude se queda sin tokens: cómo toma el control Codex
+1. Lee este archivo, el control (`CONTROL_SEPARACION_SEO_TOTAL.md` §0.9–0.13), el contrato, el manual y el buzón.
+2. Escribe en el control **«CODEX TOMA EL CONTROL»** con fecha y abre PR de control. Revisa cada ~10 min el buzón y los PR.
+3. **No construyas la sección 5 sin el «adelante» de Milton.** Mientras tanto: atender el buzón, verificar PR, mantener documentos al día, y preparar (en rama, sin fusionar) las piezas puras con pruebas.
+4. Todo cambio se documenta y comenta en el código para el siguiente. Si dudas, **pregunta a Milton como a un humano** (una sola pregunta, en palabras simples; él no entiende jerga).
+5. Nunca toques producción ni la rama del HUB; nunca ejecutes SQL de producción; el interruptor sigue **Apagado**.
 
-**Verificados y listos, SIN fusionar** (el sistema de seguridad bloquea los despliegues a producción cuando Milton no está; todos pasan juntos sobre `main`: `tsc` limpio, **151/151** pruebas, `npm run build` exit 0, 84/84):
-| Orden | PR | Qué es | Notas |
-|---|---|---|---|
-| 1 | **#343** (Codex) | Barreras de derechos en 24 rutas de API, modo sombra | Con el interruptor apagado no cambia nada |
-| 2 | **#345** (Claude) | Caché de 30 s del modo + pruebas explícitas de `requireProductAccess` | Apilado sobre #343 (se reorienta a `main` solo al fusionar #343) |
-| 3 | **#348** (Codex) | Pantalla de control del interruptor en Administración | **No fusionar sin #349** |
-| 4 | **#349** (Claude) | Seguridad del interruptor: a «Activo» solo desde «Sombra» y con la palabra ACTIVAR; panel sin estado inventado; auditoría con `from`/`to` | Apilado sobre #348 |
-| — | #328, #331, #334 (Codex) | Runbook del Lote 1, script de verificación de callbacks, contrato del Lote 4 y nota de Tumblr | Solo documentos/herramientas; verificados |
-
-**Después de fusionar, siempre:** esperar el despliegue de Vercel y comprobar `/login` 200, rutas protegidas 307 y `/api/me` 401. **El interruptor NO se enciende** sin decisión explícita de Milton: primero «Sombra» durante al menos una semana revisando los registros (`[product-access] product access denied`), y solo entonces «Activo».
-
-**Alertas vigentes:** (1) producción tiene las columnas del HUB en `User` que `schema.prisma` de `main` no declara; **nunca** marcar `accept_data_loss` ni `force_sync` en `migrate.yml`; el esquema se aplica **a mano en Supabase** con el SQL de cada lote. (2) El proyecto del HUB (`codex/hub-seo-total-migration`) está **fuera de alcance**.
-
-**Pendiente de Milton:** registrar los callbacks en las consolas de Google, Meta, LinkedIn, Pinterest, Tumblr, X, Bing y Composio (`CHECKLIST_CALLBACKS_MILTON.md`; Google y Meta tardan días); autorizar y fusionar los PR de la tabla; decidir cómo alinear `schema.prisma` con las columnas del HUB; decidir el modo y la fecha de paso a «Sombra».
+## 13. Bitácora
+- 2026-10-01 — Entrevista MAGO, blueprint triple-auditado, Fase 0, Lote 1 en producción.
+- 2026-10-02 (tarde) — **Milton decide que el HUB no participa**: SEO Total se adapta al contrato documentado de Mario; el buzón queda sin uso.
+- 2026-10-02 — Lotes 2, 3, 3b, 3c y 5, paneles y botones de 44 px en producción (interruptor Apagado). Contrato v2, manual v2, buzón con el HUB, carta y prompt para Mario. Seis puntos de decisión cerrados con Milton (sección 2). Traspaso v2 (este archivo).
