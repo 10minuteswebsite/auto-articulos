@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import Link from "next/link";
 import OnboardingWizard from "@/components/OnboardingWizard";
+import type { ProductsInfo } from "@/lib/product-page-gate";
 
 const QUICK_LINKS = [
   {
@@ -76,6 +77,7 @@ export default function InicioPage() {
   const everIncompleteRef = useRef(false);
   const [showWizard, setShowWizard] = useState<boolean | null>(null);
   const [configurationAlerts, setConfigurationAlerts] = useState<ConfigurationAlert[]>([]);
+  const [products, setProducts] = useState<ProductsInfo | null>(null);
   // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
   const [productView, setProductView] = useState(false);
 
@@ -103,6 +105,7 @@ export default function InicioPage() {
       const step1 = Boolean(credData.configured);
       const step2 = Array.isArray(catData.categories) && catData.categories.length > 0;
       setProductView(isProductViewEnabled(meData?.disabledModules));
+      setProducts(meData?.products ?? null);
       const step3 = typeof meData.contentLanguage === "string" && meData.contentLanguage.trim().length > 0;
       const step4 = Boolean(
         (googleData.connected && googleData.siteUrl) ||
@@ -130,6 +133,24 @@ export default function InicioPage() {
       setConfigurationAlerts([]);
     }
   }, []);
+
+  function hasProductFor(href: string): boolean {
+    if (!products) return true;
+    if (href === "/dashboard/oportunidades-redes") {
+      return products.redes?.allowed !== false || products.redes?.reason === "NO_NETWORK_APPROVED";
+    }
+    if (href === "/dashboard/publicar" || href === "/dashboard/oportunidades") {
+      return products.articulos?.allowed !== false;
+    }
+    if (href === "/dashboard/redes") {
+      return products.redes?.allowed !== false || products.redes?.reason === "NO_NETWORK_APPROVED";
+    }
+    if (href === "/dashboard/articulos") return products.articulos?.allowed !== false;
+    return true;
+  }
+
+  const visibleQuickLinks = QUICK_LINKS.filter((link) => hasProductFor(link.href));
+  const visibleProductCards = PRODUCT_CARDS.filter((card) => hasProductFor(card.href));
 
   useEffect(() => {
     checkWizardStatus();
@@ -223,11 +244,9 @@ export default function InicioPage() {
       {showWizard === false && (
         <div style={{ marginTop: 20, marginBottom: 20 }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>{productView ? "Elige un producto" : "Acciones posibles"}</h2>
-          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: `repeat(${productView ? PRODUCT_CARDS.length : QUICK_LINKS.length}, minmax(0, 1fr))`, gap: 16 }}>
-          {/* Pedido explícito de Milton (1/10/2026): el botón de Redes se muestra
-             siempre, como los demás; si no está activo, el clic lleva a la
-             pantalla de bloqueo (ModuleGuard) en vez de ocultarse. */}
-          {(productView ? PRODUCT_CARDS : QUICK_LINKS).map((l, i) => (
+          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: `repeat(${productView ? visibleProductCards.length : visibleQuickLinks.length}, minmax(0, 1fr))`, gap: 16 }}>
+          {/* Solo mostramos acciones del producto que la cuenta puede usar. */}
+          {(productView ? visibleProductCards : visibleQuickLinks).map((l, i) => (
             (() => {
               return (
                 <Link key={l.href} className="inicio-action-card" href={l.href} style={{ display: "flex", minHeight: 176, padding: 22, flexDirection: "column", justifyContent: "space-between", textDecoration: "none", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}>

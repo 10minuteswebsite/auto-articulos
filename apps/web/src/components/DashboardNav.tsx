@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
 import LogoutButton from "@/components/LogoutButton";
+import type { ProductsInfo } from "@/lib/product-page-gate";
 
 interface TabItem {
   id?: string;
@@ -127,6 +128,7 @@ export default function DashboardNav() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [disabledModules, setDisabledModules] = useState<string[]>([]);
   const [globalDisabledModules, setGlobalDisabledModules] = useState<string[]>([]);
+  const [products, setProducts] = useState<ProductsInfo | null>(null);
   // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
   const [productView, setProductView] = useState(false);
   // Último producto visitado: decide qué grupo se resalta en las pantallas
@@ -188,6 +190,7 @@ export default function DashboardNav() {
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
         setProductView(isProductViewEnabled(data?.disabledModules));
+        setProducts(data?.products ?? null);
         if (Array.isArray(data?.disabledModules)) {
           setDisabledModules(data.disabledModules);
         }
@@ -199,6 +202,7 @@ export default function DashboardNav() {
         setIsAdmin(false);
         setDisabledModules([]);
         setGlobalDisabledModules([]);
+        setProducts(null);
         setProductView(false);
       });
   }, []);
@@ -244,14 +248,28 @@ export default function DashboardNav() {
     };
   }, [openGroup]);
 
-  // Pedido explícito de Milton (1/10/2026): Oportunidades Redes se muestra en
-  // el menú igual que cualquier otro módulo, aunque la cuenta no lo tenga
-  // activo todavía — ModuleGuard es quien bloquea la pantalla al entrar, con
-  // un mensaje claro de por qué. Antes se ocultaba del menú directamente, lo
-  // que generaba confusión ("¿por qué no veo el botón?").
   function isVisible(tab: TabItem): boolean {
     if (isAdmin) return true;
-    return !tab.id || !disabledModules.includes(tab.id);
+    if (tab.id && disabledModules.includes(tab.id)) return false;
+    if (!products) return true;
+    const scope = productOfPath(hrefPath(tab.href));
+    if (scope === "ARTICULOS") return products.articulos?.allowed !== false;
+    if (scope === "REDES") {
+      return products.redes?.allowed !== false || products.redes?.reason === "NO_NETWORK_APPROVED";
+    }
+    return true;
+  }
+
+  function displayLabel(tab: TabItem): string {
+    if (
+      tab.id === "oportunidades-redes" &&
+      !isAdmin &&
+      products?.articulos?.allowed === false &&
+      (products.redes?.allowed !== false || products.redes?.reason === "NO_NETWORK_APPROVED")
+    ) {
+      return tab.label.replace(/^3\)/, "1)");
+    }
+    return tab.label;
   }
 
   const baseEntries = productView ? PRODUCT_ENTRIES : BASE_ENTRIES;
@@ -423,6 +441,7 @@ export default function DashboardNav() {
                     <MobileLink
                       key={tab.href}
                       tab={tab}
+                      label={displayLabel(tab)}
                       active={pathname === hrefPath(tab.href)}
                       hidden={hiddenGlobally(tab)}
                       onNavigate={() => setOpen(false)}
@@ -437,6 +456,7 @@ export default function DashboardNav() {
               <MobileLink
                 key={entry.href}
                 tab={entry}
+                label={displayLabel(entry)}
                 active={pathname === hrefPath(entry.href)}
                 hidden={hiddenGlobally(entry)}
                 onNavigate={() => setOpen(false)}
@@ -550,7 +570,7 @@ export default function DashboardNav() {
                             marginBottom: tab.id === "oportunidades-redes" ? 6 : undefined,
                           }}
                         >
-                          <span>{tab.label}</span>
+                          <span>{displayLabel(tab)}</span>
                           {hiddenGlobally(tab) && hiddenBadge(true)}
                         </Link>
                       );
@@ -590,6 +610,7 @@ export default function DashboardNav() {
 
 function MobileLink({
   tab,
+  label,
   active,
   hidden,
   onNavigate,
@@ -597,6 +618,7 @@ function MobileLink({
   separatorAfter = false,
 }: {
   tab: TabItem;
+  label: string;
   active: boolean;
   hidden: boolean;
   onNavigate: () => void;
@@ -624,7 +646,7 @@ function MobileLink({
         marginBottom: separatorAfter ? 6 : undefined,
       }}
     >
-      <span>{tab.label}</span>
+      <span>{label}</span>
       {hidden && (
         <span
           style={{
