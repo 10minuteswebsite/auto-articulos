@@ -174,6 +174,8 @@ Google y Meta van por Composio y no dependen de nuestros callbacks. El **protoco
 
 ## 9. Preguntas abiertas para Mario
 
+**Dónde responderlas:** en `BUZON_HUB_SEO_TOTAL.md` (repositorio `10minuteswebsite/auto-articulos`), con una entrada nueva `H-003` que numere las respuestas del 1 al 6, enviada como Pull Request que modifique solo ese archivo. SEO Total lo lee cada 10 minutos y responde allí. **No se responden a Milton.**
+
 1. ¿El HUB ya modela **dos productos** o hay que ampliarlo? ¿Qué nombres de `app` usará?
 2. ¿Prefieren H5 (empujar) o que SEO Total consulte en H3 con caché de 60 s? (Recomendamos ambos.)
 3. ¿Cómo viajarán las contraseñas (4, «Contraseñas»)?
