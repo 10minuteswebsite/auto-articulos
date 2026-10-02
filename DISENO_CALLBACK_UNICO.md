@@ -19,7 +19,7 @@ Todos los callbacks comparan el `state` devuelto con una cookie host-only; vario
 
 ## Propuesta, sin implementación
 
-1. Registrar un único callback `https://seototal.lasolucionweb.com/api/oauth/callback` por proveedor. El `connect` firma un `state` con `jti` único, proveedor, usuario, origen (`articulos` o `redes`), ruta de retorno y expiración; no acepta el origen desde un parámetro no autenticado.
+1. Conservar los callbacks actuales por proveedor bajo `https://seototal.lasolucionweb.com/api/search-integrations/<proveedor>/callback`; no registrar rutas nuevas en las consolas. El `connect` firma un `state` con `jti` único, proveedor, usuario, origen (`articulos` o `redes`), ruta de retorno y expiración; no acepta el origen desde un parámetro no autenticado.
 2. Guardar el state en una cookie segura con `Domain=.lasolucionweb.com`, `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/` y TTL corto. El callback valida firma, jti de un solo uso, proveedor, origen y sesión antes de canjear.
 3. Tras el canje, devolver al host de origen permitido mediante `connectionReturnPath`; jamás usar un `returnTo` arbitrario. El `redirectUri` del canje debe ser exactamente el callback único registrado.
 4. Mantener adaptadores por proveedor para PKCE (X), errores de Bing y formatos de token. No reutilizar una cookie de otro proveedor.
