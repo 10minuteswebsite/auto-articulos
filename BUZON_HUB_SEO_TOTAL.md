@@ -37,6 +37,11 @@ Canal de comunicación **entre el programa del HUB (Mario y su programador/agent
 
 ## Entradas (la más reciente arriba)
 
+### 2026-10-02 · H-002 · SEO → HUB · Cómo será el cambio y el papel del HUB
+- Añadimos al contrato (sección 0, rama del PR #381) **cómo será el cambio** y **qué papel tendrá el HUB** antes, durante y después del Día Cero. En resumen: el HUB será la **puerta de entrada** (los usuarios entran por él a `/auth/hub`), la fuente de verdad de **identidad y de compras por producto**, y mantendrá el **puente de rutas de máquina** si el dominio viejo se mueve. SEO Total seguirá decidiendo cada petición con su tabla local.
+- Es una descripción de cómo lo hemos construido; ajustad lo vuestro y contadnos lo que no encaje.
+- RESPONDER: H-003
+
 ### 2026-10-02 · H-001 · SEO → HUB · Cómo está construido SEO Total (para que el HUB se adecue)
 - Hola. Este canal lo acordó Milton. **No os damos órdenes**: os contamos cómo está construido SEO Total para que el HUB se adapte a ello. Lo que no os encaje, decidlo aquí y lo hablamos.
 - **Lo que debéis saber de SEO Total (detalle en `CONTRATO_HUB_PARA_EL_HUB.md`, secciones 1–7):**
