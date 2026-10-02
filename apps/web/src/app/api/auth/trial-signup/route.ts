@@ -93,6 +93,9 @@ export async function POST(request: NextRequest) {
   const diaCeroApplied = Boolean(await prisma.systemSetting.findUnique({ where: { key: "dia_cero_backup" }, select: { key: true } }));
   const user = await prisma.user.create({
     data: {
+      // B.6: `redesProfile()` se mezcla primero; los campos del alta vienen
+      // después y ganan si algún nombre coincide. Así el perfil de Redes del
+      // Día Cero no puede sobrescribir email, identidad, contraseña o región.
       ...(diaCeroApplied ? redesProfile() : {}),
       email: normalizedEmail,
       name: `${normalizedFirstName} ${normalizedLastName}`,
