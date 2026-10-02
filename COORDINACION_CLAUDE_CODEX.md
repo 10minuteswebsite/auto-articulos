@@ -22,6 +22,13 @@
   y confirmó el 2026-10-01 que el caso quedó resuelto.
 - Capitanía reclamada y liberada por Claude. Estado: CERRADO Y ARCHIVADO.
 
+## Claude — LOTE 1 «SEPARACION SEO TOTAL»: DESPLEGADO EN PRODUCCIÓN — 2026-10-02
+
+- Capitanía de migración: reclamada y liberada por Claude el 2026-10-02 (sin ejecutar Prisma; **la migración la aplicó Milton a mano en Supabase**). Hoy no hay capitán activo.
+- **Alerta crítica para todos:** producción ya tiene las columnas del HUB (`hubUserId`, `hubAuth0Sub`, `hubSyncedAt`, `hubSyncAttemptedAt`, `hubSyncError`) en la tabla `User` y `schema.prisma` de `main` **no las declara**. El workflow `migrate.yml` (ruta por defecto, `prisma db push`) quiere **borrarlas** (106 usuarios con datos). Los runs #74 y #75 abortaron sin cambios. **No marcar `accept_data_loss` ni `force_sync`.**
+- Aplicado: `packages/db/prisma/migrations/20261002000000_add_product_entitlements/migration.sql` (tablas, enums, CHECK, RLS y backfill, aditivo e idempotente). PR #313 fusionado. Interruptor `product_enforcement` apagado.
+- Verificado en Supabase: 106 usuarios / 106 filas de Artículos / 9 de Redes / RLS activo / 106 datos HUB intactos. Producción responde con normalidad.
+
 ## Claude — LOTE 1 «SEPARACION SEO TOTAL»: derechos por producto (base invisible) — 2026-10-01
 
 - Proyecto: «SEPARACION DE SEO TOTAL DE REDES TOTALES» (canal vivo: `CONTROL_SEPARACION_SEO_TOTAL.md`; documentos en `TRASPASO_SEPARACION_SEO_TOTAL.md`). Capitán del lote: Claude. Rama `claude/lote1-product-entitlements`, worktree `/private/tmp/separacion-lote1`.
