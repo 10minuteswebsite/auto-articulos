@@ -26,7 +26,7 @@ Derechos por producto y paneles de Administración; vista por productos (solo ad
 | P2 | **Interruptor en Sombra ≥ 7 días**, registros revisados | 🧑 enciende, 🤖 revisa | Administración → Productos muestra «Sombra»; sin bloqueos legítimos en `[product-access] product access denied` |
 | P3 | **Respuestas de Mario en el buzón** (las preguntas del contrato, sección 12) | 👤 | Entrada `H-004` en `BUZON_HUB_SEO_TOTAL.md` |
 | P4 | **DNS creado por Mario:** `articulos.lasolucionweb.com` y `redes.lasolucionweb.com` apuntando al proyecto de SEO Total en Vercel, con candado, **en privado** | 👤 Mario (🤖 verifica) | Cada dirección carga la pantalla de login con candado |
-| P5 | **Una sola fuente de acceso:** el permiso del HUB escribe nuestra tabla de derechos y la regla de prueba antigua (`trialUnlocked`) no contradice | 🤖 + 👤 | Prueba con 4 cuentas: ambos, solo Artículos, solo Redes, ninguno |
+| P5 | **Una sola fuente de acceso:** la regla de prueba de 7 días queda **desactivada con un interruptor** (decisión de Milton) y el permiso del HUB escribe nuestra tabla de derechos | 🤖 + 👤 | Prueba con 4 cuentas: ambos, solo Artículos, solo Redes, ninguno; una cuenta antigua de prueba vencida con permiso del HUB entra |
 | P6 | **Entrada desde el HUB probada** en cada producto con cuentas de prueba | 👤 + 🤖 | `/auth/hub` en `articulos` y en `redes` abre sesión y deja los datos intactos |
 | P7 | **Perfil inicial de usuario nuevo** (permisos de redes encendidos; cada usuario conecta las suyas) | 🛠/🤖 | Cuenta nueva desde el HUB entra a Redes y ve dónde conectar |
 | P8 | **Puerta de administradores y «Acceder como»** funcionan en `articulos` y en `redes` | 🤖 | Entrar por la ruta directa; «Acceder como» a Lorena |

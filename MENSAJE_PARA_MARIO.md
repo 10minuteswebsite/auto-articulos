@@ -37,7 +37,7 @@ Tu trabajo ya cubre mucho: `/auth/hub`, `user-sync`, la revalidación y los rein
 
 1. **Tu documento habla de un solo producto** (`seo-total`). Como son dos, SEO Total necesita saber **de cuál** habla cada mensaje: el producto debe viajar en el canje del código y en la verificación de acceso.
 2. **Usuarios nuevos desde el HUB:** `/auth/hub` crea la cuenta local vacía (sin permisos de redes ni módulos). SEO Total le aplicará un **perfil inicial** (en Redes, todo encendido; cada usuario conecta sus propias redes).
-3. **`trialUnlocked`:** tu revalidación lo cambia cuando el HUB dice «no», pero SEO Total decide con su tabla de derechos por producto, y además conserva una regla antigua de prueba de 7 días. Hay que dejar **una sola fuente**.
+3. **`trialUnlocked` y la prueba de 7 días:** Milton decidió que **los 7 días de prueba de SEO Total se eliminan**; el permiso del HUB es la única fuente de acceso. SEO Total desactivará su regla antigua el Día Cero (con un interruptor, sin borrar código). Tu revalidación hoy escribe `trialUnlocked`; conviene que desde entonces escriba solo los derechos por producto.
 4. **Producción ya tiene 5 columnas de tu migración** en la tabla de usuarios que el esquema de SEO Total no declara. El botón normal de migraciones intentaría borrarlas (se detuvo antes dos veces). Hay un cambio preparado que solo las declara (PR #368), **sin tocar tu rama**; Milton todavía lo decide.
 
 ## 6. Cómo nos hablamos sin pasar por Milton
@@ -63,7 +63,7 @@ Las preguntas:
 5. Las 104 cuentas (85 con acceso, 19 sin él): ¿cómo pasan a los dos productos?
 6. ¿Existe en tu rama un interruptor de login `legacy/dual/hub`, o lo construimos nosotros?
 7. Cuentas de prueba y tipos de usuario: ¿qué hace el HUB con ellas?
-8. ¿Cómo dejamos **una sola fuente** de acceso respecto a `trialUnlocked`?
+8. Dado que los 7 días de prueba se eliminan, ¿os parece bien que desde el Día Cero vuestra revalidación escriba solo los derechos por producto y no `trialUnlocked`?
 9. ¿Cuándo y cómo llegará tu rama a `main` de SEO Total?
 
 Si necesitáis permiso para abrir el Pull Request (acceso de escritura a ramas del repositorio), pedídselo a Milton: es lo único que le toca en esto.
