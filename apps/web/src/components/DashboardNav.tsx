@@ -103,7 +103,11 @@ const PRODUCT_ENTRIES: NavEntry[] = [
       { id: "historial", href: "/dashboard/historial?producto=redes", label: "Historial" },
     ],
   },
-  BASE_ENTRIES[2],
+  // Configuración con «Mi acceso» (qué productos tiene la cuenta, solo lectura).
+  {
+    ...(BASE_ENTRIES[2] as TabGroup),
+    items: [...(BASE_ENTRIES[2] as TabGroup).items, { href: "/dashboard/mi-acceso", label: "Mi acceso" }],
+  },
 ];
 
 // Administración pasó de ser un solo enlace a un grupo para alojar módulos de
