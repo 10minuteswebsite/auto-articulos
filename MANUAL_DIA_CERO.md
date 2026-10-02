@@ -13,27 +13,26 @@ Para Milton. Este manual no ejecuta nada: describe una ventana reversible para s
 
 1. Milton decide fecha y ventana.
 2. Mario crea los dos DNS apuntando al proyecto, sin cambiar el dominio canónico.
-3. Configurar solo en el entorno: `SHARED_COOKIE_DOMAIN=.lasolucionweb.com` y `OAUTH_CANONICAL_ORIGIN=https://seototal.lasolucionweb.com`. Ausentes/apagadas conserva el comportamiento actual.
-4. Ejecutar smoke test y comprobar login actual, `/api/mcp`, conexiones y «Acceder como».
-5. Ejecutar `scripts/corte/encender-permisos-redes-simulacion.sql`; revisar conteos con Milton y aplicar solo después de aprobarlos.
+3. Ejecutar smoke test y comprobar login actual, `/api/mcp`, conexiones y «Acceder como».
+4. En Administración → Usuarios, abrir Día Cero y pulsar Simular. Revisar los conteos antes de activar.
+5. Tener a mano la reversa: botón Revertir y eliminación de la variable `DIA_CERO`.
 
 ## Día Cero
 
 1. Congelar cambios de la ventana y registrar hora.
 2. Confirmar ambos subdominios con candado.
-3. Encender permisos de Redes a cuentas actuales; las nuevas reciben el mismo perfil. No tocar administradores ni módulos explícitamente deshabilitados.
-4. Activar `vista-productos` para el grupo aprobado; verificar tarjetas Artículos/Redes sin pérdida de datos.
-5. Mantener `product_enforcement` apagado hasta autorización de Milton.
-6. Probar `routeAfterLogin`: un producto va a su subdominio, ambos permanecen, sin acceso usa el `hubUrl` configurado y previews/localhost nunca redirigen.
-7. Probar OAuth desde `articulos` y `redes`; el callback de siempre devuelve al origen guardado. No tocar consolas.
-8. Smoke test final y bitácora.
+3. Escribir `DIA CERO` y pulsar Activar Día Cero. El botón enciende los permisos de Redes con respaldo reversible.
+4. En Vercel crear `DIA_CERO=on` y hacer Redeploy.
+5. Mantener `product_enforcement` apagado.
+6. Probar las tres direcciones, el router y una conexión OAuth desde cada subdominio. No tocar consolas.
+7. Smoke test final y bitácora.
 
 ## Cookies, OAuth y reversa
 
-Con `SHARED_COOKIE_DOMAIN` activo, sesión, «Acceder como» y state OAuth deben leer/borrar la variante compartida y la host-only antigua. El state firmado contiene proveedor, origen, usuario, expiración y jti único. `OAUTH_CANONICAL_ORIGIN` solo cambia el URI cuando se configura.
+Con `DIA_CERO=on`, sesión, «Acceder como» y state OAuth usan el comportamiento compartido de Día Cero. El state firmado conserva proveedor, origen, usuario, expiración y jti único.
 
-- Fallo cookies/OAuth: quitar ambas variables y redeplegar; vuelven callbacks y cookies actuales.
-- Fallo permisos: restaurar el respaldo SQL; no usar SQL improvisado.
+- Fallo cookies/OAuth: borrar `DIA_CERO` y redeplegar; vuelve el comportamiento anterior.
+- Fallo permisos: pulsar Revertir. Los SQL de `scripts/corte/` son solo plan B documentado; no usar SQL improvisado.
 - Fallo de vista: quitar `vista-productos`; fallo de derechos: mantener enforcement apagado.
 - Fallo DNS: retirar solo registros nuevos; nunca mover `seototal`.
 
