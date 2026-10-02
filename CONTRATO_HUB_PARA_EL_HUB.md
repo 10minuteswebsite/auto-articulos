@@ -1,194 +1,113 @@
 # CONTRATO ENTRE EL HUB Y SEO TOTAL (Artículos y Redes)
 
-**Para:** Mario y el equipo del HUB · **De:** el proyecto «Separación de SEO Total» (Claude/Codex, por encargo de Milton) · **Fecha:** 2026-10-02
-**Estado:** propuesta para acordar. Lo marcado **[HOY]** está verificado en el código; lo marcado **[PROPUESTA]** aún no existe y hay que acordarlo; lo marcado **[NUESTRO LADO]** lo construimos nosotros después del acuerdo.
+**Para:** Mario y el programador del HUB · **De:** el proyecto «Separación de SEO Total» (Claude/Codex, por encargo de Milton) · **Versión 2 — 2026-10-02**, ajustada a lo hablado entre Milton y Mario.
+**Estado:** lo marcado **[HOY]** está verificado en el código; **[ACORDADO]** lo decidió Milton (con Mario); **[PROPUESTA]** se habla en `BUZON_HUB_SEO_TOTAL.md`; **[NUESTRO LADO]** lo construye SEO Total.
 
-> **Cómo está construido SEO Total, en una frase:** el HUB es la fuente de **identidad y compra**; SEO Total guarda una copia de los derechos de **dos productos** (Artículos y Redes) y **decide con ella** en cada petición, así que una caída del HUB no deja a nadie sin acceso. Este documento **describe esa construcción para que el HUB se adecue**; no es una orden. Todo lo marcado [PROPUESTA] se habla en `BUZON_HUB_SEO_TOTAL.md`.
-
----
-
-## 0. Cómo será el cambio y qué papel tiene el HUB (cuando Milton decida hacerlo)
-
-**Fecha:** la decide Milton; todavía no hay. Hasta ese día **manda el login actual de SEO Total y nadie queda fuera**. Esto describe lo que ocurrirá ese día («Día Cero») y dónde interviene el HUB. El manual operativo completo está en `MANUAL_DIA_CERO.md`.
-
-### Antes del Día Cero (semanas previas)
-| Qué ocurre | Papel del HUB |
-|---|---|
-| SEO Total ya tiene en producción sus derechos por producto, con el interruptor **apagado** y luego en **sombra** (observa sin bloquear) al menos 7 días | Ninguno todavía; el HUB puede preparar sus dos productos y probar contra el entorno de pruebas |
-| **Mario crea en privado los dos subdominios** (`seototal.articulos…`, `seototal.redes…`) y se registran los retornos de conexión de LinkedIn, Pinterest, Tumblr, X, Blogger y Bing | **Crear los subdominios y apuntarlos al proyecto de SEO Total en Vercel** (un dominio solo puede pertenecer a un proyecto, así que deben quedar en el de SEO Total, no en el del HUB); decidir qué `app` lanza a cada uno |
-| Se importan los **106 usuarios** y sus derechos (todos con Artículos; con Redes quien ya tiene alguna red aprobada) | **Recibir esa importación y quedarse con ella** como punto de partida (sin crear cuentas duplicadas: se resuelve por `local_user_id` y correo) |
-| Se baja el TTL del DNS y se ensaya la reversa | Estar disponible para el ensayo |
-
-### El Día Cero (en este orden; si un paso falla, se detiene y se revierte)
-1. **SEO Total congela cambios** y comprueba que todo está sano.
-2. **SEO Total convierte los derechos a «gracia» de 5 días** (fecha de corte + 5) para quien no ha comprado; administradores y gracias puestas a mano no cambian. → **El HUB recibe el resultado y lo adopta como estado vigente** (no lo pisa).
-3. **Se habilita la vista por productos** y se pasa el interruptor de aplicación a **Activo** (desde ahí los derechos se exigen; con todos en Activo o Gracia no se bloquea a nadie).
-4. **El login pasa de `legacy` a `dual` y luego a `hub`.** → **Aquí empieza el papel central del HUB:** los usuarios inician sesión en el HUB, pulsan Artículos o Redes y entran a SEO Total por `/auth/hub` con un código de un solo uso. **Desde este paso el HUB es la puerta de entrada.** Los administradores conservan un acceso de emergencia directo en SEO Total.
-5. **ÚLTIMO PASO: el dominio viejo (`seototal.lasolucionweb.com`) se apunta al HUB** (decisión de Milton) para que los usuarios que entren por la dirección de siempre lleguen al HUB y nadie se pierda. **Condición obligatoria:** un dominio de Vercel solo pertenece a un proyecto, así que al moverlo dejan de responder en él las **rutas de máquina** (servidor MCP/OAuth2 de Alexa y Claude, `/.well-known/*` y retornos de conexión de LinkedIn, Pinterest, Tumblr, X, Blogger y Bing). **El HUB debe reenviarlas con redirección 308** (conserva método y parámetros) al **dominio estable de SEO Total** y mantener ese puente hasta comprobar con registros que nadie usa ya el host viejo. **Quien mueve el dominio es Mario, entrando él mismo a Vercel:** lo quita del proyecto de SEO Total y lo añade al del HUB (y ajusta el DNS si hace falta), cuando Milton dé la orden. Solo se mueve cuando el dominio estable ya responde y el reenvío está probado. Los subdominios nuevos los crea Mario, apuntando al proyecto de SEO Total.
-6. **Verificación con cuentas reales** (solo Artículos, solo Redes, ambos, administrador) y reconexión de una integración por proveedor.
-
-### Después del Día Cero (5 días de gracia y más allá)
-| Qué ocurre | Papel del HUB |
-|---|---|
-| Los usuarios ven avisos con los días de gracia restantes | Si un usuario **compra**, el HUB lo comunica como derecho `ACTIVE` del producto comprado (SEO Total lo aplica y sube la versión) |
-| Milton puede dar o quitar días por usuario en Administración de SEO Total | Respetar la regla de conflicto de la sección 3.4 (a decidir por Milton) |
-| Al vencer la gracia se bloquea ese producto a quien no tiene derecho | El HUB es la fuente de verdad de **compras y cancelaciones**: informa `ACTIVE` o `INACTIVE` por producto, nunca por omisión |
-| Si el HUB cae | SEO Total sigue con lo último que sabía; administradores entran por emergencia; las altas pendientes se reintentan |
-| Más adelante | Se retiran los retornos antiguos y el puente de rutas, solo cuando Milton lo ordene |
-
-**Resumen del papel del HUB:** (1) ser la **puerta de entrada** y la fuente de **identidad**; (2) ser la fuente de verdad de **qué compró cada usuario**, comunicándolo **por producto**; (3) mantener el **puente de rutas de máquina** (redirección 308 al dominio estable de SEO Total) mientras haga falta; (4) **no estar nunca en el camino de un clic** (SEO Total decide con su tabla local).
+> **En una frase:** el HUB maneja las **personas** y da permiso **sí o no por producto** (Artículos y Redes); SEO Total maneja **todo lo de dentro** (módulos, submódulos, permisos de cada red, datos) y decide cada petición con su tabla local. Esto describe cómo está construido SEO Total para que el HUB se adecue; no es una orden.
 
 ---
 
-## 1. Cómo se reparte la autoridad
+## 1. Reparto de responsabilidades [ACORDADO]
 
-| Tema | Quién manda | Detalle |
+| Tema | Quién |
+|---|---|
+| Identidad (correo, nombre, teléfono), login de usuarios normales | **HUB** (código por correo o Google) |
+| Facturación, precios, gracia, cancelaciones, reactivaciones | **HUB** (su administrador de facturación). Los plazos de gracia **no** dependen de SEO Total |
+| Permiso **sí/no por producto**: Artículos y Redes | **HUB** |
+| Módulos y submódulos que ve cada usuario, permisos de cada red, perfil inicial | **SEO Total** |
+| Conexiones a redes (cada usuario conecta las suyas) | **SEO Total / Composio** |
+| Datos del usuario (artículos, proyectos, historial) | **SEO Total** (el HUB no los ve) |
+| Decidir cada petición | **SEO Total**, con su tabla local `ProductEntitlement`; el HUB nunca está en el camino de un clic |
+| Acceso de administradores y soporte («puerta trasera») | **SEO Total** (contraseña, sin pasar por el HUB) |
+
+**Principio:** el HUB informa; SEO Total decide y recuerda. Si el HUB cae, SEO Total sigue con lo último que sabía.
+
+## 2. Dos productos, dos subdominios [ACORDADO]
+
+| Producto | Identificador interno | Dirección |
 |---|---|---|
-| Quién es el usuario (identidad, correo, teléfono) | **HUB** (desde el Día Cero) | Hasta el Día Cero manda el login actual de SEO Total |
-| Qué compró cada usuario (Artículos, Redes) | **HUB** | SEO Total lo guarda copiado en su tabla local |
-| Decidir **en cada petición** si puede usar una función | **SEO Total** (tabla local `ProductEntitlement`) | Nunca se decide con lo que trae un token ni con una llamada al HUB en cada clic |
-| Datos del usuario (artículos, proyectos, conexiones, historial) | **SEO Total** | El HUB no los toca ni los ve |
-| Conexiones a redes (Google, Meta, LinkedIn, etc.) | **SEO Total / Composio** | Compartidas por cuenta, nunca por producto |
-| Acceso de emergencia de administradores | **SEO Total** | Funciona aunque el HUB esté caído |
+| SEO Total Artículos | `ARTICULOS` | `articulos.lasolucionweb.com` |
+| SEO Total Redes | `REDES` | `redes.lasolucionweb.com` |
 
-**Principio:** el HUB informa; SEO Total decide y recuerda. Si el HUB no responde, **SEO Total sigue con lo último que sabía** y nadie pierde acceso.
+- El dominio principal `seototal.lasolucionweb.com` **no se mueve ni cambia**. Al final, lo que entre por él se lleva al HUB **solo si es una persona** (`/` y `/login`); Alexa, Claude/MCP y los retornos de conexión siguen respondiendo allí.
+- **Mario crea en el DNS del `.com` los dos registros** `articulos` y `redes`, apuntando al **mismo proyecto de SEO Total en Vercel** (un dominio solo pertenece a un proyecto; SEO Total es una sola aplicación que responde en los tres nombres).
+- El nombre que se muestra en el HUB (catálogo, factura) es **cosa del HUB**. A SEO Total solo le llega «permiso sí/no por producto» con un identificador técnico.
+- Callbacks de entrada: `https://articulos.lasolucionweb.com/auth/hub` y `https://redes.lasolucionweb.com/auth/hub`.
 
-## 2. Lo que existe hoy [HOY] (leído de la rama `codex/hub-seo-total-migration`, solo lectura)
+## 3. Lo que existe hoy [HOY] (leído de `codex/hub-seo-total-migration` y del documento de Mario)
 
-Variables de entorno en SEO Total: `HUB_BASE_URL` (por defecto `https://hub.lasolucionweb.net`), `AUTO_ARTICULOS_HUB_CLIENT_ID` (`seo-total`), `AUTO_ARTICULOS_HUB_CLIENT_SECRET`. Todas las llamadas servidor-a-servidor llevan:
-`x-platform-client-id: <client id>` y `Authorization: Bearer <client secret>`.
+Variables: `HUB_BASE_URL`, `AUTO_ARTICULOS_HUB_CLIENT_ID`, `AUTO_ARTICULOS_HUB_CLIENT_SECRET`. Llamadas servidor-a-servidor con `x-platform-client-id` y `Authorization: Bearer <secreto>`.
 
-| # | Dirección | Endpoint | Qué hace hoy |
+| # | Dirección | Endpoint | Qué hace |
 |---|---|---|---|
-| H1 | HUB → SEO Total | `GET /auth/hub?code=<código>` (en SEO Total) | Recibe un código temporal (40–80 caracteres), lo canjea con H2, busca al usuario por `hubUserId` o por correo (o lo crea), abre la **cookie de sesión** local y redirige a `/dashboard` |
-| H2 | SEO Total → HUB | `POST {HUB}/api/product-launch` `{code, app:"seo-total"}` | Devuelve `platform_user_id`, `auth0_sub`, `email`, `platform_role`, `entitlement_status` |
-| H3 | SEO Total → HUB | `POST {HUB}/api/integrations/auto-articulos/access` `{hub_user_id}` | Devuelve `{allowed: boolean}`; SEO Total lo guarda 60 s en memoria. Si el HUB falla, **se deja pasar** (fail-open) |
-| H4 | SEO Total → HUB | `POST {HUB}/api/integrations/auto-articulos/user-sync` `{local_user_id, email, name, first_name, last_name, phone, role, product_access}` | Alta/cambios de perfil; devuelve `hub_user_id`, `auth0_sub`, `product_access` |
+| H1 | HUB → SEO Total | `GET /auth/hub?code=<código>` | Código opaco de un solo uso (5 min); SEO Total lo canjea, busca/crea al usuario (por `hubUserId` o correo) y abre **su propia cookie de sesión** |
+| H2 | SEO Total → HUB | `POST {HUB}/api/product-launch` `{app, code}` | Devuelve `platform_user_id`, `auth0_sub`, `email`, `platform_role`, `entitlement_status`, `expires_at` |
+| H3 | SEO Total → HUB | `POST {HUB}/api/integrations/auto-articulos/access` `{hub_user_id}` | Devuelve `{allowed, status}`; SEO Total lo guarda 60 s |
+| H4 | SEO Total → HUB | `POST {HUB}/api/integrations/auto-articulos/user-sync` | Altas y cambios de perfil durante la coexistencia |
 
-Hoy el HUB habla de **un solo derecho** (`product_access` / `allowed` / `entitlement_status`), que SEO Total guarda en `User.trialUnlocked`. **Eso es lo que hay que ampliar a dos productos.**
+## 4. Cómo se traduce el permiso del HUB a SEO Total [PROPUESTA]
 
-## 3. Lo que SEO Total espera encontrar del lado del HUB, y por qué [PROPUESTA, a hablar en el buzón]
+El HUB ya describe **un** producto (`seo-total`). Como los productos son **dos**, SEO Total necesita saber **de cuál** habla cada mensaje:
 
-### 3.1 Dos productos, con identificadores fijos
+1. **H2:** que `app` identifique el producto (un identificador por producto, a vuestra elección) y que SEO Total lo traduzca a `ARTICULOS` o `REDES`. El usuario aterriza en el subdominio de ese producto.
+2. **H3:** aceptar el producto como dato (`{hub_user_id, product}`) o devolver ambos permisos: `{products: {ARTICULOS: true|false, REDES: true|false}}`. Compatible hacia atrás con `allowed`.
+3. **Regla en SEO Total:** permiso «sí» → el derecho local del producto queda `ACTIVE` (con `source = HUB` y sube la versión, con evento de historial); permiso «no» → `INACTIVE`. Si el HUB envía una fecha de gracia, se guarda; **SEO Total no inventa gracias**.
+4. **Nunca revocar por omisión:** un producto que no aparece en un mensaje significa «sin cambios».
+5. **Si el HUB cae** durante la coexistencia: se conserva el último estado (fail-open); al cerrarse el acceso legado, las operaciones nuevas fallan cerradas (como Mario describió).
 
-| Producto | Identificador (`product`) | Slug de lanzamiento (`app`) | Subdominio |
-|---|---|---|---|
-| SEO Total Artículos | `ARTICULOS` | `seo-total-articulos` | `seototal.articulos.lasolucionweb.com` |
-| SEO Total Redes | `REDES` | `seo-total-redes` | `seototal.redes.lasolucionweb.com` |
+## 5. Usuario nuevo creado desde el HUB [NUESTRO LADO]
 
-(Nunca «Redes Totales».) El slug `seo-total` actual debe **seguir funcionando** durante la transición y equivaler a `seo-total-articulos`.
+Hoy `/auth/hub` crea la cuenta local **vacía** (sin permisos de redes ni módulos). Para Redes eso la haría inútil. **SEO Total aplicará un perfil inicial** al crearla:
+- **Redes:** módulo de Oportunidades de Redes y el permiso de **todas** las redes de publicación activos. **Cada usuario conecta sus propias redes.**
+- **Artículos:** lo que reciben hoy los usuarios nuevos.
+- Después un administrador puede restringir a cualquiera, como hoy.
 
-### 3.2 Forma de un derecho (igual en todos los mensajes)
+## 6. Entrada y sesiones
 
-```json
-{
-  "product": "ARTICULOS",
-  "status": "ACTIVE",
-  "grace_until": null,
-  "updated_at": "2026-10-02T15:00:00Z",
-  "event_id": "evt_01H..."
-}
-```
+- **Usuarios normales:** entran **solo por el HUB**. Mario confirma: sin migrar contraseñas; código por correo o Google. (No hay «mismas credenciales».)
+- **Administradores y soporte [ACORDADO]:** conservan una **puerta directa con contraseña** (ruta no enlazada, solo cuentas de administración, con límite de intentos), **sin pasar por el HUB**, en `articulos` y en `redes`. Desde Administración pueden hacer **«Acceder como»** a cualquier usuario, como hoy, en las dos plataformas. No hay un tipo nuevo de administrador por producto.
+- **Riesgo conocido:** si el HUB cae, los usuarios normales no entran; los administradores sí.
+- **[NUESTRO LADO]** Para que una sesión valga en todos los subdominios del `.com`, la cookie de sesión se marcará para `.lasolucionweb.com`. No se comparten cookies con el HUB.
 
-- `status` ∈ `ACTIVE` | `GRACE` | `INACTIVE`.
-- `grace_until`: fecha ISO UTC. **Obligatoria si `status = GRACE`; debe ser nula en los demás casos.** (La base de SEO Total rechaza una gracia sin fecha.)
-- `event_id`: identificador único del cambio, para que repetir un mensaje **no** lo aplique dos veces (idempotencia).
-- Un producto que **no aparece** en el mensaje significa **«sin cambios»**. **Nunca se revoca por omisión:** revocar es enviar `INACTIVE` de forma explícita.
+## 7. Conexiones OAuth: «callback único» [APROBADO EN PRINCIPIO, NO CONSTRUIDO]
 
-### 3.3 Cambios a los endpoints actuales (compatibles hacia atrás)
+Para que **ninguna consola de proveedor cambie**, todas conservarán **un solo callback** en `seototal.lasolucionweb.com`. La conexión empieza en `articulos` o `redes`, el origen viaja dentro del `state` firmado y el callback devuelve al usuario a su pantalla. Google y Meta van por Composio (no dependen de nuestros callbacks). Alexa, Claude/MCP no cambian. **El protocolo de paso a Composio es intocable.**
 
-- **H2 (`product-launch`)**: añadir `entitlements: [ ... ]` (lista de derechos como en 3.2) además de los campos actuales. Aceptar `app` = `seo-total`, `seo-total-articulos` o `seo-total-redes`. Si el código se emitió para Redes, SEO Total aterriza al usuario en la portada de Redes.
-- **H3 (`access`)**: responder **además** de `allowed` con `entitlements: [ ... ]`. `allowed` queda como `true` si **cualquiera** de los dos productos está `ACTIVE` o `GRACE` vigente (compatibilidad).
-- **H4 (`user-sync`)**: SEO Total envía además `entitlements` locales **solo en la importación inicial** (para que el HUB parta de lo que ya existe: 106 usuarios con Artículos; los que tengan Redes aprobadas con Redes). Después, **el HUB es quien los modifica**.
-- **Nuevo H5 (opcional pero recomendado), HUB → SEO Total:** `POST /api/hub/entitlements` en SEO Total, con firma `HMAC-SHA256` sobre el cuerpo (cabecera `x-hub-signature`) y `x-hub-timestamp` (rechazamos mensajes de más de 5 minutos). Cuerpo: `{hub_user_id, entitlements:[...]}`. Sirve para que una compra, una revocación o una gracia surtan efecto **al instante** sin esperar la siguiente revalidación. **[NUESTRO LADO]**: lo construimos tras el acuerdo.
+## 8. Seguridad
 
-### 3.4 Gracia
+Secretos solo como variables protegidas, rotados al terminar. Código de lanzamiento de un solo uso. SEO Total no confía en el «allowed» como única barrera: la barrera real es su tabla local en APIs y worker. Cifrado en tránsito siempre. Auditoría en ambos lados. Nunca secretos ni contraseñas en el buzón.
 
-- **Día Cero:** SEO Total convierte localmente a `GRACE` (fecha de corte + 5 días) a quien no ha comprado. Ese cambio se **informa al HUB** (H4 con los derechos) para que el HUB no lo pise.
-- Después, la gracia puede **extenderse o quitarse** desde el HUB o desde Administración de SEO Total (Milton lo hace por usuario). **Regla de conflicto [A DECIDIR POR MILTON]:** una gracia puesta a mano en Administración (`source = ADMIN`) con fecha futura **no se sobrescribe** por una sincronización del HUB; solo un mensaje con `updated_at` más reciente que el cambio local puede cambiarla.
+## 9. Encabezado global del HUB
 
-### 3.3b Qué hace SEO Total al recibir un derecho [NUESTRO LADO]
+Mario pide el encabezado global del HUB en cada aplicación. **[NUESTRO LADO]** Lo añadiremos. **Decisión temporal de Milton:** por ahora lo ven todos, incluidos los usuarios de Tagcrush (marca blanca); se depura más adelante.
 
-1. Verifica firma/credenciales y `event_id` no repetido.
-2. Valida: producto conocido, `status` válido, `GRACE` con fecha.
-3. Escribe en `ProductEntitlement` con `source = HUB` y **sube `version`**; inserta una fila en `ProductEntitlementEvent` (historial).
-4. Ignora productos desconocidos y registra el aviso. No borra nada.
-
-## 4. Entrada del usuario (login) [PROPUESTA sobre lo que ya existe]
-
-1. El usuario inicia sesión **en el HUB** y pulsa Artículos o Redes.
-2. El HUB emite un **código de un solo uso**, vida ≤ 60 s, ligado a `app` y a `hub_user_id`.
-3. El navegador va a `https://<subdominio del producto>/auth/hub?code=...` [HOY existe `/auth/hub`].
-4. SEO Total canjea el código (H2), resuelve al usuario **por `hubUserId` y, si no existe, por correo normalizado** [HOY], aplica los `entitlements` recibidos y abre su sesión.
-5. **Nunca se usan cookies ni tokens del HUB para autorizar peticiones**: SEO Total usa su propia cookie y su tabla local.
-
-**Interruptor de login (`legacy` / `dual` / `hub`)** **[NUESTRO LADO, hoy NO construido; solo existe `legacy`]**:
-`legacy` = manda el login actual; `dual` = conviven; `hub` = el login actual redirige al HUB. Volver atrás es cambiar el interruptor, sin desplegar. **Qué necesitamos de Mario:** confirmar si su rama ya incluye algo equivalente; si no, lo construimos nosotros con este contrato.
-
-**Acceso de emergencia (obligatorio antes de `hub`):** los administradores conservan un acceso directo con contraseña por una ruta no enlazada, y «Acceder como» funciona en los tres modos. El HUB **no debe** poder desactivarlos.
-
-**Contraseñas [DECISIÓN ABIERTA]:** hoy están en `User.passwordHash` (bcrypt). El usuario debe poder entrar al HUB **con las mismas credenciales**. El HUB hoy crea cuentas nuevas con una contraseña aleatoria. Hay que acordar: (a) importación de hashes por canal seguro, o (b) restablecimiento guiado en el primer acceso. **Nunca** se envían hashes por un canal sin cifrar ni se exponen en registros.
-
-## 5. Qué NO puede moverse al HUB el Día Cero (críticos)
-
-Un dominio de Vercel solo pertenece a un proyecto. Si `seototal.lasolucionweb.com` pasa al HUB, **dejan de responder**: `/api/mcp`, `/api/oauth2/*` y `/.well-known/*` (Alexa+, Claude), y los retornos de conexión de LinkedIn, Pinterest, Tumblr, X, Blogger y Bing. El HUB debe:
-
-1. Reenviar esas rutas de máquina al **dominio estable de callbacks/MCP** con **redirección 308** (o *rewrite*) que conserve método y parámetros.
-2. Mantener ese puente hasta comprobar con registros que nadie usa ya el host viejo.
-3. Redirigir **solo a las personas** (`/`, `/login`, interfaz), no todo el dominio.
-
-Google y Meta van por Composio y no dependen de nuestros callbacks. El **protocolo de paso a Composio es intocable**.
-
-## 6. Seguridad (obligatoria)
-
-- Secretos solo como variables protegidas; **rotarlos** al terminar la migración. Nunca en el repositorio ni en registros.
-- Código de lanzamiento: un solo uso, ≤ 60 s, ligado a `app` y usuario; el HUB lo invalida al canjearse.
-- H5 firmado y con marca de tiempo; **idempotente** por `event_id`.
-- Limitar la tasa de llamadas y registrar auditoría (quién, qué, cuándo) en ambos lados.
-- Cifrado en tránsito (HTTPS) siempre.
-- SEO Total **no confía** en que el HUB diga «allowed» como única barrera: la barrera real es su tabla local en APIs y worker.
-
-## 7. Si algo falla
+## 10. Si algo falla
 
 | Situación | Comportamiento esperado |
 |---|---|
-| HUB caído | SEO Total conserva el último derecho guardado; nadie pierde acceso; las altas nuevas se reintentan (ya existe `sync-hub-users`) |
-| Mensaje repetido | Ignorado por `event_id` |
-| Mensaje con firma o fecha inválida | Rechazado con 401; sin cambios |
+| HUB caído | SEO Total conserva el último permiso; administradores entran por la puerta directa; altas pendientes se reintentan |
+| Código reutilizado o vencido | `401`; sin cambios |
+| Mismo correo, dos cuentas locales | Conflicto para revisión; no se fusiona a ciegas |
 | Producto desconocido | Se ignora y se registra |
-| `GRACE` sin fecha | Se rechaza ese derecho; no se aplica |
-| Usuario sin cuenta local | Se crea (como hace hoy `/auth/hub`) con derechos del mensaje; si no trae ninguno, **no se le da acceso** |
-| Revocación (`INACTIVE`) | Efecto inmediato en APIs y worker; el usuario ve el aviso de acceso terminado |
-| Correo cambiado | Se resuelve por `local_user_id` y actualiza el correo; **no** crea cuenta nueva |
+| Revocación | Efecto inmediato en APIs y worker; el usuario ve el aviso; **los datos no se borran** |
 
-## 8. Pruebas que deben pasar en ambos lados antes del Día Cero
+## 11. Qué se hace el día del cambio (resumen; el detalle está en `MANUAL_DIA_CERO.md`)
 
-☐ Importación: conteos iguales (106 usuarios; 106 Artículos; los de Redes que correspondan).
-☐ Usuario solo Artículos / solo Redes / ambos / administrador entran por el HUB y ven lo suyo.
-☐ Revocar Redes a un usuario de prueba: pierde Redes y **conserva Artículos**.
-☐ Gracia con fecha: aparece el aviso con los días correctos; al vencer se bloquea ese producto.
-☐ HUB apagado a propósito: nadie pierde acceso; administradores entran por emergencia.
-☐ Mensaje H5 duplicado, con firma mala y con hora vieja.
-☐ Reconectar una integración de cada proveedor tras mover el dominio.
-☐ Reversa: volver el login a `legacy` y el dominio al proyecto anterior.
+1. Mario crea los dos registros DNS y comprueba que cargan.
+2. Los usuarios del HUB entran con acceso gratuito (lo mantiene el HUB; la facturación y la gracia las gestiona el HUB después).
+3. Lo que entre por `seototal.lasolucionweb.com` pasa al HUB (solo personas).
+4. SEO Total aplica el perfil inicial a cuentas nuevas y recibe los permisos por producto.
 
-## 9. Preguntas abiertas para Mario
+## 12. Preguntas abiertas para Mario
 
-**Dónde responderlas:** en `BUZON_HUB_SEO_TOTAL.md` (repositorio `10minuteswebsite/auto-articulos`), con una entrada nueva `H-003` que numere las respuestas del 1 al 6, enviada como Pull Request que modifique solo ese archivo. SEO Total lo lee cada 10 minutos y responde allí. **No se responden a Milton.**
+**Dónde responderlas:** en `BUZON_HUB_SEO_TOTAL.md` (repositorio `10minuteswebsite/auto-articulos`), entrada nueva `H-004` numerando las respuestas, como Pull Request que modifique solo ese archivo. SEO Total lo lee cada 10 minutos. **No se responden a Milton.**
 
-1. ¿El HUB ya modela **dos productos** o hay que ampliarlo? ¿Qué nombres de `app` usará?
-2. ¿Prefieren H5 (empujar) o que SEO Total consulte en H3 con caché de 60 s? (Recomendamos ambos.)
-3. ¿Cómo viajarán las contraseñas (4, «Contraseñas»)?
-4. ¿Existe ya un interruptor `legacy/dual/hub` en su rama o lo construimos nosotros?
-5. ¿Cómo marcan «han comprado» vs «no han comprado» (define a quién se convierte a gracia)?
-6. ¿Qué hace el HUB con las cuentas de prueba y los tipos de usuario (incluido «PRUEBAS»)?
+1. ¿Qué identificadores usará el HUB para cada producto (`app` en H2, y producto en H3)? ¿H3 recibirá el producto o devolverá los dos permisos?
+2. Tu documento dice «un producto hasta la separación»: ¿confirmas que desde el principio son dos productos, como acordó Milton?
+3. ¿Preferís **empujar** cambios a SEO Total (mensaje firmado) o que SEO Total **consulte** con caché de 60 s?
+4. ¿Cuándo quedan creados los dos registros DNS y cuándo se pueden probar?
+5. Las 104 cuentas (85 con acceso, 19 sin él): ¿cómo se traducen a los dos productos? ¿Todas acceden a Artículos y a Redes, o solo a Artículos y Redes queda para quien la tenía?
+6. ¿Existe ya en vuestra rama el interruptor de login `legacy/dual/hub` o lo construimos nosotros?
+7. Cuentas de prueba y tipos de usuario: ¿qué hace el HUB con ellas?
 
-## 10. Lo que construirá SEO Total tras el acuerdo [NUESTRO LADO]
-
-1. Función única `applyHubEntitlements(userId, entitlements, source=HUB)` con las reglas de 3.3b y pruebas.
-2. Endpoint H5 firmado e idempotente.
-3. Ampliar el lector de H2/H3 a `entitlements` (compatible con el formato viejo).
-4. Interruptor de login `legacy/dual/hub` con acceso de emergencia.
-5. Paneles de Administración: ver origen (`source`) y versión del derecho de cada usuario.
-
-*Documento relacionado:* `MANUAL_DIA_CERO.md` (pasos operativos) y `ARQUITECTURA_FINAL_DERECHOS_POR_PRODUCTO.md` (cómo funciona hoy por dentro).
+*Documentos relacionados:* `MANUAL_DIA_CERO.md`, `ARQUITECTURA_FINAL_DERECHOS_POR_PRODUCTO.md`.
