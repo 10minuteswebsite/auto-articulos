@@ -1,22 +1,22 @@
-# TRASPASO — SEPARACIÓN DE SEO TOTAL EN ARTÍCULOS Y REDES (versión 3)
+# TRASPASO — SEPARACIÓN DE SEO TOTAL EN ARTÍCULOS Y REDES (versión 2)
 
 > **Para Codex (o cualquier agente que retome esto).** Este archivo es el punto de entrada y **sustituye a la versión 1**. Si Claude se queda sin tokens, **tú tomas el control** (ver sección 12). Léelo completo, luego `CONTROL_SEPARACION_SEO_TOTAL.md` (sección 0 y las últimas entradas `C-0xx`), `CONTRATO_HUB_PARA_EL_HUB.md`, `MANUAL_DIA_CERO.md` y `BUZON_HUB_SEO_TOTAL.md`.
 > Obedece **sin omitir nada** `COORDINACION_CLAUDE_CODEX.md` (no lo leas entero: ~650 KB; secciones «PROTOCOLO OBLIGATORIO DE NO DESTRUCCIÓN», «METODOLOGÍA DE TRABAJO EN PARALELO Y CAPITÁN DE ARCHIVO», «INCIDENTE CRÍTICO» y «ADVERTENCIA CRÍTICA SOBRE VERCEL»).
 
-Actualizado: 2026-10-02 · Responsable: Codex (ejecución; Claude conserva el control documental) · Dueño: Milton (hispanohablante; **no puede abrir `.md`**: entrégale `.html` o un Artifact).
+Actualizado: 2026-10-02 · Responsable: Claude (control del proyecto) · Dueño: Milton (hispanohablante; **no puede abrir `.md`**: entrégale `.html` o un Artifact).
 
 ## 1. Qué se construye
 SEO Total se divide, de cara al cliente, en **SEO Total Artículos** y **SEO Total Redes** (**nunca «Redes Totales»**). Un **HUB** (otro proyecto, de **Mario**) será dueño del login, la facturación y el sí/no por producto. SEO Total conserva todo lo operativo (módulos, permisos de cada red, datos).
 
 ## 2. Decisiones cerradas de Milton (no reabrir sin preguntarle)
-1. **Dominios.** `seototal.lasolucionweb.com` se conserva. Las dos entradas de cliente son **`articulos.lasolucionweb.com`** y **`redes.lasolucionweb.com`**, apuntadas por Mario al mismo proyecto de SEO Total en Vercel. El Día Cero no mueve el dominio ni construye `/auth/hub`; el HUB es paralelo y no usa este buzón.
+1. **Dominios.** `seototal.lasolucionweb.com` **no se mueve ni cambia a `.net`**. Dos subdominios nuevos en el `.com`: **`articulos.lasolucionweb.com`** y **`redes.lasolucionweb.com`** (sin «seototal.» ni acento). **Mario crea el DNS** y los apunta al **mismo proyecto de SEO Total en Vercel**. Al final, lo que entre por el dominio actual se lleva al HUB **solo si es persona** (`/`, `/login`); Alexa, Claude/MCP y retornos OAuth siguen en el `.com`.
 2. **Reparto.** El HUB: identidad, login de usuarios normales (código por correo o Google; **no se migran contraseñas**), **permiso sí/no por producto**, facturación y gracia. SEO Total: módulos, submódulos, permisos de cada red, datos. **SEO Total no convierte a gracia ni cobra.**
 3. **Dos productos desde el principio**, cada uno a su subdominio.
-4. **Todos los usuarios actuales conservan su acceso durante la separación.** Los derechos por producto locales siguen siendo la fuente operativa durante la coexistencia; cualquier cambio futuro de facturación o acceso del HUB se integra de forma defensiva y configurable.
+4. **Todos los usuarios pasan gratis** al HUB (Artículos y Redes); Milton cierra/abre por usuario desde el HUB y pone las reglas de pago después.
 5. **El Día Cero se encienden los permisos de Redes a TODOS los usuarios actuales** (módulo `oportunidades-redes` + los 10 `allow*Publishing`), **con simulación previa y lista guardada para revertir**; y a los nuevos al crearse desde el HUB. Cada usuario conecta sus propias redes.
 6. **Administradores y soporte**: **puerta directa con contraseña** (ruta no enlazada, solo cuentas `admin`, con límite de intentos), sin pasar por el HUB, en `articulos` y `redes`; «Acceder como» como hoy. **No hay rol nuevo por producto.** Riesgo conocido: si el HUB cae, los usuarios normales no entran.
 7. **Los 7 días de prueba de SEO Total se eliminan** el Día Cero (interruptor, **sin borrar código**: `hasTrialAccess` en `apps/web/src/lib/trial.ts`, `trialUnlocked`, `isTrialSignup`, «Solicitar prueba»). El HUB es la única fuente de acceso.
-8. **Callback único.** Se conservan los callbacks actuales; la conexión puede iniciarse desde `articulos` o `redes` y debe devolver al origen correcto. Cualquier cambio de cookies/callbacks permanece apagado hasta la autorización y verificación del Día Cero. Google y Meta siguen por Composio; su protocolo es INTOCABLE.
+8. **Callback único** (aprobado en principio, **NO construido; Milton aún no dio «adelante»**): todos los proveedores (LinkedIn, Pinterest, Tumblr, X, Blogger, Bing) conservan **un solo callback** en `seototal.lasolucionweb.com`; la conexión se inicia en `articulos` o `redes`, el origen viaja en el `state` firmado y el callback devuelve al usuario a su pantalla. Requiere cookie de sesión con `Domain=.lasolucionweb.com`. Google y Meta van por **Composio** (no dependen de nuestros callbacks). **El protocolo de paso a Composio es INTOCABLE.**
 9. **Encabezado global del HUB** obligatorio (marca «LA SOLUCIÓN IA», Aplicaciones, Facturación, Perfil, Administración, Salir). **Decisión temporal:** por ahora lo ve todo el mundo, incluido **Tagcrush** (marca blanca; contradice su regla; depurar después).
 10. Interruptor de aplicación `product_enforcement`: **sigue APAGADO**. Pasar a Sombra lo decide Milton (≥ 7 días antes de Activo); Activo solo desde Sombra y escribiendo **ACTIVAR**.
 
