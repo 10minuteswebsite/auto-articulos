@@ -78,13 +78,13 @@ export default function InicioPage() {
   const [showWizard, setShowWizard] = useState<boolean | null>(null);
   const [configurationAlerts, setConfigurationAlerts] = useState<ConfigurationAlert[]>([]);
   const [products, setProducts] = useState<ProductsInfo | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
   const [productView, setProductView] = useState(false);
 
   const checkWizardStatus = useCallback(async () => {
     try {
+      const currentHostProduct = productOfHost(window.location.hostname);
       const [credRes, catRes, meRes, googleRes, configurationRes, composioRes] = await Promise.all([
         fetch("/api/credentials", { cache: "no-store" }),
         fetch("/api/categories", { cache: "no-store" }),
@@ -108,7 +108,6 @@ export default function InicioPage() {
       const step2 = Array.isArray(catData.categories) && catData.categories.length > 0;
       setProductView(isProductViewEnabled(meData?.disabledModules));
       setProducts(meData?.products ?? null);
-      setIsAdmin(meData?.role === "admin" || Boolean(meData?.isActingAdmin));
       const step3 = typeof meData.contentLanguage === "string" && meData.contentLanguage.trim().length > 0;
       const step4 = Boolean(
         (googleData.connected && googleData.siteUrl) ||
@@ -119,6 +118,14 @@ export default function InicioPage() {
       const complete = process.env.NEXT_PUBLIC_LOCAL_DEMO === "true"
         ? true
         : step1 && step2 && step3 && step4;
+
+      // El asistente de cuatro pasos pertenece a SEO TOTAL ARTÍCULOS. En
+      // Redes no debe bloquear el Inicio ni mostrar instrucciones de artículos.
+      if (currentHostProduct === "REDES") {
+        setShowWizard(false);
+        setConfigurationAlerts([]);
+        return;
+      }
 
       if (!complete) everIncompleteRef.current = true;
       setShowWizard(everIncompleteRef.current ? true : !complete);
@@ -131,14 +138,18 @@ export default function InicioPage() {
         : [];
       setConfigurationAlerts(pendingAlerts);
     } catch {
-      everIncompleteRef.current = true;
-      setShowWizard(true);
+      if (productOfHost(window.location.hostname) === "REDES") {
+        setShowWizard(false);
+      } else {
+        everIncompleteRef.current = true;
+        setShowWizard(true);
+      }
       setConfigurationAlerts([]);
     }
   }, []);
 
   function hasProductFor(href: string): boolean {
-    if (!isAdmin && hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(href), hostProduct)) {
+    if (hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(href), hostProduct)) {
       return false;
     }
     if (!products) return true;

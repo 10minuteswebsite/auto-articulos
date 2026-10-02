@@ -177,7 +177,8 @@ export default function DashboardNav() {
           // configurar el sistema aunque su propia cuenta esté incompleta.
           setIsAdmin(meData?.role === "admin" || Boolean(meData?.isActingAdmin));
           const localDemo = process.env.NEXT_PUBLIC_LOCAL_DEMO === "true";
-          setHideForSetup(!localDemo && !(step1 && step2 && step3 && step4));
+          const isRedesHost = productOfHost(window.location.hostname) === "REDES";
+          setHideForSetup(!isRedesHost && !localDemo && !(step1 && step2 && step3 && step4));
         }
       })
       .catch(() => {
@@ -256,9 +257,9 @@ export default function DashboardNav() {
   }, [openGroup]);
 
   function isVisible(tab: TabItem): boolean {
+    if (hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(hrefPath(tab.href)), hostProduct)) return false;
     if (isAdmin) return true;
     if (tab.id && disabledModules.includes(tab.id)) return false;
-    if (hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(hrefPath(tab.href)), hostProduct)) return false;
     if (!products) return true;
     const scope = productOfPath(hrefPath(tab.href));
     if (scope === "ARTICULOS") return products.articulos?.allowed !== false;
@@ -271,7 +272,6 @@ export default function DashboardNav() {
   function displayLabel(tab: TabItem): string {
     if (
       tab.id === "oportunidades-redes" &&
-      !isAdmin &&
       (hostProduct === "REDES" || products?.articulos?.allowed === false) &&
       (products?.redes?.allowed !== false || products?.redes?.reason === "NO_NETWORK_APPROVED")
     ) {
