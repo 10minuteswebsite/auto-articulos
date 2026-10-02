@@ -1,8 +1,7 @@
 "use client";
 
-import { MENU_NAMES } from "@/lib/menu-names";
 import { useEffect, useState } from "react";
-import { Modulo } from "@/components/ModuleIntro";
+import { MENU_NAMES } from "@/lib/menu-names";
 import MobileInstructions from "@/components/MobileInstructions";
 import { useRouter } from "next/navigation";
 import {
@@ -415,7 +414,7 @@ export default function OportunidadesRedesPage() {
                 Un artículo publicado en tu web solo lo encuentra quien lo busca. En redes sociales lo ve gente que todavía no te estaba buscando, y cada visita que llega desde ahí es una señal más para Google de que tu contenido interesa.
               </p>
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                Aquí el sistema toma artículos que ya publicaste desde <Modulo id="publicar" /> u <Modulo id="oportunidades" />, y prepara la publicación adaptada a cada red: el texto, la imagen y el formato que esa red necesita.
+                Aquí el sistema toma artículos que ya publicaste y prepara la publicación adaptada a cada red: el texto, la imagen y el formato que esa red necesita.
               </p>
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                 Tú revisas cada propuesta y decides cuál sale y a qué red. No se publica todo ni todo el tiempo: el sistema reparte las publicaciones a lo largo de los días para que tu presencia crezca sin parecer spam y sin que las redes te penalicen.
