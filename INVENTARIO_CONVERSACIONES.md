@@ -1880,3 +1880,15 @@ este rango (detalle técnico completo en Coordinación y, para las ya cerradas, 
 between attempts", ya señalado el 2026-10-01 arriba) sigue sin ninguna entrada en Coordinación
 ni en el Controlador — este rango tampoco la trajo. Sigue siendo un hueco abierto para que
 Milton decida.
+
+## Addendum — 2026-10-03 (tarea programada diaria de propagación)
+
+**Parte B — nombre de conversación nuevo encontrado en `COORDINACION_CLAUDE_CODEX.md`** en el
+rango `d907481..origin/main` (detalle técnico completo en Coordinación y en
+`CONTROLADOR_DE_VERSIONES.md`, que ya tiene esta entrada propagada por el propio Milton; no se
+transcribe aquí para no duplicar):
+
+- `CARMEN AGUILAR CONEXION GSC` — 2026-10-02, commits `f5d1b6b2` (comportamiento) y `189379b1`
+  (configuración Vercel), CERRADO Y ARCHIVADO. Sin agente específico citado en la entrada de
+  Coordinación (cerrada directamente por Milton); se registra aquí solo para que el nombre de la
+  conversación quede en el historial.
