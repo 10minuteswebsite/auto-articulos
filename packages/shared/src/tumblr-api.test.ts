@@ -23,12 +23,12 @@ test("solicita y canjea tokens Tumblr con OAuth1", async () => {
       : "oauth_token=access-token&oauth_token_secret=access-secret", { status: 200 });
   }) as typeof fetch;
 
-  const requestToken = await requestTumblrRequestToken("https://redes.lasolucionweb.net/api/search-integrations/tumblr/callback?state=abc", credentials);
+  const requestToken = await requestTumblrRequestToken(credentials);
   const accessToken = await exchangeTumblrAccessToken(requestToken, "verifier", credentials);
 
   assert.deepEqual(requestToken, { oauthToken: "request-token", oauthTokenSecret: "request-secret" });
   assert.deepEqual(accessToken, { oauthToken: "access-token", oauthTokenSecret: "access-secret" });
-  assert.match(String((calls[0].headers as Record<string, string>).Authorization), /oauth_callback/);
+  assert.doesNotMatch(String((calls[0].headers as Record<string, string>).Authorization), /oauth_callback/);
   assert.match(String((calls[0].headers as Record<string, string>).Authorization), /oauth_signature=/);
   assert.equal((calls[0].headers as Record<string, string>)["User-Agent"], "La Solucion IA SEO TOTAL/1.0 (+https://hub.lasolucionweb.net)");
   assert.match(String((calls[1].headers as Record<string, string>).Authorization), /oauth_verifier/);

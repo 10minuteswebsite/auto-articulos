@@ -89,12 +89,11 @@ function requireOAuth1Response(value: string, label: string): TumblrOAuth1Token 
 }
 
 /** Solicita el token temporal OAuth1 que precede a la autorización del usuario. */
-export async function requestTumblrRequestToken(redirectUri: string, credentials: TumblrAppCredentials): Promise<TumblrOAuth1Token> {
-  const body = { oauth_callback: redirectUri };
+export async function requestTumblrRequestToken(credentials: TumblrAppCredentials): Promise<TumblrOAuth1Token> {
   const response = await fetch(TUMBLR_OAUTH1_REQUEST_TOKEN_URL, {
     method: "POST",
     headers: {
-      Authorization: oauthHeader("POST", TUMBLR_OAUTH1_REQUEST_TOKEN_URL, credentials, undefined, body),
+      Authorization: oauthHeader("POST", TUMBLR_OAUTH1_REQUEST_TOKEN_URL, credentials),
       "User-Agent": TUMBLR_USER_AGENT,
     },
   });
