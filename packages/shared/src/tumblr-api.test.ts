@@ -30,8 +30,11 @@ test("solicita y canjea tokens Tumblr con OAuth1", async () => {
   assert.deepEqual(accessToken, { oauthToken: "access-token", oauthTokenSecret: "access-secret" });
   assert.match(String((calls[0].headers as Record<string, string>).Authorization), /oauth_callback/);
   assert.match(String((calls[0].headers as Record<string, string>).Authorization), /oauth_signature=/);
+  assert.equal((calls[0].headers as Record<string, string>)["User-Agent"], "La Solucion IA SEO TOTAL/1.0 (+https://hub.lasolucionweb.net)");
   assert.match(String((calls[1].headers as Record<string, string>).Authorization), /oauth_verifier/);
   assert.match(String((calls[1].headers as Record<string, string>).Authorization), /oauth_token/);
+  assert.equal(calls[1].method, "GET");
+  assert.equal((calls[1].headers as Record<string, string>)["User-Agent"], "La Solucion IA SEO TOTAL/1.0 (+https://hub.lasolucionweb.net)");
 });
 
 test("firma las consultas de blogs y publicaciones con el token OAuth1", async () => {
@@ -48,7 +51,10 @@ test("firma las consultas de blogs y publicaciones con el token OAuth1", async (
   await createTumblrPhotoPost("access-token", "mi-blog", { caption: "Texto", link: "https://example.com", imageUrl: "https://example.com/image.jpg" }, "access-secret", credentials);
 
   assert.deepEqual(blogs, [{ identifier: "mi-blog", title: "Mi blog", url: null }]);
-  for (const call of calls) assert.match(String((call.init?.headers as Record<string, string>).Authorization), /^OAuth /);
+  for (const call of calls) {
+    assert.match(String((call.init?.headers as Record<string, string>).Authorization), /^OAuth /);
+    assert.equal((call.init?.headers as Record<string, string>)["User-Agent"], "La Solucion IA SEO TOTAL/1.0 (+https://hub.lasolucionweb.net)");
+  }
   assert.equal((calls[1].init?.method), "POST");
   assert.match(String((calls[1].init?.body as URLSearchParams).toString()), /type=photo/);
 });

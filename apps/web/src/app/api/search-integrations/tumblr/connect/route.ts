@@ -24,7 +24,11 @@ export async function GET(request: Request) {
     response.cookies.set(TUMBLR_STATE_COOKIE, state, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 });
     response.cookies.set(TUMBLR_REQUEST_TOKEN_COOKIE, encryptSecret(JSON.stringify(requestToken)), { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 });
     return response;
-  } catch {
+  } catch (error) {
+    console.error("Error iniciando Tumblr OAuth1:", {
+      host: new URL(request.url).host,
+      message: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.redirect(new URL("/dashboard/configuracion?tumblr=needs_config", request.url));
   }
 }

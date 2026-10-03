@@ -22,6 +22,8 @@ export interface TumblrOAuth1AccessToken extends TumblrOAuth1Token {}
 const TUMBLR_OAUTH1_REQUEST_TOKEN_URL = "https://www.tumblr.com/oauth/request_token";
 const TUMBLR_OAUTH1_AUTHORIZE_URL = "https://www.tumblr.com/oauth/authorize";
 const TUMBLR_OAUTH1_ACCESS_TOKEN_URL = "https://www.tumblr.com/oauth/access_token";
+// Tumblr exige un User-Agent consistente para todas las llamadas de la API.
+const TUMBLR_USER_AGENT = "La Solucion IA SEO TOTAL/1.0 (+https://hub.lasolucionweb.net)";
 
 function encodeOAuth(value: string): string {
   return encodeURIComponent(value).replace(/[!'()*]/g, (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`);
@@ -91,7 +93,10 @@ export async function requestTumblrRequestToken(redirectUri: string, credentials
   const body = { oauth_callback: redirectUri };
   const response = await fetch(TUMBLR_OAUTH1_REQUEST_TOKEN_URL, {
     method: "POST",
-    headers: { Authorization: oauthHeader("POST", TUMBLR_OAUTH1_REQUEST_TOKEN_URL, credentials, undefined, body) },
+    headers: {
+      Authorization: oauthHeader("POST", TUMBLR_OAUTH1_REQUEST_TOKEN_URL, credentials, undefined, body),
+      "User-Agent": TUMBLR_USER_AGENT,
+    },
   });
   const responseText = await response.text();
   if (!response.ok) throw new Error(`Tumblr no pudo iniciar OAuth1: ${responseText}`);
@@ -110,10 +115,13 @@ export async function exchangeTumblrAccessToken(
   verifier: string,
   credentials: TumblrAppCredentials,
 ): Promise<TumblrOAuth1AccessToken> {
-  const body = { oauth_verifier: verifier };
+  const parameters = { oauth_verifier: verifier };
   const response = await fetch(TUMBLR_OAUTH1_ACCESS_TOKEN_URL, {
-    method: "POST",
-    headers: { Authorization: oauthHeader("POST", TUMBLR_OAUTH1_ACCESS_TOKEN_URL, credentials, requestToken, body) },
+    method: "GET",
+    headers: {
+      Authorization: oauthHeader("GET", TUMBLR_OAUTH1_ACCESS_TOKEN_URL, credentials, requestToken, parameters),
+      "User-Agent": TUMBLR_USER_AGENT,
+    },
   });
   const responseText = await response.text();
   if (!response.ok) throw new Error(`Tumblr no pudo completar OAuth1: ${responseText}`);
@@ -147,8 +155,11 @@ export async function refreshTumblrToken(
 export async function getTumblrBlogs(accessToken: string, accessTokenSecret?: string, credentials?: TumblrAppCredentials) {
   const endpoint = `${TUMBLR_API}/user/info`;
   const headers = accessTokenSecret && credentials
-    ? { Authorization: oauthHeader("GET", endpoint, credentials, { oauthToken: accessToken, oauthTokenSecret: accessTokenSecret }) }
-    : { Authorization: `Bearer ${accessToken}` };
+    ? {
+        Authorization: oauthHeader("GET", endpoint, credentials, { oauthToken: accessToken, oauthTokenSecret: accessTokenSecret }),
+        "User-Agent": TUMBLR_USER_AGENT,
+      }
+    : { Authorization: `Bearer ${accessToken}`, "User-Agent": TUMBLR_USER_AGENT };
   const response = await fetch(endpoint, { headers, cache: "no-store" });
   if (!response.ok) throw new Error(`No se pudieron obtener los blogs de Tumblr: ${await response.text()}`);
   const json = await response.json() as { response?: { user?: { blogs?: Array<{ name: string; title?: string; url?: string }> } } };
@@ -183,10 +194,12 @@ export async function createTumblrPhotoPost(
   const headers = accessTokenSecret && credentials
     ? {
         Authorization: oauthHeader("POST", endpoint, credentials, { oauthToken: accessToken, oauthTokenSecret: accessTokenSecret }, {}, Object.fromEntries(body.entries())),
+        "User-Agent": TUMBLR_USER_AGENT,
         "Content-Type": "application/x-www-form-urlencoded",
       }
     : {
         Authorization: `Bearer ${accessToken}`,
+        "User-Agent": TUMBLR_USER_AGENT,
         "Content-Type": "application/x-www-form-urlencoded",
       };
   const response = await fetch(endpoint, {
