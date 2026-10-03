@@ -37,6 +37,7 @@ export async function GET() {
     linkedinIntegration,
     pinterestIntegration,
     tumblrIntegration,
+    blueskyIntegration,
     devToIntegration,
     bloggerIntegration,
   ] = await Promise.all([
@@ -65,6 +66,7 @@ export async function GET() {
         excludedTopics: true,
         allowPinterestPublishing: true,
         allowTumblrPublishing: true,
+        allowBlueskyPublishing: true,
         allowDevToPublishing: true,
         allowBloggerPublishing: true,
       },
@@ -111,6 +113,10 @@ export async function GET() {
     prisma.tumblrIntegration.findUnique({
       where: { userId },
       select: { expiresAt: true, blogSelectionPending: true },
+    }),
+    prisma.blueskyIntegration.findUnique({
+      where: { userId },
+      select: { handle: true },
     }),
     prisma.devToIntegration.findUnique({
       where: { userId },
@@ -276,6 +282,16 @@ export async function GET() {
       description: "Publica automáticamente tus artículos con imagen, texto y enlace en Tumblr.",
       actionUrl: "/dashboard/configuracion?tab=social",
       actionLabel: "Conectar Tumblr",
+    },
+    {
+      id: "bluesky",
+      label: "Bluesky",
+      configured: Boolean((user?.role === "admin" || user?.allowBlueskyPublishing) && blueskyIntegration?.handle),
+      required: false,
+      section: "social",
+      description: "Publica automáticamente tus artículos en Bluesky.",
+      actionUrl: "/dashboard/configuracion?tab=social",
+      actionLabel: "Conectar Bluesky",
     },
     {
       id: "devto",
