@@ -6,6 +6,7 @@ import { encryptSecret } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { GOOGLE_STATE_COOKIE, googleOAuthConfig } from "@/lib/google-oauth";
 import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
@@ -18,9 +19,7 @@ export async function GET(request: NextRequest) {
     state !== cookieStore.get(GOOGLE_STATE_COOKIE)?.value ||
     !code
   ) {
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("google-search-console", "error"), oauthReturnBase(request)),
-    );
+    return oauthErrorRedirect(request, connectionReturnPath("google-search-console", "error"), [GOOGLE_STATE_COOKIE]);
   }
   try {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
@@ -62,8 +61,6 @@ export async function GET(request: NextRequest) {
     clearOAuthOrigin(response);
     return response;
   } catch {
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("google-search-console", "error"), oauthReturnBase(request)),
-    );
+    return oauthErrorRedirect(request, connectionReturnPath("google-search-console", "error"), [GOOGLE_STATE_COOKIE]);
   }
 }

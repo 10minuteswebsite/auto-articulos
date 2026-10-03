@@ -5,6 +5,7 @@ import { encryptSecret, formatBingTokenPayload } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { BING_STATE_COOKIE, bingOAuthConfig } from "@/lib/bing-oauth";
 import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
     back.searchParams.set("bing", "error");
     back.searchParams.set("motivo", "estado");
     back.searchParams.set("detalle", motivoEstado.slice(0, 200));
-    return NextResponse.redirect(back);
+    return oauthErrorRedirect(request, "/dashboard/configuracion/conexiones?conexion=bing-webmaster", [BING_STATE_COOKIE]);
   }
   // El error real de Bing solo iba a `console.error`, y los logs de Vercel
   // rotan en minutos: en la práctica nunca se llegaba a leer y había que
@@ -100,6 +101,6 @@ export async function GET(request: NextRequest) {
     destino.searchParams.set("bing", "error");
     destino.searchParams.set("motivo", "token");
     destino.searchParams.set("detalle", detalle.slice(0, 200));
-    return NextResponse.redirect(destino);
+    return oauthErrorRedirect(request, "/dashboard/configuracion/conexiones?conexion=bing-webmaster", [BING_STATE_COOKIE]);
   }
 }

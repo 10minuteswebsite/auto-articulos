@@ -8,13 +8,14 @@ import { bloggerOAuthConfig } from "@/lib/blogger-oauth";
 import { BLOGGER_STATE_COOKIE } from "../connect/constants";
 import { clearCookie } from "@/lib/shared-cookies";
 import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
   const cookieStore = await cookies();
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
-  if (!state || state !== cookieStore.get(BLOGGER_STATE_COOKIE)?.value || !code) return NextResponse.redirect(new URL(connectionReturnPath("blogger", "error"), oauthReturnBase(request)));
+  if (!state || state !== cookieStore.get(BLOGGER_STATE_COOKIE)?.value || !code) return oauthErrorRedirect(request, connectionReturnPath("blogger", "error"), [BLOGGER_STATE_COOKIE]);
   try {
     const { clientId, clientSecret } = await bloggerOAuthConfig();
     const redirectUri = oauthCallbackUri(request, "/api/search-integrations/blogger/callback");
@@ -29,6 +30,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Error en Blogger OAuth callback:", error);
-    return NextResponse.redirect(new URL(connectionReturnPath("blogger", "error"), oauthReturnBase(request)));
+    return oauthErrorRedirect(request, connectionReturnPath("blogger", "error"), [BLOGGER_STATE_COOKIE]);
   }
 }
