@@ -51,7 +51,7 @@ on:
       hub_base_url:
         description: "Endpoint del Hub para la sincronización"
         required: false
-        default: "https://staging-hub.lasolucionweb.net"
+        default: "https://hub.lasolucionweb.net"
       sync_email:
         description: "Opcional: sincronizar únicamente este correo para diagnóstico o reintento"
         required: false
@@ -74,7 +74,7 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DATABASE_URL }}
-      HUB_BASE_URL: ${{ inputs.hub_base_url || 'https://staging-hub.lasolucionweb.net' }}
+      HUB_BASE_URL: ${{ inputs.hub_base_url || 'https://hub.lasolucionweb.net' }}
       AUTO_ARTICULOS_HUB_CLIENT_ID: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_ID }}
       AUTO_ARTICULOS_HUB_CLIENT_SECRET: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_SECRET }}
       HUB_SYNC_EMAIL: ${{ inputs.sync_email }}

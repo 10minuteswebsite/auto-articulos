@@ -21,10 +21,15 @@ Las altas, cambios de perfil, roles y estado llaman al endpoint protegido del
 Hub. Si el Hub no responde, el usuario local no se pierde: queda registrado el
 intento y el error, y el workflow `sync-hub-users` reintenta la reconciliación.
 
-Durante la migración se importan todas las cuentas. Solo las cuentas con
-`trialUnlocked=true` reciben el entitlement gratuito de SEO Total; las demás
-permanecen visibles en el Hub sin acceso al producto. El login actual sigue
-activo hasta una orden manual posterior al lanzamiento.
+Durante la migración se importaron todas las cuentas. Las 104 cuentas ya
+migradas reciben los entitlements gratuitos iniciales de Auto Artículos y
+Redes Totales. Las cuentas nuevas se sincronizan como identidades conocidas,
+pero su acceso comercial lo decide el Hub. El login actual sigue activo hasta
+una orden manual posterior al lanzamiento.
+
+La sincronización automática se ejecuta cada diez minutos y apunta al Hub de
+producción. El destino de staging solo se utiliza cuando se selecciona
+explícitamente en una ejecución manual.
 
 Los cambios de correo se resuelven por el identificador local estable y
 actualizan el correo en el Hub sin crear una segunda cuenta.

@@ -43,6 +43,13 @@ const NO_CACHE_HEADERS = {
   "Surrogate-Control": "no-store",
 };
 
+function hubProductSlugForHost(hostname: string) {
+  const host = hostname.toLowerCase();
+  return host === "redes.lasolucionweb.net" || host === "redes.lasolucionweb.com"
+    ? "auto-redes"
+    : "seo-total";
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -87,6 +94,7 @@ export async function middleware(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", userId);
+  requestHeaders.set("x-hub-product-slug", hubProductSlugForHost(request.nextUrl.hostname));
 
   const impersonationToken = request.cookies.get(IMPERSONATION_COOKIE)?.value;
   const impersonation = await verifyImpersonationToken(impersonationToken);

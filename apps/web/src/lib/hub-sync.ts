@@ -11,6 +11,8 @@ type HubSyncResult = {
   product_access: boolean;
 };
 
+export type HubProductSlug = "seo-total" | "auto-redes";
+
 function getHubConfig() {
   const baseUrl = (process.env.HUB_BASE_URL || DEFAULT_HUB_URL).replace(/\/$/, "");
   const clientId = process.env.AUTO_ARTICULOS_HUB_CLIENT_ID;
@@ -24,7 +26,7 @@ function getHubConfig() {
  * window a temporary Hub outage fails open so Auto Artículos is not taken down;
  * a successful negative response is enforced locally on the next request.
  */
-export async function refreshHubAccessForUser(userId: string) {
+export async function refreshHubAccessForUser(userId: string, appSlug: HubProductSlug = "seo-total") {
   const config = getHubConfig();
   if (!config) return;
 
@@ -34,7 +36,8 @@ export async function refreshHubAccessForUser(userId: string) {
   });
   if (!user?.hubUserId) return;
 
-  const cached = accessCache.get(userId);
+  const cacheKey = `${userId}:${appSlug}`;
+  const cached = accessCache.get(cacheKey);
   let allowed: boolean;
   if (cached && cached.expiresAt > Date.now()) {
     allowed = cached.allowed;
@@ -46,7 +49,7 @@ export async function refreshHubAccessForUser(userId: string) {
         "x-platform-client-id": config.clientId,
         Authorization: `Bearer ${config.clientSecret}`,
       },
-      body: JSON.stringify({ hub_user_id: user.hubUserId }),
+      body: JSON.stringify({ hub_user_id: user.hubUserId, app: appSlug }),
       cache: "no-store",
     });
     const payload = (await response.json().catch(() => ({}))) as { allowed?: unknown; error?: string };
@@ -54,7 +57,7 @@ export async function refreshHubAccessForUser(userId: string) {
       throw new Error(payload.error || `Hub respondió ${response.status} al verificar acceso.`);
     }
     allowed = payload.allowed;
-    accessCache.set(userId, { allowed, expiresAt: Date.now() + ACCESS_CACHE_MS });
+    accessCache.set(cacheKey, { allowed, expiresAt: Date.now() + ACCESS_CACHE_MS });
   }
 
   if (allowed) {
