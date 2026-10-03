@@ -10812,3 +10812,46 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Validaciones: typecheck web OK, build Vercel OK, Prisma generado, sin schema ni migraciones.
 - Producción verificada: deployment `dpl_vMF5BV3DBZagVoEj3VCorCbFmMRD` en estado READY; `https://seototal.lasolucionweb.com/login` HTTP 200.
 - Estado: **CERRADO Y ARCHIVADO**. Pendiente únicamente que Carmen reconecte con la cuenta de Google correcta.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-03
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-02
+(commit `d907481`). Se revisó el rango `d907481..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: 7 líneas agregadas (0 eliminadas, confirmado con `git diff
+--stat`), 1 entrada nueva: el cierre y archivo del incidente CARMEN AGUILAR CONEXION GSC
+(commit `93890db`, que en el mismo commit ya propagó una entrada equivalente a
+`CONTROLADOR_DE_VERSIONES.md` y a `HANDOFF.md`).
+
+Se revisaron los commits reales de la corrección (`f5d1b6b2` "fix: do not label incomplete
+GSC as connected" sobre `ComposioConnect.tsx`, y `189379b1` de configuración de Vercel) para
+confirmar el texto exacto mostrado al usuario, ya que la entrada de Coordinación resume el
+comportamiento sin citar las etiquetas literales de la interfaz.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: sin cambios — la entrada ya fue agregada por Milton en el
+  propio commit `93890db`, no se duplicó.
+- `apps/web/src/content/manual-usuario.ts`: nota nueva en la sección de Conexiones (debajo de
+  la actualización del 2026-10-01) explicando que, cuando Search Console, Analytics, Facebook
+  o Instagram por Composio no devuelven ninguna propiedad/Página/cuenta utilizable, la tarjeta
+  ahora dice «No conectada · sin propiedades disponibles» (antes decía, de forma engañosa,
+  «Conectada · sin propiedades disponibles»), y que una autorización activa sin selección dice
+  «Configuración incompleta · falta elegir» (antes «Conectada · falta elegir»). El bot de ayuda
+  dependía de este texto para no confundir "conectada" con "lista para usar".
+- `INVENTARIO_CONVERSACIONES.md`: addendum en Parte B con el nombre de la conversación
+  `CARMEN AGUILAR CONEXION GSC` (cerrada, sin agente específico citado en la entrada de
+  Coordinación). Parte A sin cambios — no hay ninguna reserva de archivo/rama nueva mencionada
+  en este rango.
+- `TO-DO.md`: sin cambios — ninguna idea suelta nueva sin ejecutar en este rango.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — no se encontró ninguna mención nueva a
+  árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado.
+
+La duda sin resolver sobre el commit `7474bd7` (sin registro en Coordinación ni en el
+Controlador, señalada desde el 2026-10-01) sigue abierta; este rango no trajo ninguna
+novedad al respecto, así que no se repite de nuevo aquí para no sumar ruido — sigue vigente
+donde ya está anotada (entradas del 2026-10-01 y 2026-10-02 de este mismo documento,
+`CONTROLADOR_DE_VERSIONES.md` e `INVENTARIO_CONVERSACIONES.md`).
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
