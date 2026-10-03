@@ -498,6 +498,20 @@ sobre esa propiedad. En ese caso la descripción del aviso incluye el motivo
 exacto que devolvió Google, y desaparece sola en cuanto se reconecta esa
 propiedad desde Conexiones.
 
+Actualización (2026-10-02): en Conexiones, cuando conectas Search Console,
+Analytics, Facebook o Instagram por Composio y la cuenta de Google o Meta no
+devuelve ninguna propiedad, Página o cuenta utilizable, la tarjeta ya no dice
+«Conectada · sin propiedades disponibles» (eso daba a entender que sí estaba
+conectada cuando en realidad no se podía usar). Ahora dice **«No conectada ·
+sin propiedades disponibles»**. De la misma forma, si la autorización quedó
+activa pero todavía no elegiste cuál propiedad, Página o cuenta usar, ya no
+dice «Conectada · falta elegir»: dice **«Configuración incompleta · falta
+elegir»**, y el texto de ayuda aclara que la autorización quedó incompleta
+porque todavía no hay una propiedad, Página o cuenta disponible para SEO
+TOTAL. En ambos casos la solución es la misma: revisa que la cuenta de
+Google o Meta que usaste tenga permiso sobre el sitio/Página que necesitas,
+o pulsa **Nueva conexión** para reconectar con la cuenta correcta.
+
 ## Problemas frecuentes
 
 ### No puedo publicar
