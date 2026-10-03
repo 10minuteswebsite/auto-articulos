@@ -110,7 +110,7 @@ export async function GET() {
     }),
     prisma.tumblrIntegration.findUnique({
       where: { userId },
-      select: { expiresAt: true },
+      select: { expiresAt: true, blogSelectionPending: true },
     }),
     prisma.devToIntegration.findUnique({
       where: { userId },
@@ -270,7 +270,7 @@ export async function GET() {
     {
       id: "tumblr",
       label: "Tumblr",
-      configured: Boolean((user?.role === "admin" || user?.allowTumblrPublishing) && tumblrIntegration && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
+      configured: Boolean((user?.role === "admin" || user?.allowTumblrPublishing) && tumblrIntegration && !tumblrIntegration.blogSelectionPending && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos con imagen, texto y enlace en Tumblr.",

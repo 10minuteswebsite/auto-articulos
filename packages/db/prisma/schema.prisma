@@ -423,8 +423,10 @@ model TumblrIntegration {
   blogIdentifier        String
   blogTitle             String?
   accessTokenEncrypted  String
+  accessTokenSecretEncrypted String?
   refreshTokenEncrypted String?
   expiresAt             DateTime?
+  blogSelectionPending  Boolean   @default(false)
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 

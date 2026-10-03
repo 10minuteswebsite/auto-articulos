@@ -38,6 +38,8 @@ export interface OAuthNetworkConfig {
     savedIdKey: string;
     savedNameKey: string;
     patchKey: string;
+    /** Campo que indica que la autorización terminó pero falta aprobar el destino. */
+    pendingKey?: string;
     /** Nota bajo el título al elegir (igual que en Search Console y Analytics). */
     note: string;
   };
@@ -69,7 +71,7 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
       setSettings(settingsRes.ok ? await settingsRes.json() : { configured: false });
       const next = connectionRes.ok ? await connectionRes.json() : { connected: false };
       setConnection(next);
-      if (config.destination) setSelected(next[config.destination.savedIdKey] || "");
+      if (config.destination) setSelected(config.destination.pendingKey && next[config.destination.pendingKey] ? "" : next[config.destination.savedIdKey] || "");
     } catch {
       setSettings({ configured: false });
       setConnection({ connected: false });
@@ -174,7 +176,7 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
     : [];
   const account: string | null = config.accountKey && connection?.[config.accountKey] ? `${config.accountPrefix ?? ""}${String(connection[config.accountKey])}` : null;
   const pickedOption = options.find((option) => option.id === selected);
-  const pendingDestination = Boolean(dest) && connected && !expired && !savedDestId;
+  const pendingDestination = Boolean(dest) && connected && !expired && Boolean(dest?.pendingKey ? connection?.[dest.pendingKey] : !savedDestId);
   const state: ConnectionState = savedName ? "success" : !connected ? "disconnected" : expired ? "expired" : pendingDestination ? "pending" : "connected";
   const guide = CONNECTION_GUIDES[config.id];
   const connectLink = (

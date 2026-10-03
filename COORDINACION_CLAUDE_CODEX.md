@@ -10739,3 +10739,8 @@ tarea.
 
 Responsable: Codex. Estado: listo para revisión/PR y prueba controlada en
 producción después de aplicar la migración.
+
+## Tumblr OAuth1 — 2026-10-03
+
+- **Capitanía liberada:** Codex aplicó idempotentemente en producción las columnas de OAuth1 de Tumblr y el registro de actualización durante el despliegue `dpl_Hvj2XAKoYZ6wHAa83XZ8oAXcvvAL`.
+- No se forzó el historial de migraciones antiguas porque la base contiene estructuras creadas manualmente y Prisma reporta migraciones históricas fallidas.

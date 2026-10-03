@@ -804,6 +804,7 @@ async function processTumblrJob(job: {
 }): Promise<boolean> {
   const integration = await prisma.tumblrIntegration.findUnique({ where: { userId: job.userId } });
   if (!integration) throw new Error("Tumblr no está configurado en tu cuenta.");
+  if (integration.blogSelectionPending) throw new Error("Selecciona y aprueba el blog de Tumblr antes de publicar.");
 
   // A diferencia de Threads, Tumblr nunca se renovaba en el worker — solo al
   // cargar la página de Configuración (visita manual). Si el usuario no
@@ -813,6 +814,19 @@ async function processTumblrJob(job: {
   // desconecta sola". Mismo patrón de renovación proactiva que ya usa
   // Threads (processThreadsJob).
   let accessToken = decryptSecret(integration.accessTokenEncrypted);
+  let accessTokenSecret: string | undefined;
+  let tumblrCredentials: { clientId: string; clientSecret: string } | undefined;
+  if (integration.accessTokenSecretEncrypted) {
+    accessTokenSecret = decryptSecret(integration.accessTokenSecretEncrypted);
+    const [idSetting, secretSetting] = await Promise.all([
+      prisma.systemSetting.findUnique({ where: { key: "tumblr_client_id" } }),
+      prisma.systemSetting.findUnique({ where: { key: "tumblr_client_secret" } }),
+    ]);
+    const clientId = idSetting ? decryptSecret(idSetting.encryptedValue) : process.env.TUMBLR_CLIENT_ID;
+    const clientSecret = secretSetting ? decryptSecret(secretSetting.encryptedValue) : process.env.TUMBLR_CLIENT_SECRET;
+    if (!clientId || !clientSecret) throw new Error("Tumblr no está configurado (Consumer Key/Secret).");
+    tumblrCredentials = { clientId, clientSecret };
+  }
   const daysUntilExpiration = integration.expiresAt
     ? (integration.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     : Infinity;
@@ -856,7 +870,7 @@ async function processTumblrJob(job: {
   const caption = job.suggestedText.includes("[ENLACE]") ? job.suggestedText.replace("[ENLACE]", "") : job.suggestedText;
   let result;
   try {
-    result = await createTumblrPhotoPost(accessToken, integration.blogIdentifier, { caption, link: job.articleUrl, imageUrl });
+    result = await createTumblrPhotoPost(accessToken, integration.blogIdentifier, { caption, link: job.articleUrl, imageUrl }, accessTokenSecret, tumblrCredentials);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     const sourceLabel = imageResult.source === "blob" ? "re-alojada en Blob" : `enlace directo del artículo${"fallbackReason" in imageResult && imageResult.fallbackReason ? ` — no se pudo re-alojar: ${imageResult.fallbackReason}` : ""}`;
