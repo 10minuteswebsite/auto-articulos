@@ -47,6 +47,18 @@ Las tres pasadas reprodujeron los mismos resultados. No se pulsó el botón Día
 4. Repetir las tres pasadas en ambos hosts: encabezado, inicio, menú, configuración, conexiones, historial, progreso, actualizaciones, “Cómo funciona” y rutas directas.
 5. No cerrar el ciclo hasta que las tres pasadas no tengan ningún hallazgo reproducible.
 
-## Resultado de esta auditoría
+## Resultado de la auditoría previa
 
-Resultado: **12 hallazgos reproducibles; 0 pasadas limpias**. No es seguro declarar la separación terminada mientras los subdominios sigan sirviendo el artefacto observado.
+Resultado previo: **12 hallazgos reproducibles; 0 pasadas limpias**. Esos hallazgos correspondían al artefacto antiguo que servía producción desde la rama `codex/hub-seo-total-migration`, no al código actual de `main`.
+
+## Validación posterior al despliegue correcto de `main`
+
+Se publicó el `main` actual en el proyecto de Vercel que realmente tiene los dominios (`auto-articulos-web`). Después se repitió la misma revisión visual tres veces, sin tocar Día Cero, variables, Supabase ni datos:
+
+- **Redes:** 22 rutas revisadas en cada pasada. El encabezado es `SEO TOTAL REDES`; el Inicio muestra únicamente `01 PUBLICA EN REDES SOCIALES Y EN BLOGS PÚBLICOS`; el menú solo ofrece publicación social, historial, progreso y configuración de Redes; Conexiones muestra solo Difusión; las rutas de Artículos redirigen al espacio de Redes.
+- **Artículos:** 22 rutas revisadas en cada pasada. El encabezado es `SEO TOTAL ARTÍCULOS`; el Inicio muestra únicamente `01 CONTENIDO PROPIO` y `02 CONTENIDO GENERADO POR IA`; el menú solo ofrece esas dos opciones editoriales, historial, estadísticas, progreso y configuración de Artículos; Conexiones muestra solo Analíticas; las rutas de Redes redirigen al espacio de Artículos.
+- **Visual:** la tarjeta única de Redes y las dos tarjetas de Artículos mantienen el formato cuadrado previsto; los números se reinician dentro de cada producto.
+- **Rutas y menús:** las tres pasadas terminaron sin encabezados, enlaces, módulos ni submódulos del producto contrario.
+- **Salud externa:** estado de Vercel `success`; `bash scripts/smoke-production.sh` terminó `Smoke test OK`; `seototal.lasolucionweb.com/login`, `articulos.lasolucionweb.com/login` y `redes.lasolucionweb.com/login` respondieron `200`.
+
+Resultado final de la validación: **3 pasadas limpias, 0 hallazgos nuevos que reparar**. No se abrió un PR de código adicional porque el código de separación ya estaba en `main`; el problema confirmado era el despliegue del proyecto equivocado.
