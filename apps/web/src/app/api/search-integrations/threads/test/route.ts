@@ -4,6 +4,7 @@ import { decryptSecret, getThreadsProfile } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { canPublishToNetwork } from "@/lib/social-access";
 import { NOT_CONNECTED, runConnectionTest } from "@/lib/connection-test-route";
+import { verifyPostPeerSocialConnection } from "@/lib/postpeer";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,16 @@ export async function POST() {
   const userId = await getCurrentUserId();
   if (!(await canPublishToNetwork(userId, "threads"))) {
     return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
+  }
+  const postPeer = await prisma.postPeerSocialConnection.findUnique({
+    where: { userId_platform: { userId, platform: "threads" } },
+    select: { status: true, accountName: true },
+  });
+  if (postPeer?.status === "ACTIVE") {
+    return runConnectionTest("threads", async () => {
+      if (!(await verifyPostPeerSocialConnection(userId, "threads"))) throw new Error("connection_not_found");
+      return postPeer.accountName ? `@${postPeer.accountName.replace(/^@/, "")}` : null;
+    });
   }
   const integration = await prisma.threadsIntegration.findUnique({ where: { userId } });
   if (!integration) return NextResponse.json({ error: NOT_CONNECTED }, { status: 400 });
