@@ -148,7 +148,11 @@ export default function ConexionesView() {
           };
           for (const connection of body.connections ?? []) {
             const id = composioIds[connection.app];
-            if (id) next[id] = connection.status === "ACTIVE";
+            // Una conexión directa ya verificada no puede quedar marcada como
+            // desconectada porque la vía alternativa de Composio esté inactiva.
+            // Esto ocurre con Meta: Instagram/Facebook pueden estar conectados
+            // por OAuth propio mientras Composio no tiene una cuenta activa.
+            if (id) next[id] = next[id] || connection.status === "ACTIVE";
           }
         }
         setConfiguradas(next);
