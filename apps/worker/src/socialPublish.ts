@@ -999,6 +999,28 @@ async function processBloggerJob(job: { id: string; userId: string; titleId: str
 async function processFacebookPageJob(job: {
   id: string; userId: string; titleId: string | null; articleUrl: string; articleTitle: string; suggestedText: string;
 }): Promise<boolean> {
+  const integration = await prisma.facebookPageIntegration.findUnique({ where: { userId: job.userId } });
+  if (integration) {
+    if (integration.expiresAt <= new Date()) throw new Error("La autorización de Facebook Pages expiró. Vuelve a conectar Meta en Configuración.");
+
+    await validateArticleUrl(job.articleUrl);
+    // Keep the complete URL in the Page post. Facebook auto-links a bare URL
+    // in the post body; the safe builder prevents an overlong AI caption from
+    // cutting that URL in half.
+    const finalPost = buildSafeCaption(job.suggestedText, job.articleUrl, { maxChars: 63206 });
+    const articleImage = await getArticleOpenGraphImage(job.articleUrl);
+    const imageUrl = articleImage ? await normalizeSocialImage(articleImage, 4 / 3) : undefined;
+    const result = await publishFacebookPagePost(
+      decryptSecret(integration.accessTokenEncrypted), integration.facebookPageId, finalPost, imageUrl,
+    );
+
+    await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId: result.permalink || result.postId, publishedAt: new Date(), errorLog: null } });
+    if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Facebook Page (${integration.facebookPageName || integration.facebookPageId}) - ID: ${result.postId}${imageUrl ? " (con imagen del artículo)" : ""}` } });
+    return true;
+  }
+
+  // Compatibilidad: las cuentas que todavía no han migrado a Meta directo
+  // siguen funcionando mediante la conexión histórica de Composio.
   const composio = await getComposioSocialAccount(job.userId, "facebook");
   if (composio?.pageId) {
     await validateArticleUrl(job.articleUrl);
@@ -1011,24 +1033,7 @@ async function processFacebookPageJob(job: {
     if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Facebook Page mediante la conexión alternativa${composio.pageName ? ` (${composio.pageName})` : ""}${postId ? ` - ID: ${postId}` : ""}` } });
     return true;
   }
-  const integration = await prisma.facebookPageIntegration.findUnique({ where: { userId: job.userId } });
-  if (!integration) throw new Error("Facebook Pages no está configurado en tu cuenta.");
-  if (integration.expiresAt <= new Date()) throw new Error("La autorización de Facebook Pages expiró. Vuelve a conectar Meta en Configuración.");
-
-  await validateArticleUrl(job.articleUrl);
-  // Keep the complete URL in the Page post. Facebook auto-links a bare URL
-  // in the post body; the safe builder prevents an overlong AI caption from
-  // cutting that URL in half.
-  const finalPost = buildSafeCaption(job.suggestedText, job.articleUrl, { maxChars: 63206 });
-  const articleImage = await getArticleOpenGraphImage(job.articleUrl);
-  const imageUrl = articleImage ? await normalizeSocialImage(articleImage, 4 / 3) : undefined;
-  const result = await publishFacebookPagePost(
-    decryptSecret(integration.accessTokenEncrypted), integration.facebookPageId, finalPost, imageUrl,
-  );
-
-  await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId: result.permalink || result.postId, publishedAt: new Date(), errorLog: null } });
-  if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Facebook Page (${integration.facebookPageName || integration.facebookPageId}) - ID: ${result.postId}${imageUrl ? " (con imagen del artículo)" : ""}` } });
-  return true;
+  throw new Error("Facebook Pages no está configurado en tu cuenta.");
 }
 
 /**
@@ -1151,8 +1156,15 @@ async function processInstagramJob(job: {
   suggestedText: string;
   platform: string;
 }): Promise<boolean> {
-  const composio = await getComposioSocialAccount(job.userId, "instagram");
-  if (composio?.igAccountId && job.platform === "instagram-post") {
+  // Meta es la ruta principal. Composio solo queda como compatibilidad para
+  // cuentas antiguas que todavía no han vuelto a autorizar Instagram por Meta.
+  const integration = await prisma.instagramIntegration.findUnique({
+    where: { userId: job.userId },
+  });
+
+  if (!integration) {
+    const composio = await getComposioSocialAccount(job.userId, "instagram");
+    if (composio?.igAccountId && job.platform === "instagram-post") {
     await validateArticleUrl(job.articleUrl);
     const sourceImage = await getArticleOpenGraphImage(job.articleUrl);
     const imageUrl = sourceImage ? await normalizeSocialImage(sourceImage, 4 / 5) : null;
@@ -1165,10 +1177,8 @@ async function processInstagramJob(job: {
     await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId, publishedAt: new Date(), errorLog: null, imageUrl } });
     if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Instagram mediante la conexión alternativa${composio.username ? ` (@${composio.username})` : ""}${postId ? ` - ID: ${postId}` : ""}` } });
     return true;
+    }
   }
-  const integration = await prisma.instagramIntegration.findUnique({
-    where: { userId: job.userId },
-  });
 
   if (!integration) {
     throw new Error("Instagram no está configurado en tu cuenta.");

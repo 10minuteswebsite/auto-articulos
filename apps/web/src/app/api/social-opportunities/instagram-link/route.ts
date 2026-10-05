@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
-import { composioInstagramPermalink } from "@auto-articulos/shared";
+import { decryptSecret, getInstagramPermalink, composioInstagramPermalink } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredComposioApiKey } from "@/lib/composio";
 
@@ -17,6 +17,18 @@ export async function POST(request: NextRequest) {
   const opp = await prisma.socialOpportunity.findFirst({ where: { id: body.id, userId, status: "published" }, select: { id: true, platform: true, postId: true } });
   if (!opp || !opp.platform.startsWith("instagram") || !opp.postId) return NextResponse.json({ error: "No se encontró esa publicación." }, { status: 404 });
   if (/^https?:\/\//i.test(opp.postId)) return NextResponse.json({ url: opp.postId });
+  const instagram = await prisma.instagramIntegration.findUnique({
+    where: { userId },
+    select: { accessTokenEncrypted: true, expiresAt: true },
+  });
+  if (instagram && instagram.expiresAt > new Date()) {
+    const url = await getInstagramPermalink(decryptSecret(instagram.accessTokenEncrypted), opp.postId);
+    if (url) {
+      await prisma.socialOpportunity.update({ where: { id: opp.id }, data: { postId: url } });
+      return NextResponse.json({ url });
+    }
+  }
+
   const [connection, apiKey] = await Promise.all([
     prisma.composioConnection.findFirst({ where: { userId, app: "instagram", status: "ACTIVE" }, orderBy: { updatedAt: "desc" }, select: { connectedAccountId: true } }),
     getStoredComposioApiKey(),

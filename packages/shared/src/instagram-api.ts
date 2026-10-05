@@ -26,6 +26,24 @@ export interface InstagramPublishResult {
   permalink?: string;
 }
 
+/** Obtiene el enlace público de una publicación usando la conexión Meta. */
+export async function getInstagramPermalink(
+  accessToken: string,
+  mediaId: string,
+): Promise<string | null> {
+  const params = new URLSearchParams({
+    fields: "permalink",
+    access_token: accessToken,
+  });
+  const response = await fetch(`${GRAPH_API_URL}/${encodeURIComponent(mediaId)}?${params.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+  if (!response.ok) return null;
+  const data = (await response.json()) as { permalink?: unknown };
+  return typeof data.permalink === "string" && data.permalink ? data.permalink : null;
+}
+
 /**
  * Obtiene las credenciales de la aplicación de Instagram (App ID y App Secret).
  */

@@ -27,7 +27,6 @@ export async function GET() {
     ]);
     const composioApps = new Set(composioConnections.map((connection) => connection.app));
     const history = opportunities.filter((opportunity) => {
-      if (opportunity.platform === "instagram-story" && composioApps.has("instagram")) return false;
       if (opportunity.platform === "facebook-story" && composioApps.has("facebook")) return false;
       return true;
     }).map((opportunity) => {

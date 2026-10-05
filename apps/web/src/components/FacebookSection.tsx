@@ -1,16 +1,22 @@
 "use client";
 
-import { sectionStyle, h2Style } from "./dashboard-ui";
-import ComposioConnect from "./ComposioConnect";
+import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSection";
+
+const FACEBOOK: OAuthNetworkConfig = {
+  id: "facebook-pages",
+  title: "Facebook",
+  lead: "En este sitio conectas la Página de Facebook que administras para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes.",
+  note: "Autorizas directamente en Meta. SEO TOTAL no ve tu contraseña y publica mediante la API de Páginas de Facebook.",
+  accountKey: "facebookPageName",
+  admin: {
+    title: "Credenciales de la aplicación Meta",
+    help: "App ID y App Secret de la aplicación Meta que tiene habilitado Facebook Pages API.",
+    idLabel: "App ID",
+    secretLabel: "App Secret",
+    keys: { shown: "appId", raw: "rawAppId", bodyId: "appId", bodySecret: "appSecret" },
+  },
+};
 
 export default function FacebookSection() {
-  return (
-    <section style={sectionStyle}>
-      <h2 style={h2Style}>Facebook</h2>
-      <p className="lead-copy" style={{ margin: "0 0 16px 0" }}>
-        En este sitio conectas tu cuenta de Facebook para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes en la Página que elijas. Sigue las instrucciones para configurarla paso a paso.
-      </p>
-      <ComposioConnect inline apps={["facebook"]} />
-    </section>
-  );
+  return <OAuthNetworkSection config={FACEBOOK} />;
 }
