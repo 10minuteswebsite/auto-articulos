@@ -146,7 +146,9 @@ export default function ConexionesView() {
         // directa: este listado solo refleja Composio para estas dos redes.
         for (const id of COMPOSIO_PRIMARY_CONNECTIONS) next[id] = false;
         if (composioResponse.ok) {
-          const body = (await composioResponse.json()) as { connections?: Array<{ app: string; status: string }> };
+          const body = (await composioResponse.json()) as {
+            connections?: Array<{ app: string; status: string; selection?: string | null }>;
+          };
           const composioIds: Record<string, string> = {
             google_search_console: "google-search-console",
             google_analytics: "google-analytics",
@@ -161,7 +163,9 @@ export default function ConexionesView() {
             // hacemos OR con la integración Meta directa: eso ocultaba la
             // regresión mostrando ✓ aunque Composio no estuviera conectado.
             if (COMPOSIO_PRIMARY_CONNECTIONS.has(id)) {
-              next[id] = connection.status === "ACTIVE";
+              // El check solo es válido cuando Composio tiene una conexión
+              // activa y el usuario ya eligió la Página/cuenta de destino.
+              next[id] = connection.status === "ACTIVE" && Boolean(connection.selection);
             } else {
               next[id] = next[id] || connection.status === "ACTIVE";
             }
