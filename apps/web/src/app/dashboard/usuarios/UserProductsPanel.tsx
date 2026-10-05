@@ -158,9 +158,8 @@ export default function UserProductsPanel({ userId }: { userId: string }) {
     if (row?.status === "INACTIVE") state = "Sin acceso";
     if (inGrace) {
       // Los días se calculan desde la FECHA de la gracia, no desde el resultado
-      // de acceso: ese resultado no trae días cuando otra regla (por ejemplo
-      // «sin redes aprobadas» en Redes) deniega el acceso aunque la gracia siga
-      // vigente, y la pantalla decía «vencida» por error.
+      // de acceso: así el estado mostrado siempre refleja la fecha guardada,
+      // incluso si una cuenta legacy todavía depende de otra regla.
       const msLeft = row.graceUntil ? new Date(row.graceUntil).getTime() - Date.now() : 0;
       const daysLeft = msLeft > 0 ? Math.max(1, Math.ceil(msLeft / DAY_MS)) : null;
       state = `En gracia hasta el ${formatDate(row.graceUntil)}${

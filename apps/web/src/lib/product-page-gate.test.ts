@@ -21,7 +21,7 @@ test("en enforce NO bloquea el producto que sí tiene", () => {
   assert.deepEqual(evaluatePageGate({ mode: "enforce", scope: "REDES", products }), { block: false });
 });
 
-test("«sin redes aprobadas» NO bloquea: esa pantalla ya tiene su propio aviso (ModuleGuard)", () => {
+test("«sin redes aprobadas» NO bloquea el producto: la publicación se controla aparte", () => {
   const sinRedes: ProductsInfo = { articulos: ok, redes: { allowed: false, reason: "NO_NETWORK_APPROVED" } };
   assert.deepEqual(evaluatePageGate({ mode: "enforce", scope: "REDES", products: sinRedes }), { block: false });
 });

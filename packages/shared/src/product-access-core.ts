@@ -18,9 +18,10 @@
  *  2. SIN FILA = comportamiento de hoy. Nadie queda bloqueado por no tener
  *     fila (usuarios creados después de la migración, filas que falten).
  *  3. La gracia vencida se evalúa AL LEER; no depende de ninguna tarea.
- *  4. Redes, además del derecho, exige la regla de acceso que ya existía
- *     (interruptor maestro + al menos una red aprobada): el derecho se SUMA a
- *     lo que había, no lo reemplaza.
+ *  4. El derecho explícito a REDES es suficiente para entrar al producto,
+ *     aunque todavía no haya ninguna red configurada. Las aprobaciones de
+ *     redes individuales se comprueban aparte, únicamente al mostrar o
+ *     ejecutar funciones de publicación.
  */
 
 export const PRODUCTS = ["ARTICULOS", "REDES"] as const;
@@ -63,9 +64,8 @@ export interface EvaluateInput {
   /** Fila del usuario para ese producto, o null si no existe. */
   entitlement: EntitlementRecord | null;
   /**
-   * Regla de acceso a Redes que ya existía antes de este proyecto
-   * (hasSocialModuleAccess: interruptor maestro + redes aprobadas). Solo se
-   * usa para el producto REDES.
+   * Regla legacy usada únicamente cuando todavía no existe una fila de
+   * ProductEntitlement para REDES. No puede revocar un derecho explícito.
    */
   legacyAllowsRedes: boolean;
   now: Date;
@@ -148,9 +148,9 @@ export function evaluateProductAccess(input: EvaluateInput): ProductAccess {
   }
   if (!base.allowed) return base;
 
-  // 4) Redes: el derecho se suma a la regla que ya existía.
-  if (product === "REDES" && !legacyAllowsRedes) {
-    return result(false, "NO_NETWORK_APPROVED", entitlement);
-  }
+  // 4) Un derecho explícito concede acceso al producto por sí mismo. La
+  // configuración/aprobación de redes se valida en las capacidades de
+  // publicación, no aquí: una cuenta puede entrar a Redes para configurar su
+  // primera red aunque todavía no tenga ninguna aprobada.
   return base;
 }
