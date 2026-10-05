@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import { prisma } from "@auto-articulos/db";
+import { evaluateProductAccess } from "@auto-articulos/shared";
 import { refreshHubAccessForUser, type HubProductSlug } from "@/lib/hub-sync";
+import { hasSocialModuleAccess } from "@/lib/social-access";
 
 function getHubProductSlug(requestHeaders: Headers): HubProductSlug {
   return requestHeaders.get("x-hub-product-slug") === "auto-redes" ? "auto-redes" : "seo-total";
@@ -23,7 +25,7 @@ export async function getCurrentUserId(): Promise<string> {
 
 export async function getCurrentUser() {
   const userId = await getCurrentUserId();
-  return prisma.user.findUniqueOrThrow({
+  const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: {
       id: true,
@@ -56,6 +58,10 @@ export async function getCurrentUser() {
       trialStartedAt: true,
       trialUnlocked: true,
       disabledModules: true,
+      productEntitlements: {
+        where: { product: "REDES" },
+        select: { status: true, graceUntil: true },
+      },
       hasImageCredits: true,
       defaultPromptId: true,
       allowLinkedInPublishing: true,
@@ -69,6 +75,15 @@ export async function getCurrentUser() {
       allowGoogleBusinessPublishing: true,
     },
   });
+  const { productEntitlements, ...profile } = user;
+  const redesAccess = evaluateProductAccess({
+    role: profile.role,
+    product: "REDES",
+    entitlement: productEntitlements[0] ?? null,
+    legacyAllowsRedes: hasSocialModuleAccess(profile),
+    now: new Date(),
+  });
+  return { ...profile, canConfigureRedes: redesAccess.allowed };
 }
 
 export function displayName(user: {

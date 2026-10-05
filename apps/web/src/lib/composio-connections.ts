@@ -43,6 +43,8 @@ export interface ConnectingUser {
   id: string;
   role?: string;
   disabledModules?: string | null;
+  /** Derecho al producto Redes, aunque todavía no tenga ninguna red aprobada. */
+  canConfigureRedes?: boolean;
   allowFacebookPublishing?: boolean;
   allowInstagramPublishing?: boolean;
   allowPinterestPublishing?: boolean;
@@ -53,10 +55,13 @@ export function canUseComposioModule(user: ConnectingUser): boolean {
   return hasOptInModuleAccess(user, COMPOSIO_MODULE_ID);
 }
 
-/** Facebook e Instagram respetan el mismo permiso por usuario que ya existe. */
+/**
+ * Configurar Facebook/Instagram requiere acceso al producto Redes, no una
+ * aprobación previa de esa misma red. La aprobación individual se conserva
+ * para publicar; no puede bloquear la primera conexión OAuth.
+ */
 export function userMayConnectApp(user: ConnectingUser, app: ComposioAppId): boolean {
-  if (app === "facebook") return user.allowFacebookPublishing === true;
-  if (app === "instagram") return user.allowInstagramPublishing === true;
+  if (app === "facebook" || app === "instagram") return user.canConfigureRedes === true;
   if (app === "pinterest") return user.allowPinterestPublishing === true;
   return true;
 }
@@ -138,7 +143,7 @@ export async function listUserConnections(user: ConnectingUser): Promise<UserCon
     const row = rows.find((r) => r.app === app.id);
     let unavailableReason: string | null = null;
     if (!apiKey || !authConfigs[app.id]) unavailableReason = "Aún no está configurada por el administrador.";
-    else if (!userMayConnectApp(user, app.id)) unavailableReason = "Tu cuenta no tiene habilitada esta red social.";
+    else if (!userMayConnectApp(user, app.id)) unavailableReason = "Tu cuenta no tiene acceso al producto necesario para esta conexión.";
     return {
       app: app.id,
       label: app.label,

@@ -30,6 +30,7 @@ export async function getComposioStatusUser(): Promise<ConnectingUser | null> {
 export async function getComposioUserForApp(app: unknown): Promise<ConnectingUser | null> {
   const user = await getCurrentUser();
   if (isMigrationApp(app)) return user;
+  if (app === "facebook" || app === "instagram") return user.canConfigureRedes ? user : null;
   return canUseComposioModule(user) ? user : null;
 }
 
