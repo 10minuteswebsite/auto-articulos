@@ -8,12 +8,12 @@ export const revalidate = 0;
 
 /** Prueba Facebook Pages sin publicar: valida el token y la Página guardada. */
 export async function POST() {
-  const userId = await getCurrentUserId();
-  const integration = await prisma.facebookPageIntegration.findUnique({ where: { userId } });
-  if (!integration) return NextResponse.json({ error: "Facebook no está conectado." }, { status: 400 });
-  if (integration.expiresAt <= new Date()) return NextResponse.json({ error: "La autorización de Facebook venció. Conecta la Página nuevamente." }, { status: 400 });
-
   try {
+    const userId = await getCurrentUserId();
+    const integration = await prisma.facebookPageIntegration.findUnique({ where: { userId } });
+    if (!integration) return NextResponse.json({ error: "Facebook no está conectado." }, { status: 400 });
+    if (integration.expiresAt <= new Date()) return NextResponse.json({ error: "La autorización de Facebook venció. Conecta la Página nuevamente." }, { status: 400 });
+
     const profile = await getFacebookPageProfile(
       decryptSecret(integration.accessTokenEncrypted),
       integration.facebookPageId,
