@@ -953,8 +953,17 @@ async function getBloggerAppCredentials() {
     prisma.systemSetting.findUnique({ where: { key: "blogger_client_id" } }),
     prisma.systemSetting.findUnique({ where: { key: "blogger_client_secret" } }),
   ]);
-  const clientId = idSetting ? decryptSecret(idSetting.encryptedValue) : process.env.BLOGGER_CLIENT_ID;
-  const clientSecret = secretSetting ? decryptSecret(secretSetting.encryptedValue) : process.env.BLOGGER_CLIENT_SECRET;
+  // Keep token renewal aligned with the web OAuth flow. Blogger now uses the
+  // active Google client shared with Search Console and Analytics; the legacy
+  // Blogger-specific settings remain only as a transition fallback.
+  const sharedClientId = process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID;
+  const sharedClientSecret = process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET;
+  const clientId = sharedClientId && sharedClientSecret
+    ? sharedClientId
+    : idSetting ? decryptSecret(idSetting.encryptedValue) : process.env.BLOGGER_CLIENT_ID;
+  const clientSecret = sharedClientId && sharedClientSecret
+    ? sharedClientSecret
+    : secretSetting ? decryptSecret(secretSetting.encryptedValue) : process.env.BLOGGER_CLIENT_SECRET;
   if (!clientId || !clientSecret) throw new Error("Google OAuth no está configurado para Blogger.");
   return { clientId, clientSecret };
 }
