@@ -6,6 +6,21 @@ export interface FacebookPagePublishResult {
   permalink?: string;
 }
 
+/** Comprueba en modo solo lectura que el token sigue correspondiendo a la Página. */
+export async function getFacebookPageProfile(
+  accessToken: string,
+  pageId: string,
+): Promise<{ id: string; name: string }> {
+  const params = new URLSearchParams({ fields: "id,name", access_token: accessToken });
+  const response = await fetch(`${GRAPH_API_URL}/me?${params.toString()}`);
+  if (!response.ok) throw new Error(`La autorización de Facebook Pages no es válida: ${await response.text()}`);
+  const profile = (await response.json()) as { id?: string; name?: string };
+  if (!profile.id || profile.id !== pageId) {
+    throw new Error("La autorización de Meta no corresponde a la Página de Facebook seleccionada.");
+  }
+  return { id: profile.id, name: profile.name || "Página de Facebook" };
+}
+
 /** Publica la imagen destacada del artículo en una Página de Facebook. */
 export async function publishFacebookPagePost(
   accessToken: string,
