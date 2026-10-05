@@ -1,7 +1,7 @@
 /** Minimal REST client for PostPeer's managed OAuth and publishing API. */
 const POSTPEER_API = "https://api.postpeer.dev/v1";
 
-export type PostPeerPlatform = "googlebusiness";
+export type PostPeerPlatform = "googlebusiness" | "threads";
 
 export interface PostPeerIntegration {
   id: string;
@@ -93,13 +93,15 @@ export async function createPostPeerPost(
     content: string;
     imageUrl?: string;
     idempotencyKey: string;
+    platform?: PostPeerPlatform;
   },
 ): Promise<PostPeerPostResult> {
+  const platform = input.platform ?? "googlebusiness";
   return postPeerFetch<PostPeerPostResult>(apiKey, "/posts", {
     method: "POST",
     body: JSON.stringify({
       content: input.content,
-      platforms: [{ platform: "googlebusiness", accountId: input.accountId }],
+      platforms: [{ platform, accountId: input.accountId }],
       ...(input.imageUrl ? { mediaItems: [{ type: "image", url: input.imageUrl }] } : {}),
       publishNow: true,
       idempotencyKey: input.idempotencyKey,

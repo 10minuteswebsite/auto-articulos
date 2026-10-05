@@ -33,8 +33,16 @@ export async function GET() {
     }
   }
   let blogs = [{ identifier: current.blogIdentifier, title: current.blogTitle || current.blogIdentifier }];
-  try { blogs = await getTumblrBlogs(decryptSecret(current.accessTokenEncrypted)); } catch { /* status still useful when Tumblr is temporarily unavailable */ }
-  return NextResponse.json({ connected: true, allowed, forbidden: !allowed, blogIdentifier: current.blogIdentifier, blogTitle: current.blogTitle, expiresAt: current.expiresAt, isExpired: Boolean(current.expiresAt && current.expiresAt < new Date()), blogs }, { headers: NO_CACHE });
+  try {
+    if (current.accessTokenSecretEncrypted) {
+      const credentials = await getStoredTumblrAppCredentials();
+      blogs = await getTumblrBlogs(decryptSecret(current.accessTokenEncrypted), decryptSecret(current.accessTokenSecretEncrypted), credentials);
+    } else {
+      // Compatibilidad con cualquier conexión OAuth2 antigua que todavía exista.
+      blogs = await getTumblrBlogs(decryptSecret(current.accessTokenEncrypted));
+    }
+  } catch { /* status still useful when Tumblr is temporarily unavailable */ }
+  return NextResponse.json({ connected: true, allowed, forbidden: !allowed, blogIdentifier: current.blogIdentifier, blogTitle: current.blogTitle, blogSelectionPending: current.blogSelectionPending, expiresAt: current.expiresAt, isExpired: Boolean(current.expiresAt && current.expiresAt < new Date()), blogs }, { headers: NO_CACHE });
 }
 
 export async function PATCH(request: NextRequest) {
@@ -44,10 +52,12 @@ export async function PATCH(request: NextRequest) {
   if (typeof body.blogIdentifier !== "string" || !body.blogIdentifier.trim()) return NextResponse.json({ error: "Selecciona un blog de Tumblr." }, { status: 400, headers: NO_CACHE });
   const integration = await prisma.tumblrIntegration.findUnique({ where: { userId } });
   if (!integration) return NextResponse.json({ error: "Tumblr no está conectado." }, { status: 400, headers: NO_CACHE });
-  const blogs = await getTumblrBlogs(decryptSecret(integration.accessTokenEncrypted));
+  const blogs = integration.accessTokenSecretEncrypted
+    ? await getTumblrBlogs(decryptSecret(integration.accessTokenEncrypted), decryptSecret(integration.accessTokenSecretEncrypted), await getStoredTumblrAppCredentials())
+    : await getTumblrBlogs(decryptSecret(integration.accessTokenEncrypted));
   const blog = blogs.find((item) => item.identifier === body.blogIdentifier);
   if (!blog) return NextResponse.json({ error: "El blog seleccionado no pertenece a la cuenta conectada." }, { status: 400, headers: NO_CACHE });
-  await prisma.tumblrIntegration.update({ where: { userId }, data: { blogIdentifier: blog.identifier, blogTitle: blog.title } });
+  await prisma.tumblrIntegration.update({ where: { userId }, data: { blogIdentifier: blog.identifier, blogTitle: blog.title, blogSelectionPending: false } });
   return NextResponse.json({ ok: true, blogIdentifier: blog.identifier, blogTitle: blog.title }, { headers: NO_CACHE });
 }
 

@@ -31,8 +31,8 @@ export default function PostPeerPanel() {
   }
 
   return <section style={sectionStyle}>
-    <h2 style={h2Style}>PostPeer · Google Business Profile</h2>
-    <p>PostPeer gestiona la conexión OAuth y publica en Google Business Profile. La clave se guarda cifrada y nunca se muestra completa.</p>
+    <h2 style={h2Style}>PostPeer · redes sociales</h2>
+    <p>PostPeer gestiona conexiones OAuth para Google Business Profile y Threads. La clave se guarda cifrada y nunca se muestra completa.</p>
     <form onSubmit={save} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
       <input type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder="Clave de API de PostPeer" style={{ ...inputStyle, minWidth: 300 }} />
       <button type="submit" disabled={busy || !apiKey.trim()} className="secondary" style={secondaryButtonStyle}>Guardar y verificar</button>
@@ -40,6 +40,6 @@ export default function PostPeerPanel() {
     </form>
     <p style={{ color: "#6e6e73", fontSize: 13 }}>{status?.configured ? `Configurada: ${status.maskedKey}` : "No configurada"}</p>
     {message && <p>{message}</p>}
-    <p style={{ color: "#8a5a00", fontSize: 13 }}>La publicación mediante PostPeer permanece apagada hasta completar el piloto y autorizar la activación.</p>
+    <p style={{ color: "#8a5a00", fontSize: 13 }}>Threads usará PostPeer cuando la cuenta quede conectada. La conexión Meta directa se conserva como respaldo.</p>
   </section>;
 }

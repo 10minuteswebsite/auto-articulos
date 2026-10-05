@@ -10,7 +10,8 @@ export const TRIAL_RULE_ENABLED_DEFAULT = true;
  * existente/creado por admin, así que esta función nunca los bloquea. Solo
  * los registros de "Solicitar prueba" (isTrialSignup=true, trialUnlocked
  * arranca en false) dependen del período de 7 días hasta que el admin los
- * desbloquee.
+ * desbloquee. Durante la migración, las rutas protegidas revalidan el acceso
+ * vigente del Hub antes de llegar a este helper.
  */
 export function hasTrialAccess(user: {
   role?: string;

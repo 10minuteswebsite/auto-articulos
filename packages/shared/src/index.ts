@@ -10,6 +10,7 @@ export * from "./twitter-api";
 export * from "./linkedin-api";
 export * from "./instagram-api";
 export * from "./facebook-pages-api";
+export * from "./meta-pages-api";
 export * from "./pinterest-api";
 export * from "./tumblr-api";
 export * from "./bluesky-api";

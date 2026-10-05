@@ -33,10 +33,12 @@ export async function GET() {
     bingIntegration,
     businessProfile,
     threadsIntegration,
+    postPeerThreads,
     twitterIntegration,
     linkedinIntegration,
     pinterestIntegration,
     tumblrIntegration,
+    blueskyIntegration,
     devToIntegration,
     bloggerIntegration,
   ] = await Promise.all([
@@ -65,6 +67,7 @@ export async function GET() {
         excludedTopics: true,
         allowPinterestPublishing: true,
         allowTumblrPublishing: true,
+        allowBlueskyPublishing: true,
         allowDevToPublishing: true,
         allowBloggerPublishing: true,
       },
@@ -94,6 +97,10 @@ export async function GET() {
       where: { userId },
       select: { expiresAt: true },
     }),
+    prisma.postPeerSocialConnection.findUnique({
+      where: { userId_platform: { userId, platform: "threads" } },
+      select: { status: true },
+    }),
     // 8. X/Twitter
     prisma.twitterIntegration.findUnique({
       where: { userId },
@@ -110,7 +117,11 @@ export async function GET() {
     }),
     prisma.tumblrIntegration.findUnique({
       where: { userId },
-      select: { expiresAt: true },
+      select: { expiresAt: true, blogSelectionPending: true },
+    }),
+    prisma.blueskyIntegration.findUnique({
+      where: { userId },
+      select: { handle: true },
     }),
     prisma.devToIntegration.findUnique({
       where: { userId },
@@ -230,7 +241,7 @@ export async function GET() {
     {
       id: "threads",
       label: "Meta Threads",
-      configured: Boolean(threadsIntegration && threadsIntegration.expiresAt > new Date()),
+      configured: Boolean((threadsIntegration && threadsIntegration.expiresAt > new Date()) || postPeerThreads?.status === "ACTIVE"),
       required: false,
       section: "social",
       description: "Publica automáticamente hilos en Threads con tus artículos.",
@@ -270,12 +281,22 @@ export async function GET() {
     {
       id: "tumblr",
       label: "Tumblr",
-      configured: Boolean((user?.role === "admin" || user?.allowTumblrPublishing) && tumblrIntegration && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
+      configured: Boolean((user?.role === "admin" || user?.allowTumblrPublishing) && tumblrIntegration && !tumblrIntegration.blogSelectionPending && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos con imagen, texto y enlace en Tumblr.",
       actionUrl: "/dashboard/configuracion?tab=social",
       actionLabel: "Conectar Tumblr",
+    },
+    {
+      id: "bluesky",
+      label: "Bluesky",
+      configured: Boolean((user?.role === "admin" || user?.allowBlueskyPublishing) && blueskyIntegration?.handle),
+      required: false,
+      section: "social",
+      description: "Publica automáticamente tus artículos en Bluesky.",
+      actionUrl: "/dashboard/configuracion?tab=social",
+      actionLabel: "Conectar Bluesky",
     },
     {
       id: "devto",

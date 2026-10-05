@@ -6,6 +6,7 @@ import {
   getPostPeerOAuthUrl,
   listPostPeerIntegrations,
   testPostPeerConnection,
+  type PostPeerPlatform,
 } from "@auto-articulos/shared";
 import { encryptSecret } from "@auto-articulos/shared";
 
@@ -26,6 +27,107 @@ export async function getPostPeerApiKey(): Promise<string | null> {
 }
 
 export function maskPostPeerApiKey(value: string): string { return `••••••••${value.slice(-4)}`; }
+
+async function getPostPeerSocialConnection(userId: string, platform: PostPeerPlatform) {
+  return prisma.postPeerSocialConnection.findUnique({
+    where: { userId_platform: { userId, platform } },
+  });
+}
+
+/** Inicia una conexión social de PostPeer sin tocar ninguna conexión propia. */
+export async function startPostPeerSocialConnection(
+  userId: string,
+  platform: PostPeerPlatform,
+  redirectUri: string,
+): Promise<string> {
+  const apiKey = await getPostPeerApiKey();
+  if (!apiKey) throw new Error("PostPeer aún no está configurado por el administrador.");
+
+  let connection = await getPostPeerSocialConnection(userId, platform);
+  let profileId = connection?.profileId;
+  if (!profileId) {
+    profileId = await createPostPeerProfile(apiKey, `SEO TOTAL - ${platform} - ${userId}`);
+    connection = await prisma.postPeerSocialConnection.upsert({
+      where: { userId_platform: { userId, platform } },
+      create: { userId, platform, profileId, accountId: `pending-${profileId}`, status: "PENDING" },
+      update: { profileId, status: "PENDING", lastError: null },
+    });
+  } else if (connection) {
+    await prisma.postPeerSocialConnection.update({
+      where: { id: connection.id },
+      data: { status: "PENDING", lastError: null },
+    });
+  }
+
+  const callback = new URL(redirectUri);
+  callback.searchParams.set("profileId", profileId);
+  callback.searchParams.set("platform", platform);
+  return getPostPeerOAuthUrl(apiKey, platform, { profileId, redirectUri: callback.toString() });
+}
+
+export async function completePostPeerSocialConnection(
+  platform: PostPeerPlatform,
+  profileId: string,
+): Promise<"connected" | "missing" | "error"> {
+  const apiKey = await getPostPeerApiKey();
+  const connection = await prisma.postPeerSocialConnection.findUnique({
+    where: { profileId_platform: { profileId, platform } },
+  });
+  if (!apiKey || !connection) return "missing";
+
+  try {
+    const integrations = await listPostPeerIntegrations(apiKey, { platform, profileId });
+    const integration = integrations[0];
+    if (!integration) {
+      await prisma.postPeerSocialConnection.update({
+        where: { id: connection.id },
+        data: { status: "ERROR", lastError: `No se encontró una cuenta de ${platform} conectada.` },
+      });
+      return "missing";
+    }
+    await prisma.postPeerSocialConnection.update({
+      where: { id: connection.id },
+      data: {
+        accountId: integration.id,
+        accountName: integration.displayName ?? null,
+        status: "ACTIVE",
+        connectedAt: new Date(),
+        lastError: null,
+      },
+    });
+    return "connected";
+  } catch (error) {
+    await prisma.postPeerSocialConnection.update({
+      where: { id: connection.id },
+      data: { status: "ERROR", lastError: error instanceof Error ? error.message : String(error) },
+    });
+    return "error";
+  }
+}
+
+export async function verifyPostPeerSocialConnection(userId: string, platform: PostPeerPlatform): Promise<boolean> {
+  const [apiKey, connection] = await Promise.all([
+    getPostPeerApiKey(),
+    getPostPeerSocialConnection(userId, platform),
+  ]);
+  if (!apiKey || !connection || connection.status !== "ACTIVE") return false;
+  const integrations = await listPostPeerIntegrations(apiKey, { platform, profileId: connection.profileId });
+  return integrations.some((item) => item.id === connection.accountId);
+}
+
+export async function disconnectPostPeerSocialConnection(userId: string, platform: PostPeerPlatform): Promise<void> {
+  const [apiKey, connection] = await Promise.all([
+    getPostPeerApiKey(),
+    getPostPeerSocialConnection(userId, platform),
+  ]);
+  if (apiKey && connection?.status === "ACTIVE" && !connection.accountId.startsWith("pending-")) {
+    await disconnectPostPeerIntegration(apiKey, connection.accountId);
+  }
+  await prisma.postPeerSocialConnection.updateMany({
+    where: { userId, platform },
+    data: { status: "DISCONNECTED" },
+  });
+}
 
 export async function startPostPeerBusinessConnection(userId: string, redirectUri: string): Promise<string> {
   const apiKey = await getPostPeerApiKey();

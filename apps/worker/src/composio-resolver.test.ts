@@ -9,16 +9,16 @@ import {
   type ComposioAppId,
 } from "@auto-articulos/shared";
 
-const APPS: ComposioAppId[] = ["google_search_console", "google_analytics", "facebook", "instagram"];
 const active = { status: "ACTIVE", hasSelection: true };
 
-test("INERTE por ahora: con los consumidores sin listos el método es SIEMPRE OWN", () => {
-  for (const app of APPS) {
-    assert.equal(COMPOSIO_CONSUMER_READY[app], false, `${app} no debe estar listo todavía`);
-    for (const moduleEnabled of [false, true]) for (const routeIsComposio of [false, true]) {
-      assert.equal(methodFor({ app, moduleEnabled, routeIsComposio }), "OWN");
-    }
-  }
+test("los consumidores sociales listos pueden usar Composio cuando la vía está activada", () => {
+  assert.equal(COMPOSIO_CONSUMER_READY.google_search_console, false);
+  assert.equal(COMPOSIO_CONSUMER_READY.google_analytics, false);
+  assert.equal(COMPOSIO_CONSUMER_READY.facebook, true);
+  assert.equal(COMPOSIO_CONSUMER_READY.instagram, true);
+  assert.equal(methodFor({ app: "facebook", moduleEnabled: false, routeIsComposio: true }), "COMPOSIO");
+  assert.equal(methodFor({ app: "instagram", moduleEnabled: false, routeIsComposio: true }), "COMPOSIO");
+  assert.equal(methodFor({ app: "google_search_console", moduleEnabled: false, routeIsComposio: true }), "OWN");
 });
 
 test("método OWN: usa la propia si existe; si no, sin conexión", () => {

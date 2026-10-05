@@ -5,10 +5,7 @@ import { prisma } from "@auto-articulos/db";
 import { encryptSecret, exchangeCodeForInstagramTokens } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredInstagramAppCredentials } from "@/lib/instagram-app-config";
-import { canUseSocialModule } from "@/lib/social-access";
 import { INSTAGRAM_STATE_COOKIE } from "../connect/constants";
-import { clearCookie } from "@/lib/shared-cookies";
-import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -18,61 +15,41 @@ export async function GET(request: NextRequest) {
 
   if (!state || state !== cookieStore.get(INSTAGRAM_STATE_COOKIE)?.value || !code) {
     return NextResponse.redirect(
-      new URL(connectionReturnPath("instagram", "error"), oauthReturnBase(request))
+      new URL(connectionReturnPath("instagram", "error"), request.url)
     );
   }
 
   try {
     const appCreds = await getStoredInstagramAppCredentials();
-    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/instagram/callback");
+    const redirectUri = `${request.nextUrl.protocol}//${request.nextUrl.host}/api/search-integrations/instagram/callback`;
     const tokens = await exchangeCodeForInstagramTokens(code, redirectUri, appCreds);
 
     const expiresAt = new Date(Date.now() + tokens.expiresInSeconds * 1000);
+    const pendingKey = `instagram_oauth_pending:${userId}`;
 
-    await prisma.instagramIntegration.upsert({
-      where: { userId },
+    // La autorización puede incluir varias páginas. Guardamos el resultado
+    // cifrado durante pocos minutos y dejamos que la persona elija una antes
+    // de crear la integración definitiva.
+    await prisma.systemSetting.upsert({
+      where: { key: pendingKey },
       create: {
-        userId,
-        instagramBusinessAccountId: tokens.instagramBusinessAccountId,
-        instagramUsername: tokens.instagramUsername,
-        accessTokenEncrypted: encryptSecret(tokens.longLivedToken),
-        expiresAt,
+        key: pendingKey,
+        encryptedValue: encryptSecret(JSON.stringify({ expiresAt: expiresAt.toISOString(), accounts: tokens.accounts })),
       },
       update: {
-        instagramBusinessAccountId: tokens.instagramBusinessAccountId,
-        instagramUsername: tokens.instagramUsername,
-        accessTokenEncrypted: encryptSecret(tokens.longLivedToken),
-        expiresAt,
-      },
-    });
-
-    if (await canUseSocialModule(userId)) await prisma.facebookPageIntegration.upsert({
-      where: { userId },
-      create: {
-        userId,
-        facebookPageId: tokens.facebookPageId,
-        facebookPageName: tokens.facebookPageName,
-        accessTokenEncrypted: encryptSecret(tokens.longLivedToken),
-        expiresAt,
-      },
-      update: {
-        facebookPageId: tokens.facebookPageId,
-        facebookPageName: tokens.facebookPageName,
-        accessTokenEncrypted: encryptSecret(tokens.longLivedToken),
-        expiresAt,
+        encryptedValue: encryptSecret(JSON.stringify({ expiresAt: expiresAt.toISOString(), accounts: tokens.accounts })),
       },
     });
 
     const response = NextResponse.redirect(
-      new URL(connectionReturnPath("instagram", "connected"), oauthReturnBase(request))
+      new URL(connectionReturnPath("instagram", "select"), request.url)
     );
-    clearCookie(response, INSTAGRAM_STATE_COOKIE, { path: "/" });
-    clearOAuthOrigin(response);
+    response.cookies.delete(INSTAGRAM_STATE_COOKIE);
     return response;
   } catch (error: any) {
     console.error("Error en Instagram OAuth callback:", error);
     return NextResponse.redirect(
-      new URL(connectionReturnPath("instagram", "error"), oauthReturnBase(request))
+      new URL(connectionReturnPath("instagram", "error"), request.url)
     );
   }
 }

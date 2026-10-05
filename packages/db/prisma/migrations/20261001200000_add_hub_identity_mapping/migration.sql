@@ -1,0 +1,12 @@
+ALTER TABLE "User"
+  ADD COLUMN IF NOT EXISTS "hubUserId" TEXT,
+  ADD COLUMN IF NOT EXISTS "hubAuth0Sub" TEXT,
+  ADD COLUMN IF NOT EXISTS "hubSyncedAt" TIMESTAMP(3),
+  ADD COLUMN IF NOT EXISTS "hubSyncAttemptedAt" TIMESTAMP(3),
+  ADD COLUMN IF NOT EXISTS "hubSyncError" TEXT;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "User_hubUserId_key"
+  ON "User"("hubUserId");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "User_hubAuth0Sub_key"
+  ON "User"("hubAuth0Sub");

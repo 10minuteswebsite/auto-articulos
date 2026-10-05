@@ -24,6 +24,7 @@
     "start": "bash start-auto-shutdown.sh",
     "stop": "docker-compose down",
     "db:up": "docker-compose up -d postgres",
+    "sync:hub-users": "tsx scripts/sync-hub-users.ts",
     "verify": "bash scripts/verify-before-push.sh"
   },
   "devDependencies": {

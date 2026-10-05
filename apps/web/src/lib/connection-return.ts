@@ -3,7 +3,7 @@
  * dedicada de esa conexión dentro de Conexiones, con un resultado que la pantalla
  * lee y muestra («connected», «error» o «forbidden»). Nunca se manda texto técnico.
  */
-export type ReturnOutcome = "connected" | "error" | "forbidden";
+export type ReturnOutcome = "connected" | "error" | "forbidden" | "select";
 
 const VISTA: Record<string, "analiticas" | "difusion"> = {
   "google-search-console": "analiticas",

@@ -19,6 +19,7 @@ const PUBLIC_PATHS = [
   "/terminos",
   "/api/auth/login",
   "/api/auth/trial-signup",
+  "/auth/hub",
   "/api/debug/instagram-errors",
   "/api/debug/activate-instagram",
   "/api/oauth2/authorize",
@@ -36,6 +37,8 @@ const PUBLIC_PATHS = [
 
 /** Endpoint del servidor MCP; se autentica con Bearer, no con cookie. */
 const MCP_PATH = "/api/mcp";
+const TUMBLR_CALLBACK_PATH = "/api/search-integrations/tumblr/callback";
+const TUMBLR_CANONICAL_ORIGIN = "https://redes.lasolucionweb.net";
 
 const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
@@ -44,11 +47,25 @@ const NO_CACHE_HEADERS = {
   "Surrogate-Control": "no-store",
 };
 
+function hubProductSlugForHost(hostname: string) {
+  const host = hostname.toLowerCase();
+  return host === "redes.lasolucionweb.net" || host === "redes.lasolucionweb.com"
+    ? "auto-redes"
+    : "seo-total";
+}
 const LEGACY_LOGIN_HOST = "auto-articulos-web.vercel.app";
 const CANONICAL_LOGIN_URL = "https://www.seototal.lasolucionweb.com/login";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Tumblr OAuth1 puede devolver al callback predeterminado de Vercel. Solo
+  // ese callback en un host no canónico puede pasar sin sesión para que la
+  // ruta lo redirija al dominio del Hub; en el .net la autenticación normal
+  // agrega x-user-id antes de ejecutar el callback.
+  if (pathname === TUMBLR_CALLBACK_PATH && request.nextUrl.origin !== TUMBLR_CANONICAL_ORIGIN) {
+    return NextResponse.next();
+  }
 
   // El alias antiguo de Vercel sigue recibiendo enlaces guardados y marcadores.
   // Redirigir solo ese host evita afectar al login del dominio canónico y
@@ -107,6 +124,7 @@ export async function middleware(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", userId);
+  requestHeaders.set("x-hub-product-slug", hubProductSlugForHost(request.nextUrl.hostname));
 
   const impersonationToken = request.cookies.get(IMPERSONATION_COOKIE)?.value;
   const impersonation = await verifyImpersonationToken(impersonationToken);

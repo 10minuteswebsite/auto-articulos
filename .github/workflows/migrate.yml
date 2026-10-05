@@ -38,6 +38,34 @@ on:
         required: false
         default: false
         type: boolean
+      safe_postpeer_social_connections:
+        description: "Aplicar únicamente la tabla aditiva de conexiones sociales de PostPeer (Threads), sin tocar las conexiones existentes"
+        required: false
+        default: false
+        type: boolean
+      safe_hub_identity_mapping:
+        description: "Aplicar únicamente el mapeo aditivo de identidad Hub ↔ Auto Artículos"
+        required: false
+        default: false
+        type: boolean
+      sync_hub_users:
+        description: "Sincronizar todos los usuarios existentes con el Hub sin modificar datos operativos"
+        required: false
+        default: false
+        type: boolean
+      hub_base_url:
+        description: "Endpoint del Hub para la sincronización"
+        required: false
+        default: "https://hub.lasolucionweb.net"
+      sync_email:
+        description: "Opcional: sincronizar únicamente este correo para diagnóstico o reintento"
+        required: false
+        default: ""
+      omit_legacy_phones:
+        description: "No importar teléfonos históricos durante la migración (se completan desde Perfil)"
+        required: false
+        default: false
+        type: boolean
       force_sync:
         description: "Forzar sincronización de BD con schema (--accept-data-loss). USAR SOLO CUANDO SE SABE QUE ESTÁ CORRECTO"
         required: false
@@ -51,6 +79,11 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DATABASE_URL }}
+      HUB_BASE_URL: ${{ inputs.hub_base_url || 'https://hub.lasolucionweb.net' }}
+      AUTO_ARTICULOS_HUB_CLIENT_ID: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_ID }}
+      AUTO_ARTICULOS_HUB_CLIENT_SECRET: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_SECRET }}
+      HUB_SYNC_EMAIL: ${{ inputs.sync_email }}
+      HUB_OMIT_LEGACY_PHONES: ${{ inputs.omit_legacy_phones }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -114,6 +147,27 @@ jobs:
           npx prisma db execute \
             --url "$MIGRATION_DATABASE_URL" \
             --file packages/db/prisma/migrations/20260918230000_add_composio_connections/migration.sql
+      - name: Aplicar migración segura de conexiones sociales de PostPeer
+        if: ${{ inputs.safe_postpeer_social_connections }}
+        shell: bash
+        run: |
+          MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"
+          MIGRATION_DATABASE_URL="${MIGRATION_DATABASE_URL/?pgbouncer=true/}"
+          npx prisma db execute \
+            --url "$MIGRATION_DATABASE_URL" \
+            --file packages/db/prisma/migrations/20261005120000_add_postpeer_social_connections/migration.sql
+      - name: Aplicar migración segura de identidad del Hub
+        if: ${{ inputs.safe_hub_identity_mapping }}
+        shell: bash
+        run: |
+          MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"
+          MIGRATION_DATABASE_URL="${MIGRATION_DATABASE_URL/?pgbouncer=true/}"
+          npx prisma db execute \
+            --url "$MIGRATION_DATABASE_URL" \
+            --file packages/db/prisma/migrations/20261001200000_add_hub_identity_mapping/migration.sql
+      - name: Sincronizar usuarios existentes con el Hub
+        if: ${{ inputs.sync_hub_users }}
+        run: npm run sync:hub-users
       - name: Forzar sincronización (--accept-data-loss)
         if: ${{ inputs.force_sync }}
         shell: bash
@@ -124,7 +178,7 @@ jobs:
             npx prisma db push --schema=packages/db/prisma/schema.prisma \
             --accept-data-loss
       - name: Aplicar migraciones con Session pooler
-        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_blogger_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.force_sync }}
+        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_blogger_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.safe_postpeer_social_connections && !inputs.safe_hub_identity_mapping && !inputs.sync_hub_users && !inputs.force_sync }}
         shell: bash
         run: |
           MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"

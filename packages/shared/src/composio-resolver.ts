@@ -21,8 +21,8 @@ import type { ComposioAppId } from "./composio";
 export const COMPOSIO_CONSUMER_READY: Record<ComposioAppId, boolean> = {
   google_search_console: false,
   google_analytics: false,
-  facebook: false,
-  instagram: false,
+  facebook: true,
+  instagram: true,
   pinterest: false,
 };
 

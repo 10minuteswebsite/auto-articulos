@@ -4,6 +4,7 @@ import { decryptSecret, getTumblrBlogs } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { canPublishToNetwork } from "@/lib/social-access";
 import { NOT_CONNECTED, runConnectionTest } from "@/lib/connection-test-route";
+import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,11 @@ export async function POST() {
   const integration = await prisma.tumblrIntegration.findUnique({ where: { userId } });
   if (!integration) return NextResponse.json({ error: NOT_CONNECTED }, { status: 400 });
   return runConnectionTest("tumblr", async () => {
-    await getTumblrBlogs(decryptSecret(integration.accessTokenEncrypted));
+    if (integration.accessTokenSecretEncrypted) {
+      await getTumblrBlogs(decryptSecret(integration.accessTokenEncrypted), decryptSecret(integration.accessTokenSecretEncrypted), await getStoredTumblrAppCredentials());
+    } else {
+      await getTumblrBlogs(decryptSecret(integration.accessTokenEncrypted));
+    }
     return integration.blogTitle || integration.blogIdentifier;
   });
 }

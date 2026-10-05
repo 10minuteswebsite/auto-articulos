@@ -3382,7 +3382,6 @@ RECONCILIADO, SIN ACCIÓN DE DESPLIEGUE ADICIONAL.
 
 ## Versión desplegada — 2026-09-22 — CONEXION POSTPEER 2, corrección de imagen de GBP vía og:image (PR #211)
 
-<<<<<<< HEAD
 PR #211 fusionado a `main` mediante el commit `9afbdd3` ("fix(gbp): use article og image fallback
 (#211)"). Registra el resultado de la entrada "Continuación CONEXION POSTPEER 2 — 2026-09-22" de
 Coordinación (que no se reescribe): `apps/worker/src/businessProfilePublish.ts` ahora usa primero

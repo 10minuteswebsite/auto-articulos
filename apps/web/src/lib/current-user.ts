@@ -1,5 +1,10 @@
 import { headers } from "next/headers";
 import { prisma } from "@auto-articulos/db";
+import { refreshHubAccessForUser, type HubProductSlug } from "@/lib/hub-sync";
+
+function getHubProductSlug(requestHeaders: Headers): HubProductSlug {
+  return requestHeaders.get("x-hub-product-slug") === "auto-redes" ? "auto-redes" : "seo-total";
+}
 
 /** Solo válido dentro de rutas protegidas por proxy.ts */
 export async function getCurrentUserId(): Promise<string> {
@@ -8,6 +13,11 @@ export async function getCurrentUserId(): Promise<string> {
   if (!userId) {
     throw new Error("getCurrentUserId() llamado fuera de una ruta protegida.");
   }
+  await refreshHubAccessForUser(userId, getHubProductSlug(headerList)).catch((error) => {
+    // During migration, a transient Hub outage must not interrupt Auto
+    // Artículos. Successful Hub revocations are still enforced above.
+    console.error("[HUB ACCESS] No se pudo revalidar el acceso", userId, error);
+  });
   return userId;
 }
 

@@ -38,8 +38,17 @@ export interface OAuthNetworkConfig {
     savedIdKey: string;
     savedNameKey: string;
     patchKey: string;
+    /** Campo que indica que la autorización terminó pero falta aprobar el destino. */
+    pendingKey?: string;
     /** Nota bajo el título al elegir (igual que en Search Console y Analytics). */
     note: string;
+  };
+  /** OAuth puede devolver varias cuentas y requiere una selección explícita. */
+  pendingSelection?: {
+    listKey: string;
+    idField: string;
+    accountField: string;
+    pageField: string;
   };
 }
 
@@ -69,7 +78,8 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
       setSettings(settingsRes.ok ? await settingsRes.json() : { configured: false });
       const next = connectionRes.ok ? await connectionRes.json() : { connected: false };
       setConnection(next);
-      if (config.destination) setSelected(next[config.destination.savedIdKey] || "");
+      if (config.destination) setSelected(config.destination.pendingKey && next[config.destination.pendingKey] ? "" : next[config.destination.savedIdKey] || "");
+      if (config.pendingSelection && !next.pendingSelection) setSelected("");
     } catch {
       setSettings({ configured: false });
       setConnection({ connected: false });
@@ -140,6 +150,31 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
     }
   }
 
+  async function approvePendingSelection() {
+    if (!config.pendingSelection || !selected) return;
+    setSaving(true);
+    setMessage(null);
+    try {
+      const response = await fetch(base, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instagramBusinessAccountId: selected }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setMessage({ ok: false, text: friendlyConnectionError(result.error, "No se pudo guardar la cuenta seleccionada.") });
+        return;
+      }
+      setMessage({ ok: true, text: "Cuenta seleccionada y conexión guardada." });
+      setSelected("");
+      await load();
+    } catch {
+      setMessage({ ok: false, text: "No pudimos comunicarnos con el servicio. Inténtalo de nuevo en unos minutos." });
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function disconnect() {
     if (!window.confirm(CONNECTION_LABELS.disconnectConfirm)) return;
     setSaving(true);
@@ -165,6 +200,17 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
   const expired = connected && Boolean(connection?.isExpired);
   const savedDestId: string | null = dest ? connection?.[dest.savedIdKey] || null : null;
   const savedDestName: string | null = dest ? connection?.[dest.savedNameKey] || savedDestId : null;
+  const pendingSelection = Boolean(config.pendingSelection && connection?.pendingSelection);
+  const pendingAccounts: Json[] = config.pendingSelection
+    ? ((connection?.[config.pendingSelection.listKey] as Json[] | undefined) ?? [])
+    : [];
+  const pendingAccountOptions = config.pendingSelection
+    ? pendingAccounts.map((item) => ({
+        id: String(item[config.pendingSelection!.idField]),
+        account: String(item[config.pendingSelection!.accountField] || "Cuenta de Instagram"),
+        page: String(item[config.pendingSelection!.pageField] || "Página no identificada"),
+      }))
+    : [];
   const options: Array<{ id: string; label: string; detail: string }> = dest
     ? ((connection?.[dest.listKey] as Json[] | undefined) ?? []).map((item) => ({
         id: String(item[dest.idField]),
@@ -174,8 +220,8 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
     : [];
   const account: string | null = config.accountKey && connection?.[config.accountKey] ? `${config.accountPrefix ?? ""}${String(connection[config.accountKey])}` : null;
   const pickedOption = options.find((option) => option.id === selected);
-  const pendingDestination = Boolean(dest) && connected && !expired && !savedDestId;
-  const state: ConnectionState = savedName ? "success" : !connected ? "disconnected" : expired ? "expired" : pendingDestination ? "pending" : "connected";
+  const pendingDestination = Boolean(dest) && connected && !expired && Boolean(dest?.pendingKey ? connection?.[dest.pendingKey] : !savedDestId);
+  const state: ConnectionState = savedName ? "success" : pendingSelection ? "pending" : !connected ? "disconnected" : expired ? "expired" : pendingDestination ? "pending" : "connected";
   const guide = CONNECTION_GUIDES[config.id];
   const connectLink = (
     <a href={`${base}/connect`} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
@@ -197,6 +243,34 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
               description="La configuración terminó correctamente. SEO TOTAL usará esta conexión desde ahora."
             />
           </>
+        ) : pendingSelection ? (
+          <div style={{ marginTop: 12, padding: "12px 0", borderTop: "1px solid #e5e5ea" }}>
+            <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px" }}>Elige la cuenta que se conectará</p>
+            <p style={{ color: "#6e6e73", fontSize: 14, lineHeight: 1.5, margin: "0 0 10px" }}>
+              Meta autorizó varias cuentas. Selecciona la vinculada a la página donde quieres publicar.
+            </p>
+            {pendingAccountOptions.length === 0 ? (
+              <p style={{ color: "#6e6e73", fontSize: 14 }}>No se encontraron cuentas profesionales disponibles.</p>
+            ) : (
+              <select
+                aria-label="Elige la cuenta de Instagram"
+                value={selected}
+                disabled={saving}
+                onChange={(event) => setSelected(event.target.value)}
+                style={CONNECTION_SELECT_STYLE}
+              >
+                <option value="">Elige una cuenta…</option>
+                {[...pendingAccountOptions].sort((x, y) => `${x.page} ${x.account}`.localeCompare(`${y.page} ${y.account}`, "es")).map((option) => (
+                  <option key={option.id} value={option.id}>{option.page} — @{option.account.replace(/^@/, "")}</option>
+                ))}
+              </select>
+            )}
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
+              <button type="button" onClick={approvePendingSelection} disabled={saving || !selected} style={disabledStyle({ ...buttonStyle, marginTop: 0 }, saving || !selected)}>
+                {saving ? "Guardando…" : "Conectar cuenta seleccionada"}
+              </button>
+            </div>
+          </div>
         ) : !configured ? (
           <>
             {guide && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />}
