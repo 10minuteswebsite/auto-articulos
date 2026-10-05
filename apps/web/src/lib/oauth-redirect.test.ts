@@ -8,6 +8,10 @@ test("acepta solo los hosts OAuth explícitos del proyecto", () => {
     getAllowedOAuthOrigin(new NextRequest("https://articulos.lasolucionweb.com/dashboard")),
     "https://articulos.lasolucionweb.com",
   );
+  assert.equal(
+    getAllowedOAuthOrigin(new NextRequest("https://redes.lasolucionweb.net/dashboard")),
+    "https://redes.lasolucionweb.net",
+  );
   assert.equal(getAllowedOAuthOrigin(new NextRequest("https://evil.example/dashboard")), null);
 });
 
@@ -70,7 +74,7 @@ test("retorno único apagado: el redirect_uri sale del host de la petición, com
   assert.equal(oauthReturnBase(r, {}), r.url); // ignora la cookie
 });
 
-test("DIA_CERO=on: el redirect_uri es SIEMPRE el canónico (la dirección ya registrada)", () => {
+test("DIA_CERO=on: .com usa el canónico y .net conserva su propio callback", () => {
   assert.equal(canonicalOAuthOrigin({ DIA_CERO: "on" }), "https://seototal.lasolucionweb.com");
   for (const host of ["seototal", "articulos", "redes"]) {
     assert.equal(
@@ -78,6 +82,10 @@ test("DIA_CERO=on: el redirect_uri es SIEMPRE el canónico (la dirección ya reg
       "https://seototal.lasolucionweb.com/api/search-integrations/linkedin/callback",
     );
   }
+  assert.equal(
+    oauthCallbackUri(req("https://redes.lasolucionweb.net/api/x"), "/api/search-integrations/instagram/callback", { DIA_CERO: "on" }),
+    "https://redes.lasolucionweb.net/api/search-integrations/instagram/callback",
+  );
   assert.equal(canonicalOAuthOrigin({ DIA_CERO: "on", OAUTH_CANONICAL_ORIGIN: "https://otro.example.com/ruta" }), "https://otro.example.com");
   assert.equal(canonicalOAuthOrigin({ OAUTH_CANONICAL_ORIGIN: "http://inseguro.example.com" }), null); // solo https
   assert.equal(canonicalOAuthOrigin({ OAUTH_CANONICAL_ORIGIN: "no es url" }), null);
@@ -117,7 +125,14 @@ test("rememberOAuthOrigin/clearOAuthOrigin escriben la cookie solo con el retorn
 });
 
 test("acepta los dos subdominios de producto y el principal", () => {
-  for (const host of ["seototal.lasolucionweb.com", "articulos.lasolucionweb.com", "redes.lasolucionweb.com"]) {
+  for (const host of [
+    "seototal.lasolucionweb.com",
+    "articulos.lasolucionweb.com",
+    "redes.lasolucionweb.com",
+    "seototal.lasolucionweb.net",
+    "articulos.lasolucionweb.net",
+    "redes.lasolucionweb.net",
+  ]) {
     assert.equal(getAllowedOAuthOrigin(new NextRequest(`https://${host}/dashboard`)), `https://${host}`);
   }
 });

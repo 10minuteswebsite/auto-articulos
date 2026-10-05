@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
-import { canUseSocialModule } from "@/lib/social-access";
+import { hasProductAccess } from "@/lib/product-access";
 
 export async function GET() {
   const userId = await getCurrentUserId();
-  if (!(await canUseSocialModule(userId))) return NextResponse.json({ connected: false });
+  if (!(await hasProductAccess(userId, "REDES")).allowed) return NextResponse.json({ connected: false });
   const integration = await prisma.facebookPageIntegration.findUnique({ where: { userId } });
   if (!integration) return NextResponse.json({ connected: false });
 
@@ -20,7 +20,7 @@ export async function GET() {
 
 export async function DELETE() {
   const userId = await getCurrentUserId();
-  if (!(await canUseSocialModule(userId))) return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
+  if (!(await hasProductAccess(userId, "REDES")).allowed) return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
   await prisma.facebookPageIntegration.deleteMany({ where: { userId } });
   return NextResponse.json({ ok: true });
 }

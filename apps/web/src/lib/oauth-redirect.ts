@@ -7,7 +7,24 @@ const DEFAULT_ALLOWED_HOSTS = [
   "seototal.lasolucionweb.com",
   "articulos.lasolucionweb.com",
   "redes.lasolucionweb.com",
+  "seototal.lasolucionweb.net",
+  "articulos.lasolucionweb.net",
+  "redes.lasolucionweb.net",
 ];
+
+/**
+ * Los aliases .net son dominios de entrada reales del Hub. No pueden usar un
+ * callback .com: una cookie de sesión de .net nunca cruza hacia .com. Cuando
+ * la persona inicia OAuth en .net, el callback debe permanecer en .net.
+ */
+function isNetProductHost(host: string): boolean {
+  const hostname = host.trim().toLowerCase().split(":", 1)[0];
+  return [
+    "seototal.lasolucionweb.net",
+    "articulos.lasolucionweb.net",
+    "redes.lasolucionweb.net",
+  ].includes(hostname);
+}
 
 /**
  * Devuelve el origen de la petición solo si el host está explícitamente
@@ -29,10 +46,13 @@ export function getOAuthRedirectUri(
   path: string,
   configuredRedirectUri: string,
 ): string {
+  const requestOrigin = getAllowedOAuthOrigin(request);
+  if (requestOrigin && isNetProductHost(request.nextUrl.host)) {
+    return `${requestOrigin}${path}`;
+  }
   const canonical = canonicalOAuthOrigin();
   if (canonical) return `${canonical}${path}`;
-  const origin = getAllowedOAuthOrigin(request);
-  return origin ? `${origin}${path}` : configuredRedirectUri;
+  return requestOrigin ? `${requestOrigin}${path}` : configuredRedirectUri;
 }
 
 /*
@@ -40,9 +60,11 @@ export function getOAuthRedirectUri(
  *
  * Objetivo de Milton: NO volver a tocar ninguna consola de proveedor. Con el
  * interruptor DIA_CERO=on (o OAUTH_CANONICAL_ORIGIN explícito):
- *  - Todos los `connect` (inicien en seototal., articulos. o redes.) le dicen al
- *    proveedor que vuelva a la dirección de SIEMPRE (el origen canónico), que es
- *    la que ya está registrada.
+ *  - Los `connect` que inicien en los hosts .com le dicen al proveedor que
+ *    vuelva a la dirección de SIEMPRE (el origen canónico), que es la que ya
+ *    está registrada.
+ *  - Los aliases .net se mantienen en .net porque una cookie no puede cruzar
+ *    de .net a .com; sus callbacks deben estar registrados por separado.
  *  - El host de origen se recuerda en una cookie corta (compartida por todo el
  *    .com) y, al terminar el callback, se devuelve al usuario a ese host.
  * Apagado (sin variables): todo se comporta exactamente como antes.
@@ -68,9 +90,12 @@ export function canonicalOAuthOrigin(env: Env = process.env): string | null {
 
 /** redirect_uri que se envía al proveedor: canónico si el retorno único está activo; si no, el host de la petición (como siempre). */
 export function oauthCallbackUri(request: { url: string }, path: string, env: Env = process.env): string {
+  const url = new URL(request.url);
+  if (isNetProductHost(url.host) && isAllowedOAuthHost(url.host, env)) {
+    return `${url.protocol}//${url.host}${path}`;
+  }
   const canonical = canonicalOAuthOrigin(env);
   if (canonical) return `${canonical}${path}`;
-  const url = new URL(request.url);
   return `${url.protocol}//${url.host}${path}`;
 }
 
@@ -94,6 +119,9 @@ export function rememberOAuthOrigin(
 ): void {
   if (!canonicalOAuthOrigin(env)) return;
   const host = new URL(request.url).host.toLowerCase();
+  // La cookie compartida es .com y el navegador la rechazaría desde .net.
+  // Además, en .net el callback ya vuelve al mismo host y no necesita puente.
+  if (isNetProductHost(host)) return;
   if (!isAllowedOAuthHost(host, env)) return;
   applyCookie(response, OAUTH_ORIGIN_COOKIE, host, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 }, env);
 }

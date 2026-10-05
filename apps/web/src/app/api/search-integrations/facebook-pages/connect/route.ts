@@ -3,12 +3,15 @@ import { NextResponse } from "next/server";
 import { getMetaPagesAuthUrl } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredInstagramAppCredentials } from "@/lib/instagram-app-config";
-import { canPublishToNetwork } from "@/lib/social-access";
+import { hasProductAccess } from "@/lib/product-access";
 import { FACEBOOK_PAGES_STATE_COOKIE } from "./constants";
 
 export async function GET(request: Request) {
   const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "facebook"))) {
+  // Conectar una Página es configuración del producto Redes. La aprobación
+  // individual de Facebook sigue aplicándose al publicar, pero no debe
+  // impedir que un tenant con el producto activo configure su primera red.
+  if (!(await hasProductAccess(userId, "REDES")).allowed) {
     const origin = new URL(request.url).origin;
     return NextResponse.redirect(new URL("/dashboard/configuracion/conexiones?conexion=facebook&vista=difusion&resultado=forbidden", origin));
   }

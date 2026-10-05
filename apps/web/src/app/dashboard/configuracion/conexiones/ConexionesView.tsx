@@ -63,6 +63,7 @@ export default function ConexionesView() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [modulosDeshabilitados, setModulosDeshabilitados] = useState<string[]>([]);
   const [permisos, setPermisos] = useState<Record<string, boolean>>({});
+  const [redesProductAccess, setRedesProductAccess] = useState(false);
   const [configuradas, setConfiguradas] = useState<Record<string, boolean>>({});
   const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   const [hostReady, setHostReady] = useState(false);
@@ -112,6 +113,7 @@ export default function ConexionesView() {
         if (!data) return;
         setIsAdmin(data.role === "admin");
         if (Array.isArray(data.disabledModules)) setModulosDeshabilitados(data.disabledModules);
+        setRedesProductAccess(data.products?.redes?.allowed === true);
         setPermisos({
           instagram: data.allowInstagramPublishing ?? false,
           facebook: data.allowFacebookPublishing ?? false,
@@ -210,7 +212,10 @@ export default function ConexionesView() {
   }
 
   // Misma regla que Redes Sociales: el módulo de redes abierto para esta cuenta da acceso.
-  const tieneModuloRedes = !modulosDeshabilitados.includes("oportunidades-redes");
+  // Un derecho explícito al producto Redes permite entrar a Conexiones aunque
+  // la cuenta todavía no tenga ninguna red aprobada o configurada. Las
+  // aprobaciones individuales se reservan para las funciones de publicación.
+  const tieneModuloRedes = redesProductAccess || !modulosDeshabilitados.includes("oportunidades-redes");
   const puede = (red: string) => isAdmin || tieneModuloRedes || Boolean(permisos[red]);
 
   if (!hostReady) return null;
