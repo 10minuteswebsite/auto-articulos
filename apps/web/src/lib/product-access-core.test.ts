@@ -119,18 +119,18 @@ test("GRACE sin fecha es un dato incoherente: se trata como vencida, nunca como 
   assert.equal(r.reason, "GRACE_EXPIRED");
 });
 
-// --- Regla 4: Redes suma el derecho a la regla anterior -----------------------
-test("Redes con derecho ACTIVE pero sin ninguna red aprobada sigue bloqueado", () => {
+// --- Regla 4: el derecho al producto es independiente de las redes ----------
+test("Redes con derecho ACTIVE permite entrar aunque no haya ninguna red aprobada", () => {
   const r = evaluate({
     product: "REDES",
     entitlement: { status: "ACTIVE", graceUntil: null },
     legacyAllowsRedes: false,
   });
-  assert.equal(r.allowed, false);
-  assert.equal(r.reason, "NO_NETWORK_APPROVED");
+  assert.equal(r.allowed, true);
+  assert.equal(r.reason, "ACTIVE");
 });
 
-test("Redes con derecho ACTIVE y redes aprobadas permite", () => {
+test("Redes con derecho ACTIVE también permite cuando hay redes aprobadas", () => {
   const r = evaluate({
     product: "REDES",
     entitlement: { status: "ACTIVE", graceUntil: null },
@@ -150,11 +150,11 @@ test("Redes con derecho INACTIVE bloquea aunque tenga redes aprobadas", () => {
   assert.equal(r.reason, "INACTIVE");
 });
 
-test("Redes en gracia vigente con redes aprobadas permite", () => {
+test("Redes en gracia vigente permite aunque no haya redes aprobadas", () => {
   const r = evaluate({
     product: "REDES",
     entitlement: { status: "GRACE", graceUntil: inDays(3) },
-    legacyAllowsRedes: true,
+    legacyAllowsRedes: false,
   });
   assert.equal(r.allowed, true);
   assert.equal(r.reason, "GRACE");

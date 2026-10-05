@@ -77,8 +77,9 @@ const HUB_ENTRY: TabItem = { href: HUB_URL, label: "Volver al HUB" };
 // POR PRODUCTO. Ninguna ruta cambia: son las mismas pantallas, agrupadas de
 // otra forma. Historial y Progreso aparecen en ambos porque hoy mezclan los
 // dos productos en la misma página (se filtrarán por producto más adelante).
-// La entrada de Redes se muestra siempre (pedido de Milton, 1/10/2026): sin
-// permiso, ModuleGuard bloquea la pantalla con un mensaje claro.
+// La entrada de Redes se muestra siempre (pedido de Milton, 1/10/2026): el
+// derecho al producto y las autorizaciones de publicación se comprueban por
+// separado; la pantalla puede abrirse aunque aún no haya redes configuradas.
 // CONTRATO con Historial y Progreso: los enlaces llevan `?producto=articulos|redes`
 // para que esas pantallas muestren solo su mitad. Mientras no lo implementen, lo
 // ignoran y siguen mostrando todo, como hoy (ver CONTROL, C-016, punto 4b).

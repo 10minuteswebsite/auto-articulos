@@ -3,8 +3,8 @@ import { MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
 
 // Inicio de SEO Total Redes (proyecto «SEPARACION DE SEO TOTAL», Lote 2). Se
 // muestra siempre aunque la cuenta no tenga redes activas (pedido de Milton,
-// 1/10/2026): la pantalla de publicar en redes es la que se bloquea con su
-// mensaje claro (ModuleGuard). Esta portada no mueve ninguna ruta.
+// 1/10/2026): el acceso al producto no depende de una red conectada. Las
+// funciones de publicación siguen comprobando sus permisos por red.
 export default function RedesHomePage() {
   return (
     <ProductHome

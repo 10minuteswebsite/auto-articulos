@@ -32,11 +32,10 @@ export interface ProductsInfo {
 }
 
 /**
- * Motivos por los que la puerta tapa la pantalla: el acceso ya no existe
- * (nunca activado o gracia vencida). «NO_NETWORK_APPROVED» NO está aquí a
- * propósito: significa que a la cuenta nunca se le aprobó ninguna red y esa
- * pantalla ya tiene su propio aviso claro (ModuleGuard); decir «terminó» sería
- * falso.
+ * Motivos por los que la puerta tapa la pantalla: el acceso al producto ya no
+ * existe (nunca activado o gracia vencida). «NO_NETWORK_APPROVED» NO está
+ * aquí a propósito: la ausencia de redes aprobadas no revoca el acceso al
+ * producto; solo limita las funciones de publicación.
  */
 export const GATE_BLOCK_REASONS: readonly string[] = ["INACTIVE", "GRACE_EXPIRED"];
 

@@ -10,6 +10,10 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
   const [disabledModules, setDisabledModules] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [socialPublishingApproved, setSocialPublishingApproved] = useState(false);
+  const [redesProductAccess, setRedesProductAccess] = useState<{
+    allowed?: boolean;
+    reason?: string;
+  } | null>(null);
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -21,6 +25,7 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
         setSocialPublishingApproved(Boolean(data?.socialPublishingApproved));
+        setRedesProductAccess(data?.products?.redes ?? null);
         if (Array.isArray(data?.disabledModules)) {
           setDisabledModules(data.disabledModules);
         }
@@ -50,16 +55,23 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
   ).sort((a, b) => b.href.length - a.href.length)[0];
 
   /*
-   * Redes (oportunidades-redes) se revisa primero y aparte, con un solo
-   * mensaje: no importa si la razón es que está apagado para todos, que
-   * Administración lo deshabilitó para esta cuenta en particular, o que
-   * todavía no tiene ninguna red aprobada — `socialPublishingApproved`
-   * (hasSocialModuleAccess en el servidor) ya resume las tres en un booleano.
-   * Pedido explícito de Milton (1/10/2026): el botón del Inicio se ve
-   * siempre; esta pantalla es la que explica por qué no se puede entrar.
+   * El acceso al producto Redes y las autorizaciones de publicación son dos
+   * decisiones distintas. Un ProductEntitlement ACTIVE/GRACE abre el
+   * producto aunque el tenant aún no tenga redes configuradas. Las
+   * aprobaciones individuales siguen siendo necesarias para publicar y las
+   * APIs las comprueban por separado.
+   *
+   * Si no existe ProductEntitlement, conservamos la compatibilidad legacy:
+   * una cuenta con el módulo social habilitado puede entrar; una cuenta sin
+   * ninguna autorización sigue viendo el bloqueo histórico.
    */
   if (matchingModule?.id === "oportunidades-redes") {
-    if (!socialPublishingApproved) {
+    const canEnterRedes = redesProductAccess
+      ? redesProductAccess.allowed === true ||
+        (redesProductAccess.reason === "NO_NETWORK_APPROVED" && socialPublishingApproved)
+      : socialPublishingApproved;
+
+    if (!canEnterRedes) {
       return (
         <div
           style={{
