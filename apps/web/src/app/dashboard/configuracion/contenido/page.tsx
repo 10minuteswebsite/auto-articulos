@@ -10,6 +10,7 @@ import {
   secondaryButtonStyle,
   disabledStyle,
 } from "@/components/dashboard-ui";
+import { productOfHost, type HostProductScope } from "@/lib/product-routes";
 
 const MAX_SIGNATURE_LEN = 700;
 const MAX_LOCATIONS_LEN = 500;
@@ -59,6 +60,8 @@ export default function ConfiguracionContenidoPage() {
     type: "error" | "info";
     text: string;
   } | null>(null);
+  const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
+  const [hostReady, setHostReady] = useState(false);
 
   const signaturePercent = Math.min(
     100,
@@ -86,6 +89,11 @@ export default function ConfiguracionContenidoPage() {
       setProfilePhotoUrls({ profile: data.profilePhotoUrl ?? null, profile2: data.profilePhotoUrl2 ?? null, profile3: data.profilePhotoUrl3 ?? null });
       setBusinessLogoUrls({ logo: data.businessLogoUrl ?? null, logo2: data.businessLogoUrl2 ?? null });
     }
+  }, []);
+
+  useEffect(() => {
+    setHostProduct(productOfHost(window.location.hostname));
+    setHostReady(true);
   }, []);
 
   useEffect(() => {
@@ -265,30 +273,38 @@ export default function ConfiguracionContenidoPage() {
     }
   }
 
+  if (!hostReady) return null;
+
+  const esRedes = hostProduct === "REDES";
+  const esArticulos = hostProduct === "ARTICULOS";
+
   return (
     <div>
-      <ModuleIntro titulo="Contenido">
-        <IntroP>
-          Aquí defines cómo se ven y suenan tus artículos: el estilo de
-          redacción, el texto que los firma, a qué clientes y lugares apuntan,
-          tu teléfono de contacto y las fotos que se usan al crear
-          publicaciones para redes sociales.
-        </IntroP>
-        <ol style={{ margin: "12px 0 0", paddingLeft: 22, color: "#1d1d1f", fontSize: 14, lineHeight: 1.65 }}>
-          <li><strong>Elige el estilo de redacción:</strong> el tono con el que la inteligencia artificial escribe por defecto.</li>
-          <li><strong>Escribe la firma:</strong> el texto que se agrega automáticamente al final de cada artículo nuevo.</li>
-          <li><strong>Indica ubicaciones (opcional):</strong> de dónde son tus clientes y dónde opera tu negocio, para títulos más segmentados.</li>
-          <li><strong>Segmento de no publicar (opcional):</strong> temas que la publicación inteligente debe descartar siempre, sin importar la demanda real.</li>
-          <li><strong>Guarda tu teléfono:</strong> se usa en los botones de WhatsApp y llamada de tus artículos.</li>
-          <li><strong>Sube tus fotos y logo:</strong> se usan al crear imágenes para redes sociales.</li>
-        </ol>
-        <IntroP>
-          Si buscas tu usuario y contraseña, tus categorías o el idioma de
-          redacción, eso vive en Cuenta.
-        </IntroP>
+      <ModuleIntro titulo={esRedes ? "Marca para Redes" : "Contenido"}>
+        {esRedes ? (
+          <IntroP>
+            Aquí subes las fotos y los logos que SEO TOTAL REDES usará para crear publicaciones de tu marca.
+          </IntroP>
+        ) : (
+          <>
+            <IntroP>
+              Aquí defines cómo se ven y suenan tus artículos: el estilo de redacción, la firma, las ubicaciones, el teléfono de contacto y los temas que no quieres publicar.
+            </IntroP>
+            <ol style={{ margin: "12px 0 0", paddingLeft: 22, color: "#1d1d1f", fontSize: 14, lineHeight: 1.65 }}>
+              <li><strong>Elige el estilo de redacción:</strong> el tono con el que la inteligencia artificial escribe por defecto.</li>
+              <li><strong>Escribe la firma:</strong> el texto que se agrega automáticamente al final de cada artículo nuevo.</li>
+              <li><strong>Indica ubicaciones (opcional):</strong> de dónde son tus clientes y dónde opera tu negocio, para títulos más segmentados.</li>
+              <li><strong>Segmento de no publicar (opcional):</strong> temas que la publicación inteligente debe descartar siempre.</li>
+              <li><strong>Guarda tu teléfono:</strong> se usa en los botones de WhatsApp y llamada de tus artículos.</li>
+            </ol>
+            <IntroP>
+              Si buscas tu usuario y contraseña, tus categorías o el idioma de redacción, eso vive en Cuenta.
+            </IntroP>
+          </>
+        )}
       </ModuleIntro>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {!esRedes && <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Estilo de Redacción por Defecto */}
         <section style={sectionStyle}>
           <h2 style={h2Style}>Estilo de redacción por defecto</h2>
@@ -508,7 +524,10 @@ export default function ConfiguracionContenidoPage() {
           </div>
         </section>
 
-        {/* Foto de perfil y Logo del negocio — cada usuario sube los suyos */}
+      </div>}
+
+      {/* Foto de perfil y Logo del negocio — cada usuario sube los suyos */}
+      {!esArticulos && <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <section style={sectionStyle}>
           <div
             style={{
@@ -620,7 +639,7 @@ export default function ConfiguracionContenidoPage() {
             maxKb={200}
           />
         </section>
-      </div>
+      </div>}
 
       {banner && (
         <div

@@ -1844,3 +1844,51 @@ no se puede verificar auditoría, estado de Vercel ni si fueron revisados, porqu
 registro de ese trabajo en ninguno de los documentos maestros. Esta tarea programada no
 inventa ese registro retroactivamente (no participó del trabajo original); solo señala
 el hueco.
+
+### Addendum (agregado por la tarea programada diaria de propagación, 2026-10-02, sin editar la Parte A ni la Parte B anteriores)
+
+**Parte A:** se verificó en vivo con `git ls-remote`, `git fetch` y `git merge-base
+--is-ancestor` el estado de las ramas mencionadas en el rango de Coordinación revisado
+(`59f7ae7..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`):
+
+- `claude/lote1-product-entitlements` (Lote 1 «SEPARACION SEO TOTAL», derechos por producto):
+  ya fusionada en `origin/main` vía PR #313 (merge commit `9ba0170`). **No es una reserva
+  activa** — consistente con lo que la propia Coordinación dice ("hoy no hay capitán activo").
+  Detalle de despliegue en `CONTROLADOR_DE_VERSIONES.md`.
+- `codex/mcp-autonomous-20261001` (Auditoría autónoma MCP de Codex: confirmaciones, catálogo
+  dinámico, sitemaps, migración `20261001120000_add_mcp_publish_confirmations`): **NO** es
+  ancestro de `origin/main` todavía — **sigue siendo una reserva activa de Codex**, capitanía de
+  migración reclamada y sin liberar según la propia entrada de Coordinación. No tocar los
+  archivos de esa auditoría ni aplicar esa migración sin que Codex libere la capitanía.
+
+**Parte B — nombres de conversación nuevos encontrados en `COORDINACION_CLAUDE_CODEX.md`** en
+este rango (detalle técnico completo en Coordinación y, para las ya cerradas, en
+`CONTROLADOR_DE_VERSIONES.md`; no se transcribe aquí para no duplicar):
+
+- `[Claude] - Incidente Load failed en oportunidades — Rafael Zuzolo` — 2026-09-30/10-01,
+  commit `b23b9af9`, RESUELTO Y ARCHIVADO.
+- `[Claude] - CONEXION COMPOSIO PROBLEMA PEPE` — 2026-09-28/10-01, PR #249, CERRADO Y
+  ARCHIVADO.
+- `[Claude] - LOTE 1 «SEPARACION SEO TOTAL»: derechos por producto` — 2026-10-01/10-02, PR #313,
+  fusionada y migración aditiva aplicada en producción (interruptor `product_enforcement` sigue
+  apagado); capitanía liberada, hoy sin capitán activo.
+- `[Codex] - Auditoría autónoma MCP` — 2026-10-01, capitanía de migración ACTIVA (ver Parte A
+  arriba), PR todavía sin fusionar.
+
+**Nota aparte, sin resolver (agregada también en `CONTROLADOR_DE_VERSIONES.md` y en
+`REPARADOR_DEL_ARBOL_PRINCIPAL.md`):** el commit `7474bd7` ("fix: reset category sync progress
+between attempts", ya señalado el 2026-10-01 arriba) sigue sin ninguna entrada en Coordinación
+ni en el Controlador — este rango tampoco la trajo. Sigue siendo un hueco abierto para que
+Milton decida.
+
+## Addendum — 2026-10-03 (tarea programada diaria de propagación)
+
+**Parte B — nombre de conversación nuevo encontrado en `COORDINACION_CLAUDE_CODEX.md`** en el
+rango `d907481..origin/main` (detalle técnico completo en Coordinación y en
+`CONTROLADOR_DE_VERSIONES.md`, que ya tiene esta entrada propagada por el propio Milton; no se
+transcribe aquí para no duplicar):
+
+- `CARMEN AGUILAR CONEXION GSC` — 2026-10-02, commits `f5d1b6b2` (comportamiento) y `189379b1`
+  (configuración Vercel), CERRADO Y ARCHIVADO. Sin agente específico citado en la entrada de
+  Coordinación (cerrada directamente por Milton); se registra aquí solo para que el nombre de la
+  conversación quede en el historial.

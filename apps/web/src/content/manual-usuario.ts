@@ -1,4 +1,4 @@
-import { MENU_NAMES, MENU_NAMES_ANTERIORES as ANTES } from "../lib/menu-names";
+import { MENU_NAMES, MENU_NAMES_ANTERIORES as ANTES, PRODUCT_NAMES } from "../lib/menu-names";
 
 /**
  * Manual base de uso. Se revisa cuando cambia una función estable del sistema.
@@ -29,10 +29,10 @@ También puedes volver a abrir el Asistente en cualquier momento desde **Configu
 
 Ruta: /dashboard
 
-Inicio es tu centro de operaciones:
+Inicio es tu centro de operaciones. **Si tu cuenta tiene activa la vista por productos** (ver «El menú»), Inicio muestra en cambio dos tarjetas, **${PRODUCT_NAMES.ARTICULOS}** y **${PRODUCT_NAMES.REDES}**; lo que sigue describe el Inicio estándar:
 - **Para cuentas nuevas (sin artículos aún):** Muestra de forma exclusiva el Asistente de Configuración Inicial, sin menú ni accesos directos, para que completes tu puesta a punto sin distracciones.
 - **Para cuentas ya configuradas:** Muestra únicamente el título **Acciones posibles** y tres tarjetas: **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}** y **${MENU_NAMES.redes}**. En móvil se muestran en una sola columna para que cada acción sea fácil de pulsar.
-- La tarjeta de **${MENU_NAMES.redes}** solo aparece, tanto en Inicio como en el menú y en **Comienza Aquí**, si tu cuenta tiene marcada en Administración al menos una aprobación de red social o blog; sin ninguna aprobación, esa tercera acción no se muestra. Los administradores, y los administradores que están usando una cuenta ajena para dar soporte, siempre la ven.
+- La tarjeta de **${MENU_NAMES.redes}** se muestra **siempre**, tanto en Inicio como en el menú y en **Comienza Aquí**. Si tu cuenta todavía no tiene activada esa sección (Administración debe aprobar al menos una red social o blog), al pulsarla verás un aviso claro de que aún no está disponible para tu cuenta, en lugar de que el botón desaparezca. Los administradores, y los administradores que están usando una cuenta ajena para dar soporte, siempre la tienen.
 - Las estadísticas no ocupan espacio en Inicio: se consultan desde **Publicaciones → Estadísticas**, junto al historial.
 - Desde el menú superior tienes acceso a: Cómo funciona esta aplicación, Publicaciones y Configuración. Historial está dentro de Publicaciones y Actualizaciones dentro de Configuración.
 
@@ -46,7 +46,7 @@ En el teléfono, ese recuadro de explicación aparece plegado por defecto en las
 
 ## El menú
 
-El menú superior tiene, en este orden: **Inicio**, **Cómo funciona esta aplicación**, **Publicaciones** y **Configuración**. Dentro de **Publicaciones** están **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}**, **${MENU_NAMES.redes}**, el progreso y el historial. Dentro de **Configuración** están la configuración general y las actualizaciones. Los administradores ven además **Administración**, que también se despliega y contiene **Usuarios** (/dashboard/usuarios) y **Composio** (/dashboard/composio).
+El menú superior tiene, en este orden: **Inicio**, **Cómo funciona esta aplicación**, **Publicaciones** y **Configuración**. Dentro de **Publicaciones** están **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}**, **${MENU_NAMES.redes}**, el progreso y el historial. Dentro de **Configuración** están la configuración general y las actualizaciones. Los administradores ven además **Administración**, que también se despliega y contiene **Usuarios** (/dashboard/usuarios) y **Composio** (/dashboard/composio). En la ficha de cada usuario, los administradores tienen la sección **Productos**: ahí ven los dos productos en que se separa SEO TOTAL (**${PRODUCT_NAMES.ARTICULOS}** y **${PRODUCT_NAMES.REDES}**), pueden activarlos o desactivarlos y dar o quitar días de gracia. Por ahora ese control solo prepara los datos: no cambia lo que ve ningún usuario. Debajo de los productos hay un **Historial** plegable con los últimos cambios de derechos de esa cuenta (fecha, producto, de qué estado a cuál, quién y el motivo). Además, en **Administración → Usuarios**, arriba, está el **interruptor de derechos por producto** con tres modos: **Apagado** (no se aplica nada, como hoy), **Sombra** (solo se registra lo que se bloquearía) y **Activo** (bloquea de verdad a las cuentas sin derecho). Para pasar a Activo hay que estar antes en Sombra y escribir la palabra ACTIVAR; volver a Sombra o Apagado es siempre inmediato. **Vista por productos (vista previa):** los administradores, y las cuentas a las que Administración active el módulo «Vista por productos», ven el menú y el Inicio organizados en dos productos, **${PRODUCT_NAMES.ARTICULOS}** y **${PRODUCT_NAMES.REDES}**, cada uno con su propio inicio (/dashboard/articulos y /dashboard/redes), en lugar del grupo único Publicaciones. Las pantallas y sus direcciones son las mismas de siempre; el resto de las cuentas sigue viendo el menú de siempre. **Acceso por producto:** cuando Administración lo activa, si tu acceso gratuito a un producto está por terminar verás un aviso con la fecha de fin, y si ya terminó, esa sección te lo explicará y te indicará que contactes al administrador; tus datos no se pierden. Mientras Administración no lo active, no verás ningún aviso ni bloqueo. **Mi acceso:** con la vista por productos activa, en **Configuración → Mi acceso** (/dashboard/mi-acceso) puedes consultar, solo para leer, qué productos tiene tu cuenta (**${PRODUCT_NAMES.ARTICULOS}** y **${PRODUCT_NAMES.REDES}**) y su estado: activo, en gracia hasta una fecha, o sin acceso. Los cambios de acceso los realiza siempre el administrador; si necesitas uno, contáctalo.
 
 **Publicaciones** no es una pantalla: es un grupo que se despliega. Dentro están cinco accesos relacionados con publicar y revisar tus resultados:
 
@@ -65,6 +65,10 @@ Nombres anteriores: si una novedad antigua o una explicación vieja usa otro nom
 Si el administrador te oculta algún módulo, simplemente no aparece en el menú. Si te oculta los cuatro, el grupo Publicaciones desaparece entero.
 
 ## Configuración
+
+### Día Cero
+
+En Administración, el botón Día Cero muestra primero una simulación. Si todo es correcto, escribe DIA CERO y pulsa Activar Día Cero. Después crea la variable DIA_CERO con valor on en Vercel y vuelve a desplegar. Si algo sale mal, pulsa Revertir y borra la variable.
 
 Ruta: /dashboard/configuracion
 
@@ -484,6 +488,29 @@ hacerlo paso a paso**, **Nueva conexión**, la pantalla de **Conexión exitosa**
 mismas etiquetas y guía (**Nueva conexión**, **Aprobar y guardar**, **Probar
 conexión**, **Desconectar**); su envío nocturno de sitemap y su indexación no
 cambian.
+
+Actualización (2026-10-01): el aviso rojo «Reconectar Google Search Console»
+de Inicio ahora también aparece en un segundo caso, distinto al de arriba:
+cuando la conexión actual sigue activa pero Google rechazó el último uso
+real (por ejemplo al pulsar "Analizar contenido" en ${MENU_NAMES.ia}) con un
+error concreto, como haber perdido el permiso de propietario verificado
+sobre esa propiedad. En ese caso la descripción del aviso incluye el motivo
+exacto que devolvió Google, y desaparece sola en cuanto se reconecta esa
+propiedad desde Conexiones.
+
+Actualización (2026-10-02): en Conexiones, cuando conectas Search Console,
+Analytics, Facebook o Instagram por Composio y la cuenta de Google o Meta no
+devuelve ninguna propiedad, Página o cuenta utilizable, la tarjeta ya no dice
+«Conectada · sin propiedades disponibles» (eso daba a entender que sí estaba
+conectada cuando en realidad no se podía usar). Ahora dice **«No conectada ·
+sin propiedades disponibles»**. De la misma forma, si la autorización quedó
+activa pero todavía no elegiste cuál propiedad, Página o cuenta usar, ya no
+dice «Conectada · falta elegir»: dice **«Configuración incompleta · falta
+elegir»**, y el texto de ayuda aclara que la autorización quedó incompleta
+porque todavía no hay una propiedad, Página o cuenta disponible para SEO
+TOTAL. En ambos casos la solución es la misma: revisa que la cuenta de
+Google o Meta que usaste tenga permiso sobre el sitio/Página que necesitas,
+o pulsa **Nueva conexión** para reconectar con la cuenta correcta.
 
 ## Problemas frecuentes
 

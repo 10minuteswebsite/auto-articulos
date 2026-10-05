@@ -9,6 +9,7 @@ import {
   verifySessionToken,
 } from "@/lib/session";
 import { auditLog } from "@/lib/audit";
+import { applyCookie, clearCookie } from "@/lib/shared-cookies";
 
 /**
  * Identidad real del admin, leída directamente de la cookie de sesión (no de
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
 
   const token = await createImpersonationToken(admin.id, target.id);
   const response = NextResponse.json({ ok: true });
-  response.cookies.set(IMPERSONATION_COOKIE, token, {
+  applyCookie(response, IMPERSONATION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     // "lax": con "strict" la cookie se pierde al volver de Google/Composio y el callback OAuth ve al admin, no al cliente.
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE() {
   const admin = await getRealAdmin();
   const response = NextResponse.json({ ok: true });
-  response.cookies.set(IMPERSONATION_COOKIE, "", { path: "/", maxAge: 0 });
+  clearCookie(response, IMPERSONATION_COOKIE, { path: "/" });
   if (admin) {
     auditLog("impersonation_stop", admin.id);
   }

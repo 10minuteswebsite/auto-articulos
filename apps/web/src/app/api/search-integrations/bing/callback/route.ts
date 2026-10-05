@@ -4,6 +4,8 @@ import { prisma } from "@auto-articulos/db";
 import { encryptSecret, formatBingTokenPayload } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { BING_STATE_COOKIE, bingOAuthConfig } from "@/lib/bing-oauth";
+import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -17,7 +19,7 @@ export async function GET(request: NextRequest) {
   if (!state || state !== cookieStore.get(BING_STATE_COOKIE)?.value || !code) {
     const motivoEstado = !code ? "Bing no devolvió el código de autorización" + (request.nextUrl.searchParams.get("error") ? ` (${request.nextUrl.searchParams.get("error")}: ${request.nextUrl.searchParams.get("error_description") ?? ""})` : "") : !state ? "Bing no devolvió el parámetro state" : "la cookie de seguridad no coincide (state)";
     console.error(`[bing/callback] Estado/código inválido: ${motivoEstado}`);
-    const back = new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", request.url);
+    const back = new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", oauthReturnBase(request));
     back.searchParams.set("bing", "error");
     back.searchParams.set("motivo", "estado");
     back.searchParams.set("detalle", motivoEstado.slice(0, 200));
@@ -32,7 +34,9 @@ export async function GET(request: NextRequest) {
   let detalle = "";
   try {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
-    const { clientId, clientSecret, redirectUri } = bingOAuthConfig();
+    const config = bingOAuthConfig();
+    const { clientId, clientSecret } = config;
+    const redirectUri = getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);
     const tokenResponse = await fetch(
       "https://www.bing.com/webmasters/oauth/token",
       {
@@ -80,9 +84,10 @@ export async function GET(request: NextRequest) {
     if (existing) await prisma.searchIntegration.update({ where: { id: existing.id }, data: { encryptedRefreshToken: encryptSecret(payload) } });
     else await prisma.searchIntegration.create({ data: { userId, provider: "bing", siteDomain, encryptedRefreshToken: encryptSecret(payload) } });
     const response = NextResponse.redirect(
-      new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster&bing=connected", request.url),
+      new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster&bing=connected", oauthReturnBase(request)),
     );
-    response.cookies.delete(BING_STATE_COOKIE);
+    clearCookie(response, BING_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch (error) {
     if (!detalle) {
@@ -91,7 +96,7 @@ export async function GET(request: NextRequest) {
       // es completamente distinta.
       detalle = `fallo interno: ${error instanceof Error ? error.message : String(error)}`;
     }
-    const destino = new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", request.url);
+    const destino = new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", oauthReturnBase(request));
     destino.searchParams.set("bing", "error");
     destino.searchParams.set("motivo", "token");
     destino.searchParams.set("detalle", detalle.slice(0, 200));

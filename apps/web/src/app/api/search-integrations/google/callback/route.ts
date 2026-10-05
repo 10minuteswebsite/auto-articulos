@@ -5,6 +5,8 @@ import { prisma } from "@auto-articulos/db";
 import { encryptSecret } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { GOOGLE_STATE_COOKIE, googleOAuthConfig } from "@/lib/google-oauth";
+import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -17,12 +19,14 @@ export async function GET(request: NextRequest) {
     !code
   ) {
     return NextResponse.redirect(
-      new URL(connectionReturnPath("google-search-console", "error"), request.url),
+      new URL(connectionReturnPath("google-search-console", "error"), oauthReturnBase(request)),
     );
   }
   try {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
-    const { clientId, clientSecret, redirectUri } = googleOAuthConfig();
+    const config = googleOAuthConfig();
+    const { clientId, clientSecret } = config;
+    const redirectUri = getOAuthRedirectUri(request, "/api/search-integrations/google/callback", config.redirectUri);
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -51,14 +55,15 @@ export async function GET(request: NextRequest) {
       // fallback a /dashboard
     }
 
-    const redirectTarget = new URL(returnTo, request.url);
+    const redirectTarget = new URL(returnTo, oauthReturnBase(request));
     redirectTarget.searchParams.set("google", "connected");
     const response = NextResponse.redirect(redirectTarget);
-    response.cookies.delete(GOOGLE_STATE_COOKIE);
+    clearCookie(response, GOOGLE_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch {
     return NextResponse.redirect(
-      new URL(connectionReturnPath("google-search-console", "error"), request.url),
+      new URL(connectionReturnPath("google-search-console", "error"), oauthReturnBase(request)),
     );
   }
 }

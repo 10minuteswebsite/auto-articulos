@@ -1,6 +1,8 @@
 export const TRIAL_DAYS = 7;
 export const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 export const TRIAL_WHATSAPP_LINK = "https://wa.link/qdwyyy";
+export const TRIAL_RULE_SETTING_KEY = "trial_rule_enabled";
+export const TRIAL_RULE_ENABLED_DEFAULT = true;
 
 /**
  * true si la cuenta puede usar el sistema ahora mismo. `trialUnlocked` es el
@@ -16,7 +18,9 @@ export function hasTrialAccess(user: {
   isTrialSignup: boolean;
   trialStartedAt: Date | null;
   trialUnlocked: boolean;
-}): boolean {
+}, trialRuleEnabled = TRIAL_RULE_ENABLED_DEFAULT): boolean {
+  // El interruptor apagado conserva acceso total para no bloquear cuentas.
+  if (!trialRuleEnabled) return true;
   if (user.role === "admin") return true;
   if (user.trialUnlocked) return true;
   if (!user.isTrialSignup || !user.trialStartedAt) return true;

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
-import { normalizeE164Phone } from "@/lib/phone";
 import { platformBaseUrl } from "@auto-articulos/shared";
 import { getCurrentUser, getCurrentUserId, getActingAdmin, displayName } from "@/lib/current-user";
 
@@ -11,7 +10,8 @@ import {
   parseUserModuleOverrides,
 } from "@/lib/modules";
 import { hasSocialModuleAccess } from "@/lib/social-access";
-import { syncUserToHubBestEffort } from "@/lib/hub-sync";
+import { getProductsSummary } from "@/lib/product-access";
+import { getEnforcementMode } from "@/lib/product-enforcement";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -31,6 +31,13 @@ export async function GET() {
   const disabledModules = getEffectiveDisabledModules(user, globalDisabledModules);
   const userDisabledModules = parseUserDisabledModules(user.disabledModules);
   const moduleOverrides = parseUserModuleOverrides(user.disabledModules);
+  // Derechos por producto (proyecto «SEPARACION DE SEO TOTAL», Lote 1). Es solo
+  // informativo y A PRUEBA DE FALLOS: si la tabla aún no existe devuelve null y
+  // el resto de la respuesta no cambia. Ningún campo anterior se modifica.
+  const products = await getProductsSummary(user.id);
+  // Modo del interruptor de derechos (off/shadow/enforce). Siempre «off» si hay
+  // cualquier fallo: leerlo nunca debe romper esta respuesta.
+  const productEnforcement = await getEnforcementMode();
 
   return NextResponse.json(
     {
@@ -96,6 +103,8 @@ export async function GET() {
       userDisabledModules,
       moduleOverrides,
       globalDisabledModules,
+      products,
+      productEnforcement,
     },
     {
       headers: {
@@ -231,14 +240,8 @@ export async function PATCH(request: NextRequest) {
         { status: 400 },
       );
     }
-    const normalizedPhone = normalizeE164Phone(phone);
-    if (typeof phone === "string" && phone.trim() && !normalizedPhone) {
-      return NextResponse.json(
-        { error: "El teléfono debe incluir código de país, por ejemplo +14155550100." },
-        { status: 400 },
-      );
-    }
-    data.phone = normalizedPhone;
+    const trimmed = typeof phone === "string" ? phone.trim() : "";
+    data.phone = trimmed || null;
   }
 
   if ("imagePrompt" in body) {
@@ -321,8 +324,6 @@ export async function PATCH(request: NextRequest) {
       hasImageCredits: true,
     },
   });
-
-  await syncUserToHubBestEffort(userId);
 
   return NextResponse.json(user);
 }

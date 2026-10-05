@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 
 // Registra la aceptación expresa del aviso de divulgación de Oportunidades
 // (algoritmo automatizado + IA, sin responsabilidad del administrador sobre
@@ -9,6 +10,8 @@ import { getCurrentUserId } from "@/lib/current-user";
 // vuelve a pisar (la fecha original es la que tiene valor legal).
 export async function POST() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities/disclosure");
+  if (denied) return denied;
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: { opportunitiesDisclosureAcceptedAt: true },

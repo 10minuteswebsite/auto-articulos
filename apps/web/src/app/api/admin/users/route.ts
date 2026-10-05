@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { redesProfile } from "@/lib/redes-profile";
 import {
   decryptSecret,
   encryptSecret,
@@ -10,9 +11,8 @@ import {
   PLATFORM_DOMAIN_VALUES,
 } from "@auto-articulos/shared";
 import { auditLog } from "@/lib/audit";
+import { ensureDefaultEntitlements } from "@/lib/product-access";
 import { getCurrentUserId, requireAdmin } from "@/lib/current-user";
-import { syncUserToHubBestEffort } from "@/lib/hub-sync";
-import { normalizeE164Phone } from "@/lib/phone";
 import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
@@ -307,14 +307,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (typeof phone === "string") {
-    const normalizedPhone = normalizeE164Phone(phone);
-    if (phone.trim() && !normalizedPhone) {
-      return NextResponse.json(
-        { error: "El teléfono debe incluir código de país, por ejemplo +14155550100." },
-        { status: 400 },
-      );
-    }
-    data.phone = normalizedPhone;
+    data.phone = phone.trim() || null;
   }
 
   if ("monthlyArticleLimit" in body) {
@@ -547,7 +540,6 @@ export async function PATCH(request: NextRequest) {
   }
 
   auditLog("user_updated", currentUserId, { targetUserId: userId, changes: Object.keys(data) });
-  await syncUserToHubBestEffort(userId);
   return NextResponse.json(
     {
       user: {
@@ -636,7 +628,7 @@ export async function POST(request: NextRequest) {
     typeof firstName === "string" ? firstName.trim() : "";
   const normalizedLastName =
     typeof lastName === "string" ? lastName.trim() : "";
-  const normalizedPhone = normalizeE164Phone(phone) ?? "";
+  const normalizedPhone = typeof phone === "string" ? phone.trim() : "";
 
   if (!normalizedFirstName) {
     return NextResponse.json(
@@ -652,7 +644,7 @@ export async function POST(request: NextRequest) {
   }
   if (!normalizedPhone) {
     return NextResponse.json(
-      { error: "El teléfono debe incluir código de país, por ejemplo +14155550100" },
+      { error: "El teléfono es requerido" },
       { status: 400 },
     );
   }
@@ -716,8 +708,10 @@ export async function POST(request: NextRequest) {
 
   const passwordHash = await bcrypt.hash(password, 12);
   const initialPasswordEncrypted = encryptSecret(password);
+  const diaCeroApplied = Boolean(await prisma.systemSetting.findUnique({ where: { key: "dia_cero_backup" }, select: { key: true } }));
   const user = await prisma.user.create({
     data: {
+      ...(diaCeroApplied && role !== "admin" ? redesProfile() : {}),
       email: normalizedEmail,
       name:
         typeof name === "string" && name.trim()
@@ -752,6 +746,7 @@ export async function POST(request: NextRequest) {
   });
 
   auditLog("user_created", adminId, { newUserId: user.id, email: normalizedEmail, role });
-  await syncUserToHubBestEffort(user.id);
+  // Derechos por producto de la cuenta nueva (Artículos activo, como hoy).
+  await ensureDefaultEntitlements(user.id);
   return NextResponse.json({ user });
 }

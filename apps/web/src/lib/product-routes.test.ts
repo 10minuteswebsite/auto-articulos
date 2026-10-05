@@ -1,0 +1,120 @@
+import assert from "node:assert/strict";
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
+import { test } from "node:test";
+import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfApiPath, productOfHost, productOfPath, productOfUpdate, PRODUCT_ROUTES } from "./product-routes";
+
+test("el enlace de salida apunta al HUB oficial", () => {
+  assert.equal(HUB_URL, "https://hub.lasolucionweb.net");
+});
+
+test("las direcciones de producto limitan la pantalla al producto correspondiente", () => {
+  assert.equal(productOfHost("articulos.lasolucionweb.com"), "ARTICULOS");
+  assert.equal(productOfHost("redes.lasolucionweb.com"), "REDES");
+  assert.equal(productOfHost("seototal.lasolucionweb.com"), "COMPARTIDO");
+  assert.equal(productOfHost("localhost:3000"), "COMPARTIDO");
+});
+
+test("«oportunidades-redes» es Redes y «oportunidades» es Artículos (no se confunden por prefijo)", () => {
+  assert.equal(productOfPath("/dashboard/oportunidades-redes"), "REDES");
+  assert.equal(productOfPath("/dashboard/oportunidades"), "ARTICULOS");
+  assert.equal(productOfPath("/dashboard/oportunidades/algo"), "ARTICULOS");
+});
+
+test("las pantallas de cada producto se reconocen", () => {
+  assert.equal(productOfPath("/dashboard/publicar"), "ARTICULOS");
+  assert.equal(productOfPath("/dashboard/estadisticas"), "ARTICULOS");
+  assert.equal(productOfPath("/dashboard/configuracion/redes-sociales"), "REDES");
+  assert.equal(productOfPath("/dashboard/articulos"), "ARTICULOS");
+  assert.equal(productOfPath("/dashboard/redes"), "REDES");
+});
+
+test("las APIs de cada producto también tienen una frontera explícita", () => {
+  assert.equal(productOfApiPath("/api/runs"), "ARTICULOS");
+  assert.equal(productOfApiPath("/api/opportunities/execute"), "ARTICULOS");
+  assert.equal(productOfApiPath("/api/social-opportunities"), "REDES");
+  assert.equal(productOfApiPath("/api/search-integrations/instagram/callback"), "REDES");
+  assert.equal(productOfApiPath("/api/me"), "COMPARTIDO");
+});
+
+test("las actualizaciones históricas sin ruta se separan por su contenido", () => {
+  assert.equal(productOfUpdate({ modulePath: null, title: "Guías de redes sociales", summary: "Conecta Instagram y LinkedIn", example: "" }), "REDES");
+  assert.equal(productOfUpdate({ modulePath: null, title: "Sincronización automática de publicaciones con redes sociales (Threads, X y LinkedIn)", summary: "Cada artículo publicado puede crear una publicación", example: "" }), "REDES");
+  assert.equal(productOfUpdate({ modulePath: null, title: "Sugerencias de oportunidades de contenido SEO", summary: "Analiza Google Search Console y crea títulos", example: "" }), "ARTICULOS");
+  assert.equal(productOfUpdate({ modulePath: null, title: "Nuevo estilo visual", summary: "La plataforma se ve más clara", example: "" }), "COMPARTIDO");
+});
+
+test("la coincidencia más específica gana dentro de Configuración", () => {
+  assert.equal(productOfPath("/dashboard/configuracion"), "COMPARTIDO");
+  assert.equal(productOfPath("/dashboard/configuracion/conexiones"), "COMPARTIDO");
+  assert.equal(productOfPath("/dashboard/configuracion/cuenta"), "ARTICULOS");
+  assert.equal(productOfPath("/dashboard/configuracion/contenido"), "COMPARTIDO");
+  assert.equal(productOfPath("/dashboard/configuracion/inicial"), "ARTICULOS");
+});
+
+test("historial y progreso siguen siendo compartidos (hoy mezclan ambos productos)", () => {
+  assert.equal(productOfPath("/dashboard/historial"), "COMPARTIDO");
+  assert.equal(productOfPath("/dashboard/publicaciones-en-curso"), "COMPARTIDO");
+});
+
+test("el inicio y cualquier ruta desconocida son compartidos: nunca se esconde una pantalla por duda", () => {
+  assert.equal(productOfPath("/dashboard"), "COMPARTIDO");
+  assert.equal(productOfPath("/dashboard/lo-que-sea-nuevo"), "COMPARTIDO");
+  assert.equal(productOfPath(""), "COMPARTIDO");
+  assert.equal(productOfPath(null), "COMPARTIDO");
+  assert.equal(productOfPath(undefined), "COMPARTIDO");
+});
+
+test("Administración queda fuera de ambos productos", () => {
+  for (const p of ["/dashboard/usuarios", "/dashboard/composio", "/dashboard/postpeer"]) {
+    assert.equal(productOfPath(p), "ADMIN");
+  }
+});
+
+test("barra final, query y hash no cambian el resultado", () => {
+  assert.equal(productOfPath("/dashboard/publicar/"), "ARTICULOS");
+  assert.equal(productOfPath("/dashboard/oportunidades-redes?x=1"), "REDES");
+  assert.equal(productOfPath("/dashboard/publicar#arriba"), "ARTICULOS");
+});
+
+test("un prefijo pegado no coincide: «/dashboard/publicarX» no es Artículos", () => {
+  assert.equal(productOfPath("/dashboard/publicarX"), "COMPARTIDO");
+});
+
+test("visibilidad: lo compartido va en ambos productos; lo propio solo en el suyo; admin en ninguno", () => {
+  assert.equal(isVisibleInProduct("COMPARTIDO", "ARTICULOS"), true);
+  assert.equal(isVisibleInProduct("COMPARTIDO", "REDES"), true);
+  assert.equal(isVisibleInProduct("ARTICULOS", "ARTICULOS"), true);
+  assert.equal(isVisibleInProduct("ARTICULOS", "REDES"), false);
+  assert.equal(isVisibleInProduct("REDES", "REDES"), true);
+  assert.equal(isVisibleInProduct("REDES", "ARTICULOS"), false);
+  assert.equal(isVisibleInProduct("ADMIN", "ARTICULOS"), false);
+});
+
+test("la tabla no tiene prefijos duplicados", () => {
+  const prefixes = PRODUCT_ROUTES.map(([p]) => p);
+  assert.equal(new Set(prefixes).size, prefixes.length);
+});
+
+test("la vista por productos solo se activa si /api/me ya llegó y el módulo no está deshabilitado", () => {
+  assert.equal(isProductViewEnabled(undefined), false); // aún sin cargar: como hoy
+  assert.equal(isProductViewEnabled(null), false);
+  assert.equal(isProductViewEnabled(["vista-productos"]), false); // opt-in sin «Habilitado»
+  assert.equal(isProductViewEnabled(["historial"]), true); // administrador o cuenta con «Habilitado»
+  assert.equal(isProductViewEnabled([]), true);
+});
+
+test("cada carpeta de dashboard tiene una decisión explícita de producto", () => {
+  const expected = new Map<string, string>([
+    ["actualizaciones", "COMPARTIDO"], ["articulos", "ARTICULOS"], ["como-funciona", "COMPARTIDO"],
+    ["composio", "ADMIN"], ["configuracion", "COMPARTIDO"], ["estadisticas", "ARTICULOS"],
+    ["historial", "COMPARTIDO"], ["mi-acceso", "COMPARTIDO"], ["oportunidades", "ARTICULOS"],
+    ["oportunidades-redes", "REDES"], ["postpeer", "ADMIN"], ["publicaciones-en-curso", "COMPARTIDO"],
+    ["publicar", "ARTICULOS"], ["redes", "REDES"], ["usuarios", "ADMIN"],
+    ["vista-previa-bloqueo", "COMPARTIDO"],
+  ]);
+  const folders = readdirSync(join(process.cwd(), "src/app/dashboard"), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
+  assert.deepEqual(folders.filter((folder) => !expected.has(folder)), []);
+  for (const folder of folders) assert.equal(productOfPath(`/dashboard/${folder}`), expected.get(folder), folder);
+});

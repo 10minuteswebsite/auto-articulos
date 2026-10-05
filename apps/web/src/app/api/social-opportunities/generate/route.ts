@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { canUseSocialModule } from "@/lib/social-access";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerSocialWorkerNow } from "@/lib/trigger-worker";
 import {
   composioQuerySearchAnalytics,
@@ -454,6 +455,8 @@ async function getConnectedNetworks(userId: string) {
 export async function GET() {
   try {
     const userId = await getCurrentUserId();
+    const denied = await requireProductAccess(userId, "REDES", "/api/social-opportunities/generate");
+    if (denied) return denied;
     if (!(await canUseSocialModule(userId))) return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
     return NextResponse.json(await getConnectedNetworks(userId));
   } catch {
@@ -464,6 +467,8 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const userId = await getCurrentUserId();
+    const denied = await requireProductAccess(userId, "REDES", "/api/social-opportunities/generate");
+    if (denied) return denied;
     if (!(await canUseSocialModule(userId))) return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
     const body = await request.json().catch(() => ({})) as { networks?: string[] };
     const connected = await getConnectedNetworks(userId);

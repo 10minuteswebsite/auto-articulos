@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { MENU_LABELS_NUMBERED, MENU_NAMES, MENU_NAMES_ANTERIORES } from "./menu-names";
+import { MENU_LABELS_NUMBERED, MENU_NAMES, MENU_NAMES_ANTERIORES, PRODUCT_NAMES } from "./menu-names";
 import { SYSTEM_MODULES } from "./modules";
 import { BASE_USER_MANUAL } from "../content/manual-usuario";
 
@@ -39,4 +39,10 @@ test("el manual solo cita un nombre anterior dentro del párrafo «Nombres anter
       assert.equal(fuera.includes(viejo), false, `el manual aún usa el nombre anterior «${viejo}»`);
     }
   }
+});
+
+test("los productos se llaman SEO Total Artículos y SEO Total Redes (nunca «Redes Totales»)", () => {
+  assert.equal(PRODUCT_NAMES.ARTICULOS, "SEO Total Artículos");
+  assert.equal(PRODUCT_NAMES.REDES, "SEO Total Redes");
+  assert.ok(!Object.values(PRODUCT_NAMES).some((name) => /redes totales/i.test(name)));
 });

@@ -1,4 +1,5 @@
 export * from "./crypto";
+export * from "./product-access-core";
 export * from "./google-search-console";
 export * from "./google-analytics";
 export * from "./google-business-profile";

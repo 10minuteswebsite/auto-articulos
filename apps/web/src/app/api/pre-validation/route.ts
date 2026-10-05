@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { platformHelpUrl, platformProductNameOrNeutral } from "@auto-articulos/shared";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 
 export async function GET() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/pre-validation");
+  if (denied) return denied;
   const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, platformDomain: true } });
   const productName = platformProductNameOrNeutral(account.platformDomain);
 

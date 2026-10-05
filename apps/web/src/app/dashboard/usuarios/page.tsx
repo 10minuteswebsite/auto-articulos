@@ -31,6 +31,9 @@ import {
 } from "@auto-articulos/shared";
 import { trialDaysRemaining } from "@/lib/trial";
 import { SYSTEM_MODULES } from "@/lib/modules";
+import UserProductsPanel from "./UserProductsPanel";
+import ProductEnforcementPanel from "./ProductEnforcementPanel";
+import DiaCeroPanel from "./DiaCeroPanel";
 
 interface UserRow {
   id: string;
@@ -952,6 +955,9 @@ export default function UsuariosPage() {
         </p>
       </header>
 
+      <ProductEnforcementPanel />
+      <DiaCeroPanel />
+
       <div
         style={{
           display: "flex",
@@ -1617,7 +1623,7 @@ export default function UsuariosPage() {
             }}
           >
             {SYSTEM_MODULES.map((mod) => {
-              const isHidden = globalDisabledModules.includes(mod.id);
+              const isHidden = !mod.alwaysEnabled && globalDisabledModules.includes(mod.id);
               return (
                 <div
                   key={mod.id}
@@ -1699,6 +1705,7 @@ export default function UsuariosPage() {
                     <input
                       type="checkbox"
                       checked={!isHidden}
+                      disabled={mod.alwaysEnabled}
                       onChange={(e) => {
                         const visible = e.target.checked;
                         setGlobalDisabledModules((prev) =>
@@ -1715,7 +1722,9 @@ export default function UsuariosPage() {
                       }}
                     />
                     <span>
-                      {isHidden
+                      {mod.alwaysEnabled
+                        ? "Habilitado para todos los usuarios"
+                        : isHidden
                         ? "Habilitar (hacer visible para todos)"
                         : "Visible para usuarios"}
                     </span>
@@ -2942,7 +2951,7 @@ function UserCard({
             <div style={{ display: "grid", gap: 6 }}>
               {SYSTEM_MODULES.map((mod) => {
                 const acceso = moduleOverrides[mod.id] ?? "inherit";
-                const isGloballyDisabled = globalDisabledModules.includes(mod.id);
+                const isGloballyDisabled = !mod.alwaysEnabled && globalDisabledModules.includes(mod.id);
                 return (
                   <label
                     key={mod.id}
@@ -2990,7 +2999,7 @@ function UserCard({
                             [mod.id]: e.target.value as "inherit" | "enabled" | "disabled",
                           }))
                         }
-                        disabled={savingPermissions}
+                        disabled={savingPermissions || mod.alwaysEnabled}
                         style={{
                           flex: "1 1 220px",
                           maxWidth: 280,
@@ -3001,9 +3010,15 @@ function UserCard({
                           cursor: "pointer",
                         }}
                       >
-                        <option value="inherit">Según la config. general</option>
-                        <option value="enabled">Dárselo a esta cuenta</option>
-                        <option value="disabled">Quitárselo a esta cuenta</option>
+                        {mod.alwaysEnabled ? (
+                          <option value="inherit">Habilitado para todos los usuarios</option>
+                        ) : (
+                          <>
+                            <option value="inherit">Según la config. general</option>
+                            <option value="enabled">Dárselo a esta cuenta</option>
+                            <option value="disabled">Quitárselo a esta cuenta</option>
+                          </>
+                        )}
                       </select>
                     </span>
                   </label>
@@ -3016,6 +3031,13 @@ function UserCard({
               )}
             </div>
           </Row>
+        </Section>
+
+        <Section
+          title="Productos"
+          note="Qué productos de SEO Total tiene esta cuenta y su tiempo de gracia. Mientras el interruptor de aplicación esté apagado, estos cambios solo preparan los datos y no bloquean a nadie."
+        >
+          <UserProductsPanel userId={user.id} />
         </Section>
 
         <Section title="Difusión: redes sociales y blogs" note="Es el control de las publicaciones en redes y blogs: aprobación de cada red y cuántas publicaciones por día puede hacer esta cuenta en cada formato. Cada red que no tenga un valor guardado permite 1 por día; 0 la bloquea.">

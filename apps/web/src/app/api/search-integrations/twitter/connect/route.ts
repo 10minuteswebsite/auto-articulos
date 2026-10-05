@@ -5,14 +5,15 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredTwitterAppCredentials } from "@/lib/twitter-app-config";
 
 import { TWITTER_STATE_COOKIE, TWITTER_VERIFIER_COOKIE } from "./constants";
+import { applyCookie } from "@/lib/shared-cookies";
+import { oauthCallbackUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
 
 export async function GET(request: Request) {
   await getCurrentUserId();
 
   try {
     const appCreds = await getStoredTwitterAppCredentials();
-    const reqUrl = new URL(request.url);
-    const redirectUri = `${reqUrl.protocol}//${reqUrl.host}/api/search-integrations/twitter/callback`;
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/twitter/callback");
 
     // Generar state y code_verifier para PKCE
     const state = randomBytes(24).toString("base64url");
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
 
     const response = NextResponse.redirect(authUrl);
 
-    response.cookies.set(TWITTER_STATE_COOKIE, state, {
+    applyCookie(response, TWITTER_STATE_COOKIE, state, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
@@ -39,13 +40,15 @@ export async function GET(request: Request) {
       maxAge: 600,
     });
 
-    response.cookies.set(TWITTER_VERIFIER_COOKIE, codeVerifier, {
+    applyCookie(response, TWITTER_VERIFIER_COOKIE, codeVerifier, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
       path: "/",
       maxAge: 600,
     });
+
+    rememberOAuthOrigin(response, request);
 
     return response;
   } catch {

@@ -7,6 +7,7 @@ import {
   queryGoogleSearchAnalytics,
 } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 import { analyzeSeoOpportunities } from "@/lib/opportunity-analysis";
 import { getGoogleAnalyticsSignals, summarizeGoogleAnalyticsSignals } from "@/lib/google-analytics-signals";
@@ -77,6 +78,8 @@ async function list(userId: string, siteDomain?: string | null) {
 
 export async function GET() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities");
+  if (denied) return denied;
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: { lastOpportunityAnalysisAt: true, selectedSiteDomain: true, selectedSitePanel: true, platformDomain: true },
@@ -93,6 +96,8 @@ export async function GET() {
 // cuenta tiene paneles y selectedSitePanel no coincide con los grupos visibles.
 export async function DELETE() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities");
+  if (denied) return denied;
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: { selectedSiteDomain: true },
@@ -109,6 +114,8 @@ export async function DELETE() {
 
 export async function POST(request: Request) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities");
+  if (denied) return denied;
   const pendingCount = await prisma.opportunityTitle.count({
     where: { group: { userId } },
   });
@@ -244,9 +251,34 @@ export async function POST(request: Request) {
             end,
           );
         }
+        // Uso real exitoso: limpia cualquier error previo marcado en esta
+        // conexión (ver aviso rojo unificado en configuration-status).
+        if (resolved.source !== "COMPOSIO" && integration?.lastAccessError) {
+          await prisma.searchIntegration.update({
+            where: { id: integration.id },
+            data: { lastAccessError: null, lastAccessErrorAt: null },
+          });
+        }
       } catch (err) {
         gscError = err instanceof Error ? err.message : String(err);
         console.error("POST /api/opportunities: Search Console falló, se continua sin su evidencia:", err);
+        // Se guarda el motivo real en la conexión (solo la vía propia/OWN;
+        // Composio tiene su propio estado de conexión aparte) para que el
+        // aviso rojo de "Reconectar" del dashboard lo muestre sin esperar a
+        // que alguien vuelva a presionar "Analizar contenido" — pedido de
+        // Milton, 1/10/2026: el mismo protocolo de aviso debe cubrir
+        // cualquier caso en que haya que reconectar, no solo la migración a
+        // Composio.
+        if (resolved.source !== "COMPOSIO" && integration?.id) {
+          await prisma.searchIntegration
+            .update({
+              where: { id: integration.id },
+              data: { lastAccessError: gscError, lastAccessErrorAt: new Date() },
+            })
+            .catch((updateErr) => {
+              console.error("POST /api/opportunities: no se pudo guardar lastAccessError:", updateErr);
+            });
+        }
         currentRows = [];
         previousRows = [];
         countryRows = [];

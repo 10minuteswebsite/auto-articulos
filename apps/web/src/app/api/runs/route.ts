@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
-import { hasTrialAccess } from "@/lib/trial";
+import { checkTrialAccess } from "@/lib/trial-rule-setting";
 
 // Bug de consumo de datos encontrado el 30/7/2026: este endpoint se
 // consulta con polling frecuente (Inicio) y en cada visita al Historial, y
@@ -14,6 +15,8 @@ import { hasTrialAccess } from "@/lib/trial";
 // cuando alguien expande "Ver todos los pasos" (ver /api/titles/[id]/events).
 export async function GET() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/runs");
+  if (denied) return denied;
   const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, platformDomain: true } });
   const runs = await prisma.run.findMany({
     where: {
@@ -45,6 +48,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/runs");
+  if (denied) return denied;
   const account = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: { selectedSiteDomain: true, platformDomain: true },
@@ -98,7 +103,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  if (!hasTrialAccess(user)) {
+  if (!(await checkTrialAccess(user))) {
     return NextResponse.json(
       {
         error:
@@ -286,6 +291,8 @@ export async function POST(request: NextRequest) {
 // para no interrumpir al worker a mitad de una automatización.
 export async function DELETE() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/runs");
+  if (denied) return denied;
 
   const { count } = await prisma.run.deleteMany({
     where: { userId, status: { notIn: ["pending", "running"] } },

@@ -22,6 +22,23 @@
   y confirmó el 2026-10-01 que el caso quedó resuelto.
 - Capitanía reclamada y liberada por Claude. Estado: CERRADO Y ARCHIVADO.
 
+## Claude — LOTE 1 «SEPARACION SEO TOTAL»: DESPLEGADO EN PRODUCCIÓN — 2026-10-02
+
+- Capitanía de migración: reclamada y liberada por Claude el 2026-10-02 (sin ejecutar Prisma; **la migración la aplicó Milton a mano en Supabase**). Hoy no hay capitán activo.
+- **Alerta crítica para todos:** producción ya tiene las columnas del HUB (`hubUserId`, `hubAuth0Sub`, `hubSyncedAt`, `hubSyncAttemptedAt`, `hubSyncError`) en la tabla `User` y `schema.prisma` de `main` **no las declara**. El workflow `migrate.yml` (ruta por defecto, `prisma db push`) quiere **borrarlas** (106 usuarios con datos). Los runs #74 y #75 abortaron sin cambios. **No marcar `accept_data_loss` ni `force_sync`.**
+- Aplicado: `packages/db/prisma/migrations/20261002000000_add_product_entitlements/migration.sql` (tablas, enums, CHECK, RLS y backfill, aditivo e idempotente). PR #313 fusionado. Interruptor `product_enforcement` apagado.
+- Verificado en Supabase: 106 usuarios / 106 filas de Artículos / 9 de Redes / RLS activo / 106 datos HUB intactos. Producción responde con normalidad.
+
+## Claude — LOTE 1 «SEPARACION SEO TOTAL»: derechos por producto (base invisible) — 2026-10-01
+
+- Proyecto: «SEPARACION DE SEO TOTAL DE REDES TOTALES» (canal vivo: `CONTROL_SEPARACION_SEO_TOTAL.md`; documentos en `TRASPASO_SEPARACION_SEO_TOTAL.md`). Capitán del lote: Claude. Rama `claude/lote1-product-entitlements`, worktree `/private/tmp/separacion-lote1`.
+- Reclamo de capitanía de migración: `migration-coordinator.sh claim "Claude" "Lote 1 SEPARACION SEO TOTAL: tablas ProductEntitlement (migración aditiva)"` — solo para empujar la rama y abrir el PR; **la migración NO se aplica** sin la autorización de Milton.
+- Archivos reservados: `packages/db/prisma/schema.prisma`, `packages/db/prisma/migrations/20261002000000_add_product_entitlements/`, `packages/shared/src/index.ts`, `packages/shared/src/product-access-core.ts`, `apps/web/src/lib/product-access.ts`, `product-enforcement.ts` (+ pruebas), `menu-names.ts`, `apps/web/src/app/api/admin/users/[id]/entitlements/route.ts`, `apps/web/src/app/api/admin/users/route.ts`, `apps/web/src/app/api/auth/trial-signup/route.ts`, `apps/web/src/app/api/me/route.ts`, `apps/web/src/app/dashboard/usuarios/page.tsx` y `UserProductsPanel.tsx`, `apps/web/src/content/manual-usuario.ts`.
+- Qué es: tablas de derechos por producto con interruptor de aplicación **apagado por defecto** (nada bloquea a nadie), panel «Productos» en Administración y bloque `products` en `/api/me`. Ningún guard existente cambia.
+- Auditorías: tres, documentadas en `AUDITORIAS_LOTE_1_SEPARACION_SEO_TOTAL.md` (21 pruebas nuevas; suite web 105/105; typecheck web y worker limpios; migración probada en un Postgres desechable sobre el esquema real de `main`; build de `apps/web` OK).
+- Estado: **PR abierto, sin fusionar; migración sin aplicar; sin despliegue.** Pendiente: revisión cruzada de Codex y autorización de Milton (Protocolo de No Destrucción). Para aplicar la migración hay que reclamar de nuevo la capitanía.
+- Hallazgo ajeno: `migrate deploy` desde base vacía falla en `20260823150000_add_tumblr_integration` (no se tocó).
+
 ## Claude — CIERRE fix «Conectar GSC», estado de GSC y conteo de categorías en Oportunidades — 2026-09-28
 
 - Reclamo de capitanía (sin migración): `migration-coordinator.sh claim "Claude"`.
@@ -4756,6 +4773,17 @@ manual que alimenta al asistente.
 - Archivo modificado: `apps/web/src/components/DashboardNav.tsx`.
 - El cambio solo retira fondo, borde, radio y relleno del contenedor de navegación de escritorio; los enlaces, menús y navegación móvil se mantienen sin cambios.
 - No está desplegado en producción. El archivo de código quedó preparado en staging; la verificación de tipos no pudo ejecutarse porque `tsc` no está instalado en el entorno.
+## Trabajo activo — HABILITAR REDES SOCIALES PARA TODOS — 2026-10-02
+
+Responsable: Codex. Pedido de Milton: hacer que el módulo de Redes Sociales
+quede habilitado para todos los usuarios en el control de Administración →
+Usuarios. Se modificaron `apps/web/src/lib/modules.ts`,
+`apps/web/src/app/dashboard/usuarios/page.tsx` y su prueba. El módulo
+`oportunidades-redes` ahora es `alwaysEnabled`: no lo pueden ocultar ni la
+configuración global ni excepciones antiguas por usuario; los permisos
+individuales de cada red permanecen separados. `git diff --check` pasó.
+Typecheck/tests pendientes porque el worktree no tiene `tsc`/`tsx` instalados.
+No hubo migración, commit ni despliegue.
 
 ### Continuación CONEXION POSTPEER 2 — 2026-09-22
 
@@ -10740,7 +10768,101 @@ tarea.
 Responsable: Codex. Estado: listo para revisión/PR y prueba controlada en
 producción después de aplicar la migración.
 
-## Tumblr OAuth1 — 2026-10-03
+## Claude (tarea programada diaria de propagación) — 2026-10-02
 
-- **Capitanía liberada:** Codex aplicó idempotentemente en producción las columnas de OAuth1 de Tumblr y el registro de actualización durante el despliegue `dpl_Hvj2XAKoYZ6wHAa83XZ8oAXcvvAL`.
-- No se forzó el historial de migraciones antiguas porque la base contiene estructuras creadas manualmente y Prisma reporta migraciones históricas fallidas.
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-01
+(commit `59f7ae7`). Se revisó el rango `59f7ae7..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: 97 líneas agregadas (1 línea en blanco eliminada por una
+edición ajena, sin pérdida de contenido — confirmado con `git diff --stat` y revisando el
+diff completo), 6 entradas nuevas: el incidente `Load failed` de Rafael Zuzolo (commit
+`b23b9af9`), el cierre de CONEXION COMPOSIO PROBLEMA PEPE (PR #249), el reclamo de
+capitanía del Lote 1 «SEPARACION SEO TOTAL» — derechos por producto (PR #313, sin fusionar
+en ese momento), el cierre de ese mismo lote ya DESPLEGADO EN PRODUCCIÓN con la migración
+aplicada a mano por Milton en Supabase, el cierre de PINTEREST POR COMPOSIO (PR #276, ya
+propagado por la corrida anterior) y la auditoría autónoma MCP de Codex (capitanía de
+migración activa, PR sin fusionar).
+
+Se verificó contra `git ls-remote`/`git fetch`/`git merge-base --is-ancestor` que
+`claude/lote1-product-entitlements` (PR #313) ya está fusionada en `origin/main` (merge
+commit `9ba0170`, no es una reserva activa) y que `codex/mcp-autonomous-20261001` **sigue
+sin fusionar** (reserva activa de Codex, capitanía de migración sin liberar).
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: tres entradas nuevas — el fix de Rafael Zuzolo, el cierre
+  de PEPE (PR #249) y el Lote 1 de derechos por producto ya desplegado (PR #313, con la
+  alerta crítica del desalineamiento de `schema.prisma` con las columnas del HUB). La
+  entrada de Pinterest ya estaba propagada desde la corrida anterior, no se duplicó.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A con la verificación en vivo de las dos ramas
+  mencionadas arriba (Lote 1 fusionada, MCP autónomo de Codex sigue activa); Parte B con un
+  addendum listando los 4 nombres de conversación nuevos de este rango.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: nota nueva sobre el riesgo de que `migrate.yml` en su
+  ruta por defecto borre las columnas del HUB en producción porque `schema.prisma` de `main`
+  no las declara — señalado, sin tocar el schema ni el workflow.
+- `TO-DO.md`: sin cambios — ninguna idea suelta nueva sin ejecutar en este rango.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios — se verificó que la sección del
+  panel «Productos», el interruptor de derechos (Apagado/Sombra/Activo) y "Mi acceso" ya
+  documentan el Lote 1; el interruptor sigue apagado, así que no hay comportamiento visible
+  nuevo que reflejar. Las tools nuevas de la auditoría MCP de Codex (sitemaps, historial,
+  preferencias) no se propagan todavía porque esa PR no está fusionada.
+
+**Duda señalada, sin resolver por esta tarea** (ya estaba parcialmente señalada desde la
+corrida anterior, se repite en `CONTROLADOR_DE_VERSIONES.md` e
+`INVENTARIO_CONVERSACIONES.md` para que no se pierda): el commit `7474bd7` ("fix: reset
+category sync progress between attempts", fusionado en `origin/main` el 2026-09-30) sigue
+sin ninguna entrada correspondiente en este documento ni en `CONTROLADOR_DE_VERSIONES.md`.
+Queda para que Milton (o quien hizo ese commit) decida si hace falta completarlo.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
+## Cierre y archivo — CARMEN AGUILAR CONEXION GSC — 2026-10-02
+
+- Se corrigió la interfaz de Conexiones: una autorización Composio sin propiedades de Google Search Console no se presenta como “Conectada”. Ahora se identifica como configuración incompleta o sin propiedades disponibles.
+- La pantalla explica la acción correcta: revisar la cuenta/permisos de Search Console y reconectar si Google no devuelve ninguna propiedad.
+- Validaciones: typecheck web OK, build Vercel OK, Prisma generado, sin schema ni migraciones.
+- Producción verificada: deployment `dpl_vMF5BV3DBZagVoEj3VCorCbFmMRD` en estado READY; `https://seototal.lasolucionweb.com/login` HTTP 200.
+- Estado: **CERRADO Y ARCHIVADO**. Pendiente únicamente que Carmen reconecte con la cuenta de Google correcta.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-03
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-02
+(commit `d907481`). Se revisó el rango `d907481..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: 7 líneas agregadas (0 eliminadas, confirmado con `git diff
+--stat`), 1 entrada nueva: el cierre y archivo del incidente CARMEN AGUILAR CONEXION GSC
+(commit `93890db`, que en el mismo commit ya propagó una entrada equivalente a
+`CONTROLADOR_DE_VERSIONES.md` y a `HANDOFF.md`).
+
+Se revisaron los commits reales de la corrección (`f5d1b6b2` "fix: do not label incomplete
+GSC as connected" sobre `ComposioConnect.tsx`, y `189379b1` de configuración de Vercel) para
+confirmar el texto exacto mostrado al usuario, ya que la entrada de Coordinación resume el
+comportamiento sin citar las etiquetas literales de la interfaz.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: sin cambios — la entrada ya fue agregada por Milton en el
+  propio commit `93890db`, no se duplicó.
+- `apps/web/src/content/manual-usuario.ts`: nota nueva en la sección de Conexiones (debajo de
+  la actualización del 2026-10-01) explicando que, cuando Search Console, Analytics, Facebook
+  o Instagram por Composio no devuelven ninguna propiedad/Página/cuenta utilizable, la tarjeta
+  ahora dice «No conectada · sin propiedades disponibles» (antes decía, de forma engañosa,
+  «Conectada · sin propiedades disponibles»), y que una autorización activa sin selección dice
+  «Configuración incompleta · falta elegir» (antes «Conectada · falta elegir»). El bot de ayuda
+  dependía de este texto para no confundir "conectada" con "lista para usar".
+- `INVENTARIO_CONVERSACIONES.md`: addendum en Parte B con el nombre de la conversación
+  `CARMEN AGUILAR CONEXION GSC` (cerrada, sin agente específico citado en la entrada de
+  Coordinación). Parte A sin cambios — no hay ninguna reserva de archivo/rama nueva mencionada
+  en este rango.
+- `TO-DO.md`: sin cambios — ninguna idea suelta nueva sin ejecutar en este rango.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — no se encontró ninguna mención nueva a
+  árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado.
+
+La duda sin resolver sobre el commit `7474bd7` (sin registro en Coordinación ni en el
+Controlador, señalada desde el 2026-10-01) sigue abierta; este rango no trajo ninguna
+novedad al respecto, así que no se repite de nuevo aquí para no sumar ruido — sigue vigente
+donde ya está anotada (entradas del 2026-10-01 y 2026-10-02 de este mismo documento,
+`CONTROLADOR_DE_VERSIONES.md` e `INVENTARIO_CONVERSACIONES.md`).
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).

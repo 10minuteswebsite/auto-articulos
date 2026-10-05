@@ -91,11 +91,11 @@ export default function ConfiguracionInicialPage() {
             Puedes publicar colocando tus propios títulos o usando la IA avanzada para descubrir temas y preparar contenido.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
-            <Link href="/dashboard/oportunidades" style={{ background: "#1d1d1f", color: "#fff", textDecoration: "none", padding: "14px 16px", borderRadius: 14, fontSize: 13, fontWeight: 700, boxShadow: "0 5px 12px rgba(0, 0, 0, 0.14)" }}>
-              01 · {MENU_NAMES.ia} →
-            </Link>
             <Link href="/dashboard/publicar" style={{ background: "#f5f5f7", color: "#1d1d1f", border: "1px solid rgba(60, 60, 67, 0.16)", textDecoration: "none", padding: "13px 16px", borderRadius: 14, fontSize: 13, fontWeight: 600 }}>
-              02 · {MENU_NAMES.propios}
+              01 · {MENU_NAMES.propios}
+            </Link>
+            <Link href="/dashboard/oportunidades" style={{ background: "#1d1d1f", color: "#fff", textDecoration: "none", padding: "14px 16px", borderRadius: 14, fontSize: 13, fontWeight: 700, boxShadow: "0 5px 12px rgba(0, 0, 0, 0.14)" }}>
+              02 · {MENU_NAMES.ia} →
             </Link>
           </div>
         </div>

@@ -2,22 +2,26 @@ import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
 import { BING_SCOPE, BING_STATE_COOKIE, bingOAuthConfig } from "@/lib/bing-oauth";
+import { getAllowedOAuthOrigin, getOAuthRedirectUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
+import { applyCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
-  // Bing devuelve siempre a la dirección registrada. Si la conexión se inició desde otro dominio del
-  // proyecto (por ejemplo el de Vercel), la sesión y la cookie de seguridad no viajarían y el retorno
-  // fallaría con un 401. Se lleva a la persona al dominio correcto antes de conectar.
-  try {
-    const canonical = new URL(bingOAuthConfig().redirectUri);
-    if (request.nextUrl.host !== canonical.host) {
+  // Bing solo acepta el callback canónico cuando la petición llega desde un
+  // host que no está en nuestra lista blanca; en ese caso llevamos primero la
+  // sesión al host registrado para conservar cookie, state y sesión.
+  if (!getAllowedOAuthOrigin(request)) {
+    try {
+      const canonical = new URL(bingOAuthConfig().redirectUri);
       return NextResponse.redirect(new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", canonical.origin));
+    } catch {
+      // Sin configuración válida, el bloque principal devolverá el error habitual.
     }
-  } catch {
-    // Sin configuración válida: se sigue y el bloque de abajo responde el error de siempre.
   }
   await getCurrentUserId();
   try {
-    const { clientId, redirectUri } = bingOAuthConfig();
+    const config = bingOAuthConfig();
+    const { clientId } = config;
+    const redirectUri = getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);
     const state = randomBytes(24).toString("base64url");
     const url = new URL("https://www.bing.com/webmasters/oauth/authorize");
     url.search = new URLSearchParams({
@@ -28,13 +32,14 @@ export async function GET(request: NextRequest) {
       state,
     }).toString();
     const response = NextResponse.redirect(url);
-    response.cookies.set(BING_STATE_COOKIE, state, {
+    applyCookie(response, BING_STATE_COOKIE, state, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
       path: "/",
       maxAge: 600,
     });
+    rememberOAuthOrigin(response, request);
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -8,7 +8,9 @@ import {
   verifyImpersonationToken,
   verifySessionToken,
 } from "./lib/session";
+import { applyCookie } from "./lib/shared-cookies";
 import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
+import { productOfApiPath, productOfHost, productOfPath, type HostProductScope } from "./lib/product-routes";
 
 const PUBLIC_PATHS = [
   "/login",
@@ -51,6 +53,8 @@ function hubProductSlugForHost(hostname: string) {
     ? "auto-redes"
     : "seo-total";
 }
+const LEGACY_LOGIN_HOST = "auto-articulos-web.vercel.app";
+const CANONICAL_LOGIN_URL = "https://www.seototal.lasolucionweb.com/login";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -61,6 +65,15 @@ export async function middleware(request: NextRequest) {
   // agrega x-user-id antes de ejecutar el callback.
   if (pathname === TUMBLR_CALLBACK_PATH && request.nextUrl.origin !== TUMBLR_CANONICAL_ORIGIN) {
     return NextResponse.next();
+  }
+
+  // El alias antiguo de Vercel sigue recibiendo enlaces guardados y marcadores.
+  // Redirigir solo ese host evita afectar al login del dominio canónico y
+  // conserva query params como `returnTo` para no perder el flujo de acceso.
+  if (request.nextUrl.hostname === LEGACY_LOGIN_HOST && pathname === "/login") {
+    const destination = new URL(CANONICAL_LOGIN_URL);
+    destination.search = request.nextUrl.search;
+    return NextResponse.redirect(destination, 308);
   }
 
   if (
@@ -102,6 +115,13 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Primero se autentica la petición. Sin sesión, una URL cruzada conserva la
+  // respuesta 401 esperada por los clientes y por el smoke test; con sesión,
+  // la frontera devuelve 404/redirección antes de que pueda leer o mutar datos
+  // del otro producto.
+  const productBoundary = productBoundaryResponse(request);
+  if (productBoundary) return productBoundary;
+
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", userId);
   requestHeaders.set("x-hub-product-slug", hubProductSlugForHost(request.nextUrl.hostname));
@@ -132,7 +152,7 @@ export async function middleware(request: NextRequest) {
         const remaining = Number(expiresStr) - Date.now();
         if (remaining > 0 && remaining < SESSION_TTL_MS / 2) {
           const newToken = await createSessionToken(userId);
-          response.cookies.set(SESSION_COOKIE, newToken, {
+          applyCookie(response, SESSION_COOKIE, newToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
@@ -147,6 +167,32 @@ export async function middleware(request: NextRequest) {
   }
 
   return response;
+}
+
+/** Bloquea fugas por URL directa entre los dos subdominios de producto. */
+function productBoundaryResponse(request: NextRequest): NextResponse | null {
+  const hostProduct = productOfHost(request.headers.get("host"));
+  if (hostProduct === "COMPARTIDO") return null;
+
+  const scope = request.nextUrl.pathname.startsWith("/api/")
+    ? productOfApiPath(request.nextUrl.pathname)
+    : productOfPath(request.nextUrl.pathname);
+  if (scope === "COMPARTIDO" || scope === "ADMIN" || scope === hostProduct) return null;
+
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.json(
+      { error: "Esta ruta pertenece al otro producto." },
+      { status: 404, headers: NO_CACHE_HEADERS },
+    );
+  }
+
+  const target = new URL(hostProductDashboard(hostProduct), request.url);
+  target.search = "";
+  return NextResponse.redirect(target);
+}
+
+function hostProductDashboard(product: HostProductScope): string {
+  return product === "REDES" ? "/dashboard/redes" : "/dashboard/articulos";
 }
 
 /**

@@ -1,11 +1,13 @@
 "use client";
 
-import { MENU_LABELS_NUMBERED } from "@/lib/menu-names";
+import { MENU_LABELS_NUMBERED, MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
+import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
 import LogoutButton from "@/components/LogoutButton";
+import type { ProductsInfo } from "@/lib/product-page-gate";
 
 interface TabItem {
   id?: string;
@@ -24,6 +26,11 @@ type NavEntry = TabItem | TabGroup;
 
 function isGroup(entry: NavEntry): entry is TabGroup {
   return "group" in entry;
+}
+
+/** Ruta de un enlace sin su query (los enlaces de producto llevan `?producto=`). */
+function hrefPath(href: string): string {
+  return href.split("?")[0];
 }
 
 // Orden del menú definido por Milton (18/8/2026). Todo lo que tiene que ver
@@ -62,6 +69,50 @@ const BASE_ENTRIES: NavEntry[] = [
   },
 ];
 
+const HUB_ENTRY: TabItem = { href: HUB_URL, label: "Volver al HUB" };
+
+// VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2). Cuando la
+// cuenta tiene activo el módulo opt-in «vista-productos» (hoy: administradores
+// como vista previa), el grupo único «Publicaciones» se reemplaza por UN GRUPO
+// POR PRODUCTO. Ninguna ruta cambia: son las mismas pantallas, agrupadas de
+// otra forma. Historial y Progreso aparecen en ambos porque hoy mezclan los
+// dos productos en la misma página (se filtrarán por producto más adelante).
+// La entrada de Redes se muestra siempre (pedido de Milton, 1/10/2026): sin
+// permiso, ModuleGuard bloquea la pantalla con un mensaje claro.
+// CONTRATO con Historial y Progreso: los enlaces llevan `?producto=articulos|redes`
+// para que esas pantallas muestren solo su mitad. Mientras no lo implementen, lo
+// ignoran y siguen mostrando todo, como hoy (ver CONTROL, C-016, punto 4b).
+const PRODUCT_ENTRIES: NavEntry[] = [
+  { href: "/dashboard", label: "Inicio" },
+  {
+    group: "articulos",
+    label: PRODUCT_NAMES.ARTICULOS,
+    items: [
+      { href: "/dashboard/articulos", label: "Inicio de Artículos" },
+      { id: "publicar", href: "/dashboard/publicar", label: MENU_NAMES.propios },
+      { id: "oportunidades", href: "/dashboard/oportunidades", label: MENU_NAMES.ia },
+      { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso?producto=articulos", label: "Progreso de las publicaciones" },
+      { id: "historial", href: "/dashboard/historial?producto=articulos", label: "Historial" },
+      { id: "estadisticas", href: "/dashboard/estadisticas", label: "Estadísticas" },
+    ],
+  },
+  {
+    group: "redes",
+    label: PRODUCT_NAMES.REDES,
+    items: [
+      { href: "/dashboard/redes", label: "Inicio de Redes" },
+      { id: "oportunidades-redes", href: "/dashboard/oportunidades-redes", label: MENU_NAMES.redes },
+      { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso?producto=redes", label: "Progreso de las publicaciones" },
+      { id: "historial", href: "/dashboard/historial?producto=redes", label: "Historial" },
+    ],
+  },
+  // Configuración con «Mi acceso» (qué productos tiene la cuenta, solo lectura).
+  {
+    ...(BASE_ENTRIES[2] as TabGroup),
+    items: [...(BASE_ENTRIES[2] as TabGroup).items, { href: "/dashboard/mi-acceso", label: "Mi acceso" }],
+  },
+];
+
 // Administración pasó de ser un solo enlace a un grupo para alojar módulos de
 // plataforma como Composio sin tocar la página de usuarios.
 const ADMIN_GROUP: TabGroup = {
@@ -79,6 +130,13 @@ export default function DashboardNav() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [disabledModules, setDisabledModules] = useState<string[]>([]);
   const [globalDisabledModules, setGlobalDisabledModules] = useState<string[]>([]);
+  const [products, setProducts] = useState<ProductsInfo | null>(null);
+  const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
+  // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
+  const [productView, setProductView] = useState(false);
+  // Último producto visitado: decide qué grupo se resalta en las pantallas
+  // compartidas (Historial, Progreso), que existen en los dos.
+  const [lastProduct, setLastProduct] = useState<"articulos" | "redes" | null>(null);
   const [open, setOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const groupRef = useRef<HTMLDivElement | null>(null);
@@ -88,6 +146,10 @@ export default function DashboardNav() {
   // verse sola, sin navegación a secciones que todavía están bloqueadas.
   // Solo aplica en /dashboard, que es donde vive el asistente.
   const [hideForSetup, setHideForSetup] = useState(false);
+  useEffect(() => {
+    setHostProduct(productOfHost(window.location.hostname));
+  }, []);
+
   useEffect(() => {
     if (pathname !== "/dashboard") {
       setHideForSetup(false);
@@ -115,7 +177,8 @@ export default function DashboardNav() {
           // configurar el sistema aunque su propia cuenta esté incompleta.
           setIsAdmin(meData?.role === "admin" || Boolean(meData?.isActingAdmin));
           const localDemo = process.env.NEXT_PUBLIC_LOCAL_DEMO === "true";
-          setHideForSetup(!localDemo && !(step1 && step2 && step3 && step4));
+          const isRedesHost = productOfHost(window.location.hostname) === "REDES";
+          setHideForSetup(!isRedesHost && !localDemo && !(step1 && step2 && step3 && step4));
         }
       })
       .catch(() => {
@@ -134,6 +197,8 @@ export default function DashboardNav() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
+        setProductView(isProductViewEnabled(data?.disabledModules));
+        setProducts(data?.products ?? null);
         if (Array.isArray(data?.disabledModules)) {
           setDisabledModules(data.disabledModules);
         }
@@ -145,8 +210,24 @@ export default function DashboardNav() {
         setIsAdmin(false);
         setDisabledModules([]);
         setGlobalDisabledModules([]);
+        setProducts(null);
+        setProductView(false);
       });
   }, []);
+
+  // Recuerda el último producto visitado (solo en esta pestaña). Si el
+  // navegador no deja usar sessionStorage, simplemente no se recuerda.
+  useEffect(() => {
+    try {
+      const scope = productOfPath(pathname);
+      if (scope === "ARTICULOS") window.sessionStorage.setItem("seototal_producto", "articulos");
+      else if (scope === "REDES") window.sessionStorage.setItem("seototal_producto", "redes");
+      const saved = window.sessionStorage.getItem("seototal_producto");
+      setLastProduct(saved === "articulos" || saved === "redes" ? saved : null);
+    } catch {
+      setLastProduct(null);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     setOpen(false);
@@ -175,17 +256,32 @@ export default function DashboardNav() {
     };
   }, [openGroup]);
 
-  // Pedido explícito de Milton (1/10/2026): Oportunidades Redes se muestra en
-  // el menú igual que cualquier otro módulo, aunque la cuenta no lo tenga
-  // activo todavía — ModuleGuard es quien bloquea la pantalla al entrar, con
-  // un mensaje claro de por qué. Antes se ocultaba del menú directamente, lo
-  // que generaba confusión ("¿por qué no veo el botón?").
   function isVisible(tab: TabItem): boolean {
+    if (hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(hrefPath(tab.href)), hostProduct)) return false;
     if (isAdmin) return true;
-    return !tab.id || !disabledModules.includes(tab.id);
+    if (tab.id && disabledModules.includes(tab.id)) return false;
+    if (!products) return true;
+    const scope = productOfPath(hrefPath(tab.href));
+    if (scope === "ARTICULOS") return products.articulos?.allowed !== false;
+    if (scope === "REDES") {
+      return products.redes?.allowed !== false || products.redes?.reason === "NO_NETWORK_APPROVED";
+    }
+    return true;
   }
 
-  const rawEntries: NavEntry[] = isAdmin ? [...BASE_ENTRIES, ADMIN_GROUP] : BASE_ENTRIES;
+  function displayLabel(tab: TabItem): string {
+    if (
+      tab.id === "oportunidades-redes" &&
+      (hostProduct === "REDES" || products?.articulos?.allowed === false) &&
+      (products?.redes?.allowed !== false || products?.redes?.reason === "NO_NETWORK_APPROVED")
+    ) {
+      return tab.label.replace(/^3\)/, "1)");
+    }
+    return tab.label;
+  }
+
+  const baseEntries = productView ? PRODUCT_ENTRIES : BASE_ENTRIES;
+  const rawEntries: NavEntry[] = isAdmin ? [...baseEntries, ADMIN_GROUP, HUB_ENTRY] : [...baseEntries, HUB_ENTRY];
 
   // Un grupo cuyos módulos están todos ocultos desaparece entero, en vez de
   // quedar como un desplegable vacío.
@@ -198,9 +294,25 @@ export default function DashboardNav() {
     .filter((entry): entry is NavEntry => entry !== null)
     .filter((entry) => (isGroup(entry) ? true : isVisible(entry)));
 
-  const activeGroup = entries.find(
-    (entry) => isGroup(entry) && entry.items.some((item) => item.href === pathname),
-  );
+  // En la vista por productos, una pantalla propia de un producto resalta SU
+  // grupo; una compartida (Historial, Progreso) resalta el último producto
+  // visitado en vez de quedarse siempre con el primero.
+  const pathProduct = productOfPath(pathname);
+  const preferredGroup = !productView
+    ? null
+    : pathProduct === "ARTICULOS"
+      ? "articulos"
+      : pathProduct === "REDES"
+        ? "redes"
+        : lastProduct;
+  const activeGroup =
+    (preferredGroup
+      ? entries.find(
+          (entry) =>
+            isGroup(entry) && entry.group === preferredGroup && entry.items.some((item) => hrefPath(item.href) === pathname),
+        )
+      : undefined) ??
+    entries.find((entry) => isGroup(entry) && entry.items.some((item) => hrefPath(item.href) === pathname));
 
   function hiddenGlobally(tab: TabItem): boolean {
     return isAdmin && Boolean(tab.id && globalDisabledModules.includes(tab.id));
@@ -337,7 +449,8 @@ export default function DashboardNav() {
                     <MobileLink
                       key={tab.href}
                       tab={tab}
-                      active={pathname === tab.href}
+                      label={displayLabel(tab)}
+                      active={pathname === hrefPath(tab.href)}
                       hidden={hiddenGlobally(tab)}
                       onNavigate={() => setOpen(false)}
                       indented
@@ -351,7 +464,8 @@ export default function DashboardNav() {
               <MobileLink
                 key={entry.href}
                 tab={entry}
-                active={pathname === entry.href}
+                label={displayLabel(entry)}
+                active={pathname === hrefPath(entry.href)}
                 hidden={hiddenGlobally(entry)}
                 onNavigate={() => setOpen(false)}
               />
@@ -435,7 +549,7 @@ export default function DashboardNav() {
                     }}
                   >
                     {entry.items.map((tab) => {
-                      const active = pathname === tab.href;
+                      const active = pathname === hrefPath(tab.href);
                       return (
                         <Link
                           key={tab.href}
@@ -464,7 +578,7 @@ export default function DashboardNav() {
                             marginBottom: tab.id === "oportunidades-redes" ? 6 : undefined,
                           }}
                         >
-                          <span>{tab.label}</span>
+                          <span>{displayLabel(tab)}</span>
                           {hiddenGlobally(tab) && hiddenBadge(true)}
                         </Link>
                       );
@@ -475,7 +589,7 @@ export default function DashboardNav() {
             );
           }
 
-          const active = pathname === entry.href;
+          const active = pathname === hrefPath(entry.href);
           return (
             <Link
               key={entry.href}
@@ -504,6 +618,7 @@ export default function DashboardNav() {
 
 function MobileLink({
   tab,
+  label,
   active,
   hidden,
   onNavigate,
@@ -511,6 +626,7 @@ function MobileLink({
   separatorAfter = false,
 }: {
   tab: TabItem;
+  label: string;
   active: boolean;
   hidden: boolean;
   onNavigate: () => void;
@@ -538,7 +654,7 @@ function MobileLink({
         marginBottom: separatorAfter ? 6 : undefined,
       }}
     >
-      <span>{tab.label}</span>
+      <span>{label}</span>
       {hidden && (
         <span
           style={{

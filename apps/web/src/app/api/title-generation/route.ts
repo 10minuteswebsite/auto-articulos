@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import {
   TitleGenerationError,
   generateTitlesForUser,
@@ -16,12 +17,16 @@ export const maxDuration = 60;
 /** Estado para la pantalla: si la función está disponible y cuántas solicitudes le quedan hoy. */
 export async function GET() {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/title-generation");
+  if (denied) return denied;
   const status = await getTitleGenerationStatus(userId);
   return NextResponse.json(status);
 }
 
 export async function POST(request: NextRequest) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/title-generation");
+  if (denied) return denied;
   const body = (await request.json().catch(() => ({}))) as {
     categoryId?: unknown;
     contentLanguage?: unknown;

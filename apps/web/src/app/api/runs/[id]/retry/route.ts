@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
 
 /**
@@ -19,6 +20,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/runs/[id]/retry");
+  if (denied) return denied;
   const { id } = await params;
 
   const run = await prisma.run.findFirst({ where: { id, userId } });

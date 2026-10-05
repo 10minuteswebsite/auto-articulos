@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { hasSocialPublishingApproval, hasSocialModuleAccess } from "./social-access";
+import { hasLegacySocialModuleAccess } from "@auto-articulos/shared";
 
 test("oculta difusión para un usuario sin aprobaciones de redes o blogs", () => {
   assert.equal(
@@ -62,4 +63,23 @@ test("módulo: los administradores siempre lo tienen, incluso 'Deshabilitado'", 
     }),
     true,
   );
+});
+
+test("web y worker conservan la misma regla legacy de Redes", () => {
+  const cases = [
+    { role: "admin", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }), allowBloggerPublishing: false },
+    { role: "user", disabledModules: null, allowBloggerPublishing: false },
+    { role: "user", disabledModules: null, allowBloggerPublishing: true },
+    { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }), allowBloggerPublishing: false },
+    { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }), allowBloggerPublishing: true },
+    { role: "user", disabledModules: JSON.stringify(["oportunidades-redes"]), allowBloggerPublishing: true },
+    { role: "user", disabledModules: "{malformed", allowBloggerPublishing: true },
+  ] as const;
+  for (const user of cases) {
+    assert.equal(
+      hasSocialModuleAccess(user),
+      hasLegacySocialModuleAccess({ role: user.role, disabledModules: user.disabledModules, approvals: [user.allowBloggerPublishing] }),
+      JSON.stringify(user),
+    );
+  }
 });

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { platformProductNameOrNeutral } from "@auto-articulos/shared";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
-import { hasTrialAccess } from "@/lib/trial";
+import { checkTrialAccess } from "@/lib/trial-rule-setting";
 
 // Publica una selección de títulos de diferentes categorías de Oportunidades.
 // El usuario selecciona títulos individuales mediante checkboxes, independientemente
@@ -11,6 +12,8 @@ import { hasTrialAccess } from "@/lib/trial";
 // para cada grupo, igual que execute-all pero solo con los títulos seleccionados.
 export async function POST(request: NextRequest) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities/execute-batch");
+  if (denied) return denied;
   const {
     titleIds,
     disableIndexing,
@@ -61,7 +64,7 @@ export async function POST(request: NextRequest) {
     }),
   ]);
 
-  if (!hasTrialAccess(user)) {
+  if (!(await checkTrialAccess(user))) {
     return NextResponse.json(
       {
         error:

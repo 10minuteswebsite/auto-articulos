@@ -4,40 +4,31 @@ import { connectionReturnPath } from "@/lib/connection-return";
 import { prisma } from "@auto-articulos/db";
 import { encryptSecret, exchangeCodeForBloggerTokens, getBloggerBlogs } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
-import { bloggerOAuthConfig, getBloggerRedirectUri } from "@/lib/blogger-oauth";
+import { bloggerOAuthConfig } from "@/lib/blogger-oauth";
 import { BLOGGER_STATE_COOKIE } from "../connect/constants";
+import { clearCookie } from "@/lib/shared-cookies";
+import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
-  const oauthError = request.nextUrl.searchParams.get("error");
-  if (oauthError) {
-    console.error("Blogger OAuth fue rechazado por Google:", oauthError, request.nextUrl.searchParams.get("error_description") ?? "");
-    return NextResponse.redirect(new URL(connectionReturnPath("blogger", "error"), request.url));
-  }
-  let userId: string;
-  try {
-    userId = await getCurrentUserId();
-  } catch {
-    const login = new URL("/login", request.url);
-    login.searchParams.set("returnTo", connectionReturnPath("blogger", "error"));
-    return NextResponse.redirect(login);
-  }
+  const userId = await getCurrentUserId();
   const cookieStore = await cookies();
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
-  if (!state || state !== cookieStore.get(BLOGGER_STATE_COOKIE)?.value || !code) return NextResponse.redirect(new URL(connectionReturnPath("blogger", "error"), request.url));
+  if (!state || state !== cookieStore.get(BLOGGER_STATE_COOKIE)?.value || !code) return NextResponse.redirect(new URL(connectionReturnPath("blogger", "error"), oauthReturnBase(request)));
   try {
     const { clientId, clientSecret } = await bloggerOAuthConfig();
-    const redirectUri = getBloggerRedirectUri(request.url);
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/blogger/callback");
     const tokens = await exchangeCodeForBloggerTokens(code, redirectUri, clientId, clientSecret);
     const blogs = await getBloggerBlogs(tokens.access_token);
     const blog = blogs[0];
     if (!blog) throw new Error("La cuenta de Google no tiene blogs de Blogger disponibles.");
     await prisma.bloggerIntegration.upsert({ where: { userId }, create: { userId, blogId: blog.id, blogName: blog.name, accessTokenEncrypted: encryptSecret(tokens.access_token), refreshTokenEncrypted: tokens.refresh_token ? encryptSecret(tokens.refresh_token) : null, expiresAt: tokens.expires_in ? new Date(Date.now() + tokens.expires_in * 1000) : null }, update: { blogId: blog.id, blogName: blog.name, accessTokenEncrypted: encryptSecret(tokens.access_token), refreshTokenEncrypted: tokens.refresh_token ? encryptSecret(tokens.refresh_token) : undefined, expiresAt: tokens.expires_in ? new Date(Date.now() + tokens.expires_in * 1000) : null } });
-    const response = NextResponse.redirect(new URL(connectionReturnPath("blogger", "connected"), request.url));
-    response.cookies.delete(BLOGGER_STATE_COOKIE);
+    const response = NextResponse.redirect(new URL(connectionReturnPath("blogger", "connected"), oauthReturnBase(request)));
+    clearCookie(response, BLOGGER_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch (error) {
     console.error("Error en Blogger OAuth callback:", error);
-    return NextResponse.redirect(new URL(connectionReturnPath("blogger", "error"), request.url));
+    return NextResponse.redirect(new URL(connectionReturnPath("blogger", "error"), oauthReturnBase(request)));
   }
 }

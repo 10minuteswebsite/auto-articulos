@@ -6,13 +6,17 @@ import {
   GOOGLE_STATE_COOKIE,
   googleOAuthConfig,
 } from "@/lib/google-oauth";
+import { getOAuthRedirectUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
+import { applyCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
   await getCurrentUserId();
   const returnTo = request.nextUrl.searchParams.get("returnTo") || "/dashboard";
   const selectAccount = request.nextUrl.searchParams.get("prompt") === "select_account";
   try {
-    const { clientId, redirectUri } = googleOAuthConfig();
+    const config = googleOAuthConfig();
+    const { clientId } = config;
+    const redirectUri = getOAuthRedirectUri(request, "/api/search-integrations/google/callback", config.redirectUri);
     const stateObj = { nonce: randomBytes(16).toString("base64url"), returnTo };
     const state = Buffer.from(JSON.stringify(stateObj)).toString("base64url");
     const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
@@ -27,13 +31,14 @@ export async function GET(request: NextRequest) {
       state,
     }).toString();
     const response = NextResponse.redirect(url);
-    response.cookies.set(GOOGLE_STATE_COOKIE, state, {
+    applyCookie(response, GOOGLE_STATE_COOKIE, state, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
       path: "/",
       maxAge: 600,
     });
+    rememberOAuthOrigin(response, request);
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

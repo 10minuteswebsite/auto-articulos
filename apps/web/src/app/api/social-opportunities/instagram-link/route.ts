@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret, getInstagramPermalink, composioInstagramPermalink } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { getStoredComposioApiKey } from "@/lib/composio";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,8 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(request: NextRequest) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "REDES", "/api/social-opportunities/instagram-link");
+  if (denied) return denied;
   const body = (await request.json().catch(() => ({}))) as { id?: unknown };
   if (typeof body.id !== "string" || !body.id) return NextResponse.json({ error: "Falta indicar la publicación." }, { status: 400 });
   const opp = await prisma.socialOpportunity.findFirst({ where: { id: body.id, userId, status: "published" }, select: { id: true, platform: true, postId: true } });

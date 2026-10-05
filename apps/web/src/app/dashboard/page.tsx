@@ -1,10 +1,12 @@
 "use client";
 
-import { MENU_NAMES } from "@/lib/menu-names";
+import { MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
+import { isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
 import { useEffect, useState, useCallback, useRef } from "react";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import Link from "next/link";
 import OnboardingWizard from "@/components/OnboardingWizard";
+import type { ProductsInfo } from "@/lib/product-page-gate";
 
 const QUICK_LINKS = [
   {
@@ -21,6 +23,24 @@ const QUICK_LINKS = [
     href: "/dashboard/oportunidades-redes",
     label: MENU_NAMES.redes,
     description: "Crea con ayuda de la IA publicaciones automáticas para internet y difunde tu mensaje.",
+  },
+];
+
+// VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2): con el
+// módulo opt-in «vista-productos» activo (hoy, solo administradores como vista
+// previa) el inicio muestra DOS tarjetas, una por producto, en vez de las tres
+// acciones. La de Redes se muestra siempre (pedido de Milton, 1/10/2026): sin
+// permiso, el clic lleva a la pantalla de bloqueo de su sección.
+const PRODUCT_CARDS = [
+  {
+    href: "/dashboard/articulos",
+    label: PRODUCT_NAMES.ARTICULOS,
+    description: "Crea artículos con tus propios títulos o con la IA, publícalos en tu página web y sigue su progreso, historial y estadísticas.",
+  },
+  {
+    href: "/dashboard/redes",
+    label: PRODUCT_NAMES.REDES,
+    description: "Lleva tu contenido a redes sociales y blogs públicos con ayuda de la IA y conecta tus cuentas en un solo lugar.",
   },
 ];
 
@@ -57,9 +77,14 @@ export default function InicioPage() {
   const everIncompleteRef = useRef(false);
   const [showWizard, setShowWizard] = useState<boolean | null>(null);
   const [configurationAlerts, setConfigurationAlerts] = useState<ConfigurationAlert[]>([]);
+  const [products, setProducts] = useState<ProductsInfo | null>(null);
+  const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
+  // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
+  const [productView, setProductView] = useState(false);
 
   const checkWizardStatus = useCallback(async () => {
     try {
+      const currentHostProduct = productOfHost(window.location.hostname);
       const [credRes, catRes, meRes, googleRes, configurationRes, composioRes] = await Promise.all([
         fetch("/api/credentials", { cache: "no-store" }),
         fetch("/api/categories", { cache: "no-store" }),
@@ -81,6 +106,8 @@ export default function InicioPage() {
 
       const step1 = Boolean(credData.configured);
       const step2 = Array.isArray(catData.categories) && catData.categories.length > 0;
+      setProductView(isProductViewEnabled(meData?.disabledModules));
+      setProducts(meData?.products ?? null);
       const step3 = typeof meData.contentLanguage === "string" && meData.contentLanguage.trim().length > 0;
       const step4 = Boolean(
         (googleData.connected && googleData.siteUrl) ||
@@ -91,6 +118,14 @@ export default function InicioPage() {
       const complete = process.env.NEXT_PUBLIC_LOCAL_DEMO === "true"
         ? true
         : step1 && step2 && step3 && step4;
+
+      // El asistente de cuatro pasos pertenece a SEO TOTAL ARTÍCULOS. En
+      // Redes no debe bloquear el Inicio ni mostrar instrucciones de artículos.
+      if (currentHostProduct === "REDES") {
+        setShowWizard(false);
+        setConfigurationAlerts([]);
+        return;
+      }
 
       if (!complete) everIncompleteRef.current = true;
       setShowWizard(everIncompleteRef.current ? true : !complete);
@@ -103,19 +138,45 @@ export default function InicioPage() {
         : [];
       setConfigurationAlerts(pendingAlerts);
     } catch {
-      everIncompleteRef.current = true;
-      setShowWizard(true);
+      if (productOfHost(window.location.hostname) === "REDES") {
+        setShowWizard(false);
+      } else {
+        everIncompleteRef.current = true;
+        setShowWizard(true);
+      }
       setConfigurationAlerts([]);
     }
   }, []);
 
+  function hasProductFor(href: string): boolean {
+    if (hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(href), hostProduct)) {
+      return false;
+    }
+    if (!products) return true;
+    if (href === "/dashboard/oportunidades-redes") {
+      return products.redes?.allowed !== false || products.redes?.reason === "NO_NETWORK_APPROVED";
+    }
+    if (href === "/dashboard/publicar" || href === "/dashboard/oportunidades") {
+      return products.articulos?.allowed !== false;
+    }
+    if (href === "/dashboard/redes") {
+      return products.redes?.allowed !== false || products.redes?.reason === "NO_NETWORK_APPROVED";
+    }
+    if (href === "/dashboard/articulos") return products.articulos?.allowed !== false;
+    return true;
+  }
+
+  const visibleQuickLinks = QUICK_LINKS.filter((link) => hasProductFor(link.href));
+  const visibleProductCards = PRODUCT_CARDS.filter((card) => hasProductFor(card.href));
+
   useEffect(() => {
+    setHostProduct(productOfHost(window.location.hostname));
     checkWizardStatus();
   }, [checkWizardStatus]);
 
   return (
     <div>
-      <style>{`@media (max-width: 700px) { .inicio-actions-grid { grid-template-columns: 1fr !important; } .dashboard-main:has(.inicio-actions-grid) .floating-assistant { display: none !important; } }`}</style>
+      <style>{`@media (max-width: 700px) { .inicio-actions-grid { grid-template-columns: 320px !important; justify-content: center !important; } .dashboard-main:has(.inicio-actions-grid) .floating-assistant { display: none !important; } }`}</style>
       <ModuleIntro titulo="Inicio" showEyebrow={showWizard !== false} compact={showWizard === false}>
         {showWizard === true ? (
           <>
@@ -200,15 +261,13 @@ export default function InicioPage() {
       </div>
       {showWizard === false && (
         <div style={{ marginTop: 20, marginBottom: 20 }}>
-          <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>Acciones posibles</h2>
-          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16 }}>
-          {/* Pedido explícito de Milton (1/10/2026): el botón de Redes se muestra
-             siempre, como los demás; si no está activo, el clic lleva a la
-             pantalla de bloqueo (ModuleGuard) en vez de ocultarse. */}
-          {QUICK_LINKS.map((l, i) => (
+          <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>{productView ? "Elige un producto" : "Acciones posibles"}</h2>
+          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, 320px)", gap: 16, justifyContent: "start" }}>
+          {/* Solo mostramos acciones del producto que la cuenta puede usar. */}
+          {(productView ? visibleProductCards : visibleQuickLinks).map((l, i) => (
             (() => {
               return (
-                <Link key={l.href} className="inicio-action-card" href={l.href} style={{ display: "flex", minHeight: 176, padding: 22, flexDirection: "column", justifyContent: "space-between", textDecoration: "none", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}>
+                <Link key={l.href} className="inicio-action-card" href={l.href} style={{ display: "flex", width: 320, height: 320, boxSizing: "border-box", padding: 22, flexDirection: "column", justifyContent: "space-between", textDecoration: "none", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}>
               <div
                 style={{
                   display: "flex", flexDirection: "column", height: "100%",

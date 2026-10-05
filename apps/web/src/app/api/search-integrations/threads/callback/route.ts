@@ -7,6 +7,8 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredThreadsAppCredentials } from "@/lib/threads-app-config";
 import { canPublishToNetwork } from "@/lib/social-access";
 import { THREADS_STATE_COOKIE } from "../connect/constants";
+import { clearCookie } from "@/lib/shared-cookies";
+import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -16,13 +18,13 @@ export async function GET(request: NextRequest) {
 
   if (!(await canPublishToNetwork(userId, "threads")) || !state || state !== cookieStore.get(THREADS_STATE_COOKIE)?.value || !code) {
     return NextResponse.redirect(
-      new URL(connectionReturnPath("threads", "error"), request.url)
+      new URL(connectionReturnPath("threads", "error"), oauthReturnBase(request))
     );
   }
 
   try {
     const appCreds = await getStoredThreadsAppCredentials();
-    const redirectUri = `${request.nextUrl.protocol}//${request.nextUrl.host}/api/search-integrations/threads/callback`;
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/threads/callback");
     const tokens = await exchangeCodeForThreadsTokens(code, redirectUri, appCreds);
 
     const expiresAt = new Date(Date.now() + tokens.expiresInSeconds * 1000);
@@ -45,14 +47,15 @@ export async function GET(request: NextRequest) {
     });
 
     const response = NextResponse.redirect(
-      new URL(connectionReturnPath("threads", "connected"), request.url)
+      new URL(connectionReturnPath("threads", "connected"), oauthReturnBase(request))
     );
-    response.cookies.delete(THREADS_STATE_COOKIE);
+    clearCookie(response, THREADS_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch (error) {
     console.error("Error en Threads OAuth callback:", error);
     return NextResponse.redirect(
-      new URL(connectionReturnPath("threads", "error"), request.url)
+      new URL(connectionReturnPath("threads", "error"), oauthReturnBase(request))
     );
   }
 }

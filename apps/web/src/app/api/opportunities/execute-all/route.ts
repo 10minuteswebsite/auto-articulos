@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
+import { requireProductAccess } from "@/lib/require-product-access";
 import { platformProductNameOrNeutral } from "@auto-articulos/shared";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
-import { hasTrialAccess } from "@/lib/trial";
+import { checkTrialAccess } from "@/lib/trial-rule-setting";
 
 // Publica TODAS las categorías de Oportunidades de una sola vez — pedido
 // explícito del usuario (8/8/2026). Cada categoría se convierte en un Run
@@ -19,6 +20,8 @@ import { hasTrialAccess } from "@/lib/trial";
 // se le pierda de vista el resto.
 export async function POST(request: NextRequest) {
   const userId = await getCurrentUserId();
+  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities/execute-all");
+  if (denied) return denied;
   const { disableIndexing, contentLanguage, promptId } = (await request
     .json()
     .catch(() => ({}))) as {
@@ -54,7 +57,7 @@ export async function POST(request: NextRequest) {
       },
     }),
   ]);
-  if (!hasTrialAccess(user)) {
+  if (!(await checkTrialAccess(user))) {
     return NextResponse.json(
       {
         error:
