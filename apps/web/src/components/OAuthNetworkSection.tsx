@@ -18,6 +18,8 @@ export interface OAuthNetworkConfig {
   title: string;
   lead: string;
   note: string;
+  /** Ruta interna que inicia la autorización. La interfaz sigue mostrando «Nueva conexión». */
+  connectPath?: string;
   /** Campo de la conexión que trae la cuenta (p. ej. threadsUsername) y su prefijo (p. ej. «@»). */
   accountKey?: string;
   accountPrefix?: string;
@@ -224,7 +226,7 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
   const state: ConnectionState = savedName ? "success" : pendingSelection ? "pending" : !connected ? "disconnected" : expired ? "expired" : pendingDestination ? "pending" : "connected";
   const guide = CONNECTION_GUIDES[config.id];
   const connectLink = (
-    <a href={`${base}/connect`} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+    <a href={config.connectPath ?? `${base}/connect`} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
       {CONNECTION_LABELS.connect}
     </a>
   );

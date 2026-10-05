@@ -2,13 +2,13 @@
 
 import ComposioConnect from "./ComposioConnect";
 import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSection";
-import PostPeerThreadsSection from "./PostPeerThreadsSection";
 
 const THREADS: OAuthNetworkConfig = {
   id: "threads",
   title: "Threads",
   lead: "En este sitio conectas tu cuenta de Threads para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes. Sigue las instrucciones para configurarla paso a paso.",
-  note: "Publica tus artículos como publicaciones de Threads. Autorizas directamente en Meta; nunca vemos tu contraseña.",
+  note: "Publica tus artículos como publicaciones de Threads. Autoriza tu cuenta desde una ventana segura; nunca vemos tu contraseña.",
+  connectPath: "/api/postpeer/threads/connect",
   accountKey: "threadsUsername",
   accountPrefix: "@",
   admin: {
@@ -32,7 +32,6 @@ interface ThreadsSectionProps {
 export default function ThreadsSection({ allowThreads = true, showComposioSocial = true }: ThreadsSectionProps) {
   return (
     <>
-      {allowThreads && <PostPeerThreadsSection />}
       <OAuthNetworkSection config={THREADS} allowed={allowThreads} />
       {showComposioSocial && <ComposioConnect inline showInactiveActions apps={["facebook", "instagram"]} />}
     </>
