@@ -22,6 +22,16 @@ model User {
   phone                             String?
   email                             String        @unique
   passwordHash                      String
+  // Columnas del proyecto HUB que YA EXISTEN en la base de producción (se aplicaron
+  // el 2026-10-01 desde la rama del HUB) y que este esquema no declaraba. Sin
+  // estas líneas, `prisma db push` quiere BORRARLAS (106 usuarios con datos).
+  // Mismos tipos e índices únicos que la migración 20261001200000_add_hub_identity_mapping.
+  // No requiere migración: la base ya las tiene. Ver ALERTA_SCHEMA_DESALINEADO_HUB.md.
+  hubUserId                         String?       @unique
+  hubAuth0Sub                       String?       @unique
+  hubSyncedAt                       DateTime?
+  hubSyncAttemptedAt                DateTime?
+  hubSyncError                      String?
   // Guardada cifrada (no en texto plano) además del hash, para que el
   // admin pueda recuperarla y compartirla con la persona invitada — pedido
   // explícito del usuario el 31/7/2026. El login sigue verificando contra
