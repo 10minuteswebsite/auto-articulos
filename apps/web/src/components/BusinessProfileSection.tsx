@@ -26,6 +26,7 @@ type BusinessProfileData = {
 
 type PostPeerStatus = {
   status: "PENDING" | "ACTIVE" | "DISCONNECTED" | "ERROR";
+  connected?: boolean;
   accountId?: string | null;
   accountName?: string | null;
   lastError?: string | null;
@@ -47,8 +48,8 @@ export default function BusinessProfileSection() {
     setLoadingLocations(true);
     try {
       const [res, postPeerRes] = await Promise.all([
-        fetch(searchLocations ? "/api/business-profile?locations=1" : "/api/business-profile"),
-        fetch("/api/postpeer/status"),
+        fetch(searchLocations ? "/api/business-profile?locations=1" : "/api/business-profile", { cache: "no-store" }),
+        fetch("/api/postpeer/status", { cache: "no-store" }),
       ]);
       const value = await res.json();
       const postPeerValue = await postPeerRes.json().catch(() => null);
@@ -108,7 +109,7 @@ export default function BusinessProfileSection() {
     void load();
   }
 
-  const postPeerConnected = postPeer?.status === "ACTIVE";
+  const postPeerConnected = Boolean(postPeer?.connected ?? postPeer?.status === "ACTIVE");
   const connected = Boolean(data?.connected || postPeerConnected);
   const needsLocation = Boolean(data?.connected && data.needsLocation && !postPeerConnected);
   const state = !connected ? "disconnected" : needsLocation ? "pending" : "connected";
