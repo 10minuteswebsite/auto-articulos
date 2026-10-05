@@ -53,6 +53,10 @@ export function ConnectionReturnSuccess({ conexion }: { conexion: string }) {
         const legacy = await get("/api/business-profile");
         return legacy?.locationTitle ? String(legacy.locationTitle) : null;
       }
+      if (conexion === "threads") {
+        const postPeer = await get("/api/postpeer/status?platform=threads");
+        if (postPeer?.status === "ACTIVE" && postPeer?.accountName) return String(postPeer.accountName);
+      }
       const field = network?.accountField;
       if (!field) return null;
       const data = await get(`/api/search-integrations/${conexion}`);

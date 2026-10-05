@@ -28,6 +28,7 @@ import {
   composioInstagramPost,
   composioInstagramPermalink,
   composioPinterestPin,
+  createPostPeerPost,
   methodFor,
   friendlyPublishError,
 } from "@auto-articulos/shared";
@@ -47,9 +48,32 @@ async function getComposioSocialAccount(userId: string, app: "facebook" | "insta
     prisma.systemSetting.findUnique({ where: { key: "composio_api_key" }, select: { encryptedValue: true } }),
   ]);
   const moduleEnabled = user?.role === "admin" || (() => { try { return JSON.parse(user?.disabledModules ?? "{}")?.["conexion-composio"] === "enabled"; } catch { return false; } })();
-  const method = methodFor({ app, userId, userEmail: user?.email, moduleEnabled, routeIsComposio: false });
+  const socialComposioRoute = app === "facebook" || app === "instagram";
+  const method = methodFor({
+    app,
+    userId,
+    userEmail: user?.email,
+    moduleEnabled: socialComposioRoute ? true : moduleEnabled,
+    routeIsComposio: socialComposioRoute,
+  });
   if (method !== "COMPOSIO" || !connection || !setting) return null;
   return { apiKey: decryptSecret(setting.encryptedValue), userId, connectedAccountId: connection.connectedAccountId, pageId: connection.pageId, igAccountId: connection.igAccountId, pageName: connection.pageName, username: connection.username };
+}
+
+async function getPostPeerThreadsAccount(userId: string) {
+  const [connection, setting] = await Promise.all([
+    prisma.postPeerSocialConnection.findUnique({
+      where: { userId_platform: { userId, platform: "threads" } },
+      select: { accountId: true, accountName: true, status: true },
+    }),
+    prisma.systemSetting.findUnique({ where: { key: "postpeer_api_key" }, select: { encryptedValue: true } }),
+  ]);
+  if (!connection || connection.status !== "ACTIVE" || !setting || connection.accountId.startsWith("pending-")) return null;
+  return {
+    apiKey: decryptSecret(setting.encryptedValue),
+    accountId: connection.accountId,
+    accountName: connection.accountName,
+  };
 }
 
 async function updateSocialProgress(
@@ -483,6 +507,45 @@ async function processThreadsJob(job: {
   articleTitle: string;
   suggestedText: string;
 }): Promise<boolean> {
+  // PostPeer is the temporary primary route while Meta reviews the direct
+  // app. The direct Meta integration remains untouched and is used when no
+  // active PostPeer Threads connection exists.
+  const postPeer = await getPostPeerThreadsAccount(job.userId);
+  if (postPeer) {
+    await validateArticleUrl(job.articleUrl);
+    const finalPost = buildSafeCaption(job.suggestedText, job.articleUrl, { maxChars: 500 });
+    const imageResult: ThreadsImageResult | null = job.titleId
+      ? await getRehostedThreadsImage(job.titleId, job.articleUrl)
+      : (await getArticleOpenGraphImage(job.articleUrl).then((url) => (url ? { url, source: "direct" as const } : null)));
+    if (!imageResult) throw new Error("El artículo no tiene una imagen og:image pública para Threads.");
+
+    const result = await createPostPeerPost(postPeer.apiKey, {
+      accountId: postPeer.accountId,
+      platform: "threads",
+      content: finalPost,
+      imageUrl: imageResult.url,
+      idempotencyKey: `threads-${job.id}`,
+    });
+    const platformResult = result.platforms?.find((item) => item.platform === "threads") ?? result.platforms?.[0];
+    if (result.success === false || platformResult?.success === false) {
+      throw new Error(platformResult?.error || result.message || "PostPeer rechazó la publicación en Threads.");
+    }
+    const postId = platformResult?.platformPostUrl || result.postId || null;
+    await prisma.socialOpportunity.update({
+      where: { id: job.id },
+      data: { status: "published", postId, publishedAt: new Date(), errorLog: null },
+    });
+    if (job.titleId) {
+      await prisma.titleEvent.create({
+        data: {
+          titleId: job.titleId,
+          message: `Publicado exitosamente en Threads mediante PostPeer${postPeer.accountName ? ` (${postPeer.accountName})` : ""}${postId ? ` - ${postId}` : ""}`,
+        },
+      });
+    }
+    return true;
+  }
+
   const integration = await prisma.threadsIntegration.findUnique({
     where: { userId: job.userId },
   });
@@ -1008,28 +1071,8 @@ async function processBloggerJob(job: { id: string; userId: string; titleId: str
 async function processFacebookPageJob(job: {
   id: string; userId: string; titleId: string | null; articleUrl: string; articleTitle: string; suggestedText: string;
 }): Promise<boolean> {
-  const integration = await prisma.facebookPageIntegration.findUnique({ where: { userId: job.userId } });
-  if (integration) {
-    if (integration.expiresAt <= new Date()) throw new Error("La autorización de Facebook Pages expiró. Vuelve a conectar Meta en Configuración.");
-
-    await validateArticleUrl(job.articleUrl);
-    // Keep the complete URL in the Page post. Facebook auto-links a bare URL
-    // in the post body; the safe builder prevents an overlong AI caption from
-    // cutting that URL in half.
-    const finalPost = buildSafeCaption(job.suggestedText, job.articleUrl, { maxChars: 63206 });
-    const articleImage = await getArticleOpenGraphImage(job.articleUrl);
-    const imageUrl = articleImage ? await normalizeSocialImage(articleImage, 4 / 3) : undefined;
-    const result = await publishFacebookPagePost(
-      decryptSecret(integration.accessTokenEncrypted), integration.facebookPageId, finalPost, imageUrl,
-    );
-
-    await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId: result.permalink || result.postId, publishedAt: new Date(), errorLog: null } });
-    if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Facebook Page (${integration.facebookPageName || integration.facebookPageId}) - ID: ${result.postId}${imageUrl ? " (con imagen del artículo)" : ""}` } });
-    return true;
-  }
-
-  // Compatibilidad: las cuentas que todavía no han migrado a Meta directo
-  // siguen funcionando mediante la conexión histórica de Composio.
+  // Una conexión Composio activa es la ruta preferida. La integración Meta
+  // directa se conserva y se usa automáticamente si Composio no está listo.
   const composio = await getComposioSocialAccount(job.userId, "facebook");
   if (composio?.pageId) {
     await validateArticleUrl(job.articleUrl);
@@ -1039,7 +1082,24 @@ async function processFacebookPageJob(job: {
     const result = await composioFacebookPost(composio, composio.pageId, finalPost, imageUrl);
     const postId = String(result.id ?? result.post_id ?? result.postId ?? "");
     await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId, publishedAt: new Date(), errorLog: null } });
-    if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Facebook Page mediante la conexión alternativa${composio.pageName ? ` (${composio.pageName})` : ""}${postId ? ` - ID: ${postId}` : ""}` } });
+    if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Facebook Page mediante Composio${composio.pageName ? ` (${composio.pageName})` : ""}${postId ? ` - ID: ${postId}` : ""}` } });
+    return true;
+  }
+
+  const integration = await prisma.facebookPageIntegration.findUnique({ where: { userId: job.userId } });
+  if (integration) {
+    if (integration.expiresAt <= new Date()) throw new Error("La autorización de Facebook Pages expiró. Vuelve a conectar Meta en Configuración.");
+
+    await validateArticleUrl(job.articleUrl);
+    const finalPost = buildSafeCaption(job.suggestedText, job.articleUrl, { maxChars: 63206 });
+    const articleImage = await getArticleOpenGraphImage(job.articleUrl);
+    const imageUrl = articleImage ? await normalizeSocialImage(articleImage, 4 / 3) : undefined;
+    const result = await publishFacebookPagePost(
+      decryptSecret(integration.accessTokenEncrypted), integration.facebookPageId, finalPost, imageUrl,
+    );
+
+    await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId: result.permalink || result.postId, publishedAt: new Date(), errorLog: null } });
+    if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Facebook Page (${integration.facebookPageName || integration.facebookPageId}) - ID: ${result.postId}${imageUrl ? " (con imagen del artículo)" : ""}` } });
     return true;
   }
   throw new Error("Facebook Pages no está configurado en tu cuenta.");
@@ -1165,15 +1225,11 @@ async function processInstagramJob(job: {
   suggestedText: string;
   platform: string;
 }): Promise<boolean> {
-  // Meta es la ruta principal. Composio solo queda como compatibilidad para
-  // cuentas antiguas que todavía no han vuelto a autorizar Instagram por Meta.
-  const integration = await prisma.instagramIntegration.findUnique({
-    where: { userId: job.userId },
-  });
-
-  if (!integration) {
-    const composio = await getComposioSocialAccount(job.userId, "instagram");
-    if (composio?.igAccountId && job.platform === "instagram-post") {
+  // Las publicaciones normales usan Composio cuando la persona ya conectó
+  // Instagram allí. La conexión Meta directa permanece guardada y sigue
+  // atendiendo formatos avanzados que todavía requieren su API específica.
+  const composio = await getComposioSocialAccount(job.userId, "instagram");
+  if (composio?.igAccountId && job.platform === "instagram-post") {
     await validateArticleUrl(job.articleUrl);
     const sourceImage = await getArticleOpenGraphImage(job.articleUrl);
     const imageUrl = sourceImage ? await normalizeSocialImage(sourceImage, 4 / 5) : null;
@@ -1186,8 +1242,11 @@ async function processInstagramJob(job: {
     await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId, publishedAt: new Date(), errorLog: null, imageUrl } });
     if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Instagram mediante la conexión alternativa${composio.username ? ` (@${composio.username})` : ""}${postId ? ` - ID: ${postId}` : ""}` } });
     return true;
-    }
   }
+
+  const integration = await prisma.instagramIntegration.findUnique({
+    where: { userId: job.userId },
+  });
 
   if (!integration) {
     throw new Error("Instagram no está configurado en tu cuenta.");

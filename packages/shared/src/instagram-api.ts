@@ -19,6 +19,16 @@ export interface InstagramTokenExchangeResult {
   instagramUsername: string;
   facebookPageId: string;
   facebookPageName: string;
+  accounts: InstagramAccountOption[];
+}
+
+/** Cuenta profesional de Instagram y Página de Facebook disponibles tras OAuth. */
+export interface InstagramAccountOption {
+  instagramBusinessAccountId: string;
+  instagramUsername: string;
+  facebookPageId: string;
+  facebookPageName: string;
+  publishingAccessToken: string;
 }
 
 export interface InstagramPublishResult {
@@ -62,8 +72,8 @@ export function getInstagramAppCredentials(overrideId?: string, overrideSecret?:
 
 /**
  * Genera la URL de autorización OAuth 2.0 para Instagram (Meta Graph API).
- * Necesita los scopes: instagram_basic, instagram_content_publish, pages_show_list
- * y pages_manage_posts para también publicar en la Página seleccionada.
+ * Necesita los scopes de Instagram y de lectura de la Página vinculada.
+ * La publicación en Facebook Pages usa su propia conexión y sus propios scopes.
  */
 export function getInstagramAuthUrl(
   state: string,
@@ -71,7 +81,7 @@ export function getInstagramAuthUrl(
   appCredentials?: { appId: string; appSecret: string }
 ): string {
   const { appId } = appCredentials || getInstagramAppCredentials();
-  const scope = "instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement,pages_manage_posts,business_management";
+  const scope = "instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement,business_management";
   const params = new URLSearchParams({
     client_id: appId,
     redirect_uri: redirectUri,
@@ -170,11 +180,10 @@ export async function exchangeCodeForInstagramTokens(
     );
   }
 
-  // Usar la primera página que tenga Instagram Business Account
-  let instagramBusinessAccountId = "";
-  let instagramUsername = "";
-  let facebookPageId = "";
-  let facebookPageName = "";
+  // No elegimos automáticamente la primera cuenta: una persona puede
+  // administrar varias páginas/cuentas profesionales. Devolvemos todas para
+  // que la interfaz permita elegir explícitamente el destino correcto.
+  const accounts: InstagramAccountOption[] = [];
 
   for (const page of pagesData.data) {
     const pageRes = await fetch(
@@ -187,17 +196,19 @@ export async function exchangeCodeForInstagramTokens(
       };
 
       if (pageData.instagram_business_account) {
-        instagramBusinessAccountId = pageData.instagram_business_account.id;
-        instagramUsername = pageData.instagram_business_account.username || "";
-        publishingAccessToken = page.access_token || longLivedToken;
-        facebookPageId = page.id;
-        facebookPageName = page.name || "";
-        break;
+        const pageAccessToken = page.access_token || longLivedToken;
+        accounts.push({
+          instagramBusinessAccountId: pageData.instagram_business_account.id,
+          instagramUsername: pageData.instagram_business_account.username || "",
+          publishingAccessToken: pageAccessToken,
+          facebookPageId: page.id,
+          facebookPageName: page.name || "",
+        });
       }
     }
   }
 
-  if (!instagramBusinessAccountId) {
+  if (accounts.length === 0) {
     throw new Error(
       "Ninguna de tus páginas de Facebook tiene una cuenta de Instagram " +
       "profesional (Business/Creator) vinculada. " +
@@ -208,10 +219,8 @@ export async function exchangeCodeForInstagramTokens(
   return {
     longLivedToken: publishingAccessToken,
     expiresInSeconds,
-    instagramBusinessAccountId,
-    instagramUsername,
-    facebookPageId,
-    facebookPageName,
+    ...accounts[0],
+    accounts,
   };
 }
 
@@ -241,6 +250,24 @@ export async function refreshInstagramToken(
     accessToken: data.access_token,
     expiresInSeconds: data.expires_in,
   };
+}
+
+/** Comprueba en modo lectura que la cuenta profesional sigue accesible. */
+export async function getInstagramAccountProfile(
+  accessToken: string,
+  instagramBusinessAccountId: string,
+): Promise<{ id: string; username?: string }> {
+  const params = new URLSearchParams({ fields: "id,username", access_token: accessToken });
+  const response = await fetch(`${GRAPH_API_URL}/${encodeURIComponent(instagramBusinessAccountId)}?${params.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error("Meta no pudo verificar la cuenta profesional de Instagram.");
+  const data = (await response.json()) as { id?: unknown; username?: unknown };
+  if (typeof data.id !== "string" || data.id !== instagramBusinessAccountId) {
+    throw new Error("Meta devolvió una cuenta de Instagram distinta a la conectada.");
+  }
+  return { id: data.id, username: typeof data.username === "string" ? data.username : undefined };
 }
 
 // ─── PUBLICACIÓN: IMAGEN INDIVIDUAL ───────────────────────────────────────

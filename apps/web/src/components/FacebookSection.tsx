@@ -1,6 +1,7 @@
 "use client";
 
 import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSection";
+import ComposioConnect from "./ComposioConnect";
 
 const FACEBOOK: OAuthNetworkConfig = {
   id: "facebook-pages",
@@ -18,5 +19,10 @@ const FACEBOOK: OAuthNetworkConfig = {
 };
 
 export default function FacebookSection() {
-  return <OAuthNetworkSection config={FACEBOOK} />;
+  return (
+    <>
+      <OAuthNetworkSection config={FACEBOOK} />
+      <ComposioConnect inline showInactiveActions apps={["facebook"]} />
+    </>
+  );
 }

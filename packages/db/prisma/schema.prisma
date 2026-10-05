@@ -200,6 +200,7 @@ model User {
   mcpConnections             McpConnection[]
   composioConnections        ComposioConnection[]
   postPeerConnection         PostPeerConnection?
+  postPeerSocialConnections  PostPeerSocialConnection[]
   runs                       Run[]
   categories                 Category[]
   categorySyncJobs           CategorySyncJob[]
@@ -697,6 +698,31 @@ model PostPeerConnection {
   updatedAt   DateTime                 @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Conexiones sociales administradas por PostPeer. Se mantiene separada de la
+// conexión histórica de Google Business para poder activar Threads sin tocar
+// ni migrar la conexión existente de ningún cliente.
+model PostPeerSocialConnection {
+  id          String                   @id @default(cuid())
+  userId      String
+  platform    String
+  profileId   String
+  accountId   String
+  accountName String?
+  status      PostPeerConnectionStatus @default(PENDING)
+  connectedAt DateTime?
+  lastError   String?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@unique([profileId, platform])
+  @@unique([accountId, platform])
+  @@index([userId])
+  @@index([status])
 }
 
 model Category {

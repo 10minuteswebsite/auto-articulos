@@ -33,6 +33,7 @@ export async function GET() {
     bingIntegration,
     businessProfile,
     threadsIntegration,
+    postPeerThreads,
     twitterIntegration,
     linkedinIntegration,
     pinterestIntegration,
@@ -95,6 +96,10 @@ export async function GET() {
     prisma.threadsIntegration.findUnique({
       where: { userId },
       select: { expiresAt: true },
+    }),
+    prisma.postPeerSocialConnection.findUnique({
+      where: { userId_platform: { userId, platform: "threads" } },
+      select: { status: true },
     }),
     // 8. X/Twitter
     prisma.twitterIntegration.findUnique({
@@ -236,7 +241,7 @@ export async function GET() {
     {
       id: "threads",
       label: "Meta Threads",
-      configured: Boolean(threadsIntegration && threadsIntegration.expiresAt > new Date()),
+      configured: Boolean((threadsIntegration && threadsIntegration.expiresAt > new Date()) || postPeerThreads?.status === "ACTIVE"),
       required: false,
       section: "social",
       description: "Publica automáticamente hilos en Threads con tus artículos.",

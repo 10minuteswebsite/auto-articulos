@@ -2,6 +2,7 @@
 
 import ComposioConnect from "./ComposioConnect";
 import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSection";
+import PostPeerThreadsSection from "./PostPeerThreadsSection";
 
 const THREADS: OAuthNetworkConfig = {
   id: "threads",
@@ -31,6 +32,7 @@ interface ThreadsSectionProps {
 export default function ThreadsSection({ allowThreads = true, showComposioSocial = true }: ThreadsSectionProps) {
   return (
     <>
+      {allowThreads && <PostPeerThreadsSection />}
       <OAuthNetworkSection config={THREADS} allowed={allowThreads} />
       {showComposioSocial && <ComposioConnect inline showInactiveActions apps={["facebook", "instagram"]} />}
     </>

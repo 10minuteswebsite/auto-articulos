@@ -5,7 +5,6 @@ import { prisma } from "@auto-articulos/db";
 import { encryptSecret, exchangeCodeForInstagramTokens } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredInstagramAppCredentials } from "@/lib/instagram-app-config";
-import { canUseSocialModule } from "@/lib/social-access";
 import { INSTAGRAM_STATE_COOKIE } from "../connect/constants";
 
 export async function GET(request: NextRequest) {
@@ -26,43 +25,24 @@ export async function GET(request: NextRequest) {
     const tokens = await exchangeCodeForInstagramTokens(code, redirectUri, appCreds);
 
     const expiresAt = new Date(Date.now() + tokens.expiresInSeconds * 1000);
+    const pendingKey = `instagram_oauth_pending:${userId}`;
 
-    await prisma.instagramIntegration.upsert({
-      where: { userId },
+    // La autorización puede incluir varias páginas. Guardamos el resultado
+    // cifrado durante pocos minutos y dejamos que la persona elija una antes
+    // de crear la integración definitiva.
+    await prisma.systemSetting.upsert({
+      where: { key: pendingKey },
       create: {
-        userId,
-        instagramBusinessAccountId: tokens.instagramBusinessAccountId,
-        instagramUsername: tokens.instagramUsername,
-        accessTokenEncrypted: encryptSecret(tokens.longLivedToken),
-        expiresAt,
+        key: pendingKey,
+        encryptedValue: encryptSecret(JSON.stringify({ expiresAt: expiresAt.toISOString(), accounts: tokens.accounts })),
       },
       update: {
-        instagramBusinessAccountId: tokens.instagramBusinessAccountId,
-        instagramUsername: tokens.instagramUsername,
-        accessTokenEncrypted: encryptSecret(tokens.longLivedToken),
-        expiresAt,
-      },
-    });
-
-    if (await canUseSocialModule(userId)) await prisma.facebookPageIntegration.upsert({
-      where: { userId },
-      create: {
-        userId,
-        facebookPageId: tokens.facebookPageId,
-        facebookPageName: tokens.facebookPageName,
-        accessTokenEncrypted: encryptSecret(tokens.longLivedToken),
-        expiresAt,
-      },
-      update: {
-        facebookPageId: tokens.facebookPageId,
-        facebookPageName: tokens.facebookPageName,
-        accessTokenEncrypted: encryptSecret(tokens.longLivedToken),
-        expiresAt,
+        encryptedValue: encryptSecret(JSON.stringify({ expiresAt: expiresAt.toISOString(), accounts: tokens.accounts })),
       },
     });
 
     const response = NextResponse.redirect(
-      new URL(connectionReturnPath("instagram", "connected"), request.url)
+      new URL(connectionReturnPath("instagram", "select"), request.url)
     );
     response.cookies.delete(INSTAGRAM_STATE_COOKIE);
     return response;
