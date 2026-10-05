@@ -59,4 +59,14 @@ test("la vista por productos la ve un administrador y quien tenga «Habilitado»
     getEffectiveDisabledModules({ role: "user", disabledModules: JSON.stringify({ "vista-productos": "enabled" }) }, []).includes("vista-productos"),
     false,
   );
+test("redes sociales permanece habilitado para todas las cuentas", () => {
+  const disabled = getEffectiveDisabledModules(
+    { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) },
+    ["oportunidades-redes"],
+  );
+  assert.equal(disabled.includes("oportunidades-redes"), false);
+});
+
+test("solo Composio es opt-in por ahora", () => {
+  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), ["conexion-composio"]);
 });

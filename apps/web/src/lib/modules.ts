@@ -14,6 +14,8 @@ export interface SystemModule {
    * todos por descuido. Se quita esta marca cuando se decide abrirlo a todos.
    */
   optIn?: boolean;
+  /** Módulo disponible para todas las cuentas y no modificable por cuenta. */
+  alwaysEnabled?: boolean;
 }
 
 // El orden es el mismo que el del menú (ver DashboardNav), para que el panel
@@ -44,6 +46,7 @@ export const SYSTEM_MODULES: SystemModule[] = [
     label: MENU_NAMES.redes,
     href: "/dashboard/oportunidades-redes",
     description: "Distribución de contenido e ideas para redes sociales.",
+    alwaysEnabled: true,
   },
   {
     id: "publicaciones-en-curso",
@@ -173,12 +176,18 @@ export function getEffectiveDisabledModules(
   }
   const overrides = parseUserModuleOverrides(user.disabledModules);
   const effective = new Set(globalDisabled);
+  for (const mod of SYSTEM_MODULES) {
+    if (mod.alwaysEnabled) effective.delete(mod.id);
+  }
   for (const [moduleId, access] of Object.entries(overrides)) {
+    const mod = SYSTEM_MODULES.find((candidate) => candidate.id === moduleId);
+    if (mod?.alwaysEnabled) continue;
     if (access === "enabled") effective.delete(moduleId);
     if (access === "disabled") effective.add(moduleId);
   }
   // Los módulos opt-in solo se muestran con «Habilitado» explícito.
   for (const mod of SYSTEM_MODULES) {
+    if (mod.alwaysEnabled) effective.delete(mod.id);
     if (mod.optIn && overrides[mod.id] !== "enabled") effective.add(mod.id);
   }
   return Array.from(effective);

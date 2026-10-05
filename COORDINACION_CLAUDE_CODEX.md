@@ -4773,6 +4773,17 @@ manual que alimenta al asistente.
 - Archivo modificado: `apps/web/src/components/DashboardNav.tsx`.
 - El cambio solo retira fondo, borde, radio y relleno del contenedor de navegación de escritorio; los enlaces, menús y navegación móvil se mantienen sin cambios.
 - No está desplegado en producción. El archivo de código quedó preparado en staging; la verificación de tipos no pudo ejecutarse porque `tsc` no está instalado en el entorno.
+## Trabajo activo — HABILITAR REDES SOCIALES PARA TODOS — 2026-10-02
+
+Responsable: Codex. Pedido de Milton: hacer que el módulo de Redes Sociales
+quede habilitado para todos los usuarios en el control de Administración →
+Usuarios. Se modificaron `apps/web/src/lib/modules.ts`,
+`apps/web/src/app/dashboard/usuarios/page.tsx` y su prueba. El módulo
+`oportunidades-redes` ahora es `alwaysEnabled`: no lo pueden ocultar ni la
+configuración global ni excepciones antiguas por usuario; los permisos
+individuales de cada red permanecen separados. `git diff --check` pasó.
+Typecheck/tests pendientes porque el worktree no tiene `tsc`/`tsx` instalados.
+No hubo migración, commit ni despliegue.
 
 ### Continuación CONEXION POSTPEER 2 — 2026-09-22
 

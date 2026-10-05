@@ -2,6 +2,23 @@
 
 Última actualización: 2026-09-08, por Claude.
 
+## Preparado — Redes Sociales habilitadas para todos (2/10/2026, Codex)
+
+- El módulo `oportunidades-redes` quedó marcado como `alwaysEnabled` en
+  `apps/web/src/lib/modules.ts`: se ignoran tanto el apagado global como las
+  excepciones antiguas por usuario para este módulo.
+- El panel `/dashboard/usuarios` ahora muestra Redes Sociales como
+  **Habilitado para todos los usuarios** y bloquea controles que ya no pueden
+  modificar esa regla. Los permisos individuales por red no cambian.
+- Se agregó una prueba de regresión para confirmar que una configuración
+  antigua `disabled` no vuelve a ocultar el módulo.
+- `git diff --check` pasó. Typecheck y tests no pudieron ejecutarse porque las
+  dependencias del worktree no están instaladas (`tsc`/`tsx` ausentes).
+- No se ejecutó migración, no se modificó producción y no se creó commit.
+
+Pendiente: instalar dependencias en un entorno autorizado, ejecutar typecheck
+y tests, y publicar solo después de la revisión y autorización correspondiente.
+
 ## Cierre final — auditoría editorial y enlaces (20/9/2026, Codex)
 
 Trabajo documentado y archivado. PR #187 quedó fusionado a `main` y la
