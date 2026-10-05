@@ -2996,7 +2996,7 @@ function UserCard({
                             [mod.id]: e.target.value as "inherit" | "enabled" | "disabled",
                           }))
                         }
-                        disabled={savingPermissions || savingUserModules || mod.alwaysEnabled}
+                        disabled={savingPermissions || mod.alwaysEnabled}
                         style={{
                           flex: "1 1 220px",
                           maxWidth: 280,
