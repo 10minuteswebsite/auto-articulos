@@ -44,8 +44,20 @@ const NO_CACHE_HEADERS = {
   "Surrogate-Control": "no-store",
 };
 
+const LEGACY_LOGIN_HOST = "auto-articulos-web.vercel.app";
+const CANONICAL_LOGIN_URL = "https://www.seototal.lasolucionweb.com/login";
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // El alias antiguo de Vercel sigue recibiendo enlaces guardados y marcadores.
+  // Redirigir solo ese host evita afectar al login del dominio canónico y
+  // conserva query params como `returnTo` para no perder el flujo de acceso.
+  if (request.nextUrl.hostname === LEGACY_LOGIN_HOST && pathname === "/login") {
+    const destination = new URL(CANONICAL_LOGIN_URL);
+    destination.search = request.nextUrl.search;
+    return NextResponse.redirect(destination, 308);
+  }
 
   if (
     PUBLIC_PATHS.some((path) => pathname === path) ||
