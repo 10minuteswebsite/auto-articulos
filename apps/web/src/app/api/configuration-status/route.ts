@@ -34,6 +34,8 @@ export async function GET() {
     businessProfile,
     threadsIntegration,
     postPeerThreads,
+    instagramIntegration,
+    facebookPageIntegration,
     twitterIntegration,
     linkedinIntegration,
     pinterestIntegration,
@@ -101,7 +103,17 @@ export async function GET() {
       where: { userId_platform: { userId, platform: "threads" } },
       select: { status: true },
     }),
-    // 8. X/Twitter
+    // 8. Instagram Graph API (Meta)
+    prisma.instagramIntegration.findUnique({
+      where: { userId },
+      select: { expiresAt: true },
+    }),
+    // 9. Facebook Pages (Meta)
+    prisma.facebookPageIntegration.findUnique({
+      where: { userId },
+      select: { expiresAt: true },
+    }),
+    // 10. X/Twitter
     prisma.twitterIntegration.findUnique({
       where: { userId },
       select: { expiresAt: true },
@@ -237,6 +249,26 @@ export async function GET() {
       description: "Publica automáticamente tus artículos como posts en tu perfil de negocio de Google.",
       actionUrl: "/dashboard/configuracion?tab=social",
       actionLabel: "Conectar Business Profile",
+    },
+    {
+      id: "instagram",
+      label: "Instagram",
+      configured: Boolean(instagramIntegration && instagramIntegration.expiresAt > new Date()),
+      required: false,
+      section: "social",
+      description: "Publica automáticamente artículos e imágenes en tu cuenta profesional de Instagram.",
+      actionUrl: "/dashboard/configuracion/conexiones?conexion=instagram",
+      actionLabel: "Conectar Instagram",
+    },
+    {
+      id: "facebook",
+      label: "Facebook",
+      configured: Boolean(facebookPageIntegration && facebookPageIntegration.expiresAt > new Date()),
+      required: false,
+      section: "social",
+      description: "Publica automáticamente contenido en la Página de Facebook conectada.",
+      actionUrl: "/dashboard/configuracion/conexiones?conexion=facebook",
+      actionLabel: "Conectar Facebook",
     },
     {
       id: "threads",
