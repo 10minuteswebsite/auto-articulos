@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
 import { BING_SCOPE, BING_STATE_COOKIE, bingOAuthConfig } from "@/lib/bing-oauth";
 import { getAllowedOAuthOrigin, getOAuthRedirectUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
-import { applyCookie } from "@/lib/shared-cookies";
+import { applyOAuthStateCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
   // Bing solo acepta el callback canónico cuando la petición llega desde un
@@ -32,13 +32,13 @@ export async function GET(request: NextRequest) {
       state,
     }).toString();
     const response = NextResponse.redirect(url);
-    applyCookie(response, BING_STATE_COOKIE, state, {
+    applyOAuthStateCookie(response, BING_STATE_COOKIE, state, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
       path: "/",
       maxAge: 600,
-    });
+    }, request);
     rememberOAuthOrigin(response, request);
     return response;
   } catch (error) {
