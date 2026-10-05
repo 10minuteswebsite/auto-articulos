@@ -59,14 +59,12 @@ test("la vista por productos la ve un administrador y quien tenga «Habilitado»
     getEffectiveDisabledModules({ role: "user", disabledModules: JSON.stringify({ "vista-productos": "enabled" }) }, []).includes("vista-productos"),
     false,
   );
-});
-
-test("redes sociales permanece habilitado para todas las cuentas", () => {
+test("redes sociales permanece deshabilitado para todas las cuentas", () => {
   const disabled = getEffectiveDisabledModules(
     { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) },
     ["oportunidades-redes"],
   );
-  assert.equal(disabled.includes("oportunidades-redes"), false);
+  assert.equal(disabled.includes("oportunidades-redes"), true);
 });
 
 test("la vista por productos es el único módulo opt-in por ahora", () => {
