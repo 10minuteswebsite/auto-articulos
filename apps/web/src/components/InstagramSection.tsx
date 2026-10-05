@@ -1,9 +1,9 @@
 "use client";
 
-import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSection";
+import { type OAuthNetworkConfig } from "./OAuthNetworkSection";
 import ComposioConnect from "./ComposioConnect";
 
-const INSTAGRAM: OAuthNetworkConfig = {
+export const INSTAGRAM: OAuthNetworkConfig = {
   id: "instagram",
   title: "Instagram",
   lead: "En este sitio conectas tu cuenta profesional de Instagram para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes.",
@@ -28,7 +28,14 @@ const INSTAGRAM: OAuthNetworkConfig = {
 export default function InstagramSection() {
   return (
     <>
-      <OAuthNetworkSection config={INSTAGRAM} />
+      {/*
+       * La conexión operativa nueva de Instagram es Composio. Conservamos la
+       * configuración OAuth directa arriba como legado documentado para no
+       * borrar ni romper cuentas antiguas, pero no la montamos en la interfaz:
+       * las nuevas conexiones deben pasar por Composio.
+       *
+       * <OAuthNetworkSection config={INSTAGRAM} />
+       */}
       <ComposioConnect inline showInactiveActions apps={["instagram"]} />
     </>
   );

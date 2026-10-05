@@ -333,7 +333,7 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
           Conecta tus cuentas de Google y Meta a través de Composio, nuestro proveedor de integraciones.
           Al autorizar verás el nombre <strong>Composio</strong> en la pantalla de Google o de Meta: es
           normal. Después de conectar, eliges y apruebas qué sitio, propiedad, Página o cuenta usarás.
-          Tus conexiones actuales siguen funcionando igual mientras pruebas esta.
+          Las conexiones directas históricas se conservan como respaldo; las nuevas conexiones de Facebook e Instagram se hacen por Composio.
         </p>
         {message && !(message.ok && connections?.some((connection) => connection.status === "ACTIVE" && connection.selection)) && (
           <p role="status" style={{ fontSize: 14, marginTop: 12, color: message.ok ? "#1a7f37" : "#c62828" }}>

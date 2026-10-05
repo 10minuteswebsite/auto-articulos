@@ -1,9 +1,9 @@
 "use client";
 
-import OAuthNetworkSection, { type OAuthNetworkConfig } from "./OAuthNetworkSection";
+import { type OAuthNetworkConfig } from "./OAuthNetworkSection";
 import ComposioConnect from "./ComposioConnect";
 
-const FACEBOOK: OAuthNetworkConfig = {
+export const FACEBOOK: OAuthNetworkConfig = {
   id: "facebook-pages",
   title: "Facebook",
   lead: "En este sitio conectas la Página de Facebook que administras para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes.",
@@ -21,7 +21,15 @@ const FACEBOOK: OAuthNetworkConfig = {
 export default function FacebookSection() {
   return (
     <>
-      <OAuthNetworkSection config={FACEBOOK} />
+      {/*
+       * La conexión operativa nueva de Facebook es Composio. Conservamos la
+       * configuración OAuth directa arriba como legado documentado para no
+       * borrar ni romper cuentas antiguas, pero no la montamos en la interfaz:
+       * las nuevas conexiones deben pasar por Composio.
+       *
+       * <OAuthNetworkSection config={FACEBOOK} />
+       */
+      }
       <ComposioConnect inline showInactiveActions apps={["facebook"]} />
     </>
   );

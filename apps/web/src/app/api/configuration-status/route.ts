@@ -34,8 +34,6 @@ export async function GET() {
     businessProfile,
     threadsIntegration,
     postPeerThreads,
-    instagramIntegration,
-    facebookPageIntegration,
     twitterIntegration,
     linkedinIntegration,
     pinterestIntegration,
@@ -103,16 +101,9 @@ export async function GET() {
       where: { userId_platform: { userId, platform: "threads" } },
       select: { status: true },
     }),
-    // 8. Instagram Graph API (Meta)
-    prisma.instagramIntegration.findUnique({
-      where: { userId },
-      select: { expiresAt: true },
-    }),
-    // 9. Facebook Pages (Meta)
-    prisma.facebookPageIntegration.findUnique({
-      where: { userId },
-      select: { expiresAt: true },
-    }),
+    // 8-9. Instagram/Facebook se consultan abajo exclusivamente por Composio.
+    // Las integraciones Meta directas permanecen en sus rutas y en el worker
+    // como legado, pero no deben marcar esta lista como conectada.
     // 10. X/Twitter
     prisma.twitterIntegration.findUnique({
       where: { userId },
@@ -145,7 +136,7 @@ export async function GET() {
     }),
   ]);
 
-  const [resolvedSearchConsole, analyticsComposioConnection] = await Promise.all([
+  const [resolvedSearchConsole, analyticsComposioConnection, composioSocialConnections] = await Promise.all([
     resolveSearchConsoleForUser(userId, account.selectedSiteDomain ?? ""),
     prisma.composioConnection.findFirst({
       where: {
@@ -157,12 +148,21 @@ export async function GET() {
       orderBy: { updatedAt: "desc" },
       select: { propertyId: true, siteUrl: true },
     }),
+    prisma.composioConnection.findMany({
+      where: { userId, app: { in: ["instagram", "facebook"] }, status: "ACTIVE", siteDomain: "" },
+      orderBy: { updatedAt: "desc" },
+      select: { app: true, pageId: true, igAccountId: true },
+    }),
   ]);
   const searchConsoleConfigured = Boolean(googleIntegration?.siteUrl) || (
     resolvedSearchConsole.source === "COMPOSIO" && Boolean(resolvedSearchConsole.state.composio?.siteUrl)
   );
   const hasLegacyGoogleAnalytics = Boolean(googleAnalyticsIntegration?.siteUrl && googleAnalyticsIntegration.encryptedRefreshToken);
   const hasActiveComposioAnalytics = Boolean(analyticsComposioConnection?.propertyId || analyticsComposioConnection?.siteUrl);
+  const composioInstagram = composioSocialConnections.find((connection) => connection.app === "instagram");
+  const composioFacebook = composioSocialConnections.find((connection) => connection.app === "facebook");
+  const hasActiveComposioInstagram = Boolean(composioInstagram?.igAccountId);
+  const hasActiveComposioFacebook = Boolean(composioFacebook?.pageId);
 
   const checks: ConfigurationCheck[] = [
     // ━━━ MÍNIMO PARA PUBLICAR ━━━
@@ -253,20 +253,20 @@ export async function GET() {
     {
       id: "instagram",
       label: "Instagram",
-      configured: Boolean(instagramIntegration && instagramIntegration.expiresAt > new Date()),
+      configured: hasActiveComposioInstagram,
       required: false,
       section: "social",
-      description: "Publica automáticamente artículos e imágenes en tu cuenta profesional de Instagram.",
+      description: "Publica automáticamente artículos e imágenes en tu cuenta profesional de Instagram mediante Composio.",
       actionUrl: "/dashboard/configuracion/conexiones?conexion=instagram",
       actionLabel: "Conectar Instagram",
     },
     {
       id: "facebook",
       label: "Facebook",
-      configured: Boolean(facebookPageIntegration && facebookPageIntegration.expiresAt > new Date()),
+      configured: hasActiveComposioFacebook,
       required: false,
       section: "social",
-      description: "Publica automáticamente contenido en la Página de Facebook conectada.",
+      description: "Publica automáticamente contenido en la Página de Facebook conectada mediante Composio.",
       actionUrl: "/dashboard/configuracion/conexiones?conexion=facebook",
       actionLabel: "Conectar Facebook",
     },

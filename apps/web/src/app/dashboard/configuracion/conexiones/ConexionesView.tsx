@@ -26,6 +26,11 @@ type Vista = "analiticas" | "difusion";
 type Producto = "articulos" | "redes";
 type ConexionId = "google-search-console" | "google-analytics" | "bing-webmaster" | "instagram" | "facebook" | "threads" | "linkedin" | "pinterest" | "tumblr" | "bluesky" | "devto" | "blogger" | "business-profile";
 
+// Instagram y Facebook se conectan ahora por Composio. Las integraciones Meta
+// directas se conservan para compatibilidad histórica, pero no pueden pintar
+// el estado de la tarjeta ni habilitar el flujo nuevo.
+const COMPOSIO_PRIMARY_CONNECTIONS = new Set(["instagram", "facebook"]);
+
 const VISTAS: { id: Vista; label: string; ayuda: string }[] = [
   { id: "analiticas", label: "ANALÍTICAS", ayuda: "Leen datos y ayudan a que aparezcas en los buscadores." },
   { id: "difusion", label: "DIFUSIÓN", ayuda: "Publican tu contenido en redes, microblogs y blogs." },
@@ -137,6 +142,9 @@ export default function ConexionesView() {
           const body = (await configurationResponse.json()) as { checks?: Array<{ id: string; configured: boolean }> };
           for (const check of body.checks ?? []) next[check.id] = check.configured;
         }
+        // A response antigua o una caché no puede reactivar la ruta Meta
+        // directa: este listado solo refleja Composio para estas dos redes.
+        for (const id of COMPOSIO_PRIMARY_CONNECTIONS) next[id] = false;
         if (composioResponse.ok) {
           const body = (await composioResponse.json()) as { connections?: Array<{ app: string; status: string }> };
           const composioIds: Record<string, string> = {
@@ -148,11 +156,15 @@ export default function ConexionesView() {
           };
           for (const connection of body.connections ?? []) {
             const id = composioIds[connection.app];
-            // Una conexión directa ya verificada no puede quedar marcada como
-            // desconectada porque la vía alternativa de Composio esté inactiva.
-            // Esto ocurre con Meta: Instagram/Facebook pueden estar conectados
-            // por OAuth propio mientras Composio no tiene una cuenta activa.
-            if (id) next[id] = next[id] || connection.status === "ACTIVE";
+            if (!id) continue;
+            // Para Instagram/Facebook Composio es la fuente de verdad. Nunca
+            // hacemos OR con la integración Meta directa: eso ocultaba la
+            // regresión mostrando ✓ aunque Composio no estuviera conectado.
+            if (COMPOSIO_PRIMARY_CONNECTIONS.has(id)) {
+              next[id] = connection.status === "ACTIVE";
+            } else {
+              next[id] = next[id] || connection.status === "ACTIVE";
+            }
           }
         }
         setConfiguradas(next);
