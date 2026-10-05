@@ -9,6 +9,7 @@ import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 import { TUMBLR_STATE_COOKIE } from "../connect/constants";
 import { clearCookie } from "@/lib/shared-cookies";
 import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { oauthErrorRedirect } from "@/lib/oauth-error";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
   if (!(await canPublishToNetwork(userId, "tumblr")) || !state || state !== cookieStore.get(TUMBLR_STATE_COOKIE)?.value || !code) {
-    return NextResponse.redirect(new URL(connectionReturnPath("tumblr", "error"), oauthReturnBase(request)));
+    return oauthErrorRedirect(request, connectionReturnPath("tumblr", "error"), [TUMBLR_STATE_COOKIE]);
   }
   try {
     const credentials = await getStoredTumblrAppCredentials();
@@ -40,6 +41,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Error en Tumblr OAuth callback:", error);
-    return NextResponse.redirect(new URL(connectionReturnPath("tumblr", "error"), oauthReturnBase(request)));
+    return oauthErrorRedirect(request, connectionReturnPath("tumblr", "error"), [TUMBLR_STATE_COOKIE]);
   }
 }
