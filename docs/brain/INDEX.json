@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "repository": "auto-articulos",
+  "standard": "CLAUDE_CODE_CEREBRO_STANDARD",
+  "status": "partial_bootstrap",
+  "audit_scripts_available": false,
+  "note": "Este repositorio todavía no contiene los scripts brain:audit/brain:complete ni un registry completo. Los estados de tarea se mantienen aquí y en la coordinación versionada hasta incorporar ese tooling explícitamente.",
+  "tasks": [
+    {
+      "task_id": "TASK-20261006-hub-auth-navigation",
+      "state": "tasks/TASK-20261006-hub-auth-navigation/state.json"
+    }
+  ]
+}

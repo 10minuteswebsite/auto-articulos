@@ -4774,6 +4774,31 @@ Responsable: Claude (tarea programada diaria de propagación).
 - La confirmación del usuario prevalece sobre el estado intermedio registrado
   inmediatamente después del deployment.
 
+## Trabajo activo — navegación del Hub según origen de sesión — 2026-10-06
+
+- **Solicitud:** los usuarios antiguos que entran directamente al producto con
+  el login legacy no deben ver la cabecera global del Hub ni el enlace «Volver
+  al HUB», porque su sesión no puede validar esos destinos. Los usuarios que
+  llegan mediante `/auth/hub` deben conservar ambos.
+- **Hallazgo:** `HubPlatformHeader` se renderizaba para cualquier sesión válida;
+  el token solo contenía el usuario y la expiración, sin origen de
+  autenticación.
+- **Corrección en curso:** el payload HMAC de sesión incorpora `hub` o
+  `legacy`. Las cookies antiguas de tres partes se aceptan como `legacy`, sin
+  expulsar usuarios. Middleware envía `x-auth-source` firmado/verificado a las
+  rutas; el layout muestra la cabecera global y el enlace de vuelta solo para
+  `hub`.
+- **Superficies preservadas:** login legacy, impersonificación, aislamiento de
+  tenants, base de datos, migraciones, secretos y todas las conexiones OAuth.
+- **Estado CEREBRO:** `docs/brain/INDEX.json` y
+  `docs/brain/tasks/TASK-20261006-hub-auth-navigation/state.json`. El repo no
+  trae todavía scripts `brain:audit`/`brain:complete`; se deja constancia en
+  vez de simular su ejecución.
+- **Validación local actual:** 195 pruebas web pasan, 1 integración se omite
+  por no tener `TITLE_GENERATION_TEST_DATABASE_URL`, typecheck y build pasan.
+- **Deploy:** no realizado. Falta revisión final del diff, commit, push, PR y
+  autorización específica para publicar este cambio de autenticación.
+
 
 ## Confirmación del usuario — Blogger conectado en producción — 2026-10-05
 

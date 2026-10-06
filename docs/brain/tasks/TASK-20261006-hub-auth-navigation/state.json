@@ -1,0 +1,57 @@
+{
+  "task_id": "TASK-20261006-hub-auth-navigation",
+  "title": "Ocultar navegación global del Hub para sesiones legacy",
+  "base_sha": "10e5254576d192ce6113e426a1da2e2fd264b84f",
+  "branch": "codex/hide-hub-navigation-legacy-auth",
+  "allowed_paths": [
+    "apps/web/src/lib/session.ts",
+    "apps/web/src/lib/session.test.ts",
+    "apps/web/src/middleware.ts",
+    "apps/web/src/app/auth/hub/route.ts",
+    "apps/web/src/app/dashboard/layout.tsx",
+    "apps/web/src/components/DashboardNav.tsx",
+    "docs/brain/INDEX.json",
+    "docs/brain/tasks/TASK-20261006-hub-auth-navigation/state.json",
+    "COORDINACION_CLAUDE_CODEX.md",
+    "HANDOFF.md"
+  ],
+  "shared_surfaces": [
+    "apps/web/src/app/dashboard/layout.tsx",
+    "apps/web/src/components/DashboardNav.tsx",
+    "apps/web/src/lib/session.ts",
+    "apps/web/src/middleware.ts"
+  ],
+  "protected_surfaces": [
+    "legacy login and credential verification",
+    "database schema and migrations",
+    "OAuth integrations and provider credentials",
+    "tenant isolation and product access rules",
+    "production deployment"
+  ],
+  "findings": [
+    "HubPlatformHeader se renderizaba para cualquier sesión válida.",
+    "La cookie de sesión no distinguía si había sido creada por /auth/hub o por el login legacy.",
+    "Las cookies antiguas de tres partes se conservan y se clasifican como legacy.",
+    "El menú DashboardNav también contenía el enlace Volver al HUB y debe ocultarse para legacy."
+  ],
+  "decision": "Agregar origen firmado hub/legacy al payload de sesión, mantener compatibilidad con tokens antiguos y renderizar la navegación global solo cuando middleware confirme x-auth-source=hub.",
+  "tests": {
+    "web_tests": "195 passed, 0 failed, 1 skipped integration test requiring TITLE_GENERATION_TEST_DATABASE_URL",
+    "typecheck": "passed",
+    "build": "passed",
+    "git_diff_check": "passed"
+  },
+  "process_flags": {
+    "enabled": true,
+    "stage": "ready_for_review",
+    "attempt": 1,
+    "outcome": "ready_for_review",
+    "failure_reason": null
+  },
+  "blockers": [
+    "No se ejecutó Browser E2E porque el cambio todavía no está desplegado.",
+    "No se ejecutó deploy: el cambio toca la frontera de autenticación y requiere revisión del diff antes de publicar."
+  ],
+  "next_safe_action": "Ejecutar diff final, commit, push y abrir/actualizar PR; después revisar el PR antes de autorizar deployment.",
+  "secrets_or_pii": "none"
+}

@@ -8,6 +8,13 @@ const IMPERSONATION_COOKIE = "auto_articulos_impersonation";
 const IMPERSONATION_TTL_MS = 1000 * 60 * 60 * 12; // 12 horas
 const MCP_ACCESS_TOKEN_TTL_MS = 1000 * 60 * 60; // 1 hora
 
+export type SessionAuthSource = "legacy" | "hub";
+
+export type SessionContext = {
+  userId: string;
+  source: SessionAuthSource;
+};
+
 function getSecret(): string {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error("SESSION_SECRET no está configurada.");
@@ -42,33 +49,53 @@ function fromBase64Url(str: string): Uint8Array {
  * este archivo se importa tanto desde el middleware (Edge Runtime) como desde
  * route handlers (Node runtime), y Web Crypto es la única API común a ambos.
  */
-export async function createSessionToken(userId: string): Promise<string> {
+export async function createSessionToken(userId: string, source: SessionAuthSource = "legacy"): Promise<string> {
   const expires = Date.now() + SESSION_TTL_MS;
-  const payload = `${userId}.${expires}`;
+  const payload = `${userId}.${expires}.${source}`;
   const key = await getKey();
   const signatureBuf = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
   return `${payload}.${toBase64Url(signatureBuf)}`;
 }
 
-export async function verifySessionToken(token: string | undefined | null): Promise<string | null> {
+/**
+ * Verifica la sesión y conserva el origen autenticado.
+ *
+ * Las cookies antiguas tenían tres partes (`userId.expires.signature`) y se
+ * consideran `legacy` para no expulsar ni cambiar el comportamiento de los
+ * usuarios existentes. Las nuevas sesiones incluyen explícitamente `hub` o
+ * `legacy` dentro del payload firmado.
+ */
+export async function verifySessionContext(token: string | undefined | null): Promise<SessionContext | null> {
   if (!token) return null;
   const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  const [userId, expiresStr, signature] = parts;
+  if (parts.length !== 3 && parts.length !== 4) return null;
+
+  const userId = parts[0];
+  const expiresStr = parts[1];
+  const source: SessionAuthSource = parts.length === 4 && parts[2] === "hub" ? "hub" : "legacy";
+  const signature = parts.length === 4 ? parts[3] : parts[2];
+  if (!userId || !signature || (parts.length === 4 && parts[2] !== "hub" && parts[2] !== "legacy")) return null;
 
   const expires = Number(expiresStr);
   if (!Number.isFinite(expires) || Date.now() > expires) return null;
 
-  const payload = `${userId}.${expiresStr}`;
-  const key = await getKey();
-  const valid = await crypto.subtle.verify(
-    "HMAC",
-    key,
-    fromBase64Url(signature).buffer as ArrayBuffer,
-    new TextEncoder().encode(payload)
-  );
+  const payload = parts.length === 4 ? `${userId}.${expiresStr}.${source}` : `${userId}.${expiresStr}`;
+  try {
+    const key = await getKey();
+    const valid = await crypto.subtle.verify(
+      "HMAC",
+      key,
+      fromBase64Url(signature).buffer as ArrayBuffer,
+      new TextEncoder().encode(payload)
+    );
+    return valid ? { userId, source } : null;
+  } catch {
+    return null;
+  }
+}
 
-  return valid ? userId : null;
+export async function verifySessionToken(token: string | undefined | null): Promise<string | null> {
+  return (await verifySessionContext(token))?.userId ?? null;
 }
 
 /** Access token OAuth para el recurso MCP, separado del token de cookie web. */

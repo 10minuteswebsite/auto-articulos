@@ -2049,3 +2049,27 @@ El usuario confirmó el 5 de octubre de 2026 que Google Business Profile quedó
 conectado, listo y funcional en producción para `yolyripepi@gmail.com`.
 
 Estado: **CERRADO, FUNCIONAL Y LISTO PARA TRASPASO**.
+
+## Trabajo activo — navegación global solo para sesiones del Hub — 2026-10-06
+
+La nueva cabecera global del Hub no debe aparecer a usuarios antiguos que
+entran directamente mediante el login legacy. El cambio en curso registra el
+origen dentro del payload HMAC de la sesión: `/auth/hub` crea sesiones `hub`,
+los logins antiguos crean sesiones `legacy` y los tokens antiguos de tres
+partes se interpretan como `legacy` para mantener compatibilidad.
+
+El middleware propaga `x-auth-source` únicamente después de verificar la sesión.
+El layout muestra `HubPlatformHeader` y `Volver al HUB` solo para sesiones
+`hub`; la navegación interna del producto continúa disponible para ambos
+modos. No hay cambios de base de datos, migraciones, secretos, integraciones
+OAuth ni reglas de acceso.
+
+Estado durable CEREBRO: `docs/brain/INDEX.json` y
+`docs/brain/tasks/TASK-20261006-hub-auth-navigation/state.json`. El repositorio
+no contiene todavía los scripts `brain:audit`/`brain:complete`; la limitación
+queda registrada y no se simula evidencia.
+
+Validación local: 195 pruebas pasan, 1 integración se omite por falta de
+`TITLE_GENERATION_TEST_DATABASE_URL`, typecheck y build pasan. No se ha hecho
+deploy ni Browser E2E; el siguiente agente debe revisar el diff y el PR antes
+de publicar este cambio sensible de autenticación.
