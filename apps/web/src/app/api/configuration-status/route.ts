@@ -345,7 +345,7 @@ export async function GET() {
     {
       id: "blogger",
       label: "Blogger",
-      configured: Boolean((user?.role === "admin" || user?.allowBloggerPublishing) && bloggerIntegration),
+      configured: Boolean(bloggerIntegration),
       required: false,
       section: "social",
       description: "Publica entradas de tus artículos en el blog de Blogger conectado.",

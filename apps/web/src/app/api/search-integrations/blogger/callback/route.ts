@@ -3,14 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectionReturnPath } from "@/lib/connection-return";
 import { prisma } from "@auto-articulos/db";
 import { encryptSecret, exchangeCodeForBloggerTokens, getBloggerBlogs } from "@auto-articulos/shared";
-import { getCurrentUserId } from "@/lib/current-user";
+import { getCurrentUser } from "@/lib/current-user";
 import { bloggerOAuthConfig } from "@/lib/blogger-oauth";
 import { BLOGGER_STATE_COOKIE } from "../connect/constants";
 import { clearCookie } from "@/lib/shared-cookies";
 import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
-  const userId = await getCurrentUserId();
+  const user = await getCurrentUser();
+  const userId = user.id;
+  if (!user.canConfigureRedes) return NextResponse.redirect(new URL(connectionReturnPath("blogger", "error"), oauthReturnBase(request)));
   const cookieStore = await cookies();
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
