@@ -32,12 +32,10 @@ export async function bloggerOAuthConfig() {
   ]);
   const sharedClientId = process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID;
   const sharedClientSecret = process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET;
-  const clientId = sharedClientId && sharedClientSecret
-    ? sharedClientId
-    : idSetting ? decryptSecret(idSetting.encryptedValue) : process.env.BLOGGER_CLIENT_ID;
-  const clientSecret = sharedClientId && sharedClientSecret
-    ? sharedClientSecret
-    : secretSetting ? decryptSecret(secretSetting.encryptedValue) : process.env.BLOGGER_CLIENT_SECRET;
+  const clientId = idSetting ? decryptSecret(idSetting.encryptedValue)
+    : process.env.BLOGGER_CLIENT_ID || sharedClientId;
+  const clientSecret = secretSetting ? decryptSecret(secretSetting.encryptedValue)
+    : process.env.BLOGGER_CLIENT_SECRET || sharedClientSecret;
   if (!clientId || !clientSecret) throw new Error("Google OAuth no está configurado.");
   return { clientId, clientSecret, scope: BLOGGER_SCOPE };
 }

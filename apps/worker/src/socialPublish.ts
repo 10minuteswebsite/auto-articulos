@@ -1022,12 +1022,10 @@ async function getBloggerAppCredentials() {
   // Blogger-specific settings remain only as a transition fallback.
   const sharedClientId = process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID;
   const sharedClientSecret = process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET;
-  const clientId = sharedClientId && sharedClientSecret
-    ? sharedClientId
-    : idSetting ? decryptSecret(idSetting.encryptedValue) : process.env.BLOGGER_CLIENT_ID;
-  const clientSecret = sharedClientId && sharedClientSecret
-    ? sharedClientSecret
-    : secretSetting ? decryptSecret(secretSetting.encryptedValue) : process.env.BLOGGER_CLIENT_SECRET;
+  const clientId = idSetting ? decryptSecret(idSetting.encryptedValue)
+    : process.env.BLOGGER_CLIENT_ID || sharedClientId;
+  const clientSecret = secretSetting ? decryptSecret(secretSetting.encryptedValue)
+    : process.env.BLOGGER_CLIENT_SECRET || sharedClientSecret;
   if (!clientId || !clientSecret) throw new Error("Google OAuth no está configurado para Blogger.");
   return { clientId, clientSecret };
 }

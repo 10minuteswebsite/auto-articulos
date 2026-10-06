@@ -18,10 +18,8 @@ export async function GET() {
   const sharedGoogleConfigured = Boolean(process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID && process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET);
   const configured = sharedGoogleConfigured || Boolean((idSetting && secretSetting) || (envClientId && envClientSecret));
   if (user.role !== "admin") return NextResponse.json({ configured, isAdmin: false }, { headers: NO_CACHE });
-  const clientId = sharedGoogleConfigured
-    ? process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID!
-    : idSetting ? decryptSecret(idSetting.encryptedValue) : envClientId || null;
-  return NextResponse.json({ configured, isAdmin: true, clientId: clientId ? `${clientId.slice(0, 4)}...${clientId.slice(-4)}` : null, rawClientId: clientId ?? "", source: sharedGoogleConfigured ? "shared-google-environment" : idSetting ? "database" : envClientId ? "environment" : "none" }, { headers: NO_CACHE });
+  const clientId = idSetting ? decryptSecret(idSetting.encryptedValue) : envClientId || (sharedGoogleConfigured ? process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID! : null);
+  return NextResponse.json({ configured, isAdmin: true, clientId: clientId ? `${clientId.slice(0, 4)}...${clientId.slice(-4)}` : null, rawClientId: clientId ?? "", source: idSetting ? "database" : envClientId ? "environment" : sharedGoogleConfigured ? "shared-google-environment" : "none" }, { headers: NO_CACHE });
 }
 
 export async function POST(request: NextRequest) {
