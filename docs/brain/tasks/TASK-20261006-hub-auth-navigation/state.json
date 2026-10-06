@@ -43,15 +43,22 @@
   },
   "process_flags": {
     "enabled": true,
-    "stage": "ready_for_review",
+    "stage": "pr_open",
     "attempt": 1,
-    "outcome": "ready_for_review",
+    "outcome": "pending_review_and_browser_e2e",
     "failure_reason": null
   },
   "blockers": [
     "No se ejecutó Browser E2E porque el cambio todavía no está desplegado.",
     "No se ejecutó deploy: el cambio toca la frontera de autenticación y requiere revisión del diff antes de publicar."
   ],
-  "next_safe_action": "Ejecutar diff final, commit, push y abrir/actualizar PR; después revisar el PR antes de autorizar deployment.",
+  "pr": {
+    "number": 486,
+    "url": "https://github.com/10minuteswebsite/auto-articulos/pull/486",
+    "base_branch": "codex/oauth-repair-bing-instagram-facebook",
+    "head_branch": "codex/hide-hub-navigation-legacy-auth",
+    "status": "open"
+  },
+  "next_safe_action": "Revisar el PR #486; con autorización explícita, desplegar y ejecutar Browser E2E de sesión Hub, sesión legacy y compatibilidad de tokens antiguos.",
   "secrets_or_pii": "none"
 }
