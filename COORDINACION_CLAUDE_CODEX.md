@@ -4735,6 +4735,38 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## REPARACIÓN DE BUILD WEB — 2026-10-06
+
+**Identidad:** CODEX - GPT-5 - REPARADOR DEL ARBOL PRINCIPAL.
+
+**Base:** `origin/main` en rama aislada
+`codex/reparar-typecheck-web-20261006`.
+
+**Causa 1:** `apps/web/src/lib/modules.test.ts` tenía un bloque de test sin
+cerrar; faltaba `});` antes del siguiente `test()`.
+
+**Causa 2:** `apps/web/src/app/dashboard/usuarios/page.tsx` referenciaba el
+estado inexistente `savingUserModules`. Se sustituyó por `savingAny`, el estado
+agregado existente para bloquear el guardado durante cualquier operación de
+permisos, módulos o límites.
+
+**Alcance excluido:** Blogger, Composio, PostPeer, callbacks, secretos,
+credenciales, schema Prisma, migraciones, middleware y `vercel.json` no fueron
+modificados.
+
+**Validación:** `prisma generate` correcto; typecheck web correcto después de
+regenerar Prisma; build worker correcto; pruebas worker 20/20 correctas.
+Las pruebas web ejecutaron 187 casos: 186 correctos, 1 fallo preexistente en
+la expectativa antigua de `oportunidades-redes`, que ahora está deshabilitado
+intencionalmente en `origin/main`. El build web no pudo terminar por un error
+de permisos del entorno al crear un proceso/puerto interno de Turbopack
+(`Operation not permitted`), no por estos dos archivos.
+
+**Estado:** commit local creado para conservar la reparación y su evidencia,
+pero **NO LISTO PARA PRODUCCIÓN** hasta repetir el build web en un entorno con
+permisos de procesos completos y resolver o actualizar separadamente el test
+preexistente de Redes Sociales. No hubo deploy ni cambios de producción.
+
 ## Cierre Codex — corrección de retornos OAuth de conexiones — 2026-09-24
 
 - Commit desplegado: `67547d5bc60574dc4b15567b6fa7c86dd0b8c975` en `main`.

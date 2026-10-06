@@ -2,6 +2,27 @@
 
 Última actualización: 2026-09-08, por Claude.
 
+## Reparación de build web — 2026-10-06
+
+En la rama aislada `codex/reparar-typecheck-web-20261006` se corrigieron dos
+errores ajenos a Blogger:
+
+- `apps/web/src/lib/modules.test.ts`: se cerró el test de vista por productos
+  con el `});` faltante.
+- `apps/web/src/app/dashboard/usuarios/page.tsx`: se reemplazó la referencia
+  inexistente `savingUserModules` por el estado agregado `savingAny`.
+
+No se modificaron Blogger, Composio, PostPeer, callbacks, secretos,
+credenciales, schema, migraciones, middleware ni `vercel.json`. No hubo deploy.
+
+`prisma generate`, typecheck web, build worker y pruebas worker 20/20 fueron
+correctos. Las pruebas web dieron 186/187: el único fallo es una expectativa
+antigua sobre `oportunidades-redes`, ya deshabilitado intencionalmente en
+`origin/main`. El build web quedó bloqueado por `Operation not permitted` al
+crear un proceso/puerto interno de Turbopack en este entorno. Por ello el
+commit no se considera listo para producción hasta repetir el build web en un
+entorno con permisos completos.
+
 ## Corrección — Redes Sociales deshabilitadas temporalmente para todos (5/10/2026, Codex)
 
 - El módulo `oportunidades-redes` quedó marcado como `alwaysDisabled` en
