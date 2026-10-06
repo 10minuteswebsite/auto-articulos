@@ -370,7 +370,6 @@ export default function OportunidadesRedesPage() {
     <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
       {/* Panel Superior */}
       <div
-        className="panel"
         style={{
           ...sectionStyle,
           // Pedido explícito de Milton (1/10/2026): sin el rectángulo
@@ -448,9 +447,9 @@ export default function OportunidadesRedesPage() {
                   disabled={generatingAll || generatingNetwork !== null}
                   style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginBottom: 16 }}
                 >
-                  {generatingAll ? "GENERANDO PARA TODAS LAS REDES..." : "GENERAR 1 POR CADA RED ACTIVADA"}
+                  {generatingAll ? "Generando para todas las redes..." : "Generar 1 por cada red (todas)"}
                 </button>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
+                <div>
                 {([
                 ["threads", "threads", "Threads", "threads"], ["x", "x", "X (Twitter)", null], ["linkedin", "linkedin", "LinkedIn", "linkedin"], ["instagram", "instagram", "Instagram", "instagram"], ["facebookPage", "facebook-page", "Facebook", "facebook"], ["pinterest", "pinterest", "Pinterest", "pinterest"], ["tumblr", "tumblr", "Tumblr", "tumblr"], ["bluesky", "bluesky", "Bluesky", "bluesky"], ["devto", "devto", "DEV.to", "devto"], ["blogger", "blogger", "Blogger", "blogger"], ["googleBusiness", "google-business", "Google Business Profile", "business-profile"],
                 ] as const).map(([key, platform, label, conexionId]) => {
@@ -458,21 +457,20 @@ export default function OportunidadesRedesPage() {
                 const connected = connectedNetworks[key];
                 const busy = Boolean(generatingNetwork);
                 const unavailable = !connected;
-                return <button key={key} type="button" onClick={() => {
-                  if (unavailable) {
-                    // Pedido explícito de Milton (1/10/2026): el botón "Configurar"
-                    // ya no queda inerte — lleva a Conexiones y, al volver de ahí,
-                    // ConexionesView trae de regreso a esta pantalla sola.
-                    if (conexionId) {
+                const actionStyle: CSSProperties = { border: "none", background: "transparent", padding: 0, fontSize: 14, color: unavailable ? "#86868b" : "#0066cc", cursor: busy ? "wait" : "pointer", fontFamily: "inherit" };
+                return <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid #e5e5ea" }}>
+                  <span style={{ fontSize: 15, color: unavailable ? "#86868b" : "#1d1d1f" }}>{label}</span>
+                  {unavailable && conexionId ? (
+                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => {
                       try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
                       router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`);
-                    }
-                    return;
-                  }
-                  handleGenerate(platform);
-                }} disabled={busy} className="secondary" style={disabledStyle({ ...secondaryButtonStyle, ...uniformButtonSize, width: "100%", border: unavailable ? "1px solid #e5e5ea" : "1px solid #1d1d1f", background: unavailable ? "#f5f5f7" : "#1d1d1f", color: unavailable ? "#86868b" : "#ffffff", justifyContent: "center" }, busy)}>
-                  {generatingNetwork === platform ? "Analizando..." : unavailable ? "Configurar " + label : "✓ " + label + " · Crear oportunidad"}
-                </button>;
+                    }}>Configurar ›</button>
+                  ) : unavailable ? (
+                    <span style={{ fontSize: 14, color: "#86868b" }}>No disponible</span>
+                  ) : (
+                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => handleGenerate(platform)}>{generatingNetwork === platform ? "Analizando..." : "Crear oportunidad"}</button>
+                  )}
+                </div>;
                 })}
                 </div>
               </>
@@ -508,10 +506,7 @@ export default function OportunidadesRedesPage() {
             aria-live="polite"
             style={{
               marginTop: 16,
-              padding: 16,
-              border: "1px solid #e5e5ea",
-              borderRadius: 14,
-              background: "#f5f5f7",
+              padding: 0,
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", marginBottom: 10 }}>
@@ -540,14 +535,11 @@ export default function OportunidadesRedesPage() {
       {message && (
         <div
           style={{
-            padding: "12px 16px",
-            borderRadius: 12,
-            marginBottom: 20,
+            padding: "0 0 16px",
+            marginBottom: 4,
             fontSize: 13,
             fontWeight: 500,
-            background: message.kind === "success" ? "#f2faf4" : message.kind === "error" ? "#fff2f1" : "#f5f5f7",
             color: message.kind === "success" ? "#16803c" : message.kind === "error" ? "#ff3b30" : "#6e6e73",
-            border: `1px solid ${message.kind === "success" ? "rgba(52, 199, 89, 0.25)" : message.kind === "error" ? "rgba(255, 59, 48, 0.25)" : "#e5e5ea"}`,
           }}
         >
           {message.text}
@@ -567,7 +559,7 @@ export default function OportunidadesRedesPage() {
           </div>
 
           {pendingList.length === 0 ? (
-            <section style={{ ...sectionStyle, textAlign: "center", padding: 32 }}>
+            <section style={{ ...sectionStyle, padding: "16px 0 24px" }}>
               <p className="muted" style={{ margin: 0 }}>
                 No tienes propuestas pendientes. Usa los botones de arriba para generarlas.
               </p>
@@ -584,37 +576,12 @@ export default function OportunidadesRedesPage() {
               {pendingList.map((opp) => {
                 const isQueuedOrProcessing = false;
                 return (
-                  <div key={opp.id} className="panel" style={sectionStyle}>
+                  <div key={opp.id} style={sectionStyle}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
                       <div>
-                        <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              padding: "2px 8px",
-                              borderRadius: 999,
-                              fontSize: 11,
-                              fontWeight: 600,
-                              textTransform: "uppercase",
-                              background: "#f5f5f7",
-                              color: "#1d1d1f",
-                            }}
-                          >
-                            {opp.platform}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 500,
-                              padding: "2px 8px",
-                              borderRadius: 999,
-                              background: opp.status === "published" ? "rgba(52, 199, 89, 0.1)" : "#f5f5f7",
-                              color: opp.status === "published" ? "#16803c" : "#6e6e73",
-                            }}
-                          >
-                            {opp.status === "published" ? "✓ Publicado" : opp.status === "processing" ? "Publicando..." : "Pendiente"}
-                          </span>
-                        </div>
+                        <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "#6e6e73" }}>
+                          {opp.platform} · {opp.status === "published" ? "Publicado" : opp.status === "processing" ? "Publicando..." : "Pendiente"}
+                        </p>
                         <h4 style={{ color: "#1d1d1f", margin: "0 0 4px 0", fontSize: 16, fontWeight: 600 }}>
                           {opp.articleTitle}
                         </h4>
