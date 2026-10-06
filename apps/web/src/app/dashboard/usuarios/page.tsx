@@ -3618,7 +3618,7 @@ function UserHistorial({ email }: { email: string }) {
                           {title.attempts}
                         </td>
                         <td style={tdStyle} data-label="Enlace / Error">
-                          {title.articleUrl ? (
+                          {title.status === "success" && title.articleUrl ? (
                             <a
                               href={title.articleUrl}
                               target="_blank"
@@ -3628,7 +3628,9 @@ function UserHistorial({ email }: { email: string }) {
                               Ver artículo
                             </a>
                           ) : (
-                            (title.errorMessage ?? "—")
+                            <span style={{ color: title.errorMessage ? "#ff3b30" : "inherit" }}>
+                              {title.errorMessage ?? (title.status === "success" ? "Publicado, pero sin enlace confirmado" : "—")}
+                            </span>
                           )}
                         </td>
                       </tr>

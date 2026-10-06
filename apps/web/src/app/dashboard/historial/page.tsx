@@ -1821,10 +1821,12 @@ function latestPublicationAt(titles: TitleRow[]) {
 }
 
 function renderMessageWithLinks(message: string) {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  // No incluyas puntuación final en el href: los mensajes suelen terminar
+  // la URL con un punto o una coma.
+  const urlRegex = /(https?:\/\/[^\s<]+?)([.,;:!?)]?)(?=\s|$)/g;
   const parts = message.split(urlRegex);
   return parts.map((part, i) => {
-    if (part.match(urlRegex)) {
+    if (/^https?:\/\//.test(part)) {
       return (
         <a
           key={i}
@@ -1905,7 +1907,7 @@ function TitleRowWithLog({ title }: { title: TitleRow }) {
         )}
       </td>
       <td style={tdStyle} data-label="Enlace / Error">
-        {title.articleUrl ? (
+        {title.status === "success" && title.articleUrl ? (
           <div>
             <a
               href={title.articleUrl}
@@ -2007,7 +2009,7 @@ function TitleRowWithLog({ title }: { title: TitleRow }) {
           </div>
         ) : (
           <span style={{ color: title.errorMessage ? "#ff3b30" : "inherit" }}>
-            {title.errorMessage ?? "—"}
+            {title.errorMessage ? renderMessageWithLinks(title.errorMessage) : title.status === "success" ? "Publicado, pero sin enlace confirmado" : "—"}
           </span>
         )}
       </td>
