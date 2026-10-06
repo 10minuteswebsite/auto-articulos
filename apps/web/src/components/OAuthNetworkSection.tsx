@@ -302,7 +302,7 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
                 rows={dest && savedDestName ? [{ label: dest.label, value: savedDestName }] : undefined}
               />
             )}
-            {guide && dest && (pendingDestination || choosing) && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />}
+            {guide && (!dest || pendingDestination || choosing) && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />}
             {dest && (pendingDestination || choosing) && (
               <div style={{ marginTop: 12, padding: "10px 0", borderTop: "1px solid #e5e5ea" }}>
                 <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px" }}>Elige {dest.noun} donde se publicará</p>

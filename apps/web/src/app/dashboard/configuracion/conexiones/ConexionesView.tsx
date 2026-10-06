@@ -19,6 +19,7 @@ import FacebookSection from "@/components/FacebookSection";
 import InstagramSection from "@/components/InstagramSection";
 import { ConnectionReturnSuccess, LEGACY_RETURN_NETWORKS, useConnectionReturn } from "@/components/ConnectionReturn";
 import { ConnectionReturnContext } from "@/components/connection-return-context";
+import { shouldShowStaticConnectionSuccess } from "@/lib/connection-return-state";
 import { isConnectionVisible, isProductViewAllowed } from "@/lib/product-view-filter";
 import { productOfHost, type HostProductScope } from "@/lib/product-routes";
 
@@ -73,7 +74,11 @@ export default function ConexionesView() {
   const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   const [hostReady, setHostReady] = useState(false);
   const retorno = useConnectionReturn(conexion);
-  const soloExito = retorno === "connected" && conexion !== null && LEGACY_RETURN_NETWORKS[conexion]?.choice === null;
+  const soloExito = shouldShowStaticConnectionSuccess({
+    conexion,
+    resultado: retorno,
+    choice: conexion ? LEGACY_RETURN_NETWORKS[conexion]?.choice : undefined,
+  });
 
   // Pedido explícito de Milton (1/10/2026): si llegó aquí desde Difusión en
   // Redes (botón "Configurar X" de una red sin conectar), un botón la trae
