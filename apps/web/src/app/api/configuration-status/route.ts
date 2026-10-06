@@ -315,7 +315,7 @@ export async function GET() {
     {
       id: "tumblr",
       label: "Tumblr",
-      configured: Boolean(redesAccess && tumblrIntegration && !tumblrIntegration.blogSelectionPending && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
+      configured: Boolean(tumblrIntegration && !tumblrIntegration.blogSelectionPending && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos con imagen, texto y enlace en Tumblr.",
@@ -325,7 +325,7 @@ export async function GET() {
     {
       id: "bluesky",
       label: "Bluesky",
-      configured: Boolean(redesAccess && blueskyIntegration?.handle),
+      configured: Boolean(blueskyIntegration?.handle),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos en Bluesky.",
