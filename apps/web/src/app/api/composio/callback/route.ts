@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
   const back = new URL("/dashboard/configuracion/conexiones", request.nextUrl.origin);
   const app = request.nextUrl.searchParams.get("app");
   const isMigrationApp = app === "google_search_console" || app === "google_analytics";
-  const isMetaProductApp = app === "facebook" || app === "instagram";
-  const callbackAllowed = isMigrationApp || (isMetaProductApp ? user.canConfigureRedes === true : canUseComposioModule(user));
+  const isRedesProductApp = app === "facebook" || app === "instagram" || app === "pinterest";
+  const callbackAllowed = isMigrationApp || (isRedesProductApp ? user.canConfigureRedes === true : canUseComposioModule(user));
   if (!callbackAllowed) {
     return NextResponse.redirect(new URL("/dashboard", request.nextUrl.origin));
   }

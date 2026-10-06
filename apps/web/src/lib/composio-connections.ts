@@ -56,13 +56,12 @@ export function canUseComposioModule(user: ConnectingUser): boolean {
 }
 
 /**
- * Configurar Facebook/Instagram requiere acceso al producto Redes, no una
+ * Configurar Facebook/Instagram/Pinterest requiere acceso al producto Redes, no una
  * aprobación previa de esa misma red. La aprobación individual se conserva
  * para publicar; no puede bloquear la primera conexión OAuth.
  */
 export function userMayConnectApp(user: ConnectingUser, app: ComposioAppId): boolean {
-  if (app === "facebook" || app === "instagram") return user.canConfigureRedes === true;
-  if (app === "pinterest") return user.allowPinterestPublishing === true;
+  if (app === "facebook" || app === "instagram" || app === "pinterest") return user.canConfigureRedes === true;
   return true;
 }
 
