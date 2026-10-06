@@ -4752,8 +4752,19 @@ Responsable: Claude (tarea programada diaria de propagación).
   la integración antigua como respaldo y no se borran datos.
 - **Validación local:** 193 pruebas web, typecheck, build de producción y
   `git diff --check` aprobados.
-- **Estado:** CORRECCIÓN PREPARADA, PENDIENTE DE PUBLICACIÓN Y VERIFICACIÓN E2E
-  EN PRODUCCIÓN. No se ejecutó deploy en esta auditoría.
+- **Publicación:** commit `43502970` publicado mediante deployment de Vercel
+  `dpl_DX3M2ahzMaUNyRz1dibcJP8WjnBv`, estado `READY`, proyecto
+  `auto-articulos-web`, equipo `la-solucion-web`. Se conservaron y verificaron
+  los alias `.net` y `.com`; `/login` respondió HTTP 200 en ambos dominios.
+- **Verificación posterior:** con `yolyripepi@gmail.com`, la tarjeta ahora
+  muestra el estado real `No conectada` y ofrece `Nueva conexión`, en lugar de
+  mostrar una falsa conexión exitosa sin acciones. El escaneo de errores de
+  producción posterior al deploy no encontró errores.
+- **Estado:** CORRECCIÓN PUBLICADA Y VERIFICADA. La regresión de interfaz quedó
+  reparada; la autorización de Google Business Profile de esa cuenta no está
+  activa en PostPeer y requiere repetir `Nueva conexión` para completar el E2E.
+  No hubo migraciones, cambios de secretos ni modificaciones de otras
+  conexiones.
 
 
 ## Confirmación del usuario — Blogger conectado en producción — 2026-10-05

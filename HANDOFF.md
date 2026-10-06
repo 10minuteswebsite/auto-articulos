@@ -2029,7 +2029,16 @@ Estado: CERRADO Y ARCHIVADO.
 
 Se reprodujo una regresión de estado: la conexión PostPeer de Google Business
 Profile respondía correctamente, pero el listado no mostraba `Configurada ✓` y
-el retorno OAuth ocultaba las acciones de la tarjeta. La corrección preparada
-considera `postPeerConnection.status = ACTIVE` y devuelve GBP a la tarjeta
-estándar. Tests web (193), typecheck, build y `git diff --check` pasaron. Queda
-pendiente publicar y verificar E2E en producción; no se hizo deploy.
+el retorno OAuth ocultaba las acciones de la tarjeta. La corrección considera
+`postPeerConnection.status = ACTIVE` y devuelve GBP a la tarjeta estándar.
+
+- Commit: `43502970` (`fix: restore Google Business Profile connection state`).
+- Deployment: `dpl_DX3M2ahzMaUNyRz1dibcJP8WjnBv`, Vercel `READY`, proyecto
+  `auto-articulos-web`, equipo `la-solucion-web`.
+- Verificación: alias `.net` y `.com` preservados; `/login` HTTP 200 en ambos;
+  escaneo de errores posterior sin errores.
+- E2E real: con `yolyripepi@gmail.com`, la tarjeta muestra `No conectada` y
+  `Nueva conexión`. Esto confirma que la interfaz dejó de falsear el estado;
+  la autorización GBP de esa cuenta no está activa en PostPeer y debe repetirse.
+- Seguridad: sin migraciones, sin cambios de secretos y sin cambios en otras
+  conexiones.
