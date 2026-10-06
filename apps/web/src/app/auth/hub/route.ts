@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const token = await createSessionToken(user.id);
+  const token = await createSessionToken(user.id, "hub");
   const destination = appSlug === "auto-redes" ? "/dashboard/oportunidades-redes" : "/dashboard";
   const response = NextResponse.redirect(new URL(destination, request.url), 303);
   response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");

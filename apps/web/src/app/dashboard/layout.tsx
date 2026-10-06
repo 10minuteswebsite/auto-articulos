@@ -25,6 +25,7 @@ export default async function DashboardLayout({
   const { user, actingAdmin } = await getSessionContext();
   const requestHeaders = await headers();
   const hostProduct = productOfHost(requestHeaders.get("host"));
+  const showHubNavigation = requestHeaders.get("x-auth-source") === "hub";
   const productTitle = hostProduct === "ARTICULOS"
     ? "SEO TOTAL ARTÍCULOS"
     : hostProduct === "REDES"
@@ -53,7 +54,7 @@ export default async function DashboardLayout({
         position: "relative",
       }}
     >
-      <HubPlatformHeader user={user} actingAdmin={actingAdmin} />
+      {showHubNavigation && <HubPlatformHeader user={user} actingAdmin={actingAdmin} />}
       <style>{`
         @media (max-width: 639px) {
           .topbar { display: flex !important; margin-bottom: 12px !important; align-items: center !important; }
@@ -165,7 +166,7 @@ export default async function DashboardLayout({
         <TrialBlockedScreen />
       ) : (
         <>
-          <DashboardNav />
+          <DashboardNav showHubNavigation={showHubNavigation} />
           <ProductAccessGuard>
             <ModuleGuard>{children}</ModuleGuard>
           </ProductAccessGuard>
