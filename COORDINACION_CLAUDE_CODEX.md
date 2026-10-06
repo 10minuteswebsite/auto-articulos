@@ -10862,3 +10862,48 @@ donde ya está anotada (entradas del 2026-10-01 y 2026-10-02 de este mismo docum
 No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-06
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-03
+(commit `d351feb`). Se revisó el rango `d351feb..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: dos commits lo tocaron, ambos de Milton directamente sobre el
+documento — `f787bd9` ("feat: habilitar redes sociales para todos", agregó la entrada "Trabajo
+activo — HABILITAR REDES SOCIALES PARA TODOS — 2026-10-02") y `5f10b56` ("fix: deshabilitar
+redes sociales temporalmente", 2026-10-05), que **borró esa misma entrada** y la reemplazó por
+"Corrección — REDES SOCIALES OFF PARA TODOS — 2026-10-05". Esa edición no la hizo esta tarea de
+propagación (que nunca borra), sino un commit ajeno sobre el propio documento maestro; se deja
+anotado aquí por transparencia, sin revertirlo, porque el protocolo de no-destrucción de este
+documento aplica a cualquiera que lo edite, no solo a esta tarea.
+
+Se verificó contra el código real de `origin/main` cuál de las dos versiones sigue vigente:
+`apps/web/src/lib/modules.ts` tiene hoy `alwaysDisabled: true` en la entrada
+`oportunidades-redes`, confirmando que el estado final es "apagado para todos los no
+administradores" (commit `5f10b56`), no el "habilitado para todos" del commit `f787bd9` que ya
+fue revertido.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: entrada nueva "Versión — 2026-10-05 — módulo de Redes
+  Sociales: habilitado para todos y revertido el mismo día", con ambos commits (`f787bd9` y
+  `5f10b56`), la verificación contra el código vigente, y la falta de confirmación de
+  despliegue/Vercel en las entradas originales (esta tarea no tiene acceso a Vercel para
+  comprobarlo).
+- `apps/web/src/content/manual-usuario.ts`: nota nueva en la sección de
+  `${MENU_NAMES.redes}` (debajo de la frase "Este módulo está en prueba...") explicando que,
+  desde el 2026-10-05, el módulo está apagado para toda cuenta que no sea administradora, para
+  que el bot de ayuda no siga diciendo solo que "se está activando poco a poco" cuando en
+  realidad está deshabilitado a propósito.
+- `INVENTARIO_CONVERSACIONES.md`: sin cambios — ninguna de las dos entradas trae un nombre de
+  conversación en formato «[AGENTE] - [NOMBRE DEL PROBLEMA]» ni una reserva de archivo/rama
+  activa verificable (no hay ningún worktree abierto además del de esta misma tarea, según
+  `git worktree list`), así que no hay nada que indexar ahí todavía.
+- `TO-DO.md`: sin cambios — ninguna idea suelta nueva sin ejecutar en este rango.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — no se encontró ninguna mención nueva a
+  árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado (la edición
+  que borró y reemplazó una entrada se anotó arriba, en este mismo documento, por no calzar
+  exactamente en el tema de ese archivo).
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
