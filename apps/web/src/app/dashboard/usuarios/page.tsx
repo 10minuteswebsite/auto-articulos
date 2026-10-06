@@ -1459,7 +1459,6 @@ export default function UsuariosPage() {
               <UserCard
                 key={u.id}
                 user={u}
-                globalDisabledModules={globalDisabledModules}
                 isCurrentUser={u.id === currentUserId}
                 onUpdated={loadUsers}
               />
@@ -2003,12 +2002,10 @@ export default function UsuariosPage() {
 
 function UserCard({
   user,
-  globalDisabledModules = [],
   isCurrentUser,
   onUpdated,
 }: {
   user: UserRow;
-  globalDisabledModules?: string[];
   isCurrentUser: boolean;
   onUpdated: () => void;
 }) {
