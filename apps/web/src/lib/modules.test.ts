@@ -24,7 +24,7 @@ test("«Habilitado» explícito lo muestra aunque el ocultar global lo incluya",
 });
 
 test("el resto de módulos se comporta exactamente como antes", () => {
-  const normal = SYSTEM_MODULES.filter((m) => !m.optIn).map((m) => m.id);
+  const normal = SYSTEM_MODULES.filter((m) => !m.optIn && !m.alwaysDisabled).map((m) => m.id);
   // sin overrides ni global: ningún módulo normal queda oculto
   const base = getEffectiveDisabledModules({ role: "user", disabledModules: null }, []);
   for (const id of normal) assert.equal(base.includes(id), false, `${id} no debería estar oculto por defecto`);
@@ -59,6 +59,8 @@ test("la vista por productos la ve un administrador y quien tenga «Habilitado»
     getEffectiveDisabledModules({ role: "user", disabledModules: JSON.stringify({ "vista-productos": "enabled" }) }, []).includes("vista-productos"),
     false,
   );
+});
+
 test("redes sociales permanece deshabilitado para todas las cuentas", () => {
   const disabled = getEffectiveDisabledModules(
     { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) },
