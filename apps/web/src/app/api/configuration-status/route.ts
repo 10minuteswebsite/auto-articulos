@@ -3,6 +3,7 @@ import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { platformHelpUrl } from "@auto-articulos/shared";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { hasProductAccess } from "@/lib/product-access";
 
 interface ConfigurationCheck {
   id: string;
@@ -154,6 +155,7 @@ export async function GET() {
       select: { app: true, pageId: true, igAccountId: true },
     }),
   ]);
+  const redesAccess = (await hasProductAccess(userId, "REDES")).allowed;
   const searchConsoleConfigured = Boolean(googleIntegration?.siteUrl) || (
     resolvedSearchConsole.source === "COMPOSIO" && Boolean(resolvedSearchConsole.state.composio?.siteUrl)
   );
@@ -303,7 +305,7 @@ export async function GET() {
     {
       id: "pinterest",
       label: "Pinterest",
-      configured: Boolean((user?.role === "admin" || user?.allowPinterestPublishing) && pinterestIntegration && pinterestIntegration.boardId && (!pinterestIntegration.expiresAt || pinterestIntegration.expiresAt > new Date())),
+      configured: Boolean(redesAccess && pinterestIntegration && pinterestIntegration.boardId && (!pinterestIntegration.expiresAt || pinterestIntegration.expiresAt > new Date())),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos como Pins con imagen y enlace al artículo.",
@@ -313,7 +315,7 @@ export async function GET() {
     {
       id: "tumblr",
       label: "Tumblr",
-      configured: Boolean((user?.role === "admin" || user?.allowTumblrPublishing) && tumblrIntegration && !tumblrIntegration.blogSelectionPending && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
+      configured: Boolean(redesAccess && tumblrIntegration && !tumblrIntegration.blogSelectionPending && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos con imagen, texto y enlace en Tumblr.",
@@ -323,7 +325,7 @@ export async function GET() {
     {
       id: "bluesky",
       label: "Bluesky",
-      configured: Boolean((user?.role === "admin" || user?.allowBlueskyPublishing) && blueskyIntegration?.handle),
+      configured: Boolean(redesAccess && blueskyIntegration?.handle),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos en Bluesky.",
