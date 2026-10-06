@@ -4760,11 +4760,19 @@ Responsable: Claude (tarea programada diaria de propagación).
   muestra el estado real `No conectada` y ofrece `Nueva conexión`, en lugar de
   mostrar una falsa conexión exitosa sin acciones. El escaneo de errores de
   producción posterior al deploy no encontró errores.
-- **Estado:** CORRECCIÓN PUBLICADA Y VERIFICADA. La regresión de interfaz quedó
-  reparada; la autorización de Google Business Profile de esa cuenta no está
-  activa en PostPeer y requiere repetir `Nueva conexión` para completar el E2E.
-  No hubo migraciones, cambios de secretos ni modificaciones de otras
-  conexiones.
+- **Estado al publicar:** CORRECCIÓN PUBLICADA Y VERIFICADA. La tarjeta dejó de
+  falsear el estado; inicialmente la autorización de esa cuenta aún no estaba
+  activa en PostPeer.
+- **Confirmación final del usuario (2026-10-05):** el usuario confirmó que la
+  conexión de Google Business Profile quedó lista y funcional en producción para
+  `yolyripepi@gmail.com`. No hubo migraciones, cambios de secretos ni
+  modificaciones de otras conexiones.
+
+## Cierre confirmado — Google Business Profile funcional — 2026-10-05
+
+- Estado: **CERRADO, FUNCIONAL Y LISTO PARA TRASPASO**.
+- La confirmación del usuario prevalece sobre el estado intermedio registrado
+  inmediatamente después del deployment.
 
 
 ## Confirmación del usuario — Blogger conectado en producción — 2026-10-05

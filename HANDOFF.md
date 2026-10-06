@@ -2042,3 +2042,10 @@ el retorno OAuth ocultaba las acciones de la tarjeta. La corrección considera
   la autorización GBP de esa cuenta no está activa en PostPeer y debe repetirse.
 - Seguridad: sin migraciones, sin cambios de secretos y sin cambios en otras
   conexiones.
+
+### Cierre confirmado por el usuario — Google Business Profile — 2026-10-05
+
+El usuario confirmó el 5 de octubre de 2026 que Google Business Profile quedó
+conectado, listo y funcional en producción para `yolyripepi@gmail.com`.
+
+Estado: **CERRADO, FUNCIONAL Y LISTO PARA TRASPASO**.
