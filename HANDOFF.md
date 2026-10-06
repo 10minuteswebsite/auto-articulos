@@ -2041,6 +2041,22 @@ de una decisión aparte de Milton sobre si borrarlos.
 - Producción verificada: `/login` respondió HTTP 200.
 
 Estado: CERRADO, DESPLEGADO Y SIN PENDIENTES.
+
+## Cierre — Google Analytics por Composio / Zulmad — 2026-10-06
+
+- Se corrigió el lector de respuestas de Composio para Google Analytics 4.
+- Causa: si una cuenta devuelta por `GOOGLE_ANALYTICS_LIST_ACCOUNT_SUMMARIES` no
+  tenía propiedades, el parser descartaba la lista completa y no mostraba las
+  propiedades de las demás cuentas, incluida la cuenta de Zulmad.
+- La corrección conserva las cuentas con `propertySummaries`, acepta variantes
+  de respuesta y añade una prueba de regresión para cuentas mixtas.
+- PR #488 corrigió la primera variante del parser; PR #489 contiene la
+  corrección definitiva y fue fusionado a `main`.
+- Producción verificada en deployment `bf680a629f14167d62841f684d6e1a9f06813aec`;
+  Vercel terminó en estado `success`.
+- Sin cambios de schema, migraciones ni acciones destructivas.
+
+Estado: CERRADO, DESPLEGADO Y ARCHIVADO.
 ## Cierre y archivo — Carmen Aguilar / Google Search Console — 2026-10-02
 
 El incidente quedó resuelto en producción. La interfaz ya no afirma que GSC está conectado cuando Composio no devuelve ninguna propiedad utilizable; muestra configuración incompleta o conexión sin propiedades y orienta a revisar permisos/cuenta o reconectar. Deployment verificado: `dpl_vMF5BV3DBZagVoEj3VCorCbFmMRD` (`READY`), dominio `/login` HTTP 200. Sin migraciones ni cambios destructivos.

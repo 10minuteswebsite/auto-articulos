@@ -10014,6 +10014,15 @@ Propagado por documento:
 No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+### Cierre Codex — Google Analytics Composio / Zulmad — 2026-10-06
+
+La incidencia quedó resuelta. El parser de `GOOGLE_ANALYTICS_LIST_ACCOUNT_SUMMARIES`
+descartaba la respuesta completa cuando una de las cuentas venía sin propiedades;
+ahora conserva las cuentas que sí contienen `propertySummaries` y cuenta con una
+prueba de regresión para respuestas mixtas. PR #489 fue fusionado a `main` y el
+deployment productivo del commit `bf680a6` terminó en `success`. Sin schema,
+migraciones ni cambios destructivos. Estado: CERRADO Y ARCHIVADO.
 - Ramas locales `claude/*` antiguas sin subir de proyectos previos: no son de este trabajo; no tocar.
 
 ## Claude (tarea programada diaria de propagación) — 2026-09-29

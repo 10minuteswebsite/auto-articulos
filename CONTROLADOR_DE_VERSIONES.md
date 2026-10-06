@@ -4080,3 +4080,10 @@ programada diaria de propagación (2026-10-06).
 - Responsable de ambos commits: Codex (según las entradas de Coordinación).
 - Estado: vigente el apagado ("OFF para todos", commit `5f10b56`); sin confirmación de
   despliegue en producción registrada en ningún documento maestro.
+
+## Versión — 2026-10-06 — Google Analytics Composio Zulmad
+
+- PR #489 fusionado a `main`; corrigió el parser de propiedades GA4 cuando una
+  respuesta contiene cuentas mixtas, algunas sin propiedades.
+- Deployment productivo: commit `bf680a6`, estado Vercel `success`.
+- Sin schema ni migraciones. Estado: desplegado y cerrado.
