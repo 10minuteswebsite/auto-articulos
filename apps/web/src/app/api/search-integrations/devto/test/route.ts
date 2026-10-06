@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret, verifyDevToApiKey } from "@auto-articulos/shared";
-import { getCurrentUserId } from "@/lib/current-user";
-import { canPublishToNetwork } from "@/lib/social-access";
+import { getCurrentUser } from "@/lib/current-user";
 import { NOT_CONNECTED, runConnectionTest } from "@/lib/connection-test-route";
 
 export const dynamic = "force-dynamic";
 
 export async function POST() {
-  const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "devto"))) {
+  const user = await getCurrentUser();
+  const userId = user.id;
+  if (!user.canConfigureRedes) {
     return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
   }
   const integration = await prisma.devToIntegration.findUnique({ where: { userId }, select: { username: true, encryptedApiKey: true } });

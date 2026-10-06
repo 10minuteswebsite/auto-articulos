@@ -335,7 +335,7 @@ export async function GET() {
     {
       id: "devto",
       label: "DEV.to",
-      configured: Boolean((user?.role === "admin" || user?.allowDevToPublishing) && devToIntegration),
+      configured: Boolean(devToIntegration),
       required: false,
       section: "social",
       description: "Publica una versión adaptada del artículo con enlace canónico en DEV.to.",
