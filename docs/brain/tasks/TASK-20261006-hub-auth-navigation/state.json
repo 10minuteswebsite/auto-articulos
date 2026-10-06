@@ -43,10 +43,22 @@
   },
   "process_flags": {
     "enabled": true,
-    "stage": "pr_open",
+    "stage": "security_reviewed",
     "attempt": 1,
-    "outcome": "pending_review_and_browser_e2e",
+    "outcome": "safe_for_review_and_preview_pending_browser_e2e",
     "failure_reason": null
+  },
+  "security_review": {
+    "result": "No se encontró un bypass evidente en el diff revisado.",
+    "checks": [
+      "El origen hub/legacy está incluido en el payload HMAC firmado; no proviene de una cabecera del cliente.",
+      "Middleware sobrescribe x-auth-source después de verificar la cookie.",
+      "Tokens antiguos de tres partes siguen válidos únicamente como legacy.",
+      "No se modificaron OAuth, secretos, base de datos, aislamiento de productos ni reglas de acceso.",
+      "La renovación conserva el origen ya verificado.",
+      "El PR tiene build de Vercel Preview exitoso y el estado de merge está limpio."
+    ],
+    "qualification": "Seguro para revisión y Preview; todavía no certificado para producción porque falta Browser E2E con una sesión Hub y una sesión legacy reales."
   },
   "blockers": [
     "No se ejecutó Browser E2E porque el cambio todavía no está desplegado.",
