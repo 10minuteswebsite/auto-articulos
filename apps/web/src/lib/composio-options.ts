@@ -105,15 +105,30 @@ export function optionsForAnalytics(data: unknown): SelectionOption[] {
   // la versión de la acción, puede envolver el resultado dentro de `data` o
   // devolver propiedades directamente. No dependemos de una sola forma para
   // no mostrar una cuenta válida como si estuviera vacía.
-  const summaries = findArray(
-    data,
-    (item) =>
-      Array.isArray(item.propertySummaries) ||
-      Array.isArray(item.property_summaries) ||
-      Array.isArray(item.properties),
-  ) ?? [];
+  const summaries: Json[] = [];
+  const collectSummaries = (value: unknown, depth = 0) => {
+    if (depth > 5 || value === null || value === undefined) return;
+    if (Array.isArray(value)) {
+      const accounts = value.filter(
+        (item): item is Json =>
+          isObject(item) &&
+          (Array.isArray(item.propertySummaries) ||
+            Array.isArray(item.property_summaries) ||
+            Array.isArray(item.properties)),
+      );
+      if (accounts.length > 0) summaries.push(...accounts);
+      // No descartes toda la respuesta si una cuenta no trae propiedades.
+      for (const item of value) collectSummaries(item, depth + 1);
+      return;
+    }
+    if (isObject(value)) {
+      for (const inner of Object.values(value)) collectSummaries(inner, depth + 1);
+    }
+  };
+  collectSummaries(data);
+  const uniqueSummaries = Array.from(new Map(summaries.map((item) => [JSON.stringify(item), item])).values());
   const options: SelectionOption[] = [];
-  for (const account of summaries) {
+  for (const account of uniqueSummaries) {
     const accountName =
       str(account.displayName) ??
       str(account.display_name) ??
