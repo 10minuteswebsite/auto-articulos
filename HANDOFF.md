@@ -2050,6 +2050,18 @@ conectado, listo y funcional en producción para `yolyripepi@gmail.com`.
 
 Estado: **CERRADO, FUNCIONAL Y LISTO PARA TRASPASO**.
 
+## Publicación — navegación global solo para sesiones del Hub — 2026-10-06
+
+El cambio quedó publicado en producción: deployment `dpl_13f6kLCz2HbNkarHZWj9c1HHczji`
+en estado `READY`. Se verificaron los aliases `.com` y `.net` de Redes, SEO Total y
+Artículos. Sin sesión, `/dashboard` redirige a `/login` y `/api/me` responde `401`.
+
+El único paso pendiente es Browser E2E autenticado: probar una sesión iniciada desde el
+Hub (debe mostrar el menú global) y una sesión legacy/directa (debe ocultarlo). El
+navegador quedó esperando selección de una cuenta Google; no se asumió una cuenta.
+
+Estado: **DESPLEGADO; E2E autenticado pendiente**.
+
 ## Trabajo activo — navegación global solo para sesiones del Hub — 2026-10-06
 
 La nueva cabecera global del Hub no debe aparecer a usuarios antiguos que
@@ -2070,6 +2082,6 @@ no contiene todavía los scripts `brain:audit`/`brain:complete`; la limitación
 queda registrada y no se simula evidencia.
 
 Validación local: 195 pruebas pasan, 1 integración se omite por falta de
-`TITLE_GENERATION_TEST_DATABASE_URL`, typecheck y build pasan. No se ha hecho
-deploy ni Browser E2E; el siguiente agente debe revisar el diff y el PR antes
-de publicar este cambio sensible de autenticación.
+`TITLE_GENERATION_TEST_DATABASE_URL`, typecheck y build pasan. El cambio ya está
+publicado en `dpl_13f6kLCz2HbNkarHZWj9c1HHczji`; faltan únicamente las pruebas
+Browser E2E autenticadas con una sesión Hub y una sesión legacy reales.

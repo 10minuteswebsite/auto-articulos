@@ -4735,6 +4735,21 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Publicación y verificación — navegación global según origen de sesión — 2026-10-06
+
+- El cambio de sesión `hub/legacy` quedó publicado en producción mediante Vercel.
+- Deployment: `dpl_13f6kLCz2HbNkarHZWj9c1HHczji`, estado `READY`.
+- Aliases verificados: `redes.lasolucionweb.com`, `redes.lasolucionweb.net`,
+  `seototal.lasolucionweb.com`, `seototal.lasolucionweb.net`,
+  `articulos.lasolucionweb.com` y `articulos.lasolucionweb.net`.
+- Smoke check sin sesión: `/dashboard` devuelve `307 -> /login` y `/api/me` devuelve
+  `401 No autenticado` en `.com` y `.net`.
+- El Browser E2E autenticado queda pendiente porque el navegador llegó al selector de
+  cuenta de Google y no se eligió una cuenta por no asumir cuál debía probarse.
+- No se tocaron migraciones, secretos, OAuth ni reglas de acceso.
+
+Estado: **DESPLEGADO; pendiente únicamente la prueba autenticada Hub/legacy**.
+
 ## Auditoría y reparación preparada — Google Business Profile — 2026-10-05
 
 - **Síntoma verificado en producción:** la tarjeta de Google Business Profile no

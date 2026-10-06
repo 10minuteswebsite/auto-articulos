@@ -43,9 +43,9 @@
   },
   "process_flags": {
     "enabled": true,
-    "stage": "security_reviewed",
+    "stage": "production_deployed",
     "attempt": 1,
-    "outcome": "safe_for_review_and_preview_pending_browser_e2e",
+    "outcome": "deployed_smoke_verified_pending_authenticated_browser_e2e",
     "failure_reason": null
   },
   "security_review": {
@@ -58,11 +58,10 @@
       "La renovación conserva el origen ya verificado.",
       "El PR tiene build de Vercel Preview exitoso y el estado de merge está limpio."
     ],
-    "qualification": "Seguro para revisión y Preview; todavía no certificado para producción porque falta Browser E2E con una sesión Hub y una sesión legacy reales."
+    "qualification": "Desplegado en producción y verificado sin sesión en ambos dominios; falta Browser E2E autenticado con una sesión Hub y una sesión legacy reales."
   },
   "blockers": [
-    "No se ejecutó Browser E2E porque el cambio todavía no está desplegado.",
-    "No se ejecutó deploy: el cambio toca la frontera de autenticación y requiere revisión del diff antes de publicar."
+    "La prueba Browser E2E autenticada no se completó: el navegador quedó en el selector de cuenta de Google y no se seleccionó una cuenta por no asumir cuál debía usarse."
   ],
   "pr": {
     "number": 486,
@@ -71,6 +70,24 @@
     "head_branch": "codex/hide-hub-navigation-legacy-auth",
     "status": "open"
   },
-  "next_safe_action": "Revisar el PR #486; con autorización explícita, desplegar y ejecutar Browser E2E de sesión Hub, sesión legacy y compatibilidad de tokens antiguos.",
+  "deployment": {
+    "id": "dpl_13f6kLCz2HbNkarHZWj9c1HHczji",
+    "target": "production",
+    "status": "READY",
+    "url": "https://auto-articulos-4108o88nr-la-solucion-web.vercel.app",
+    "aliases_verified": [
+      "https://redes.lasolucionweb.com",
+      "https://redes.lasolucionweb.net",
+      "https://seototal.lasolucionweb.com",
+      "https://seototal.lasolucionweb.net",
+      "https://articulos.lasolucionweb.com",
+      "https://articulos.lasolucionweb.net"
+    ],
+    "smoke_checks": {
+      "dashboard_without_session": "307 -> /login on .com and .net",
+      "api_me_without_session": "401 {\"error\":\"No autenticado\"} on .com and .net"
+    }
+  },
+  "next_safe_action": "Seleccionar una cuenta de prueba autorizada en el navegador y verificar que una sesión Hub muestra la navegación global; después iniciar una sesión legacy y verificar que la oculta.",
   "secrets_or_pii": "none"
 }
