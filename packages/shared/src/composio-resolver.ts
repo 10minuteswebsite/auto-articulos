@@ -23,7 +23,7 @@ export const COMPOSIO_CONSUMER_READY: Record<ComposioAppId, boolean> = {
   google_analytics: false,
   facebook: true,
   instagram: true,
-  pinterest: false,
+  pinterest: true,
 };
 
 /** Piloto aislado: permite probar una app con usuarios concretos sin activar la vía global. */
