@@ -4053,3 +4053,30 @@ Problemas conocidos: el hook de actualizaciones no pudo registrar el cambio por 
 Responsable: Codex.
 Siguiente acción: ninguna; queda pendiente únicamente la comprobación visual de Carmen en la pantalla de Conexiones.
 Estado: VERIFICADA
+
+## Versión — 2026-10-05 — módulo de Redes Sociales: habilitado para todos y revertido el mismo día
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("Trabajo activo — HABILITAR REDES SOCIALES PARA
+TODOS — 2026-10-02" y "Corrección — REDES SOCIALES OFF PARA TODOS — 2026-10-05") por la tarea
+programada diaria de propagación (2026-10-06).
+
+- Commit `f787bd9` ("feat: habilitar redes sociales para todos", 2026-10-05 09:27 EDT): el
+  módulo `oportunidades-redes` pasó a `alwaysEnabled` en `apps/web/src/lib/modules.ts` y
+  `apps/web/src/app/dashboard/usuarios/page.tsx`, quedando habilitado para todos los usuarios
+  sin que la configuración global ni excepciones antiguas por usuario pudieran ocultarlo.
+- Commit `5f10b56` ("fix: deshabilitar redes sociales temporalmente", 2026-10-05 13:18 EDT):
+  Milton pidió revertir esa decisión; el mismo módulo pasó a `alwaysDisabled`, quedando apagado
+  para todas las cuentas no administradoras hasta nueva indicación. Verificado contra el código
+  vigente de `origin/main` al momento de esta propagación: `apps/web/src/lib/modules.ts` tiene
+  `alwaysDisabled: true` en la entrada `oportunidades-redes`.
+- Ninguna de las dos entradas de Coordinación registra migración, typecheck/tests completos (el
+  worktree no tenía `tsc`/`tsx` instalados, según el propio texto) ni confirmación de
+  despliegue/Vercel. Esta tarea programada no tiene acceso a Vercel ni a producción para
+  verificarlo, así que queda anotado como pendiente de confirmar por quien sí tenga ese acceso.
+- `apps/web/src/content/manual-usuario.ts` fue actualizado por esta misma tarea programada
+  (sección `${MENU_NAMES.redes}`) para que el bot de ayuda explique que el módulo está apagado
+  para cuentas no administradoras por este cambio, en vez de describirlo solo como una prueba
+  que se activa "poco a poco".
+- Responsable de ambos commits: Codex (según las entradas de Coordinación).
+- Estado: vigente el apagado ("OFF para todos", commit `5f10b56`); sin confirmación de
+  despliegue en producción registrada en ningún documento maestro.

@@ -209,6 +209,8 @@ Nada se publica sin que tú lo mandes. Las sugerencias ayudan a decidir, pero la
 
 **Este módulo está en prueba.** Todavía no está disponible para todas las cuentas: se está activando poco a poco. Si no aparece en tu menú, no es que te falte algo por configurar.
 
+**Actualización (2026-10-05):** por ahora este módulo está apagado para todas las cuentas que no son de administrador (se probó habilitarlo para todos y se revirtió el mismo día); solo las cuentas administradoras pueden entrar a esta pantalla. Si a tu cuenta no le aparece esta opción en el menú, es por este apagado temporal, no por un error ni por falta de configuración de tu parte.
+
 Ruta: /dashboard/oportunidades-redes
 
 Aquí puedes revisar propuestas de contenido para redes sociales. Las propuestas pendientes se pueden aprobar, editar o descartar explicando el motivo. Si algo falla, abre el detalle del error para ver qué ocurrió antes de intentarlo otra vez. El botón **Borrar todas las oportunidades**, junto a "Publicar todo el lote", elimina de una vez todas las propuestas pendientes (pide confirmación antes de borrar y no se puede deshacer).
