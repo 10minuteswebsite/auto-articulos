@@ -1,15 +1,14 @@
 import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { encryptSecret, getTumblrAuthUrl, requestTumblrRequestToken } from "@auto-articulos/shared";
-import { getCurrentUserId } from "@/lib/current-user";
-import { canPublishToNetwork } from "@/lib/social-access";
+import { getCurrentUser } from "@/lib/current-user";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 
 import { TUMBLR_REQUEST_TOKEN_COOKIE, TUMBLR_STATE_COOKIE } from "./constants";
 
 export async function GET(request: Request) {
-  const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "tumblr"))) return NextResponse.json({ error: "Tumblr no está habilitado para este usuario." }, { status: 403 });
+  const user = await getCurrentUser();
+  if (!user.canConfigureRedes) return NextResponse.json({ error: "Tumblr no está habilitado para este usuario." }, { status: 403 });
   try {
     const credentials = await getStoredTumblrAppCredentials();
     const state = randomBytes(24).toString("base64url");

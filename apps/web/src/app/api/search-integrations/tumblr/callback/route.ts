@@ -3,8 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectionReturnPath } from "@/lib/connection-return";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret, encryptSecret, exchangeTumblrAccessToken, getTumblrBlogs } from "@auto-articulos/shared";
-import { getCurrentUserId } from "@/lib/current-user";
-import { canPublishToNetwork } from "@/lib/social-access";
+import { getCurrentUser } from "@/lib/current-user";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 import { TUMBLR_REQUEST_TOKEN_COOKIE, TUMBLR_STATE_COOKIE } from "../connect/constants";
 
@@ -20,13 +19,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(canonicalCallback);
   }
 
-  const userId = await getCurrentUserId();
+  const user = await getCurrentUser();
+  const userId = user.id;
   const cookieStore = await cookies();
   const oauthToken = request.nextUrl.searchParams.get("oauth_token");
   const oauthVerifier = request.nextUrl.searchParams.get("oauth_verifier");
   const denied = request.nextUrl.searchParams.get("denied");
   const requestTokenCookie = cookieStore.get(TUMBLR_REQUEST_TOKEN_COOKIE)?.value;
-  if (!(await canPublishToNetwork(userId, "tumblr")) || !cookieStore.get(TUMBLR_STATE_COOKIE)?.value || !oauthToken || !oauthVerifier || denied || !requestTokenCookie) {
+  if (!user.canConfigureRedes || !cookieStore.get(TUMBLR_STATE_COOKIE)?.value || !oauthToken || !oauthVerifier || denied || !requestTokenCookie) {
     return NextResponse.redirect(new URL(connectionReturnPath("tumblr", "error"), request.url));
   }
   try {
