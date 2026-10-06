@@ -2,14 +2,17 @@ import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret, getLinkedInProfile } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
-import { canPublishToNetwork } from "@/lib/social-access";
+import { hasProductAccess } from "@/lib/product-access";
 import { NOT_CONNECTED, runConnectionTest } from "@/lib/connection-test-route";
 
 export const dynamic = "force-dynamic";
 
 export async function POST() {
   const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "linkedin"))) {
+  // La pantalla de Conexiones permite configurar cualquier red con el producto
+  // Redes activo. No exigir aquí la aprobación individual histórica, porque
+  // deja conectada la cuenta pero bloquea «Probar conexión» inmediatamente.
+  if (!(await hasProductAccess(userId, "REDES")).allowed) {
     return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
   }
   const integration = await prisma.linkedInIntegration.findUnique({ where: { userId } });
