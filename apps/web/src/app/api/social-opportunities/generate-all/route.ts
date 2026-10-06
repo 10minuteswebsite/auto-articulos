@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     // Generar 1 oportunidad por cada red conectada
-    const networks = ["threads", "x", "linkedin", "instagram", "facebook-page", "pinterest", "tumblr", "bluesky", "devto", "blogger"];
+    const networks = ["threads", "x", "linkedin", "instagram", "facebook-page", "pinterest", "tumblr", "bluesky", "blogger"];
     const results: any = {};
     const errors: any = {};
 

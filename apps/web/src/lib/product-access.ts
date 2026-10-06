@@ -44,7 +44,6 @@ export async function hasProductAccess(
       allowPinterestPublishing: true,
       allowTumblrPublishing: true,
       allowBlueskyPublishing: true,
-      allowDevToPublishing: true,
       allowBloggerPublishing: true,
       allowGoogleBusinessPublishing: true,
       productEntitlements: {

@@ -25,7 +25,6 @@ export async function canUseSocialModule(userId: string): Promise<boolean> {
       allowPinterestPublishing: true,
       allowTumblrPublishing: true,
       allowBlueskyPublishing: true,
-      allowDevToPublishing: true,
       allowBloggerPublishing: true,
       allowGoogleBusinessPublishing: true,
     },
@@ -57,7 +56,7 @@ export function hasSocialModuleAccess(user: SocialModuleAccessUser): boolean {
   });
 }
 
-export type SocialPublishNetwork = "instagram" | "linkedin" | "threads" | "facebook" | "pinterest" | "tumblr" | "bluesky" | "devto" | "blogger";
+export type SocialPublishNetwork = "instagram" | "linkedin" | "threads" | "facebook" | "pinterest" | "tumblr" | "bluesky" | "blogger";
 
 /** Campos que Administración controla para autorizar difusión social/blog. */
 export const SOCIAL_PUBLISHING_PERMISSION_KEYS = [
@@ -68,7 +67,6 @@ export const SOCIAL_PUBLISHING_PERMISSION_KEYS = [
   "allowPinterestPublishing",
   "allowTumblrPublishing",
   "allowBlueskyPublishing",
-  "allowDevToPublishing",
   "allowBloggerPublishing",
   "allowGoogleBusinessPublishing",
 ] as const;
@@ -103,7 +101,6 @@ export async function canPublishToNetwork(
       allowPinterestPublishing: true,
       allowTumblrPublishing: true,
       allowBlueskyPublishing: true,
-      allowDevToPublishing: true,
       allowBloggerPublishing: true,
     },
   });
@@ -117,7 +114,6 @@ export async function canPublishToNetwork(
     pinterest: user.allowPinterestPublishing,
     tumblr: user.allowTumblrPublishing,
     bluesky: user.allowBlueskyPublishing,
-    devto: user.allowDevToPublishing,
     blogger: user.allowBloggerPublishing,
   };
   return permissions[network];

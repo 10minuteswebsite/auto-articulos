@@ -15,7 +15,6 @@ export const REDES_PUBLISHING_FIELDS = [
   "allowPinterestPublishing",
   "allowTumblrPublishing",
   "allowBlueskyPublishing",
-  "allowDevToPublishing",
   "allowBloggerPublishing",
   "allowGoogleBusinessPublishing",
 ] as const;
@@ -65,7 +64,6 @@ export function redesProfile(input: RedesProfileInput = {}): RedesProfile | null
     allowPinterestPublishing: true,
     allowTumblrPublishing: true,
     allowBlueskyPublishing: true,
-    allowDevToPublishing: true,
     allowBloggerPublishing: true,
     allowGoogleBusinessPublishing: true,
     disabledModules: enableSocialModule(input.disabledModules),

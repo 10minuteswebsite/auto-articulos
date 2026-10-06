@@ -14,7 +14,6 @@ export * from "./meta-pages-api";
 export * from "./pinterest-api";
 export * from "./tumblr-api";
 export * from "./bluesky-api";
-export * from "./devto-api";
 export * from "./blogger-api";
 export * from "./caption-limits";
 export * from "./image-prompt";

@@ -57,7 +57,7 @@ function networkLabel(platform: string): string {
   if (p.startsWith("facebook")) return "Facebook";
   const names: Record<string, string> = {
     threads: "Threads", linkedin: "LinkedIn", pinterest: "Pinterest", tumblr: "Tumblr",
-    bluesky: "Bluesky", devto: "DEV.to", blogger: "Blogger", x: "X", "google-business-profile": "Google Business Profile", gbp: "Google Business Profile",
+    bluesky: "Bluesky", blogger: "Blogger", x: "X", "google-business-profile": "Google Business Profile", gbp: "Google Business Profile",
   };
   return names[p] ?? platform;
 }

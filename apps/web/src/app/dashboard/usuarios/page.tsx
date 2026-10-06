@@ -57,7 +57,6 @@ interface UserRow {
   allowPinterestPublishing: boolean;
   allowTumblrPublishing: boolean;
   allowBlueskyPublishing: boolean;
-  allowDevToPublishing: boolean;
   allowBloggerPublishing: boolean;
   allowGoogleBusinessPublishing: boolean;
   aiImageGenerationEnabled: boolean;
@@ -246,7 +245,6 @@ const SOCIAL_GROUPS: {
     title: "Blogs",
     networks: [
       { id: "tumblr", label: "Tumblr", formats: [["tumblr", "Artículo"]] },
-      { id: "devto", label: "DEV.to", formats: [["devto", "Artículo"]] },
       { id: "blogger", label: "Blogger", formats: [["blogger", "Artículo"]] },
     ],
   },
@@ -2077,7 +2075,6 @@ function UserCard({
     Boolean(user.allowTumblrPublishing),
   );
   const [permBluesky, setPermBluesky] = useState(Boolean(user.allowBlueskyPublishing));
-  const [permDevTo, setPermDevTo] = useState(Boolean(user.allowDevToPublishing));
   const [permBlogger, setPermBlogger] = useState(Boolean(user.allowBloggerPublishing));
   const [permGoogleBusiness, setPermGoogleBusiness] = useState(Boolean(user.allowGoogleBusinessPublishing));
   const [permAiImageGeneration, setPermAiImageGeneration] = useState(
@@ -2118,7 +2115,6 @@ function UserCard({
     setPermPinterest(Boolean(user.allowPinterestPublishing));
     setPermTumblr(Boolean(user.allowTumblrPublishing));
     setPermBluesky(Boolean(user.allowBlueskyPublishing));
-    setPermDevTo(Boolean(user.allowDevToPublishing));
     setPermBlogger(Boolean(user.allowBloggerPublishing));
     setPermGoogleBusiness(Boolean(user.allowGoogleBusinessPublishing));
     setPermAiImageGeneration(Boolean(user.aiImageGenerationEnabled));
@@ -2136,7 +2132,6 @@ function UserCard({
     permPinterest !== Boolean(user.allowPinterestPublishing) ||
     permTumblr !== Boolean(user.allowTumblrPublishing) ||
     permBluesky !== Boolean(user.allowBlueskyPublishing) ||
-    permDevTo !== Boolean(user.allowDevToPublishing) ||
     permBlogger !== Boolean(user.allowBloggerPublishing) ||
     permGoogleBusiness !== Boolean(user.allowGoogleBusinessPublishing) ||
     permAiImageGeneration !== Boolean(user.aiImageGenerationEnabled) ||
@@ -2164,7 +2159,6 @@ function UserCard({
     bluesky: [permBluesky, setPermBluesky],
     "google-business": [permGoogleBusiness, setPermGoogleBusiness],
     tumblr: [permTumblr, setPermTumblr],
-    devto: [permDevTo, setPermDevTo],
     blogger: [permBlogger, setPermBlogger],
   };
 
@@ -2194,7 +2188,6 @@ function UserCard({
     setPermPinterest(Boolean(user.allowPinterestPublishing));
     setPermTumblr(Boolean(user.allowTumblrPublishing));
     setPermBluesky(Boolean(user.allowBlueskyPublishing));
-    setPermDevTo(Boolean(user.allowDevToPublishing));
     setPermBlogger(Boolean(user.allowBloggerPublishing));
     setPermGoogleBusiness(Boolean(user.allowGoogleBusinessPublishing));
     setPermAiImageGeneration(Boolean(user.aiImageGenerationEnabled));
@@ -2398,7 +2391,6 @@ function UserCard({
           allowPinterestPublishing: permPinterest,
           allowTumblrPublishing: permTumblr,
           allowBlueskyPublishing: permBluesky,
-          allowDevToPublishing: permDevTo,
           allowBloggerPublishing: permBlogger,
           allowGoogleBusinessPublishing: permGoogleBusiness,
           aiImageGenerationEnabled: permAiImageGeneration,

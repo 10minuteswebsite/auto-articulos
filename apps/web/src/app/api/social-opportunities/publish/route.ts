@@ -98,7 +98,6 @@ export async function POST(request: NextRequest) {
       "pinterest",
       "tumblr",
       "bluesky",
-      "devto",
       "blogger",
       "google-business",
       "instagram-carousel",
@@ -160,9 +159,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (platform === "pinterest" || platform === "tumblr" || platform === "bluesky" || platform === "devto") {
-      const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, allowPinterestPublishing: true, allowTumblrPublishing: true, allowBlueskyPublishing: true, allowDevToPublishing: true } });
-      const allowed = platform === "pinterest" ? user?.role === "admin" || user?.allowPinterestPublishing : platform === "tumblr" ? user?.role === "admin" || user?.allowTumblrPublishing : platform === "bluesky" ? user?.role === "admin" || user?.allowBlueskyPublishing : user?.role === "admin" || user?.allowDevToPublishing;
+    if (platform === "pinterest" || platform === "tumblr" || platform === "bluesky") {
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, allowPinterestPublishing: true, allowTumblrPublishing: true, allowBlueskyPublishing: true } });
+      const allowed = platform === "pinterest" ? user?.role === "admin" || user?.allowPinterestPublishing : platform === "tumblr" ? user?.role === "admin" || user?.allowTumblrPublishing : user?.role === "admin" || user?.allowBlueskyPublishing;
       if (!allowed) return NextResponse.json({ error: `No tienes permiso para publicar en ${opp.platform}. Contacta al administrador.` }, { status: 403 });
     }
 
@@ -205,8 +204,6 @@ export async function POST(request: NextRequest) {
         ? "Publicación encolada. El sistema publicará el post en Tumblr en segundo plano."
         : platform === "bluesky"
         ? "Publicación encolada. El sistema publicará en Bluesky en segundo plano."
-        : platform === "devto"
-        ? "Publicación encolada. El sistema adaptará y publicará el artículo en DEV.to en segundo plano."
         : platform === "blogger"
         ? "Publicación encolada. El sistema publicará el artículo en Blogger en segundo plano."
         : platform === "google-business"
