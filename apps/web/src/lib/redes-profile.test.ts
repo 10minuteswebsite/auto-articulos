@@ -5,7 +5,7 @@ import { REDES_PUBLISHING_FIELDS, redesProfile } from "./redes-profile";
 test("la cuenta vacía recibe todos los campos actuales de Redes y el módulo", () => {
   const profile = redesProfile();
   assert.ok(profile);
-  assert.deepEqual(REDES_PUBLISHING_FIELDS.map((field) => profile[field]), Array(10).fill(true));
+  assert.deepEqual(REDES_PUBLISHING_FIELDS.map((field) => profile[field]), Array(9).fill(true));
   assert.deepEqual(JSON.parse(profile.disabledModules), { "oportunidades-redes": "enabled" });
 });
 

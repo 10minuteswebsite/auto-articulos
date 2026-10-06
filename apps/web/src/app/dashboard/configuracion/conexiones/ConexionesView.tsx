@@ -13,7 +13,6 @@ import LinkedInSection from "@/components/LinkedInSection";
 import PinterestSection from "@/components/PinterestSection";
 import TumblrSection from "@/components/TumblrSection";
 import BlueskySection from "@/components/BlueskySection";
-import DevToSection from "@/components/DevToSection";
 import BloggerSection from "@/components/BloggerSection";
 import FacebookSection from "@/components/FacebookSection";
 import InstagramSection from "@/components/InstagramSection";
@@ -24,7 +23,7 @@ import { productOfHost, type HostProductScope } from "@/lib/product-routes";
 
 type Vista = "analiticas" | "difusion";
 type Producto = "articulos" | "redes";
-type ConexionId = "google-search-console" | "google-analytics" | "bing-webmaster" | "instagram" | "facebook" | "threads" | "linkedin" | "pinterest" | "tumblr" | "bluesky" | "devto" | "blogger" | "business-profile";
+type ConexionId = "google-search-console" | "google-analytics" | "bing-webmaster" | "instagram" | "facebook" | "threads" | "linkedin" | "pinterest" | "tumblr" | "bluesky" | "blogger" | "business-profile";
 
 const VISTAS: { id: Vista; label: string; ayuda: string }[] = [
   { id: "analiticas", label: "ANALÍTICAS", ayuda: "Leen datos y ayudan a que aparezcas en los buscadores." },
@@ -120,7 +119,6 @@ export default function ConexionesView() {
           pinterest: data.allowPinterestPublishing ?? false,
           tumblr: data.allowTumblrPublishing ?? false,
           bluesky: data.allowBlueskyPublishing ?? false,
-          devto: data.allowDevToPublishing ?? false,
           blogger: data.allowBloggerPublishing ?? false,
         });
       })
@@ -227,7 +225,6 @@ export default function ConexionesView() {
       { id: "pinterest", title: "Pinterest", text: "Publica contenido visual en tus tableros de Pinterest.", view: "difusion" as Vista },
       { id: "tumblr", title: "Tumblr", text: "Publica artículos y contenido en tu blog de Tumblr.", view: "difusion" as Vista },
       { id: "bluesky", title: "Bluesky", text: "Comparte tus publicaciones en Bluesky.", view: "difusion" as Vista },
-      { id: "devto", title: "DEV.to", text: "Publica artículos técnicos en tu cuenta de DEV.to.", view: "difusion" as Vista },
       { id: "blogger", title: "Blogger", text: "Publica artículos en tu blog de Blogger.", view: "difusion" as Vista },
       { id: "business-profile", title: "Google Business Profile", text: "Publica novedades en la ficha de tu negocio en Google.", view: "difusion" as Vista },
     ];
@@ -385,7 +382,6 @@ export default function ConexionesView() {
           {solo("bluesky") && puede("bluesky") && <BlueskySection allowed={puede("bluesky")} />}
           {solo("tumblr") && puede("tumblr") && <TumblrSection allowed={puede("tumblr")} />}
           {solo("blogger") && puede("blogger") && <BloggerSection allowed={puede("blogger")} />}
-          {solo("devto") && puede("devto") && <DevToSection allowed={puede("devto")} />}
         </div>
       )}
 

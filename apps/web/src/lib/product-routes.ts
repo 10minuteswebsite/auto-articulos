@@ -98,7 +98,6 @@ const PRODUCT_API_ROUTES: ReadonlyArray<readonly [string, HostProductScope]> = [
   ["/api/search-integrations/tumblr", "REDES"],
   ["/api/search-integrations/twitter", "REDES"],
   ["/api/search-integrations/bluesky", "REDES"],
-  ["/api/search-integrations/devto", "REDES"],
   ["/api/search-integrations/blogger", "REDES"],
 ];
 

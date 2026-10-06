@@ -19,9 +19,7 @@ import {
   createBlueskySession,
   createBlueskyPost,
   getBlueskyPostUrl,
-  createDevToArticle,
   createBloggerPost,
-  getDevToArticleUrl,
   buildSafeCaption,
   truncatePlainCaption,
   composioFacebookPost,
@@ -36,7 +34,6 @@ import { put } from "@vercel/blob";
 import sharp from "sharp";
 import { generateAiSocialImage } from "./aiImageGenerator";
 import { formatBloggerSummary } from "./bloggerContent";
-import { deriveDevToEditorialTags, isDevToEligible } from "./devtoEditorial";
 import { checkSocialProductAccess } from "./product-access";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -206,9 +203,6 @@ function decodeHtmlEntities(value: string): string {
     .replace(/&gt;/gi, ">");
 }
 
-export function deriveDevToTags(title: string, summary: string, category: string | null): string[] {
-  return deriveDevToEditorialTags(title, summary, category);
-}
 
 function stripHtml(value: string): string {
   return decodeHtmlEntities(value.replace(/<[^>]*>/g, "")).replace(/\s+/g, " ").trim();
@@ -258,7 +252,7 @@ function extractArticleContentHtml(html: string): string {
 /**
  * Limpia el HTML editorial del artículo, conservando el formato que Blogger
  * debe mostrar (encabezados, párrafos, listas, citas, enlaces e imágenes).
- * No se convierte a Markdown: esa conversión solo sirve para DEV.to.
+ * No se convierte a Markdown: los canales sociales usan el contenido original.
  */
 function cleanArticleContentHtml(container: string): string {
   let cleaned = container
@@ -315,11 +309,10 @@ export async function getArticleBodyHtml(articleUrl: string): Promise<string> {
   return contentHtml;
 }
 
-/** Lee el cuerpo real del artículo publicado y lo adapta al Markdown de DEV.to. */
+/** Lee el cuerpo real del artículo publicado. */
 export async function getArticleBodyMarkdown(articleUrl: string): Promise<string> {
   const contentHtml = await getArticleBodyHtml(articleUrl);
   let markdown = contentHtml
-    // DEV.to ya muestra el título arriba; no lo repetimos en el cuerpo.
     .replace(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi, (_match, level: string, content: string) => `\n\n${"#".repeat(Number(level))} ${stripHtml(content)}\n\n`)
     .replace(/<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_match, href: string, content: string) => {
       const label = stripHtml(content);
@@ -974,42 +967,6 @@ async function processBlueskyJob(job: {
   return true;
 }
 
-// ─── DEV.TO ───────────────────────────────────────────────────────────────
-
-async function processDevToJob(job: {
-  id: string; userId: string; titleId: string | null; articleUrl: string; articleTitle: string; suggestedText: string;
-}): Promise<boolean> {
-  const integration = await prisma.devToIntegration.findUnique({ where: { userId: job.userId } });
-  if (!integration) throw new Error("DEV.to no está configurado en tu cuenta.");
-  await validateArticleUrl(job.articleUrl);
-  const title = job.titleId ? await prisma.title.findUnique({ where: { id: job.titleId }, select: { summary: true, finalTitle: true, run: { select: { category: { select: { name: true } } } } } }) : null;
-  const articleTitle = title?.finalTitle || job.articleTitle;
-  const articleSummary = title?.summary || job.articleTitle;
-  const bodyMarkdown = await getArticleBodyMarkdown(job.articleUrl);
-  if (!isDevToEligible(articleTitle, articleSummary, bodyMarkdown)) {
-    throw new Error("DEV.to rechazó la publicación: el artículo no presenta un tema técnico o de desarrollo claramente relevante para su audiencia.");
-  }
-  const tags = deriveDevToTags(articleTitle, articleSummary, title?.run.category.name || null);
-  if (tags.length === 0) {
-    throw new Error("DEV.to rechazó la publicación: no se pudo asignar ningún tag técnico pertinente.");
-  }
-  const imageUrl = await getArticleOpenGraphImage(job.articleUrl);
-  const result = await createDevToArticle(decryptSecret(integration.encryptedApiKey), {
-    title: articleTitle,
-    bodyMarkdown,
-    canonicalUrl: job.articleUrl,
-    description: articleSummary,
-    mainImage: imageUrl,
-    tags,
-    series: title?.run.category.name || null,
-  });
-  const postUrl = getDevToArticleUrl(result);
-  if (!postUrl) throw new Error("DEV.to no devolvió la URL del artículo publicado.");
-  await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId: postUrl, publishedAt: new Date(), errorLog: null } });
-  if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Artículo adaptado publicado exitosamente en DEV.to${imageUrl ? " (con imagen y canonical URL)" : " (con canonical URL)"}.` } });
-  return true;
-}
-
 // ─── BLOGGER ──────────────────────────────────────────────────────────────
 
 async function getBloggerAppCredentials() {
@@ -1558,8 +1515,6 @@ export async function processNextSocialPublish(filterUserId?: string, filterArti
       published = await processTumblrJob(job);
     } else if (job.platform === "bluesky") {
       published = await processBlueskyJob(job);
-    } else if (job.platform === "devto") {
-      published = await processDevToJob(job);
     } else if (job.platform === "blogger") {
       published = await processBloggerJob(job);
     } else if (job.platform === "facebook-page") {

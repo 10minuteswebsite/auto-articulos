@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { TitleRow } from "@/types/dashboard";
 
 // Pedido explícito del usuario (13/8/2026): los estados intermedios/pendientes
@@ -13,8 +12,11 @@ import type { TitleRow } from "@/types/dashboard";
 // enviado a Bing) y errores reales; el silencio es el estado normal de
 // "todavía no, pero va a pasar".
 export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
-  const [status] = useState(title.googleIndexingStatus);
-  const [message] = useState(title.googleIndexingMessage);
+  // Leer siempre las props actuales. El estado se actualiza después de
+  // "Comprobar indexación" y una copia inicial con useState dejaba visible
+  // el resultado anterior hasta recargar toda la página.
+  const status = title.googleIndexingStatus;
+  const message = title.googleIndexingMessage;
 
   const indexed = status === "indexed";
 
@@ -65,14 +67,16 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
                 : "Publicando en Google Business Profile..."}
         </div>
       )}
-      {(status === "error" || indexed) && (
-        <div style={{ color: status === "error" ? "#ff3b30" : "#16803c" }}>
+      {(status === "error" || indexed || status === "inspection_pending") && (
+        <div style={{ color: status === "error" ? "#ff3b30" : indexed ? "#16803c" : "#8a4b08" }}>
           {status === "error"
-            ? "Google: error al consultar la indexación"
-            : "✓ Indexada en Google"}
+            ? "Google: no se pudo consultar la indexación"
+            : indexed
+              ? "✓ Indexada en Google"
+              : "Google todavía no confirma la indexación"}
         </div>
       )}
-      {message && status === "error" && (
+      {message && (status === "error" || status === "inspection_pending") && (
         <div style={{ color: "#6e6e73", marginTop: 2 }}>{message}</div>
       )}
       {/* Bing Indexing Status.

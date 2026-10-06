@@ -66,10 +66,10 @@ export default function OportunidadesRedesPage() {
   const [loading, setLoading] = useState(true);
   const [connectionsLoading, setConnectionsLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [generatingNetwork, setGeneratingNetwork] = useState<"threads" | "x" | "linkedin" | "instagram" | "facebook-page" | "pinterest" | "tumblr" | "bluesky" | "devto" | "blogger" | "google-business" | null>(null);
+  const [generatingNetwork, setGeneratingNetwork] = useState<"threads" | "x" | "linkedin" | "instagram" | "facebook-page" | "pinterest" | "tumblr" | "bluesky" | "blogger" | "google-business" | null>(null);
   const [generatingAll, setGeneratingAll] = useState(false);
-  const [connectedNetworks, setConnectedNetworks] = useState({ threads: false, x: false, linkedin: false, instagram: false, facebookPage: false, pinterest: false, tumblr: false, bluesky: false, devto: false, blogger: false, googleBusiness: false });
-  const [activeNetworks, setActiveNetworks] = useState({ threads: false, x: false, linkedin: false, instagram: false, facebookPage: false, pinterest: false, tumblr: false, bluesky: false, devto: false, blogger: false, googleBusiness: false });
+  const [connectedNetworks, setConnectedNetworks] = useState({ threads: false, x: false, linkedin: false, instagram: false, facebookPage: false, pinterest: false, tumblr: false, bluesky: false, blogger: false, googleBusiness: false });
+  const [activeNetworks, setActiveNetworks] = useState({ threads: false, x: false, linkedin: false, instagram: false, facebookPage: false, pinterest: false, tumblr: false, bluesky: false, blogger: false, googleBusiness: false });
   const [storiesUnavailable, setStoriesUnavailable] = useState({ instagram: false, facebook: false });
   const [generateSeconds, setGenerateSeconds] = useState(0);
   const [usedGsc, setUsedGsc] = useState(false);
@@ -126,13 +126,13 @@ export default function OportunidadesRedesPage() {
       const response = await fetch("/api/social-opportunities/generate", { cache: "no-store" });
       if (response.ok) {
         const data = await response.json();
-        const effectiveConnections = { threads: Boolean(data.threads), x: Boolean(data.x), linkedin: Boolean(data.linkedin), instagram: Boolean(data.instagram), facebookPage: Boolean(data.facebookPage), pinterest: Boolean(data.pinterest), tumblr: Boolean(data.tumblr), bluesky: Boolean(data.bluesky), devto: Boolean(data.devto), blogger: Boolean(data.blogger), googleBusiness: Boolean(data.googleBusiness) };
+        const effectiveConnections = { threads: Boolean(data.threads), x: Boolean(data.x), linkedin: Boolean(data.linkedin), instagram: Boolean(data.instagram), facebookPage: Boolean(data.facebookPage), pinterest: Boolean(data.pinterest), tumblr: Boolean(data.tumblr), bluesky: Boolean(data.bluesky), blogger: Boolean(data.blogger), googleBusiness: Boolean(data.googleBusiness) };
         setConnectedNetworks(effectiveConnections);
         setActiveNetworks(data.activeNetworks ?? effectiveConnections);
         setStoriesUnavailable({ instagram: Boolean(data.hideInstagramStories), facebook: Boolean(data.hideFacebookStories) });
       }
     } catch {
-    const none = { threads: false, x: false, linkedin: false, instagram: false, facebookPage: false, pinterest: false, tumblr: false, bluesky: false, devto: false, blogger: false, googleBusiness: false };
+        const none = { threads: false, x: false, linkedin: false, instagram: false, facebookPage: false, pinterest: false, tumblr: false, bluesky: false, blogger: false, googleBusiness: false };
       setConnectedNetworks(none);
       setActiveNetworks(none);
       setStoriesUnavailable({ instagram: false, facebook: false });
@@ -149,7 +149,7 @@ export default function OportunidadesRedesPage() {
   const progress = Math.min(92, 8 + generateSeconds * 4);
   const elapsed = `${Math.floor(generateSeconds / 60)}:${String(generateSeconds % 60).padStart(2, "0")}`;
 
-  async function handleGenerate(network: "threads" | "x" | "linkedin" | "instagram" | "facebook-page" | "pinterest" | "tumblr" | "bluesky" | "devto" | "blogger" | "google-business") {
+  async function handleGenerate(network: "threads" | "x" | "linkedin" | "instagram" | "facebook-page" | "pinterest" | "tumblr" | "bluesky" | "blogger" | "google-business") {
     setGenerating(true);
     setGeneratingNetwork(network);
     setMessage(null);
@@ -418,7 +418,7 @@ export default function OportunidadesRedesPage() {
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                 Tú revisas cada propuesta y decides cuál sale y a qué red. No se publica todo ni todo el tiempo: el sistema reparte las publicaciones a lo largo de los días para que tu presencia crezca sin parecer spam y sin que las redes te penalicen.
               </p>
-              {!connectedNetworks.threads && !connectedNetworks.x && !connectedNetworks.linkedin && !connectedNetworks.instagram && !connectedNetworks.facebookPage && !connectedNetworks.pinterest && !connectedNetworks.tumblr && !connectedNetworks.bluesky && !connectedNetworks.devto && !connectedNetworks.blogger && !connectedNetworks.googleBusiness && !loading && !connectionsLoading && (
+              {!connectedNetworks.threads && !connectedNetworks.x && !connectedNetworks.linkedin && !connectedNetworks.instagram && !connectedNetworks.facebookPage && !connectedNetworks.pinterest && !connectedNetworks.tumblr && !connectedNetworks.bluesky && !connectedNetworks.blogger && !connectedNetworks.googleBusiness && !loading && !connectionsLoading && (
                 <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                   Todavía no tienes ninguna red conectada, así que no hay dónde publicar. Pulsa cualquiera de los
                   botones grises de abajo para configurar esa red; en cuanto conectes una, vuelves aquí solo y ya
@@ -451,7 +451,7 @@ export default function OportunidadesRedesPage() {
                 </button>
                 <div>
                 {([
-                ["threads", "threads", "Threads", "threads"], ["x", "x", "X (Twitter)", null], ["linkedin", "linkedin", "LinkedIn", "linkedin"], ["instagram", "instagram", "Instagram", "instagram"], ["facebookPage", "facebook-page", "Facebook", "facebook"], ["pinterest", "pinterest", "Pinterest", "pinterest"], ["tumblr", "tumblr", "Tumblr", "tumblr"], ["bluesky", "bluesky", "Bluesky", "bluesky"], ["devto", "devto", "DEV.to", "devto"], ["blogger", "blogger", "Blogger", "blogger"], ["googleBusiness", "google-business", "Google Business Profile", "business-profile"],
+                ["threads", "threads", "Threads", "threads"], ["x", "x", "X (Twitter)", null], ["linkedin", "linkedin", "LinkedIn", "linkedin"], ["instagram", "instagram", "Instagram", "instagram"], ["facebookPage", "facebook-page", "Facebook", "facebook"], ["pinterest", "pinterest", "Pinterest", "pinterest"], ["tumblr", "tumblr", "Tumblr", "tumblr"], ["bluesky", "bluesky", "Bluesky", "bluesky"], ["blogger", "blogger", "Blogger", "blogger"], ["googleBusiness", "google-business", "Google Business Profile", "business-profile"],
                 ] as const).map(([key, platform, label, conexionId]) => {
                 if (!activeNetworks[key]) return null;
                 const connected = connectedNetworks[key];

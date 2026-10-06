@@ -39,7 +39,6 @@ export async function GET() {
     pinterestIntegration,
     tumblrIntegration,
     blueskyIntegration,
-    devToIntegration,
     bloggerIntegration,
   ] = await Promise.all([
     // 1. Credenciales 10minutesWebsite
@@ -68,7 +67,6 @@ export async function GET() {
         allowPinterestPublishing: true,
         allowTumblrPublishing: true,
         allowBlueskyPublishing: true,
-        allowDevToPublishing: true,
         allowBloggerPublishing: true,
       },
     }),
@@ -122,10 +120,6 @@ export async function GET() {
     prisma.blueskyIntegration.findUnique({
       where: { userId },
       select: { handle: true },
-    }),
-    prisma.devToIntegration.findUnique({
-      where: { userId },
-      select: { username: true },
     }),
     prisma.bloggerIntegration.findUnique({
       where: { userId },
@@ -297,16 +291,6 @@ export async function GET() {
       description: "Publica automáticamente tus artículos en Bluesky.",
       actionUrl: "/dashboard/configuracion?tab=social",
       actionLabel: "Conectar Bluesky",
-    },
-    {
-      id: "devto",
-      label: "DEV.to",
-      configured: Boolean((user?.role === "admin" || user?.allowDevToPublishing) && devToIntegration),
-      required: false,
-      section: "social",
-      description: "Publica una versión adaptada del artículo con enlace canónico en DEV.to.",
-      actionUrl: "/dashboard/configuracion?tab=social",
-      actionLabel: "Conectar DEV.to",
     },
     {
       id: "blogger",

@@ -64,16 +64,4 @@ export const CONNECTION_GUIDES: Record<string, ConnectionGuideContent> = {
     signupUrl: "https://bsky.app/",
     signupLabel: "Crear una cuenta de Bluesky",
   },
-  devto: {
-    steps: [
-      "Abre DEV.to en otra pestaña del mismo navegador (si no tienes cuenta, créala en dev.to/enter).",
-      "En DEV.to abre tu foto de perfil y entra en Settings → Extensions → API Keys (los menús de DEV.to están en inglés).",
-      "Crea una clave con el nombre SEO TOTAL y copia la clave completa. No uses tu contraseña.",
-      "Escribe tu nombre de usuario de DEV.to, pega la clave aquí abajo y pulsa Conectar.",
-      PROBAR,
-    ],
-    ifFails: "revisa que copiaste la clave completa, sin espacios, y que pertenece al mismo usuario escrito.",
-    signupUrl: "https://dev.to/enter",
-    signupLabel: "Crear una cuenta de DEV.to",
-  },
 };
