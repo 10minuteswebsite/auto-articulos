@@ -49,6 +49,11 @@ test("Analytics: propiedades dentro de las cuentas, con id numérico", () => {
   assert.equal(buildOptions("google_analytics", { account_summaries: [{ display_name: "C", property_summaries: [{ property: "properties/5", display_name: "P" }] }] }, { confirmedDomain: null })[0].id, "5");
 });
 
+test("Analytics: acepta propiedades directas y variantes snake_case de Composio", () => {
+  const o = buildOptions("google_analytics", { data: { account_summaries: [{ account_id: "accounts/zulmad", account_name: "Cuenta Zulmad", properties: [{ property_id: "properties/777", display_name: "Sitio Zulmad" }] }] } }, { confirmedDomain: null });
+  assert.deepEqual(o.map((x) => [x.id, x.label, x.detail]), [["777", "Sitio Zulmad", "Cuenta Zulmad · cuenta zulmad · propiedad 777"]]);
+});
+
 test("Facebook: solo id y nombre — jamás el token de acceso", () => {
   const o = buildOptions("facebook", { data: [{ id: "111", name: "Mi Página", category: "Inmobiliaria", access_token: "EAAB-SECRETO", tasks: ["MANAGE"] }] }, { confirmedDomain: null });
   assert.equal(o.length, 1);

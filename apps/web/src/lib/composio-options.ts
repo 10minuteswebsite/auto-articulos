@@ -91,23 +91,42 @@ export function optionsForSearchConsole(data: unknown, confirmedDomain: string |
 }
 
 export function optionsForAnalytics(data: unknown): SelectionOption[] {
-  const summaries =
-    findArray(data, (item) => Array.isArray(item.propertySummaries) || Array.isArray(item.property_summaries)) ?? [];
+  // Composio ha entregado ambas variantes (camelCase y snake_case) y, según
+  // la versión de la acción, puede envolver el resultado dentro de `data` o
+  // devolver propiedades directamente. No dependemos de una sola forma para
+  // no mostrar una cuenta válida como si estuviera vacía.
+  const summaries = findArray(
+    data,
+    (item) =>
+      Array.isArray(item.propertySummaries) ||
+      Array.isArray(item.property_summaries) ||
+      Array.isArray(item.properties),
+  ) ?? [];
   const options: SelectionOption[] = [];
   for (const account of summaries) {
-    const accountName = str(account.displayName) ?? str(account.display_name);
-    const accountId = (str(account.account) ?? str(account.name) ?? "").replace(/^accounts\//, "");
-    const properties = (account.propertySummaries ?? account.property_summaries) as unknown[];
+    const accountName =
+      str(account.displayName) ??
+      str(account.display_name) ??
+      str(account.accountName) ??
+      str(account.account_name);
+    const accountId = (
+      str(account.account) ??
+      str(account.accountId) ??
+      str(account.account_id) ??
+      (str(account.name)?.startsWith("accounts/") ? str(account.name) : null) ??
+      ""
+    ).replace(/^accounts\//, "");
+    const properties = (account.propertySummaries ?? account.property_summaries ?? account.properties) as unknown[];
     for (const raw of properties) {
       if (!isObject(raw)) continue;
-      const property = str(raw.property);
+      const property = str(raw.property) ?? str(raw.name) ?? str(raw.propertyId) ?? str(raw.property_id);
       const propertyId = property ? property.replace(/^properties\//, "") : null;
       if (!propertyId) continue;
       options.push({
         id: propertyId,
         label: str(raw.displayName) ?? str(raw.display_name) ?? propertyId,
         // Dos cuentas pueden llamarse igual (pasa en la práctica): los números las distinguen.
-        detail: [accountName, accountId ? `cuenta ${accountId}` : null, `propiedad ${propertyId}`]
+        detail: [accountName ?? "Cuenta de Google Analytics", accountId ? `cuenta ${accountId}` : null, `propiedad ${propertyId}`]
           .filter(Boolean)
           .join(" · "),
         selectable: true,
