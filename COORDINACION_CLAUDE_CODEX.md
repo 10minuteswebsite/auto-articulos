@@ -4735,6 +4735,26 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Auditoría y reparación preparada — Google Business Profile — 2026-10-05
+
+- **Síntoma verificado en producción:** la tarjeta de Google Business Profile no
+  mostraba `Configurada ✓`; al abrirla, el retorno OAuth quedaba en una pantalla
+  estática sin `Probar conexión`, `Cambiar` ni `Desconectar`.
+- **Evidencia:** `/api/business-profile` respondió HTTP 200 y la vista detallada
+  mostró `ESTADO: Conexión exitosa`. La conexión PostPeer existía, pero el estado
+  global solo consultaba `businessProfileIntegration.locationName`, ignorando
+  `postPeerConnection.status = ACTIVE`.
+- **Causa de la regresión:** el retorno estándar se habilitó para LinkedIn y
+  Threads, pero no para Google Business Profile, aunque GBP también usa la
+  tarjeta estándar; además, el cálculo de configuración no incorporó PostPeer.
+- **Corrección preparada:** GBP vuelve a `BusinessProfileSection` después de OAuth
+  y el check global considera activa una conexión PostPeer `ACTIVE`; se conserva
+  la integración antigua como respaldo y no se borran datos.
+- **Validación local:** 193 pruebas web, typecheck, build de producción y
+  `git diff --check` aprobados.
+- **Estado:** CORRECCIÓN PREPARADA, PENDIENTE DE PUBLICACIÓN Y VERIFICACIÓN E2E
+  EN PRODUCCIÓN. No se ejecutó deploy en esta auditoría.
+
 
 ## Confirmación del usuario — Blogger conectado en producción — 2026-10-05
 

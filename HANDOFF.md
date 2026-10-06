@@ -2024,3 +2024,12 @@ Estado: CERRADO, DESPLEGADO Y SIN PENDIENTES.
 El incidente quedó resuelto en producción. La interfaz ya no afirma que GSC está conectado cuando Composio no devuelve ninguna propiedad utilizable; muestra configuración incompleta o conexión sin propiedades y orienta a revisar permisos/cuenta o reconectar. Deployment verificado: `dpl_vMF5BV3DBZagVoEj3VCorCbFmMRD` (`READY`), dominio `/login` HTTP 200. Sin migraciones ni cambios destructivos.
 
 Estado: CERRADO Y ARCHIVADO.
+
+## Auditoría — Google Business Profile — 2026-10-05
+
+Se reprodujo una regresión de estado: la conexión PostPeer de Google Business
+Profile respondía correctamente, pero el listado no mostraba `Configurada ✓` y
+el retorno OAuth ocultaba las acciones de la tarjeta. La corrección preparada
+considera `postPeerConnection.status = ACTIVE` y devuelve GBP a la tarjeta
+estándar. Tests web (193), typecheck, build y `git diff --check` pasaron. Queda
+pendiente publicar y verificar E2E en producción; no se hizo deploy.

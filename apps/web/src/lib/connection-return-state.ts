@@ -1,11 +1,11 @@
 export type ConnectionReturnOutcome = "connected" | "error" | "forbidden" | null;
 
 /**
- * LinkedIn y Threads tienen una tarjeta estándar con acciones después del OAuth.
- * No deben quedar atrapados en la pantalla estática de retorno, porque esa pantalla
- * no ofrece Probar conexión ni Desconectar.
+ * Las conexiones que usan una tarjeta estándar deben volver a ella después del
+ * OAuth para conservar Probar conexión, Cambiar y Desconectar. Google Business
+ * Profile también usa esa tarjeta aunque la autorización la gestione PostPeer.
  */
-const STANDARD_OAUTH_CONNECTIONS = new Set(["linkedin", "threads"]);
+const STANDARD_OAUTH_CONNECTIONS = new Set(["business-profile", "linkedin", "threads"]);
 
 export function shouldShowStaticConnectionSuccess({
   conexion,

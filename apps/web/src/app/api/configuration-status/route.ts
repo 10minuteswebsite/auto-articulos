@@ -33,6 +33,7 @@ export async function GET() {
     googleAnalyticsIntegration,
     bingIntegration,
     businessProfile,
+    postPeerBusinessProfile,
     threadsIntegration,
     postPeerThreads,
     twitterIntegration,
@@ -92,6 +93,10 @@ export async function GET() {
     prisma.businessProfileIntegration.findUnique({
       where: { userId },
       select: { locationName: true },
+    }),
+    prisma.postPeerConnection.findUnique({
+      where: { userId },
+      select: { status: true },
     }),
     // 7. Meta Threads
     prisma.threadsIntegration.findUnique({
@@ -245,7 +250,7 @@ export async function GET() {
     {
       id: "business-profile",
       label: "Google Business Profile",
-      configured: Boolean(businessProfile?.locationName),
+      configured: Boolean(businessProfile?.locationName || postPeerBusinessProfile?.status === "ACTIVE"),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos como posts en tu perfil de negocio de Google.",

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { shouldShowStaticConnectionSuccess } from "./connection-return-state";
 
-test("LinkedIn y Threads conservan la tarjeta con acciones después del OAuth", () => {
-  for (const conexion of ["linkedin", "threads"]) {
+test("GBP, LinkedIn y Threads conservan la tarjeta con acciones después del OAuth", () => {
+  for (const conexion of ["business-profile", "linkedin", "threads"]) {
     assert.equal(
       shouldShowStaticConnectionSuccess({ conexion, resultado: "connected", choice: null }),
       false,
@@ -13,10 +13,6 @@ test("LinkedIn y Threads conservan la tarjeta con acciones después del OAuth", 
 });
 
 test("las conexiones con destino pendiente conservan el retorno estático", () => {
-  assert.equal(
-    shouldShowStaticConnectionSuccess({ conexion: "business-profile", resultado: "connected", choice: null }),
-    true,
-  );
   assert.equal(
     shouldShowStaticConnectionSuccess({ conexion: "tumblr", resultado: "connected", choice: "el blog" }),
     false,
