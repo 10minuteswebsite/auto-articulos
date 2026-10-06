@@ -1616,7 +1616,7 @@ export default function UsuariosPage() {
             }}
           >
             {SYSTEM_MODULES.map((mod) => {
-              const isHidden = mod.alwaysDisabled || globalDisabledModules.includes(mod.id);
+              const isHidden = globalDisabledModules.includes(mod.id);
               return (
                 <div
                   key={mod.id}
@@ -1698,7 +1698,6 @@ export default function UsuariosPage() {
                     <input
                       type="checkbox"
                       checked={!isHidden}
-                      disabled={mod.alwaysDisabled}
                       onChange={(e) => {
                         const visible = e.target.checked;
                         setGlobalDisabledModules((prev) =>
@@ -1715,9 +1714,7 @@ export default function UsuariosPage() {
                       }}
                     />
                     <span>
-                      {mod.alwaysDisabled
-                        ? "Deshabilitado para todos los usuarios"
-                        : isHidden
+                      {isHidden
                         ? "Habilitar (hacer visible para todos)"
                         : "Visible para usuarios"}
                     </span>
@@ -2938,7 +2935,6 @@ function UserCard({
             <div style={{ display: "grid", gap: 6 }}>
               {SYSTEM_MODULES.map((mod) => {
                 const acceso = moduleOverrides[mod.id] ?? "inherit";
-                const isGloballyDisabled = mod.alwaysDisabled || globalDisabledModules.includes(mod.id);
                 return (
                   <label
                     key={mod.id}
@@ -2962,22 +2958,6 @@ function UserCard({
                         justifyContent: "flex-end",
                       }}
                     >
-                      {isGloballyDisabled && (
-                        <span
-                          style={{
-                            fontSize: 9,
-                            fontWeight: 700,
-                            padding: "1px 5px",
-                            borderRadius: 4,
-                            background: "#fff4e5",
-                            color: "#8a4b08",
-                            border: "1px solid rgba(255, 149, 0, 0.25)",
-                          }}
-                          title="Este módulo está oculto globalmente para todos los usuarios"
-                        >
-                          Oculto global
-                        </span>
-                      )}
                       <select
                         value={acceso}
                         onChange={(e) =>
@@ -2986,7 +2966,7 @@ function UserCard({
                             [mod.id]: e.target.value as "inherit" | "enabled" | "disabled",
                           }))
                         }
-                        disabled={savingAny || mod.alwaysDisabled}
+                        disabled={savingAny}
                         style={{
                           flex: "1 1 220px",
                           maxWidth: 280,
@@ -2997,15 +2977,9 @@ function UserCard({
                           cursor: "pointer",
                         }}
                       >
-                        {mod.alwaysDisabled ? (
-                          <option value="inherit">Deshabilitado para todos los usuarios</option>
-                        ) : (
-                          <>
-                            <option value="inherit">Según la config. general</option>
-                            <option value="enabled">Dárselo a esta cuenta</option>
-                            <option value="disabled">Quitárselo a esta cuenta</option>
-                          </>
-                        )}
+                        <option value="inherit">Según la config. general</option>
+                        <option value="enabled">Dárselo a esta cuenta</option>
+                        <option value="disabled">Quitárselo a esta cuenta</option>
                       </select>
                     </span>
                   </label>

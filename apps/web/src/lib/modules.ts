@@ -14,8 +14,6 @@ export interface SystemModule {
    * todos por descuido. Se quita esta marca cuando se decide abrirlo a todos.
    */
   optIn?: boolean;
-  /** Módulo temporalmente deshabilitado para todas las cuentas no admin. */
-  alwaysDisabled?: boolean;
 }
 
 // El orden es el mismo que el del menú (ver DashboardNav), para que el panel
@@ -46,7 +44,6 @@ export const SYSTEM_MODULES: SystemModule[] = [
     label: MENU_NAMES.redes,
     href: "/dashboard/oportunidades-redes",
     description: "Distribución de contenido e ideas para redes sociales.",
-    alwaysDisabled: true,
   },
   {
     id: "publicaciones-en-curso",
@@ -113,7 +110,9 @@ export async function getGlobalDisabledModules(): Promise<string[]> {
     const setting = await prisma.systemSetting.findUnique({
       where: { key: GLOBAL_DISABLED_MODULES_KEY },
     });
-    if (!setting?.encryptedValue) return [];
+    // Redes sociales arranca apagado globalmente, pero sigue siendo reversible
+    // desde Administración → Usuarios → Módulos.
+    if (!setting?.encryptedValue) return ["oportunidades-redes"];
 
     let raw = "";
     try {
@@ -123,10 +122,12 @@ export async function getGlobalDisabledModules(): Promise<string[]> {
     }
 
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((id): id is string => typeof id === "string")
+      : ["oportunidades-redes"];
   } catch (error) {
     console.error("[modules] Error leyendo módulos deshabilitados globales:", error);
-    return [];
+    return ["oportunidades-redes"];
   }
 }
 
@@ -178,13 +179,12 @@ export function getEffectiveDisabledModules(
   const effective = new Set(globalDisabled);
   for (const [moduleId, access] of Object.entries(overrides)) {
     const mod = SYSTEM_MODULES.find((candidate) => candidate.id === moduleId);
-    if (mod?.alwaysDisabled) continue;
+    if (!mod) continue;
     if (access === "enabled") effective.delete(moduleId);
     if (access === "disabled") effective.add(moduleId);
   }
   // Los módulos opt-in solo se muestran con «Habilitado» explícito.
   for (const mod of SYSTEM_MODULES) {
-    if (mod.alwaysDisabled) effective.add(mod.id);
     if (mod.optIn && overrides[mod.id] !== "enabled") effective.add(mod.id);
   }
   return Array.from(effective);
