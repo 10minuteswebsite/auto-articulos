@@ -4735,6 +4735,17 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+
+## Confirmación del usuario — Blogger conectado en producción — 2026-10-05
+
+- El usuario confirmó la conexión de Blogger para `yolyripepi@gmail.com`.
+- Verificación visual en producción: la pantalla mostró `ESTADO: Conectada` y
+  `✓ Conexión activa`.
+- La autorización OAuth quedó guardada correctamente.
+- Pendiente funcional separado: la interfaz todavía muestra `Blog : .`, por lo
+  que falta seleccionar y aprobar el blog concreto antes de probar una
+  publicación. Esta confirmación no debe interpretarse como publicación E2E.
+
 ## Reparación Blogger OAuth — 2026-10-05
 
 - Síntoma: Google completaba el consentimiento, pero Blogger regresaba a
