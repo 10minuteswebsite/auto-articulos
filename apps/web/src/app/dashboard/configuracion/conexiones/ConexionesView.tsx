@@ -140,8 +140,10 @@ export default function ConexionesView() {
     Promise.all([
       fetch("/api/configuration-status", { cache: "no-store" }),
       fetch("/api/composio/status", { cache: "no-store" }),
+      fetch("/api/search-integrations/tumblr?_t=" + Date.now(), { cache: "no-store" }),
+      fetch("/api/search-integrations/bluesky?_t=" + Date.now(), { cache: "no-store" }),
     ])
-      .then(async ([configurationResponse, composioResponse]) => {
+      .then(async ([configurationResponse, composioResponse, tumblrResponse, blueskyResponse]) => {
         const next: Record<string, boolean> = {};
         if (configurationResponse.ok) {
           const body = (await configurationResponse.json()) as { checks?: Array<{ id: string; configured: boolean }> };
@@ -175,6 +177,18 @@ export default function ConexionesView() {
               next[id] = next[id] || connection.status === "ACTIVE";
             }
           }
+        }
+        // Tumblr y Bluesky tienen endpoints de estado propios. Son la fuente
+        // final del check del listado: la conexión puede estar configurada por
+        // el producto Redes aunque todavía no tenga permiso individual para
+        // publicar.
+        if (tumblrResponse.ok) {
+          const body = (await tumblrResponse.json()) as { connected?: boolean; blogSelectionPending?: boolean; isExpired?: boolean };
+          next.tumblr = body.connected === true && body.blogSelectionPending !== true && body.isExpired !== true;
+        }
+        if (blueskyResponse.ok) {
+          const body = (await blueskyResponse.json()) as { connected?: boolean; handle?: string | null };
+          next.bluesky = body.connected === true && Boolean(body.handle);
         }
         setConfiguradas(next);
       })
