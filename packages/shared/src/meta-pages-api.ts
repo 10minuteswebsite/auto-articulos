@@ -23,7 +23,10 @@ export function getMetaPagesAuthUrl(
   const params = new URLSearchParams({
     client_id: appCredentials.appId,
     redirect_uri: redirectUri,
-    scope: "pages_show_list,pages_read_engagement,pages_manage_posts,business_management",
+    // Meta currently rejects pages_manage_posts for this app because it is
+    // still pending App Review. Keep connection/discovery available with the
+    // permissions already enabled; publishing is gated until Meta approves it.
+    scope: "pages_show_list,pages_read_engagement,business_management",
     response_type: "code",
     state,
     auth_type: "rerequest",

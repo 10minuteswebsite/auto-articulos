@@ -5,7 +5,7 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredLinkedInAppCredentials } from "@/lib/linkedin-app-config";
 
 import { LINKEDIN_STATE_COOKIE } from "./constants";
-import { applyCookie } from "@/lib/shared-cookies";
+import { applyOAuthStateCookie } from "@/lib/shared-cookies";
 import { oauthCallbackUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
 
 export async function GET(request: Request) {
@@ -18,13 +18,13 @@ export async function GET(request: Request) {
     const authUrl = getLinkedInAuthUrl(state, redirectUri, appCreds);
 
     const response = NextResponse.redirect(authUrl);
-    applyCookie(response, LINKEDIN_STATE_COOKIE, state, {
+    applyOAuthStateCookie(response, LINKEDIN_STATE_COOKIE, state, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
       path: "/",
       maxAge: 600,
-    });
+    }, request);
 
     rememberOAuthOrigin(response, request);
 

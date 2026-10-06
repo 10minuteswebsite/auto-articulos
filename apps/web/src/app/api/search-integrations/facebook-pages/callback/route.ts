@@ -5,7 +5,7 @@ import { prisma } from "@auto-articulos/db";
 import { encryptSecret, exchangeCodeForMetaPageToken } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredInstagramAppCredentials } from "@/lib/instagram-app-config";
-import { canPublishToNetwork } from "@/lib/social-access";
+import { hasProductAccess } from "@/lib/product-access";
 import { FACEBOOK_PAGES_STATE_COOKIE } from "../connect/constants";
 
 export async function GET(request: NextRequest) {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
 
-  if (!(await canPublishToNetwork(userId, "facebook")) || !state || state !== cookieStore.get(FACEBOOK_PAGES_STATE_COOKIE)?.value || !code) {
+  if (!(await hasProductAccess(userId, "REDES")).allowed || !state || state !== cookieStore.get(FACEBOOK_PAGES_STATE_COOKIE)?.value || !code) {
     return NextResponse.redirect(new URL(connectionReturnPath("facebook", "error"), request.url));
   }
 

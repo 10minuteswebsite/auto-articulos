@@ -25,11 +25,13 @@ export async function getComposioStatusUser(): Promise<ConnectingUser | null> {
 
 /**
  * Acciones de conexión: GSC/Analytics quedan abiertas para la migración;
- * Facebook/Instagram conservan el opt-in y sus permisos propios.
+ * Facebook/Instagram/Pinterest requieren acceso al producto Redes; la
+ * aprobación individual de la red no puede bloquear su configuración.
  */
 export async function getComposioUserForApp(app: unknown): Promise<ConnectingUser | null> {
   const user = await getCurrentUser();
   if (isMigrationApp(app)) return user;
+  if (app === "facebook" || app === "instagram" || app === "pinterest") return user.canConfigureRedes ? user : null;
   return canUseComposioModule(user) ? user : null;
 }
 

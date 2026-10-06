@@ -64,6 +64,18 @@ const APP_NOTES: Record<string, string> = {
   pinterest: "Permite publicar tus artículos como Pins con imagen y enlace en el tablero de Pinterest que elijas.",
 };
 
+const APP_LEADS: Record<string, string> = {
+  facebook:
+    "En este sitio conectas la Página de Facebook que administras para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes.",
+  instagram:
+    "En este sitio conectas tu cuenta profesional de Instagram para que SEO TOTAL pueda publicar los artículos o el contenido seleccionado por la IA que tú apruebes.",
+};
+
+const AUTHORIZATION_NOTES: Record<string, string> = {
+  facebook: "La autorización se realiza mediante Composio. SEO TOTAL no ve tu contraseña y solo publicará en la Página que elijas.",
+  instagram: "La autorización se realiza mediante Composio. SEO TOTAL no ve tu contraseña y solo publicará en la cuenta Business o Creator que elijas.",
+};
+
 const CHOOSE_TITLE: Record<string, string> = {
   google_search_console: "Elige el sitio que usarás",
   google_analytics: "Elige la propiedad que usarás",
@@ -333,7 +345,7 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
           Conecta tus cuentas de Google y Meta a través de Composio, nuestro proveedor de integraciones.
           Al autorizar verás el nombre <strong>Composio</strong> en la pantalla de Google o de Meta: es
           normal. Después de conectar, eliges y apruebas qué sitio, propiedad, Página o cuenta usarás.
-          Tus conexiones actuales siguen funcionando igual mientras pruebas esta.
+          Las conexiones directas históricas se conservan como respaldo; las nuevas conexiones de Facebook e Instagram se hacen por Composio.
         </p>
         {message && !(message.ok && connections?.some((connection) => connection.status === "ACTIVE" && connection.selection)) && (
           <p role="status" style={{ fontSize: 14, marginTop: 12, color: message.ok ? "#1a7f37" : "#c62828" }}>
@@ -394,9 +406,25 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
           const isBusy = busy === connection.app;
           if (inline && showInactiveActions && connection.status !== "ACTIVE") {
             return (
-              <button key={connection.app} type="button" onClick={() => connect(connection.app)} disabled={busy !== null} style={{ ...secondaryButtonStyle, marginTop: 12 }}>
-                {isBusy ? "Abriendo…" : `Nueva conexión de ${connection.app === "facebook" ? "Facebook" : connection.app === "pinterest" ? "Pinterest" : "Instagram"}`}
-              </button>
+              <section key={connection.app} style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #e5e5ea" }}>
+                <p style={{ ...mutedStyle, margin: 0 }}>{APP_LEADS[connection.app]}</p>
+                <p style={{ ...mutedStyle, margin: "6px 0 0" }}>{APP_NOTES[connection.app]}</p>
+                {AUTHORIZATION_NOTES[connection.app] && (
+                  <p style={{ ...mutedStyle, margin: "6px 0 0" }}>{AUTHORIZATION_NOTES[connection.app]}</p>
+                )}
+                <div role="note" style={{ marginTop: 10, padding: "10px 0", color: "#1d1d1f", fontSize: 13, lineHeight: 1.5 }}>
+                  <strong>Te acompañamos para conectar tu cuenta</strong>
+                  <p style={{ margin: "6px 0 0" }}>
+                    Sigue estos pasos y podrás elegir exactamente dónde quieres publicar. Si algo no coincide, puedes detenerte antes de aceptar.
+                  </p>
+                  <ol style={{ margin: "6px 0 0", paddingLeft: 20 }}>
+                    {(CONNECTION_STEPS[connection.app] ?? []).map((step) => <li key={step}>{step}</li>)}
+                  </ol>
+                </div>
+                <button type="button" onClick={() => connect(connection.app)} disabled={busy !== null} style={{ ...buttonStyle, marginTop: 4, opacity: busy !== null ? 0.5 : 1 }}>
+                  {isBusy ? "Abriendo…" : `Nueva conexión de ${connection.app === "facebook" ? "Facebook" : connection.app === "pinterest" ? "Pinterest" : "Instagram"}`}
+                </button>
+              </section>
             );
           }
           const isSuccessful = connection.status === "ACTIVE" && Boolean(connection.selection) && !choice;

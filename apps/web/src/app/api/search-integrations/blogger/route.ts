@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret, encryptSecret, getBloggerBlogs, refreshBloggerToken } from "@auto-articulos/shared";
-import { getCurrentUserId } from "@/lib/current-user";
+import { getCurrentUser } from "@/lib/current-user";
 import { bloggerOAuthConfig } from "@/lib/blogger-oauth";
-import { canPublishToNetwork } from "@/lib/social-access";
 
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate" };
 
 export async function GET() {
-  const userId = await getCurrentUserId();
-  const allowed = await canPublishToNetwork(userId, "blogger");
-  if (!allowed) return NextResponse.json({ error: "Blogger no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE });
+  const user = await getCurrentUser();
+  const userId = user.id;
+  if (!user.canConfigureRedes) return NextResponse.json({ error: "Blogger no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE });
   let integration = await prisma.bloggerIntegration.findUnique({ where: { userId } });
   if (!integration) return NextResponse.json({ connected: false }, { headers: NO_CACHE });
   if (integration.expiresAt && integration.expiresAt <= new Date() && integration.refreshTokenEncrypted) {
@@ -22,8 +21,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
-  const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "blogger"))) return NextResponse.json({ error: "Blogger no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE });
+  const user = await getCurrentUser();
+  const userId = user.id;
+  if (!user.canConfigureRedes) return NextResponse.json({ error: "Blogger no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE });
   const body = await request.json().catch(() => ({})) as { blogId?: unknown };
   if (typeof body.blogId !== "string" || !body.blogId.trim()) return NextResponse.json({ error: "Selecciona un blog de Blogger." }, { status: 400, headers: NO_CACHE });
   const integration = await prisma.bloggerIntegration.findUnique({ where: { userId } });
@@ -35,4 +35,4 @@ export async function PATCH(request: NextRequest) {
   return NextResponse.json({ ok: true, blogId: blog.id, blogName: blog.name }, { headers: NO_CACHE });
 }
 
-export async function DELETE() { const userId = await getCurrentUserId(); if (!(await canPublishToNetwork(userId, "blogger"))) return NextResponse.json({ error: "Blogger no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE }); await prisma.bloggerIntegration.deleteMany({ where: { userId } }); return NextResponse.json({ ok: true }, { headers: NO_CACHE }); }
+export async function DELETE() { const user = await getCurrentUser(); const userId = user.id; if (!user.canConfigureRedes) return NextResponse.json({ error: "Blogger no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE }); await prisma.bloggerIntegration.deleteMany({ where: { userId } }); return NextResponse.json({ ok: true }, { headers: NO_CACHE }); }

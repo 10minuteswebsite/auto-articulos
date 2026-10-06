@@ -123,6 +123,35 @@ export function applyCookie(
   appendCookieHeaders(response, setCookieHeaders(name, value, options, env));
 }
 
+/**
+ * Fija una cookie para el host que inició la petición OAuth.
+ *
+ * Los aliases .net no pueden recibir una cookie Domain=.lasolucionweb.com.
+ * Las cookies de estado OAuth deben quedarse en el mismo host para que el
+ * callback .net pueda validarlas; en .com se conserva el comportamiento de
+ * cookies compartidas del Día Cero.
+ */
+export function applyOAuthStateCookie(
+  response: CookieResponse,
+  name: string,
+  value: string,
+  options: SharedCookieOptions = {},
+  request: { url: string },
+  env: Env = process.env,
+): void {
+  const host = new URL(request.url).hostname.toLowerCase();
+  const netProductHosts = new Set([
+    "seototal.lasolucionweb.net",
+    "articulos.lasolucionweb.net",
+    "redes.lasolucionweb.net",
+  ]);
+  if (netProductHosts.has(host)) {
+    response.cookies.set(name, value, options);
+    return;
+  }
+  applyCookie(response, name, value, options, env);
+}
+
 /** Borra una cookie (en sus dos variantes si hay dominio compartido). */
 export function clearCookie(
   response: CookieResponse,

@@ -11,5 +11,6 @@ export async function GET(request: Request) {
   const connection = platform === "threads"
     ? await prisma.postPeerSocialConnection.findUnique({ where: { userId_platform: { userId: user.id, platform } }, select: { status: true, accountId: true, accountName: true, connectedAt: true, lastError: true } })
     : await prisma.postPeerConnection.findUnique({ where: { userId: user.id }, select: { status: true, accountId: true, accountName: true, connectedAt: true, lastError: true } });
-  return NextResponse.json(connection ?? { status: "DISCONNECTED", accountId: null, accountName: null, connectedAt: null, lastError: null }, { headers: { "Cache-Control": "no-store" } });
+  const value = connection ?? { status: "DISCONNECTED", accountId: null, accountName: null, connectedAt: null, lastError: null };
+  return NextResponse.json({ ...value, connected: value.status === "ACTIVE" }, { headers: { "Cache-Control": "no-store" } });
 }

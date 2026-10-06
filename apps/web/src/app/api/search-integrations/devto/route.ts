@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { encryptSecret, verifyDevToApiKey } from "@auto-articulos/shared";
-import { getCurrentUserId } from "@/lib/current-user";
-import { canPublishToNetwork } from "@/lib/social-access";
+import { getCurrentUser } from "@/lib/current-user";
 
 export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "no-store, no-cache, must-revalidate" };
 
 export async function GET() {
-  const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "devto"))) return NextResponse.json({ connected: false, forbidden: true }, { status: 403, headers });
+  const user = await getCurrentUser();
+  const userId = user.id;
+  if (!user.canConfigureRedes) return NextResponse.json({ connected: false, forbidden: true }, { status: 403, headers });
   const integration = await prisma.devToIntegration.findUnique({ where: { userId }, select: { username: true, updatedAt: true } });
   return NextResponse.json({ connected: Boolean(integration), username: integration?.username, updatedAt: integration?.updatedAt }, { headers });
 }
 
 export async function POST(request: NextRequest) {
-  const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "devto"))) return NextResponse.json({ error: "DEV.to no está habilitado para este usuario." }, { status: 403, headers });
+  const user = await getCurrentUser();
+  const userId = user.id;
+  if (!user.canConfigureRedes) return NextResponse.json({ error: "DEV.to no está habilitado para este usuario." }, { status: 403, headers });
   const body = await request.json().catch(() => ({})) as { apiKey?: unknown; username?: unknown };
   const apiKey = typeof body.apiKey === "string" ? body.apiKey.trim() : "";
   const username = typeof body.username === "string" ? body.username.trim() : "";
@@ -32,8 +33,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE() {
-  const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "devto"))) return NextResponse.json({ error: "DEV.to no está habilitado para este usuario." }, { status: 403, headers });
+  const user = await getCurrentUser();
+  const userId = user.id;
+  if (!user.canConfigureRedes) return NextResponse.json({ error: "DEV.to no está habilitado para este usuario." }, { status: 403, headers });
   await prisma.devToIntegration.deleteMany({ where: { userId } });
   return NextResponse.json({ ok: true }, { headers });
 }

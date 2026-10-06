@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret, encryptSecret, getTumblrBlogs, refreshTumblrToken } from "@auto-articulos/shared";
-import { getCurrentUserId } from "@/lib/current-user";
-import { canPublishToNetwork } from "@/lib/social-access";
+import { getCurrentUser } from "@/lib/current-user";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +9,9 @@ export const revalidate = 0;
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate" };
 
 export async function GET() {
-  const userId = await getCurrentUserId();
-  const allowed = await canPublishToNetwork(userId, "tumblr");
+  const user = await getCurrentUser();
+  const userId = user.id;
+  const allowed = user.canConfigureRedes;
   const integration = await prisma.tumblrIntegration.findUnique({ where: { userId } });
   if (!integration) return NextResponse.json({ connected: false, allowed }, { headers: NO_CACHE });
   let current = integration;
@@ -46,8 +46,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
-  const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "tumblr"))) return NextResponse.json({ error: "Tumblr no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE });
+  const user = await getCurrentUser();
+  const userId = user.id;
+  if (!user.canConfigureRedes) return NextResponse.json({ error: "Tumblr no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE });
   const body = await request.json().catch(() => ({})) as { blogIdentifier?: unknown };
   if (typeof body.blogIdentifier !== "string" || !body.blogIdentifier.trim()) return NextResponse.json({ error: "Selecciona un blog de Tumblr." }, { status: 400, headers: NO_CACHE });
   const integration = await prisma.tumblrIntegration.findUnique({ where: { userId } });
@@ -62,8 +63,9 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE() {
-  const userId = await getCurrentUserId();
-  if (!(await canPublishToNetwork(userId, "tumblr"))) return NextResponse.json({ error: "Tumblr no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE });
+  const user = await getCurrentUser();
+  const userId = user.id;
+  if (!user.canConfigureRedes) return NextResponse.json({ error: "Tumblr no está habilitado para este usuario." }, { status: 403, headers: NO_CACHE });
   await prisma.tumblrIntegration.deleteMany({ where: { userId } });
   return NextResponse.json({ ok: true }, { headers: NO_CACHE });
 }

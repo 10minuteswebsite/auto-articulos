@@ -2,14 +2,13 @@ import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DashboardNav from "@/components/DashboardNav";
+import HubPlatformHeader from "@/components/HubPlatformHeader";
 import FloatingAssistant from "@/components/FloatingAssistant";
-import LogoutButton from "@/components/LogoutButton";
 import ModuleGuard from "@/components/ModuleGuard";
 import ProductAccessGuard from "@/components/ProductAccessGuard";
-import StopImpersonationButton from "@/components/StopImpersonationButton";
 import TrialBlockedScreen from "@/components/TrialBlockedScreen";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
-import { displayName, getSessionContext } from "@/lib/current-user";
+import { getSessionContext } from "@/lib/current-user";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { resolveAccessRedirect } from "@/lib/access-router-adapter";
 import { getMaintenanceMode } from "@/lib/maintenance";
@@ -54,6 +53,7 @@ export default async function DashboardLayout({
         position: "relative",
       }}
     >
+      <HubPlatformHeader user={user} actingAdmin={actingAdmin} />
       <style>{`
         @media (max-width: 639px) {
           .topbar { display: flex !important; margin-bottom: 12px !important; align-items: center !important; }
@@ -61,7 +61,7 @@ export default async function DashboardLayout({
           .topbar-title .eyebrow { display: block; font-size: 9px !important; margin-top: 2px !important; letter-spacing: 0.06em !important; }
           .topbar-title h1 { font-size: 21px !important; }
           .session-actions { display: none !important; }
-          .dashboard-nav { position: absolute !important; top: 18px; right: 16px; margin: 0 !important; z-index: 20; }
+          .dashboard-nav { position: relative !important; top: auto; right: auto; margin: 0 0 22px !important; z-index: 20; }
           .dashboard-main > nav { margin-top: 0 !important; margin-bottom: 22px !important; }
           .dashboard-main {
             padding: 20px 16px 44px !important;
@@ -140,10 +140,7 @@ export default async function DashboardLayout({
         className="topbar"
         style={{
           display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
           alignItems: "center",
-          gap: 12,
           marginBottom: 18,
         }}
       >
@@ -157,69 +154,11 @@ export default async function DashboardLayout({
               color: "#1d1d1f",
             }}
           >
-            LA SOLUCIÓN IA
+            {productTitle}
           </h1>
           <p className="eyebrow" style={{ margin: "4px 0 0" }}>
-            {productTitle}
+            Aplicación
           </p>
-        </div>
-        <div
-          className="session-actions"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            flexWrap: "wrap",
-            justifyContent: "flex-end",
-          }}
-        >
-          {actingAdmin ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-end",
-                gap: 2,
-                maxWidth: "100%",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 12,
-                  color: "#6e6e73",
-                  wordBreak: "break-word",
-                  textAlign: "right",
-                }}
-              >
-                {displayName(actingAdmin)}
-              </span>
-              <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#8a4b08",
-                  wordBreak: "break-word",
-                  textAlign: "right",
-                }}
-              >
-                Actuando como: {displayName(user)}
-              </span>
-            </div>
-          ) : (
-            <span
-              className="session-user"
-              style={{
-                fontSize: 13,
-                color: "#6e6e73",
-                fontWeight: 500,
-                wordBreak: "break-word",
-              }}
-            >
-              {displayName(user)}
-            </span>
-          )}
-          {actingAdmin && <StopImpersonationButton />}
-          <LogoutButton />
         </div>
       </div>
       {blocked ? (

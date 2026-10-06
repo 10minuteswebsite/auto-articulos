@@ -19,12 +19,18 @@ import FacebookSection from "@/components/FacebookSection";
 import InstagramSection from "@/components/InstagramSection";
 import { ConnectionReturnSuccess, LEGACY_RETURN_NETWORKS, useConnectionReturn } from "@/components/ConnectionReturn";
 import { ConnectionReturnContext } from "@/components/connection-return-context";
+import { shouldShowStaticConnectionSuccess } from "@/lib/connection-return-state";
 import { isConnectionVisible, isProductViewAllowed } from "@/lib/product-view-filter";
 import { productOfHost, type HostProductScope } from "@/lib/product-routes";
 
 type Vista = "analiticas" | "difusion";
 type Producto = "articulos" | "redes";
 type ConexionId = "google-search-console" | "google-analytics" | "bing-webmaster" | "instagram" | "facebook" | "threads" | "linkedin" | "pinterest" | "tumblr" | "bluesky" | "devto" | "blogger" | "business-profile";
+
+// Instagram y Facebook se conectan ahora por Composio. Las integraciones Meta
+// directas se conservan para compatibilidad histórica, pero no pueden pintar
+// el estado de la tarjeta ni habilitar el flujo nuevo.
+const COMPOSIO_PRIMARY_CONNECTIONS = new Set(["instagram", "facebook"]);
 
 const VISTAS: { id: Vista; label: string; ayuda: string }[] = [
   { id: "analiticas", label: "ANALÍTICAS", ayuda: "Leen datos y ayudan a que aparezcas en los buscadores." },
@@ -63,11 +69,16 @@ export default function ConexionesView() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [modulosDeshabilitados, setModulosDeshabilitados] = useState<string[]>([]);
   const [permisos, setPermisos] = useState<Record<string, boolean>>({});
+  const [redesProductAccess, setRedesProductAccess] = useState(false);
   const [configuradas, setConfiguradas] = useState<Record<string, boolean>>({});
   const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   const [hostReady, setHostReady] = useState(false);
   const retorno = useConnectionReturn(conexion);
-  const soloExito = retorno === "connected" && conexion !== null && LEGACY_RETURN_NETWORKS[conexion]?.choice === null;
+  const soloExito = shouldShowStaticConnectionSuccess({
+    conexion,
+    resultado: retorno,
+    choice: conexion ? LEGACY_RETURN_NETWORKS[conexion]?.choice : undefined,
+  });
 
   // Pedido explícito de Milton (1/10/2026): si llegó aquí desde Difusión en
   // Redes (botón "Configurar X" de una red sin conectar), un botón la trae
@@ -112,6 +123,7 @@ export default function ConexionesView() {
         if (!data) return;
         setIsAdmin(data.role === "admin");
         if (Array.isArray(data.disabledModules)) setModulosDeshabilitados(data.disabledModules);
+        setRedesProductAccess(data.products?.redes?.allowed === true);
         setPermisos({
           instagram: data.allowInstagramPublishing ?? false,
           facebook: data.allowFacebookPublishing ?? false,
@@ -128,15 +140,22 @@ export default function ConexionesView() {
     Promise.all([
       fetch("/api/configuration-status", { cache: "no-store" }),
       fetch("/api/composio/status", { cache: "no-store" }),
+      fetch("/api/search-integrations/tumblr?_t=" + Date.now(), { cache: "no-store" }),
+      fetch("/api/search-integrations/bluesky?_t=" + Date.now(), { cache: "no-store" }),
     ])
-      .then(async ([configurationResponse, composioResponse]) => {
+      .then(async ([configurationResponse, composioResponse, tumblrResponse, blueskyResponse]) => {
         const next: Record<string, boolean> = {};
         if (configurationResponse.ok) {
           const body = (await configurationResponse.json()) as { checks?: Array<{ id: string; configured: boolean }> };
           for (const check of body.checks ?? []) next[check.id] = check.configured;
         }
+        // A response antigua o una caché no puede reactivar la ruta Meta
+        // directa: este listado solo refleja Composio para estas dos redes.
+        for (const id of COMPOSIO_PRIMARY_CONNECTIONS) next[id] = false;
         if (composioResponse.ok) {
-          const body = (await composioResponse.json()) as { connections?: Array<{ app: string; status: string }> };
+          const body = (await composioResponse.json()) as {
+            connections?: Array<{ app: string; status: string; selection?: string | null }>;
+          };
           const composioIds: Record<string, string> = {
             google_search_console: "google-search-console",
             google_analytics: "google-analytics",
@@ -146,8 +165,30 @@ export default function ConexionesView() {
           };
           for (const connection of body.connections ?? []) {
             const id = composioIds[connection.app];
-            if (id) next[id] = connection.status === "ACTIVE";
+            if (!id) continue;
+            // Para Instagram/Facebook Composio es la fuente de verdad. Nunca
+            // hacemos OR con la integración Meta directa: eso ocultaba la
+            // regresión mostrando ✓ aunque Composio no estuviera conectado.
+            if (COMPOSIO_PRIMARY_CONNECTIONS.has(id)) {
+              // El check solo es válido cuando Composio tiene una conexión
+              // activa y el usuario ya eligió la Página/cuenta de destino.
+              next[id] = connection.status === "ACTIVE" && Boolean(connection.selection);
+            } else {
+              next[id] = next[id] || connection.status === "ACTIVE";
+            }
           }
+        }
+        // Tumblr y Bluesky tienen endpoints de estado propios. Son la fuente
+        // final del check del listado: la conexión puede estar configurada por
+        // el producto Redes aunque todavía no tenga permiso individual para
+        // publicar.
+        if (tumblrResponse.ok) {
+          const body = (await tumblrResponse.json()) as { connected?: boolean; blogSelectionPending?: boolean; isExpired?: boolean };
+          next.tumblr = body.connected === true && body.blogSelectionPending !== true && body.isExpired !== true;
+        }
+        if (blueskyResponse.ok) {
+          const body = (await blueskyResponse.json()) as { connected?: boolean; handle?: string | null };
+          next.bluesky = body.connected === true && Boolean(body.handle);
         }
         setConfiguradas(next);
       })
@@ -210,7 +251,10 @@ export default function ConexionesView() {
   }
 
   // Misma regla que Redes Sociales: el módulo de redes abierto para esta cuenta da acceso.
-  const tieneModuloRedes = !modulosDeshabilitados.includes("oportunidades-redes");
+  // Un derecho explícito al producto Redes permite entrar a Conexiones aunque
+  // la cuenta todavía no tenga ninguna red aprobada o configurada. Las
+  // aprobaciones individuales se reservan para las funciones de publicación.
+  const tieneModuloRedes = redesProductAccess || !modulosDeshabilitados.includes("oportunidades-redes");
   const puede = (red: string) => isAdmin || tieneModuloRedes || Boolean(permisos[red]);
 
   if (!hostReady) return null;

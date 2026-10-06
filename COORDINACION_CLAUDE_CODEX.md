@@ -4735,6 +4735,80 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Auditoría y reparación preparada — Google Business Profile — 2026-10-05
+
+- **Síntoma verificado en producción:** la tarjeta de Google Business Profile no
+  mostraba `Configurada ✓`; al abrirla, el retorno OAuth quedaba en una pantalla
+  estática sin `Probar conexión`, `Cambiar` ni `Desconectar`.
+- **Evidencia:** `/api/business-profile` respondió HTTP 200 y la vista detallada
+  mostró `ESTADO: Conexión exitosa`. La conexión PostPeer existía, pero el estado
+  global solo consultaba `businessProfileIntegration.locationName`, ignorando
+  `postPeerConnection.status = ACTIVE`.
+- **Causa de la regresión:** el retorno estándar se habilitó para LinkedIn y
+  Threads, pero no para Google Business Profile, aunque GBP también usa la
+  tarjeta estándar; además, el cálculo de configuración no incorporó PostPeer.
+- **Corrección preparada:** GBP vuelve a `BusinessProfileSection` después de OAuth
+  y el check global considera activa una conexión PostPeer `ACTIVE`; se conserva
+  la integración antigua como respaldo y no se borran datos.
+- **Validación local:** 193 pruebas web, typecheck, build de producción y
+  `git diff --check` aprobados.
+- **Publicación:** commit `43502970` publicado mediante deployment de Vercel
+  `dpl_DX3M2ahzMaUNyRz1dibcJP8WjnBv`, estado `READY`, proyecto
+  `auto-articulos-web`, equipo `la-solucion-web`. Se conservaron y verificaron
+  los alias `.net` y `.com`; `/login` respondió HTTP 200 en ambos dominios.
+- **Verificación posterior:** con `yolyripepi@gmail.com`, la tarjeta ahora
+  muestra el estado real `No conectada` y ofrece `Nueva conexión`, en lugar de
+  mostrar una falsa conexión exitosa sin acciones. El escaneo de errores de
+  producción posterior al deploy no encontró errores.
+- **Estado al publicar:** CORRECCIÓN PUBLICADA Y VERIFICADA. La tarjeta dejó de
+  falsear el estado; inicialmente la autorización de esa cuenta aún no estaba
+  activa en PostPeer.
+- **Confirmación final del usuario (2026-10-05):** el usuario confirmó que la
+  conexión de Google Business Profile quedó lista y funcional en producción para
+  `yolyripepi@gmail.com`. No hubo migraciones, cambios de secretos ni
+  modificaciones de otras conexiones.
+
+## Cierre confirmado — Google Business Profile funcional — 2026-10-05
+
+- Estado: **CERRADO, FUNCIONAL Y LISTO PARA TRASPASO**.
+- La confirmación del usuario prevalece sobre el estado intermedio registrado
+  inmediatamente después del deployment.
+
+
+## Confirmación del usuario — Blogger conectado en producción — 2026-10-05
+
+- El usuario confirmó la conexión de Blogger para `yolyripepi@gmail.com`.
+- Verificación visual en producción: la pantalla mostró `ESTADO: Conectada` y
+  `✓ Conexión activa`.
+- La autorización OAuth quedó guardada correctamente.
+- Pendiente funcional separado: la interfaz todavía muestra `Blog : .`, por lo
+  que falta seleccionar y aprobar el blog concreto antes de probar una
+  publicación. Esta confirmación no debe interpretarse como publicación E2E.
+
+## Reparación Blogger OAuth — 2026-10-05
+
+- Síntoma: Google completaba el consentimiento, pero Blogger regresaba a
+  Conexiones con «No se pudo completar la conexión» y no guardaba el blog.
+- Diagnóstico: el callback directo usa Google OAuth 2.0 + Blogger API v3. La
+  ruta dependía de la cookie de sesión y del encabezado `x-user-id`; al volver
+  desde Google ese contexto podía no llegar y el middleware terminaba el
+  callback antes de guardar la integración. No intervienen Auth0, Composio ni
+  PostPeer.
+- Corrección: el estado OAuth de Blogger ahora incluye el usuario que inició el
+  flujo, queda firmado con `SESSION_SECRET`, expira en 10 minutos y se valida
+  antes de intercambiar el código. El callback exacto puede atravesar el
+  middleware sin sesión, consulta de nuevo el acceso a Redes y limpia el estado
+  después del resultado. Se añadió prueba contra manipulación del estado.
+- Código: commit `16f43914` en `codex/oauth-repair-bing-instagram-facebook`.
+- Validación: 193 pruebas web, typecheck, build de producción y `git diff
+  --check` OK.
+- Deployment: `dpl_EU9oCE422jcTrfRXSLrDVKGo7Q6J`, Vercel
+  `10minuteswebsite-8051 / auto-articulos-web`, estado `Ready`; alias `.net` y
+  `.com` conservados.
+- Pendiente de verificación E2E: completar el botón `Continue` de Google para
+  la cuenta Blogger que el usuario desea conectar. No registrar tokens ni
+  secretos en este documento.
+
 ## Cierre Codex — corrección de retornos OAuth de conexiones — 2026-09-24
 
 - Commit desplegado: `67547d5bc60574dc4b15567b6fa7c86dd0b8c975` en `main`.

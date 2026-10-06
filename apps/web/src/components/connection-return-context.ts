@@ -21,7 +21,9 @@ export function useConnectionNotice(id?: string): { ok: boolean; text: string } 
   if (!id || !resultado || conexion !== id) return null;
   if (resultado === "connected") {
     const noun = CHOSEN_NOUN[id];
-    return noun ? { ok: true, text: `Autorización completada. Ahora elige y aprueba ${noun} que usará SEO TOTAL.` } : null;
+    return noun
+      ? { ok: true, text: `Autorización completada. Ahora elige y aprueba ${noun} que usará SEO TOTAL.` }
+      : { ok: true, text: "Autorización completada. La conexión quedó disponible para probarla, cambiarla o desconectarla desde aquí." };
   }
   if (resultado === "forbidden") return { ok: false, text: "Tu cuenta no tiene esta red habilitada. Pídele acceso al administrador." };
   return { ok: false, text: "No se pudo completar la conexión. Inténtalo de nuevo." };

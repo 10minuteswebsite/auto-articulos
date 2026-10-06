@@ -1,9 +1,43 @@
 import { BLOGGER_SCOPE } from "@auto-articulos/shared";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret } from "@auto-articulos/shared";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 export const BLOGGER_STATE_COOKIE = "blogger_oauth_state";
 export const BLOGGER_CALLBACK_PATH = "/api/search-integrations/blogger/callback";
+const BLOGGER_STATE_TTL_MS = 10 * 60 * 1000;
+
+function stateSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) throw new Error("SESSION_SECRET no está configurada.");
+  return secret;
+}
+
+function signState(payload: string): string {
+  return createHmac("sha256", stateSecret()).update(payload).digest("base64url");
+}
+
+/** Estado OAuth firmado: permite completar el callback aunque Google no reenvíe la cookie de sesión. */
+export function createBloggerOAuthState(userId: string): string {
+  const payload = [userId, Date.now() + BLOGGER_STATE_TTL_MS, randomBytes(16).toString("base64url")].join(".");
+  return `${payload}.${signState(payload)}`;
+}
+
+export function verifyBloggerOAuthState(state: string | null): string | null {
+  if (!state) return null;
+  const parts = state.split(".");
+  if (parts.length !== 4) return null;
+  const [userId, expiresAt, nonce, signature] = parts;
+  if (!userId || !nonce || !/^\d+$/.test(expiresAt) || Number(expiresAt) < Date.now()) return null;
+  try {
+    const expected = signState([userId, expiresAt, nonce].join("."));
+    const actualBytes = Buffer.from(signature, "base64url");
+    const expectedBytes = Buffer.from(expected, "base64url");
+    return actualBytes.length === expectedBytes.length && timingSafeEqual(actualBytes, expectedBytes) ? userId : null;
+  } catch {
+    return null;
+  }
+}
 
 // Blogger usa el mismo cliente OAuth de Google que Search Console y Analytics
 // cuando está disponible. Durante la transición conservamos como fallback las

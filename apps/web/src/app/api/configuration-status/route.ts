@@ -3,6 +3,7 @@ import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { platformHelpUrl } from "@auto-articulos/shared";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { hasProductAccess } from "@/lib/product-access";
 
 interface ConfigurationCheck {
   id: string;
@@ -32,6 +33,7 @@ export async function GET() {
     googleAnalyticsIntegration,
     bingIntegration,
     businessProfile,
+    postPeerBusinessProfile,
     threadsIntegration,
     postPeerThreads,
     twitterIntegration,
@@ -92,6 +94,10 @@ export async function GET() {
       where: { userId },
       select: { locationName: true },
     }),
+    prisma.postPeerConnection.findUnique({
+      where: { userId },
+      select: { status: true },
+    }),
     // 7. Meta Threads
     prisma.threadsIntegration.findUnique({
       where: { userId },
@@ -101,7 +107,10 @@ export async function GET() {
       where: { userId_platform: { userId, platform: "threads" } },
       select: { status: true },
     }),
-    // 8. X/Twitter
+    // 8-9. Instagram/Facebook se consultan abajo exclusivamente por Composio.
+    // Las integraciones Meta directas permanecen en sus rutas y en el worker
+    // como legado, pero no deben marcar esta lista como conectada.
+    // 10. X/Twitter
     prisma.twitterIntegration.findUnique({
       where: { userId },
       select: { expiresAt: true },
@@ -133,7 +142,7 @@ export async function GET() {
     }),
   ]);
 
-  const [resolvedSearchConsole, analyticsComposioConnection] = await Promise.all([
+  const [resolvedSearchConsole, analyticsComposioConnection, composioSocialConnections] = await Promise.all([
     resolveSearchConsoleForUser(userId, account.selectedSiteDomain ?? ""),
     prisma.composioConnection.findFirst({
       where: {
@@ -145,12 +154,22 @@ export async function GET() {
       orderBy: { updatedAt: "desc" },
       select: { propertyId: true, siteUrl: true },
     }),
+    prisma.composioConnection.findMany({
+      where: { userId, app: { in: ["instagram", "facebook"] }, status: "ACTIVE", siteDomain: "" },
+      orderBy: { updatedAt: "desc" },
+      select: { app: true, pageId: true, igAccountId: true },
+    }),
   ]);
+  const redesAccess = (await hasProductAccess(userId, "REDES")).allowed;
   const searchConsoleConfigured = Boolean(googleIntegration?.siteUrl) || (
     resolvedSearchConsole.source === "COMPOSIO" && Boolean(resolvedSearchConsole.state.composio?.siteUrl)
   );
   const hasLegacyGoogleAnalytics = Boolean(googleAnalyticsIntegration?.siteUrl && googleAnalyticsIntegration.encryptedRefreshToken);
   const hasActiveComposioAnalytics = Boolean(analyticsComposioConnection?.propertyId || analyticsComposioConnection?.siteUrl);
+  const composioInstagram = composioSocialConnections.find((connection) => connection.app === "instagram");
+  const composioFacebook = composioSocialConnections.find((connection) => connection.app === "facebook");
+  const hasActiveComposioInstagram = Boolean(composioInstagram?.igAccountId);
+  const hasActiveComposioFacebook = Boolean(composioFacebook?.pageId);
 
   const checks: ConfigurationCheck[] = [
     // ━━━ MÍNIMO PARA PUBLICAR ━━━
@@ -231,12 +250,32 @@ export async function GET() {
     {
       id: "business-profile",
       label: "Google Business Profile",
-      configured: Boolean(businessProfile?.locationName),
+      configured: Boolean(businessProfile?.locationName || postPeerBusinessProfile?.status === "ACTIVE"),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos como posts en tu perfil de negocio de Google.",
       actionUrl: "/dashboard/configuracion?tab=social",
       actionLabel: "Conectar Business Profile",
+    },
+    {
+      id: "instagram",
+      label: "Instagram",
+      configured: hasActiveComposioInstagram,
+      required: false,
+      section: "social",
+      description: "Publica automáticamente artículos e imágenes en tu cuenta profesional de Instagram mediante Composio.",
+      actionUrl: "/dashboard/configuracion/conexiones?conexion=instagram",
+      actionLabel: "Conectar Instagram",
+    },
+    {
+      id: "facebook",
+      label: "Facebook",
+      configured: hasActiveComposioFacebook,
+      required: false,
+      section: "social",
+      description: "Publica automáticamente contenido en la Página de Facebook conectada mediante Composio.",
+      actionUrl: "/dashboard/configuracion/conexiones?conexion=facebook",
+      actionLabel: "Conectar Facebook",
     },
     {
       id: "threads",
@@ -271,7 +310,7 @@ export async function GET() {
     {
       id: "pinterest",
       label: "Pinterest",
-      configured: Boolean((user?.role === "admin" || user?.allowPinterestPublishing) && pinterestIntegration && pinterestIntegration.boardId && (!pinterestIntegration.expiresAt || pinterestIntegration.expiresAt > new Date())),
+      configured: Boolean(redesAccess && pinterestIntegration && pinterestIntegration.boardId && (!pinterestIntegration.expiresAt || pinterestIntegration.expiresAt > new Date())),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos como Pins con imagen y enlace al artículo.",
@@ -281,7 +320,7 @@ export async function GET() {
     {
       id: "tumblr",
       label: "Tumblr",
-      configured: Boolean((user?.role === "admin" || user?.allowTumblrPublishing) && tumblrIntegration && !tumblrIntegration.blogSelectionPending && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
+      configured: Boolean(tumblrIntegration && !tumblrIntegration.blogSelectionPending && (!tumblrIntegration.expiresAt || tumblrIntegration.expiresAt > new Date())),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos con imagen, texto y enlace en Tumblr.",
@@ -291,7 +330,7 @@ export async function GET() {
     {
       id: "bluesky",
       label: "Bluesky",
-      configured: Boolean((user?.role === "admin" || user?.allowBlueskyPublishing) && blueskyIntegration?.handle),
+      configured: Boolean(blueskyIntegration?.handle),
       required: false,
       section: "social",
       description: "Publica automáticamente tus artículos en Bluesky.",
@@ -301,7 +340,7 @@ export async function GET() {
     {
       id: "devto",
       label: "DEV.to",
-      configured: Boolean((user?.role === "admin" || user?.allowDevToPublishing) && devToIntegration),
+      configured: Boolean(devToIntegration),
       required: false,
       section: "social",
       description: "Publica una versión adaptada del artículo con enlace canónico en DEV.to.",
@@ -311,7 +350,7 @@ export async function GET() {
     {
       id: "blogger",
       label: "Blogger",
-      configured: Boolean((user?.role === "admin" || user?.allowBloggerPublishing) && bloggerIntegration),
+      configured: Boolean(bloggerIntegration),
       required: false,
       section: "social",
       description: "Publica entradas de tus artículos en el blog de Blogger conectado.",

@@ -2025,3 +2025,28 @@ Estado: CERRADO, DESPLEGADO Y SIN PENDIENTES.
 El incidente quedó resuelto en producción. La interfaz ya no afirma que GSC está conectado cuando Composio no devuelve ninguna propiedad utilizable; muestra configuración incompleta o conexión sin propiedades y orienta a revisar permisos/cuenta o reconectar. Deployment verificado: `dpl_vMF5BV3DBZagVoEj3VCorCbFmMRD` (`READY`), dominio `/login` HTTP 200. Sin migraciones ni cambios destructivos.
 
 Estado: CERRADO Y ARCHIVADO.
+
+## Auditoría — Google Business Profile — 2026-10-05
+
+Se reprodujo una regresión de estado: la conexión PostPeer de Google Business
+Profile respondía correctamente, pero el listado no mostraba `Configurada ✓` y
+el retorno OAuth ocultaba las acciones de la tarjeta. La corrección considera
+`postPeerConnection.status = ACTIVE` y devuelve GBP a la tarjeta estándar.
+
+- Commit: `43502970` (`fix: restore Google Business Profile connection state`).
+- Deployment: `dpl_DX3M2ahzMaUNyRz1dibcJP8WjnBv`, Vercel `READY`, proyecto
+  `auto-articulos-web`, equipo `la-solucion-web`.
+- Verificación: alias `.net` y `.com` preservados; `/login` HTTP 200 en ambos;
+  escaneo de errores posterior sin errores.
+- E2E real: con `yolyripepi@gmail.com`, la tarjeta muestra `No conectada` y
+  `Nueva conexión`. Esto confirma que la interfaz dejó de falsear el estado;
+  la autorización GBP de esa cuenta no está activa en PostPeer y debe repetirse.
+- Seguridad: sin migraciones, sin cambios de secretos y sin cambios en otras
+  conexiones.
+
+### Cierre confirmado por el usuario — Google Business Profile — 2026-10-05
+
+El usuario confirmó el 5 de octubre de 2026 que Google Business Profile quedó
+conectado, listo y funcional en producción para `yolyripepi@gmail.com`.
+
+Estado: **CERRADO, FUNCIONAL Y LISTO PARA TRASPASO**.

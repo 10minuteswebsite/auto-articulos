@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { clearCookieHeaders, diaCeroActive, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
+import { applyOAuthStateCookie, clearCookieHeaders, diaCeroActive, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
 
 test("el dominio compartido solo vale si es válido; si no, todo queda como hoy", () => {
   assert.equal(sharedCookieDomain({}), undefined);
@@ -45,4 +45,27 @@ test("DIA_CERO=on activa el dominio por defecto; el explícito manda; apagado = 
   assert.equal(sharedCookieDomain({ DIA_CERO: "on" }), ".lasolucionweb.com");
   assert.equal(sharedCookieDomain({ DIA_CERO: "on", SHARED_COOKIE_DOMAIN: ".otro.com" }), ".otro.com");
   assert.equal(sharedCookieDomain({ DIA_CERO: "off" }), undefined);
+});
+
+test("OAuth de producto en .net conserva la cookie de estado aunque DIA_CERO esté activo", () => {
+  const calls: Array<{ name: string; value: string; options?: Record<string, unknown> }> = [];
+  const response = {
+    headers: new Headers(),
+    cookies: { set: (name: string, value: string, options?: Record<string, unknown>) => calls.push({ name, value, options }) },
+  };
+
+  applyOAuthStateCookie(
+    response,
+    "linkedin_oauth_state",
+    "state-123",
+    { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 },
+    { url: "https://redes.lasolucionweb.net/api/search-integrations/linkedin/connect" },
+    { DIA_CERO: "on" },
+  );
+
+  assert.deepEqual(calls, [{
+    name: "linkedin_oauth_state",
+    value: "state-123",
+    options: { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 },
+  }]);
 });
