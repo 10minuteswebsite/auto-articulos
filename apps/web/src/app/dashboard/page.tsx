@@ -29,8 +29,7 @@ const QUICK_LINKS = [
 // VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2): con el
 // módulo opt-in «vista-productos» activo (hoy, solo administradores como vista
 // previa) el inicio muestra DOS tarjetas, una por producto, en vez de las tres
-// acciones. La de Redes se muestra siempre (pedido de Milton, 1/10/2026): sin
-// permiso, el clic lleva a la pantalla de bloqueo de su sección.
+// acciones. Las tarjetas respetan el permiso efectivo de cada módulo.
 const PRODUCT_CARDS = [
   {
     href: "/dashboard/articulos",
@@ -78,6 +77,7 @@ export default function InicioPage() {
   const [showWizard, setShowWizard] = useState<boolean | null>(null);
   const [configurationAlerts, setConfigurationAlerts] = useState<ConfigurationAlert[]>([]);
   const [products, setProducts] = useState<ProductsInfo | null>(null);
+  const [disabledModules, setDisabledModules] = useState<string[]>([]);
   const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
   const [productView, setProductView] = useState(false);
@@ -107,6 +107,7 @@ export default function InicioPage() {
       const step1 = Boolean(credData.configured);
       const step2 = Array.isArray(catData.categories) && catData.categories.length > 0;
       setProductView(isProductViewEnabled(meData?.disabledModules));
+      setDisabledModules(Array.isArray(meData?.disabledModules) ? meData.disabledModules : []);
       setProducts(meData?.products ?? null);
       const step3 = typeof meData.contentLanguage === "string" && meData.contentLanguage.trim().length > 0;
       const step4 = Boolean(
@@ -149,6 +150,9 @@ export default function InicioPage() {
   }, []);
 
   function hasProductFor(href: string): boolean {
+    if ((href === "/dashboard/oportunidades-redes" || href === "/dashboard/redes") && disabledModules.includes("oportunidades-redes")) {
+      return false;
+    }
     if (hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(href), hostProduct)) {
       return false;
     }
