@@ -1,8 +1,7 @@
-import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { getBloggerAuthUrl } from "@auto-articulos/shared";
 import { getCurrentUser } from "@/lib/current-user";
-import { bloggerOAuthConfig } from "@/lib/blogger-oauth";
+import { bloggerOAuthConfig, createBloggerOAuthState } from "@/lib/blogger-oauth";
 import { BLOGGER_STATE_COOKIE } from "./constants";
 import { applyCookie } from "@/lib/shared-cookies";
 import { oauthCallbackUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
@@ -13,7 +12,7 @@ export async function GET(request: Request) {
   try {
     const { clientId } = await bloggerOAuthConfig();
     const redirectUri = oauthCallbackUri(request, "/api/search-integrations/blogger/callback");
-    const state = randomBytes(24).toString("base64url");
+    const state = createBloggerOAuthState(user.id);
     const response = NextResponse.redirect(getBloggerAuthUrl(state, redirectUri, clientId));
     applyCookie(response, BLOGGER_STATE_COOKIE, state, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 });
     rememberOAuthOrigin(response, request);

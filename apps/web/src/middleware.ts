@@ -38,6 +38,7 @@ const PUBLIC_PATHS = [
 /** Endpoint del servidor MCP; se autentica con Bearer, no con cookie. */
 const MCP_PATH = "/api/mcp";
 const TUMBLR_CALLBACK_PATH = "/api/search-integrations/tumblr/callback";
+const BLOGGER_CALLBACK_PATH = "/api/search-integrations/blogger/callback";
 
 const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
@@ -62,7 +63,7 @@ export async function middleware(request: NextRequest) {
   // subdominio .com distinto del host que inició el flujo. El callback valida
   // el token temporal cifrado y el usuario enlazado antes de guardar nada, por
   // lo que debe poder ejecutarse también sin la cookie de sesión del navegador.
-  if (pathname === TUMBLR_CALLBACK_PATH) {
+  if (pathname === TUMBLR_CALLBACK_PATH || pathname === BLOGGER_CALLBACK_PATH) {
     return NextResponse.next();
   }
 
