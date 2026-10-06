@@ -37,6 +37,10 @@ HANDOFF, solo alimenta ideas hacia él).
 
 ## Pendientes
 
+- **(6/10/2026)** Pasar a producción la corrección de enlaces del Historial
+  para todas las redes y blogs. La corrección está preparada localmente, pero
+  queda expresamente en cola: no subir ni desplegar todavía.
+
 - **(8/8/2026)** Motor de Distribución Inteligente SEO para Redes Sociales:
   Crear un programador automático que publique un máximo de 2 posts por semana
   por red social activa (X, LinkedIn, Threads, Instagram, Facebook Pages y

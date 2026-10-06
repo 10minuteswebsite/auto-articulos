@@ -4748,6 +4748,46 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Codex — AUDITORÍA ENLACES HISTORIAL TODAS LAS REDES — 2026-10-06
+
+- Se revisaron los enlaces de Historial para Threads, X, LinkedIn, Facebook,
+  Instagram, Pinterest, Tumblr, Bluesky, DEV.to, Blogger y Google Business.
+- X y LinkedIn dejaron de construir URLs directamente en la vista y ahora
+  usan `socialPostUrl`, igual que Threads.
+- `socialPostUrl` respeta URLs completas para todas las plataformas y añade el
+  alias `twitter` para X. Cuando un ID aislado no basta para formar un
+  permalink fiable, devuelve `null` en vez de mostrar un enlace incorrecto.
+- Se añadieron pruebas para URLs completas de Blogger, Pinterest y Tumblr,
+  el alias Twitter y el rechazo de IDs opacos sin URL.
+- `git diff --check` pendiente de ejecutar después de esta edición. No hubo
+  migración ni deploy.
+
+## Cola de producción — enlaces de Historial — 2026-10-06
+
+Milton pidió dejar este cambio en cola para producción. La corrección de
+enlaces de Historial para todas las redes/blogs permanece únicamente en el
+worktree local: **no subir, no crear PR y no desplegar todavía**.
+
+## Codex — HISTORIAL ENLACE THREADS MALO — 2026-10-06
+
+- Se reclamó la capitanía local para corregir los enlaces públicos de Threads
+  mostrados en Historial.
+- `apps/web/src/app/dashboard/historial/page.tsx` dejó de construir por su
+  cuenta la URL antigua `threads.net/t/...` y usa `socialPostUrl`.
+- `apps/web/src/lib/social-post-url.ts` ahora usa `https://www.threads.com`;
+  las URLs completas guardadas (incluido el permalink real
+  `https://www.threads.com/@usuario/post/id`) se conservan sin alteración.
+- Se añadió una prueba para el dominio nuevo y para el permalink completo.
+  `git diff --check` pasó. No se ejecutaron tests porque `tsx` no está
+  instalado en este worktree.
+- El worker ya guardaba `result.permalink || result.postId`; no fue necesario
+  cambiar el contrato de publicación ni el schema.
+
+Estado: corrección local lista para revisión. No hubo deploy ni migración.
+
+Capitanía liberada: corrección aplicada; sin deploy; commit bloqueado por
+permisos del git admin del worktree.
+
 ## REPARACIÓN DE BUILD WEB — 2026-10-06
 
 **Identidad:** CODEX - GPT-5 - REPARADOR DEL ARBOL PRINCIPAL.

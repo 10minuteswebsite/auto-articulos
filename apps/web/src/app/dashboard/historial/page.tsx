@@ -1939,7 +1939,7 @@ function TitleRowWithLog({ title }: { title: TitleRow }) {
               >
                 {title.threadsPublishStatus === "success" ? (
                   <a
-                    href={title.threadsPostId ? (title.threadsPostId.startsWith("http") ? title.threadsPostId : `https://www.threads.net/t/${title.threadsPostId}`) : "#"}
+                    href={socialPostUrl("threads", title.threadsPostId) ?? undefined}
                     target="_blank"
                     rel="noreferrer"
                     className="link-button"
@@ -1965,7 +1965,7 @@ function TitleRowWithLog({ title }: { title: TitleRow }) {
               >
                 {title.twitterPublishStatus === "success" ? (
                   <a
-                    href={title.twitterPostId ? (title.twitterPostId.startsWith("http") ? title.twitterPostId : `https://x.com/i/status/${title.twitterPostId}`) : "#"}
+                    href={socialPostUrl("x", title.twitterPostId) ?? undefined}
                     target="_blank"
                     rel="noreferrer"
                     className="link-button"
@@ -1991,7 +1991,7 @@ function TitleRowWithLog({ title }: { title: TitleRow }) {
               >
                 {title.linkedinPublishStatus === "success" ? (
                   <a
-                    href={title.linkedinPostId ? (title.linkedinPostId.startsWith("http") ? title.linkedinPostId : `https://www.linkedin.com/feed/update/${title.linkedinPostId}`) : "#"}
+                    href={socialPostUrl("linkedin", title.linkedinPostId) ?? undefined}
                     target="_blank"
                     rel="noreferrer"
                     className="link-button"
