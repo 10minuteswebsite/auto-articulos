@@ -1,5 +1,18 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Incidente «Analizar contenido» caído (cuenta de Alfonzo Lobo) — Claude — 2026-10-02 — CERRADO
+
+- **Síntoma:** en `/dashboard/oportunidades` el botón «Analizar contenido» mostraba «No se pudo completar el análisis.» (mensaje genérico del cliente: la respuesta llegó sin cuerpo JSON). Se sospechó de la transición controlada hacia el HUB.
+- **Causa real (logs de producción de Vercel):** `PrismaClientKnownRequestError P2022: The column SearchIntegration.lastAccessErrorAt does not exist in the current database` (y lo mismo para `lastAccessError`), en `prisma.searchIntegration.findFirst()` de `POST /api/opportunities`. 456 + 144 errores en 24 h; afectaba a TODAS las cuentas, no solo a Alfonzo.
+- **Origen:** PR #282 (2026-10-01, aviso rojo de reconexión de Search Console) añadió las dos columnas al schema y creó la migración `20261001150000_add_search_integration_access_error`, pero **esa migración nunca se aplicó en producción**. `migrate.yml` está detenido a propósito (querría borrar las columnas HUB de `User`; no usar `accept_data_loss` ni `force_sync`). **No fue la transición al HUB**, ni la capa de derechos por producto (`requireProductAccess` falla en abierto y no intervino).
+- **Arreglo:** Milton aplicó a mano en Supabase, el 2026-10-02, SQL aditivo e idempotente:
+  `ALTER TABLE "SearchIntegration" ADD COLUMN IF NOT EXISTS "lastAccessErrorAt" TIMESTAMP(3);`
+  `ALTER TABLE "SearchIntegration" ADD COLUMN IF NOT EXISTS "lastAccessError" TEXT;`
+  Sin redespliegue ni cambios de código.
+- **Verificación:** tras el SQL, `POST /api/opportunities` respondió 200 en producción, sin errores «column does not exist»; Milton probó con la cuenta de Alfonzo. Un barrido de errores de 24 h no mostró ninguna otra columna o tabla faltante.
+- **Lección:** schema + migración inseparables incluye APLICARLA. Mientras `migrate.yml` siga bloqueado por las columnas HUB, toda migración nueva debe aplicarse a mano y anotarse aquí; si no, la ruta que la use cae con 500 sin mensaje. Para diagnosticar: `vercel logs --scope la-solucion-web --project auto-articulos-web --environment production --level error --json`.
+- Capitanía reclamada y liberada por Claude (solo documentación). Estado: CERRADO Y ARCHIVADO.
+
 ## Incidente `Load failed` en oportunidades — Rafael Zuzolo — 2026-10-01
 
 - **Síntoma:** en producción, la cuenta de Rafael Zuzolo mostraba `Load failed` al ejecutar “Analizar contenido”; la carga inicial sí funcionaba.
