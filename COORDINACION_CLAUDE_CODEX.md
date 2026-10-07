@@ -11001,3 +11001,51 @@ Propagado por documento:
 No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-07
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-06 (commit
+`0498b99`). Se revisó el rango `0498b99..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 94
+líneas agregadas (0 eliminadas, confirmado con `git diff --stat`), 5 bloques nuevos.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: dos entradas nuevas. (1) "Versión — 2026-10-02 — incidente
+  Analizar contenido caído por migración sin aplicar (Alfonzo Lobo)" (commit `45ccae7`),
+  incidente CERRADO sobre `SearchIntegration.lastAccessErrorAt`/`lastAccessError` sin migrar en
+  producción, corregido a mano en Supabase por Milton. (2) "Versión — 2026-10-06 — reparación de
+  typecheck/build web (PR #487)" (commit `26d5a3b`, merge `483cf31`), fijó un test sin cerrar en
+  `modules.test.ts` y una referencia a estado inexistente en `usuarios/page.tsx`; se anotó que la
+  propia entrada de Coordinación decía "no listo para producción" pero el commit igual se
+  fusionó a `main`, sin confirmación de build/Vercel posterior en ningún documento.
+- `INVENTARIO_CONVERSACIONES.md`: addendum en Parte B con los cuatro nombres de conversación
+  nuevos de este rango (incidente Alfonzo Lobo, auditoría de enlaces de Historial para todas las
+  redes, corrección del enlace malo de Threads, y la reparación de build web). Parte A sin
+  cambios — se verificó con `git worktree list` y `git merge-base --is-ancestor` que la única
+  rama nueva mencionada (`codex/reparar-typecheck-web-20261006`) ya está fusionada, no es
+  reserva activa.
+- `TO-DO.md`: sin cambios por esta tarea — la única idea suelta nueva del rango ("pasar a
+  producción la corrección de enlaces del Historial") ya fue agregada por el propio commit
+  `4ff6d9a` a la sección Pendientes; no se duplica.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. El incidente de Alfonzo Lobo fue un
+  error transitorio ya resuelto, sin texto visible nuevo que explicar al bot de ayuda. La
+  corrección de enlaces de Historial no cambia ninguna etiqueta ni flujo visible (solo corrige a
+  dónde apunta un enlace que ya existía) y además su estado de despliegue es contradictorio (ver
+  duda abajo), así que no se propagó mientras eso no se aclare.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguno de los bloques nuevos describe un
+  árbol de git enredado, ramas pisadas o commits mezclados (la reparación de build web fue un
+  fix de código/typecheck bajo esa identidad, no un problema de árbol; ya quedó registrada en
+  `CONTROLADOR_DE_VERSIONES.md` e `INVENTARIO_CONVERSACIONES.md`).
+
+**Duda sin resolver, para que Milton decida (anotada también en `INVENTARIO_CONVERSACIONES.md`):**
+la entrada "Cola de producción — enlaces de Historial — 2026-10-06" dice que la corrección de
+enlaces queda "únicamente en el worktree local: no subir, no crear PR y no desplegar todavía".
+Pero el commit `4ff6d9a` ("Codex worktree snapshot: startup-cleanup"), ya fusionado en
+`origin/main`, modifica `apps/web/src/app/dashboard/historial/page.tsx` y
+`apps/web/src/lib/social-post-url.ts` con exactamente esa corrección (Threads/X/LinkedIn vía
+`socialPostUrl`, dominio `threads.com`). No se resolvió esta contradicción ni se tocó el manual
+del bot de ayuda por este motivo.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
