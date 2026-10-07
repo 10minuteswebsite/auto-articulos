@@ -2925,13 +2925,22 @@ function UserCard({
           </Row>
           <Row label="Módulos de esta cuenta" hint="Pasa por encima del apagado global." stacked>
             <p style={{ margin: "0 0 8px", fontSize: 11, lineHeight: 1.5, color: "#6e6e73" }}>
-              <strong>Dárselo a esta cuenta</strong> pasa por encima del apagado
+              <strong>El acceso se controla por cuenta</strong> y puede pasar por encima del apagado
               global: aunque el módulo esté oculto para todos, esta persona sí lo
               verá. Se guarda con <strong>Guardar cambios</strong>.
             </p>
             <div style={{ display: "grid", gap: 6 }}>
               {SYSTEM_MODULES.map((mod) => {
                 const acceso = moduleOverrides[mod.id] ?? "inherit";
+                const accountIdentity = [user.name, user.firstName, user.lastName, user.email]
+                  .filter(Boolean)
+                  .join(" ")
+                  .toLocaleLowerCase("es");
+                const networksException =
+                  user.role === "admin" ||
+                  accountIdentity.includes("zulmad") ||
+                  accountIdentity.includes("lorena alvarez");
+                const isSocialModule = mod.id === "oportunidades-redes";
                 return (
                   <label
                     key={mod.id}
@@ -2975,8 +2984,12 @@ function UserCard({
                         }}
                       >
                         <option value="inherit">Según la config. general</option>
-                        <option value="enabled">Dárselo a esta cuenta</option>
-                        <option value="disabled">Quitárselo a esta cuenta</option>
+                        <option value="enabled">
+                          {isSocialModule && !networksException ? "Quitárselo a esta cuenta" : "Dárselo a esta cuenta"}
+                        </option>
+                        <option value="disabled">
+                          {isSocialModule && !networksException ? "Quitado de esta cuenta" : "Quitárselo a esta cuenta"}
+                        </option>
                       </select>
                     </span>
                   </label>
