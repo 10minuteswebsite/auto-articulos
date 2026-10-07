@@ -25,8 +25,8 @@ export const HUB_URL = "https://hub.lasolucionweb.net";
 /** Producto de la dirección pública desde la que el usuario está trabajando. */
 export function productOfHost(hostname: string | null | undefined): HostProductScope {
   const host = (hostname ?? "").toLowerCase().split(":")[0];
-  if (host === "articulos.lasolucionweb.com") return "ARTICULOS";
-  if (host === "redes.lasolucionweb.com") return "REDES";
+  if (host === "articulos.lasolucionweb.com" || host === "articulos.lasolucionweb.net") return "ARTICULOS";
+  if (host === "redes.lasolucionweb.com" || host === "redes.lasolucionweb.net") return "REDES";
   return "COMPARTIDO";
 }
 

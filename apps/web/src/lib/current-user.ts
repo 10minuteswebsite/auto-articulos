@@ -1,6 +1,7 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { prisma } from "@auto-articulos/db";
 import { refreshHubAccessForUser, type HubProductSlug } from "@/lib/hub-sync";
+import { HUB_SESSION_CONTEXT_COOKIE, verifyHubSessionContextToken, type HubSessionContext } from "@/lib/session";
 
 function getHubProductSlug(requestHeaders: Headers): HubProductSlug {
   return requestHeaders.get("x-hub-product-slug") === "auto-redes" ? "auto-redes" : "seo-total";
@@ -101,14 +102,35 @@ export async function requireAdmin() {
  */
 export async function getActingAdmin() {
   const headerList = await headers();
+  const currentUserId = headerList.get("x-user-id");
   const hubActorEmail = headerList.get("x-hub-acting-admin-email");
-  if (headerList.get("x-hub-authenticated") === "1" && hubActorEmail) {
+  let hubContext: HubSessionContext | null = headerList.get("x-hub-authenticated") === "1" && hubActorEmail
+    ? {
+        targetUserId: currentUserId ?? "",
+        actorUserId: headerList.get("x-hub-acting-admin-id"),
+        actorEmail: hubActorEmail,
+        actorName: headerList.get("x-hub-acting-admin-name"),
+      }
+    : null;
+
+  // Fallback for product requests where the Edge middleware header is not
+  // preserved by the hosting adapter. The signed cookie is the source of
+  // truth for Hub-originated sessions and remains scoped to this product.
+  if (!hubContext && currentUserId) {
+    const cookieStore = await cookies();
+    const verified = await verifyHubSessionContextToken(
+      cookieStore.get(HUB_SESSION_CONTEXT_COOKIE)?.value,
+    );
+    if (verified?.targetUserId === currentUserId) hubContext = verified;
+  }
+
+  if (hubContext?.actorEmail) {
     return {
-      id: headerList.get("x-hub-acting-admin-id") ?? "hub-admin",
-      name: headerList.get("x-hub-acting-admin-name"),
+      id: hubContext.actorUserId ?? "hub-admin",
+      name: hubContext.actorName,
       firstName: null,
       lastName: null,
-      email: hubActorEmail,
+      email: hubContext.actorEmail,
     };
   }
   const adminId = headerList.get("x-acting-admin-id");
@@ -126,5 +148,13 @@ export async function getSessionContext() {
     getActingAdmin(),
   ]);
   const requestHeaders = await headers();
-  return { user, actingAdmin, hubAuthenticated: requestHeaders.get("x-hub-authenticated") === "1" };
+  let hubAuthenticated = requestHeaders.get("x-hub-authenticated") === "1";
+  if (!hubAuthenticated) {
+    const cookieStore = await cookies();
+    const hubContext = await verifyHubSessionContextToken(
+      cookieStore.get(HUB_SESSION_CONTEXT_COOKIE)?.value,
+    );
+    hubAuthenticated = hubContext?.targetUserId === user.id;
+  }
+  return { user, actingAdmin, hubAuthenticated };
 }

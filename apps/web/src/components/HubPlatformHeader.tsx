@@ -11,7 +11,9 @@ type PlatformUser = {
 };
 
 export default function HubPlatformHeader({ user, actingAdmin }: { user: PlatformUser; actingAdmin: PlatformUser | null }) {
-  const canManage = user.role === "admin" || Boolean(actingAdmin);
+  // Match the Hub exactly: impersonating a tenant does not grant that tenant
+  // an Administration link. The admin keeps management in the Hub banner.
+  const canManage = user.role === "admin";
 
   return (
     <>
