@@ -4748,6 +4748,30 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Cierre Codex — Redes restringidas por allowlist — 2026-10-07
+
+- Solicitud final: Redes solo para administradores, Lorena Alvarez y Zulmad;
+  ningún otro usuario debe ver la tarjeta ni entrar por URL.
+- Causa del incidente con Hector Travasillo: tenía un override histórico
+  `oportunidades-redes = enabled`; cambiar solo la etiqueta del administrador
+  no revocaba ese acceso.
+- Corrección definitiva: `oportunidades-redes` es opt-in; la regla central
+  `canSeeSocialModule` permite únicamente administradores, cuentas cuya
+  identidad contiene `lorena alvarez` o `zulmad`; el guard también bloquea el
+  acceso directo cuando el módulo está deshabilitado.
+- La etiqueta administrativa refleja ahora «Quitárselo a esta cuenta» para
+  cuentas fuera de la allowlist.
+- PR #501 (`209fa502`) aplicó la restricción real. PR #502 (`5ff3c11c`) corrigió
+  la etiqueta administrativa. Ambos fueron fusionados a `main`.
+- Producción verificada en Vercel: deployment `42Lr4iy6cK1T1Dv6CCcA7gQVtDXj`,
+  estado `success`.
+- Sin schema, migraciones ni cambios destructivos. `git diff --check` OK;
+  typecheck local no ejecutado por ausencia de `node_modules` en el worktree.
+
+Estado: CERRADO, DESPLEGADO Y VERIFICADO.
+
+Responsable: Codex.
+
 ## Codex — etiqueta de Redes por cuenta en Administración — 2026-10-07
 
 - Se ajustó `apps/web/src/app/dashboard/usuarios/page.tsx` para que el selector

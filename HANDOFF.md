@@ -2072,3 +2072,12 @@ Estado: CERRADO, DESPLEGADO Y ARCHIVADO.
 El incidente quedó resuelto en producción. La interfaz ya no afirma que GSC está conectado cuando Composio no devuelve ninguna propiedad utilizable; muestra configuración incompleta o conexión sin propiedades y orienta a revisar permisos/cuenta o reconectar. Deployment verificado: `dpl_vMF5BV3DBZagVoEj3VCorCbFmMRD` (`READY`), dominio `/login` HTTP 200. Sin migraciones ni cambios destructivos.
 
 Estado: CERRADO Y ARCHIVADO.
+
+## Cierre — Redes restringidas por allowlist — 2026-10-07
+
+- Redes quedó restringido a administradores, Lorena Alvarez y Zulmad.
+- Héctor Travasillo y el resto de cuentas no autorizadas no ven la tarjeta ni
+  pueden entrar por URL, aunque conservaran un override histórico habilitado.
+- PR #501 desplegó la restricción; PR #502 corrigió la etiqueta mostrada en
+  Administración. Deployment final: `42Lr4iy6cK1T1Dv6CCcA7gQVtDXj` (`success`).
+- Estado: cerrado y verificado en producción.
