@@ -43,8 +43,8 @@ test("los administradores lo ven siempre (lista vacía)", () => {
 // Único módulo opt-in: el interruptor de la vista por productos (proyecto
 // «SEPARACION DE SEO TOTAL», Lote 2). Este test fija que no se cuele ningún otro
 // por descuido: un módulo opt-in nuevo debe añadirse aquí a propósito.
-test("el único módulo opt-in es la vista por productos", () => {
-  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), ["vista-productos"]);
+test("Redes y la vista por productos son módulos opt-in", () => {
+  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), ["oportunidades-redes", "vista-productos"]);
 });
 
 test("la vista por productos NO la ve un usuario normal, ni con el ocultar global vacío", () => {
@@ -61,7 +61,7 @@ test("la vista por productos la ve un administrador y quien tenga «Habilitado»
   );
 });
 
-test("redes sociales puede apagarse globalmente y el override individual sigue funcionando", () => {
+test("Redes queda reservada a las cuentas permitidas", () => {
   const disabled = getEffectiveDisabledModules(
     { role: "user", disabledModules: null },
     ["oportunidades-redes"],
@@ -69,13 +69,15 @@ test("redes sociales puede apagarse globalmente y el override individual sigue f
   assert.equal(disabled.includes("oportunidades-redes"), true);
   assert.equal(
     getEffectiveDisabledModules(
-      { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }) },
+      { role: "user", name: "Hector Travasillo", disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }) },
       ["oportunidades-redes"],
     ).includes("oportunidades-redes"),
-    false,
+    true,
   );
+  assert.equal(getEffectiveDisabledModules({ role: "user", name: "Lorena Alvarez", disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }) }, ["oportunidades-redes"]).includes("oportunidades-redes"), false);
+  assert.equal(getEffectiveDisabledModules({ role: "user", name: "Zulmad Antolinez", disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }) }, ["oportunidades-redes"]).includes("oportunidades-redes"), false);
 });
 
-test("la vista por productos es el único módulo opt-in por ahora", () => {
-  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), ["vista-productos"]);
+test("los administradores siempre ven Redes", () => {
+  assert.equal(getEffectiveDisabledModules({ role: "admin", disabledModules: null }, ["oportunidades-redes"]).includes("oportunidades-redes"), false);
 });
