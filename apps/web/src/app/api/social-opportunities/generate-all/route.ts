@@ -15,38 +15,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
     }
 
-    // Generar 1 oportunidad por cada red conectada
-    const networks = ["threads", "x", "linkedin", "instagram", "facebook-page", "pinterest", "tumblr", "bluesky", "blogger"];
-    const results: any = {};
-    const errors: any = {};
-
-    for (const network of networks) {
-      try {
-        const res = await fetch(`${new URL(request.url).origin}/api/social-opportunities/generate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ networks: [network] }),
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          results[network] = { success: true, message: data.message, count: data.count };
-        } else {
-          errors[network] = data.error || "Error desconocido";
-        }
-      } catch (err) {
-        errors[network] = err instanceof Error ? err.message : String(err);
-      }
-    }
-
-    const successCount = Object.values(results).filter((r: any) => r.success).length;
-    const errorCount = Object.keys(errors).length;
-
-    return NextResponse.json({
-      message: `Se generaron oportunidades para ${successCount} redes. ${errorCount > 0 ? `${errorCount} redes sin conexión o error.` : ""}`,
-      results,
-      errors: errorCount > 0 ? errors : undefined,
+    // Una sola ejecución coordinada. La ruta de generación autentica una vez,
+    // carga las señales una vez y aplica los límites a todas las redes. X queda
+    // fuera del producto actual; Google Business sí participa cuando aplica.
+    const networks = ["threads", "linkedin", "instagram", "facebook-page", "pinterest", "tumblr", "bluesky", "blogger", "google-business"];
+    const res = await fetch(`${new URL(request.url).origin}/api/social-opportunities/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        cookie: request.headers.get("cookie") ?? "",
+      },
+      body: JSON.stringify({ networks }),
     });
+    const data = await res.json();
+    if (!res.ok) return NextResponse.json(data, { status: res.status });
+    return NextResponse.json(data);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: `Error al generar oportunidades: ${errorMessage}` }, { status: 500 });
