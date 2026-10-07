@@ -4756,6 +4756,20 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Validaciones: `git diff --check`, typecheck de ambas aplicaciones y builds de
   Hub Cloudflare y Auto Artículos OK. Producción no se tocó en este bloque.
 
+## Bitácora de continuidad — cierre de implementación — 2026-10-07
+
+- Commit de Auto Artículos: `dda8384a`; PR
+  [#504](https://github.com/10minuteswebsite/auto-articulos/pull/504).
+- El contrato depende del commit `99e7202` y PR #12 del repositorio Hub.
+- No publicar este repositorio antes de que el Hub tenga aplicada la migración
+  `20261007190000_product_launch_impersonation_context.sql` y el mismo lote de
+  cambios esté listo.
+- Smoke test obligatorio: lanzamiento normal desde Hub, lanzamiento durante
+  impersonificación, navegación a otra ruta del producto, retorno al Hub y
+  logout. Confirmar que el login nativo no renderiza `HubPlatformHeader`.
+- Si otro programador retoma el trabajo, debe leer esta entrada y los PR antes
+  de modificar menús, middleware, sesiones o `product_launch_codes`.
+
 ## Cierre de reparación Hub ↔ Auto Artículos — 2026-10-07
 
 - **Causa raíz confirmada:** el deployment de Auto Artículos incluía el campo
