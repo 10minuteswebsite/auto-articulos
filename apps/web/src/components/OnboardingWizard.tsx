@@ -616,7 +616,11 @@ export default function OnboardingWizard({
   // confirmado — si no, Paso 2 podría sincronizar categorías de un sitio
   // equivocado cuando la cuenta expone más de uno.
   const step1Done = step1Saved && siteSelectionConfirmed;
-  const step2Done = step1Done && categories.length > 0;
+  // Las categorías son opcionales durante el onboarding. Una cuenta nueva
+  // puede todavía no tener categorías creadas en su web; eso no debe impedir
+  // completar el Wizard. El paso permanece disponible para sincronizarlas o
+  // agregarlas después, pero no actúa como barrera para los pasos siguientes.
+  const step2Done = step1Done;
   const step3Done = step1Done && step2Done && Boolean(contentLanguage);
   const step4Done = step1Done && step2Done && step3Done && Boolean(googleData?.connected && googleData?.siteUrl);
   const step5Done = step1Done && step2Done && step3Done && step4Done && hasPublishedAny;
@@ -1178,7 +1182,9 @@ export default function OnboardingWizard({
             isActive={activeStep === 2}
             badgeText={
               step2Done
-                ? `${categories.length} ${categories.length === 1 ? "categoría" : "categorías"} listas`
+                ? categories.length > 0
+                  ? `${categories.length} ${categories.length === 1 ? "categoría" : "categorías"} listas`
+                  : "Opcional · sin categorías"
                 : activeStep === 2
                   ? "Paso 2 en curso"
                   : "Pendiente"
@@ -1189,7 +1195,7 @@ export default function OnboardingWizard({
                 <p style={{ fontSize: 13, color: "#6e6e73", margin: 0 }}>
                   Este paso se desbloqueará automáticamente al completar el Paso 1.
                 </p>
-              ) : step2Done ? (
+              ) : step2Done && categories.length > 0 ? (
                 <div>
                   <div
                     style={{
@@ -1206,7 +1212,11 @@ export default function OnboardingWizard({
                     }}
                   >
                     <div style={{ fontSize: 13, color: "#1d1d1f" }}>
-                      <strong>{categories.length} categorías</strong> sincronizadas y listas para publicar.
+                      {categories.length > 0 ? (
+                        <><strong>{categories.length} categorías</strong> sincronizadas y listas para publicar.</>
+                      ) : (
+                        <><strong>No hay categorías todavía.</strong> Puedes continuar el Wizard y sincronizarlas más adelante.</>
+                      )}
                     </div>
                     <button
                       type="button"
