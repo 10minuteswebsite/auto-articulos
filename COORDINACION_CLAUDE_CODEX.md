@@ -4735,6 +4735,34 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Bitácora de continuidad — header del Hub e impersonificación — 2026-10-07
+
+El header visible en Auto Artículos debe ser el mismo contrato de navegación
+del Hub: marca LA SOLUCIÓN IA, Aplicaciones, Facturación, Perfil,
+Administración cuando corresponda, identidad de la cuenta y salida. No debe
+reemplazarse por un menú propio del producto ni por una variante visual
+encajonada.
+
+Cuando la sesión proviene de `/auth/hub`, el header se renderiza en todas las
+rutas protegidas del producto. Si existe contexto de impersonificación, la
+franja amarilla debe permanecer arriba del header durante toda la navegación y
+mostrar tenant seleccionado, administrador real y acceso para gestionar desde
+el Hub. El menú operativo de Auto Artículos continúa debajo y no se elimina.
+
+Corrección aplicada en `HubPlatformHeader.tsx` y `dashboard/layout.tsx`:
+
+- Se unificó la estructura visual con el header del Hub.
+- La franja y el header salieron del contenedor interno del producto para
+  ocupar siempre la parte superior de la página.
+- Se conserva la condición `hubAuthenticated`; el login nativo antiguo no
+  recibe el menú Hub.
+- Se conserva `actingAdmin` derivado de los headers firmados por middleware.
+
+Validación: typecheck web OK y build de producción OK. Antes de desplegar,
+probar Hub → impersonificar tenant → abrir Auto Artículos → navegar a una ruta
+interna, y comprobar que la franja y el header siguen visibles. No modificar el
+menú propio del producto ni el contrato de sesión sin actualizar esta entrada.
+
 ## Menús separados e impersonificación persistente — 2026-10-07
 
 - Se corrigió el contrato de sesión para distinguir el login nativo antiguo

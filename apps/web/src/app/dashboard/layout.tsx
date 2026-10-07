@@ -43,17 +43,18 @@ export default async function DashboardLayout({
   }
 
   return (
-    <main
-      className="dashboard-main shell"
-      style={{
-        maxWidth: 1120,
-        margin: "0 auto",
-        padding: "28px 24px 64px",
-        boxSizing: "border-box",
-        position: "relative",
-      }}
-    >
+    <>
       {hubAuthenticated && <HubPlatformHeader user={user} actingAdmin={actingAdmin} />}
+      <main
+        className="dashboard-main shell"
+        style={{
+          maxWidth: 1120,
+          margin: "0 auto",
+          padding: "28px 24px 64px",
+          boxSizing: "border-box",
+          position: "relative",
+        }}
+      >
       <style>{`
         @media (max-width: 639px) {
           .topbar { display: flex !important; margin-bottom: 12px !important; align-items: center !important; }
@@ -172,6 +173,7 @@ export default async function DashboardLayout({
           <FloatingAssistant />
         </>
       )}
-    </main>
+      </main>
+    </>
   );
 }

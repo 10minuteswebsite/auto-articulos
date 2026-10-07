@@ -1,5 +1,4 @@
 import { HUB_URL } from "@/lib/product-routes";
-import { displayName } from "@/lib/current-user";
 import LogoutButton from "@/components/LogoutButton";
 import StopImpersonationButton from "@/components/StopImpersonationButton";
 
@@ -17,45 +16,43 @@ export default function HubPlatformHeader({ user, actingAdmin }: { user: Platfor
   return (
     <>
       {actingAdmin && (
-        <div role="status" aria-live="polite" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "10px 14px", marginBottom: 10, border: "1px solid #f2c078", borderRadius: 12, background: "#fff7e6", color: "#7a4100", fontSize: 13, fontWeight: 600 }}>
-          <span>Impersonificación activa: estás viendo la cuenta de {displayName(user)}. Administrador: {actingAdmin.email}.</span>
-          <a href={`${HUB_URL}/dashboard`} style={{ color: "#7a4100", textDecoration: "underline", whiteSpace: "nowrap" }}>Gestionar desde el Hub</a>
+        <div role="status" aria-live="polite" style={{ borderBottom: "1px solid #f2dfb2", background: "#fffbea", color: "#6f3f08" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", maxWidth: 1280, margin: "0 auto", padding: "10px 24px", fontSize: 14 }}>
+            <span><strong>Impersonificación activa.</strong> Estás viendo el Hub como el tenant seleccionado. Administrador: {actingAdmin.email}.</span>
+            <a href={`${HUB_URL}/dashboard`} style={{ border: "1px solid #f2c078", borderRadius: 9, background: "#ffffff", color: "#6f3f08", padding: "7px 12px", fontSize: 12, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>Gestionar desde el Hub</a>
+          </div>
         </div>
       )}
       <header
         aria-label="Navegación de LA SOLUCIÓN IA"
         style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 18,
-        flexWrap: "wrap",
-        padding: "14px 18px",
-        marginBottom: 18,
-        border: "1px solid #e5e5ea",
-        borderRadius: 16,
-        background: "linear-gradient(110deg, #f7f7fb 0%, #ffffff 58%, #f2f7ff 100%)",
-        boxShadow: "0 2px 12px rgba(29, 29, 31, 0.04)",
+          borderBottom: "1px solid #e5e5ea",
+          background: "rgba(255, 255, 255, 0.92)",
+          backdropFilter: "blur(18px)",
+          position: "relative",
+          zIndex: 30,
       }}
-    >
-      <a href={`${HUB_URL}/dashboard`} style={{ color: "#1d1d1f", textDecoration: "none", minWidth: 190 }}>
-        <strong style={{ display: "block", fontSize: 17, letterSpacing: "-0.02em" }}>LA SOLUCIÓN IA</strong>
-        <span style={{ display: "block", marginTop: 2, color: "#6e6e73", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Plataforma</span>
-      </a>
-      <nav aria-label="Secciones del Hub" style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", flex: 1 }}>
-        <a href={`${HUB_URL}/dashboard`} style={navLinkStyle}>Aplicaciones</a>
-        <a href={`${HUB_URL}/billing`} style={navLinkStyle}>Facturación</a>
-        <a href={`${HUB_URL}/profile`} style={navLinkStyle}>Perfil</a>
-        {canManage && <a href={`${HUB_URL}/admin`} style={navLinkStyle}>Administración</a>}
-      </nav>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-        <div style={{ textAlign: "right", minWidth: 120 }}>
-          <span style={{ display: "block", color: "#6e6e73", fontSize: 12 }}>{displayName(user)}</span>
-          {actingAdmin && <span style={{ display: "block", color: "#8a4b08", fontSize: 11, fontWeight: 700 }}>Sesión administrada</span>}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap", maxWidth: 1280, margin: "0 auto", padding: "14px 24px" }}>
+          <a href={`${HUB_URL}/dashboard`} style={{ display: "flex", alignItems: "center", gap: 12, color: "#1d1d1f", textDecoration: "none", minWidth: 190 }}>
+            <span aria-hidden="true" style={{ display: "flex", height: 36, width: 36, alignItems: "center", justifyContent: "center", borderRadius: 12, background: "#050505", color: "#ffffff", fontSize: 13, fontWeight: 700 }}>L</span>
+            <strong style={{ fontSize: 16, letterSpacing: "-0.02em" }}>LA SOLUCIÓN IA</strong>
+          </a>
+          <nav aria-label="Secciones del Hub" style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap", flex: 1 }}>
+            <a href={`${HUB_URL}/dashboard`} style={{ ...navLinkStyle, background: "#f1f1f3", color: "#1d1d1f" }}>Aplicaciones</a>
+            <a href={`${HUB_URL}/billing`} style={navLinkStyle}>Facturación</a>
+            <a href={`${HUB_URL}/profile`} style={navLinkStyle}>Perfil</a>
+            {canManage && <a href={`${HUB_URL}/admin`} style={{ ...navLinkStyle, border: "1px solid #e5e5ea" }}>Administración</a>}
+          </nav>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <div style={{ textAlign: "right", minWidth: 120 }}>
+              <span style={{ display: "block", color: "#6e6e73", fontSize: 12 }}>{user.email}</span>
+              {actingAdmin && <span style={{ display: "block", color: "#8a4b08", fontSize: 11, fontWeight: 700 }}>Sesión administrada</span>}
+            </div>
+            {actingAdmin && <StopImpersonationButton />}
+            <LogoutButton />
+          </div>
         </div>
-        {actingAdmin && <StopImpersonationButton />}
-        <LogoutButton />
-      </div>
       </header>
     </>
   );
