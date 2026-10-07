@@ -16,8 +16,10 @@ test("los consumidores sociales listos pueden usar Composio cuando la vía está
   assert.equal(COMPOSIO_CONSUMER_READY.google_analytics, false);
   assert.equal(COMPOSIO_CONSUMER_READY.facebook, true);
   assert.equal(COMPOSIO_CONSUMER_READY.instagram, true);
+  assert.equal(COMPOSIO_CONSUMER_READY.pinterest, true);
   assert.equal(methodFor({ app: "facebook", moduleEnabled: false, routeIsComposio: true }), "COMPOSIO");
   assert.equal(methodFor({ app: "instagram", moduleEnabled: false, routeIsComposio: true }), "COMPOSIO");
+  assert.equal(methodFor({ app: "pinterest", moduleEnabled: true, routeIsComposio: false }), "COMPOSIO");
   assert.equal(methodFor({ app: "google_search_console", moduleEnabled: false, routeIsComposio: true }), "OWN");
 });
 

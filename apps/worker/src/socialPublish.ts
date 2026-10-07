@@ -390,8 +390,12 @@ async function normalizeSocialImage(imageUrl: string, targetAspect = 3 / 4): Pro
       }
       const cropLeft = left + Math.max(0, Math.round((trimmedWidth - cropWidth) / 2));
       const cropTop = top + Math.max(0, Math.round((trimmedHeight - cropHeight) / 2));
-      const outputWidth = targetAspect > 1 ? 1200 : targetAspect < 0.65 ? 1080 : 900;
-      const outputHeight = targetAspect > 1 ? 900 : targetAspect < 0.65 ? 1920 : 1200;
+      // Pinterest recomienda 2:3; conservar ese formato evita que la OG
+      // apaisada llegue al Pin sin adaptar. Los demás destinos mantienen sus
+      // formatos históricos.
+      const isPinterest = Math.abs(targetAspect - 2 / 3) < 0.01;
+      const outputWidth = targetAspect > 1 ? 1200 : isPinterest ? 1000 : targetAspect < 0.65 ? 1080 : 900;
+      const outputHeight = targetAspect > 1 ? 900 : isPinterest ? 1500 : targetAspect < 0.65 ? 1920 : 1200;
       normalized = await sharp(source)
         .extract({ left: cropLeft, top: cropTop, width: cropWidth, height: cropHeight })
         .resize(outputWidth, outputHeight, { fit: "fill" })
@@ -820,12 +824,14 @@ async function processPinterestJob(job: {
     await validateArticleUrl(job.articleUrl);
     const composioImage = await getPinterestImage(job.titleId || job.id, job.articleUrl);
     if (!composioImage) throw new Error("El artículo no tiene una imagen OG pública para Pinterest.");
+    const pinterestImage = await normalizeSocialImage(composioImage, 2 / 3);
+    const description = truncatePlainCaption(job.suggestedText.replace("[ENLACE]", "").trim(), 500) || job.articleTitle.slice(0, 500);
     const pin = await composioPinterestPin(composio, {
       boardId: composio.pageId,
       title: job.articleTitle,
-      description: pinterestDescription(job.articleTitle, job.suggestedText),
+      description,
       link: job.articleUrl,
-      imageUrl: composioImage,
+      imageUrl: pinterestImage,
     });
     await prisma.socialOpportunity.update({
       where: { id: job.id },

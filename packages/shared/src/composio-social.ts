@@ -38,7 +38,7 @@ export async function composioPinterestPin(
     board_id: input.boardId,
     media_source: { source_type: "image_url", url: input.imageUrl },
     title: input.title.slice(0, 100),
-    description: input.description.slice(0, 800),
+    description: input.description.slice(0, 500),
     link: input.link,
   });
   const id = findPinId(created);
