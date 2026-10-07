@@ -4735,6 +4735,26 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Despliegue producción — header Hub e impersonificación — 2026-10-07
+
+- Commit desplegado: `9f0aa3cc` (`fix: align product header with hub navigation`).
+- Proyecto confirmado antes de publicar: Vercel `la-solucion-web/auto-articulos-web`
+  (`prj_xJawH8OSMKr7aaRnfhYNbJLPyKq6`), con raíz configurada en `apps/web`.
+- Deployment de producción: `dpl_4zR7YaSC55fNr2B26dyNsd2yGvi4`.
+- Estado Vercel: `READY`; alias verificados: `articulos.lasolucionweb.com`,
+  `articulos.lasolucionweb.net`, `redes.lasolucionweb.com`, `redes.lasolucionweb.net`,
+  `seototal.lasolucionweb.com` y `seototal.lasolucionweb.net`.
+- Verificación posterior: el dominio de producción respondió HTTP 307 en
+  `/dashboard`, comportamiento esperado para una ruta protegida sin cookie en la
+  comprobación automatizada. El build remoto completó TypeScript y generó 87 páginas/rutas.
+- El cambio conserva el contrato: el menú del Hub y la franja de impersonificación se
+  muestran únicamente cuando existe autenticación de Hub; los usuarios del login nativo
+  no reciben enlaces del Hub inválidos.
+- No se tocaron datos, secretos, migraciones ni el proyecto `agente-enrutador`.
+
+Estado: **DESPLEGADO EN PRODUCCIÓN Y VERIFICADO**.
+Responsable: Codex.
+
 ## Bitácora de continuidad — header del Hub e impersonificación — 2026-10-07
 
 El header visible en Auto Artículos debe ser el mismo contrato de navegación
