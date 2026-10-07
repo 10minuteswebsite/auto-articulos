@@ -4735,6 +4735,27 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Menús separados e impersonificación persistente — 2026-10-07
+
+- Se corrigió el contrato de sesión para distinguir el login nativo antiguo
+  del acceso emitido por el Hub.
+- El `HubPlatformHeader` solo se renderiza cuando existe un contexto Hub
+  firmado y válido. El menú operativo `DashboardNav` permanece independiente,
+  por lo que los usuarios antiguos conservan su aplicación sin recibir enlaces
+  del Hub que no pueden usar.
+- El lanzamiento Hub→producto transporta el administrador real únicamente
+  cuando existe impersonificación. Auto Artículos valida la firma, liga el
+  contexto al usuario efectivo y muestra un aviso persistente con el tenant y
+  el administrador.
+- Un login nativo borra el contexto Hub anterior para evitar estados cruzados.
+- El logout también borra el contexto Hub y la impersonificación local, evitando
+  que una sesión posterior herede un aviso administrativo anterior.
+- La parte de base de datos vive en la migración del Hub
+  `20261007190000_product_launch_impersonation_context.sql`; debe aplicarse
+  antes del despliegue coordinado del código.
+- Validaciones: `git diff --check`, typecheck de ambas aplicaciones y builds de
+  Hub Cloudflare y Auto Artículos OK. Producción no se tocó en este bloque.
+
 ## Cierre de reparación Hub ↔ Auto Artículos — 2026-10-07
 
 - **Causa raíz confirmada:** el deployment de Auto Artículos incluía el campo

@@ -2,6 +2,7 @@ const SESSION_COOKIE = "auto_articulos_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 días
 
 const IMPERSONATION_COOKIE = "auto_articulos_impersonation";
+const HUB_SESSION_CONTEXT_COOKIE = "auto_articulos_hub_context";
 // Más corta que la sesión normal: es un estado de acceso elevado (un admin
 // operando la cuenta de otro usuario), así que conviene que expire sola
 // aunque el admin no la cierre explícitamente.
@@ -141,4 +142,46 @@ export async function verifyImpersonationToken(
   return valid ? { adminUserId, targetUserId } : null;
 }
 
-export { SESSION_COOKIE, SESSION_TTL_MS, IMPERSONATION_COOKIE, IMPERSONATION_TTL_MS, MCP_ACCESS_TOKEN_TTL_MS };
+export type HubSessionContext = {
+  targetUserId: string;
+  actorUserId: string | null;
+  actorEmail: string | null;
+  actorName: string | null;
+};
+
+/** Contexto firmado que distingue Hub de login nativo y conserva el aviso administrativo. */
+export async function createHubSessionContextToken(context: HubSessionContext): Promise<string> {
+  const encoded = toBase64Url(new TextEncoder().encode(JSON.stringify(context)).buffer);
+  const payload = `hubctx.${encoded}`;
+  const signatureBuf = await crypto.subtle.sign("HMAC", await getKey(), new TextEncoder().encode(payload));
+  return `${payload}.${toBase64Url(signatureBuf)}`;
+}
+
+export async function verifyHubSessionContextToken(token: string | undefined | null): Promise<HubSessionContext | null> {
+  if (!token) return null;
+  const parts = token.split(".");
+  if (parts.length !== 3 || parts[0] !== "hubctx") return null;
+  const [, encoded, signature] = parts;
+  const payload = `hubctx.${encoded}`;
+  const valid = await crypto.subtle.verify(
+    "HMAC",
+    await getKey(),
+    fromBase64Url(signature).buffer as ArrayBuffer,
+    new TextEncoder().encode(payload),
+  );
+  if (!valid) return null;
+  try {
+    const parsed = JSON.parse(new TextDecoder().decode(fromBase64Url(encoded))) as Partial<HubSessionContext>;
+    if (typeof parsed.targetUserId !== "string" || !parsed.targetUserId) return null;
+    return {
+      targetUserId: parsed.targetUserId,
+      actorUserId: typeof parsed.actorUserId === "string" ? parsed.actorUserId : null,
+      actorEmail: typeof parsed.actorEmail === "string" ? parsed.actorEmail : null,
+      actorName: typeof parsed.actorName === "string" ? parsed.actorName : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export { SESSION_COOKIE, SESSION_TTL_MS, IMPERSONATION_COOKIE, IMPERSONATION_TTL_MS, HUB_SESSION_CONTEXT_COOKIE, MCP_ACCESS_TOKEN_TTL_MS };

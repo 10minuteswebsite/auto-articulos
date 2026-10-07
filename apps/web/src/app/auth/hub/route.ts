@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "node:crypto";
 import { prisma } from "@auto-articulos/db";
-import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
+import { createHubSessionContextToken, createSessionToken, HUB_SESSION_CONTEXT_COOKIE, SESSION_COOKIE } from "@/lib/session";
 
 export const runtime = "nodejs";
 
@@ -47,6 +47,9 @@ export async function GET(request: NextRequest) {
     email?: string;
     platform_role?: string;
     entitlement_status?: string;
+    acting_admin_user_id?: string | null;
+    acting_admin_email?: string | null;
+    acting_admin_name?: string | null;
     error?: string;
   };
 
@@ -87,10 +90,23 @@ export async function GET(request: NextRequest) {
   }
 
   const token = await createSessionToken(user.id);
+  const hubContextToken = await createHubSessionContextToken({
+    targetUserId: user.id,
+    actorUserId: launch.acting_admin_user_id ?? null,
+    actorEmail: launch.acting_admin_email ?? null,
+    actorName: launch.acting_admin_name ?? null,
+  });
   const destination = appSlug === "auto-redes" ? "/dashboard/oportunidades-redes" : "/dashboard";
   const response = NextResponse.redirect(new URL(destination, request.url), 303);
   response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
   response.cookies.set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+  response.cookies.set(HUB_SESSION_CONTEXT_COOKIE, hubContextToken, {
     httpOnly: true,
     secure: true,
     sameSite: "lax",

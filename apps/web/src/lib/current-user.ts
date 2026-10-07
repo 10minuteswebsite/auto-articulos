@@ -101,6 +101,16 @@ export async function requireAdmin() {
  */
 export async function getActingAdmin() {
   const headerList = await headers();
+  const hubActorEmail = headerList.get("x-hub-acting-admin-email");
+  if (headerList.get("x-hub-authenticated") === "1" && hubActorEmail) {
+    return {
+      id: headerList.get("x-hub-acting-admin-id") ?? "hub-admin",
+      name: headerList.get("x-hub-acting-admin-name"),
+      firstName: null,
+      lastName: null,
+      email: hubActorEmail,
+    };
+  }
   const adminId = headerList.get("x-acting-admin-id");
   if (!adminId) return null;
   return prisma.user.findUnique({
@@ -115,5 +125,6 @@ export async function getSessionContext() {
     getCurrentUser(),
     getActingAdmin(),
   ]);
-  return { user, actingAdmin };
+  const requestHeaders = await headers();
+  return { user, actingAdmin, hubAuthenticated: requestHeaders.get("x-hub-authenticated") === "1" };
 }

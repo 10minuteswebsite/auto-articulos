@@ -15,9 +15,16 @@ export default function HubPlatformHeader({ user, actingAdmin }: { user: Platfor
   const canManage = user.role === "admin" || Boolean(actingAdmin);
 
   return (
-    <header
-      aria-label="Navegación de LA SOLUCIÓN IA"
-      style={{
+    <>
+      {actingAdmin && (
+        <div role="status" aria-live="polite" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "10px 14px", marginBottom: 10, border: "1px solid #f2c078", borderRadius: 12, background: "#fff7e6", color: "#7a4100", fontSize: 13, fontWeight: 600 }}>
+          <span>Impersonificación activa: estás viendo la cuenta de {displayName(user)}. Administrador: {actingAdmin.email}.</span>
+          <a href={`${HUB_URL}/dashboard`} style={{ color: "#7a4100", textDecoration: "underline", whiteSpace: "nowrap" }}>Gestionar desde el Hub</a>
+        </div>
+      )}
+      <header
+        aria-label="Navegación de LA SOLUCIÓN IA"
+        style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -49,7 +56,8 @@ export default function HubPlatformHeader({ user, actingAdmin }: { user: Platfor
         {actingAdmin && <StopImpersonationButton />}
         <LogoutButton />
       </div>
-    </header>
+      </header>
+    </>
   );
 }
 

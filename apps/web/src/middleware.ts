@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   IMPERSONATION_COOKIE,
+  HUB_SESSION_CONTEXT_COOKIE,
   SESSION_COOKIE,
   SESSION_TTL_MS,
   createSessionToken,
   verifyMcpAccessToken,
   verifyImpersonationToken,
+  verifyHubSessionContextToken,
   verifySessionToken,
 } from "./lib/session";
 import { applyCookie } from "./lib/shared-cookies";
@@ -125,6 +127,16 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", userId);
   requestHeaders.set("x-hub-product-slug", hubProductSlugForHost(request.nextUrl.hostname));
+
+  const hubContext = await verifyHubSessionContextToken(
+    request.cookies.get(HUB_SESSION_CONTEXT_COOKIE)?.value,
+  );
+  if (hubContext?.targetUserId === userId) {
+    requestHeaders.set("x-hub-authenticated", "1");
+    if (hubContext.actorUserId) requestHeaders.set("x-hub-acting-admin-id", hubContext.actorUserId);
+    if (hubContext.actorEmail) requestHeaders.set("x-hub-acting-admin-email", hubContext.actorEmail);
+    if (hubContext.actorName) requestHeaders.set("x-hub-acting-admin-name", hubContext.actorName);
+  }
 
   const impersonationToken = request.cookies.get(IMPERSONATION_COOKIE)?.value;
   const impersonation = await verifyImpersonationToken(impersonationToken);

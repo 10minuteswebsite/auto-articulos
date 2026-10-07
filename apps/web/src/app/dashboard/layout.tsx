@@ -22,7 +22,7 @@ export default async function DashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  const { user, actingAdmin } = await getSessionContext();
+  const { user, actingAdmin, hubAuthenticated } = await getSessionContext();
   const requestHeaders = await headers();
   const hostProduct = productOfHost(requestHeaders.get("host"));
   const productTitle = hostProduct === "ARTICULOS"
@@ -53,7 +53,7 @@ export default async function DashboardLayout({
         position: "relative",
       }}
     >
-      <HubPlatformHeader user={user} actingAdmin={actingAdmin} />
+      {hubAuthenticated && <HubPlatformHeader user={user} actingAdmin={actingAdmin} />}
       <style>{`
         @media (max-width: 639px) {
           .topbar { display: flex !important; margin-bottom: 12px !important; align-items: center !important; }
