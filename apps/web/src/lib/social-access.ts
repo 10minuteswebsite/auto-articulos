@@ -1,5 +1,6 @@
 import { prisma } from "@auto-articulos/db";
 import { hasLegacySocialModuleAccess } from "@auto-articulos/shared";
+import { canSeeSocialModule } from "./modules";
 
 /** Id del módulo en SYSTEM_MODULES (ver modules.ts); DashboardNav/ModuleGuard lo tratan aparte. */
 export const SOCIAL_MODULE_ID = "oportunidades-redes";
@@ -35,6 +36,10 @@ export async function canUseSocialModule(userId: string): Promise<boolean> {
 
 export type SocialModuleAccessUser = {
   role?: string | null;
+  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
   disabledModules?: string | null;
 } & SocialPublishingPermissionUser;
 
@@ -49,6 +54,7 @@ export type SocialModuleAccessUser = {
  * ya lo tenía.
  */
 export function hasSocialModuleAccess(user: SocialModuleAccessUser): boolean {
+  if (!canSeeSocialModule(user)) return false;
   return hasLegacySocialModuleAccess({
     role: user.role,
     disabledModules: user.disabledModules,

@@ -36,6 +36,10 @@ export async function hasProductAccess(
     where: { id: userId },
     select: {
       role: true,
+      name: true,
+      firstName: true,
+      lastName: true,
+      email: true,
       disabledModules: true,
       allowInstagramPublishing: true,
       allowFacebookPublishing: true,

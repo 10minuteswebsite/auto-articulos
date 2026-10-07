@@ -103,6 +103,24 @@ export const GLOBAL_DISABLED_MODULES_KEY = "global_disabled_modules";
 export type ModuleAccessOverride = "inherit" | "enabled" | "disabled";
 export type ModuleAccessOverrides = Record<string, ModuleAccessOverride>;
 
+/** Redes queda reservada temporalmente a administradores y a las dos cuentas piloto. */
+export function canSeeSocialModule(user: {
+  role?: string | null;
+  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+}): boolean {
+  if (user.role === "admin") return true;
+  const identity = [user.name, user.firstName, user.lastName, user.email]
+    .filter(Boolean)
+    .join(" ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es");
+  return identity.includes("zulmad") || identity.includes("lorena alvarez");
+}
+
 /**
  * Obtiene los módulos deshabilitados globalmente (para todos los usuarios regulares).
  */
@@ -170,7 +188,7 @@ export function parseUserDisabledModules(rawDisabledModules?: string | null): st
  * Los administradores no tienen módulos bloqueados para poder realizar tareas de soporte y mantenimiento.
  */
 export function getEffectiveDisabledModules(
-  user: { role?: string; disabledModules?: string | null },
+  user: { role?: string; name?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; disabledModules?: string | null },
   globalDisabled: string[],
 ): string[] {
   if (user.role === "admin") {
@@ -188,6 +206,7 @@ export function getEffectiveDisabledModules(
   for (const mod of SYSTEM_MODULES) {
     if (mod.optIn && overrides[mod.id] !== "enabled") effective.add(mod.id);
   }
+  if (!canSeeSocialModule(user)) effective.add("oportunidades-redes");
   return Array.from(effective);
 }
 

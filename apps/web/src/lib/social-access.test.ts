@@ -29,8 +29,8 @@ test("los administradores conservan acceso para soporte", () => {
 test("módulo: sin decisión del administrador, se mantiene el comportamiento histórico", () => {
   assert.equal(hasSocialModuleAccess({ role: "user" }), false);
   assert.equal(
-    hasSocialModuleAccess({ role: "user", allowBloggerPublishing: true }),
-    true,
+    hasSocialModuleAccess({ role: "user", name: "Hector Travasillo", allowBloggerPublishing: true }),
+    false,
   );
 });
 
@@ -38,6 +38,7 @@ test("módulo: 'Habilitado' lo muestra aunque no tenga ninguna red aprobada toda
   assert.equal(
     hasSocialModuleAccess({
       role: "user",
+      name: "Lorena Alvarez",
       disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }),
     }),
     true,
