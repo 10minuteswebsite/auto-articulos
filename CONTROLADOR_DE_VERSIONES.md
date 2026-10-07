@@ -4087,3 +4087,58 @@ programada diaria de propagación (2026-10-06).
   respuesta contiene cuentas mixtas, algunas sin propiedades.
 - Deployment productivo: commit `bf680a6`, estado Vercel `success`.
 - Sin schema ni migraciones. Estado: desplegado y cerrado.
+
+## Versión — 2026-10-02 (documentado y cerrado en Coordinación el 2026-10-06) — incidente "Analizar contenido" caído por migración sin aplicar (cuenta de Alfonzo Lobo)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("Incidente «Analizar contenido» caído (cuenta
+de Alfonzo Lobo) — Claude — 2026-10-02 — CERRADO", commit `45ccae7`) por la tarea programada
+diaria de propagación (2026-10-07).
+
+- **Síntoma:** `/dashboard/oportunidades` → «Analizar contenido» devolvía «No se pudo completar
+  el análisis.» para TODAS las cuentas (456 + 144 errores en 24 h), no solo Alfonzo Lobo.
+- **Causa real (logs de producción de Vercel):** `PrismaClientKnownRequestError P2022: The
+  column SearchIntegration.lastAccessErrorAt does not exist` (y lo mismo para
+  `lastAccessError`) en `POST /api/opportunities`. El PR #282 (2026-10-01, aviso rojo de
+  reconexión de Search Console) agregó esas columnas al schema y creó la migración
+  `20261001150000_add_search_integration_access_error`, pero **esa migración nunca se aplicó en
+  producción**. No fue causado por la transición al HUB ni por `requireProductAccess`.
+- **Arreglo:** Milton aplicó a mano en Supabase, el 2026-10-02, SQL aditivo e idempotente
+  (`ALTER TABLE "SearchIntegration" ADD COLUMN IF NOT EXISTS "lastAccessErrorAt" TIMESTAMP(3);`
+  y lo mismo para `lastAccessError` como `TEXT`), sin redespliegue ni cambios de código.
+- **Verificado en producción:** tras el SQL, `POST /api/opportunities` respondió 200 sin
+  errores de columna faltante; Milton confirmó con la cuenta de Alfonzo. Un barrido de 24 h no
+  mostró ninguna otra columna o tabla faltante.
+- **Lección registrada en Coordinación:** mientras `migrate.yml` siga bloqueado por las
+  columnas del HUB (ver alerta vigente arriba en este mismo documento y en
+  `REPARADOR_DEL_ARBOL_PRINCIPAL.md`), toda migración nueva debe aplicarse a mano y anotarse
+  aquí, o la ruta que la use cae con 500 sin mensaje.
+- Estado: CERRADO Y ARCHIVADO. Sin acción destructiva, migración automática ni deploy
+  ejecutados por esta tarea de propagación (solo documentación).
+
+## Versión — 2026-10-06 — reparación de typecheck/build web (PR #487)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("REPARACIÓN DE BUILD WEB — 2026-10-06",
+identidad CODEX - GPT-5 - REPARADOR DEL ARBOL PRINCIPAL, commit `26d5a3b` fusionado vía PR #487
+/ merge commit `483cf31`) por la tarea programada diaria de propagación (2026-10-07).
+
+- Rama aislada: `codex/reparar-typecheck-web-20261006` (base `origin/main`; verificado con
+  `git merge-base --is-ancestor` que ya es ancestro de `origin/main`, no es una reserva activa).
+- Corrigió dos errores ajenos a Blogger: `apps/web/src/lib/modules.test.ts` tenía un bloque de
+  test sin cerrar (faltaba `});`); `apps/web/src/app/dashboard/usuarios/page.tsx` referenciaba
+  el estado inexistente `savingUserModules`, sustituido por el estado agregado existente
+  `savingAny`.
+- Alcance excluido explícitamente: Blogger, Composio, PostPeer, callbacks, secretos,
+  credenciales, schema Prisma, migraciones, middleware y `vercel.json`.
+- Validación en el worktree original: `prisma generate` correcto; typecheck web correcto;
+  build worker correcto; pruebas worker 20/20 correctas. Pruebas web 186/187 (el único fallo es
+  una expectativa antigua sobre `oportunidades-redes`, ya deshabilitado intencionalmente en
+  `origin/main` desde el commit `5f10b56` del 2026-10-05). El build web no pudo completarse en
+  ese entorno por un error de permisos al crear un proceso/puerto interno de Turbopack
+  (`Operation not permitted`), no por estos dos archivos.
+- Según la propia entrada de Coordinación, el commit **no se consideraba listo para
+  producción** hasta repetir el build web en un entorno con permisos completos. Pese a eso, el
+  commit `26d5a3b` quedó fusionado a `origin/main` vía PR #487 (merge `483cf31`). Esta tarea de
+  propagación no tiene acceso a Vercel para confirmar si el build sí completó en el entorno de
+  CI/CD real ni si hay un deployment productivo posterior verificado — queda sin confirmar en
+  ningún documento maestro revisado.
+- Sin schema ni migraciones. No hubo deploy ejecutado por esta tarea de propagación.
