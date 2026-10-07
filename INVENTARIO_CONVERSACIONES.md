@@ -1892,3 +1892,39 @@ transcribe aquí para no duplicar):
   (configuración Vercel), CERRADO Y ARCHIVADO. Sin agente específico citado en la entrada de
   Coordinación (cerrada directamente por Milton); se registra aquí solo para que el nombre de la
   conversación quede en el historial.
+
+## Addendum — 2026-10-07 (tarea programada diaria de propagación)
+
+**Parte A:** sin cambios. Se verificó en vivo (`git worktree list` en este entorno; no hay
+ningún worktree abierto además del de esta misma tarea) y con `git fetch` + `git merge-base
+--is-ancestor` que la única rama nueva mencionada en el rango revisado de Coordinación
+(`0498b99..origin/main`), `codex/reparar-typecheck-web-20261006`, ya es ancestro de
+`origin/main` (fusionada vía PR #487) — **no es una reserva activa**. Detalle de despliegue en
+`CONTROLADOR_DE_VERSIONES.md`.
+
+**Parte B — nombres de conversación nuevos encontrados en `COORDINACION_CLAUDE_CODEX.md`** en
+el rango `0498b99..origin/main` (detalle técnico completo en Coordinación y, para las ya
+propagadas, en `CONTROLADOR_DE_VERSIONES.md`; no se transcribe aquí para no duplicar):
+
+- `[Claude] - Incidente «Analizar contenido» caído (cuenta de Alfonzo Lobo)` — 2026-10-02,
+  commit de corrección manual en Supabase (sin commit de código), documentado en Coordinación
+  vía commit `45ccae7` (2026-10-06). CERRADO Y ARCHIVADO.
+- `[Codex] - AUDITORÍA ENLACES HISTORIAL TODAS LAS REDES` — 2026-10-06. Revisó los enlaces de
+  Historial de Threads, X, LinkedIn, Facebook, Instagram, Pinterest, Tumblr, Bluesky, DEV.to,
+  Blogger y Google Business; X y LinkedIn pasaron a usar `socialPostUrl` igual que Threads.
+- `[Codex] - HISTORIAL ENLACE THREADS MALO` — 2026-10-06. Corrigió el dominio de Threads en
+  `social-post-url.ts` (de `threads.net` a `threads.com`) y quitó la construcción manual de URL
+  en `historial/page.tsx`.
+- `[Codex - GPT-5 - REPARADOR DEL ARBOL PRINCIPAL] - REPARACIÓN DE BUILD WEB` — 2026-10-06, PR
+  #487 (merge `483cf31`), ya propagada con el detalle completo en `CONTROLADOR_DE_VERSIONES.md`.
+
+**Duda sin resolver, anotada también en `COORDINACION_CLAUDE_CODEX.md` por esta misma tarea
+(2026-10-07):** la entrada de Coordinación "Cola de producción — enlaces de Historial —
+2026-10-06" dice textualmente que la corrección de enlaces queda "únicamente en el worktree
+local: no subir, no crear PR y no desplegar todavía". Sin embargo, el commit `4ff6d9a` ("Codex
+worktree snapshot: startup-cleanup"), que ya está fusionado en `origin/main`, modifica
+`apps/web/src/app/dashboard/historial/page.tsx` y `apps/web/src/lib/social-post-url.ts` con
+exactamente esa corrección (Threads/X/LinkedIn vía `socialPostUrl`, dominio `threads.com`). Esta
+tarea de propagación no resuelve la contradicción ni toca `apps/web/src/content/manual-usuario.ts`
+por este motivo — queda para que Milton confirme si el cambio está realmente en producción o si
+falta revertirlo/aclararlo.
