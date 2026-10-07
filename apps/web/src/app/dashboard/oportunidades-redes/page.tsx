@@ -447,7 +447,7 @@ export default function OportunidadesRedesPage() {
                   disabled={generatingAll || generatingNetwork !== null}
                   style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginBottom: 16 }}
                 >
-                  {generatingAll ? "Generando para todas las redes..." : "Generar 1 por cada red (todas)"}
+                  {generatingAll ? "Generando propuestas..." : "Generar propuestas para redes y blogs"}
                 </button>
                 <div>
                 {([

@@ -493,6 +493,29 @@ async function getRehostedImageForTumblr(titleId: string, articleUrl: string): P
   }
 }
 
+async function getPinterestImage(titleId: string, articleUrl: string): Promise<string | null> {
+  const ogImageUrl = await getArticleOpenGraphImage(articleUrl);
+  if (!ogImageUrl) return null;
+  const response = await fetchWithRetry(ogImageUrl, { signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error(`No se pudo descargar la imagen OG para Pinterest (HTTP ${response.status}).`);
+  const normalized = await sharp(Buffer.from(await response.arrayBuffer()))
+    .rotate()
+    .resize(1000, 1500, { fit: "cover", position: "centre" })
+    .jpeg({ quality: 90, mozjpeg: true })
+    .toBuffer();
+  const blob = await put(`pinterest/${titleId}-1000x1500.jpg`, normalized, {
+    access: "public",
+    contentType: "image/jpeg",
+    allowOverwrite: true,
+  });
+  return blob.url;
+}
+
+function pinterestDescription(title: string, caption: string): string {
+  const clean = truncatePlainCaption(caption.replace("[ENLACE]", "").trim(), 500);
+  return clean || title.slice(0, 500);
+}
+
 async function processThreadsJob(job: {
   id: string;
   userId: string;
@@ -795,12 +818,12 @@ async function processPinterestJob(job: {
   const composio = await getComposioSocialAccount(job.userId, "pinterest");
   if (composio?.pageId) {
     await validateArticleUrl(job.articleUrl);
-    const composioImage = await getArticleOpenGraphImage(job.articleUrl);
+    const composioImage = await getPinterestImage(job.titleId || job.id, job.articleUrl);
     if (!composioImage) throw new Error("El artículo no tiene una imagen OG pública para Pinterest.");
     const pin = await composioPinterestPin(composio, {
       boardId: composio.pageId,
       title: job.articleTitle,
-      description: truncatePlainCaption(job.suggestedText.replace("[ENLACE]", "").trim(), 500),
+      description: pinterestDescription(job.articleTitle, job.suggestedText),
       link: job.articleUrl,
       imageUrl: composioImage,
     });
@@ -819,12 +842,12 @@ async function processPinterestJob(job: {
   }
 
   await validateArticleUrl(job.articleUrl);
-  const imageUrl = await getArticleOpenGraphImage(job.articleUrl);
+  const imageUrl = await getPinterestImage(job.titleId || job.id, job.articleUrl);
   if (!imageUrl) throw new Error("El artículo no tiene una imagen OG pública para Pinterest.");
   // El Pin ya lleva el link del artículo en su propio campo `link` (abajo);
   // no hace falta repetirlo dentro del texto de la descripción, que tiene
   // su propio límite de 500 caracteres.
-  const description = truncatePlainCaption(job.suggestedText.replace("[ENLACE]", "").trim(), 500);
+  const description = pinterestDescription(job.articleTitle, job.suggestedText);
   const result = await createPinterestPin(decryptSecret(integration.accessTokenEncrypted), {
     boardId: integration.boardId,
     title: job.articleTitle,

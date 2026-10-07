@@ -198,11 +198,15 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
   // separado — GSC entrega URL completa, GA4 entrega solo el path, y sin
   // normalizar ambos a la misma forma desde el inicio sus puntajes quedaban
   // en dos entradas distintas del mapa y nunca se sumaban entre sí.
-  const scoreByPath = new Map<string, number>();
+  type SignalSource = "gsc" | "ga" | "bing";
+  type SignalBucket = Record<SignalSource, number>;
+  const signalsByPath = new Map<string, SignalBucket>();
   const queriesByPath = new Map<string, string[]>();
   let bingRowsForRanking: Array<{ query: string; clicks: number; impressions: number }> = [];
-  const addScore = (path: string, amount: number) => {
-    scoreByPath.set(path, (scoreByPath.get(path) ?? 0) + amount);
+  const addSignal = (source: SignalSource, path: string, amount: number) => {
+    const bucket = signalsByPath.get(path) ?? { gsc: 0, ga: 0, bing: 0 };
+    bucket[source] += Math.max(0, amount);
+    signalsByPath.set(path, bucket);
   };
 
   // 1) Google Search Console: impresiones/clics actuales + tendencia (mismo
@@ -257,7 +261,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
         const query = row.keys[1] ?? "";
         currentImpressionsByPath.set(path, (currentImpressionsByPath.get(path) ?? 0) + row.impressions);
         // Puntaje: impresiones + peso fuerte a clics reales.
-        addScore(path, row.impressions + row.clicks * 8);
+        addSignal("gsc", path, row.impressions + row.clicks * 8);
 
         if (query) {
           const perQuery = queryTotalsByPath.get(path) ?? new Map<string, number>();
@@ -269,7 +273,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
       // por página, no por fila, a diferencia del bloque de arriba).
       for (const [path, currentImpressions] of currentImpressionsByPath) {
         const previousImpressions = previousImpressionsByPath.get(path) ?? 0;
-        addScore(path, Math.max(0, currentImpressions - previousImpressions) * 2);
+        addSignal("gsc", path, Math.max(0, currentImpressions - previousImpressions) * 2);
       }
 
       for (const [path, perQuery] of queryTotalsByPath) {
@@ -291,7 +295,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
     const ga4 = await getGoogleAnalyticsSignals(userId);
     for (const row of ga4.rows) {
       if (!row.pagePath) continue;
-      addScore(pathnameOf(row.pagePath), row.sessions * 3 + row.activeUsers * 2);
+      addSignal("ga", pathnameOf(row.pagePath), row.sessions * 3 + row.activeUsers * 2);
     }
   } catch {
     // opcional, igual que en el resto del sistema.
@@ -315,7 +319,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
           const shared = [...bingTokens].filter((t) => pathTokens.has(t)).length;
           if (shared >= 2) bingBoost += bingRow.impressions;
         }
-        if (bingBoost > 0) addScore(path, bingBoost);
+        if (bingBoost > 0) addSignal("bing", path, bingBoost);
       }
     }
   } catch {
@@ -348,8 +352,36 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
         const shared = [...tokenizeForMatch(bingRow.query)].filter((token) => articleTokens.has(token)).length;
         if (shared >= 2) bingScore += bingRow.impressions + bingRow.clicks * 8;
       }
-      if (bingScore > 0) addScore(pathnameOf(article.articleUrl), bingScore);
+      if (bingScore > 0) addSignal("bing", pathnameOf(article.articleUrl), bingScore);
     }
+  }
+
+  // Las fuentes tienen escalas incomparables. Se normaliza cada fuente con
+  // min-max entre los artículos disponibles y luego se promedia únicamente
+  // entre las fuentes que aportaron datos para ese artículo. Así una fuente
+  // con números grandes no domina artificialmente y una fuente ausente no
+  // penaliza al artículo.
+  const normalizeSource = (source: SignalSource) => {
+    const values = articles
+      .map((article) => signalsByPath.get(pathnameOf(article.articleUrl!))?.[source] ?? 0)
+      .filter((value) => value > 0);
+    const min = values.length > 0 ? Math.min(...values) : 0;
+    const max = values.length > 0 ? Math.max(...values) : 0;
+    return (value: number) => max > min && value > 0 ? (value - min) / (max - min) : value > 0 ? 1 : 0;
+  };
+  const normalizedBySource = {
+    gsc: normalizeSource("gsc"),
+    ga: normalizeSource("ga"),
+    bing: normalizeSource("bing"),
+  };
+  const scoreByPath = new Map<string, number>();
+  for (const article of articles) {
+    const bucket = signalsByPath.get(pathnameOf(article.articleUrl!));
+    if (!bucket) continue;
+    const normalized = (["gsc", "ga", "bing"] as SignalSource[])
+      .filter((source) => bucket[source] > 0)
+      .map((source) => normalizedBySource[source](bucket[source]));
+    if (normalized.length > 0) scoreByPath.set(pathnameOf(article.articleUrl!), normalized.reduce((sum, value) => sum + value, 0) / normalized.length);
   }
 
   const ranked = articles
@@ -532,13 +564,16 @@ export async function POST(request: Request) {
     const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
     const limitedOut: string[] = [];
     const integrationsWithinLimit: string[] = [];
+    const remainingByPlatform = new Map<string, number>();
     for (const platform of integrations) {
       const raw = dailyLimits[platform];
       const limit = typeof raw === "number" && Number.isInteger(raw) && raw >= 0 ? raw : 1;
       const published = await prisma.socialOpportunity.count({
         where: { userId, platform, status: "published", publishedAt: { gte: dayStart } },
       });
-      if (published >= limit) limitedOut.push(platform);
+      const remaining = Math.max(0, limit - published);
+      remainingByPlatform.set(platform, remaining);
+      if (remaining === 0) limitedOut.push(platform);
       else integrationsWithinLimit.push(platform);
     }
 
@@ -642,7 +677,8 @@ export async function POST(request: Request) {
     const freshToday = availableNow.filter((article) => !wasUsedToday(article));
     // Hasta 3 candidatos por clic para dar más opciones sin saturar de pendientes.
     // Se aplica a todas las redes sociales (Threads, X, LinkedIn, Instagram, Pinterest, etc.)
-    const candidates = (freshToday.length > 0 ? freshToday : availableNow).slice(0, 3);
+    const maxRemaining = Math.max(...integrationsWithinLimit.map((platform) => remainingByPlatform.get(platform) ?? 1), 1);
+    const candidates = (freshToday.length > 0 ? freshToday : availableNow).slice(0, maxRemaining);
 
     if (candidates.length === 0) {
       // El mensaje viejo ("no hay artículos nuevos disponibles") sonaba a
@@ -669,6 +705,7 @@ export async function POST(request: Request) {
 
     for (const article of candidates) {
       for (const platform of integrationsWithinLimit) {
+        if ((remainingByPlatform.get(platform) ?? 0) <= 0) continue;
         const opportunityKey = `${article.id}:${normalizePlatform(platform)}`;
         if (activeKeys.has(opportunityKey)) continue;
 
@@ -686,17 +723,42 @@ export async function POST(request: Request) {
         profile,
       );
 
-        const opp = await prisma.socialOpportunity.create({
-          data: {
-            userId,
-            titleId: article.id,
-            articleTitle: article.finalTitle || article.text,
-            articleUrl: article.articleUrl || "",
-            platform,
-            suggestedText: copyText,
-            status: "pending",
-          },
+        // Serializa por usuario + URL + red/formato para que dos clics
+        // simultáneos no creen la misma oportunidad. Se mantiene dentro de
+        // una transacción y no requiere confiar solo en el estado local de
+        // activeKeys.
+        const lockKey = `${userId}:${article.articleUrl || article.id}:${platform}`;
+        const opp = await prisma.$transaction(async (tx) => {
+          await tx.$queryRawUnsafe("SELECT pg_advisory_xact_lock(hashtext($1))", lockKey);
+          const existing = await tx.socialOpportunity.findFirst({
+            where: {
+              userId,
+              platform,
+              status: { in: ["pending", "queued", "processing", "published"] },
+              OR: [
+                { titleId: article.id },
+                ...(article.articleUrl ? [{ articleUrl: article.articleUrl }] : []),
+              ],
+            },
+            select: { id: true },
+          });
+          if (existing) return null;
+          return tx.socialOpportunity.create({
+            data: {
+              userId,
+              titleId: article.id,
+              articleTitle: article.finalTitle || article.text,
+              articleUrl: article.articleUrl || "",
+              platform,
+              suggestedText: copyText,
+              status: "pending",
+            },
+          });
         });
+        if (!opp) {
+          activeKeys.add(opportunityKey);
+          continue;
+        }
 
         // La imagen la genera el worker (processNextOpportunityImage) en
         // background para no agotar el timeout de Vercel Functions con la
@@ -704,6 +766,7 @@ export async function POST(request: Request) {
 
         createdOpportunities.push(opp);
         activeKeys.add(opportunityKey);
+        remainingByPlatform.set(platform, (remainingByPlatform.get(platform) ?? 1) - 1);
       }
     }
 
