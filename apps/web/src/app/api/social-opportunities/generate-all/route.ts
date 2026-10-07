@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
 import { canUseSocialModule } from "@/lib/social-access";
 import { requireProductAccess } from "@/lib/require-product-access";
+import { POST as generateOpportunities } from "../generate/route";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,14 +20,18 @@ export async function POST(request: Request) {
     // carga las señales una vez y aplica los límites a todas las redes. X queda
     // fuera del producto actual; Google Business sí participa cuando aplica.
     const networks = ["threads", "linkedin", "instagram", "facebook-page", "pinterest", "tumblr", "bluesky", "blogger", "google-business"];
-    const res = await fetch(`${new URL(request.url).origin}/api/social-opportunities/generate`, {
+    // No hacer fetch contra la propia aplicación: en producción puede crear
+    // una segunda ejecución de Vercel que queda esperando o agota el tiempo.
+    // Reutilizamos la ruta directamente y conservamos la identidad del
+    // usuario mediante los mismos headers de la petición original.
+    const headers = new Headers(request.headers);
+    headers.set("Content-Type", "application/json");
+    const internalRequest = new Request(request.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        cookie: request.headers.get("cookie") ?? "",
-      },
+      headers,
       body: JSON.stringify({ networks }),
     });
+    const res = await generateOpportunities(internalRequest);
     const data = await res.json();
     if (!res.ok) return NextResponse.json(data, { status: res.status });
     return NextResponse.json(data);
