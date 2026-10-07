@@ -4735,6 +4735,27 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Cierre de reparación Hub ↔ Auto Artículos — 2026-10-07
+
+- **Causa raíz confirmada:** el deployment de Auto Artículos incluía el campo
+  `User.allowDevToPublishing`, pero la base de datos de producción no tenía la
+  columna ni la tabla `DevToIntegration`. El resultado era `Prisma P2022` en
+  `/auth/hub`, que impedía completar el acceso desde el Hub.
+- **Reparación aplicada:** se ejecutó la ruta segura
+  `safe_devto_integration=true` del workflow `migrate.yml` mediante GitHub
+  Actions, usando el secreto `DATABASE_URL` del entorno y sin exponerlo. No se
+  ejecutó `db push` genérico ni se modificaron secretos o código funcional.
+- **Ejecución:** workflow `37701675741` terminó en estado `success`.
+- **Verificación:** después de la migración, `GET /auth/hub` dejó de registrar
+  `P2022`; el lanzamiento autenticado desde el Hub abrió correctamente:
+  `https://articulos.lasolucionweb.net/dashboard` y
+  `https://redes.lasolucionweb.net/dashboard/oportunidades-redes`.
+- **Coordinación:** Codex liberó el lote de migración después de verificar ambos
+  productos. No queda un bloqueo de migraciones activo.
+- **Prevención:** futuras discrepancias de schema deben resolverse mediante una
+  migración idempotente y coordinada; no aplicar `prisma db push` genérico sobre
+  producción.
+
 ## 2026-10-07 — Reparación de acceso Hub: migración DEV.to pendiente
 
 - Capitán de migración: Codex. Motivo: sincronizar producción con
