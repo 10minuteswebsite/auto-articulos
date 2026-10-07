@@ -4735,6 +4735,18 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## 2026-10-07 — Reparación de acceso Hub: migración DEV.to pendiente
+
+- Capitán de migración: Codex. Motivo: sincronizar producción con
+  `allowDevToPublishing` para restaurar el acceso Hub ↔ Auto Artículos.
+- Evidencia: Vercel registró Prisma `P2022` porque falta
+  `User.allowDevToPublishing` en producción; la migración local es
+  `20260823173000_add_devto_integration`.
+- Se añadió al workflow `migrate.yml` la ruta explícita
+  `safe_devto_integration`, que ejecuta únicamente el SQL versionado mediante
+  `prisma db execute` usando Session pooler. No usa `db push --accept-data-loss`.
+- Aún no se ha aplicado la migración ni se ha desplegado código en este punto.
+
 ## Cierre Codex — corrección de retornos OAuth de conexiones — 2026-09-24
 
 - Commit desplegado: `67547d5bc60574dc4b15567b6fa7c86dd0b8c975` en `main`.

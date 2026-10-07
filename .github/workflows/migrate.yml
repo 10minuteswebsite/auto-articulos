@@ -28,6 +28,11 @@ on:
         required: false
         default: false
         type: boolean
+      safe_devto_integration:
+        description: "Aplicar únicamente la columna de permiso y tabla de la integración DEV.to"
+        required: false
+        default: false
+        type: boolean
       safe_client_business_locations:
         description: "Aplicar solo las columnas nuevas clientLocations/businessLocations, sin tocar nada mas del schema"
         required: false
@@ -129,6 +134,15 @@ jobs:
           npx prisma db execute \
             --url "$MIGRATION_DATABASE_URL" \
             --file packages/db/prisma/migrations/20260902150000_add_blogger_integration/migration.sql
+      - name: Aplicar migración segura de DEV.to
+        if: ${{ inputs.safe_devto_integration }}
+        shell: bash
+        run: |
+          MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"
+          MIGRATION_DATABASE_URL="${MIGRATION_DATABASE_URL/?pgbouncer=true/}"
+          npx prisma db execute \
+            --url "$MIGRATION_DATABASE_URL" \
+            --file packages/db/prisma/migrations/20260823173000_add_devto_integration/migration.sql
       - name: Aplicar migración segura de ubicaciones cliente/negocio
         if: ${{ inputs.safe_client_business_locations }}
         shell: bash
@@ -178,7 +192,7 @@ jobs:
             npx prisma db push --schema=packages/db/prisma/schema.prisma \
             --accept-data-loss
       - name: Aplicar migraciones con Session pooler
-        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_blogger_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.safe_postpeer_social_connections && !inputs.safe_hub_identity_mapping && !inputs.sync_hub_users && !inputs.force_sync }}
+        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_blogger_integration && !inputs.safe_devto_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.safe_postpeer_social_connections && !inputs.safe_hub_identity_mapping && !inputs.sync_hub_users && !inputs.force_sync }}
         shell: bash
         run: |
           MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"
