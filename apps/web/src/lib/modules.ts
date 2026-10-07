@@ -44,6 +44,7 @@ export const SYSTEM_MODULES: SystemModule[] = [
     label: MENU_NAMES.redes,
     href: "/dashboard/oportunidades-redes",
     description: "Distribución de contenido e ideas para redes sociales.",
+    optIn: true,
   },
   {
     id: "publicaciones-en-curso",

@@ -4748,6 +4748,21 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Codex — etiqueta de Redes por cuenta en Administración — 2026-10-07
+
+- Se ajustó `apps/web/src/app/dashboard/usuarios/page.tsx` para que el selector
+  del módulo `oportunidades-redes` muestre «Quitárselo a esta cuenta» para las
+  cuentas normales y conserve «Dárselo a esta cuenta» para administradores,
+  Zulmad y Lorena Alvarez.
+- El cambio es únicamente de interfaz; no modifica permisos individuales de
+  redes, schema, migraciones, datos ni producción.
+- Verificación: `git diff --check` OK. Typecheck pendiente porque este worktree
+  no contiene `node_modules`.
+
+Estado: PREPARADO LOCALMENTE; sin commit, PR ni deploy.
+
+Responsable: Codex.
+
 ## Codex — AUDITORÍA ENLACES HISTORIAL TODAS LAS REDES — 2026-10-06
 
 - Se revisaron los enlaces de Historial para Threads, X, LinkedIn, Facebook,

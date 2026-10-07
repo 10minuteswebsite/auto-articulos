@@ -66,10 +66,10 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
    * ninguna autorización sigue viendo el bloqueo histórico.
    */
   if (matchingModule?.id === "oportunidades-redes") {
-    const canEnterRedes = redesProductAccess
+    const canEnterRedes = !disabledModules.includes("oportunidades-redes") && (redesProductAccess
       ? redesProductAccess.allowed === true ||
         (redesProductAccess.reason === "NO_NETWORK_APPROVED" && socialPublishingApproved)
-      : socialPublishingApproved;
+      : socialPublishingApproved);
 
     if (!canEnterRedes) {
       return (

@@ -2057,6 +2057,16 @@ Estado: CERRADO, DESPLEGADO Y SIN PENDIENTES.
 - Sin cambios de schema, migraciones ni acciones destructivas.
 
 Estado: CERRADO, DESPLEGADO Y ARCHIVADO.
+
+## Cambios importantes — 2026-10-07 — etiqueta de Redes por cuenta
+
+- En Administración → Usuarios, el selector del módulo `oportunidades-redes`
+  ahora muestra «Quitárselo a esta cuenta» para cuentas normales.
+- Administradores, Zulmad y Lorena Alvarez conservan «Dárselo a esta cuenta».
+- Cambio solo visual en `apps/web/src/app/dashboard/usuarios/page.tsx`; no hay
+  cambios de datos, schema, migraciones, commit, PR ni deployment.
+- Verificación: `git diff --check` OK. Typecheck pendiente por falta de
+  `node_modules` en este worktree.
 ## Cierre y archivo — Carmen Aguilar / Google Search Console — 2026-10-02
 
 El incidente quedó resuelto en producción. La interfaz ya no afirma que GSC está conectado cuando Composio no devuelve ninguna propiedad utilizable; muestra configuración incompleta o conexión sin propiedades y orienta a revisar permisos/cuenta o reconectar. Deployment verificado: `dpl_vMF5BV3DBZagVoEj3VCorCbFmMRD` (`READY`), dominio `/login` HTTP 200. Sin migraciones ni cambios destructivos.
