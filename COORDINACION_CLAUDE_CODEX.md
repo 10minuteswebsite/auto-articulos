@@ -4787,6 +4787,59 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Auditoría y reparación MCP — Codex — 2026-10-08
+
+### Síntoma reportado
+
+`https://seototal.lasolucionweb.com/api/mcp` mostraba `{"error":"No autenticado"}` después del trabajo del 2026-10-07.
+
+### Evidencia y diagnóstico
+
+- El proyecto Vercel auditado es `la-solucion-web/auto-articulos-web`, ID
+  `prj_xJawH8OSMKr7aaRnfhYNbJLPyKq6`, con los aliases `seototal`, `articulos` y
+  `redes` en `.com` y `.net`. No se confundió con Hub, Cloudflare ni Vercel.
+- El deployment de producción vigente al iniciar la auditoría era READY, pero la
+  URL MCP sin Bearer respondía 401. Eso es correcto para un recurso protegido:
+  abrir la URL directamente en Chrome no es una prueba autenticada del protocolo.
+- El 401 no incluía `WWW-Authenticate` con `resource_metadata`, aunque MCP/RFC
+  9728 lo usa para que clientes como MUSE/Claude descubran automáticamente el
+  authorization server. Este era el defecto de interoperabilidad que podía dejar
+  al cliente detenido en “No autenticado”.
+- `/api/mcp/capabilities` estaba descrito como catálogo público, pero el middleware
+  lo dejaba caer al gate de sesión y respondía 401. Era una discrepancia real entre
+  la ruta y su contrato.
+- Los cambios de navegación/impersonificación del 2026-10-07 no modificaron la
+  ruta MCP ni sus herramientas; la comparación Git confirmó que la reparación se
+  limita a la frontera MCP.
+
+### Reparación aplicada
+
+- `apps/web/src/middleware.ts`: se añadió `/api/mcp/capabilities` a las rutas
+  públicas porque solo expone nombres/descripciones de herramientas y no datos de
+  cuentas.
+- `apps/web/src/middleware.ts`: el 401 MCP ahora conserva `No autenticado`, no
+  expone secretos y agrega `Cache-Control: no-store` más
+  `WWW-Authenticate: Bearer resource_metadata="<origen>/.well-known/oauth-protected-resource"`.
+  Esto activa el descubrimiento estándar sin relajar la autenticación ni permitir
+  cookies como credenciales del MCP.
+- No se tocó el catálogo de herramientas, el esquema de base de datos, OAuth de
+  productos, sesiones del Hub ni datos de usuarios. No requiere migración.
+
+### Validación antes de producción
+
+- `npm run typecheck --workspace=apps/web`: OK.
+- `npm test --workspace=apps/web`: 187 passed, 0 failed, 1 skipped por ausencia
+  deliberada de base de datos de integración.
+- `npm run build --workspace=apps/web`: OK; build Next.js completado y `/api/mcp`,
+  `/api/mcp/capabilities` y las rutas OAuth generadas.
+- Prueba pública previa: aliases MCP resolvían al proyecto correcto; metadata
+  protegida y metadata OAuth respondían 200; el endpoint protegido respondía 401
+  sin token y 403 ante un Origin ajeno. No se declaró éxito autenticado antes de
+  desplegar la reparación.
+
+Estado: reparación lista para desplegar y repetir la matriz HTTP contra producción.
+Responsable: Codex.
+
 ## Despliegue producción — header Hub e impersonificación — 2026-10-07
 
 - Commit desplegado: `9f0aa3cc` (`fix: align product header with hub navigation`).

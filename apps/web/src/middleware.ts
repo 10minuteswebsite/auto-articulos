@@ -30,6 +30,10 @@ const PUBLIC_PATHS = [
   // Documento de descubrimiento OAuth del servidor MCP: por definición se
   // consulta SIN token (es lo que le dice al cliente dónde autenticarse).
   "/.well-known/oauth-protected-resource",
+  // Catálogo público de capacidades: no contiene datos de ninguna cuenta y
+  // lo consume la pantalla de configuración para mantenerse sincronizada con
+  // el catálogo real del servidor.
+  "/api/mcp/capabilities",
   // Ruta nodejs auxiliar que el propio middleware llama por `fetch` para
   // resolver tokens personales (ver handleMcpAuth) — no lleva cookie de
   // sesión, así que no puede pasar por el gate de abajo. No expone nada sin
@@ -246,7 +250,20 @@ async function handleMcpAuth(request: NextRequest) {
   }
 
   if (!userId) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    const resourceMetadata = new URL("/.well-known/oauth-protected-resource", request.url).toString();
+    return NextResponse.json(
+      { error: "No autenticado" },
+      {
+        status: 401,
+        headers: {
+          ...NO_CACHE_HEADERS,
+          // RFC 9728/MCP: permite que un cliente descubra automáticamente el
+          // authorization server y empiece el flujo OAuth en vez de quedarse
+          // en un 401 genérico.
+          "WWW-Authenticate": `Bearer resource_metadata="${resourceMetadata}"`,
+        },
+      },
+    );
   }
 
   const requestHeaders = new Headers(request.headers);
