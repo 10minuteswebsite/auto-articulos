@@ -1484,6 +1484,18 @@ se confirme la prueba real pendiente de arriba.
 
 Responsable: Codex.
 
+## Ajuste final de paridad visual — 2026-10-07
+
+- Se alineó el texto de cierre de sesión del producto a «Salir», como en el
+  menú del Hub, conservando el control existente para volver de la
+  impersonificación y sin retirar ninguna capacidad funcional.
+- Typecheck y build remoto completados correctamente; 87 páginas/rutas generadas.
+- Deployment: `dpl_6jBkW7V6xhvmjCy1c87WYh99BAvM`, estado `READY`, alias de producción
+  activo en `redes.lasolucionweb.com`.
+
+Estado: **DESPLEGADO EN PRODUCCIÓN**.
+Responsable: Codex.
+
 ## Corrección post-despliegue — sesión Hub y menú en Artículos — 2026-10-07
 
 - Hallazgo: el build anterior sí estaba en producción, pero la visibilidad del
