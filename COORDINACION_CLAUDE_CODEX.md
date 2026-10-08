@@ -4900,7 +4900,14 @@ externo lo sigue usando.
 
 ### Estado
 
-Cambio local aplicado y pendiente de validación completa, commit y despliegue.
+Cambio validado, guardado en Git (`8381e7c0`) y desplegado en Producción:
+deployment Vercel `dpl_e6kHoXK2YdKKEDc7mtvqLYJ5DjZu`, estado `READY`, proyecto
+`la-solucion-web/auto-articulos-web`. La pantalla `articulos.lasolucionweb.net/
+dashboard/configuracion/mcp` fue recargada y muestra explícitamente
+`https://articulos.lasolucionweb.net/api/mcp`. Build remoto completado con las
+rutas `/api/mcp`, `/api/mcp/capabilities` y OAuth. La dirección antigua puede
+seguir respondiendo 401 sin Bearer por compatibilidad y protección; no es la
+dirección que debe copiar un tenant lanzado desde el Hub.
 
 ## Despliegue producción — header Hub e impersonificación — 2026-10-07
 
