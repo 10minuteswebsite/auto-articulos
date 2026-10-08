@@ -52,7 +52,7 @@ export default function HubPlatformHeader({ user, actingAdmin }: { user: Platfor
               {actingAdmin && <span style={{ display: "block", color: "#8a4b08", fontSize: 11, fontWeight: 700 }}>Sesión administrada</span>}
             </div>
             {actingAdmin && <StopImpersonationButton />}
-            <LogoutButton />
+            <LogoutButton label="Salir" />
           </div>
         </div>
       </header>
