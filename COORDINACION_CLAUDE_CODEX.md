@@ -11088,3 +11088,38 @@ del bot de ayuda por este motivo.
 No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-08
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-07 (commit
+`b68356d`). Se revisó el rango `b68356d..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 39
+líneas agregadas (0 eliminadas, confirmado con `git diff --stat`), 2 bloques nuevos: "Cierre
+Codex — Redes restringidas por allowlist — 2026-10-07" y "Codex — etiqueta de Redes por cuenta
+en Administración — 2026-10-07".
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: nueva entrada "Versión — 2026-10-07 — Redes restringido por
+  allowlist (PRs #500, #501, #502, #503)", con el detalle de la corrección en
+  `canSeeSocialModule` (`apps/web/src/lib/modules.ts`), el incidente que la motivó (override
+  histórico de la cuenta de Hector Travasillo), los commits/merges exactos de cada PR y el
+  deployment de Vercel citado por la propia entrada de Coordinación.
+- `INVENTARIO_CONVERSACIONES.md`: nueva entrada en Parte B, `CODEX - REDES RESTRINGIDAS POR
+  ALLOWLIST`. Parte A sin cambios — se verificó con `git merge-base --is-ancestor` que la rama
+  `codex/redes-etiqueta-cuentas-20261007` ya es ancestro de `origin/main` (PRs #500-#503
+  fusionados), no es una reserva activa.
+- `apps/web/src/content/manual-usuario.ts`: se agregó una línea nueva (sin tocar el texto
+  existente) justo debajo de la descripción de la tarjeta de `${MENU_NAMES.redes}` en Inicio,
+  aclarando que desde el 2026-10-07 el módulo quedó reservado a administradores, Lorena
+  Alvarez y Zulmad, y que un permiso individual antiguo marcado como habilitado ya no da
+  acceso real. Sin este aviso, el bot de ayuda seguía afirmando (texto preexistente, no
+  tocado) que Administración puede activar Redes para cualquier cuenta.
+- `TO-DO.md`: sin cambios por esta tarea — ninguno de los dos bloques nuevos describe una idea
+  suelta pendiente de ejecutar; ambos documentan trabajo ya cerrado y desplegado.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguno de los bloques nuevos describe un
+  árbol de git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. No quedó
+ninguna duda sin resolver para Milton en este rango.
+
+Responsable: Claude (tarea programada diaria de propagación).
