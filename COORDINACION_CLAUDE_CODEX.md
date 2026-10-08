@@ -4837,7 +4837,27 @@ Responsable: Claude (tarea programada diaria de propagación).
   sin token y 403 ante un Origin ajeno. No se declaró éxito autenticado antes de
   desplegar la reparación.
 
-Estado: reparación lista para desplegar y repetir la matriz HTTP contra producción.
+### Producción verificada
+
+- Deployment `dpl_6h6dva5PoRn3hyoWQUBmzntdWTUR`, estado Vercel `READY`, aliasado al
+  proyecto correcto y a `seototal.lasolucionweb.com`.
+- `POST/GET https://seototal.lasolucionweb.com/api/mcp` sin Bearer sigue dando 401,
+  pero ahora incluye `WWW-Authenticate` con el metadata URL RFC 9728 correcto.
+  Esa respuesta es la esperada: la URL abierta directamente en Chrome no es una
+  sesión MCP autenticada.
+- `GET /api/mcp/capabilities`: 200 y catálogo dinámico visible sin sesión.
+- `GET /.well-known/oauth-protected-resource`: 200 y declara el endpoint MCP y el
+  authorization server correctos.
+- `Origin: https://evil.example` contra MCP: 403; se conserva la protección contra
+  puentes desde orígenes web no autorizados.
+- Variables de producción revisadas solo por nombre, sin leer valores: existen
+  `OAUTH_CHATGPT_CLIENT_ID` y `OAUTH_CHATGPT_REDIRECT_URIS`. No se inventó ni se
+  agregó ningún secreto. No se alteró la base de datos.
+
+Estado: **REPARADO, DESPLEGADO Y VERIFICADO**. La URL directa puede seguir mostrando
+401 si se abre sin token; ahora un cliente MCP compatible puede iniciar el descubrimiento
+OAuth automáticamente. El flujo autenticado con un token real no se falsificó ni se
+declaró probado sin exponer ni pedir una credencial.
 Responsable: Codex.
 
 ## Despliegue producción — header Hub e impersonificación — 2026-10-07
