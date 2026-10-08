@@ -458,6 +458,24 @@ antiguo, la Parte A (verificación en vivo por rama/worktree) es más confiable
 que el texto libre de Coordinación para las conversaciones de aquí en
 adelante.
 
+### `CODEX - REDES RESTRINGIDAS POR ALLOWLIST`
+
+Entrada agregada por la tarea programada diaria de propagación (2026-10-08), a partir de las
+secciones "Cierre Codex — Redes restringidas por allowlist — 2026-10-07" y "Codex — etiqueta
+de Redes por cuenta en Administración — 2026-10-07" de `COORDINACION_CLAUDE_CODEX.md`.
+
+- Agente: Codex.
+- Proyecto: restringir el módulo Redes (`oportunidades-redes`) para que solo lo vean
+  administradores, Lorena Alvarez y Zulmad, corrigiendo un override histórico por cuenta que
+  dejaba acceso real a cuentas fuera de esa lista (caso detectado: Hector Travasillo).
+- Rama: `codex/redes-etiqueta-cuentas-20261007`. Verificado con
+  `git merge-base --is-ancestor codex/redes-etiqueta-cuentas-20261007 origin/main` que ya es
+  ancestro de `origin/main` (PRs #500, #501, #502 y #503 fusionados) — no es una reserva
+  activa.
+- Estado: CERRADO, DESPLEGADO Y VERIFICADO según la propia entrada de Coordinación (deployment
+  Vercel `42Lr4iy6cK1T1Dv6CCcA7gQVtDXj`, estado `success`). Detalle completo propagado también
+  a `CONTROLADOR_DE_VERSIONES.md`.
+
 ---
 
 ## Entradas originales completas (preservadas tal cual, sin editar)

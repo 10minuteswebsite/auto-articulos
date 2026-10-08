@@ -4142,3 +4142,35 @@ identidad CODEX - GPT-5 - REPARADOR DEL ARBOL PRINCIPAL, commit `26d5a3b` fusion
   CI/CD real ni si hay un deployment productivo posterior verificado — queda sin confirmar en
   ningún documento maestro revisado.
 - Sin schema ni migraciones. No hubo deploy ejecutado por esta tarea de propagación.
+
+## Versión — 2026-10-07 — Redes restringido por allowlist (PRs #500, #501, #502, #503)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("Cierre Codex — Redes restringidas por
+allowlist — 2026-10-07" y "Codex — etiqueta de Redes por cuenta en Administración —
+2026-10-07") por la tarea programada diaria de propagación (2026-10-08).
+
+- Pedido de Milton: el módulo Redes (`oportunidades-redes`) solo debe ser visible para
+  administradores, Lorena Alvarez y Zulmad; ninguna otra cuenta debe ver la tarjeta ni poder
+  entrar por URL directa.
+- Incidente que motivó la corrección: la cuenta de Hector Travasillo conservaba un override
+  histórico `oportunidades-redes = enabled`; cambiar solo la etiqueta administrativa no
+  revocaba ese acceso real.
+- Corrección aplicada en `apps/web/src/lib/modules.ts` (función `canSeeSocialModule`): el
+  acceso deja de depender del override por cuenta y pasa a depender únicamente de
+  `role === "admin"` o de que la identidad (nombre/email) de la cuenta contenga "zulmad" o
+  "lorena alvarez"; el guard de acceso directo por URL se actualizó para bloquear a quien no
+  cumpla esa condición.
+- La etiqueta del selector en Administración → Usuarios
+  (`apps/web/src/app/dashboard/usuarios/page.tsx`) pasó a mostrar «Quitárselo a esta cuenta»
+  para las cuentas fuera de la allowlist, en vez de «Dárselo a esta cuenta».
+- PRs fusionados a `main`: #500 (merge `f11c7f8`, commits `3f846ea` y `e8efd6e`), #501 (merge
+  `209fa50`, commit `480abb4`, aplica la restricción real de acceso), #502 (merge `5ff3c11`,
+  commit `8d5df6a`, corrige la etiqueta administrativa), #503 (merge `425c727`, commit
+  `70ae545`, cierre y documentación en Coordinación).
+- Producción verificada en Vercel según la propia entrada de Coordinación (esta tarea de
+  propagación no tiene acceso a Vercel para confirmarlo de forma independiente): deployment
+  `42Lr4iy6cK1T1Dv6CCcA7gQVtDXj`, estado `success`.
+- Sin schema, sin migraciones y sin acción destructiva, según las entradas originales de
+  Coordinación.
+- Responsable: Codex.
+- Estado: CERRADO, DESPLEGADO Y VERIFICADO (según Coordinación).
