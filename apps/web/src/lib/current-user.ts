@@ -124,13 +124,19 @@ export async function getActingAdmin() {
     if (verified?.targetUserId === currentUserId) hubContext = verified;
   }
 
-  if (hubContext?.actorEmail) {
+  if (hubContext?.actorUserId || hubContext?.actorEmail) {
+    const actorFromProductDb = hubContext.actorUserId
+      ? await prisma.user.findUnique({
+          where: { id: hubContext.actorUserId },
+          select: { id: true, name: true, firstName: true, lastName: true, email: true },
+        })
+      : null;
     return {
-      id: hubContext.actorUserId ?? "hub-admin",
-      name: hubContext.actorName,
+      id: hubContext.actorUserId ?? actorFromProductDb?.id ?? "hub-admin",
+      name: hubContext.actorName ?? actorFromProductDb?.name ?? null,
       firstName: null,
       lastName: null,
-      email: hubContext.actorEmail,
+      email: hubContext.actorEmail ?? actorFromProductDb?.email ?? "Administrador del Hub",
     };
   }
   const adminId = headerList.get("x-acting-admin-id");
