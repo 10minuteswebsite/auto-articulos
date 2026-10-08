@@ -8,7 +8,7 @@ import {
   buttonStyle,
   secondaryButtonStyle,
 } from "@/components/dashboard-ui";
-import { productOfHost, type HostProductScope } from "@/lib/product-routes";
+import { mcpOriginForHost, productOfHost, type HostProductScope } from "@/lib/product-routes";
 
 type TokenStatus =
   | { active: false }
@@ -77,7 +77,7 @@ export default function ConfiguracionMcpPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setServerUrl(`${window.location.origin}/api/mcp`);
+      setServerUrl(`${mcpOriginForHost(window.location.hostname)}/api/mcp`);
     }
   }, []);
 
@@ -210,6 +210,9 @@ export default function ConfiguracionMcpPage() {
 
         <section style={sectionStyle}>
           <h2 style={h2Style}>Token personal</h2>
+          <p style={{ color: "#6e6e73", fontSize: 14, lineHeight: 1.5, margin: "0 0 12px" }}>
+            Dirección de conexión para tu producto: {serverUrl || "cargando…"}
+          </p>
 
           {loading ? (
             <p style={{ color: "#6e6e73", fontSize: 14 }}>Cargando…</p>

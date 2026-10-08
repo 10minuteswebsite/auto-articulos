@@ -21,6 +21,25 @@
 export type ProductScope = "ARTICULOS" | "REDES" | "COMPARTIDO" | "ADMIN";
 export type HostProductScope = Exclude<ProductScope, "ADMIN">;
 export const HUB_URL = "https://hub.lasolucionweb.net";
+/**
+ * Public product origins used when a tenant launches a product from the Hub.
+ * The old `seototal` origin remains available for backwards compatibility,
+ * but must not be emitted as the MCP address for a Hub-launched session.
+ */
+export const HUB_PRODUCT_ORIGINS = {
+  ARTICULOS: "https://articulos.lasolucionweb.net",
+  REDES: "https://redes.lasolucionweb.net",
+} as const;
+
+export function mcpOriginForHost(hostname: string | null | undefined): string {
+  const host = (hostname ?? "").toLowerCase().split(":")[0];
+  const product = productOfHost(host);
+  if (product === "REDES") return HUB_PRODUCT_ORIGINS.REDES;
+  if (product === "ARTICULOS") return HUB_PRODUCT_ORIGINS.ARTICULOS;
+  // `seototal.lasolucionweb.com` is the legacy human-facing alias. It is not
+  // the public MCP address used after the Hub handoff; use the product host.
+  return HUB_PRODUCT_ORIGINS.ARTICULOS;
+}
 
 /** Producto de la dirección pública desde la que el usuario está trabajando. */
 export function productOfHost(hostname: string | null | undefined): HostProductScope {

@@ -4860,6 +4860,48 @@ OAuth automáticamente. El flujo autenticado con un token real no se falsificó 
 declaró probado sin exponer ni pedir una credencial.
 Responsable: Codex.
 
+## Corrección de dominio MCP para sesiones iniciadas desde el Hub — Codex — 2026-10-08
+
+### Hallazgo
+
+El enlace `https://seototal.lasolucionweb.com/api/mcp` pertenece al alias legado.
+Ese alias conserva la ruta por compatibilidad, pero no es la dirección que debe
+recibir un tenant que entra por el Hub. Al abrirlo directamente sin Bearer, el
+`401 No autenticado` es además la respuesta esperada de un recurso MCP protegido.
+
+La dirección canónica para Auto Artículos cuando el tenant llega desde el Hub es:
+
+`https://articulos.lasolucionweb.net/api/mcp`
+
+Para Redes, la dirección equivalente es:
+
+`https://redes.lasolucionweb.net/api/mcp`
+
+### Cambio aplicado
+
+- `apps/web/src/lib/product-routes.ts`: se centralizaron los orígenes públicos de
+  producto del Hub y se añadió `mcpOriginForHost`. El alias `seototal` ya no se
+  emite como dirección MCP; se conserva solamente como endpoint legado para no
+  romper asistentes que ya estuvieran configurados.
+- `apps/web/src/app/dashboard/configuracion/mcp/page.tsx`: el prompt usa el
+  dominio canónico del producto y la pantalla muestra explícitamente la dirección
+  que debe copiarse. No se modificaron tokens, sesiones, OAuth, herramientas MCP,
+  base de datos ni permisos.
+- `apps/web/src/lib/product-routes.test.ts`: se agregaron pruebas para los hosts
+  `.net`, `.com` y el alias legado `seototal`.
+
+### Regla para evitar regresiones
+
+Cuando un tenant sea lanzado desde `hub.lasolucionweb.net`, se debe usar el host
+del producto (`articulos.lasolucionweb.net` o `redes.lasolucionweb.net`) para
+MCP. No se debe copiar ni documentar `seototal.lasolucionweb.com/api/mcp` como
+URL nueva. El endpoint antiguo no se elimina hasta confirmar que ningún asistente
+externo lo sigue usando.
+
+### Estado
+
+Cambio local aplicado y pendiente de validación completa, commit y despliegue.
+
 ## Despliegue producción — header Hub e impersonificación — 2026-10-07
 
 - Commit desplegado: `9f0aa3cc` (`fix: align product header with hub navigation`).

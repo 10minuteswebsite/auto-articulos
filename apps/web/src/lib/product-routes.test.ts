@@ -2,10 +2,15 @@ import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfApiPath, productOfHost, productOfPath, productOfUpdate, PRODUCT_ROUTES } from "./product-routes";
+import { HUB_PRODUCT_ORIGINS, HUB_URL, isProductViewEnabled, isVisibleInProduct, mcpOriginForHost, productOfApiPath, productOfHost, productOfPath, productOfUpdate, PRODUCT_ROUTES } from "./product-routes";
 
 test("el enlace de salida apunta al HUB oficial", () => {
   assert.equal(HUB_URL, "https://hub.lasolucionweb.net");
+  assert.equal(HUB_PRODUCT_ORIGINS.ARTICULOS, "https://articulos.lasolucionweb.net");
+  assert.equal(mcpOriginForHost("articulos.lasolucionweb.net"), "https://articulos.lasolucionweb.net");
+  assert.equal(mcpOriginForHost("articulos.lasolucionweb.com"), "https://articulos.lasolucionweb.net");
+  assert.equal(mcpOriginForHost("seototal.lasolucionweb.com"), "https://articulos.lasolucionweb.net");
+  assert.equal(mcpOriginForHost("redes.lasolucionweb.net"), "https://redes.lasolucionweb.net");
 });
 
 test("las direcciones de producto limitan la pantalla al producto correspondiente", () => {
