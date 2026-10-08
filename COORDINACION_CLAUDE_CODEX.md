@@ -1483,6 +1483,27 @@ se confirme la prueba real pendiente de arriba.
 ## Trabajo activo — Blogger variables aisladas — 2026-09-03
 
 Responsable: Codex.
+
+## Corrección post-despliegue — sesión Hub y menú en Artículos — 2026-10-07
+
+- Hallazgo: el build anterior sí estaba en producción, pero la visibilidad del
+  header dependía únicamente de `x-hub-authenticated`, un header interno que
+  puede no conservarse al servir la página desde el subdominio del producto.
+- Corrección: `getSessionContext()` y `getActingAdmin()` verifican como respaldo
+  la cookie firmada `auto_articulos_hub_context`, siempre atada al usuario
+  efectivo; el login nativo no obtiene el menú del Hub.
+- Corrección adicional: `articulos.lasolucionweb.net` y `redes.lasolucionweb.net`
+  ahora se clasifican explícitamente como productos, igual que sus dominios
+  `.com`.
+- Alineación visual: durante impersonificación el producto ya no muestra
+  «Administración», igual que el Hub; la administración sigue estando en el Hub.
+- Validación local: typecheck y build de producción OK; 87 páginas/rutas generadas.
+- Deployment: `dpl_BX7ZS8QhfbzTVwXwzXDtPDhMDZZ1`, estado `READY`, alias de producción
+  `.net` verificados; `/dashboard` devuelve HTTP 307 sin cookie, esperado para
+  una ruta protegida.
+
+Estado: **CORREGIDO Y DESPLEGADO EN PRODUCCIÓN**.
+Responsable: Codex.
 Worktree aislado: `/private/tmp/auto-articulos-blogger-fix-20260903`.
 Base: `bcdac28` (`feat: preparar integracion de Blogger`).
 Alcance: separar las credenciales OAuth de Blogger de las variables existentes de GSC/GA.
