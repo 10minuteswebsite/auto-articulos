@@ -1484,6 +1484,25 @@ se confirme la prueba real pendiente de arriba.
 
 Responsable: Codex.
 
+## Reparación final — franja de impersonificación en productos — 2026-10-08
+
+- Evidencia confirmada: el menú del Hub sí llegaba a `articulos` y `redes`, pero
+  faltaba únicamente la franja de impersonificación.
+- Causa: el producto exigía `actorEmail` directamente; si el contexto firmado
+  solo traía `actorUserId`, descartaba toda la identidad administrativa.
+- Corrección: `getActingAdmin()` reconstruye ahora el administrador desde la
+  base local cuando el contexto Hub trae el ID del actor, conservando la
+  validación de la cookie firmada y sin afectar el login nativo.
+- Validación: typecheck y build remoto OK; 87 páginas/rutas generadas.
+- Deployment: `dpl_CpZnoByGpB1bt4GNBGrAUofXufVo`, estado `READY`.
+
+Para una prueba limpia, el tenant debe volver a abrir cada producto desde el
+botón «Abrir aplicación» del Hub mientras la impersonificación está activa;
+eso crea un contexto firmado nuevo con el actor actual.
+
+Estado: **CORREGIDO Y DESPLEGADO EN PRODUCCIÓN**.
+Responsable: Codex.
+
 ## Ajuste final de paridad visual — 2026-10-07
 
 - Se alineó el texto de cierre de sesión del producto a «Salir», como en el
