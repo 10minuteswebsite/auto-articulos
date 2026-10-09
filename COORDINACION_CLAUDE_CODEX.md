@@ -1,5 +1,23 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — INSTRUCCIONES MCP EXACTAS en /dashboard/configuracion/mcp — 2026-10-09
+
+- Reclamo de capitanía (sin migración): `migration-coordinator.sh claim "Claude"`.
+- Pedido de Milton: instrucciones de conexión exactas por IA (Claude, ChatGPT,
+  Muse, Otra IA), solo acciones con los campos reales; en Claude se usa
+  «Sin inicio de sesión» + encabezado Authorization con el token real (el
+  servidor no admite registro automático OAuth). Prompt con autorización
+  permanente para crear y publicar artículos (obtiene el comprobante con
+  confirmar=false y publica en el mismo turno); borrar/descartar/cancelar
+  siguen pidiendo confirmación.
+- Aplicado sobre la pantalla REAL (token real, URL del host, lista de
+  herramientas dinámica). NO se publica la maqueta `mcp-preview` de Codex: usa
+  un token de prueba fijo y la URL de Redes escrita a mano.
+- Descartado a pedido de Milton: la publicación diaria programada (la hace el
+  asistente IA del usuario, no SEO Total). No quedó ningún cambio de schema.
+- Archivos: `dashboard/configuracion/mcp/page.tsx`, `content/manual-usuario.ts`.
+
+
 ## Incidente «Analizar contenido» caído (cuenta de Alfonzo Lobo) — Claude — 2026-10-02 — CERRADO
 
 - **Síntoma:** en `/dashboard/oportunidades` el botón «Analizar contenido» mostraba «No se pudo completar el análisis.» (mensaje genérico del cliente: la respuesta llegó sin cuerpo JSON). Se sospechó de la transición controlada hacia el HUB.
