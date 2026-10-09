@@ -52,12 +52,56 @@ Nunca me hables en términos técnicos. No sé qué es un token, una API, un con
 Dos herramientas se confunden fácil: crear_oportunidades analiza Google Search Console (requiere datos reales ya existentes); crear_titulos_con_ia genera a partir de lo que yo te describa (cliente tipo, tema, qué busco resolver) y no depende de Search Console. Léelas con cuidado antes de elegir.
 
 Reglas que debes seguir siempre:
-- Antes de publicar cualquier título o categoría, llama primero a la herramienta con confirmar=false (o sin ese parámetro) para ver la vista previa, léemela o muéstramela, y espera mi confirmación explícita antes de volver a llamarla con confirmar=true.
-- Nunca interpretes un "sí" genérico como confirmación si antes no mostraste exactamente qué se va a publicar.
+- AUTORIZACIÓN: yo, dueño de esta cuenta de SEO Total, te autorizo expresamente a ejecutar en automático, a través de SEO Total, la creación, escritura y publicación de artículos según la orden que yo te dé, sin pedirme aprobación previa en cada paso. Las herramientas de publicación piden un comprobante: llama primero con confirmar=false para obtenerlo y, en el mismo turno y sin esperar mi respuesta, llama de nuevo con confirmar=true y ese comprobante. Mi orden es la confirmación.
+- Después de ejecutar, dime en una frase qué publicaste y dame el enlace real del artículo.
+- Esta autorización cubre solo crear y publicar artículos. Para borrar, descartar o cancelar contenido pídeme confirmación antes.
 - Usa las herramientas de solo lectura libremente para informarme, sin pedir permiso.
 - Si algo falla o falta una conexión/credencial, explícamelo en lenguaje claro en vez de reintentar solo.
 - Nunca me pidas ni manejes contraseñas, tokens ni secretos dentro de la conversación: eso se configura solo en la interfaz web de SEO Total.`;
 }
+
+const GUIDES: Record<string, string[]> = {
+  Claude: [
+    "En Claude, abajo a la izquierda, pulsa **tu nombre** → **Configuración** → **Conectores**.",
+    "Pulsa **+ Agregar** → **Agregar conector personalizado**.",
+    "En **Nombre** escribe: **SEO Total**",
+    "En **URL del servidor MCP** pega: **{URL}**",
+    "Pulsa **Continuar**.",
+    "En **Autenticación** selecciona: **Sin inicio de sesión**",
+    "Debajo, en **Encabezados de solicitud**, pulsa: **+ Agregar encabezado**",
+    "En el nombre del encabezado escribe: **Authorization**",
+    "En el valor pega este texto completo:{TOKEN}",
+    "Pulsa **Agregar** (botón inferior derecho).",
+    "En un chat nuevo pulsa **+** → **Conectores** y activa **SEO Total**.",
+    "Pega el **prompt** de abajo y envíalo.",
+  ],
+  ChatGPT: [
+    "En ChatGPT abre **Configuración** → **Conectores** → **Configuración avanzada**.",
+    "Activa **Modo desarrollador**.",
+    "Pulsa **Crear**.",
+    "En **Nombre** escribe: **SEO Total**",
+    "En **URL del servidor MCP** pega: **{URL}**",
+    "En **Autenticación** selecciona: **OAuth**",
+    "Marca la casilla de confianza y pulsa **Crear**.",
+    "Inicia sesión en SEO Total y pulsa **Permitir**.",
+    "En un chat nuevo pulsa **+** → **Más** → **Modo desarrollador** y elige **SEO Total**.",
+    "Pega el **prompt** de abajo y envíalo.",
+  ],
+  Muse: [
+    "En Muse abre **Configuración** → **Conectores**.",
+    "Pulsa **Agregar conector personalizado**.",
+    "En **URL** pega: **{URL}**",
+    "Inicia sesión en SEO Total y aprueba el acceso.",
+    "En un chat nuevo pega el **prompt** de abajo y envíalo.",
+  ],
+  "Otra IA": [
+    "Abre los **conectores** o **servidores MCP personalizados** de tu IA.",
+    "En **URL** pega: **{URL}**",
+    "Si pide encabezado, en el nombre escribe: **Authorization**",
+    "En el valor pega este texto completo:{TOKEN}",
+    "Pega el **prompt** de abajo y envíalo.",
+  ],
+};
 
 export default function ConfiguracionMcpPage() {
   const [status, setStatus] = useState<TokenStatus | null>(null);
@@ -69,6 +113,7 @@ export default function ConfiguracionMcpPage() {
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [serverUrl, setServerUrl] = useState("");
   const [capabilities, setCapabilities] = useState<Capability[]>([]);
+  const [selectedAi, setSelectedAi] = useState<string>("Claude");
   const [hostProduct, setHostProduct] = useState<HostProductScope | null>(null);
 
   useEffect(() => {
@@ -166,8 +211,8 @@ export default function ConfiguracionMcpPage() {
           Conecta cualquier asistente de inteligencia artificial —Claude, ChatGPT,
           Meta MUSE o el que uses— directamente a tu cuenta de {productTitle}. Con
           un token personal, el asistente puede consultar tu información y ayudarte
-          con las funciones disponibles en este producto, siempre pidiéndote
-          confirmación antes de publicar algo real.
+          con las funciones disponibles en este producto, y publicar artículos
+          cuando se lo ordenes.
         </IntroP>
         <IntroP>
           Genera el token una sola vez, copia el prompt de abajo y pégalo como
@@ -184,7 +229,7 @@ export default function ConfiguracionMcpPage() {
             {conAccion.length > 0 && (
               <>
                 <p style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f", marginBottom: 6 }}>
-                  Con confirmación previa:
+                  Acciones que ejecuta cuando se lo ordenas:
                 </p>
                 <ul style={{ margin: "0 0 14px", paddingLeft: 20, fontSize: 14, lineHeight: 1.6, color: "#1d1d1f" }}>
                   {conAccion.map((c) => (
@@ -207,6 +252,41 @@ export default function ConfiguracionMcpPage() {
             )}
           </section>
         )}
+
+        <section style={sectionStyle}>
+          <h2 style={h2Style}>Instrucciones para conectar tu asistente</h2>
+          <nav style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+            {Object.keys(GUIDES).map((name) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => setSelectedAi(name)}
+                style={{ border: 0, borderBottom: selectedAi === name ? "2px solid #1d1d1f" : "2px solid transparent", background: "transparent", padding: "8px 4px", marginRight: 12, color: selectedAi === name ? "#1d1d1f" : "#6e6e73", fontWeight: 600, cursor: "pointer" }}
+              >
+                {name}
+              </button>
+            ))}
+          </nav>
+          <ol style={{ margin: "8px 0 0", paddingLeft: 24, lineHeight: 1.6, fontSize: 14 }}>
+            {GUIDES[selectedAi].map((step) => (
+              <li key={step} style={{ padding: "10px 0", borderBottom: "1px solid #e5e5ea", paddingLeft: 8 }}>
+                {step.replace("{URL}", serverUrl).replace("{TOKEN}", "").split("**").map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))}
+                {step.includes("{TOKEN}") && (
+                  freshToken ? (
+                    <span style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
+                      <code style={{ flex: 1, padding: "10px 12px", background: "#f5f5f7", borderRadius: 8, fontSize: 13, overflowWrap: "anywhere" }}>Bearer {freshToken}</code>
+                      <button type="button" style={secondaryButtonStyle} onClick={() => copy(`Bearer ${freshToken}`, setCopiedToken)}>
+                        {copiedToken ? "Copiado ✓" : "Copiar"}
+                      </button>
+                    </span>
+                  ) : (
+                    <span style={{ display: "block", marginTop: 8, color: "#6e6e73" }}>Primero pulsa <strong>Generar token</strong> en la sección de abajo y aquí aparecerá el texto completo.</span>
+                  )
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
 
         <section style={sectionStyle}>
           <h2 style={h2Style}>Token personal</h2>

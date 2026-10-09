@@ -330,7 +330,7 @@ Conecta cualquier asistente de inteligencia artificial (Claude, ChatGPT, Meta MU
 
 1. Pulsa **Generar token** (o **Regenerar token** si ya tenías uno; el anterior deja de funcionar de inmediato).
 2. El valor del token solo se muestra una vez, en el momento de generarlo — cópialo con el botón **Copiar token**. Si lo pierdes, genera uno nuevo.
-3. Copia también el bloque de **Prompt para tu asistente** con el botón **Copiar prompt**, y pégalo como instrucciones (o primer mensaje) de tu asistente de IA. Ese texto ya incluye la dirección del servidor, el token, la lista de herramientas disponibles y las reglas de seguridad: nunca publica nada sin mostrarte antes qué va a hacer y pedirte confirmación explícita.
+3. Sigue las **Instrucciones para conectar tu asistente**: elige tu IA (Claude, ChatGPT, Muse u Otra IA) y completa cada paso tal cual aparece, con los campos exactos de esa IA; el texto del encabezado ya incluye tu token y se copia con un botón. Después copia también el bloque de **Prompt para tu asistente** con el botón **Copiar prompt**, y pégalo como instrucciones (o primer mensaje) de tu asistente de IA. Ese texto ya incluye la dirección del servidor, el token, la lista de herramientas disponibles y las reglas de seguridad y una autorización para que, según la orden que le des, cree y publique artículos en automático sin pedirte aprobación en cada paso. Para borrar, descartar o cancelar contenido sí te pide confirmación.
 4. Pulsa **Revocar** si quieres desconectar todos los asistentes sin generar uno nuevo.
 
 La protección de publicación no depende solo de las instrucciones del asistente:
