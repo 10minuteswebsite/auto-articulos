@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
-import { canUseSocialModule } from "@/lib/social-access";
+import { canUseSocialModule, getSocialHostContext } from "@/lib/social-access";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerSocialWorkerNow } from "@/lib/trigger-worker";
 
@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
     if (!(await canUseSocialModule(userId))) {
       return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
     }
+    // redes.lasolucionweb.com: todas las redes abiertas para todas las cuentas.
+    const redesHost = Boolean((await getSocialHostContext()).redesHost);
     const { id } = await request.json();
 
     if (!id) {
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "La propuesta no está vinculada a un artículo publicable." }, { status: 400 });
       }
       const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, allowGoogleBusinessPublishing: true } });
-      if (user?.role !== "admin" && !user?.allowGoogleBusinessPublishing) {
+      if (user?.role !== "admin" && !redesHost && !user?.allowGoogleBusinessPublishing) {
         return NextResponse.json({ error: "No tienes permiso para publicar en Google Business Profile. Contacta al administrador." }, { status: 403 });
       }
       await prisma.businessProfilePost.upsert({
@@ -118,7 +120,7 @@ export async function POST(request: NextRequest) {
         where: { id: userId },
         select: { allowInstagramPublishing: true },
       });
-      if (!user?.allowInstagramPublishing) {
+      if (!redesHost && !user?.allowInstagramPublishing) {
         return NextResponse.json(
           { error: "No tienes permiso para publicar en Instagram. Contacta al administrador." },
           { status: 403 }
@@ -131,7 +133,7 @@ export async function POST(request: NextRequest) {
         where: { id: userId },
         select: { role: true, allowThreadsPublishing: true },
       });
-      if (user?.role !== "admin" && !user?.allowThreadsPublishing) {
+      if (user?.role !== "admin" && !redesHost && !user?.allowThreadsPublishing) {
         return NextResponse.json(
           { error: "No tienes permiso para publicar en Threads. Contacta al administrador." },
           { status: 403 },
@@ -144,7 +146,7 @@ export async function POST(request: NextRequest) {
         where: { id: userId },
         select: { role: true, allowBloggerPublishing: true },
       });
-      if (user?.role !== "admin" && !user?.allowBloggerPublishing) {
+      if (user?.role !== "admin" && !redesHost && !user?.allowBloggerPublishing) {
         return NextResponse.json(
           { error: "No tienes permiso para publicar en Blogger. Contacta al administrador." },
           { status: 403 },
@@ -154,14 +156,14 @@ export async function POST(request: NextRequest) {
 
     if (platform.startsWith("facebook-")) {
       const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, allowFacebookPublishing: true } });
-      if (user?.role !== "admin" && !user?.allowFacebookPublishing) {
+      if (user?.role !== "admin" && !redesHost && !user?.allowFacebookPublishing) {
         return NextResponse.json({ error: "No tienes permiso para publicar en Facebook. Contacta al administrador." }, { status: 403 });
       }
     }
 
     if (platform === "pinterest" || platform === "tumblr" || platform === "bluesky") {
       const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, allowPinterestPublishing: true, allowTumblrPublishing: true, allowBlueskyPublishing: true } });
-      const allowed = platform === "pinterest" ? user?.role === "admin" || user?.allowPinterestPublishing : platform === "tumblr" ? user?.role === "admin" || user?.allowTumblrPublishing : user?.role === "admin" || user?.allowBlueskyPublishing;
+      const allowed = redesHost || platform === "pinterest" ? user?.role === "admin" || user?.allowPinterestPublishing : platform === "tumblr" ? user?.role === "admin" || user?.allowTumblrPublishing : user?.role === "admin" || user?.allowBlueskyPublishing;
       if (!allowed) return NextResponse.json({ error: `No tienes permiso para publicar en ${opp.platform}. Contacta al administrador.` }, { status: 403 });
     }
 

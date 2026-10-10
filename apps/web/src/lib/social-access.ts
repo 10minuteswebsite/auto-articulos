@@ -28,6 +28,20 @@ export async function getSocialHostContext(): Promise<SocialHostContext> {
   }
 }
 
+/**
+ * En redes.lasolucionweb.com todas las cuentas tienen todas las redes abiertas
+ * (decisión de Milton, 2026-10-10): las marcas por red de Administración solo
+ * rigen en seototal.lasolucionweb.com.
+ */
+export function openAllNetworks<T extends SocialPublishingPermissionUser>(
+  user: T,
+  context: SocialHostContext = {},
+): T {
+  if (!context.redesHost) return user;
+  const open = Object.fromEntries(SOCIAL_PUBLISHING_PERMISSION_KEYS.map((key) => [key, true]));
+  return { ...user, ...open };
+}
+
 export async function canUseSocialModule(userId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -79,10 +93,11 @@ export function hasSocialModuleAccess(
   context: SocialHostContext = {},
 ): boolean {
   if (!canSeeSocialModule(user, context)) return false;
+  const open = openAllNetworks(user, context);
   return hasLegacySocialModuleAccess({
     role: user.role,
     disabledModules: user.disabledModules,
-    approvals: SOCIAL_PUBLISHING_PERMISSION_KEYS.map((key) => user[key]),
+    approvals: SOCIAL_PUBLISHING_PERMISSION_KEYS.map((key) => open[key]),
   });
 }
 
@@ -136,6 +151,7 @@ export async function canPublishToNetwork(
   });
   if (!user) return false;
   if (user.role === "admin") return true;
+  if ((await getSocialHostContext()).redesHost) return true;
   const permissions: Record<SocialPublishNetwork, boolean> = {
     instagram: user.allowInstagramPublishing,
     linkedin: user.allowLinkedInPublishing,

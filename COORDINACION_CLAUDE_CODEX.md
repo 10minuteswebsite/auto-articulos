@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — REDES: todas las redes abiertas en redes.lasolucionweb.com — 2026-10-10 — PR siguiente a #514
+
+- Decisión de Milton: en redes.lasolucionweb.com TODAS las cuentas tienen todas las redes abiertas; en seototal.lasolucionweb.com no cambia nada (marcas por red y lista piloto siguen).
+- Cambio (sin schema ni migración): `openAllNetworks` + `getSocialHostContext` (lib/social-access.ts) aplicados en `canPublishToNetwork`, `/api/me`, `social-opportunities/publish` y `generate`. El «Deshabilitado» explícito por cuenta se respeta.
+- Pendiente: el worker (`apps/worker/src/product-access.ts`) no conoce el dominio; solo importa si el interruptor de derechos pasa de «off» a «enforce».
+
 ## Claude — REDES por dominio: acceso activo en redes.lasolucionweb.com + 403 de la API — 2026-10-10
 
 - Hallazgo (revisión en vivo con la cuenta de Lorena): `/api/social-opportunities` respondía 403 a TODA cuenta no administradora. Causa: `canUseSocialModule` no traía nombre/correo y la lista piloto (commit `480abb4b`, 2026-10-07) decide por identidad. `/api/me` tenía el mismo defecto.
