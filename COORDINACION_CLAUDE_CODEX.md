@@ -1,5 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — REDES por dominio: acceso activo en redes.lasolucionweb.com + 403 de la API — 2026-10-10
+
+- Hallazgo (revisión en vivo con la cuenta de Lorena): `/api/social-opportunities` respondía 403 a TODA cuenta no administradora. Causa: `canUseSocialModule` no traía nombre/correo y la lista piloto (commit `480abb4b`, 2026-10-07) decide por identidad. `/api/me` tenía el mismo defecto.
+- Decisión de Milton: Redes oculto solo en seototal.lasolucionweb.com; en redes.lasolucionweb.com siempre activo (lo gobierna el HUB).
+- Cambio (sin schema ni migración): `canSeeSocialModule`/`getEffectiveDisabledModules`/`hasSocialModuleAccess` reciben el contexto de dominio; en el dominio redes ni el apagado global ni la lista piloto aplican (el «Deshabilitado» explícito por cuenta sí se respeta). Archivos: `lib/modules.ts`, `lib/social-access.ts`, `lib/product-access.ts`, `api/me/route.ts`, manual y pruebas.
+- Pendiente de decidir: ¿en el dominio redes sigue exigiéndose al menos una red aprobada, o solo manda el derecho del HUB?
+- Detalle de hallazgos: `HALLAZGOS_REVISION_EN_VIVO_REDES.md`.
+
 ## Claude — CIERRE «REPARACION DE INSTRUCCIONES MCP» — 2026-10-09
 
 - Estado: CERRADO Y ARCHIVADO. Capitanía liberada. Sin migraciones.

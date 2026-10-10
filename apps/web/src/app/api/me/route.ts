@@ -9,7 +9,7 @@ import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
 } from "@/lib/modules";
-import { hasSocialModuleAccess } from "@/lib/social-access";
+import { getSocialHostContext, hasSocialModuleAccess } from "@/lib/social-access";
 import { getProductsSummary } from "@/lib/product-access";
 import { getEnforcementMode } from "@/lib/product-enforcement";
 
@@ -28,7 +28,8 @@ export async function GET() {
   const user = await getCurrentUser();
   const actingAdmin = await getActingAdmin();
   const globalDisabledModules = await getGlobalDisabledModules();
-  const disabledModules = getEffectiveDisabledModules(user, globalDisabledModules);
+  const socialHost = await getSocialHostContext();
+  const disabledModules = getEffectiveDisabledModules(user, globalDisabledModules, socialHost);
   const userDisabledModules = parseUserDisabledModules(user.disabledModules);
   const moduleOverrides = parseUserModuleOverrides(user.disabledModules);
   // Derechos por producto (proyecto «SEPARACION DE SEO TOTAL», Lote 1). Es solo
@@ -82,6 +83,10 @@ export async function GET() {
       allowGoogleBusinessPublishing: user.allowGoogleBusinessPublishing,
       socialPublishingApproved: Boolean(actingAdmin) || hasSocialModuleAccess({
         role: user.role,
+        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
         disabledModules: user.disabledModules,
         allowInstagramPublishing: user.allowInstagramPublishing,
         allowFacebookPublishing: user.allowFacebookPublishing,
@@ -92,7 +97,7 @@ export async function GET() {
         allowBlueskyPublishing: user.allowBlueskyPublishing,
         allowBloggerPublishing: user.allowBloggerPublishing,
         allowGoogleBusinessPublishing: user.allowGoogleBusinessPublishing,
-      }),
+      }, socialHost),
       hasImageCredits: user.hasImageCredits,
       isTrialSignup: user.isTrialSignup,
       trialStartedAt: user.trialStartedAt,

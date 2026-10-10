@@ -1,5 +1,5 @@
 import { prisma } from "@auto-articulos/db";
-import { hasSocialModuleAccess } from "./social-access";
+import { getSocialHostContext, hasSocialModuleAccess } from "./social-access";
 import {
   evaluateProductAccess,
   type ProductAccess,
@@ -64,7 +64,7 @@ export async function hasProductAccess(
     role: user.role,
     product,
     entitlement: user.productEntitlements[0] ?? null,
-    legacyAllowsRedes: hasSocialModuleAccess(user),
+    legacyAllowsRedes: hasSocialModuleAccess(user, await getSocialHostContext()),
     now,
   });
 }
