@@ -1,5 +1,31 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — CIERRE «REPARACION DE INSTRUCCIONES MCP» — 2026-10-09
+
+- Estado: CERRADO Y ARCHIVADO. Capitanía liberada. Sin migraciones.
+- PR fusionadas (todas Vercel success): #505, #506 (pantalla real idéntica a la
+  maqueta aprobada), #507, #508 (prompt corto), #509 (Muse por chat, Otra IA
+  genérica, ChatGPT oficial), #510 (URL fija seototal, REVERTIDA), #511 (URL por
+  dominio; cierre `a1903f5f`).
+- Pantalla: `/dashboard/configuracion/mcp` con 4 pasos, selector Claude /
+  ChatGPT / Muse / Otra IA, token real con botón Copiar, prompt con
+  autorización permanente para crear y publicar (comprobante con
+  confirmar=false y confirmar=true en el mismo turno), horarios programados vía
+  tareas del propio asistente, y confirmación solo para borrar/descartar/cancelar.
+- Claude: Sin inicio de sesión + encabezado Authorization con el token (el
+  servidor NO tiene registro dinámico OAuth ni cliente de Claude).
+- Auditoría de dominios: articulos, seototal y redes sirven el mismo
+  despliegue y el mismo MCP; sin lógica por dominio. La URL mostrada es la del
+  dominio donde se abre (decisión de Milton: productos separables a futuro).
+- DESCARTADO por Milton: publicación diaria programada dentro de SEO Total
+  (la hace el asistente IA del usuario).
+- NO publicado: maqueta `mcp-preview` (token de prueba fijo); sigue solo en el
+  worktree de Codex.
+- Pendiente sin verificar: login OAuth de ChatGPT (requiere
+  OAUTH_CHATGPT_CLIENT_ID en el servidor), etiquetas en español de ChatGPT y
+  Muse contra pantalla real, y revisión visual de la pantalla protegida.
+
+
 ## Claude — INSTRUCCIONES MCP EXACTAS en /dashboard/configuracion/mcp — 2026-10-09
 
 - Reclamo de capitanía (sin migración): `migration-coordinator.sh claim "Claude"`.
