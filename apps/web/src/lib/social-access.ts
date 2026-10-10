@@ -1,6 +1,7 @@
 import { prisma } from "@auto-articulos/db";
 import { hasLegacySocialModuleAccess } from "@auto-articulos/shared";
-import { canSeeSocialModule } from "./modules";
+import { productOfHost } from "./product-routes";
+import { canSeeSocialModule, type SocialHostContext } from "./modules";
 
 /** Id del módulo en SYSTEM_MODULES (ver modules.ts); DashboardNav/ModuleGuard lo tratan aparte. */
 export const SOCIAL_MODULE_ID = "oportunidades-redes";
@@ -13,11 +14,31 @@ export const SOCIAL_MODULE_ID = "oportunidades-redes";
  * Administración: al menos una red o blog debe estar marcado para la cuenta.
  * Los administradores siempre lo tienen, para poder dar soporte.
  */
+/**
+ * ¿La petición actual llega por redes.lasolucionweb.com? Fuera de una petición
+ * (sin cabeceras) devuelve false: se conserva el comportamiento anterior.
+ */
+export async function getSocialHostContext(): Promise<SocialHostContext> {
+  try {
+    const { headers } = await import("next/headers");
+    const host = (await headers()).get("host");
+    return { redesHost: productOfHost(host) === "REDES" };
+  } catch {
+    return {};
+  }
+}
+
 export async function canUseSocialModule(userId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
       role: true,
+      // La lista de cuentas piloto decide por identidad: sin estos campos la
+      // identidad queda vacía y toda cuenta no administradora recibe 403.
+      name: true,
+      firstName: true,
+      lastName: true,
+      email: true,
       disabledModules: true,
       allowInstagramPublishing: true,
       allowFacebookPublishing: true,
@@ -31,7 +52,7 @@ export async function canUseSocialModule(userId: string): Promise<boolean> {
     },
   });
   if (!user) return false;
-  return hasSocialModuleAccess(user);
+  return hasSocialModuleAccess(user, await getSocialHostContext());
 }
 
 export type SocialModuleAccessUser = {
@@ -53,8 +74,11 @@ export type SocialModuleAccessUser = {
  * tenga al menos una red aprobada — para no quitarle el acceso a nadie que
  * ya lo tenía.
  */
-export function hasSocialModuleAccess(user: SocialModuleAccessUser): boolean {
-  if (!canSeeSocialModule(user)) return false;
+export function hasSocialModuleAccess(
+  user: SocialModuleAccessUser,
+  context: SocialHostContext = {},
+): boolean {
+  if (!canSeeSocialModule(user, context)) return false;
   return hasLegacySocialModuleAccess({
     role: user.role,
     disabledModules: user.disabledModules,

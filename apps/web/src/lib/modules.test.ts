@@ -81,3 +81,14 @@ test("Redes queda reservada a las cuentas permitidas", () => {
 test("los administradores siempre ven Redes", () => {
   assert.equal(getEffectiveDisabledModules({ role: "admin", disabledModules: null }, ["oportunidades-redes"]).includes("oportunidades-redes"), false);
 });
+
+test("Redes: en el dominio redes no se oculta por el apagado global ni por la lista piloto", () => {
+  const user = { role: "user", name: "Hector Travasillo", disabledModules: null };
+  assert.ok(getEffectiveDisabledModules(user, ["oportunidades-redes"], {}).includes("oportunidades-redes"));
+  assert.equal(getEffectiveDisabledModules(user, ["oportunidades-redes"], { redesHost: true }).includes("oportunidades-redes"), false);
+});
+
+test("Redes: en el dominio redes, 'Deshabilitado' por cuenta sigue ocultándolo", () => {
+  const user = { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) };
+  assert.ok(getEffectiveDisabledModules(user, [], { redesHost: true }).includes("oportunidades-redes"));
+});

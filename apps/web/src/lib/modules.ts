@@ -103,15 +103,27 @@ export const GLOBAL_DISABLED_MODULES_KEY = "global_disabled_modules";
 export type ModuleAccessOverride = "inherit" | "enabled" | "disabled";
 export type ModuleAccessOverrides = Record<string, ModuleAccessOverride>;
 
-/** Redes queda reservada temporalmente a administradores y a las dos cuentas piloto. */
-export function canSeeSocialModule(user: {
-  role?: string | null;
-  name?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  email?: string | null;
-}): boolean {
+/** Dónde se está abriendo la aplicación. `redesHost` = redes.lasolucionweb.com. */
+export type SocialHostContext = { redesHost?: boolean };
+
+/**
+ * En seototal.lasolucionweb.com Redes queda reservada temporalmente a
+ * administradores y a las dos cuentas piloto. En redes.lasolucionweb.com
+ * (producto dominado por el HUB) siempre está activa: quién entra lo decide
+ * el HUB, no esta lista.
+ */
+export function canSeeSocialModule(
+  user: {
+    role?: string | null;
+    name?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    email?: string | null;
+  },
+  context: SocialHostContext = {},
+): boolean {
   if (user.role === "admin") return true;
+  if (context.redesHost) return true;
   const identity = [user.name, user.firstName, user.lastName, user.email]
     .filter(Boolean)
     .join(" ")
@@ -190,12 +202,15 @@ export function parseUserDisabledModules(rawDisabledModules?: string | null): st
 export function getEffectiveDisabledModules(
   user: { role?: string; name?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; disabledModules?: string | null },
   globalDisabled: string[],
+  context: SocialHostContext = {},
 ): string[] {
   if (user.role === "admin") {
     return [];
   }
   const overrides = parseUserModuleOverrides(user.disabledModules);
   const effective = new Set(globalDisabled);
+  // En redes.lasolucionweb.com el apagado global de Redes no aplica.
+  if (context.redesHost) effective.delete("oportunidades-redes");
   for (const [moduleId, access] of Object.entries(overrides)) {
     const mod = SYSTEM_MODULES.find((candidate) => candidate.id === moduleId);
     if (!mod) continue;
@@ -204,9 +219,10 @@ export function getEffectiveDisabledModules(
   }
   // Los módulos opt-in solo se muestran con «Habilitado» explícito.
   for (const mod of SYSTEM_MODULES) {
+    if (context.redesHost && mod.id === "oportunidades-redes") continue;
     if (mod.optIn && overrides[mod.id] !== "enabled") effective.add(mod.id);
   }
-  if (!canSeeSocialModule(user)) effective.add("oportunidades-redes");
+  if (!canSeeSocialModule(user, context)) effective.add("oportunidades-redes");
   return Array.from(effective);
 }
 

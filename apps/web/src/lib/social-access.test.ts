@@ -78,9 +78,40 @@ test("web y worker conservan la misma regla legacy de Redes", () => {
   ] as const;
   for (const user of cases) {
     assert.equal(
-      hasSocialModuleAccess(user),
+      // Cuenta piloto: la lista de identidad ya no interviene y se compara solo la regla legacy.
+      hasSocialModuleAccess({ ...user, name: "Lorena Alvarez" }),
       hasLegacySocialModuleAccess({ role: user.role, disabledModules: user.disabledModules, approvals: [user.allowBloggerPublishing] }),
       JSON.stringify(user),
     );
   }
+});
+
+// Redes por dominio: en redes.lasolucionweb.com (HUB) siempre activo; en
+// seototal.lasolucionweb.com sigue la lista de cuentas piloto.
+test("dominio redes: cuenta cualquiera con redes aprobadas accede sin estar en la lista piloto", () => {
+  assert.equal(
+    hasSocialModuleAccess({ role: "user", name: "Hector Travasillo", allowBloggerPublishing: true }, { redesHost: true }),
+    true,
+  );
+});
+
+test("dominio redes: 'Deshabilitado' explícito de Administración se respeta", () => {
+  assert.equal(
+    hasSocialModuleAccess(
+      { role: "user", allowBloggerPublishing: true, disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) },
+      { redesHost: true },
+    ),
+    false,
+  );
+});
+
+test("otros dominios: cuenta fuera de la lista piloto sigue sin acceso", () => {
+  assert.equal(
+    hasSocialModuleAccess({ role: "user", name: "Hector Travasillo", allowBloggerPublishing: true }, {}),
+    false,
+  );
+  assert.equal(
+    hasSocialModuleAccess({ role: "user", name: "Lorena Alvarez", allowBloggerPublishing: true }, {}),
+    true,
+  );
 });
