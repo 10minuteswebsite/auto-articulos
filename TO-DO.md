@@ -272,6 +272,15 @@ HANDOFF, solo alimenta ideas hacia él).
   a toda la cadena de fixes de categoría de esa fecha. Señalado como fuera
   de alcance de esa auditoría; sin fecha límite ni responsable asignado
   todavía.
+- **(10/10/2026, origen: tarea programada diaria de propagación, al revisar
+  `COORDINACION_CLAUDE_CODEX.md` → "Claude — CIERRE «REPARACION DE
+  INSTRUCCIONES MCP» — 2026-10-09")** Tres verificaciones sin probar todavía
+  sobre la pantalla real de Configuración → Asistentes IA
+  (`/dashboard/configuracion/mcp`, PRs #505-#511): (1) login OAuth de
+  ChatGPT, que requiere configurar `OAUTH_CHATGPT_CLIENT_ID` en el servidor;
+  (2) las etiquetas en español de ChatGPT y Muse contra la pantalla real; y
+  (3) una revisión visual de la pantalla protegida con sesión iniciada. Sin
+  fecha límite ni responsable asignado todavía.
 ## Hecho
 
 - **(1/10/2026)** MCP: se agregó `eliminar_oportunidades` con vista previa y
