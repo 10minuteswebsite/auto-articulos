@@ -127,6 +127,23 @@ Estado: PREPARADA / DESPLEGADA / VERIFICADA / REEMPLAZADA
 - Si falla una prueba o verificación, conservar el registro y marcar el
   estado real; nunca sustituirlo por `DESPLEGADA` o `VERIFICADA`.
 
+## Versión — 2026-10-09 — instrucciones MCP exactas (PR #505–#511)
+
+Fecha y hora: 2026-10-09 (America/New_York)
+Versión/commit: `a1903f5f` (PR #511)
+Rama: `main`
+Conversación/proyecto: REPARACION DE INSTRUCCIONES MCP
+Cambios incluidos: pantalla real de Asistentes IA idéntica a la maqueta aprobada, instrucciones exactas por IA, prompt corto con autorización permanente y horarios, URL por dominio.
+Archivos modificados: `apps/web/src/app/dashboard/configuracion/mcp/page.tsx`, `apps/web/src/content/manual-usuario.ts`, `COORDINACION_CLAUDE_CODEX.md`.
+Migraciones creadas/aplicadas: ninguna
+Auditoría 1: typecheck y build web OK en las PR #505 y #506.
+Auditoría 2: Vercel success en cada fusión (#505–#511).
+Auditoría 3: auditoría de dominios articulos/seototal/redes: mismo despliegue y mismas respuestas.
+Producción verificada: despliegue success; pantalla protegida sin revisar visualmente con sesión.
+Problemas conocidos: login OAuth de ChatGPT y etiquetas de ChatGPT/Muse sin probar en pantalla real.
+Responsable: Claude
+Estado: DESPLEGADA
+
 ## Versión preparada — 2026-08-28 — lotes atascados
 
 Fecha y hora: 2026-08-28
