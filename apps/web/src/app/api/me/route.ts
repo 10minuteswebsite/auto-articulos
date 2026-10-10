@@ -9,7 +9,7 @@ import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
 } from "@/lib/modules";
-import { getSocialHostContext, hasSocialModuleAccess } from "@/lib/social-access";
+import { getSocialHostContext, hasSocialModuleAccess, openAllNetworks } from "@/lib/social-access";
 import { getProductsSummary } from "@/lib/product-access";
 import { getEnforcementMode } from "@/lib/product-enforcement";
 
@@ -29,6 +29,7 @@ export async function GET() {
   const actingAdmin = await getActingAdmin();
   const globalDisabledModules = await getGlobalDisabledModules();
   const socialHost = await getSocialHostContext();
+  const networks = openAllNetworks(user, socialHost);
   const disabledModules = getEffectiveDisabledModules(user, globalDisabledModules, socialHost);
   const userDisabledModules = parseUserDisabledModules(user.disabledModules);
   const moduleOverrides = parseUserModuleOverrides(user.disabledModules);
@@ -72,15 +73,15 @@ export async function GET() {
       profilePhotoUrl3: user.profilePhotoUrl3,
       businessLogoUrl: user.businessLogoUrl,
       businessLogoUrl2: user.businessLogoUrl2,
-      allowInstagramPublishing: user.allowInstagramPublishing,
-      allowFacebookPublishing: user.allowFacebookPublishing,
-      allowLinkedInPublishing: user.allowLinkedInPublishing,
-      allowThreadsPublishing: user.allowThreadsPublishing,
-      allowBlueskyPublishing: user.allowBlueskyPublishing,
-      allowBloggerPublishing: user.allowBloggerPublishing,
-      allowPinterestPublishing: user.allowPinterestPublishing,
-      allowTumblrPublishing: user.allowTumblrPublishing,
-      allowGoogleBusinessPublishing: user.allowGoogleBusinessPublishing,
+      allowInstagramPublishing: networks.allowInstagramPublishing,
+      allowFacebookPublishing: networks.allowFacebookPublishing,
+      allowLinkedInPublishing: networks.allowLinkedInPublishing,
+      allowThreadsPublishing: networks.allowThreadsPublishing,
+      allowBlueskyPublishing: networks.allowBlueskyPublishing,
+      allowBloggerPublishing: networks.allowBloggerPublishing,
+      allowPinterestPublishing: networks.allowPinterestPublishing,
+      allowTumblrPublishing: networks.allowTumblrPublishing,
+      allowGoogleBusinessPublishing: networks.allowGoogleBusinessPublishing,
       socialPublishingApproved: Boolean(actingAdmin) || hasSocialModuleAccess({
         role: user.role,
         name: user.name,

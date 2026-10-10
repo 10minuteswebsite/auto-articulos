@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
-import { canUseSocialModule } from "@/lib/social-access";
+import { canUseSocialModule, getSocialHostContext } from "@/lib/social-access";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerSocialWorkerNow } from "@/lib/trigger-worker";
 import {
@@ -473,13 +473,14 @@ async function getConnectedNetworks(userId: string) {
   ]);
   const tumblrExpiresAt = await getFreshTumblrExpiry(tumblr, userId);
   const isAdmin = user?.role === "admin";
+  const redesHost = Boolean((await getSocialHostContext()).redesHost);
   const socialOverride = user?.email?.toLowerCase() === "lorenalvarez30@gmail.com";
   // X (Twitter) apagada a pedido explícito de Milton (30/8/2026): "no la
   // usaremos, salvo que la volvamos a solicitar". Se deja el resto del
   // código de X intacto (integración, publicación, historial) para poder
   // reactivarla fácil más adelante — solo se fuerza a `false` acá, el único
   // punto de donde sale si se muestra o no en Oportunidades en Redes.
-  const activeNetworks = { threads: Boolean(isAdmin || socialOverride || user?.allowThreadsPublishing), x: false, linkedin: Boolean(isAdmin || socialOverride || user?.allowLinkedInPublishing), instagram: Boolean(isAdmin || socialOverride || user?.allowInstagramPublishing), facebookPage: Boolean(isAdmin || socialOverride || user?.allowFacebookPublishing), pinterest: Boolean(isAdmin || socialOverride || user?.allowPinterestPublishing), tumblr: Boolean(isAdmin || socialOverride || user?.allowTumblrPublishing), bluesky: Boolean(isAdmin || user?.allowBlueskyPublishing), blogger: Boolean(isAdmin || socialOverride || user?.allowBloggerPublishing), googleBusiness: Boolean(isAdmin || socialOverride || user?.allowGoogleBusinessPublishing) };
+  const activeNetworks = { threads: Boolean(isAdmin || socialOverride || redesHost || user?.allowThreadsPublishing), x: false, linkedin: Boolean(isAdmin || socialOverride || redesHost || user?.allowLinkedInPublishing), instagram: Boolean(isAdmin || socialOverride || redesHost || user?.allowInstagramPublishing), facebookPage: Boolean(isAdmin || socialOverride || redesHost || user?.allowFacebookPublishing), pinterest: Boolean(isAdmin || socialOverride || redesHost || user?.allowPinterestPublishing), tumblr: Boolean(isAdmin || socialOverride || redesHost || user?.allowTumblrPublishing), bluesky: Boolean(isAdmin || redesHost || user?.allowBlueskyPublishing), blogger: Boolean(isAdmin || socialOverride || redesHost || user?.allowBloggerPublishing), googleBusiness: Boolean(isAdmin || socialOverride || redesHost || user?.allowGoogleBusinessPublishing) };
   return { activeNetworks, hideInstagramStories: !instagram && Boolean(composioInstagram?.igAccountId), hideFacebookStories: Boolean(composioFacebook?.pageId), threads: activeNetworks.threads && Boolean(threads || postPeerThreads?.status === "ACTIVE"), x: activeNetworks.x && Boolean(twitter), linkedin: activeNetworks.linkedin && Boolean(linkedin), instagram: activeNetworks.instagram && Boolean(instagram || composioInstagram?.igAccountId), facebookPage: activeNetworks.facebookPage && Boolean(facebookPage || composioFacebook?.pageId), pinterest: activeNetworks.pinterest && Boolean(composioPinterest || (pinterest && pinterest.boardId && (!pinterest.expiresAt || pinterest.expiresAt > new Date()))), tumblr: activeNetworks.tumblr && Boolean(tumblr && (!tumblrExpiresAt || tumblrExpiresAt > new Date())), bluesky: activeNetworks.bluesky && Boolean(bluesky), blogger: activeNetworks.blogger && Boolean(blogger), googleBusiness: activeNetworks.googleBusiness && googleBusiness?.status === "ACTIVE" };
 }
 
@@ -544,7 +545,7 @@ export async function POST(request: Request) {
         where: { id: userId },
         select: { allowInstagramPublishing: true },
       });
-      if (user?.allowInstagramPublishing) {
+      if ((await getSocialHostContext()).redesHost || user?.allowInstagramPublishing) {
         const hasComposioInstagram = Boolean((connected as { hideInstagramStories?: boolean }).hideInstagramStories);
         if (!hasComposioInstagram) integrations.push("instagram-story");
         integrations.push("instagram-post");

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { hasSocialPublishingApproval, hasSocialModuleAccess } from "./social-access";
+import { type SocialPublishingPermissionUser, hasSocialPublishingApproval, hasSocialModuleAccess, openAllNetworks } from "./social-access";
 import { hasLegacySocialModuleAccess } from "@auto-articulos/shared";
 
 test("oculta difusión para un usuario sin aprobaciones de redes o blogs", () => {
@@ -114,4 +114,18 @@ test("otros dominios: cuenta fuera de la lista piloto sigue sin acceso", () => {
     hasSocialModuleAccess({ role: "user", name: "Lorena Alvarez", allowBloggerPublishing: true }, {}),
     true,
   );
+});
+
+test("dominio redes: todas las redes quedan abiertas aunque Administración no marque ninguna", () => {
+  const opened = openAllNetworks<SocialPublishingPermissionUser>({ role: "user", allowInstagramPublishing: false }, { redesHost: true });
+  assert.equal(opened.allowInstagramPublishing, true);
+  assert.equal(opened.allowTumblrPublishing, true);
+  assert.equal(hasSocialPublishingApproval(opened), true);
+  assert.equal(hasSocialModuleAccess({ role: "user", name: "Hector Travasillo" }, { redesHost: true }), true);
+});
+
+test("otros dominios: las marcas por red de Administración no se tocan", () => {
+  const user = { role: "user", allowInstagramPublishing: false };
+  assert.equal(openAllNetworks(user, {}), user);
+  assert.equal(openAllNetworks(user, {}).allowInstagramPublishing, false);
 });
