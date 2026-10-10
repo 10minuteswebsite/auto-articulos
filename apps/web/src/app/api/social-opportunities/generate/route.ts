@@ -730,7 +730,9 @@ export async function POST(request: Request) {
         // activeKeys.
         const lockKey = `${userId}:${article.articleUrl || article.id}:${platform}`;
         const opp = await prisma.$transaction(async (tx) => {
-          await tx.$queryRawUnsafe("SELECT pg_advisory_xact_lock(hashtext($1))", lockKey);
+          // $executeRawUnsafe, no $queryRawUnsafe: pg_advisory_xact_lock devuelve
+          // `void` y Prisma no puede leer esa columna (500 en producción desde 2026-10-06).
+          await tx.$executeRawUnsafe("SELECT pg_advisory_xact_lock(hashtext($1))", lockKey);
           const existing = await tx.socialOpportunity.findFirst({
             where: {
               userId,

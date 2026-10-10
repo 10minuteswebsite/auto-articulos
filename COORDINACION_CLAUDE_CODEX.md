@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — «Generar propuestas» respondía 500 (pg_advisory_xact_lock / void) — 2026-10-10
+
+- Síntoma (prueba en vivo con Lorena en redes.lasolucionweb.com): `POST /api/social-opportunities/generate` → 500 «Failed to deserialize column of type 'void'».
+- Causa (logs de producción): `generate/route.ts` leía `SELECT pg_advisory_xact_lock(...)` con `$queryRawUnsafe`; esa función devuelve `void`. Entró en el commit `7e1e4c69` (2026-10-06): crear propuestas estaba roto para todas las cuentas desde entonces.
+- Arreglo: `$executeRawUnsafe` + prueba de regresión. Sin schema ni migración.
+
 ## Claude — REDES: todas las redes abiertas en redes.lasolucionweb.com — 2026-10-10 — PR siguiente a #514
 
 - Decisión de Milton: en redes.lasolucionweb.com TODAS las cuentas tienen todas las redes abiertas; en seototal.lasolucionweb.com no cambia nada (marcas por red y lista piloto siguen).
