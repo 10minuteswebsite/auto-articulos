@@ -96,7 +96,7 @@ export default function ConfiguracionMcpPage() {
     const scope = productOfHost(window.location.hostname);
     setHostProduct(scope);
     setProduct(scope === "REDES" ? "Redes" : scope === "ARTICULOS" ? "Artículos" : "SEO Total");
-    setServerUrl("https://seototal.lasolucionweb.com/api/mcp");
+    setServerUrl(`${window.location.origin}/api/mcp`);
     fetch("/api/configuracion/mcp-token")
       .then((res) => (res.ok ? res.json() : null))
       .then((data: { active?: boolean } | null) => setTokenActive(Boolean(data?.active)))
