@@ -11167,3 +11167,39 @@ No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta ta
 ninguna duda sin resolver para Milton en este rango.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-10
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-08 (commit
+`de9c38e`). Se revisó el rango `de9c38e..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 44
+líneas agregadas (0 eliminadas, confirmado con `git diff --stat`), 2 bloques nuevos: "Claude —
+CIERRE «REPARACION DE INSTRUCCIONES MCP» — 2026-10-09" y "Claude — INSTRUCCIONES MCP EXACTAS
+en /dashboard/configuracion/mcp — 2026-10-09".
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: sin cambios por esta tarea — ya tenía la entrada "Versión —
+  2026-10-09 — instrucciones MCP exactas (PR #505–#511)" (agregada por el propio PR #512 de
+  cierre, commit `321087f`), con el mismo detalle de PRs, archivos y auditorías que describen
+  los dos bloques nuevos de Coordinación. No se duplicó.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios por esta tarea — el PR #505 (commit
+  `cd2d208`) ya actualizó la sección "Asistentes IA" del manual con las instrucciones por IA
+  (Claude, ChatGPT, Muse, Otra IA), la autorización permanente para crear y publicar, y la
+  confirmación exigida solo para borrar/descartar/cancelar. El detalle de "URL por dominio"
+  (PR #510/#511) no cambia ninguna acción visible para la persona usuaria (solo cambia qué
+  dirección de servidor aparece ya escrita en el texto que copia) y la publicación programada
+  dentro de SEO Total fue descartada por Milton, así que no requería texto nuevo.
+- `INVENTARIO_CONVERSACIONES.md`: nueva entrada en Parte B, `REPARACION DE INSTRUCCIONES MCP`.
+  Parte A sin cambios — se verificó que no hay ningún worktree ni rama sin fusionar para este
+  proyecto en `origin/main` (coincide con "Capitanía liberada" de la propia entrada de cierre).
+- `TO-DO.md`: nueva entrada en "Pendientes" (10/10/2026) con las tres verificaciones que la
+  propia entrada de cierre deja sin probar: login OAuth de ChatGPT (requiere
+  `OAUTH_CHATGPT_CLIENT_ID` en el servidor), etiquetas en español de ChatGPT/Muse contra la
+  pantalla real, y revisión visual de la pantalla protegida con sesión iniciada.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguno de los dos bloques nuevos describe
+  un árbol de git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. No quedó
+ninguna duda sin resolver para Milton en este rango.
+
+Responsable: Claude (tarea programada diaria de propagación).
