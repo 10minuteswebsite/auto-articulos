@@ -476,6 +476,29 @@ de Redes por cuenta en Administración — 2026-10-07" de `COORDINACION_CLAUDE_C
   Vercel `42Lr4iy6cK1T1Dv6CCcA7gQVtDXj`, estado `success`). Detalle completo propagado también
   a `CONTROLADOR_DE_VERSIONES.md`.
 
+### `REPARACION DE INSTRUCCIONES MCP`
+
+Entrada agregada por la tarea programada diaria de propagación (2026-10-10), a partir de las
+secciones "Claude — CIERRE «REPARACION DE INSTRUCCIONES MCP» — 2026-10-09" y "Claude —
+INSTRUCCIONES MCP EXACTAS en /dashboard/configuracion/mcp — 2026-10-09" de
+`COORDINACION_CLAUDE_CODEX.md`.
+
+- Agente: Claude.
+- Proyecto: instrucciones de conexión exactas por IA (Claude, ChatGPT, Muse, Otra IA) en la
+  pantalla real de Configuración → Asistentes IA (`/dashboard/configuracion/mcp`), con prompt
+  corto y autorización permanente para crear y publicar artículos sin pedir aprobación en cada
+  paso (borrar/descartar/cancelar sí sigue pidiendo confirmación), y URL del servidor mostrada
+  según el dominio donde se abre la pantalla.
+- PRs fusionadas (todas Vercel success): #505, #506, #507, #508, #509, #510 (revertida), #511
+  (cierre `a1903f5f`).
+- No hay worktree ni rama declarados como reserva activa — la propia entrada de Coordinación
+  dice "Capitanía liberada", y no se encontró ningún commit sin fusionar para este proyecto al
+  revisar `origin/main`.
+- Estado: CERRADO Y ARCHIVADO. Detalle completo propagado también a
+  `CONTROLADOR_DE_VERSIONES.md` ("Versión — 2026-10-09 — instrucciones MCP exactas (PR
+  #505–#511)"). Pendientes sin verificar (login OAuth de ChatGPT, etiquetas en español contra
+  pantalla real, revisión visual con sesión) anotados en `TO-DO.md`.
+
 ---
 
 ## Entradas originales completas (preservadas tal cual, sin editar)
