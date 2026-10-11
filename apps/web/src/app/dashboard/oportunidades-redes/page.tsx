@@ -82,6 +82,19 @@ function groupOfPlatform(platform: string): NetworkGroup {
   return value === "threads" || value.startsWith("instagram") || value.startsWith("facebook") ? "meta" : "otras";
 }
 
+/** Redacta lo que publica el sistema: «1 publicación por día» o «por día: Instagram 5, Threads 5 y Facebook 1». */
+function describeDailyLimits(rows: ReadonlyArray<{ key: string; label: string }>, limits: Record<string, number>): string {
+  const items = rows.map((row) => ({ label: row.label, limit: limits[row.key] ?? 1 }));
+  if (items.length === 0) return "1 publicación por día";
+  const first = items[0].limit;
+  if (items.every((item) => item.limit === first)) {
+    return first === 0 ? "ninguna publicación (Administración la tiene en 0)" : `${first} ${first === 1 ? "publicación" : "publicaciones"} por día en cada red`;
+  }
+  const parts = items.map((item) => `${item.label} ${item.limit}`);
+  const list = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} y ${parts[parts.length - 1]}` : parts[0];
+  return `por día: ${list}`;
+}
+
 const GROUP_CARDS: ReadonlyArray<{ id: NetworkGroup; title: string; hint: string }> = [
   { id: "meta", title: "META", hint: "Instagram, Threads y Facebook" },
   { id: "otras", title: "Otras redes y blogs", hint: "LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business" },
@@ -104,6 +117,7 @@ export default function OportunidadesRedesPage() {
   const [publishingAll, setPublishingAll] = useState(false);
   const [message, setMessage] = useState<{ kind: "success" | "error" | "info"; text: string } | null>(null);
   const [skipModal, setSkipModal] = useState<{ opp: SocialOpportunity; reason: string; customReason: string } | null>(null);
+  const [dailyLimits, setDailyLimits] = useState<Record<string, number>>({});
   const [openGroup, setOpenGroup] = useState<NetworkGroup | null>(null);
   const [cameFromHome, setCameFromHome] = useState(false);
   // Entrada directa desde las tarjetas del Inicio: /dashboard/oportunidades-redes?grupo=meta|otras
@@ -166,6 +180,7 @@ export default function OportunidadesRedesPage() {
         const effectiveConnections = { threads: Boolean(data.threads), x: Boolean(data.x), linkedin: Boolean(data.linkedin), instagram: Boolean(data.instagram), facebookPage: Boolean(data.facebookPage), pinterest: Boolean(data.pinterest), tumblr: Boolean(data.tumblr), bluesky: Boolean(data.bluesky), blogger: Boolean(data.blogger), googleBusiness: Boolean(data.googleBusiness) };
         setConnectedNetworks(effectiveConnections);
         setActiveNetworks(data.activeNetworks ?? effectiveConnections);
+        setDailyLimits(data.dailyLimits ?? {});
         setStoriesUnavailable({ instagram: Boolean(data.hideInstagramStories), facebook: Boolean(data.hideFacebookStories) });
       }
     } catch {
@@ -503,16 +518,20 @@ export default function OportunidadesRedesPage() {
               {openCard?.title ?? MENU_NAMES.redes}
             </h1>
             <MobileInstructions>
+              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
+                Aquí configuras las redes que difunden de forma inteligente el contenido de tu página web: el sistema
+                toma tus artículos, prepara la publicación para cada red y publica{" "}
+                <strong>{describeDailyLimits(groupRows, dailyLimits)}</strong>.
+              </p>
               {groupConnectedCount === 0 ? (
-                <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
+                <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                   Aún no hay ninguna red conectada aquí. Pulsa <strong>Configurar</strong> en la que quieras activar y,
                   al terminar, volverás a esta pantalla.
                 </p>
               ) : (
                 <>
-                  <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                    Pulsa <strong>Crear oportunidad</strong> en una red conectada y el sistema prepara la publicación a
-                    partir de tus artículos. Tú la revisas y decides si sale.
+                  <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
+                    Pulsa <strong>Crear oportunidad</strong> en una red conectada, revisa la propuesta y decide si sale.
                   </p>
                   {groupConnectedCount < groupRows.length && (
                     <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#6e6e73" }}>
