@@ -4191,3 +4191,49 @@ allowlist — 2026-10-07" y "Codex — etiqueta de Redes por cuenta en Administr
   Coordinación.
 - Responsable: Codex.
 - Estado: CERRADO, DESPLEGADO Y VERIFICADO (según Coordinación).
+
+## Versión — 2026-10-10 — Redes: excepción por dominio, todas las redes abiertas y fix de "Generar propuestas" (PRs #514, #515, #516)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("Claude — REDES por dominio: acceso activo en
+redes.lasolucionweb.com + 403 de la API — 2026-10-10", "Claude — REDES: todas las redes
+abiertas en redes.lasolucionweb.com — 2026-10-10 — PR siguiente a #514" y "Claude — «Generar
+propuestas» respondía 500 (pg_advisory_xact_lock / void) — 2026-10-10") por la tarea programada
+diaria de propagación (2026-10-11).
+
+- **PR #514 (commit `cd76253`)** — Hallazgo en prueba en vivo con la cuenta de Lorena Alvarez:
+  `/api/social-opportunities` y `/api/me` devolvían 403 a toda cuenta no administradora porque
+  `canUseSocialModule` no traía nombre/correo y la lista piloto (commit `480abb4` del 2026-10-07)
+  decide por identidad. Decisión de Milton: el módulo Redes queda oculto solo en
+  `seototal.lasolucionweb.com`; en `redes.lasolucionweb.com` siempre está activo (lo gobierna el
+  HUB). Cambio en `apps/web/src/lib/modules.ts`, `apps/web/src/lib/social-access.ts`,
+  `apps/web/src/lib/product-access.ts` y `apps/web/src/app/api/me/route.ts`: reciben el contexto
+  de dominio; en el dominio redes ni el apagado global ni la lista piloto aplican (el
+  "Deshabilitado" explícito por cuenta sí se respeta). Detalle completo de hallazgos en
+  `HALLAZGOS_REVISION_EN_VIVO_REDES.md`. Sin schema ni migración.
+- **PR #515 (commit `42219ad`)** — Decisión de Milton: en `redes.lasolucionweb.com` TODAS las
+  cuentas tienen todas las redes abiertas, sin depender de las marcas por red de
+  Administración; en `seototal.lasolucionweb.com` no cambia nada (marcas por red y lista piloto
+  siguen). Cambio con `openAllNetworks` + `getSocialHostContext`
+  (`apps/web/src/lib/social-access.ts`), aplicados en `canPublishToNetwork`, `/api/me`,
+  `social-opportunities/publish` y `social-opportunities/generate`. El "Deshabilitado" explícito
+  por cuenta se sigue respetando. Sin schema ni migración.
+- **PR #516 (commit `f12ca46`)** — Bug en producción detectado también en la prueba en vivo con
+  Lorena: `POST /api/social-opportunities/generate` devolvía 500 ("Failed to deserialize column
+  of type 'void'"). Causa: `apps/web/src/app/api/social-opportunities/generate/route.ts` leía
+  `SELECT pg_advisory_xact_lock(...)` con `$queryRawUnsafe`, y esa función devuelve `void`; el
+  defecto entró con el commit `7e1e4c6` del 2026-10-06, así que "Generar propuestas" estuvo roto
+  para todas las cuentas desde esa fecha hasta este fix. Arreglo: cambiar a
+  `$executeRawUnsafe` + prueba de regresión agregada. Sin schema ni migración.
+- `apps/web/src/content/manual-usuario.ts` ya fue actualizado por los propios PRs #514/#515
+  (línea "Excepción por dirección (2026-10-10)" en la sección de Redes): esta tarea de
+  propagación no duplicó ese texto.
+- Producción: las tres entradas de Coordinación describen pruebas hechas en vivo directamente
+  sobre `redes.lasolucionweb.com`; esta tarea de propagación no tiene acceso a Vercel para
+  verificar el estado del deployment de forma independiente.
+- Pendiente sin resolver (anotado por la propia entrada de Coordinación del PR #515): el worker
+  (`apps/worker/src/product-access.ts`) no conoce el dominio; solo importa si el interruptor de
+  derechos pasa de "off" a "enforce". Ver también la duda abierta sobre si el dominio redes debe
+  seguir exigiendo al menos una red aprobada (agregada en `TO-DO.md` por esta misma tarea).
+- Responsable: Claude.
+- Estado: CERRADO según las entradas originales de Coordinación (sin acción destructiva, sin
+  migración, sin deploy ejecutado por esta tarea de propagación).
