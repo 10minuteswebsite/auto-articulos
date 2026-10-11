@@ -472,51 +472,23 @@ export default function OportunidadesRedesPage() {
 
   return (
     <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
-      {/* Panel Superior */}
-      <div
-        style={{
-          ...sectionStyle,
-          // Pedido explícito de Milton (1/10/2026): sin el rectángulo
-          // exterior del `.panel` estándar en esta pantalla en particular.
-          border: "none",
-          padding: "20px 0 24px",
-          marginBottom: 20,
-          marginTop: 0,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            gap: 16,
+      {/* Cabecera */}
+      <div style={{ padding: "20px 0 20px" }}>
+        <button
+          type="button"
+          onClick={() => {
+            setMessage(null);
+            if (cameFromHome) router.push("/dashboard");
+            else setOpenGroup(null);
           }}
+          style={{ border: "none", background: "transparent", padding: 0, margin: "0 0 10px", fontSize: 14, color: "#0066cc", cursor: "pointer", fontFamily: "inherit" }}
         >
-          <div>
-            <button
-              type="button"
-              onClick={() => {
-                setMessage(null);
-                if (cameFromHome) router.push("/dashboard");
-                else setOpenGroup(null);
-              }}
-              style={{ border: "none", background: "transparent", padding: 0, margin: "0 0 10px", fontSize: 14, color: "#0066cc", cursor: "pointer", fontFamily: "inherit" }}
-            >
-              {cameFromHome ? "‹ Inicio" : "‹ Redes"}
-            </button>
-            <p className="eyebrow" style={{ margin: "0 0 6px" }}>Difusión Social</p>
-            <h1
-              style={{
-                fontSize: 26,
-                fontWeight: 600,
-                color: "#1d1d1f",
-                margin: "0 0 6px 0",
-                letterSpacing: "-0.03em",
-              }}
-            >
-              {openCard?.title ?? MENU_NAMES.redes}
-            </h1>
+          {cameFromHome ? "‹ Inicio" : "‹ Redes"}
+        </button>
+        <p className="eyebrow" style={{ margin: "0 0 6px" }}>Difusión Social</p>
+        <h1 style={{ fontSize: 26, fontWeight: 600, color: "#1d1d1f", margin: "0 0 6px 0", letterSpacing: "-0.03em" }}>
+          {openCard?.title ?? MENU_NAMES.redes}
+        </h1>
             <MobileInstructions>
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                 Aquí configuras las redes que difunden de forma inteligente el contenido de tu página web: el sistema
@@ -541,80 +513,54 @@ export default function OportunidadesRedesPage() {
                 </>
               )}
             </MobileInstructions>
-          </div>
+      </div>
 
-          <div
-            style={{
-              width: "100%",
-              marginTop: 18,
-              paddingTop: 16,
-              borderTop: "1px solid #e5e5ea",
-            }}
-          >
-            {connectionsLoading ? (
-              <span className="muted" style={{ fontSize: 13, padding: "9px 0" }}>
-                Preparando las redes conectadas...
-              </span>
-            ) : (
-              <>
-                <button
-                  onClick={handleGenerateGroup}
-                  disabled={generatingAll || generatingNetwork !== null}
-                  style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginBottom: 16 }}
-                >
-                  {generatingAll ? "Generando propuestas..." : `Generar propuestas para ${openCard?.title ?? "redes y blogs"}`}
-                </button>
-                {openGroup && (
-                  <div style={{ marginTop: 8 }}>
-                    {NETWORK_ROWS.filter((row) => row.group === openGroup).map(({ key, platform, label, conexionId }) => {
-                      if (!activeNetworks[key]) return null;
-                      const connected = connectedNetworks[key];
-                      const busy = Boolean(generatingNetwork);
-                      const unavailable = !connected;
-                      const actionStyle: CSSProperties = { border: "none", background: "transparent", padding: 0, fontSize: 14, color: unavailable ? "#86868b" : "#0066cc", cursor: busy ? "wait" : "pointer", fontFamily: "inherit" };
-                      return <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid #e5e5ea" }}>
-                        <span style={{ fontSize: 15, color: unavailable ? "#86868b" : "#1d1d1f" }}>{label}</span>
-                        {unavailable && conexionId ? (
-                          <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => {
-                            try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
-                            router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`);
-                          }}>Configurar ›</button>
-                        ) : unavailable ? (
-                          <span style={{ fontSize: 14, color: "#86868b" }}>No disponible</span>
-                        ) : (
-                          <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => handleGenerate(platform)}>{generatingNetwork === platform ? "Analizando..." : "Crear oportunidad"}</button>
-                        )}
-                      </div>;
-                    })}
-                  </div>
-                )}
-              </>
-            )}
-            {groupPending.length > 0 && (
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
-                <button
-                  onClick={handleDeleteAll}
-                  disabled={deletingAll || publishingAll}
-                  className="secondary"
-                  style={disabledStyle(
-                    { ...secondaryButtonStyle, ...uniformButtonSize, color: "#ff3b30", whiteSpace: "nowrap" },
-                    deletingAll || publishingAll,
+      <div className="redes-split">
+        {/* Columna izquierda: redes y generar */}
+        <aside className="redes-split-side" style={{ border: "1px solid #d2d2d7", borderRadius: 6, padding: 18, background: "#ffffff" }}>
+          {connectionsLoading ? (
+            <span className="muted" style={{ fontSize: 13 }}>Preparando las redes conectadas...</span>
+          ) : (
+            <>
+              <p style={{ margin: "0 0 12px", fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: "#6e6e73" }}>
+                Redes de {openCard?.title}
+              </p>
+              <button
+                onClick={handleGenerateGroup}
+                disabled={generatingAll || generatingNetwork !== null || groupConnectedCount === 0}
+                style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginTop: 0, marginBottom: 8 }}
+              >
+                {generatingAll ? "Generando propuestas..." : "Generar propuestas"}
+              </button>
+              {NETWORK_ROWS.filter((row) => row.group === openGroup).map(({ key, platform, label, conexionId }) => {
+                if (!activeNetworks[key]) return null;
+                const connected = connectedNetworks[key];
+                const busy = Boolean(generatingNetwork);
+                const unavailable = !connected;
+                const actionStyle: CSSProperties = { border: "none", background: "transparent", padding: 0, fontSize: 14, color: unavailable ? "#86868b" : "#0066cc", cursor: busy ? "wait" : "pointer", fontFamily: "inherit", whiteSpace: "nowrap" };
+                return <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "11px 0", borderTop: "1px solid #e5e5ea" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, color: unavailable ? "#86868b" : "#1d1d1f" }}>
+                    <span aria-hidden="true" style={{ fontSize: 9, color: unavailable ? "#c7c7cc" : "#16803c" }}>●</span>
+                    {label}
+                  </span>
+                  {unavailable && conexionId ? (
+                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => {
+                      try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
+                      router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`);
+                    }}>Configurar ›</button>
+                  ) : unavailable ? (
+                    <span style={{ fontSize: 14, color: "#86868b" }}>No disponible</span>
+                  ) : (
+                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => handleGenerate(platform)}>{generatingNetwork === platform ? "Analizando..." : "Crear oportunidad"}</button>
                   )}
-                >
-                  {deletingAll ? "Borrando..." : `Borrar las pendientes de ${openCard?.title ?? "esta lista"}`}
-                </button>
-                <button
-                  onClick={handlePublishAll}
-                  disabled={publishingAll || deletingAll}
-                  style={{ ...buttonStyle, ...uniformButtonSize, marginTop: 0, whiteSpace: "nowrap" }}
-                >
-                  {publishingAll ? "Publicando..." : `Publicar el lote de ${openCard?.title ?? "esta lista"}`}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+                </div>;
+              })}
+            </>
+          )}
+        </aside>
 
+        {/* Columna derecha: progreso, mensajes y propuestas */}
+        <div className="redes-split-main">
         {generating && (
           <div
             role="status"
@@ -645,49 +591,69 @@ export default function OportunidadesRedesPage() {
             </div>
           </div>
         )}
-      </div>
 
-      {message && (
-        <div
-          style={{
-            padding: "0 0 16px",
-            marginBottom: 4,
-            fontSize: 13,
-            fontWeight: 500,
-            color: message.kind === "success" ? "#16803c" : message.kind === "error" ? "#ff3b30" : "#6e6e73",
-          }}
-        >
-          {message.text}
-        </div>
-      )}
+          {message && (
+            <div
+              style={{
+                padding: "0 0 16px",
+                fontSize: 13,
+                fontWeight: 500,
+                color: message.kind === "success" ? "#16803c" : message.kind === "error" ? "#ff3b30" : "#6e6e73",
+              }}
+            >
+              {message.text}
+            </div>
+          )}
 
-      {loading ? (
-        <div className="muted" style={{ textAlign: "center", padding: 40 }}>
-          Cargando propuestas...
-        </div>
-      ) : (
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h2 style={{ ...h2Style, margin: 0, fontSize: 18 }}>
-              Propuestas Pendientes ({groupPending.length})
-            </h2>
-          </div>
-
-          {groupPending.length === 0 ? (
-            <section style={{ ...sectionStyle, padding: "16px 0 24px" }}>
-              <p className="muted" style={{ margin: 0 }}>
-                No tienes propuestas pendientes. Usa los botones de arriba para generarlas.
-              </p>
-              <button
-                onClick={() => router.push("/dashboard/publicaciones-en-curso")}
-                className="secondary"
-                style={{ ...secondaryButtonStyle, ...uniformButtonSize, marginTop: 14 }}
-              >
-                Ver progreso de las publicaciones
-              </button>
-            </section>
+          {loading ? (
+            <div className="muted" style={{ textAlign: "center", padding: 40 }}>
+              Cargando propuestas...
+            </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 14 }}>
+                <h2 style={{ ...h2Style, margin: 0, fontSize: 18 }}>
+                  Propuestas pendientes ({groupPending.length})
+                </h2>
+                {groupPending.length > 0 && (
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button
+                      onClick={handleDeleteAll}
+                      disabled={deletingAll || publishingAll}
+                      className="secondary"
+                      style={disabledStyle(
+                        { ...secondaryButtonStyle, ...uniformButtonSize, color: "#ff3b30", whiteSpace: "nowrap" },
+                        deletingAll || publishingAll,
+                      )}
+                    >
+                      {deletingAll ? "Borrando..." : "Borrar pendientes"}
+                    </button>
+                    <button
+                      onClick={handlePublishAll}
+                      disabled={publishingAll || deletingAll}
+                      style={{ ...buttonStyle, ...uniformButtonSize, marginTop: 0, whiteSpace: "nowrap" }}
+                    >
+                      {publishingAll ? "Publicando..." : "Publicar todas"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {groupPending.length === 0 ? (
+                <section style={{ ...sectionStyle, padding: "16px 0 24px" }}>
+                  <p className="muted" style={{ margin: 0 }}>
+                    No tienes propuestas pendientes. Pulsa <strong>Crear oportunidad</strong> en una red conectada para generarlas.
+                  </p>
+                  <button
+                    onClick={() => router.push("/dashboard/publicaciones-en-curso")}
+                    className="secondary"
+                    style={{ ...secondaryButtonStyle, ...uniformButtonSize, marginTop: 14 }}
+                  >
+                    Ver progreso de las publicaciones
+                  </button>
+                </section>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
               {groupPending.map((opp) => {
                 const isQueuedOrProcessing = false;
                 return (
@@ -775,10 +741,12 @@ export default function OportunidadesRedesPage() {
                   </div>
                 );
               })}
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
+      </div>
 
       {/* Modal de Descarte */}
       {skipModal && (

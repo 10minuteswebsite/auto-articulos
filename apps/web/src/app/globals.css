@@ -457,3 +457,25 @@ select {
     white-space: normal;
   }
 }
+
+
+/* Pantalla de Redes: columna de redes a la izquierda y propuestas a la derecha; en móvil se apilan. */
+.redes-split {
+  display: grid;
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.redes-split-side {
+  position: sticky;
+  top: 16px;
+}
+@media (max-width: 700px) {
+  .redes-split {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .redes-split-side {
+    position: static;
+  }
+}
