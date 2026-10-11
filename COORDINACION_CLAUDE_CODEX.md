@@ -1,5 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Enlaces NO clicables en Threads/Bluesky (recorte + facets) — 2026-10-11
+
+- Hallazgo (Milton, post de Threads publicado en vivo): el enlace no se resaltaba ni se podía pulsar. Evidencia en el navegador: en Threads el post corto (espacio antes de la URL) sí tenía enlace azul; los recortados («cobe...https://…») no. En Bluesky ningún post tenía enlace clicable (el código nunca declaraba «facets»). LinkedIn y Facebook: correctos; Tumblr tiene su propio enlace; Blogger usa anchor HTML.
+- Causa 1: `buildSafeCaption` (packages/shared/src/caption-limits.ts) pegaba la URL justo después de «...» al recortar. Arreglo: espacio obligatorio antes de la URL, sin partir la última palabra, y `[ENLACE]` pegado a otra palabra se separa.
+- Causa 2: `createBlueskyPost` no enviaba `facets`. Arreglo: `buildBlueskyLinkFacets` (posiciones en bytes UTF-8).
+- Sin schema ni migración. Lo ya publicado no se modifica. Pruebas nuevas en `apps/worker/src/socialLinkContract.test.ts`.
+- Aparte, anotado: el post de Facebook del 21-sep muestra un recuadro amarillo en vez de la imagen (por revisar).
+
 ## Claude — «Generar propuestas» respondía 500 (pg_advisory_xact_lock / void) — 2026-10-10
 
 - Síntoma (prueba en vivo con Lorena en redes.lasolucionweb.com): `POST /api/social-opportunities/generate` → 500 «Failed to deserialize column of type 'void'».
