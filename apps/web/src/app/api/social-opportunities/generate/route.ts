@@ -81,8 +81,12 @@ async function generateGPTCopy(
   const isFacebookPage = platform === "facebook-page";
   const isPinterest = platform === "pinterest";
   const isBlogger = platform === "blogger";
-  const charLimit = isLinkedIn ? 1300 : isFacebookPage ? 700 : isInstagramFeedCaption ? 1000 : isPinterest ? 800 : isBlogger ? 1600 : 360;
-  const maxTokens = isLinkedIn ? 700 : isFacebookPage ? 450 : isInstagramFeedCaption ? 550 : isPinterest ? 500 : isBlogger ? 800 : 300;
+  const charLimit = isLinkedIn ? 1300 : isFacebookPage ? 700 : isInstagramFeedCaption ? 1000 : isPinterest ? 800 : isBlogger ? 1600 : platform === "bluesky" ? 170 : 360;
+  const maxTokens = isLinkedIn ? 700 : isFacebookPage ? 450 : isInstagramFeedCaption ? 550 : isPinterest ? 500 : isBlogger ? 800 : platform === "bluesky" ? 150 : 300;
+  // Presupuesto real del texto de la IA en las redes cortas: el límite de la red
+  // INCLUYE el enlace (~90 caracteres) y la IA suele pasarse (Bluesky: 365-407
+  // caracteres para un tope de 300). Si se pasa, se le pide una sola vez que lo acorte.
+  const hardBudget = platform === "bluesky" ? 200 : platform === "x" ? 240 : platform === "threads" ? 400 : null;
   const styleNote = isLinkedIn
     ? "Tono profesional pero cercano (LinkedIn), con más contexto y valor. Puedes usar párrafos cortos separados por saltos de línea."
     : isBlogger
@@ -112,7 +116,7 @@ async function generateGPTCopy(
     : "No hay identidad profesional verificada disponible. No inventes nombre, profesión, ubicación, clientes ni anécdotas personales; escribe desde la utilidad del contenido y usa primera persona solo de forma editorial, sin afirmaciones biográficas.\n";
   const language = profile?.contentLanguage === "en" ? "inglés" : "español";
   try {
-    const response = await fetch(OPENAI_CHAT_URL, {
+    const callModel = (extraMessages: Array<{ role: "assistant" | "user"; content: string }>) => fetch(OPENAI_CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -146,13 +150,28 @@ async function generateGPTCopy(
               searchContext + analyticsContext +
               `- Usa las consultas reales solo como contexto: no las enumeres, no inventes datos y mantén un tono natural.`,
           },
+          ...extraMessages,
         ],
         temperature: 0.85,
         max_tokens: maxTokens,
       }),
     });
+    const response = await callModel([]);
     const data = (await response.json()) as any;
-    return data.choices?.[0]?.message?.content?.trim() ?? fallbackText;
+    const text: string = data.choices?.[0]?.message?.content?.trim() ?? fallbackText;
+    if (hardBudget && text !== fallbackText && text.length > hardBudget) {
+      const retry = await callModel([
+        { role: "assistant", content: text },
+        {
+          role: "user",
+          content: `Tu texto midió ${text.length} caracteres y el máximo es ${hardBudget}. Reescríbelo más corto (máximo ${hardBudget} caracteres), con la misma idea y el mismo tono, terminando con la palabra exacta "[ENLACE]". Responde solo con el texto.`,
+        },
+      ]);
+      const retryData = (await retry.json()) as any;
+      const shorter: string | undefined = retryData.choices?.[0]?.message?.content?.trim();
+      if (shorter && shorter.length < text.length) return shorter;
+    }
+    return text;
   } catch {
     return fallbackText;
   }
@@ -552,39 +571,14 @@ export async function POST(request: Request) {
       }
     }
 
-    // El cupo diario (Administración → Difusión) antes solo se aplicaba al
-    // publicar en el worker: el botón de generación podía crear una
-    // propuesta pendiente igual, aunque el cupo del día ya estuviera
-    // completo — hallazgo de la auditoría del 1/10/2026. Se filtra acá
-    // también, con el mismo cálculo exacto que usa el worker
-    // (enforceSocialDailyLimit en apps/worker/src/socialPublish.ts): 1 por
-    // día si no hay valor guardado, 0 bloquea el formato.
-    const dailyLimitsRaw = (await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } }))?.socialDailyLimits;
-    const dailyLimits = (dailyLimitsRaw && typeof dailyLimitsRaw === "object" && !Array.isArray(dailyLimitsRaw))
-      ? dailyLimitsRaw as Record<string, unknown> : {};
-    const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
-    const limitedOut: string[] = [];
-    const integrationsWithinLimit: string[] = [];
-    const remainingByPlatform = new Map<string, number>();
-    for (const platform of integrations) {
-      const raw = dailyLimits[platform];
-      const limit = typeof raw === "number" && Number.isInteger(raw) && raw >= 0 ? raw : 1;
-      const published = await prisma.socialOpportunity.count({
-        where: { userId, platform, status: "published", publishedAt: { gte: dayStart } },
-      });
-      const remaining = Math.max(0, limit - published);
-      remainingByPlatform.set(platform, remaining);
-      if (remaining === 0) limitedOut.push(platform);
-      else integrationsWithinLimit.push(platform);
-    }
+    // El cupo diario (Administración → Difusión) limita cuántas veces se PUBLICA
+    // por día, no cuántas propuestas se crean (decisión de Milton, 2026-10-11).
+    // Se comprueba al pulsar «Publicar» (publish/route.ts) y, como respaldo, en
+    // el worker. Cada pulsación crea una propuesta por red.
+    const integrationsWithinLimit: string[] = [...integrations];
+    const remainingByPlatform = new Map<string, number>(integrations.map((platform) => [platform, 1]));
 
     if (integrationsWithinLimit.length === 0) {
-      if (limitedOut.length > 0) {
-        return NextResponse.json(
-          { error: `Ya alcanzaste el cupo diario de hoy para ${limitedOut.join(", ")}. Se renueva mañana, o puedes ajustarlo en Administración.` },
-          { status: 400 },
-        );
-      }
       console.warn("[social-opportunities/generate] red solicitada sin conexión efectiva", {
         requestedNetworks,
         connected,

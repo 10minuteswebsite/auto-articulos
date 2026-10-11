@@ -515,6 +515,55 @@ async function getPinterestImage(titleId: string, articleUrl: string): Promise<s
   return blob.url;
 }
 
+/**
+ * Imagen del Pin. Si la cuenta tiene activado el generador de imágenes con IA,
+ * se crea con el Director Creativo en formato Pinterest (2:3); si no, o si la
+ * IA falla por cualquier motivo, se usa la foto del artículo recortada como
+ * siempre: publicar en Pinterest nunca depende de la IA.
+ */
+async function getPinterestPinImage(job: {
+  id: string;
+  userId: string;
+  titleId: string | null;
+  articleUrl: string;
+  articleTitle: string;
+}): Promise<string | null> {
+  const fallback = () => getPinterestImage(job.titleId || job.id, job.articleUrl);
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: job.userId },
+      select: {
+        aiImageGenerationEnabled: true,
+        businessLogoUrl: true,
+        businessLogoUrl2: true,
+        profilePhotoUrl: true,
+        profilePhotoUrl2: true,
+        profilePhotoUrl3: true,
+      },
+    });
+    if (!user?.aiImageGenerationEnabled) return await fallback();
+    const ogImageUrl = await getArticleOpenGraphImage(job.articleUrl);
+    if (!ogImageUrl) return await fallback();
+    const title = job.titleId ? await prisma.title.findUnique({ where: { id: job.titleId }, select: { summary: true } }) : null;
+    const generated = await generateAiSocialImage({
+      articleTitle: job.articleTitle,
+      articleSummary: title?.summary || job.articleTitle,
+      ogImageUrl,
+      format: "pinterest",
+      businessLogoUrl: user.businessLogoUrl,
+      businessLogoUrl2: user.businessLogoUrl2,
+      profilePhotoUrl: user.profilePhotoUrl,
+      profilePhotoUrl2: user.profilePhotoUrl2,
+      profilePhotoUrl3: user.profilePhotoUrl3,
+      pathPrefix: `pinterest/ai/${job.titleId || job.id}`,
+    });
+    return generated?.imageUrl ?? (await fallback());
+  } catch (error) {
+    console.warn("[Pinterest] La imagen con IA falló; se usa la foto del artículo:", error);
+    return await fallback();
+  }
+}
+
 function pinterestDescription(title: string, caption: string): string {
   const clean = truncatePlainCaption(caption.replace("[ENLACE]", "").trim(), 500);
   return clean || title.slice(0, 500);
@@ -822,7 +871,7 @@ async function processPinterestJob(job: {
   const composio = await getComposioSocialAccount(job.userId, "pinterest");
   if (composio?.pageId) {
     await validateArticleUrl(job.articleUrl);
-    const composioImage = await getPinterestImage(job.titleId || job.id, job.articleUrl);
+    const composioImage = await getPinterestPinImage(job);
     if (!composioImage) throw new Error("El artículo no tiene una imagen OG pública para Pinterest.");
     const pinterestImage = await normalizeSocialImage(composioImage, 2 / 3);
     const description = truncatePlainCaption(job.suggestedText.replace("[ENLACE]", "").trim(), 500) || job.articleTitle.slice(0, 500);
@@ -848,7 +897,7 @@ async function processPinterestJob(job: {
   }
 
   await validateArticleUrl(job.articleUrl);
-  const imageUrl = await getPinterestImage(job.titleId || job.id, job.articleUrl);
+  const imageUrl = await getPinterestPinImage(job);
   if (!imageUrl) throw new Error("El artículo no tiene una imagen OG pública para Pinterest.");
   // El Pin ya lleva el link del artículo en su propio campo `link` (abajo);
   // no hace falta repetirlo dentro del texto de la descripción, que tiene
@@ -1255,7 +1304,10 @@ async function processInstagramJob(job: {
         infographicPrompt: true,
         aiImageGenerationEnabled: true,
         businessLogoUrl: true,
+        businessLogoUrl2: true,
         profilePhotoUrl: true,
+        profilePhotoUrl2: true,
+        profilePhotoUrl3: true,
       },
     }),
   ]);
@@ -1323,7 +1375,10 @@ async function processInstagramJob(job: {
           ogImageUrl: sourceImage,
           format: "reel-image",
           businessLogoUrl: user.businessLogoUrl,
+          businessLogoUrl2: user.businessLogoUrl2,
           profilePhotoUrl: user.profilePhotoUrl,
+          profilePhotoUrl2: user.profilePhotoUrl2,
+          profilePhotoUrl3: user.profilePhotoUrl3,
           pathPrefix: `instagram/ai/reel-image/${job.titleId || job.id}`,
         });
         imageUrl = generated?.imageUrl ?? null;
@@ -1358,7 +1413,10 @@ async function processInstagramJob(job: {
           ogImageUrl: sourceImage,
           format: "story",
           businessLogoUrl: user.businessLogoUrl,
+          businessLogoUrl2: user.businessLogoUrl2,
           profilePhotoUrl: user.profilePhotoUrl,
+          profilePhotoUrl2: user.profilePhotoUrl2,
+          profilePhotoUrl3: user.profilePhotoUrl3,
           pathPrefix: `instagram/ai/story/${job.titleId || job.id}`,
         });
         imageUrl = generated?.imageUrl ?? null;
@@ -1393,7 +1451,10 @@ async function processInstagramJob(job: {
           ogImageUrl: sourceImage,
           format: "post",
           businessLogoUrl: user.businessLogoUrl,
+          businessLogoUrl2: user.businessLogoUrl2,
           profilePhotoUrl: user.profilePhotoUrl,
+          profilePhotoUrl2: user.profilePhotoUrl2,
+          profilePhotoUrl3: user.profilePhotoUrl3,
           pathPrefix: `instagram/ai/post/${job.titleId || job.id}`,
         });
         imageUrl = generated?.imageUrl ?? null;

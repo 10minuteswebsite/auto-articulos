@@ -71,6 +71,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // El cupo diario (Administración → Difusión) limita las PUBLICACIONES por día
+    // en cada red/formato, no las propuestas: 1 si no hay valor guardado, 0 lo
+    // bloquea. Cuenta lo ya publicado hoy más lo que está en cola o procesando.
+    // La propuesta queda pendiente para publicarla otro día. El worker repite
+    // esta comprobación como respaldo.
+    const limitsRaw = (await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } }))?.socialDailyLimits;
+    const dailyLimits = (limitsRaw && typeof limitsRaw === "object" && !Array.isArray(limitsRaw)) ? limitsRaw as Record<string, unknown> : {};
+    const rawLimit = dailyLimits[opp.platform];
+    const dailyLimit = typeof rawLimit === "number" && Number.isInteger(rawLimit) && rawLimit >= 0 ? rawLimit : 1;
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+    const usedToday = await prisma.socialOpportunity.count({
+      where: {
+        userId,
+        platform: opp.platform,
+        id: { not: opp.id },
+        OR: [{ status: "published", publishedAt: { gte: dayStart } }, { status: { in: ["queued", "processing"] } }],
+      },
+    });
+    if (usedToday >= dailyLimit) {
+      return NextResponse.json(
+        { error: `Ya llegaste al cupo de publicaciones de hoy en ${opp.platform} (${dailyLimit}). Esta propuesta queda pendiente para otro día, o puedes ajustar el cupo en Administración.` },
+        { status: 400 },
+      );
+    }
+
     // Google Business Profile usa el lane específico de BusinessProfilePost
     // (incluido PostPeer), no el worker genérico de redes sociales.
     if (platform === "google-business") {

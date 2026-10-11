@@ -36,6 +36,7 @@ import sharp from "sharp";
 import { put } from "@vercel/blob";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret } from "@auto-articulos/shared";
+import { DIRECTOR_PROMPT_V2 } from "./directorPromptV2";
 
 const OPENAI_IMAGE_API_KEY = process.env.OPENAI_IMAGE_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
@@ -50,16 +51,27 @@ const OPENAI_EDIT_URL = "https://api.openai.com/v1/images/edits";
 const FAL_API_KEY = process.env.FAL_API_KEY;
 const FAL_IDEOGRAM_REMIX_URL = "https://fal.run/fal-ai/ideogram/v3/remix";
 const FAL_GPT_IMAGE_2_EDIT_URL = "https://fal.run/openai/gpt-image-2/edit";
+// Fracción de piezas en las que aparece la persona (foto subida en Configuración →
+// Contenido). 0 = apagado: se activa (p. ej. 0.2, «cada ~5 días» según la guía de
+// estilo) solo tras comprobar con el diagnóstico que el rostro sale idéntico.
+const PERSON_PHOTO_RATE = 0;
 const IMAGE_PROVIDER = (process.env.IMAGE_PROVIDER || "openai").toLowerCase();
+
+/** Referencias extra (logos y, si aplica, foto de la persona): una URL, varias o ninguna. */
+function toUrlList(refs?: string | string[] | null): string[] {
+  if (!refs) return [];
+  return (Array.isArray(refs) ? refs : [refs]).filter((url): url is string => Boolean(url));
+}
 
 async function generateImageBufferFal(
   prompt: string,
   ogImageUrl: string,
   width: number,
   height: number,
-  logoUrl?: string | null,
+  logoUrl?: string | string[] | null,
 ): Promise<Buffer | null> {
   if (!FAL_API_KEY) return null;
+  const refUrls = toUrlList(logoUrl);
   const body: Record<string, unknown> = {
     prompt: prompt.slice(0, 4000),
     image_url: ogImageUrl,
@@ -84,8 +96,8 @@ async function generateImageBufferFal(
   // cuando también se envían `image_urls`: "`style` cannot be 'DESIGN' when
   // `image_urls` are provided." Confirmado en vivo el 22/8/2026 (falló la
   // generación completa). Con logo, se deja sin `style` (default de fal.ai).
-  if (logoUrl) {
-    body.image_urls = [logoUrl];
+  if (refUrls.length > 0) {
+    body.image_urls = refUrls;
   } else {
     body.style = "DESIGN";
   }
@@ -124,11 +136,10 @@ async function generateImageBufferNanoBanana(
   ogImageUrl: string,
   width: number,
   height: number,
-  logoUrl?: string | null,
+  logoUrl?: string | string[] | null,
 ): Promise<Buffer | null> {
   if (!FAL_API_KEY) return null;
-  const imageUrls = [ogImageUrl];
-  if (logoUrl) imageUrls.push(logoUrl);
+  const imageUrls = [ogImageUrl, ...toUrlList(logoUrl)];
   // Nano Banana no acepta ancho/alto exactos como Ideogram, solo un preset
   // de relación de aspecto — se mapea desde las dimensiones reales del
   // formato (FORMAT_TARGET más abajo solo usa 9:16 y 4:5 hoy).
@@ -169,11 +180,10 @@ async function generateImageBufferGptImage2(
   ogImageUrl: string,
   width: number,
   height: number,
-  logoUrl?: string | null,
+  logoUrl?: string | string[] | null,
 ): Promise<Buffer | null> {
   if (!FAL_API_KEY) return null;
-  const imageUrls = [ogImageUrl];
-  if (logoUrl) imageUrls.push(logoUrl);
+  const imageUrls = [ogImageUrl, ...toUrlList(logoUrl)];
   // GPT Image 2 requires custom dimensions to be multiples of 16. Keep the
   // requested social ratio while leaving only a minimal final normalization
   // crop for the platform's exact dimensions.
@@ -204,7 +214,29 @@ async function generateImageBufferGptImage2(
   return Buffer.from(await imgRes.arrayBuffer());
 }
 
-export type AiImageFormat = "story" | "reel-image" | "post" | "facebook-story";
+/**
+ * Lista, para el Director Creativo, de los materiales de marca que la persona
+ * subió (Configuración → Contenido: hasta 2 logos y 3 fotos) y de cómo se
+ * adjuntan al generador, en este orden: foto del artículo, logos, foto de la
+ * persona. La decisión de si la persona aparece en la pieza la toma el código
+ * (no el modelo) y se le comunica como un hecho.
+ */
+export function buildAssetBriefing(input: { logoCount: number; personPhotoCount: number; includePerson: boolean }): string {
+  const attachments = ["foto del artículo (base de la imagen)"];
+  if (input.logoCount > 0) {
+    attachments.push(input.logoCount > 1 ? "logo principal" : "logo");
+    if (input.logoCount > 1) attachments.push("logo alternativo (otra versión)");
+  }
+  if (input.includePerson && input.personPhotoCount > 0) attachments.push("foto de la persona (su rostro real)");
+  const lines = [
+    `Imágenes adjuntas al generador, en este orden: ${attachments.map((item, i) => `${i + 1}) ${item}`).join("; ")}.`,
+    `Logos disponibles: ${input.logoCount}.`,
+    `Fotos de la persona subidas: ${input.personPhotoCount}. Persona en ESTA pieza: ${input.includePerson && input.personPhotoCount > 0 ? "sí" : "no"}.`,
+  ];
+  return lines.join("\n");
+}
+
+export type AiImageFormat = "story" | "reel-image" | "post" | "facebook-story" | "pinterest";
 
 // Tamaño que se le pide a gpt-image-1-mini (solo soporta 1024x1024,
 // 1024x1536, 1536x1024) y tamaño final real al que se recorta después con
@@ -217,6 +249,8 @@ const FORMAT_TARGET: Record<AiImageFormat, { editSize: "1024x1536"; width: numbe
   "reel-image": { editSize: "1024x1536", width: 1080, height: 1920 },
   post: { editSize: "1024x1536", width: 1080, height: 1350 },
   "facebook-story": { editSize: "1024x1536", width: 1080, height: 1920 },
+  // Pin de Pinterest: 2:3 (1000x1500), el formato que Pinterest recomienda.
+  pinterest: { editSize: "1024x1536", width: 1000, height: 1500 },
 };
 
 const FORMAT_LABEL: Record<AiImageFormat, string> = {
@@ -224,6 +258,7 @@ const FORMAT_LABEL: Record<AiImageFormat, string> = {
   "reel-image": "Instagram Reel cover",
   post: "Instagram feed post",
   "facebook-story": "Facebook Story",
+  pinterest: "Pinterest Pin (vertical 2:3)",
 };
 
 // Rediseño 22/8/2026 (pedido explícito de Milton, tras comparar en vivo
@@ -252,8 +287,7 @@ const AI_IMAGE_PROMPT_KEY = "ai_social_image_prompt";
 // querer — Milton siempre tiene uno guardado en el panel, este default
 // prácticamente nunca se usa en la práctica. Debe mantener el mismo
 // contrato de salida (una línea, tags + TEXT) que el prompt real.
-const DEFAULT_SYSTEM_PROMPT =
-  "Eres un Director Creativo Senior de publicaciones para redes sociales. Ves una foto real (imagen OG) y un artículo. Decide el mensaje corto más relevante para la imagen y elige etiquetas de estilo visual coherentes. Responde ÚNICAMENTE con una línea de texto plano, sin JSON ni explicación, con este formato exacto: /etiqueta /etiqueta /etiqueta ... TEXT: mensaje exacto";
+const DEFAULT_SYSTEM_PROMPT = DIRECTOR_PROMPT_V2;
 
 async function getCustomSystemPrompt(): Promise<string | null> {
   try {
@@ -338,13 +372,14 @@ async function decideCreativeDirection(
   articleTitle: string,
   articleSummary: string,
   ogImagePng: Buffer,
-  hasLogo: boolean,
+  assetBriefing: string,
   formatLabel: string,
+  systemPromptOverride?: string | null,
 ): Promise<CreativeDecision | null> {
   if (!OPENAI_IMAGE_API_KEY) return null;
   try {
     const ogBase64 = ogImagePng.toString("base64");
-    const customPrompt = await getCustomSystemPrompt();
+    const customPrompt = systemPromptOverride?.trim() || (await getCustomSystemPrompt());
     const res = await fetch(OPENAI_CHAT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${OPENAI_IMAGE_API_KEY}` },
@@ -369,7 +404,7 @@ async function decideCreativeDirection(
                   `Red social y formato: ${formatLabel}.\n` +
                   `Título del artículo: ${articleTitle}\n` +
                   `Resumen del artículo: ${articleSummary}\n` +
-                  `¿Hay logo de marca disponible?: ${hasLogo ? "sí" : "no"}\n\n` +
+                  `${assetBriefing}\n\n` +
                   `Aquí está la imagen OG del artículo. Analízala y aplica tu metodología completa.`,
               },
               {
@@ -379,7 +414,7 @@ async function decideCreativeDirection(
             ],
           },
         ],
-        max_tokens: 300,
+        max_tokens: 400,
       }),
       signal: AbortSignal.timeout(30000),
     });
@@ -470,8 +505,16 @@ export async function generateAiSocialImage(params: {
   ogImageUrl: string;
   format: AiImageFormat;
   businessLogoUrl?: string | null;
+  /** Segunda versión del logo (Configuración → Contenido). */
+  businessLogoUrl2?: string | null;
   profilePhotoUrl?: string | null;
+  profilePhotoUrl2?: string | null;
+  profilePhotoUrl3?: string | null;
   pathPrefix: string;
+  /** Solo diagnóstico: fuerza (true) o prohíbe (false) que aparezca la persona. */
+  forcePerson?: boolean;
+  /** Solo diagnóstico: prompt del director a probar en vez del guardado en el panel. */
+  systemPromptOverride?: string | null;
 }): Promise<AiImageResult | null> {
   if (!OPENAI_IMAGE_API_KEY) return null;
 
@@ -481,31 +524,6 @@ export async function generateAiSocialImage(params: {
   const ogPng = await fetchImageAsPng(params.ogImageUrl);
   if (!ogPng) return null;
 
-  // El logo es OBLIGATORIO usarlo cuando existe (regla explícita de Milton:
-  // "si el logo existe, su uso es obligatorio, nunca debe omitirse"). La
-  // foto de perfil del usuario sigue siendo aleatoria — pedido explícito de
-  // que las imágenes no se vean todas iguales.
-  const logoPng = params.businessLogoUrl ? await fetchImageAsPng(params.businessLogoUrl) : null;
-  const usePhoto = Boolean(params.profilePhotoUrl) && Math.random() < 0.3;
-  const photoPng = usePhoto && params.profilePhotoUrl ? await fetchImageAsPng(params.profilePhotoUrl) : null;
-
-  const decision = await decideCreativeDirection(
-    params.articleTitle,
-    params.articleSummary,
-    ogPng,
-    Boolean(logoPng),
-    formatLabel,
-  );
-  if (!decision) return null;
-
-  // Camino OpenAI: el logo NUNCA se le pasa a la IA como referencia a
-  // dibujar (probado en vivo: lo cortaba/deformaba pese a instrucciones
-  // explícitas) — se pega aparte, después, con código exacto. Solo la OG
-  // y la foto de perfil (cuando aplica) van como referencias reales.
-  // Caminos fal.ai/Nano Banana: distinto a propósito (pedido de Milton) —
-  // el logo SÍ se manda como material de referencia, y el modelo decide
-  // cómo usarlo.
-  const refImages = [ogPng, photoPng].filter((b): b is Buffer => b !== null);
   const providerLabel: "openai" | "fal" | "nano" | "gpt-image-2" =
     IMAGE_PROVIDER === "fal"
       ? "fal"
@@ -514,6 +532,44 @@ export async function generateAiSocialImage(params: {
         : IMAGE_PROVIDER === "gpt-image-2" || IMAGE_PROVIDER === "gpt2"
           ? "gpt-image-2"
           : "openai";
+
+  // El logo es OBLIGATORIO usarlo cuando existe (regla explícita de Milton:
+  // "si el logo existe, su uso es obligatorio, nunca debe omitirse"). La
+  // persona puede subir hasta 2 logos y 3 fotos: el Director Creativo recibe
+  // la lista de lo disponible. La foto de la persona sale en una fracción de
+  // las piezas (PERSON_PHOTO_RATE; 0 = apagado hasta verificar que el
+  // generador conserva su rostro) — esa decisión la toma el código.
+  const logoUrls = [params.businessLogoUrl, params.businessLogoUrl2].filter((url): url is string => Boolean(url));
+  const logoPng = params.businessLogoUrl ? await fetchImageAsPng(params.businessLogoUrl) : null;
+  const personUrls = [params.profilePhotoUrl, params.profilePhotoUrl2, params.profilePhotoUrl3].filter((url): url is string => Boolean(url));
+  const wantPerson = personUrls.length > 0 && (params.forcePerson ?? Math.random() < PERSON_PHOTO_RATE);
+  const personUrl = wantPerson ? personUrls[Math.floor(Math.random() * personUrls.length)] : null;
+  const photoPng = personUrl && providerLabel === "openai" ? await fetchImageAsPng(personUrl) : null;
+
+  const decision = await decideCreativeDirection(
+    params.articleTitle,
+    params.articleSummary,
+    ogPng,
+    buildAssetBriefing({
+      // En el camino OpenAI el logo se pega después por código: no se adjunta.
+      logoCount: providerLabel === "openai" ? 0 : logoUrls.length,
+      personPhotoCount: personUrls.length,
+      includePerson: Boolean(personUrl),
+    }),
+    formatLabel,
+    params.systemPromptOverride,
+  );
+  if (!decision) return null;
+
+  // Camino OpenAI: el logo NUNCA se le pasa a la IA como referencia a
+  // dibujar (probado en vivo: lo cortaba/deformaba pese a instrucciones
+  // explícitas) — se pega aparte, después, con código exacto. Solo la OG
+  // y la foto de perfil (cuando aplica) van como referencias reales.
+  // Caminos fal.ai/Nano Banana/GPT Image 2: distinto a propósito (pedido de
+  // Milton) — logos y foto de la persona SÍ se mandan como material de
+  // referencia (en ese orden), y el modelo decide cómo usarlos.
+  const refImages = [ogPng, photoPng].filter((b): b is Buffer => b !== null);
+  const extraRefUrls = [...logoUrls, ...(personUrl ? [personUrl] : [])];
   const prompt = buildEditPrompt(decision, Boolean(logoPng), Boolean(photoPng), providerLabel);
 
   try {
@@ -527,11 +583,11 @@ export async function generateAiSocialImage(params: {
     // puro como Ideogram.
     let rawOutput: Buffer | null;
     if (providerLabel === "fal") {
-      rawOutput = await generateImageBufferFal(prompt, params.ogImageUrl, target.width, target.height, params.businessLogoUrl);
+      rawOutput = await generateImageBufferFal(prompt, params.ogImageUrl, target.width, target.height, extraRefUrls);
     } else if (providerLabel === "nano") {
-      rawOutput = await generateImageBufferNanoBanana(prompt, params.ogImageUrl, target.width, target.height, params.businessLogoUrl);
+      rawOutput = await generateImageBufferNanoBanana(prompt, params.ogImageUrl, target.width, target.height, extraRefUrls);
     } else if (providerLabel === "gpt-image-2") {
-      rawOutput = await generateImageBufferGptImage2(prompt, params.ogImageUrl, target.width, target.height, params.businessLogoUrl);
+      rawOutput = await generateImageBufferGptImage2(prompt, params.ogImageUrl, target.width, target.height, extraRefUrls);
     } else {
       const form = new FormData();
       form.append("model", "gpt-image-1-mini");
@@ -599,7 +655,7 @@ export async function generateAiSocialImage(params: {
     console.log(
       `[AI Image] Generada con ${modelLabel}: ${blob.url} (${(finalBuffer.length / 1024).toFixed(0)}KB) — ` +
         `etiquetas: ${decision.tagString} — texto: "${decision.message}"` +
-        `${logoPng ? " +logo" : ""}${photoPng ? " +foto" : ""}`,
+        `${logoUrls.length > 0 ? ` +logo(${logoUrls.length})` : ""}${personUrl ? " +persona" : ""}`,
     );
     return { imageUrl: blob.url, prompt };
   } catch (err) {

@@ -28,6 +28,24 @@ export async function createBlueskySession(handle: string, appPassword: string) 
   return request<BlueskySession>("com.atproto.server.createSession", undefined, { identifier: handle, password: appPassword });
 }
 
+/**
+ * Bluesky no convierte las URL en enlaces por sí solo: cada una debe declararse
+ * como «facet» con su posición en BYTES (UTF-8) dentro del texto.
+ */
+export function buildBlueskyLinkFacets(text: string) {
+  const encoder = new TextEncoder();
+  const facets: Array<{ index: { byteStart: number; byteEnd: number }; features: Array<{ $type: string; uri: string }> }> = [];
+  for (const match of text.matchAll(/https?:\/\/\S+/g)) {
+    const uri = match[0].replace(/[.,;:!?)\]]+$/, "");
+    const byteStart = encoder.encode(text.slice(0, match.index ?? 0)).length;
+    facets.push({
+      index: { byteStart, byteEnd: byteStart + encoder.encode(uri).length },
+      features: [{ $type: "app.bsky.richtext.facet#link", uri }],
+    });
+  }
+  return facets;
+}
+
 export async function createBlueskyPost(session: BlueskySession, text: string, imageUrl?: string | null) {
   // Bluesky cuenta por "graphemes" (caracteres visibles), no por unidades
   // UTF-16 de JS — .slice(0,300) puede partir un emoji a la mitad. El texto
@@ -35,6 +53,8 @@ export async function createBlueskyPost(session: BlueskySession, text: string, i
   // worker); esto queda como red de seguridad.
   const safeText = truncateGraphemes(text, 300);
   const record: Record<string, unknown> = { $type: "app.bsky.feed.post", text: safeText, createdAt: new Date().toISOString() };
+  const facets = buildBlueskyLinkFacets(safeText);
+  if (facets.length > 0) record.facets = facets;
   if (imageUrl) {
     const imageResponse = await fetch(imageUrl, { signal: AbortSignal.timeout(15000) });
     if (imageResponse.ok) {

@@ -1,5 +1,57 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Director v2: el modo híbrido NO funcionó; se ajusta el v2 corto — 2026-10-11
+
+- Evidencia (diagnóstico en vivo, 9 imágenes): el brazo `hibrido` (prompt del panel + guía) casi no cambió nada y no añadió la frase de la guía: el prompt largo manda y la sección final se ignora; además `actual` repite siempre las mismas etiquetas (el código no pasa `RECENT_STYLE_HISTORY`, así que la rotación y el análisis de marca del prompt largo no operan en la práctica).
+- Decisión: el v2 corto es el candidato, absorbiendo lo útil del prompt del panel (máximo 6 palabras, OG como base, logo obligatorio, alto contraste, paleta del logo orienta los colores). La regla 8 ahora exige personas reales en primer plano (en las 3 pruebas previas Story/Post/Pinterest salieron con calle vacía porque la OG es una ilustración de calle).
+- Aplicación futura: `apply-director-prompt.yml mode=reemplazar` (con respaldo exacto en `ai_social_image_prompt_backup` y `mode=restaurar`). Nada aplicado aún en producción.
+
+## Claude — Director Creativo de imágenes: se CONSERVA el prompt del panel y se le AÑADE la guía — 2026-10-11 — FASE 2/3
+
+- Hallazgo: el prompt guardado en el panel (`ai_social_image_prompt`) mide 20.733 caracteres: sistema de etiquetas con catálogo cerrado, análisis de marca por el logo, 2–3 candidatas, anti-repetición y reglas de contraste. Reemplazarlo por el v2 corto habría tirado ese trabajo.
+- Decisión: modo híbrido. `mergeDirectorPrompt(panel)` = prompt del panel + sección «# GUÍA DE ESTILO VISUAL v2» (prioridad sobre lo anterior: luz natural y gente real, texto en zona limpia, logo flotando, uno de dos logos, cero números, foto de la persona solo si «Persona en ESTA pieza: sí», frase en inglés tras el texto). Idempotente (no duplica la sección).
+- Workflows (sin schema ni migración): `diagnose-ai-image-prompt.yml` con directores `actual`, `hibrido` y `nuevo` (sin publicar); `apply-director-prompt.yml` con `mode=aplicar` (panel + guía), `reemplazar` (solo el v2 corto) y `restaurar`; todos guardan antes una copia exacta en `ai_social_image_prompt_backup`.
+- Aún sin aplicar en producción: primero comparar los tres brazos con imágenes.
+
+## Claude — Director Creativo v2: resultados del diagnóstico y vía para aplicarlo — 2026-10-11 — FASE 2/3
+
+- Diagnóstico (PR #521/#522, cuenta de Lorena, gpt-image-2): el director NUEVO supera al actual (titular condensado en zona limpia, gancho en pregunta, logo flotando, luz natural; Pinterest 2:3 OK). Debilidades: a veces escena sin personas (regla 8 añadida) y titulares sin sentido («cambiar de salud») → regla de titular completo añadida en este PR.
+- La foto de la persona (Lorena) NO conserva el rostro: se mantiene apagada (`PERSON_PHOTO_RATE = 0`).
+- Aplicar sin sesión de administrador: workflow manual `apply-director-prompt.yml` (`mode=aplicar|restaurar`). Al aplicar guarda una copia EXACTA del prompt actual en `ai_social_image_prompt_backup` (no la sobrescribe si ya existe) y escribe el nuevo en `ai_social_image_prompt`; restaurar devuelve la copia. Sin schema ni migración.
+- Pendiente: infografía de Instagram (pide «datos y números»); Milton aún no decidió.
+
+## Claude — Director Creativo de imágenes v2 (guía de estilo de Lorena) — 2026-10-11 — FASE 1 de 3
+
+- Pedido de Milton: reformar el prompt de creación de imágenes de SEO Total con la guía `guia-estilo-imagenes.md` (Lorena), sabiendo que la persona puede subir logos (2) y fotos (3) en Configuración → Contenido.
+- Producción usa `IMAGE_PROVIDER=gpt-image-2` (fal.ai): recibe la foto OG del artículo + referencias. El Director Creativo (gpt-4o-mini, prompt global `ai_social_image_prompt` editable en Administración → «Prompts») debe devolver UNA línea con `text that reads: "TITULAR"` o la imagen no se genera.
+- Fase 1 (este PR, sin schema ni migración; NO cambia el prompt guardado en el panel):
+  - `directorPromptV2.ts`: el prompt nuevo (reglas de la guía generalizadas + materiales de marca + formato Pinterest). Es el respaldo si no hay prompt guardado y el candidato a probar.
+  - `aiImageGenerator.ts`: el director recibe la lista de materiales (logos y fotos) en orden de adjuntos; se envían los 2 logos (usa solo uno, el de mejor contraste) y, si aplica, la foto de la persona; `PERSON_PHOTO_RATE = 0` (la persona NO aparece hasta verificar que el rostro sale idéntico); formato `pinterest` 2:3; `max_tokens` del director 300→400.
+  - Pinterest: si la cuenta tiene activado el generador IA, el Pin se crea con el director; si falla, vuelve a la foto del artículo recortada (publicar nunca depende de la IA).
+  - `diagnose-ai-image-prompt.yml`: workflow manual que compara director ACTUAL vs NUEVO y deja las imágenes en el resumen, sin publicar ni escribir en la base.
+- Fase 2: correr el diagnóstico con la cuenta de Lorena y revisar las imágenes. Fase 3: respaldo del prompt actual y aplicar el nuevo en el panel.
+- Anotado, no tocado: la infografía de Instagram pide «datos y números» (choca con «cero números» de la guía); `npm test` del worker no recoge los `*.test.ts` de la raíz de `src` (se corrieron con `tsx --test src/*.test.ts`: 45/45).
+
+## Claude — El cupo diario limita publicaciones, no propuestas — 2026-10-11
+
+- Decisión de Milton: el cupo (Administración → Difusión) define cuántas veces se PUBLICA por día en cada red/formato, no cuántas propuestas se crean.
+- Antes: `generate/route.ts` creaba tantas propuestas como cupo restante (5 con cupo 5) y se negaba con «Ya alcanzaste el cupo diario…» si el cupo estaba lleno (Threads no dejaba crear propuestas).
+- Ahora: generar crea 1 propuesta por red por pulsación, sin mirar el cupo. El cupo se comprueba al pulsar «Publicar» (`publish/route.ts`: publicadas hoy + en cola/procesando; la propuesta queda pendiente con un aviso claro) y el worker lo repite como respaldo (`enforceSocialDailyLimit`). Sin schema ni migración.
+
+## Claude — Texto de la IA más largo que el límite de la red (Bluesky/Threads) — 2026-10-11
+
+- Evidencia (prueba en vivo, cuenta de Lorena, cupo 5): una pulsación en Bluesky creó 5 propuestas de 365 a 407 caracteres; el límite de Bluesky es 300 INCLUYENDO el enlace (~90). El prompt pedía «menos de 360 caracteres» a Threads/X/Bluesky por igual y la IA se pasaba (Threads: 481).
+- Cambio (`social-opportunities/generate/route.ts`): Bluesky pide 170 caracteres y `max_tokens` 150; en Threads/X/Bluesky, si el texto excede el presupuesto real (400/240/200), se pide UNA reescritura más corta; si no mejora, se conserva el texto y `buildSafeCaption` recorta de forma segura. Sin schema ni migración.
+- Observaciones sin tocar: con cupo N, una pulsación crea N propuestas (esperado); un artículo de Lorena se llama «… — versión 8821919-1» (dato, parece duplicado/prueba).
+
+## Claude — Enlaces NO clicables en Threads/Bluesky (recorte + facets) — 2026-10-11
+
+- Hallazgo (Milton, post de Threads publicado en vivo): el enlace no se resaltaba ni se podía pulsar. Evidencia en el navegador: en Threads el post corto (espacio antes de la URL) sí tenía enlace azul; los recortados («cobe...https://…») no. En Bluesky ningún post tenía enlace clicable (el código nunca declaraba «facets»). LinkedIn y Facebook: correctos; Tumblr tiene su propio enlace; Blogger usa anchor HTML.
+- Causa 1: `buildSafeCaption` (packages/shared/src/caption-limits.ts) pegaba la URL justo después de «...» al recortar. Arreglo: espacio obligatorio antes de la URL, sin partir la última palabra, y `[ENLACE]` pegado a otra palabra se separa.
+- Causa 2: `createBlueskyPost` no enviaba `facets`. Arreglo: `buildBlueskyLinkFacets` (posiciones en bytes UTF-8).
+- Sin schema ni migración. Lo ya publicado no se modifica. Pruebas nuevas en `apps/worker/src/socialLinkContract.test.ts`.
+- Aparte, anotado: el post de Facebook del 21-sep muestra un recuadro amarillo en vez de la imagen (por revisar).
+
 ## Claude — «Generar propuestas» respondía 500 (pg_advisory_xact_lock / void) — 2026-10-10
 
 - Síntoma (prueba en vivo con Lorena en redes.lasolucionweb.com): `POST /api/social-opportunities/generate` → 500 «Failed to deserialize column of type 'void'».
