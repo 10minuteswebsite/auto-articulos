@@ -30,20 +30,29 @@ Panel de Administración con sesión de administrador (quién tiene/no tiene Red
 
 ---
 
-## Estado al 2026-10-11
+## Estado al 2026-10-11 (cierre del día)
 
 ### Resuelto y verificado en producción
 - H1: 403 de la API de Redes a toda cuenta no administradora (PR #514).
 - Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; seototal sin cambios (PR #514 y #515).
 - «Crear oportunidad» devolvía 500 por `pg_advisory_xact_lock` (void) desde 2026-10-06 (PR #516).
-- Flujo completo probado en Threads con la cuenta de Lorena: crear propuesta → vista previa → publicar → post vivo con enlace real (`[ENLACE]` se sustituye al publicar).
+- El cupo diario limita publicaciones, no propuestas (PR #520): generar crea 1 por red; el cupo se comprueba al pulsar «Publicar».
+- Enlaces clicables: Threads (espacio antes del enlace al recortar) y Bluesky (facets) (PR #518); verificado en posts reales.
+- Texto de la IA ajustado al largo real de Bluesky/Threads (PR #519): Bluesky pasó de 365-407 a 159-196 caracteres.
+- Flujo completo probado con la cuenta de Lorena: crear propuesta → vista previa → publicar → post vivo (Threads y Bluesky).
+- Director Creativo de imágenes v2 basado en la guía de estilo de Lorena, materiales de marca (2 logos, 3 fotos), Pinterest con IA y diagnóstico sin publicar (PR #521-#525).
 
-### Pedidos de Milton (2026-10-11) — por hacer, NO iniciados
-1. **Rediseñar la interfaz gráfica de Redes** para que se entienda mejor (hoy: texto largo y explicativo arriba, lista de redes sin agrupar, botones «Borrar todas» / «Publicar todo el lote» sin contexto, vista previa de ~70 s sin aviso de progreso).
-2. **Separar META de las otras redes** (Instagram, Facebook y Threads van en su propio grupo; el resto —LinkedIn, Pinterest, Tumblr, Bluesky, Blogger, Google Business— aparte).
-3. **Revisar el algoritmo de generación** de propuestas para comprobar que hace las cosas bien: elección del artículo, no repetir artículos ni intención entre redes, respeto del cupo diario por red, calidad del texto y del recorte (en Threads el texto se corta a mitad de frase antes del enlace por el límite de 500 caracteres), uso de Search Console. Con evidencia dura primero; no cambiar nada sin auditoría.
+### Decisiones de Milton
+- Las historias inventadas en los textos de la IA están aprobadas.
+- Una sola publicación por red en las pruebas; borrar las propuestas sobrantes después de cada prueba.
+- Infografía de Instagram («datos y números» vs «cero números»): EN PAUSA.
+- La foto de la persona en las imágenes IA queda APAGADA (`PERSON_PHOTO_RATE = 0`): en las pruebas el rostro generado no era el de Lorena.
 
-### Pendiente de las pruebas en vivo
-- Probar el resto de redes una por una y el botón «Generar propuestas para redes y blogs».
-- Revisar Administración con una sesión de administrador (cupos por red, que 0 bloquee de verdad).
-- Worker (`apps/worker/src/product-access.ts`) no distingue dominio: solo importa si el interruptor de derechos del HUB pasa de «off» a «enforce».
+### Pendiente
+1. **Aplicar el prompt nuevo del Director** en producción: ejecutar el workflow `apply-director-prompt.yml` con `mode=reemplazar` (guarda respaldo exacto en `ai_social_image_prompt_backup`; `mode=restaurar` lo devuelve). Aún NO ejecutado.
+2. Pedidos de Milton sin iniciar: rediseñar la interfaz de Redes, separar META de las otras redes y revisar el algoritmo de generación (elección de artículo, repetición, calidad del texto).
+3. Probar el resto de redes una por una (LinkedIn, Facebook, Instagram, Pinterest, Tumblr, Blogger, Google Business) y el botón «Generar propuestas para redes y blogs».
+4. Revisar Administración con una sesión de administrador (cupos por red, que 0 bloquee de verdad).
+5. Posibles mejoras menores: la vista previa tarda ~70 s sin aviso; título de pestaña «SEO TOTAL — Artículos…»; asteriscos sueltos en App Móvil; recuadro amarillo en la imagen de un post antiguo de Facebook (21-sep); titulares de imagen a veces sin sentido.
+6. Worker (`apps/worker/src/product-access.ts`) no distingue dominio: solo importa si el interruptor de derechos del HUB pasa de «off» a «enforce».
+7. Coordinación con la línea MCP (otro programador): imágenes de texto a imagen en `ai_mcp_image_config`; mis archivos de imágenes quedaron liberados.
