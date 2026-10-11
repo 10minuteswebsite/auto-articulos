@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Director v2: el modo híbrido NO funcionó; se ajusta el v2 corto — 2026-10-11
+
+- Evidencia (diagnóstico en vivo, 9 imágenes): el brazo `hibrido` (prompt del panel + guía) casi no cambió nada y no añadió la frase de la guía: el prompt largo manda y la sección final se ignora; además `actual` repite siempre las mismas etiquetas (el código no pasa `RECENT_STYLE_HISTORY`, así que la rotación y el análisis de marca del prompt largo no operan en la práctica).
+- Decisión: el v2 corto es el candidato, absorbiendo lo útil del prompt del panel (máximo 6 palabras, OG como base, logo obligatorio, alto contraste, paleta del logo orienta los colores). La regla 8 ahora exige personas reales en primer plano (en las 3 pruebas previas Story/Post/Pinterest salieron con calle vacía porque la OG es una ilustración de calle).
+- Aplicación futura: `apply-director-prompt.yml mode=reemplazar` (con respaldo exacto en `ai_social_image_prompt_backup` y `mode=restaurar`). Nada aplicado aún en producción.
+
 ## Claude — Director Creativo de imágenes: se CONSERVA el prompt del panel y se le AÑADE la guía — 2026-10-11 — FASE 2/3
 
 - Hallazgo: el prompt guardado en el panel (`ai_social_image_prompt`) mide 20.733 caracteres: sistema de etiquetas con catálogo cerrado, análisis de marca por el logo, 2–3 candidatas, anti-repetición y reglas de contraste. Reemplazarlo por el v2 corto habría tirado ese trabajo.
