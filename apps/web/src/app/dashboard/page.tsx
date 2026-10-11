@@ -20,9 +20,14 @@ const QUICK_LINKS = [
     description: "Deja que la IA cree contenido para tu blog y aumenta tus oportunidades de aparecer en las búsquedas.",
   },
   {
-    href: "/dashboard/oportunidades-redes",
-    label: MENU_NAMES.redes,
-    description: "Crea con ayuda de la IA publicaciones automáticas para internet y difunde tu mensaje.",
+    href: "/dashboard/oportunidades-redes?grupo=meta",
+    label: "META",
+    description: "Instagram, Threads y Facebook. Crea con ayuda de la IA publicaciones para las redes de Meta y difunde tu mensaje.",
+  },
+  {
+    href: "/dashboard/oportunidades-redes?grupo=otras",
+    label: "Otras redes y blogs",
+    description: "LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business. Difunde tu contenido en el resto de redes y blogs públicos.",
   },
 ];
 
@@ -149,7 +154,8 @@ export default function InicioPage() {
     }
   }, []);
 
-  function hasProductFor(href: string): boolean {
+  function hasProductFor(fullHref: string): boolean {
+    const href = fullHref.split("?")[0];
     if ((href === "/dashboard/oportunidades-redes" || href === "/dashboard/redes") && disabledModules.includes("oportunidades-redes")) {
       return false;
     }

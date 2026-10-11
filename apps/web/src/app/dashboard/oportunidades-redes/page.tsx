@@ -105,6 +105,15 @@ export default function OportunidadesRedesPage() {
   const [message, setMessage] = useState<{ kind: "success" | "error" | "info"; text: string } | null>(null);
   const [skipModal, setSkipModal] = useState<{ opp: SocialOpportunity; reason: string; customReason: string } | null>(null);
   const [openGroup, setOpenGroup] = useState<NetworkGroup | null>(null);
+  const [cameFromHome, setCameFromHome] = useState(false);
+  // Entrada directa desde las tarjetas del Inicio: /dashboard/oportunidades-redes?grupo=meta|otras
+  useEffect(() => {
+    const grupo = new URLSearchParams(window.location.search).get("grupo");
+    if (grupo === "meta" || grupo === "otras") {
+      setOpenGroup(grupo);
+      setCameFromHome(true);
+    }
+  }, []);
   const [previewModal, setPreviewModal] = useState<{ loading: boolean; imageUrl: string | null; imageBase64: string | null; platform: string; title: string } | null>(null);
 
   useEffect(() => {
@@ -472,10 +481,14 @@ export default function OportunidadesRedesPage() {
           <div>
             <button
               type="button"
-              onClick={() => { setMessage(null); setOpenGroup(null); }}
+              onClick={() => {
+                setMessage(null);
+                if (cameFromHome) router.push("/dashboard");
+                else setOpenGroup(null);
+              }}
               style={{ border: "none", background: "transparent", padding: 0, margin: "0 0 10px", fontSize: 14, color: "#0066cc", cursor: "pointer", fontFamily: "inherit" }}
             >
-              ‹ Redes
+              {cameFromHome ? "‹ Inicio" : "‹ Redes"}
             </button>
             <p className="eyebrow" style={{ margin: "0 0 6px" }}>Difusión Social</p>
             <h1
