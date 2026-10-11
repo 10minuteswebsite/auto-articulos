@@ -503,27 +503,23 @@ export default function OportunidadesRedesPage() {
               {openCard?.title ?? MENU_NAMES.redes}
             </h1>
             <MobileInstructions>
-              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                <strong style={{ fontWeight: 600 }}>Ya tienes esta sección disponible.</strong> Abajo aparece un botón
-                por cada red: si ya está conectada, pulsa <strong>Crear oportunidad</strong> para generar una
-                propuesta a partir de tus artículos; si aparece en gris con <strong>Configurar</strong>, esa red
-                todavía no está activada — actívala ahí mismo y vuelves aquí solo al terminar.
-              </p>
-              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                Un artículo publicado en tu web solo lo encuentra quien lo busca. En redes sociales lo ve gente que todavía no te estaba buscando, y cada visita que llega desde ahí es una señal más para Google de que tu contenido interesa.
-              </p>
-              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                Aquí el sistema toma artículos que ya publicaste y prepara la publicación adaptada a cada red: el texto, la imagen y el formato que esa red necesita.
-              </p>
-              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                Tú revisas cada propuesta y decides cuál sale y a qué red. No se publica todo ni todo el tiempo: el sistema reparte las publicaciones a lo largo de los días para que tu presencia crezca sin parecer spam y sin que las redes te penalicen.
-              </p>
-              {groupConnectedCount === 0 && !loading && !connectionsLoading && (
+              {groupConnectedCount === 0 ? (
                 <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                  Todavía no tienes ninguna red conectada, así que no hay dónde publicar. Pulsa cualquiera de los
-                  botones grises de abajo para configurar esa red; en cuanto conectes una, vuelves aquí solo y ya
-                  puedes crear propuestas.
+                  Aún no hay ninguna red conectada aquí. Pulsa <strong>Configurar</strong> en la que quieras activar y,
+                  al terminar, volverás a esta pantalla.
                 </p>
+              ) : (
+                <>
+                  <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
+                    Pulsa <strong>Crear oportunidad</strong> en una red conectada y el sistema prepara la publicación a
+                    partir de tus artículos. Tú la revisas y decides si sale.
+                  </p>
+                  {groupConnectedCount < groupRows.length && (
+                    <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#6e6e73" }}>
+                      Las redes en gris aún no están conectadas: pulsa <strong>Configurar</strong> para activarlas.
+                    </p>
+                  )}
+                </>
               )}
             </MobileInstructions>
           </div>
