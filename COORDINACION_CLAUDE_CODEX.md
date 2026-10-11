@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — El cupo diario limita publicaciones, no propuestas — 2026-10-11
+
+- Decisión de Milton: el cupo (Administración → Difusión) define cuántas veces se PUBLICA por día en cada red/formato, no cuántas propuestas se crean.
+- Antes: `generate/route.ts` creaba tantas propuestas como cupo restante (5 con cupo 5) y se negaba con «Ya alcanzaste el cupo diario…» si el cupo estaba lleno (Threads no dejaba crear propuestas).
+- Ahora: generar crea 1 propuesta por red por pulsación, sin mirar el cupo. El cupo se comprueba al pulsar «Publicar» (`publish/route.ts`: publicadas hoy + en cola/procesando; la propuesta queda pendiente con un aviso claro) y el worker lo repite como respaldo (`enforceSocialDailyLimit`). Sin schema ni migración.
+
 ## Claude — Texto de la IA más largo que el límite de la red (Bluesky/Threads) — 2026-10-11
 
 - Evidencia (prueba en vivo, cuenta de Lorena, cupo 5): una pulsación en Bluesky creó 5 propuestas de 365 a 407 caracteres; el límite de Bluesky es 300 INCLUYENDO el enlace (~90). El prompt pedía «menos de 360 caracteres» a Threads/X/Bluesky por igual y la IA se pasaba (Threads: 481).
