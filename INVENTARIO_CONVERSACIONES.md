@@ -1969,3 +1969,26 @@ exactamente esa corrección (Threads/X/LinkedIn vía `socialPostUrl`, dominio `t
 tarea de propagación no resuelve la contradicción ni toca `apps/web/src/content/manual-usuario.ts`
 por este motivo — queda para que Milton confirme si el cambio está realmente en producción o si
 falta revertirlo/aclararlo.
+
+## Addendum — 2026-10-11 (tarea programada diaria de propagación)
+
+**Parte A:** sin cambios. Se verificó en vivo (`git worktree list` en este entorno: solo el
+worktree de esta misma tarea y el directorio principal, ambos en `f12ca46`) y con `git
+merge-base --is-ancestor` que los tres commits nuevos revisados en el rango de Coordinación
+(`a72153d..origin/main`) — `cd76253`, `42219ad` y `f12ca46` (PRs #514, #515 y #516) — ya son
+ancestros de `origin/main`: **no son reservas activas**, son trabajo ya fusionado y cerrado.
+
+**Parte B — nombres de conversación nuevos encontrados en `COORDINACION_CLAUDE_CODEX.md`** en
+el rango `a72153d..origin/main` (detalle técnico completo en Coordinación y, propagado, en
+`CONTROLADOR_DE_VERSIONES.md`; no se transcribe aquí para no duplicar):
+
+- `[Claude] - REDES POR DOMINIO: ACCESO ACTIVO Y 403 DE LA API` — 2026-10-10, PR #514 (commit
+  `cd76253`), CERRADO.
+- `[Claude] - REDES: TODAS LAS REDES ABIERTAS EN redes.lasolucionweb.com` — 2026-10-10, PR #515
+  (commit `42219ad`), CERRADO.
+- `[Claude] - GENERAR PROPUESTAS 500 (pg_advisory_xact_lock)` — 2026-10-10, PR #516 (commit
+  `f12ca46`), CERRADO.
+
+Ninguna de las tres describe un árbol de git enredado ni ramas pisadas, así que no se agregó
+nada en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Sin dudas nuevas sin resolver encontradas por esta
+tarea en este rango, más allá de las ya anotadas en `TO-DO.md`.
