@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { MENU_NAMES } from "@/lib/menu-names";
-import MobileInstructions from "@/components/MobileInstructions";
 import { useRouter } from "next/navigation";
 import {
   buttonStyle,
   disabledStyle,
   h2Style,
   secondaryButtonStyle,
-  sectionStyle,
 } from "@/components/dashboard-ui";
 import type { CSSProperties } from "react";
 
@@ -82,17 +80,39 @@ function groupOfPlatform(platform: string): NetworkGroup {
   return value === "threads" || value.startsWith("instagram") || value.startsWith("facebook") ? "meta" : "otras";
 }
 
-/** Redacta lo que publica el sistema: «1 publicación por día» o «por día: Instagram 5, Threads 5 y Facebook 1». */
-function describeDailyLimits(rows: ReadonlyArray<{ key: string; label: string }>, limits: Record<string, number>): string {
-  const items = rows.map((row) => ({ label: row.label, limit: limits[row.key] ?? 1 }));
-  if (items.length === 0) return "1 publicación por día";
-  const first = items[0].limit;
-  if (items.every((item) => item.limit === first)) {
-    return first === 0 ? "ninguna publicación (Administración la tiene en 0)" : `${first} ${first === 1 ? "publicación" : "publicaciones"} por día en cada red`;
-  }
-  const parts = items.map((item) => `${item.label} ${item.limit}`);
-  const list = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} y ${parts[parts.length - 1]}` : parts[0];
-  return `por día: ${list}`;
+/** Botones compactos de esta pantalla (los estándar de la plataforma son demasiado grandes aquí). */
+const compactPrimary: CSSProperties = { height: 34, padding: "0 16px", borderRadius: 8, border: "1px solid #1d1d1f", background: "#1d1d1f", color: "#ffffff", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", margin: 0, minHeight: 0 };
+const compactSecondary: CSSProperties = { ...compactPrimary, border: "1px solid #d2d2d7", background: "#ffffff", color: "#1d1d1f" };
+const compactDanger: CSSProperties = { ...compactPrimary, border: "1px solid transparent", background: "transparent", color: "#ff3b30", padding: "0 8px" };
+
+/** Nombre legible de la red de una propuesta (instagram-post → «Instagram · Post»). */
+function platformLabel(platform: string): string {
+  const labels: Record<string, string> = {
+    threads: "Threads",
+    x: "X",
+    linkedin: "LinkedIn",
+    pinterest: "Pinterest",
+    tumblr: "Tumblr",
+    bluesky: "Bluesky",
+    blogger: "Blogger",
+    "google-business": "Google Business",
+    "facebook-page": "Facebook",
+    "facebook-story": "Facebook · Story",
+    "instagram-post": "Instagram · Post",
+    "instagram-story": "Instagram · Story",
+    "instagram-reel-image": "Instagram · Reel",
+    "instagram-carousel": "Instagram · Carrusel",
+    "instagram-infografia": "Instagram · Infografía",
+  };
+  return labels[platform.trim().toLowerCase()] ?? platform;
+}
+
+/** ¿Esta propuesta pertenece a esa red de la lista? (Instagram y Facebook agrupan varios formatos.) */
+function belongsToRow(rowKey: string, rowPlatform: string, oppPlatform: string): boolean {
+  const value = oppPlatform.trim().toLowerCase();
+  if (rowKey === "instagram") return value.startsWith("instagram");
+  if (rowKey === "facebookPage") return value.startsWith("facebook");
+  return value === rowPlatform;
 }
 
 const GROUP_CARDS: ReadonlyArray<{ id: NetworkGroup; title: string; hint: string }> = [
@@ -117,6 +137,7 @@ export default function OportunidadesRedesPage() {
   const [publishingAll, setPublishingAll] = useState(false);
   const [message, setMessage] = useState<{ kind: "success" | "error" | "info"; text: string } | null>(null);
   const [skipModal, setSkipModal] = useState<{ opp: SocialOpportunity; reason: string; customReason: string } | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [dailyLimits, setDailyLimits] = useState<Record<string, number>>({});
   const [openGroup, setOpenGroup] = useState<NetworkGroup | null>(null);
   const [cameFromHome, setCameFromHome] = useState(false);
@@ -470,10 +491,14 @@ export default function OportunidadesRedesPage() {
     );
   }
 
+  const todayKey = new Date().toDateString();
+  const publishedTodayFor = (rowKey: string, rowPlatform: string) =>
+    opportunities.filter((o) => o.status === "published" && o.publishedAt && new Date(o.publishedAt).toDateString() === todayKey && belongsToRow(rowKey, rowPlatform, o.platform)).length;
+
   return (
-    <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
+    <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto", paddingBottom: 40 }}>
       {/* Cabecera */}
-      <div style={{ padding: "20px 0 20px" }}>
+      <div style={{ padding: "8px 0 24px" }}>
         <button
           type="button"
           onClick={() => {
@@ -481,87 +506,82 @@ export default function OportunidadesRedesPage() {
             if (cameFromHome) router.push("/dashboard");
             else setOpenGroup(null);
           }}
-          style={{ border: "none", background: "transparent", padding: 0, margin: "0 0 10px", fontSize: 14, color: "#0066cc", cursor: "pointer", fontFamily: "inherit" }}
+          style={{ border: "none", background: "transparent", padding: 0, margin: "0 0 14px", fontSize: 14, color: "#0066cc", cursor: "pointer", fontFamily: "inherit" }}
         >
           {cameFromHome ? "‹ Inicio" : "‹ Redes"}
         </button>
-        <p className="eyebrow" style={{ margin: "0 0 6px" }}>Difusión Social</p>
-        <h1 style={{ fontSize: 26, fontWeight: 600, color: "#1d1d1f", margin: "0 0 6px 0", letterSpacing: "-0.03em" }}>
-          {openCard?.title ?? MENU_NAMES.redes}
-        </h1>
-            <MobileInstructions>
-              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                Aquí configuras las redes que difunden de forma inteligente el contenido de tu página web: el sistema
-                toma tus artículos, prepara la publicación para cada red y publica{" "}
-                <strong>{describeDailyLimits(groupRows, dailyLimits)}</strong>.
-              </p>
-              {groupConnectedCount === 0 ? (
-                <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                  Aún no hay ninguna red conectada aquí. Pulsa <strong>Configurar</strong> en la que quieras activar y,
-                  al terminar, volverás a esta pantalla.
-                </p>
-              ) : (
-                <>
-                  <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                    Pulsa <strong>Crear oportunidad</strong> en una red conectada, revisa la propuesta y decide si sale.
-                  </p>
-                  {groupConnectedCount < groupRows.length && (
-                    <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#6e6e73" }}>
-                      Las redes en gris aún no están conectadas: pulsa <strong>Configurar</strong> para activarlas.
-                    </p>
-                  )}
-                </>
-              )}
-            </MobileInstructions>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{ fontSize: 30, fontWeight: 600, color: "#1d1d1f", margin: 0, letterSpacing: "-0.03em", lineHeight: 1.15 }}>
+              {openCard?.title ?? MENU_NAMES.redes}
+            </h1>
+            <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.5, color: "#6e6e73", maxWidth: 620 }}>
+              Tu contenido, difundido de forma inteligente en {openCard?.hint}. Tú apruebas cada publicación.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleGenerateGroup}
+            disabled={generatingAll || generatingNetwork !== null || groupConnectedCount === 0}
+            title={groupConnectedCount === 0 ? "Conecta una red para empezar" : undefined}
+            style={disabledStyle(compactPrimary, generatingAll || generatingNetwork !== null || groupConnectedCount === 0)}
+          >
+            {generatingAll ? "Creando propuestas..." : "Crear propuestas"}
+          </button>
+        </div>
       </div>
 
-      <div className="redes-split">
-        {/* Columna izquierda: redes y generar */}
-        <aside className="redes-split-side" style={{ border: "1px solid #d2d2d7", borderRadius: 6, padding: 18, background: "#ffffff" }}>
-          {connectionsLoading ? (
-            <span className="muted" style={{ fontSize: 13 }}>Preparando las redes conectadas...</span>
-          ) : (
-            <>
-              <p style={{ margin: "0 0 12px", fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: "#6e6e73" }}>
-                Redes de {openCard?.title}
-              </p>
-              <button
-                onClick={handleGenerateGroup}
-                disabled={generatingAll || generatingNetwork !== null || groupConnectedCount === 0}
-                style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginTop: 0, marginBottom: 8 }}
-              >
-                {generatingAll ? "Generando propuestas..." : "Generar propuestas"}
-              </button>
-              {NETWORK_ROWS.filter((row) => row.group === openGroup).map(({ key, platform, label, conexionId }) => {
-                if (!activeNetworks[key]) return null;
-                const connected = connectedNetworks[key];
-                const busy = Boolean(generatingNetwork);
-                const unavailable = !connected;
-                const actionStyle: CSSProperties = { border: "none", background: "transparent", padding: 0, fontSize: 14, color: unavailable ? "#86868b" : "#0066cc", cursor: busy ? "wait" : "pointer", fontFamily: "inherit", whiteSpace: "nowrap" };
-                return <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "11px 0", borderTop: "1px solid #e5e5ea" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, color: unavailable ? "#86868b" : "#1d1d1f" }}>
-                    <span aria-hidden="true" style={{ fontSize: 9, color: unavailable ? "#c7c7cc" : "#16803c" }}>●</span>
-                    {label}
-                  </span>
-                  {unavailable && conexionId ? (
-                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => {
-                      try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
-                      router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`);
-                    }}>Configurar ›</button>
-                  ) : unavailable ? (
-                    <span style={{ fontSize: 14, color: "#86868b" }}>No disponible</span>
-                  ) : (
-                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => handleGenerate(platform)}>{generatingNetwork === platform ? "Analizando..." : "Crear oportunidad"}</button>
-                  )}
-                </div>;
-              })}
-            </>
-          )}
-        </aside>
+      {/* Redes del grupo */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 32 }}>
+        {groupRows.map((row) => {
+          const connected = connectedNetworks[row.key];
+          const limit = dailyLimits[row.key] ?? 1;
+          const used = publishedTodayFor(row.key, row.platform);
+          const percent = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 100;
+          const busy = Boolean(generatingNetwork);
+          return (
+            <div key={row.key} style={{ border: "1px solid #e5e5ea", borderRadius: 12, padding: "14px 16px", background: connected ? "#ffffff" : "#fafafa", display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "4px 8px" }}>
+                <span style={{ fontSize: 15, fontWeight: 600, color: connected ? "#1d1d1f" : "#86868b" }}>{row.label}</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: connected ? "#16803c" : "#86868b" }}>
+                  <span aria-hidden="true" style={{ width: 7, height: 7, borderRadius: 999, background: connected ? "#16803c" : "#c7c7cc" }} />
+                  {connected ? "Conectada" : "Sin conectar"}
+                </span>
+              </div>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6e6e73", marginBottom: 6 }}>
+                  <span>Hoy</span>
+                  <span style={{ fontVariantNumeric: "tabular-nums" }}>{used} de {limit}</span>
+                </div>
+                <div style={{ height: 4, borderRadius: 999, background: "#e5e5ea", overflow: "hidden" }}>
+                  <div style={{ width: `${percent}%`, height: "100%", background: connected ? "#1d1d1f" : "#c7c7cc" }} />
+                </div>
+              </div>
+              {connected ? (
+                <button type="button" disabled={busy} onClick={() => handleGenerate(row.platform)} style={disabledStyle({ ...compactSecondary, width: "100%" }, busy)}>
+                  {generatingNetwork === row.platform ? "Analizando..." : "Crear propuesta"}
+                </button>
+              ) : row.conexionId ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
+                    router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${row.conexionId}`);
+                  }}
+                  style={disabledStyle({ ...compactSecondary, width: "100%", color: "#0066cc" }, busy)}
+                >
+                  Conectar
+                </button>
+              ) : (
+                <span style={{ fontSize: 13, color: "#86868b" }}>No disponible</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
-        {/* Columna derecha: progreso, mensajes y propuestas */}
-        <div className="redes-split-main">
-        {generating && (
+      {generating && (
           <div
             role="status"
             aria-live="polite"
@@ -592,161 +612,88 @@ export default function OportunidadesRedesPage() {
           </div>
         )}
 
-          {message && (
-            <div
-              style={{
-                padding: "0 0 16px",
-                fontSize: 13,
-                fontWeight: 500,
-                color: message.kind === "success" ? "#16803c" : message.kind === "error" ? "#ff3b30" : "#6e6e73",
-              }}
-            >
-              {message.text}
-            </div>
-          )}
+      {message && (
+        <div style={{ padding: "0 0 16px", fontSize: 13, fontWeight: 500, color: message.kind === "success" ? "#16803c" : message.kind === "error" ? "#ff3b30" : "#6e6e73" }}>
+          {message.text}
+        </div>
+      )}
 
-          {loading ? (
-            <div className="muted" style={{ textAlign: "center", padding: 40 }}>
-              Cargando propuestas...
+      {/* Propuestas */}
+      {loading ? (
+        <div className="muted" style={{ textAlign: "center", padding: 40 }}>Cargando propuestas...</div>
+      ) : (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 4 }}>
+            <h2 style={{ ...h2Style, margin: 0, fontSize: 18 }}>
+              Propuestas <span style={{ color: "#6e6e73", fontWeight: 500 }}>({groupPending.length})</span>
+            </h2>
+            {groupPending.length > 0 && (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <button type="button" onClick={handleDeleteAll} disabled={deletingAll || publishingAll} style={disabledStyle(compactDanger, deletingAll || publishingAll)}>
+                  {deletingAll ? "Borrando..." : "Borrar todas"}
+                </button>
+                <button type="button" onClick={handlePublishAll} disabled={publishingAll || deletingAll} style={disabledStyle(compactPrimary, publishingAll || deletingAll)}>
+                  {publishingAll ? "Publicando..." : "Publicar todas"}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {groupPending.length === 0 ? (
+            <div style={{ borderTop: "1px solid #e5e5ea", padding: "28px 0", color: "#6e6e73", fontSize: 14 }}>
+              Aún no hay propuestas. Pulsa <strong style={{ color: "#1d1d1f" }}>Crear propuestas</strong> y el sistema las prepara a partir de tus artículos.
+              <div style={{ marginTop: 12 }}>
+                <button type="button" onClick={() => router.push("/dashboard/publicaciones-en-curso")} style={compactSecondary}>
+                  Ver progreso de las publicaciones
+                </button>
+              </div>
             </div>
           ) : (
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 14 }}>
-                <h2 style={{ ...h2Style, margin: 0, fontSize: 18 }}>
-                  Propuestas pendientes ({groupPending.length})
-                </h2>
-                {groupPending.length > 0 && (
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button
-                      onClick={handleDeleteAll}
-                      disabled={deletingAll || publishingAll}
-                      className="secondary"
-                      style={disabledStyle(
-                        { ...secondaryButtonStyle, ...uniformButtonSize, color: "#ff3b30", whiteSpace: "nowrap" },
-                        deletingAll || publishingAll,
-                      )}
-                    >
-                      {deletingAll ? "Borrando..." : "Borrar pendientes"}
-                    </button>
-                    <button
-                      onClick={handlePublishAll}
-                      disabled={publishingAll || deletingAll}
-                      style={{ ...buttonStyle, ...uniformButtonSize, marginTop: 0, whiteSpace: "nowrap" }}
-                    >
-                      {publishingAll ? "Publicando..." : "Publicar todas"}
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {groupPending.length === 0 ? (
-                <section style={{ ...sectionStyle, padding: "16px 0 24px" }}>
-                  <p className="muted" style={{ margin: 0 }}>
-                    No tienes propuestas pendientes. Pulsa <strong>Crear oportunidad</strong> en una red conectada para generarlas.
-                  </p>
-                  <button
-                    onClick={() => router.push("/dashboard/publicaciones-en-curso")}
-                    className="secondary"
-                    style={{ ...secondaryButtonStyle, ...uniformButtonSize, marginTop: 14 }}
-                  >
-                    Ver progreso de las publicaciones
-                  </button>
-                </section>
-              ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
               {groupPending.map((opp) => {
-                const isQueuedOrProcessing = false;
+                const editing = editingId === opp.id;
+                const canPreview = opp.platform.startsWith("instagram") || opp.platform === "threads" || opp.platform === "linkedin";
                 return (
-                  <div key={opp.id} style={sectionStyle}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
-                      <div>
-                        <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "#6e6e73" }}>
-                          {opp.platform} · {opp.status === "published" ? "Publicado" : opp.status === "processing" ? "Publicando..." : "Pendiente"}
+                  <div key={opp.id} style={{ borderTop: "1px solid #e5e5ea", padding: "18px 0", display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div style={{ flex: "1 1 340px", minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "#1d1d1f", background: "#f5f5f7", borderRadius: 999, padding: "3px 10px" }}>
+                          {platformLabel(opp.platform)}
+                        </span>
+                        <a href={opp.articleUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#0066cc", textDecoration: "none" }}>Ver artículo ↗</a>
+                      </div>
+                      <h4 style={{ color: "#1d1d1f", margin: "0 0 6px", fontSize: 15, fontWeight: 600, lineHeight: 1.35 }}>{opp.articleTitle}</h4>
+                      {editing ? (
+                        <textarea
+                          value={opp.suggestedText}
+                          onChange={(e) => handleTextChange(opp.id, e.target.value)}
+                          style={{ width: "100%", minHeight: 110, padding: 10, borderRadius: 8, background: "#ffffff", color: "#1d1d1f", border: "1px solid #d2d2d7", fontSize: 14, fontFamily: "inherit", resize: "vertical", boxSizing: "border-box" }}
+                        />
+                      ) : (
+                        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "#424245", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", whiteSpace: "pre-line" }}>
+                          {opp.suggestedText}
                         </p>
-                        <h4 style={{ color: "#1d1d1f", margin: "0 0 4px 0", fontSize: 16, fontWeight: 600 }}>
-                          {opp.articleTitle}
-                        </h4>
-                        <a
-                          href={opp.articleUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="link-button"
-                          style={{ fontSize: 12 }}
-                        >
-                          Ver artículo original &rarr;
-                        </a>
-                      </div>
-
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        {!isQueuedOrProcessing && (
-                          <>
-                            {(opp.platform.startsWith("instagram") || opp.platform === "threads" || opp.platform === "linkedin") && (
-                              <button
-                                onClick={() => handlePreview(opp)}
-                                className="secondary"
-                                style={{ ...secondaryButtonStyle, ...uniformButtonSize }}
-                              >
-                                Preview
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleSaveText(opp)}
-                              className="secondary"
-                              style={{ ...secondaryButtonStyle, ...uniformButtonSize }}
-                            >
-                              Guardar
-                            </button>
-                            <button
-                              onClick={() => handlePublishOne(opp)}
-                              disabled={publishingId === opp.id}
-                              style={{ ...buttonStyle, ...uniformButtonSize, marginTop: 0 }}
-                            >
-                              {publishingId === opp.id ? "Publicando..." : "Publicar"}
-                            </button>
-                            <button
-                              onClick={() => handleSkipOne(opp)}
-                              className="secondary"
-                              style={{ ...secondaryButtonStyle, ...uniformButtonSize, color: "#ff3b30" }}
-                            >
-                              Descartar
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      )}
                     </div>
-
-                    <div style={{ marginTop: 14 }}>
-                      <label style={{ display: "block", color: "#6e6e73", fontSize: 12, marginBottom: 4 }}>
-                        Texto de la publicación:
-                      </label>
-                      <textarea
-                        value={opp.suggestedText}
-                        onChange={(e) => handleTextChange(opp.id, e.target.value)}
-                        disabled={isQueuedOrProcessing}
-                        style={{
-                          width: "100%",
-                          minHeight: 90,
-                          padding: 10,
-                          borderRadius: 10,
-                          background: "#ffffff",
-                          color: "#1d1d1f",
-                          border: "1px solid #d2d2d7",
-                          fontSize: 14,
-                          fontFamily: "inherit",
-                          resize: "vertical",
-                          boxSizing: "border-box",
-                        }}
-                      />
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                      <button type="button" onClick={() => handlePublishOne(opp)} disabled={publishingId === opp.id} style={disabledStyle(compactPrimary, publishingId === opp.id)}>
+                        {publishingId === opp.id ? "Publicando..." : "Publicar"}
+                      </button>
+                      {editing ? (
+                        <button type="button" onClick={async () => { await handleSaveText(opp); setEditingId(null); }} style={compactSecondary}>Guardar</button>
+                      ) : (
+                        <button type="button" onClick={() => setEditingId(opp.id)} style={compactSecondary}>Editar</button>
+                      )}
+                      {canPreview && <button type="button" onClick={() => handlePreview(opp)} style={compactSecondary}>Vista previa</button>}
+                      <button type="button" onClick={() => handleSkipOne(opp)} style={compactDanger}>Descartar</button>
                     </div>
                   </div>
                 );
               })}
-                </div>
-              )}
             </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* Modal de Descarte */}
       {skipModal && (
