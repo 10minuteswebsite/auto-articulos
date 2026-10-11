@@ -69,8 +69,12 @@ export function buildSafeCaption(suggestedText: string, articleUrl: string, opti
   const len = (s: string) => (useGraphemes ? countGraphemes(s) : s.length);
   const truncate = (s: string, n: number) => (useGraphemes ? truncateGraphemes(s, n) : s.slice(0, Math.max(0, n)));
 
-  const expanded = suggestedText.includes("[ENLACE]")
-    ? suggestedText.replace("[ENLACE]", articleUrl)
+  // El enlace siempre va separado del texto por un espacio o salto de línea:
+  // pegado a otra palabra («aquí:https://…» o «...https://…») las redes no lo
+  // reconocen como enlace y queda sin resaltar ni clic.
+  const spaced = suggestedText.replace(/(\S)\[ENLACE\]/, "$1 [ENLACE]");
+  const expanded = spaced.includes("[ENLACE]")
+    ? spaced.replace("[ENLACE]", articleUrl)
     : `${suggestedText}\n\n${articleUrl}`;
 
   if (len(expanded) <= maxChars) return expanded;
@@ -92,9 +96,15 @@ export function buildSafeCaption(suggestedText: string, articleUrl: string, opti
   // primero para no dejar pasar texto de más allá del link.
   const truncatedAfter = len(after) > budgetForBeforeAndAfter ? truncate(after, budgetForBeforeAndAfter) : after;
   const budgetForBefore = Math.max(0, budgetForBeforeAndAfter - len(truncatedAfter));
-  const truncatedBefore = len(before) > budgetForBefore
-    ? truncate(before, Math.max(0, budgetForBefore - 3)) + "..."
-    : before;
+  // Al recortar: sin partir la última palabra y con un espacio antes del
+  // enlace (se reserva "..." + " " = 4 caracteres) para que siga siendo clicable.
+  let truncatedBefore = before;
+  if (len(before) > budgetForBefore) {
+    const cut = truncate(before, Math.max(0, budgetForBefore - 4));
+    const lastSpace = cut.search(/\s\S*$/);
+    const clean = lastSpace > 0 && cut.length - lastSpace <= 30 ? cut.slice(0, lastSpace) : cut;
+    truncatedBefore = `${clean.trimEnd()}... `;
+  }
 
   return `${truncatedBefore}${articleUrl}${truncatedAfter}`;
 }
