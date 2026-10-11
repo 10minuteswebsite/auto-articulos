@@ -37,3 +37,15 @@ test("con fotos subidas pero sin permiso de usarlas, la persona no aparece", () 
   assert.match(text, /Persona en ESTA pieza: no/);
   assert.ok(!text.includes("foto de la persona (su rostro real)"));
 });
+
+import { mergeDirectorPrompt, DIRECTOR_ADDENDUM_MARKER } from "./directorPromptV2";
+
+test("la guía se añade al prompt del panel sin reemplazarlo y no se duplica", () => {
+  const panel = "# ROL\n\nEres un DIRECTOR CREATIVO SENIOR...\n\nLA SALIDA FINAL ES UNA SOLA LÍNEA.";
+  const once = mergeDirectorPrompt(panel);
+  assert.ok(once.startsWith(panel));
+  assert.equal(once.split(DIRECTOR_ADDENDUM_MARKER).length - 1, 1);
+  const twice = mergeDirectorPrompt(once);
+  assert.equal(twice, once);
+  assert.ok(once.includes("Persona en ESTA pieza"));
+});

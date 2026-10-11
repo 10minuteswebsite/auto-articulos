@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "aplicar (guarda respaldo y pone el prompt nuevo) | restaurar (vuelve al respaldo)"
+        description: "aplicar (respaldo + prompt del panel con la guía añadida) | reemplazar (respaldo + solo el v2 corto) | restaurar (vuelve al respaldo)"
         required: true
         default: "aplicar"
 
