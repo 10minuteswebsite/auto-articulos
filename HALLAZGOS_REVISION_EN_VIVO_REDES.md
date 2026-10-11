@@ -26,3 +26,24 @@ Protocolo leído: COORDINACION_CLAUDE_CODEX.md (No Destrucción, capitán, tres 
 
 ## Pendiente de revisar
 Panel de Administración con sesión de administrador (quién tiene/no tiene Redes; si cada interruptor guarda y se respeta), cada red en Conexiones, flujo de crear propuesta/publicar.
+
+
+---
+
+## Estado al 2026-10-11
+
+### Resuelto y verificado en producción
+- H1: 403 de la API de Redes a toda cuenta no administradora (PR #514).
+- Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; seototal sin cambios (PR #514 y #515).
+- «Crear oportunidad» devolvía 500 por `pg_advisory_xact_lock` (void) desde 2026-10-06 (PR #516).
+- Flujo completo probado en Threads con la cuenta de Lorena: crear propuesta → vista previa → publicar → post vivo con enlace real (`[ENLACE]` se sustituye al publicar).
+
+### Pedidos de Milton (2026-10-11) — por hacer, NO iniciados
+1. **Rediseñar la interfaz gráfica de Redes** para que se entienda mejor (hoy: texto largo y explicativo arriba, lista de redes sin agrupar, botones «Borrar todas» / «Publicar todo el lote» sin contexto, vista previa de ~70 s sin aviso de progreso).
+2. **Separar META de las otras redes** (Instagram, Facebook y Threads van en su propio grupo; el resto —LinkedIn, Pinterest, Tumblr, Bluesky, Blogger, Google Business— aparte).
+3. **Revisar el algoritmo de generación** de propuestas para comprobar que hace las cosas bien: elección del artículo, no repetir artículos ni intención entre redes, respeto del cupo diario por red, calidad del texto y del recorte (en Threads el texto se corta a mitad de frase antes del enlace por el límite de 500 caracteres), uso de Search Console. Con evidencia dura primero; no cambiar nada sin auditoría.
+
+### Pendiente de las pruebas en vivo
+- Probar el resto de redes una por una y el botón «Generar propuestas para redes y blogs».
+- Revisar Administración con una sesión de administrador (cupos por red, que 0 bloquee de verdad).
+- Worker (`apps/worker/src/product-access.ts`) no distingue dominio: solo importa si el interruptor de derechos del HUB pasa de «off» a «enforce».
