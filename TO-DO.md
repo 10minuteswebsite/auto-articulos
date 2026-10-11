@@ -281,6 +281,24 @@ HANDOFF, solo alimenta ideas hacia él).
   (2) las etiquetas en español de ChatGPT y Muse contra la pantalla real; y
   (3) una revisión visual de la pantalla protegida con sesión iniciada. Sin
   fecha límite ni responsable asignado todavía.
+
+- **(11/10/2026, origen: tarea programada diaria de propagación, al revisar
+  `COORDINACION_CLAUDE_CODEX.md` → "Claude — REDES: todas las redes abiertas
+  en redes.lasolucionweb.com — 2026-10-10 — PR siguiente a #514")** El worker
+  (`apps/worker/src/product-access.ts`) no conoce el dominio (redes vs.
+  seototal); solo le importa si el interruptor de derechos pasa de "off" a
+  "enforce". Falta decidir si el worker necesita enterarse del dominio para
+  el nuevo comportamiento de "todas las redes abiertas" en
+  redes.lasolucionweb.com. Sin fecha límite ni responsable asignado todavía.
+
+- **(11/10/2026, origen: tarea programada diaria de propagación, al revisar
+  `COORDINACION_CLAUDE_CODEX.md` → "Claude — REDES por dominio: acceso activo
+  en redes.lasolucionweb.com + 403 de la API — 2026-10-10")** Decisión
+  pendiente de Milton: en el dominio redes.lasolucionweb.com, ¿sigue
+  exigiéndose que la cuenta tenga al menos una red aprobada para usar el
+  módulo, o alcanza con que el HUB le dé el derecho de Redes? Sin fecha
+  límite ni responsable asignado todavía.
+
 ## Hecho
 
 - **(1/10/2026)** MCP: se agregó `eliminar_oportunidades` con vista previa y
