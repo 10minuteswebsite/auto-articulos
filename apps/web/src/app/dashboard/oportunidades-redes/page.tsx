@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MENU_NAMES } from "@/lib/menu-names";
+import MobileInstructions from "@/components/MobileInstructions";
 import { useRouter } from "next/navigation";
 import {
   buttonStyle,
@@ -78,6 +79,19 @@ const NETWORK_ROWS = [
 function groupOfPlatform(platform: string): NetworkGroup {
   const value = platform.trim().toLowerCase();
   return value === "threads" || value.startsWith("instagram") || value.startsWith("facebook") ? "meta" : "otras";
+}
+
+/** Redacta lo que publica el sistema: «1 publicación por día» o «por día: Instagram 5, Threads 5 y Facebook 1». */
+function describeDailyLimits(rows: ReadonlyArray<{ key: string; label: string }>, limits: Record<string, number>): string {
+  const items = rows.map((row) => ({ label: row.label, limit: limits[row.key] ?? 1 }));
+  if (items.length === 0) return "1 publicación por día";
+  const first = items[0].limit;
+  if (items.every((item) => item.limit === first)) {
+    return first === 0 ? "ninguna publicación (Administración la tiene en 0)" : `${first} ${first === 1 ? "publicación" : "publicaciones"} por día en cada red`;
+  }
+  const parts = items.map((item) => `${item.label} ${item.limit}`);
+  const list = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} y ${parts[parts.length - 1]}` : parts[0];
+  return `por día: ${list}`;
 }
 
 /** Botones compactos de esta pantalla (los estándar de la plataforma son demasiado grandes aquí). */
@@ -515,9 +529,6 @@ export default function OportunidadesRedesPage() {
             <h1 style={{ fontSize: 30, fontWeight: 600, color: "#1d1d1f", margin: 0, letterSpacing: "-0.03em", lineHeight: 1.15 }}>
               {openCard?.title ?? MENU_NAMES.redes}
             </h1>
-            <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.5, color: "#6e6e73", maxWidth: 620 }}>
-              Tu contenido, difundido de forma inteligente en {openCard?.hint}. Tú apruebas cada publicación.
-            </p>
           </div>
           <button
             type="button"
@@ -529,6 +540,30 @@ export default function OportunidadesRedesPage() {
             {generatingAll ? "Creando propuestas..." : "Crear propuestas"}
           </button>
         </div>
+        <MobileInstructions>
+          <p style={{ margin: "14px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", maxWidth: 760 }}>
+            Aquí configuras las redes que difunden de forma inteligente el contenido de tu página web: el sistema
+            toma tus artículos, prepara la publicación para cada red y publica{" "}
+            <strong>{describeDailyLimits(groupRows, dailyLimits)}</strong>.
+          </p>
+          {groupConnectedCount === 0 ? (
+            <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", maxWidth: 760 }}>
+              Aún no hay ninguna red conectada aquí. Pulsa <strong>Conectar</strong> en la que quieras activar y,
+              al terminar, volverás a esta pantalla.
+            </p>
+          ) : (
+            <>
+              <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", maxWidth: 760 }}>
+                Pulsa <strong>Crear propuesta</strong> en una red conectada, revisa la propuesta y decide si sale.
+              </p>
+              {groupConnectedCount < groupRows.length && (
+                <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#6e6e73", maxWidth: 760 }}>
+                  Las redes sin conectar aún no están activas: pulsa <strong>Conectar</strong> para activarlas.
+                </p>
+              )}
+            </>
+          )}
+        </MobileInstructions>
       </div>
 
       {/* Redes del grupo */}
