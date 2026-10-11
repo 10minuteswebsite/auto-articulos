@@ -81,8 +81,12 @@ async function generateGPTCopy(
   const isFacebookPage = platform === "facebook-page";
   const isPinterest = platform === "pinterest";
   const isBlogger = platform === "blogger";
-  const charLimit = isLinkedIn ? 1300 : isFacebookPage ? 700 : isInstagramFeedCaption ? 1000 : isPinterest ? 800 : isBlogger ? 1600 : 360;
-  const maxTokens = isLinkedIn ? 700 : isFacebookPage ? 450 : isInstagramFeedCaption ? 550 : isPinterest ? 500 : isBlogger ? 800 : 300;
+  const charLimit = isLinkedIn ? 1300 : isFacebookPage ? 700 : isInstagramFeedCaption ? 1000 : isPinterest ? 800 : isBlogger ? 1600 : platform === "bluesky" ? 170 : 360;
+  const maxTokens = isLinkedIn ? 700 : isFacebookPage ? 450 : isInstagramFeedCaption ? 550 : isPinterest ? 500 : isBlogger ? 800 : platform === "bluesky" ? 150 : 300;
+  // Presupuesto real del texto de la IA en las redes cortas: el límite de la red
+  // INCLUYE el enlace (~90 caracteres) y la IA suele pasarse (Bluesky: 365-407
+  // caracteres para un tope de 300). Si se pasa, se le pide una sola vez que lo acorte.
+  const hardBudget = platform === "bluesky" ? 200 : platform === "x" ? 240 : platform === "threads" ? 400 : null;
   const styleNote = isLinkedIn
     ? "Tono profesional pero cercano (LinkedIn), con más contexto y valor. Puedes usar párrafos cortos separados por saltos de línea."
     : isBlogger
@@ -112,7 +116,7 @@ async function generateGPTCopy(
     : "No hay identidad profesional verificada disponible. No inventes nombre, profesión, ubicación, clientes ni anécdotas personales; escribe desde la utilidad del contenido y usa primera persona solo de forma editorial, sin afirmaciones biográficas.\n";
   const language = profile?.contentLanguage === "en" ? "inglés" : "español";
   try {
-    const response = await fetch(OPENAI_CHAT_URL, {
+    const callModel = (extraMessages: Array<{ role: "assistant" | "user"; content: string }>) => fetch(OPENAI_CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -146,13 +150,28 @@ async function generateGPTCopy(
               searchContext + analyticsContext +
               `- Usa las consultas reales solo como contexto: no las enumeres, no inventes datos y mantén un tono natural.`,
           },
+          ...extraMessages,
         ],
         temperature: 0.85,
         max_tokens: maxTokens,
       }),
     });
+    const response = await callModel([]);
     const data = (await response.json()) as any;
-    return data.choices?.[0]?.message?.content?.trim() ?? fallbackText;
+    const text: string = data.choices?.[0]?.message?.content?.trim() ?? fallbackText;
+    if (hardBudget && text !== fallbackText && text.length > hardBudget) {
+      const retry = await callModel([
+        { role: "assistant", content: text },
+        {
+          role: "user",
+          content: `Tu texto midió ${text.length} caracteres y el máximo es ${hardBudget}. Reescríbelo más corto (máximo ${hardBudget} caracteres), con la misma idea y el mismo tono, terminando con la palabra exacta "[ENLACE]". Responde solo con el texto.`,
+        },
+      ]);
+      const retryData = (await retry.json()) as any;
+      const shorter: string | undefined = retryData.choices?.[0]?.message?.content?.trim();
+      if (shorter && shorter.length < text.length) return shorter;
+    }
+    return text;
   } catch {
     return fallbackText;
   }
