@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Texto de la IA más largo que el límite de la red (Bluesky/Threads) — 2026-10-11
+
+- Evidencia (prueba en vivo, cuenta de Lorena, cupo 5): una pulsación en Bluesky creó 5 propuestas de 365 a 407 caracteres; el límite de Bluesky es 300 INCLUYENDO el enlace (~90). El prompt pedía «menos de 360 caracteres» a Threads/X/Bluesky por igual y la IA se pasaba (Threads: 481).
+- Cambio (`social-opportunities/generate/route.ts`): Bluesky pide 170 caracteres y `max_tokens` 150; en Threads/X/Bluesky, si el texto excede el presupuesto real (400/240/200), se pide UNA reescritura más corta; si no mejora, se conserva el texto y `buildSafeCaption` recorta de forma segura. Sin schema ni migración.
+- Observaciones sin tocar: con cupo N, una pulsación crea N propuestas (esperado); un artículo de Lorena se llama «… — versión 8821919-1» (dato, parece duplicado/prueba).
+
 ## Claude — Enlaces NO clicables en Threads/Bluesky (recorte + facets) — 2026-10-11
 
 - Hallazgo (Milton, post de Threads publicado en vivo): el enlace no se resaltaba ni se podía pulsar. Evidencia en el navegador: en Threads el post corto (espacio antes de la URL) sí tenía enlace azul; los recortados («cobe...https://…») no. En Bluesky ningún post tenía enlace clicable (el código nunca declaraba «facets»). LinkedIn y Facebook: correctos; Tumblr tiene su propio enlace; Blogger usa anchor HTML.
