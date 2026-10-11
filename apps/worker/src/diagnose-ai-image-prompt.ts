@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { prisma } from "@auto-articulos/db";
 import { generateAiSocialImage, type AiImageFormat } from "./aiImageGenerator";
-import { DIRECTOR_PROMPT_V2 } from "./directorPromptV2";
+import { DIRECTOR_PROMPT_V2, mergeDirectorPrompt } from "./directorPromptV2";
+import { decryptSecret } from "@auto-articulos/shared";
 import { getArticleOpenGraphImage } from "./socialPublish";
 
 // Diagnóstico (11/10/2026) para comparar el Director Creativo ACTUAL (el prompt
@@ -12,7 +13,7 @@ import { getArticleOpenGraphImage } from "./socialPublish";
 //
 // Variables: DIAG_USER_EMAIL (obligatoria), DIAG_ARTICLE_URL (opcional),
 // DIAG_FORMATS (story,reel-image,post,pinterest), DIAG_ARMS (actual,nuevo),
-// DIAG_PERSON (no | si | ambos).
+// DIAG_PERSON (no | si | ambos). Directores: actual (panel), hibrido (panel + guía), nuevo (v2 corto).
 
 const VALID_FORMATS: AiImageFormat[] = ["story", "reel-image", "post", "facebook-story", "pinterest"];
 
@@ -59,6 +60,18 @@ async function main() {
       `fotos=${[user.profilePhotoUrl, user.profilePhotoUrl2, user.profilePhotoUrl3].filter(Boolean).length}`,
   );
 
+  const stored = await prisma.systemSetting.findUnique({ where: { key: "ai_social_image_prompt" } });
+  let storedPrompt = "";
+  if (stored?.encryptedValue) {
+    try {
+      storedPrompt = decryptSecret(stored.encryptedValue);
+    } catch {
+      storedPrompt = stored.encryptedValue;
+    }
+  }
+  const overrideFor = (arm: string): string | null =>
+    arm === "nuevo" ? DIRECTOR_PROMPT_V2 : arm === "hibrido" ? mergeDirectorPrompt(storedPrompt || DIRECTOR_PROMPT_V2) : null;
+
   const stamp = Date.now();
   const rows: string[] = [];
   for (const format of formats) {
@@ -77,7 +90,7 @@ async function main() {
           profilePhotoUrl3: user.profilePhotoUrl3,
           pathPrefix: `diagnostics/ai-image/${stamp}/${format}-${arm}${person ? "-persona" : ""}`,
           forcePerson: person,
-          systemPromptOverride: arm === "nuevo" ? DIRECTOR_PROMPT_V2 : null,
+          systemPromptOverride: overrideFor(arm),
         });
         const seconds = ((Date.now() - started) / 1000).toFixed(0);
         const line = `${format} | ${arm}${person ? " + persona" : ""} | ${seconds}s | ${result ? result.imageUrl : "SIN IMAGEN (falló)"}`;

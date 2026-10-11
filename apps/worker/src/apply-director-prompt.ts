@@ -2,7 +2,7 @@ import "dotenv/config";
 import { prisma } from "@auto-articulos/db";
 import { createHash } from "node:crypto";
 import { decryptSecret, encryptSecret } from "@auto-articulos/shared";
-import { DIRECTOR_PROMPT_V2 } from "./directorPromptV2";
+import { DIRECTOR_PROMPT_V2, mergeDirectorPrompt } from "./directorPromptV2";
 
 // Aplica (o restaura) el prompt del Director Creativo de imágenes en el ajuste
 // global `ai_social_image_prompt` (el mismo que se edita en Administración →
@@ -28,14 +28,16 @@ function fingerprint(encryptedValue: string | undefined): string {
 
 async function main() {
   const mode = (process.env.DIRECTOR_MODE || "").trim();
-  if (mode !== "aplicar" && mode !== "restaurar") throw new Error('DIRECTOR_MODE debe ser "aplicar" o "restaurar".');
+  if (mode !== "aplicar" && mode !== "reemplazar" && mode !== "restaurar") {
+    throw new Error('DIRECTOR_MODE debe ser "aplicar" (panel + guía), "reemplazar" (solo el v2 corto) o "restaurar".');
+  }
 
   const current = await prisma.systemSetting.findUnique({ where: { key: KEY } });
   const backup = await prisma.systemSetting.findUnique({ where: { key: BACKUP_KEY } });
   console.log(`Prompt actual en la base: ${fingerprint(current?.encryptedValue)}`);
   console.log(`Copia de respaldo existente: ${backup ? "sí" : "no"}`);
 
-  if (mode === "aplicar") {
+  if (mode === "aplicar" || mode === "reemplazar") {
     if (!backup) {
       await prisma.systemSetting.create({
         data: { key: BACKUP_KEY, encryptedValue: current?.encryptedValue ?? NONE_MARKER },
@@ -44,7 +46,16 @@ async function main() {
     } else {
       console.log("Ya había un respaldo: se conserva intacto (es el original).");
     }
-    const encryptedValue = encryptSecret(DIRECTOR_PROMPT_V2.trim());
+    let plainCurrent = "";
+    if (current?.encryptedValue) {
+      try {
+        plainCurrent = decryptSecret(current.encryptedValue);
+      } catch {
+        plainCurrent = current.encryptedValue;
+      }
+    }
+    const nextPrompt = mode === "reemplazar" || !plainCurrent.trim() ? DIRECTOR_PROMPT_V2.trim() : mergeDirectorPrompt(plainCurrent);
+    const encryptedValue = encryptSecret(nextPrompt);
     await prisma.systemSetting.upsert({
       where: { key: KEY },
       create: { key: KEY, encryptedValue },

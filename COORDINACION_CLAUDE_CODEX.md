@@ -1,5 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Director Creativo de imágenes: se CONSERVA el prompt del panel y se le AÑADE la guía — 2026-10-11 — FASE 2/3
+
+- Hallazgo: el prompt guardado en el panel (`ai_social_image_prompt`) mide 20.733 caracteres: sistema de etiquetas con catálogo cerrado, análisis de marca por el logo, 2–3 candidatas, anti-repetición y reglas de contraste. Reemplazarlo por el v2 corto habría tirado ese trabajo.
+- Decisión: modo híbrido. `mergeDirectorPrompt(panel)` = prompt del panel + sección «# GUÍA DE ESTILO VISUAL v2» (prioridad sobre lo anterior: luz natural y gente real, texto en zona limpia, logo flotando, uno de dos logos, cero números, foto de la persona solo si «Persona en ESTA pieza: sí», frase en inglés tras el texto). Idempotente (no duplica la sección).
+- Workflows (sin schema ni migración): `diagnose-ai-image-prompt.yml` con directores `actual`, `hibrido` y `nuevo` (sin publicar); `apply-director-prompt.yml` con `mode=aplicar` (panel + guía), `reemplazar` (solo el v2 corto) y `restaurar`; todos guardan antes una copia exacta en `ai_social_image_prompt_backup`.
+- Aún sin aplicar en producción: primero comparar los tres brazos con imágenes.
+
 ## Claude — Director Creativo v2: resultados del diagnóstico y vía para aplicarlo — 2026-10-11 — FASE 2/3
 
 - Diagnóstico (PR #521/#522, cuenta de Lorena, gpt-image-2): el director NUEVO supera al actual (titular condensado en zona limpia, gancho en pregunta, logo flotando, luz natural; Pinterest 2:3 OK). Debilidades: a veces escena sin personas (regla 8 añadida) y titulares sin sentido («cambiar de salud») → regla de titular completo añadida en este PR.

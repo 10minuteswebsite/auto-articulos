@@ -29,3 +29,30 @@ FORMATO: historias, reels y Facebook Story = vertical 9:16. Post de feed = portr
 
 SALIDA OBLIGATORIA (una línea, en inglés, con esta forma exacta; omite las frases de logo o persona que no apliquen):
 Bright daylight candid phone photo, [vertical 9:16 | portrait 4:5 | vertical 2:3]: [escena concreta basada en el tema y la foto OG: personas, lugar, momento del día, emoción, luz natural cálida, textura de piel real]. [Solo si aplica: The person from the attached portrait photo appears naturally in the scene, face exactly identical to the reference, unaltered.] Baked Spanish headline in a clean area ([clear sky | plain wall | blurred background], never over faces), bold condensed white letters with high-contrast text that reads: "TITULAR EN ESPAÑOL". [Solo si hay logo: Use only ONE attached logo, the version with the best contrast, floating directly on the photo, never in a box or white background, medium readable size.] No prices, no dollar amounts, no readable numbers. Photorealistic documentary style.`;
+
+// ── Sección que se AÑADE al final del prompt guardado en el panel (no lo reemplaza) ──
+// El prompt del panel es un sistema de etiquetas con análisis de marca, candidatas y
+// anti-repetición; esta sección le suma la guía de estilo visual y los materiales de marca.
+export const DIRECTOR_ADDENDUM_MARKER = "# GUÍA DE ESTILO VISUAL v2";
+
+export const DIRECTOR_ADDENDUM_V2 = `${DIRECTOR_ADDENDUM_MARKER} (PRIORIDAD ABSOLUTA: si algo de arriba la contradice, manda esta guía)
+
+La petición trae «Imágenes adjuntas al generador», «Logos disponibles: N» y «Fotos de la persona subidas: N. Persona en ESTA pieza: sí/no». LOGO_AVAILABLE = true si Logos disponibles es mayor que 0. Pinterest = /pinterest con formato vertical 2:3.
+
+REGLAS DE ESTILO
+1. Fotografía documental y luminosa, como tomada con un teléfono: luz natural, día soleado, personas reales con textura de piel natural. Nunca oscuro, tétrico, dramático ni con acabado plástico de IA. Si el tema lo permite, la escena incluye personas reales y cotidianas (adultos o familias acordes a la audiencia), de expresión positiva; evita calles o espacios vacíos y las ilustraciones.
+2. El texto va en una zona limpia (cielo despejado, pared lisa o fondo desenfocado), NUNCA sobre caras, sin textos encimados. Titular en letras gruesas y condensadas, claras y de tamaño mediano legible; máximo 6 palabras, frase completa y con sentido tomada fielmente del título del artículo (nunca mezcles ni cortes palabras).
+3. Si hay dos logos, usa SOLO UNO: el de mejor contraste con la zona donde flota. El logo va flotando directo sobre la foto, nunca en caja, recuadro ni fondo blanco, de tamaño mediano y legible, fuera de la franja superior de controles. /uselogo sigue siendo obligatorio cuando hay logo.
+4. Cero montos, precios ni números legibles en la imagen, tampoco en documentos o utilería. Comunicación también en positivo (esperanza, familias preparadas, decisión de amor), sin cifras fijas ni absolutos.
+5. FOTO DE LA PERSONA: la regla 2 de arriba se aplica así: la petición dice «Persona en ESTA pieza: sí» solo cuando hay autorización; entonces la persona de la foto adjunta aparece de forma natural con su rostro idéntico a la referencia (sin alisar ni deformar) y nunca tapado por el texto. Si dice «no», no representes a esa persona.
+
+SALIDA: sigue siendo UNA SOLA LÍNEA con el formato de arriba. Inmediatamente DESPUÉS del texto entre comillas añade esta frase breve en inglés, adaptada a la pieza (máximo 40 palabras): Bright daylight candid phone photo style, real people with natural skin texture, headline in a clean area never over faces, logo floating without a box, no prices and no readable numbers.`;
+
+/** Prompt del panel + sección de la guía. Si la sección ya estaba, se reemplaza (no se duplica). */
+export function mergeDirectorPrompt(currentPrompt: string): string {
+  const index = currentPrompt.indexOf(DIRECTOR_ADDENDUM_MARKER);
+  const before = index >= 0 ? currentPrompt.slice(0, index) : currentPrompt;
+  // Al reaplicar, se quita también el separador «---» que dejó la aplicación anterior.
+  const base = (index >= 0 ? before.trimEnd().replace(/\n*---$/, "") : before).trimEnd();
+  return `${base}\n\n---\n\n${DIRECTOR_ADDENDUM_V2}`;
+}
