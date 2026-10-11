@@ -1,6 +1,5 @@
 "use client";
 
-import { MENU_NAMES } from "@/lib/menu-names";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ModuleIntro, { IntroP, Modulo } from "@/components/ModuleIntro";
@@ -208,14 +207,10 @@ export default function PublicacionesEnCursoPage() {
         >
           <h2 style={h2Style}>No hay ninguna ejecución en curso</h2>
           <p style={{ fontSize: 13, color: "#6e6e73" }}>
-            {soloRedes
-              ? "Ve a Publica en Redes para preparar una nueva publicación."
-              : soloArticulos
-                ? `Ve a "${MENU_NAMES.propios}" para elegir una categoría, pegar títulos e iniciar una nueva tanda.`
-                : `Ve a "${MENU_NAMES.propios}" para elegir una categoría, pegar títulos e iniciar una nueva tanda.`}
+            Lo que ya terminó (publicado o con error) está en el Historial, con su estado y su enlace.
           </p>
-          <Link href={soloRedes ? "/dashboard/oportunidades-redes" : "/dashboard/publicar"} className="button" style={{ ...buttonStyle, textDecoration: "none" }}>
-            {soloRedes ? "Ir a Redes" : "Ir a Publicar"}
+          <Link href="/dashboard/historial" className="button" style={{ ...buttonStyle, textDecoration: "none" }}>
+            Ir al Historial
           </Link>
         </section>
       )}

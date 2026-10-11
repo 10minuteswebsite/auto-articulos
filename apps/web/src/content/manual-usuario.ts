@@ -360,6 +360,8 @@ Ruta: /dashboard/publicaciones-en-curso
 
 Aquí ves cada lote activo y el estado de cada título. Puedes cancelar el lote completo si ya no deseas continuarlo. Cuando un título muestra un error, usa **Reintentar** solo después de leer el mensaje y corregir la causa, por ejemplo una conexión vencida o una configuración incompleta.
 
+Cuando no hay nada en curso, la pantalla muestra el botón **Ir al Historial**: ahí quedan, con su estado y su enlace, tanto las publicaciones terminadas como las que fallaron.
+
 ### Historial
 
 Ruta: /dashboard/historial

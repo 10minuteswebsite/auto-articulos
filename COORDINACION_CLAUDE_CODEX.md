@@ -1,5 +1,10 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Publicaciones en curso: el botón vacío va al Historial — 2026-10-11
+
+- Pedido de Milton: al terminar de publicar, la pantalla decía «Ir a Publicar»; ahora dice «Ir al Historial» (`/dashboard/historial`, que ya muestra artículos y redes, publicados o con error). Solo web, sin schema ni migración. Manual actualizado.
+- Capitanía reclamada (`migration-coordinator.sh claim`), se libera al fusionar.
+
 ## Claude — Director v2: el modo híbrido NO funcionó; se ajusta el v2 corto — 2026-10-11
 
 - Evidencia (diagnóstico en vivo, 9 imágenes): el brazo `hibrido` (prompt del panel + guía) casi no cambió nada y no añadió la frase de la guía: el prompt largo manda y la sección final se ignora; además `actual` repite siempre las mismas etiquetas (el código no pasa `RECENT_STYLE_HISTORY`, así que la rotación y el análisis de marca del prompt largo no operan en la práctica).
