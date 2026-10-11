@@ -571,39 +571,14 @@ export async function POST(request: Request) {
       }
     }
 
-    // El cupo diario (Administración → Difusión) antes solo se aplicaba al
-    // publicar en el worker: el botón de generación podía crear una
-    // propuesta pendiente igual, aunque el cupo del día ya estuviera
-    // completo — hallazgo de la auditoría del 1/10/2026. Se filtra acá
-    // también, con el mismo cálculo exacto que usa el worker
-    // (enforceSocialDailyLimit en apps/worker/src/socialPublish.ts): 1 por
-    // día si no hay valor guardado, 0 bloquea el formato.
-    const dailyLimitsRaw = (await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } }))?.socialDailyLimits;
-    const dailyLimits = (dailyLimitsRaw && typeof dailyLimitsRaw === "object" && !Array.isArray(dailyLimitsRaw))
-      ? dailyLimitsRaw as Record<string, unknown> : {};
-    const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
-    const limitedOut: string[] = [];
-    const integrationsWithinLimit: string[] = [];
-    const remainingByPlatform = new Map<string, number>();
-    for (const platform of integrations) {
-      const raw = dailyLimits[platform];
-      const limit = typeof raw === "number" && Number.isInteger(raw) && raw >= 0 ? raw : 1;
-      const published = await prisma.socialOpportunity.count({
-        where: { userId, platform, status: "published", publishedAt: { gte: dayStart } },
-      });
-      const remaining = Math.max(0, limit - published);
-      remainingByPlatform.set(platform, remaining);
-      if (remaining === 0) limitedOut.push(platform);
-      else integrationsWithinLimit.push(platform);
-    }
+    // El cupo diario (Administración → Difusión) limita cuántas veces se PUBLICA
+    // por día, no cuántas propuestas se crean (decisión de Milton, 2026-10-11).
+    // Se comprueba al pulsar «Publicar» (publish/route.ts) y, como respaldo, en
+    // el worker. Cada pulsación crea una propuesta por red.
+    const integrationsWithinLimit: string[] = [...integrations];
+    const remainingByPlatform = new Map<string, number>(integrations.map((platform) => [platform, 1]));
 
     if (integrationsWithinLimit.length === 0) {
-      if (limitedOut.length > 0) {
-        return NextResponse.json(
-          { error: `Ya alcanzaste el cupo diario de hoy para ${limitedOut.join(", ")}. Se renueva mañana, o puedes ajustarlo en Administración.` },
-          { status: 400 },
-        );
-      }
       console.warn("[social-opportunities/generate] red solicitada sin conexión efectiva", {
         requestedNetworks,
         connected,
