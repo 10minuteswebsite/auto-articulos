@@ -1,5 +1,17 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Director Creativo de imágenes v2 (guía de estilo de Lorena) — 2026-10-11 — FASE 1 de 3
+
+- Pedido de Milton: reformar el prompt de creación de imágenes de SEO Total con la guía `guia-estilo-imagenes.md` (Lorena), sabiendo que la persona puede subir logos (2) y fotos (3) en Configuración → Contenido.
+- Producción usa `IMAGE_PROVIDER=gpt-image-2` (fal.ai): recibe la foto OG del artículo + referencias. El Director Creativo (gpt-4o-mini, prompt global `ai_social_image_prompt` editable en Administración → «Prompts») debe devolver UNA línea con `text that reads: "TITULAR"` o la imagen no se genera.
+- Fase 1 (este PR, sin schema ni migración; NO cambia el prompt guardado en el panel):
+  - `directorPromptV2.ts`: el prompt nuevo (reglas de la guía generalizadas + materiales de marca + formato Pinterest). Es el respaldo si no hay prompt guardado y el candidato a probar.
+  - `aiImageGenerator.ts`: el director recibe la lista de materiales (logos y fotos) en orden de adjuntos; se envían los 2 logos (usa solo uno, el de mejor contraste) y, si aplica, la foto de la persona; `PERSON_PHOTO_RATE = 0` (la persona NO aparece hasta verificar que el rostro sale idéntico); formato `pinterest` 2:3; `max_tokens` del director 300→400.
+  - Pinterest: si la cuenta tiene activado el generador IA, el Pin se crea con el director; si falla, vuelve a la foto del artículo recortada (publicar nunca depende de la IA).
+  - `diagnose-ai-image-prompt.yml`: workflow manual que compara director ACTUAL vs NUEVO y deja las imágenes en el resumen, sin publicar ni escribir en la base.
+- Fase 2: correr el diagnóstico con la cuenta de Lorena y revisar las imágenes. Fase 3: respaldo del prompt actual y aplicar el nuevo en el panel.
+- Anotado, no tocado: la infografía de Instagram pide «datos y números» (choca con «cero números» de la guía); `npm test` del worker no recoge los `*.test.ts` de la raíz de `src` (se corrieron con `tsx --test src/*.test.ts`: 45/45).
+
 ## Claude — El cupo diario limita publicaciones, no propuestas — 2026-10-11
 
 - Decisión de Milton: el cupo (Administración → Difusión) define cuántas veces se PUBLICA por día en cada red/formato, no cuántas propuestas se crean.

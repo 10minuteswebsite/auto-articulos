@@ -1,0 +1,65 @@
+name: Diagnóstico - Comparar Director Creativo de imágenes (sin publicar)
+
+# Genera imágenes de prueba con el prompt ACTUAL (panel de Administración) y el
+# NUEVO (apps/worker/src/directorPromptV2.ts) para una cuenta y un artículo, y
+# deja las direcciones en el resumen del job. NO publica nada ni escribe en la base
+# de datos. Se dispara a mano:
+#   gh workflow run diagnose-ai-image-prompt.yml -f user_email=correo@cuenta.com
+
+on:
+  workflow_dispatch:
+    inputs:
+      user_email:
+        description: "Correo de la cuenta (usa sus logos y fotos subidos)"
+        required: true
+      article_url:
+        description: "URL del artículo (opcional; si no, el de su oportunidad más reciente)"
+        required: false
+      formats:
+        description: "Formatos separados por coma: story,reel-image,post,pinterest"
+        required: false
+        default: "story,post,pinterest"
+      arms:
+        description: "Directores a comparar: actual,nuevo"
+        required: false
+        default: "actual,nuevo"
+      person:
+        description: "¿Foto de la persona en la pieza? no | si | ambos"
+        required: false
+        default: "no"
+
+jobs:
+  comparar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DATABASE_URL }}
+      CREDENTIALS_ENCRYPTION_KEY: ${{ secrets.CREDENTIALS_ENCRYPTION_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_IMAGE_API_KEY: ${{ secrets.OPENAI_IMAGE_API_KEY }}
+      FAL_API_KEY: ${{ secrets.FAL_API_KEY }}
+      IMAGE_PROVIDER: ${{ vars.IMAGE_PROVIDER }}
+      BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+      DIAG_USER_EMAIL: ${{ github.event.inputs.user_email }}
+      DIAG_ARTICLE_URL: ${{ github.event.inputs.article_url }}
+      DIAG_FORMATS: ${{ github.event.inputs.formats }}
+      DIAG_ARMS: ${{ github.event.inputs.arms }}
+      DIAG_PERSON: ${{ github.event.inputs.person }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Generar cliente de Prisma
+        run: npx prisma generate --schema=packages/db/prisma/schema.prisma
+
+      - name: Generar imágenes de prueba (no publica)
+        working-directory: apps/worker
+        run: npx tsx src/diagnose-ai-image-prompt.ts
