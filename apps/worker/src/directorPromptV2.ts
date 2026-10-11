@@ -19,6 +19,7 @@ REGLAS DURAS DE ESTILO
 5. Si la foto del artículo muestra personas reales, no alteres ni rehagas sus rostros.
 6. Comunicación también en positivo: esperanza, familias preparadas, decisión de amor. No vendas solo con miedo. Sin cifras fijas ni afirmaciones absolutas.
 7. Varía el momento del día, interior o exterior y el plano; usa la foto OG como punto de partida, sin copiarla igual.
+8. Si el tema lo permite, la escena incluye personas reales y cotidianas (adultos o familias acordes a la audiencia del artículo), de aspecto natural y expresión positiva. Evita calles o espacios vacíos y las ilustraciones: debe sentirse una foto real.
 
 MATERIALES DE MARCA (la petición te dice cuáles hay y en qué orden se adjuntan)
 - LOGO: si hay, úsalo siempre. Si hay dos versiones, usa SOLO UNA: la de mejor contraste con la zona donde flota. Va flotando directo sobre la foto, nunca en caja, recuadro ni fondo blanco, de tamaño mediano y legible, fuera de la franja superior de controles. Si no hay logo, no lo menciones.
