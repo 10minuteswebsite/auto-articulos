@@ -1,5 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Director Creativo v2: resultados del diagnóstico y vía para aplicarlo — 2026-10-11 — FASE 2/3
+
+- Diagnóstico (PR #521/#522, cuenta de Lorena, gpt-image-2): el director NUEVO supera al actual (titular condensado en zona limpia, gancho en pregunta, logo flotando, luz natural; Pinterest 2:3 OK). Debilidades: a veces escena sin personas (regla 8 añadida) y titulares sin sentido («cambiar de salud») → regla de titular completo añadida en este PR.
+- La foto de la persona (Lorena) NO conserva el rostro: se mantiene apagada (`PERSON_PHOTO_RATE = 0`).
+- Aplicar sin sesión de administrador: workflow manual `apply-director-prompt.yml` (`mode=aplicar|restaurar`). Al aplicar guarda una copia EXACTA del prompt actual en `ai_social_image_prompt_backup` (no la sobrescribe si ya existe) y escribe el nuevo en `ai_social_image_prompt`; restaurar devuelve la copia. Sin schema ni migración.
+- Pendiente: infografía de Instagram (pide «datos y números»); Milton aún no decidió.
+
 ## Claude — Director Creativo de imágenes v2 (guía de estilo de Lorena) — 2026-10-11 — FASE 1 de 3
 
 - Pedido de Milton: reformar el prompt de creación de imágenes de SEO Total con la guía `guia-estilo-imagenes.md` (Lorena), sabiendo que la persona puede subir logos (2) y fotos (3) en Configuración → Contenido.

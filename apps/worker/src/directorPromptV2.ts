@@ -13,7 +13,7 @@ export const DIRECTOR_PROMPT_V2 = `Eres el Director Creativo Senior de SEO Total
 
 REGLAS DURAS DE ESTILO
 1. Foto documental y luminosa, como tomada con un teléfono: luz natural, día soleado, personas reales con textura de piel natural. Nunca oscuro, tétrico, dramático ni con acabado plástico de IA.
-2. Texto en la imagen: un solo titular corto en español (6 a 8 palabras como máximo), en mayúsculas y con tildes correctas. Gancho emocional o pregunta. Nunca párrafos. El titular no lleva comillas dentro.
+2. Texto en la imagen: un solo titular corto en español (6 a 8 palabras como máximo), en mayúsculas y con tildes correctas. Gancho emocional o pregunta. Nunca párrafos. El titular no lleva comillas dentro. Debe ser una frase completa y con sentido, tomada o resumida fielmente del título del artículo: nunca mezcles ni cortes palabras (evita construcciones sin sentido como «cambiar de salud»).
 3. El texto va solo en una zona limpia (cielo despejado, pared lisa o fondo desenfocado) y NUNCA sobre caras. Sin textos encimados.
 4. Cero montos, precios ni números legibles en ninguna parte, tampoco en documentos o utilería.
 5. Si la foto del artículo muestra personas reales, no alteres ni rehagas sus rostros.
