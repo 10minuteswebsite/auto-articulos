@@ -60,6 +60,27 @@ const fallbackStages = [
   "Guardando propuestas",
 ];
 
+type NetworkGroup = "meta" | "otras";
+
+/** Redes de la pantalla, agrupadas: META (Instagram, Threads, Facebook) y el resto. */
+const NETWORK_ROWS = [
+  { key: "instagram", platform: "instagram", label: "Instagram", conexionId: "instagram", group: "meta" },
+  { key: "threads", platform: "threads", label: "Threads", conexionId: "threads", group: "meta" },
+  { key: "facebookPage", platform: "facebook-page", label: "Facebook", conexionId: "facebook", group: "meta" },
+  { key: "linkedin", platform: "linkedin", label: "LinkedIn", conexionId: "linkedin", group: "otras" },
+  { key: "pinterest", platform: "pinterest", label: "Pinterest", conexionId: "pinterest", group: "otras" },
+  { key: "tumblr", platform: "tumblr", label: "Tumblr", conexionId: "tumblr", group: "otras" },
+  { key: "bluesky", platform: "bluesky", label: "Bluesky", conexionId: "bluesky", group: "otras" },
+  { key: "blogger", platform: "blogger", label: "Blogger", conexionId: "blogger", group: "otras" },
+  { key: "googleBusiness", platform: "google-business", label: "Google Business Profile", conexionId: "business-profile", group: "otras" },
+  { key: "x", platform: "x", label: "X (Twitter)", conexionId: null, group: "otras" },
+] as const;
+
+const GROUP_CARDS: ReadonlyArray<{ id: NetworkGroup; title: string; hint: string }> = [
+  { id: "meta", title: "META", hint: "Instagram, Threads y Facebook" },
+  { id: "otras", title: "Otras redes y blogs", hint: "LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business" },
+];
+
 export default function OportunidadesRedesPage() {
   const router = useRouter();
   const [opportunities, setOpportunities] = useState<SocialOpportunity[]>([]);
@@ -77,6 +98,7 @@ export default function OportunidadesRedesPage() {
   const [publishingAll, setPublishingAll] = useState(false);
   const [message, setMessage] = useState<{ kind: "success" | "error" | "info"; text: string } | null>(null);
   const [skipModal, setSkipModal] = useState<{ opp: SocialOpportunity; reason: string; customReason: string } | null>(null);
+  const [openGroup, setOpenGroup] = useState<NetworkGroup | null>(null);
   const [previewModal, setPreviewModal] = useState<{ loading: boolean; imageUrl: string | null; imageBase64: string | null; platform: string; title: string } | null>(null);
 
   useEffect(() => {
@@ -449,30 +471,70 @@ export default function OportunidadesRedesPage() {
                 >
                   {generatingAll ? "Generando propuestas..." : "Generar propuestas para redes y blogs"}
                 </button>
-                <div>
-                {([
-                ["threads", "threads", "Threads", "threads"], ["x", "x", "X (Twitter)", null], ["linkedin", "linkedin", "LinkedIn", "linkedin"], ["instagram", "instagram", "Instagram", "instagram"], ["facebookPage", "facebook-page", "Facebook", "facebook"], ["pinterest", "pinterest", "Pinterest", "pinterest"], ["tumblr", "tumblr", "Tumblr", "tumblr"], ["bluesky", "bluesky", "Bluesky", "bluesky"], ["blogger", "blogger", "Blogger", "blogger"], ["googleBusiness", "google-business", "Google Business Profile", "business-profile"],
-                ] as const).map(([key, platform, label, conexionId]) => {
-                if (!activeNetworks[key]) return null;
-                const connected = connectedNetworks[key];
-                const busy = Boolean(generatingNetwork);
-                const unavailable = !connected;
-                const actionStyle: CSSProperties = { border: "none", background: "transparent", padding: 0, fontSize: 14, color: unavailable ? "#86868b" : "#0066cc", cursor: busy ? "wait" : "pointer", fontFamily: "inherit" };
-                return <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid #e5e5ea" }}>
-                  <span style={{ fontSize: 15, color: unavailable ? "#86868b" : "#1d1d1f" }}>{label}</span>
-                  {unavailable && conexionId ? (
-                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => {
-                      try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
-                      router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`);
-                    }}>Configurar ›</button>
-                  ) : unavailable ? (
-                    <span style={{ fontSize: 14, color: "#86868b" }}>No disponible</span>
-                  ) : (
-                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => handleGenerate(platform)}>{generatingNetwork === platform ? "Analizando..." : "Crear oportunidad"}</button>
-                  )}
-                </div>;
-                })}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 240px))", gap: 16, marginBottom: 8 }}>
+                  {GROUP_CARDS.map((card) => {
+                    const rows = NETWORK_ROWS.filter((row) => row.group === card.id && activeNetworks[row.key]);
+                    if (rows.length === 0) return null;
+                    const connectedCount = rows.filter((row) => connectedNetworks[row.key]).length;
+                    const selected = openGroup === card.id;
+                    return (
+                      <button
+                        key={card.id}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => setOpenGroup(selected ? null : card.id)}
+                        style={{
+                          aspectRatio: "1 / 1",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                          textAlign: "left",
+                          padding: 18,
+                          borderRadius: 18,
+                          border: selected ? "1.5px solid #1d1d1f" : "1px solid #d2d2d7",
+                          background: selected ? "#f5f5f7" : "#ffffff",
+                          cursor: "pointer",
+                          fontFamily: "inherit",
+                          color: "#1d1d1f",
+                          transition: "border-color 0.15s ease, background 0.15s ease",
+                        }}
+                      >
+                        <span style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "#86868b" }}>
+                          {connectedCount} de {rows.length} conectadas
+                        </span>
+                        <span>
+                          <span style={{ display: "block", fontSize: 24, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15 }}>{card.title}</span>
+                          <span style={{ display: "block", marginTop: 6, fontSize: 13, lineHeight: 1.4, color: "#6e6e73" }}>{card.hint}</span>
+                        </span>
+                        <span style={{ fontSize: 14, color: "#0066cc" }}>{selected ? "Ocultar ‹" : "Ver redes ›"}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+                {openGroup && (
+                  <div style={{ marginTop: 8 }}>
+                    {NETWORK_ROWS.filter((row) => row.group === openGroup).map(({ key, platform, label, conexionId }) => {
+                      if (!activeNetworks[key]) return null;
+                      const connected = connectedNetworks[key];
+                      const busy = Boolean(generatingNetwork);
+                      const unavailable = !connected;
+                      const actionStyle: CSSProperties = { border: "none", background: "transparent", padding: 0, fontSize: 14, color: unavailable ? "#86868b" : "#0066cc", cursor: busy ? "wait" : "pointer", fontFamily: "inherit" };
+                      return <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid #e5e5ea" }}>
+                        <span style={{ fontSize: 15, color: unavailable ? "#86868b" : "#1d1d1f" }}>{label}</span>
+                        {unavailable && conexionId ? (
+                          <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => {
+                            try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
+                            router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`);
+                          }}>Configurar ›</button>
+                        ) : unavailable ? (
+                          <span style={{ fontSize: 14, color: "#86868b" }}>No disponible</span>
+                        ) : (
+                          <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => handleGenerate(platform)}>{generatingNetwork === platform ? "Analizando..." : "Crear oportunidad"}</button>
+                        )}
+                      </div>;
+                    })}
+                  </div>
+                )}
               </>
             )}
             {pendingList.length > 0 && (
