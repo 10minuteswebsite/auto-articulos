@@ -11223,3 +11223,41 @@ No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta ta
 ninguna duda sin resolver para Milton en este rango.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-11
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-10 (commit
+`a72153d`). Se revisó el rango `a72153d..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 20
+líneas agregadas (0 eliminadas, confirmado con `git diff --stat`), 3 bloques nuevos, todos del
+2026-10-10: "Claude — «Generar propuestas» respondía 500 (pg_advisory_xact_lock / void)",
+"Claude — REDES: todas las redes abiertas en redes.lasolucionweb.com — PR siguiente a #514" y
+"Claude — REDES por dominio: acceso activo en redes.lasolucionweb.com + 403 de la API"
+(corresponden a los PRs #514, #515 y #516, commits `cd76253`, `42219ad` y `f12ca46`).
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: nueva entrada "Versión — 2026-10-10 — Redes: excepción por
+  dominio, todas las redes abiertas y fix de 'Generar propuestas' (PRs #514, #515, #516)", con
+  el detalle de cada PR, archivos tocados y la aclaración de que esta tarea no tiene acceso a
+  Vercel para verificar el deployment de forma independiente.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios por esta tarea — los propios PRs #514 y
+  #515 (commits `cd76253` y `42219ad`) ya actualizaron la línea "Excepción por dirección
+  (2026-10-10)" en la sección de Redes del manual, cubriendo tanto la excepción de dominio como
+  "todas las redes abiertas". El fix de "Generar propuestas" (PR #516) es una corrección de un
+  error 500 sin ningún comportamiento nuevo que describir al usuario (el manual no mencionaba
+  ese error), así que no requería texto nuevo.
+- `INVENTARIO_CONVERSACIONES.md`: nuevo addendum con 3 entradas en Parte B (una por PR). Parte A
+  sin cambios — se verificó con `git worktree list` y `git merge-base --is-ancestor` que los
+  tres commits ya son ancestros de `origin/main`: no son reservas activas.
+- `TO-DO.md`: dos nuevas entradas en "Pendientes" (11/10/2026): (1) si el worker
+  (`apps/worker/src/product-access.ts`) necesita conocer el dominio para el nuevo comportamiento
+  de redes abiertas, y (2) la decisión pendiente de Milton sobre si el dominio redes sigue
+  exigiendo al menos una red aprobada o solo manda el derecho del HUB.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguno de los tres bloques nuevos describe
+  un árbol de git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. No quedó
+ninguna duda sin resolver para Milton en este rango (las dos decisiones pendientes encontradas
+quedaron anotadas en `TO-DO.md` como corresponde, ya que no requieren una respuesta urgente).
+
+Responsable: Claude (tarea programada diaria de propagación).
