@@ -26,3 +26,33 @@ Protocolo leído: COORDINACION_CLAUDE_CODEX.md (No Destrucción, capitán, tres 
 
 ## Pendiente de revisar
 Panel de Administración con sesión de administrador (quién tiene/no tiene Redes; si cada interruptor guarda y se respeta), cada red en Conexiones, flujo de crear propuesta/publicar.
+
+
+---
+
+## Estado al 2026-10-11 (cierre del día)
+
+### Resuelto y verificado en producción
+- H1: 403 de la API de Redes a toda cuenta no administradora (PR #514).
+- Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; seototal sin cambios (PR #514 y #515).
+- «Crear oportunidad» devolvía 500 por `pg_advisory_xact_lock` (void) desde 2026-10-06 (PR #516).
+- El cupo diario limita publicaciones, no propuestas (PR #520): generar crea 1 por red; el cupo se comprueba al pulsar «Publicar».
+- Enlaces clicables: Threads (espacio antes del enlace al recortar) y Bluesky (facets) (PR #518); verificado en posts reales.
+- Texto de la IA ajustado al largo real de Bluesky/Threads (PR #519): Bluesky pasó de 365-407 a 159-196 caracteres.
+- Flujo completo probado con la cuenta de Lorena: crear propuesta → vista previa → publicar → post vivo (Threads y Bluesky).
+- Director Creativo de imágenes v2 basado en la guía de estilo de Lorena, materiales de marca (2 logos, 3 fotos), Pinterest con IA y diagnóstico sin publicar (PR #521-#525).
+
+### Decisiones de Milton
+- Las historias inventadas en los textos de la IA están aprobadas.
+- Una sola publicación por red en las pruebas; borrar las propuestas sobrantes después de cada prueba.
+- Infografía de Instagram («datos y números» vs «cero números»): EN PAUSA.
+- La foto de la persona en las imágenes IA queda APAGADA (`PERSON_PHOTO_RATE = 0`): en las pruebas el rostro generado no era el de Lorena.
+
+### Pendiente
+1. **Aplicar el prompt nuevo del Director** en producción: ejecutar el workflow `apply-director-prompt.yml` con `mode=reemplazar` (guarda respaldo exacto en `ai_social_image_prompt_backup`; `mode=restaurar` lo devuelve). Aún NO ejecutado.
+2. Pedidos de Milton sin iniciar: rediseñar la interfaz de Redes, separar META de las otras redes y revisar el algoritmo de generación (elección de artículo, repetición, calidad del texto).
+3. Probar el resto de redes una por una (LinkedIn, Facebook, Instagram, Pinterest, Tumblr, Blogger, Google Business) y el botón «Generar propuestas para redes y blogs».
+4. Revisar Administración con una sesión de administrador (cupos por red, que 0 bloquee de verdad).
+5. Posibles mejoras menores: la vista previa tarda ~70 s sin aviso; título de pestaña «SEO TOTAL — Artículos…»; asteriscos sueltos en App Móvil; recuadro amarillo en la imagen de un post antiguo de Facebook (21-sep); titulares de imagen a veces sin sentido.
+6. Worker (`apps/worker/src/product-access.ts`) no distingue dominio: solo importa si el interruptor de derechos del HUB pasa de «off» a «enforce».
+7. Coordinación con la línea MCP (otro programador): imágenes de texto a imagen en `ai_mcp_image_config`; mis archivos de imágenes quedaron liberados.
