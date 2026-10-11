@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — CIERRE «Publicaciones en curso: botón al Historial» — 2026-10-11
+
+- Estado: CERRADO Y ARCHIVADO. PR #526 fusionado (Vercel success). Sin migración. Capitanía liberada.
+- Resultado: con nada en curso, el botón dice «Ir al Historial» y lleva a `/dashboard/historial` (Artículos y Redes). Manual actualizado.
+- Pendiente: Milton no ha confirmado visualmente en producción.
+
 ## Claude — Publicaciones en curso: el botón vacío va al Historial — 2026-10-11
 
 - Pedido de Milton: al terminar de publicar, la pantalla decía «Ir a Publicar»; ahora dice «Ir al Historial» (`/dashboard/historial`, que ya muestra artículos y redes, publicados o con error). Solo web, sin schema ni migración. Manual actualizado.
