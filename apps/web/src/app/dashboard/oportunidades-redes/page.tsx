@@ -76,6 +76,12 @@ const NETWORK_ROWS = [
   { key: "x", platform: "x", label: "X (Twitter)", conexionId: null, group: "otras" },
 ] as const;
 
+/** A qué grupo pertenece una propuesta según su red (instagram-post, facebook-story, threads…). */
+function groupOfPlatform(platform: string): NetworkGroup {
+  const value = platform.trim().toLowerCase();
+  return value === "threads" || value.startsWith("instagram") || value.startsWith("facebook") ? "meta" : "otras";
+}
+
 const GROUP_CARDS: ReadonlyArray<{ id: NetworkGroup; title: string; hint: string }> = [
   { id: "meta", title: "META", hint: "Instagram, Threads y Facebook" },
   { id: "otras", title: "Otras redes y blogs", hint: "LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business" },
@@ -199,20 +205,28 @@ export default function OportunidadesRedesPage() {
     }
   }
 
-  async function handleGenerateAll() {
+  /** Crea propuestas para todas las redes conectadas del grupo abierto (una por red). */
+  async function handleGenerateGroup() {
+    if (!openGroup) return;
+    const networks = NETWORK_ROWS.filter((row) => row.group === openGroup && row.key !== "x" && activeNetworks[row.key] && connectedNetworks[row.key]).map((row) => row.platform);
+    if (networks.length === 0) {
+      setMessage({ kind: "info", text: "Todavía no hay ninguna red conectada en este grupo. Usa «Configurar» en la red que quieras activar." });
+      return;
+    }
     setGeneratingAll(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/social-opportunities/generate-all", {
+      const res = await fetch("/api/social-opportunities/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ networks }),
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage({ kind: "success", text: data.message || "Contenido preparado para todas las redes." });
+        setMessage({ kind: "success", text: data.message || "Propuestas generadas con éxito." });
         loadOpportunities();
       } else {
-        setMessage({ kind: "error", text: data.error || "Error al preparar las publicaciones." });
+        setMessage({ kind: "error", text: data.error || "Error al generar propuestas." });
       }
     } catch (err: any) {
       setMessage({ kind: "error", text: err.message });
@@ -267,7 +281,7 @@ export default function OportunidadesRedesPage() {
   }
 
   async function handlePublishAll() {
-    const pendingOpps = opportunities.filter((o) => o.status === "pending");
+    const pendingOpps = opportunities.filter((o) => o.status === "pending" && (!openGroup || groupOfPlatform(o.platform) === openGroup));
     if (pendingOpps.length === 0) {
       setMessage({ kind: "info", text: "No hay publicaciones pendientes para procesar." });
       return;
@@ -344,11 +358,13 @@ export default function OportunidadesRedesPage() {
   const [deletingAll, setDeletingAll] = useState(false);
 
   async function handleDeleteAll() {
-    if (!window.confirm("¿Borrar todas las publicaciones pendientes? Esta acción no se puede deshacer.")) return;
+    const groupTitle = GROUP_CARDS.find((card) => card.id === openGroup)?.title;
+    if (!window.confirm(`¿Borrar todas las publicaciones pendientes${groupTitle ? ` de ${groupTitle}` : ""}? Esta acción no se puede deshacer.`)) return;
     setDeletingAll(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/social-opportunities?scope=pending", { method: "DELETE" });
+      const platforms = Array.from(new Set(opportunities.filter((o) => o.status === "pending" && (!openGroup || groupOfPlatform(o.platform) === openGroup)).map((o) => o.platform)));
+      const res = await fetch(`/api/social-opportunities?scope=pending${openGroup ? `&platforms=${encodeURIComponent(platforms.join(","))}` : ""}`, { method: "DELETE" });
       if (res.ok) {
         setMessage({ kind: "info", text: "Se borraron todas las oportunidades pendientes." });
         loadOpportunities();
@@ -388,6 +404,48 @@ export default function OportunidadesRedesPage() {
 
   if (loading || connectionsLoading) return null;
 
+  const groupPending = openGroup ? pendingList.filter((o) => groupOfPlatform(o.platform) === openGroup) : pendingList;
+  const openCard = GROUP_CARDS.find((card) => card.id === openGroup);
+  const groupRows = NETWORK_ROWS.filter((row) => row.group === openGroup && activeNetworks[row.key]);
+  const groupConnectedCount = groupRows.filter((row) => connectedNetworks[row.key]).length;
+
+  // Pantalla inicial: solo las tarjetas (mismo estándar que las de Inicio). El resto aparece al entrar.
+  if (!openGroup) {
+    return (
+      <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
+        <div style={{ marginTop: 20, marginBottom: 20 }}>
+          <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>Elige dónde publicar</h2>
+          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, 320px)", gap: 16, justifyContent: "start" }}>
+            {GROUP_CARDS.map((card, i) => {
+              const rows = NETWORK_ROWS.filter((row) => row.group === card.id && activeNetworks[row.key]);
+              if (rows.length === 0) return null;
+              const connectedCount = rows.filter((row) => connectedNetworks[row.key]).length;
+              const pendingCount = pendingList.filter((o) => groupOfPlatform(o.platform) === card.id).length;
+              return (
+                <button
+                  key={card.id}
+                  type="button"
+                  className="inicio-action-card"
+                  onClick={() => { setMessage(null); setOpenGroup(card.id); }}
+                  style={{ display: "flex", width: 320, height: 320, boxSizing: "border-box", padding: 22, flexDirection: "column", justifyContent: "space-between", textAlign: "left", fontFamily: "inherit", cursor: "pointer", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}
+                >
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <p style={{ margin: 0, fontSize: 12, fontWeight: 700, lineHeight: 1.2, color: "#6e6e73", letterSpacing: "0.02em" }}>{String(i + 1).padStart(2, "0")}</p>
+                    <p style={{ margin: "20px 0 0", fontSize: 18, fontWeight: 700, color: "#1d1d1f", lineHeight: 1.3, textTransform: "uppercase" }}>{card.title}</p>
+                    <p style={{ margin: "10px 0 0", fontSize: 13, lineHeight: 1.5, color: "#6e6e73" }}>{card.hint}</p>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 12, lineHeight: 1.4, color: "#6e6e73" }}>
+                    {connectedCount} de {rows.length} conectadas{pendingCount > 0 ? ` · ${pendingCount} propuesta${pendingCount === 1 ? "" : "s"} pendiente${pendingCount === 1 ? "" : "s"}` : ""}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
       {/* Panel Superior */}
@@ -412,6 +470,13 @@ export default function OportunidadesRedesPage() {
           }}
         >
           <div>
+            <button
+              type="button"
+              onClick={() => { setMessage(null); setOpenGroup(null); }}
+              style={{ border: "none", background: "transparent", padding: 0, margin: "0 0 10px", fontSize: 14, color: "#0066cc", cursor: "pointer", fontFamily: "inherit" }}
+            >
+              ‹ Redes
+            </button>
             <p className="eyebrow" style={{ margin: "0 0 6px" }}>Difusión Social</p>
             <h1
               style={{
@@ -422,7 +487,7 @@ export default function OportunidadesRedesPage() {
                 letterSpacing: "-0.03em",
               }}
             >
-              {MENU_NAMES.redes}
+              {openCard?.title ?? MENU_NAMES.redes}
             </h1>
             <MobileInstructions>
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
@@ -440,7 +505,7 @@ export default function OportunidadesRedesPage() {
               <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                 Tú revisas cada propuesta y decides cuál sale y a qué red. No se publica todo ni todo el tiempo: el sistema reparte las publicaciones a lo largo de los días para que tu presencia crezca sin parecer spam y sin que las redes te penalicen.
               </p>
-              {!connectedNetworks.threads && !connectedNetworks.x && !connectedNetworks.linkedin && !connectedNetworks.instagram && !connectedNetworks.facebookPage && !connectedNetworks.pinterest && !connectedNetworks.tumblr && !connectedNetworks.bluesky && !connectedNetworks.blogger && !connectedNetworks.googleBusiness && !loading && !connectionsLoading && (
+              {groupConnectedCount === 0 && !loading && !connectionsLoading && (
                 <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
                   Todavía no tienes ninguna red conectada, así que no hay dónde publicar. Pulsa cualquiera de los
                   botones grises de abajo para configurar esa red; en cuanto conectes una, vuelves aquí solo y ya
@@ -465,52 +530,12 @@ export default function OportunidadesRedesPage() {
             ) : (
               <>
                 <button
-                  onClick={handleGenerateAll}
+                  onClick={handleGenerateGroup}
                   disabled={generatingAll || generatingNetwork !== null}
                   style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginBottom: 16 }}
                 >
-                  {generatingAll ? "Generando propuestas..." : "Generar propuestas para redes y blogs"}
+                  {generatingAll ? "Generando propuestas..." : `Generar propuestas para ${openCard?.title ?? "redes y blogs"}`}
                 </button>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 240px))", gap: 16, marginBottom: 8 }}>
-                  {GROUP_CARDS.map((card) => {
-                    const rows = NETWORK_ROWS.filter((row) => row.group === card.id && activeNetworks[row.key]);
-                    if (rows.length === 0) return null;
-                    const connectedCount = rows.filter((row) => connectedNetworks[row.key]).length;
-                    const selected = openGroup === card.id;
-                    return (
-                      <button
-                        key={card.id}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => setOpenGroup(selected ? null : card.id)}
-                        style={{
-                          aspectRatio: "1 / 1",
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "space-between",
-                          textAlign: "left",
-                          padding: 18,
-                          borderRadius: 18,
-                          border: selected ? "1.5px solid #1d1d1f" : "1px solid #d2d2d7",
-                          background: selected ? "#f5f5f7" : "#ffffff",
-                          cursor: "pointer",
-                          fontFamily: "inherit",
-                          color: "#1d1d1f",
-                          transition: "border-color 0.15s ease, background 0.15s ease",
-                        }}
-                      >
-                        <span style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "#86868b" }}>
-                          {connectedCount} de {rows.length} conectadas
-                        </span>
-                        <span>
-                          <span style={{ display: "block", fontSize: 24, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15 }}>{card.title}</span>
-                          <span style={{ display: "block", marginTop: 6, fontSize: 13, lineHeight: 1.4, color: "#6e6e73" }}>{card.hint}</span>
-                        </span>
-                        <span style={{ fontSize: 14, color: "#0066cc" }}>{selected ? "Ocultar ‹" : "Ver redes ›"}</span>
-                      </button>
-                    );
-                  })}
-                </div>
                 {openGroup && (
                   <div style={{ marginTop: 8 }}>
                     {NETWORK_ROWS.filter((row) => row.group === openGroup).map(({ key, platform, label, conexionId }) => {
@@ -537,7 +562,7 @@ export default function OportunidadesRedesPage() {
                 )}
               </>
             )}
-            {pendingList.length > 0 && (
+            {groupPending.length > 0 && (
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
                 <button
                   onClick={handleDeleteAll}
@@ -548,14 +573,14 @@ export default function OportunidadesRedesPage() {
                     deletingAll || publishingAll,
                   )}
                 >
-                  {deletingAll ? "Borrando..." : "Borrar todas las oportunidades"}
+                  {deletingAll ? "Borrando..." : `Borrar las pendientes de ${openCard?.title ?? "esta lista"}`}
                 </button>
                 <button
                   onClick={handlePublishAll}
                   disabled={publishingAll || deletingAll}
                   style={{ ...buttonStyle, ...uniformButtonSize, marginTop: 0, whiteSpace: "nowrap" }}
                 >
-                  {publishingAll ? "Publicando..." : "Publicar todo el lote"}
+                  {publishingAll ? "Publicando..." : `Publicar el lote de ${openCard?.title ?? "esta lista"}`}
                 </button>
               </div>
             )}
@@ -616,11 +641,11 @@ export default function OportunidadesRedesPage() {
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
             <h2 style={{ ...h2Style, margin: 0, fontSize: 18 }}>
-              Propuestas Pendientes ({pendingList.length})
+              Propuestas Pendientes ({groupPending.length})
             </h2>
           </div>
 
-          {pendingList.length === 0 ? (
+          {groupPending.length === 0 ? (
             <section style={{ ...sectionStyle, padding: "16px 0 24px" }}>
               <p className="muted" style={{ margin: 0 }}>
                 No tienes propuestas pendientes. Usa los botones de arriba para generarlas.
@@ -635,7 +660,7 @@ export default function OportunidadesRedesPage() {
             </section>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
-              {pendingList.map((opp) => {
+              {groupPending.map((opp) => {
                 const isQueuedOrProcessing = false;
                 return (
                   <div key={opp.id} style={sectionStyle}>

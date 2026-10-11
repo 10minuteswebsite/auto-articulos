@@ -129,10 +129,12 @@ export async function DELETE(request: NextRequest) {
     // skipped permite borrar únicamente las propuestas descartadas desde
     // el bloque correspondiente de /dashboard/historial.
     const scope = request.nextUrl.searchParams.get("scope");
+    // Opcional: limitar el borrado de pendientes a ciertas redes (p. ej. solo META).
+    const onlyPlatforms = (request.nextUrl.searchParams.get("platforms") ?? "").split(",").map((value) => value.trim()).filter(Boolean);
     await prisma.socialOpportunity.deleteMany({
       where:
         scope === "pending"
-          ? { userId, status: "pending" }
+          ? { userId, status: "pending", ...(onlyPlatforms.length > 0 ? { platform: { in: onlyPlatforms } } : {}) }
           : scope === "skipped"
             ? { userId, status: "skipped" }
             : scope === "unconfirmed"
