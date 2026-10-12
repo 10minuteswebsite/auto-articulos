@@ -18,8 +18,8 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 **Pantalla de Redes (hoy solo en local, sin subir)**
 - [x] Corregir «Hoy X de N» (2026-10-12, en el PR del rediseño) — C.
 - [ ] Vista previa: decidir quitarla o hacerla fiel a lo que se publica — M decide, C ejecuta.
-- [ ] Errores de publicación visibles en la pantalla del grupo, con reintento — C.
-- [ ] Pinterest: el generador pide 800 caracteres y se recorta a 500 con «...» — C.
+- [x] Errores de publicación visibles en la pantalla del grupo, con reintento (2026-10-12) — C.
+- [x] Pinterest: el generador ya pide menos de 450 caracteres y no se recorta (2026-10-12) — C.
 - [x] Manual de usuario actualizado (2026-10-12, en el PR del rediseño) — C.
 - [ ] Subir el rediseño con las tres auditorías: pruebas, typecheck, build y Preview verde — C; la fusión la hace M si el sistema vuelve a bloquearla.
 

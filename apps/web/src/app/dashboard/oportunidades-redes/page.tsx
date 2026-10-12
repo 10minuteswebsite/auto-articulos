@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { friendlyPublishError } from "@auto-articulos/shared/src/friendly-error";
 import { MENU_NAMES } from "@/lib/menu-names";
 import MobileInstructions from "@/components/MobileInstructions";
 import { useRouter } from "next/navigation";
@@ -36,6 +37,7 @@ interface SocialOpportunity {
   skipReason: string | null;
   createdAt: string;
   publishedAt: string | null;
+  finishedAt?: string | null;
 }
 
 const SKIP_REASONS = [
@@ -467,6 +469,10 @@ export default function OportunidadesRedesPage() {
   if (loading || connectionsLoading) return null;
 
   const groupPending = openGroup ? pendingList.filter((o) => groupOfPlatform(o.platform) === openGroup) : pendingList;
+  // Publicaciones que fallaron en las últimas 24 h: se muestran con el motivo y un reintento,
+  // en vez de desaparecer de la pantalla.
+  const failedCutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const failedList = opportunities.filter((o) => o.status === "error" && (!openGroup || groupOfPlatform(o.platform) === openGroup) && new Date(o.finishedAt ?? o.createdAt).getTime() > failedCutoff);
   const openCard = GROUP_CARDS.find((card) => card.id === openGroup);
   const groupRows = NETWORK_ROWS.filter((row) => row.group === openGroup && activeNetworks[row.key]);
   const groupConnectedCount = groupRows.filter((row) => connectedNetworks[row.key]).length;
@@ -679,6 +685,23 @@ export default function OportunidadesRedesPage() {
               </div>
             )}
           </div>
+
+          {failedList.length > 0 && (
+            <div style={{ borderTop: "1px solid #e5e5ea", padding: "14px 0 4px" }}>
+              <h3 style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: "#ff3b30" }}>Publicaciones con error ({failedList.length})</h3>
+              {failedList.map((opp) => (
+                <div key={opp.id} style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", padding: "10px 0" }}>
+                  <div style={{ flex: "1 1 340px", minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#1d1d1f" }}>{platformLabel(opp.platform)} · {opp.articleTitle}</div>
+                    <div style={{ fontSize: 13, color: "#ff3b30", marginTop: 2 }}>{friendlyPublishError(opp.errorLog, platformLabel(opp.platform))}</div>
+                  </div>
+                  <button type="button" onClick={() => handlePublishOne(opp)} disabled={publishingId === opp.id} style={disabledStyle(compactPrimary, publishingId === opp.id)}>
+                    {publishingId === opp.id ? "Reintentando..." : "Reintentar"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {groupPending.length === 0 ? (
             <div style={{ borderTop: "1px solid #e5e5ea", padding: "28px 0", color: "#6e6e73", fontSize: 14 }}>
