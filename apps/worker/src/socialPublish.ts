@@ -1266,14 +1266,51 @@ async function processInstagramJob(job: {
   if (composio?.igAccountId && job.platform === "instagram-post") {
     await validateArticleUrl(job.articleUrl);
     const sourceImage = await getArticleOpenGraphImage(job.articleUrl);
-    const imageUrl = sourceImage ? await normalizeSocialImage(sourceImage, 4 / 5) : null;
+    // Igual que en la conexión directa y en Pinterest: si la cuenta tiene activado el generador de
+    // imágenes con IA, la imagen del post la crea el Director Creativo a partir de la foto del artículo,
+    // el logo y los materiales de marca. Si la IA falla, se usa la foto del artículo recortada a 4:5
+    // (publicar nunca depende de la IA).
+    const aiUser = sourceImage
+      ? await prisma.user.findUnique({
+          where: { id: job.userId },
+          select: {
+            aiImageGenerationEnabled: true,
+            businessLogoUrl: true,
+            businessLogoUrl2: true,
+            profilePhotoUrl: true,
+            profilePhotoUrl2: true,
+            profilePhotoUrl3: true,
+          },
+        })
+      : null;
+    let aiImage: { imageUrl: string; prompt: string } | null = null;
+    if (sourceImage && aiUser?.aiImageGenerationEnabled) {
+      try {
+        const aiTitle = job.titleId ? await prisma.title.findUnique({ where: { id: job.titleId }, select: { summary: true } }) : null;
+        aiImage = await generateAiSocialImage({
+          articleTitle: job.articleTitle,
+          articleSummary: aiTitle?.summary || job.articleTitle,
+          ogImageUrl: sourceImage,
+          format: "post",
+          businessLogoUrl: aiUser.businessLogoUrl,
+          businessLogoUrl2: aiUser.businessLogoUrl2,
+          profilePhotoUrl: aiUser.profilePhotoUrl,
+          profilePhotoUrl2: aiUser.profilePhotoUrl2,
+          profilePhotoUrl3: aiUser.profilePhotoUrl3,
+          pathPrefix: `instagram/ai/post/${job.titleId || job.id}`,
+        });
+      } catch (error) {
+        console.warn("[Instagram Composio] La imagen con IA falló; se usa la foto del artículo:", error);
+      }
+    }
+    const imageUrl = aiImage?.imageUrl ?? (sourceImage ? await normalizeSocialImage(sourceImage, 4 / 5) : null);
     if (!imageUrl) throw new Error("No se pudo adaptar la imagen del artículo para Instagram.");
     const caption = job.suggestedText.includes("[ENLACE]") ? job.suggestedText.replace("[ENLACE]", job.articleUrl) : job.suggestedText;
     const result = await composioInstagramPost(composio, composio.igAccountId, imageUrl, caption);
     const mediaId = String(result.id ?? result.post_id ?? result.postId ?? "");
     // Se guarda el enlace público cuando se puede obtener; si no, el id (el Historial lo resuelve al pulsar).
     const postId = (await composioInstagramPermalink(composio, mediaId)) ?? mediaId;
-    await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId, publishedAt: new Date(), errorLog: null, imageUrl } });
+    await prisma.socialOpportunity.update({ where: { id: job.id }, data: { status: "published", postId, publishedAt: new Date(), errorLog: null, imageUrl, ...(aiImage ? { aiImagePrompt: aiImage.prompt } : {}) } });
     if (job.titleId) await prisma.titleEvent.create({ data: { titleId: job.titleId, message: `Publicado en Instagram mediante la conexión alternativa${composio.username ? ` (@${composio.username})` : ""}${postId ? ` - ID: ${postId}` : ""}` } });
     return true;
   }

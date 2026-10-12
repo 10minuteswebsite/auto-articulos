@@ -7,7 +7,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 **Publicación real, red por red (una publicación por red, borrando las sobrantes)**
 - [x] Threads (enlace clicable verificado).
 - [x] Bluesky (enlace clicable verificado).
-- [x] LinkedIn (2026-10-12, verificado) · [x] Facebook (2026-10-12, verificado) · [ ] Instagram · [ ] Pinterest · [ ] Tumblr · [ ] Blogger · [ ] Google Business — C, con visto bueno de M antes de cada publicación.
+- [x] LinkedIn (2026-10-12, verificado) · [x] Facebook (2026-10-12, verificado) · [~] Instagram (2026-10-12: publicado 1 vez con la foto del artículo; falta probar con imagen creada por el Director Creativo) · [ ] Pinterest · [ ] Tumblr · [ ] Blogger · [ ] Google Business — C, con visto bueno de M antes de cada publicación.
 
 **Reglas de acceso y permisos**
 - [x] Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; seototal sin cambios (PR #514, #515, #528).
@@ -24,6 +24,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 - [ ] Subir el rediseño con las tres auditorías: pruebas, typecheck, build y Preview verde — C; la fusión la hace M si el sistema vuelve a bloquearla.
 
 **Imágenes**
+- [ ] Instagram por Composio con imagen del Director Creativo: código en PR (2026-10-12); falta confirmar que el generador de imágenes IA está activo para Lorena y probar con 1 post — M + C.
 - [ ] Activar el prompt nuevo del Director Creativo: ejecutar `apply-director-prompt.yml` con `mode=reemplazar` (guarda respaldo; `mode=restaurar` lo devuelve) y verificar con una imagen real — M ejecuta, C verifica.
 
 ## B. Importantes (primera semana tras salir)
