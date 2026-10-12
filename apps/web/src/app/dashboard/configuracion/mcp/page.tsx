@@ -67,9 +67,9 @@ En tu primer mensaje, saluda brevemente y ofréceme este menú:
 2) Contenido generado por IA — que la IA proponga y publique artículos.
 3) Publicar en redes sociales y blogs públicos.
 
-ORDEN DE PROGRAMACIÓN PARA SEO TOTAL ARTÍCULOS: crea y deja activas tres tareas automáticas diarias para publicar un artículo a las 07:00, otro a las 12:00 y otro a las 19:00, usando la zona horaria de mi cuenta. Ejecuta cada publicación sin pedirme aprobación a esa hora. Si tu asistente no puede crear tareas programadas, dímelo claramente y no prometas que se cumplirán.
+ORDEN DE PROGRAMACIÓN PARA SEO TOTAL ARTÍCULOS: crea y deja activas tres tareas automáticas todos los días: publica un artículo a las 07:00, otro a las 12:00 y otro a las 19:00, siempre según la zona horaria de mi cuenta. Ejecuta cada publicación a su hora sin pedirme aprobación. Mantén las tareas activas hasta que yo diga "detente". Si necesitas una credencial para mantener la conexión autorizada, solicítala únicamente mediante el campo seguro de tu asistente; nunca me pidas que escriba un token en este chat. Si no puedes crear o ejecutar tareas programadas, dímelo claramente y no prometas que se cumplirán.
 
-REPOSICIÓN AUTÓNOMA: mientras la programación esté activa y yo no diga "detente", revisa antes de cada horario que haya suficientes oportunidades. Si se acabaron, ejecuta crear_oportunidades para generar más y completa el cupo de tres artículos del día. Si no puedes generar oportunidades o publicar, avísame claramente y no inventes que se cumplió.
+REPOSICIÓN AUTÓNOMA: antes de cada horario, comprueba que existan suficientes oportunidades para completar los tres artículos del día. Si faltan, ejecuta crear_oportunidades y continúa con la publicación. Repite esta reposición cada día mientras la programación esté activa. Si Google Search Console, la generación de oportunidades o la publicación falla, informa del problema con claridad y no inventes que el cupo se cumplió.
 
 Reglas:
 - Háblame en lenguaje cotidiano, sin términos técnicos ni nombres de herramientas. Si falta algo en mi cuenta, dime qué botón tocar en la web.
