@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createPostPeerPost, getPostPeerOAuthUrl, listPostPeerIntegrations } from "./postpeer-api";
+import { createPostPeerPost, getPostPeerOAuthUrl, getPostPeerOAuthUrlWithProfileRecovery, listPostPeerIntegrations } from "./postpeer-api";
 
 const originalFetch = globalThis.fetch;
 
@@ -38,4 +38,37 @@ test("PostPeer publication sends idempotency and Google Business target", async 
   };
   const result = await createPostPeerPost("key", { accountId: "g1", content: "Texto", imageUrl: "https://img", idempotencyKey: "title-1" });
   assert.equal(result.status, "published");
+});
+
+test("si PostPeer rechaza el perfil guardado (500), crea uno nuevo y reintenta", async () => {
+  const calls: string[] = [];
+  globalThis.fetch = async (input, init) => {
+    const url = String(input);
+    calls.push(`${init?.method ?? "GET"} ${url}`);
+    if (url.includes("profileId=viejo")) return new Response(JSON.stringify({ message: "boom" }), { status: 500 });
+    if (url.endsWith("/profiles")) return new Response(JSON.stringify({ profile: { id: "nuevo" } }), { status: 200 });
+    return new Response(JSON.stringify({ url: "https://oauth.example/ok" }), { status: 200 });
+  };
+  const result = await getPostPeerOAuthUrlWithProfileRecovery("key-123456", "googlebusiness", {
+    profileId: "viejo",
+    redirectUri: (id) => `https://app.example/cb?profileId=${id}`,
+    newProfileName: "Auto Artículos - u1",
+  });
+  assert.deepEqual(result, { url: "https://oauth.example/ok", profileId: "nuevo", recovered: true });
+  assert.equal(calls.length, 3);
+});
+
+test("con un perfil válido no crea otro perfil", async () => {
+  let creates = 0;
+  globalThis.fetch = async (input, init) => {
+    if (String(input).endsWith("/profiles")) creates++;
+    return new Response(JSON.stringify({ url: "https://oauth.example/ok" }), { status: 200 });
+  };
+  const result = await getPostPeerOAuthUrlWithProfileRecovery("key-123456", "googlebusiness", {
+    profileId: "p1",
+    redirectUri: (id) => `https://app.example/cb?profileId=${id}`,
+    newProfileName: "x",
+  });
+  assert.equal(result.recovered, false);
+  assert.equal(creates, 0);
 });
