@@ -1,5 +1,10 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Fix: en redes.lasolucionweb.com Pinterest/Tumblr/Bluesky seguían exigiendo aprobación — 2026-10-11
+
+- Hallazgo (auditoría de Redes): en `social-opportunities/publish/route.ts` la línea `redesHost || platform === "pinterest" ? A : B` (introducida en el PR #515) se evalúa como `(redesHost || pinterest) ? A : B`. En el dominio redes, Pinterest, Tumblr y Bluesky comprobaban la aprobación de PINTEREST: una cuenta sin esa aprobación recibía 403 aunque «todas las redes estén abiertas». En otros dominios el comportamiento era correcto.
+- Arreglo: función pura `isNetworkApprovedForPublishing` (lib/social-access.ts) usada por la ruta + 3 pruebas de regresión. Sin schema ni migración.
+
 ## Claude — CIERRE «Publicaciones en curso: botón al Historial» — 2026-10-11
 
 - Estado: CERRADO Y ARCHIVADO. PR #526 fusionado (Vercel success). Sin migración. Capitanía liberada.
