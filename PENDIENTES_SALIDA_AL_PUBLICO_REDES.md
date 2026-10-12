@@ -7,7 +7,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 **Publicación real, red por red (una publicación por red, borrando las sobrantes)**
 - [x] Threads (enlace clicable verificado).
 - [x] Bluesky (enlace clicable verificado).
-- [x] LinkedIn · [x] Facebook · [x] Instagram con imagen IA del Director (2026-10-12) · [x] Pinterest (2026-10-12) · [x] Tumblr (2026-10-12; enlace del Historial arreglado en este lote) · [x] Blogger (2026-10-12) · [ ] Google Business (APARCADO: créditos de PostPeer sin pagar; falta que el worker de contenido reciba `POSTPEER_GBP_CONSUMER_READY`; este lote lo añade; después probar, y de fondo publicar al instante desde el botón) — C, con visto bueno de M antes de cada publicación.
+- [x] LinkedIn · [x] Facebook · [x] Instagram con imagen IA del Director (2026-10-12) · [x] Pinterest (2026-10-12) · [x] Tumblr (2026-10-12; enlace del Historial arreglado en este lote) · [x] Blogger (2026-10-12) · [x] Google Business (2026-10-12: publicado con PostPeer desde el worker de Redes; carril limitado a lo aprobado y con cupo) — C, con visto bueno de M antes de cada publicación.
 
 **Reglas de acceso y permisos**
 - [x] Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; seototal sin cambios (PR #514, #515, #528).
@@ -28,7 +28,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 - [x] Activar el prompt nuevo del Director Creativo: `apply-director-prompt.yml` modo reemplazar ejecutado (2026-10-12); respaldo en `ai_social_image_prompt_backup` (`mode=restaurar` lo devuelve); verificado con imágenes reales de Instagram y Pinterest — M + C.
 
 ## B. Importantes (primera semana tras salir)
-- [ ] Google Business: publicar al instante desde el botón (llamada directa a PostPeer en `publish/route.ts`), sin cola de worker — C.
+- [x] Google Business: ya sale en ~40 s desde el worker de Redes (se dispara al pulsar Publicar) — C.
 - [ ] Reutilizar una imagen IA entre redes del mismo artículo/formato y guardar el costo por imagen — C.
 - [ ] Unificar nombres: google-business / business-profile / googleBusiness; «Facebook Pages» vs «Facebook»; «oportunidad» vs «propuesta»; etiqueta del menú «1) PUBLICA EN REDES SOCIALES…» — C.
 - [ ] Formatos sin dueño: Administración da cupos a Instagram carrusel/reel/infografía y Facebook Story que la pantalla nunca genera; Instagram crea 2 propuestas por pulsación — decidir qué formatos existen — M.
