@@ -262,7 +262,7 @@ Ruta: /dashboard/configuracion
 Configuración es un índice de páginas independientes. Una barra de
 navegación visible en todo momento, con la sección actual resaltada, te
 permite moverte entre ellas sin volver primero al índice. Las redes sociales
-y Google Business Profile se conectan en **Conexiones** (pestaña Difusión);
+y Google Business Profile se conectan en **Conexiones** (pestaña Difusión). **Instagram, Facebook y Pinterest se conectan por Composio para todas las cuentas** (desde 2026-10-12): pulsa el botón de Composio de esa red y autoriza; ya no hace falta pedirle a Administración el módulo «Conexión por Composio» y la conexión directa con Meta queda solo para administradores o cuentas que ya la tenían;
 si una red no aparece allí, puede estar deshabilitada para tu cuenta por el
 administrador.
 

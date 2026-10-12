@@ -21,7 +21,7 @@ const FACEBOOK: OAuthNetworkConfig = {
 export default function FacebookSection() {
   return (
     <>
-      <OAuthNetworkSection config={FACEBOOK} />
+      <OAuthNetworkSection config={FACEBOOK} hideUnlessConnectedOrAdmin />
       <ComposioConnect inline showInactiveActions apps={["facebook"]} />
     </>
   );

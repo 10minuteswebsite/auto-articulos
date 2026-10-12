@@ -28,7 +28,7 @@ const INSTAGRAM: OAuthNetworkConfig = {
 export default function InstagramSection() {
   return (
     <>
-      <OAuthNetworkSection config={INSTAGRAM} />
+      <OAuthNetworkSection config={INSTAGRAM} hideUnlessConnectedOrAdmin />
       <ComposioConnect inline showInactiveActions apps={["instagram"]} />
     </>
   );

@@ -46,7 +46,8 @@ async function getComposioSocialAccount(userId: string, app: "facebook" | "insta
     prisma.systemSetting.findUnique({ where: { key: "composio_api_key" }, select: { encryptedValue: true } }),
   ]);
   const moduleEnabled = user?.role === "admin" || (() => { try { return JSON.parse(user?.disabledModules ?? "{}")?.["conexion-composio"] === "enabled"; } catch { return false; } })();
-  const socialComposioRoute = app === "facebook" || app === "instagram";
+  // Desde 2026-10-12 (pedido de Milton) las tres redes publican por Composio para todas las cuentas.
+  const socialComposioRoute = app === "facebook" || app === "instagram" || app === "pinterest";
   const method = methodFor({
     app,
     userId,

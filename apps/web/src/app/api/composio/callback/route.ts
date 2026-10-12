@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auditLog } from "@/lib/audit";
 import { canUseComposioModule, completeConnection } from "@/lib/composio-connections";
+import { isOpenComposioApp } from "@/lib/composio-access";
 import { getCurrentUser } from "@/lib/current-user";
 
 export const dynamic = "force-dynamic";
@@ -22,8 +23,7 @@ export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
   const back = new URL("/dashboard/configuracion/conexiones", request.nextUrl.origin);
   const app = request.nextUrl.searchParams.get("app");
-  const isMigrationApp = app === "google_search_console" || app === "google_analytics";
-  if (!isMigrationApp && !canUseComposioModule(user)) {
+  if (!isOpenComposioApp(app) && !canUseComposioModule(user)) {
     return NextResponse.redirect(new URL("/dashboard", request.nextUrl.origin));
   }
 

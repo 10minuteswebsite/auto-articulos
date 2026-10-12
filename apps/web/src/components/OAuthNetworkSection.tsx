@@ -56,7 +56,7 @@ export interface OAuthNetworkConfig {
 
 type Json = Record<string, any>;
 
-export default function OAuthNetworkSection({ config, allowed = true, adminExtra }: { config: OAuthNetworkConfig; allowed?: boolean; adminExtra?: ReactNode }) {
+export default function OAuthNetworkSection({ config, allowed = true, adminExtra, hideUnlessConnectedOrAdmin = false }: { config: OAuthNetworkConfig; allowed?: boolean; adminExtra?: ReactNode; hideUnlessConnectedOrAdmin?: boolean }) {
   const base = `/api/search-integrations/${config.id}`;
   const [settings, setSettings] = useState<Json | null>(null);
   const [connection, setConnection] = useState<Json | null>(null);
@@ -230,6 +230,9 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
       {CONNECTION_LABELS.connect}
     </a>
   );
+
+  // Conexión directa con Meta: solo para administradores o cuentas que ya la tienen. El resto conecta por Composio.
+  if (hideUnlessConnectedOrAdmin && !loading && !connected && !settings?.isAdmin) return null;
 
   return (
     <>
