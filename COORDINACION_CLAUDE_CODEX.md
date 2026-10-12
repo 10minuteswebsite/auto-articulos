@@ -1,5 +1,38 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## ÍNDICE DE TRASPASO — Redes (cuando Milton pida un «traspaso»)
+
+Si Milton pide un traspaso, un mensaje de traspaso o «por si las moscas»: entrega el contenido de `TRASPASO_REDES_SALIDA_AL_PUBLICO.md` completado con el estado vivo (comandos al final). Dónde está cada cosa:
+
+| Qué | Dónde |
+|---|---|
+| Mensaje de traspaso completo (quién es Milton, reglas, qué está en producción, cómo levantar el entorno, qué hacer ahora) | `TRASPASO_REDES_SALIDA_AL_PUBLICO.md` (raíz del repo, en `main`) |
+| Lista de pendientes con casillas | `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md` (y el bloque «LISTA VIVA» de este documento) |
+| Auditoría de inconsistencias con archivo y línea | `AUDITORIA_REDES_2026-10-11.md` |
+| Cada cambio hecho, en orden | sección «BITÁCORA REDES» de este documento (más abajo) |
+| Trabajo local SIN subir | rama `claude/redes-meta-y-admin-ux`, worktree `/Users/miltondavila/Creador de articulos/.claude/worktrees/redes-lasolucionweb-live-review-9446b3` (commits listados en la bitácora) |
+| Memoria de Claude | `~/.claude/projects/-Users-miltondavila-Creador-de-articulos/memory/proyecto-redes-salida-al-publico.md` |
+| Cómo levantar el entorno local | `TRASPASO_REDES_SALIDA_AL_PUBLICO.md`, sección «Cómo levantar el entorno local» |
+
+Estado vivo (ejecutar antes de entregar el traspaso): `git fetch origin main` · `git log origin/main --oneline -15` · `gh pr list --state open` · `git -C "<worktree>" log origin/main..claude/redes-meta-y-admin-ux --oneline` · `gh run list --workflow=apply-director-prompt.yml`.
+
+## REGLA PERMANENTE (orden de Milton, 2026-10-11): cada cambio se anota aquí
+
+Todo cambio de Redes —subido o solo en local— se anota en la «BITÁCORA REDES» en el mismo lote o commit que el cambio: fecha, qué cambió, archivos, PR o commit, estado (PRODUCCIÓN o LOCAL) y cómo se verificó. Al terminar un punto de la lista de pendientes se marca también en `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`. Si el cambio queda solo en local, se anota igual como LOCAL con su hash. Si un cambio no está en la bitácora, se considera que no se hizo.
+
+## BITÁCORA REDES (más reciente arriba)
+
+**2026-10-11**
+- PRODUCCIÓN · PR #529 — documentación: lista viva, pendientes, auditoría y traspaso (este bloque).
+- PRODUCCIÓN · PR #528 — fix `publish/route.ts`: la precedencia de `redesHost || platform === "pinterest" ? …` hacía que Pinterest, Tumblr y Bluesky exigieran la aprobación de Pinterest en el dominio redes; función pura `isNetworkApprovedForPublishing` + 3 pruebas. Verificado: pruebas 200/200 y Preview de Vercel.
+- PRODUCCIÓN · PR #521–#525 — Director Creativo de imágenes v2 (`directorPromptV2.ts`, materiales de marca, Pinterest con IA, `diagnose-ai-image-prompt.yml`, `apply-director-prompt.yml`). El prompt del panel NO se ha cambiado todavía (pendiente de Milton).
+- PRODUCCIÓN · PR #520 — el cupo diario limita publicaciones, no propuestas (`generate` y `publish`).
+- PRODUCCIÓN · PR #519 — el texto de la IA respeta el largo real de Bluesky/Threads (Bluesky de 365–407 a 159–196 caracteres).
+- PRODUCCIÓN · PR #518 — enlaces clicables: espacio antes de la URL al recortar (Threads) y facets (Bluesky). Verificado en posts reales.
+- PRODUCCIÓN · PR #516 — «Crear propuesta» devolvía 500 (`pg_advisory_xact_lock` con `$queryRawUnsafe`). Verificado en vivo.
+- PRODUCCIÓN · PR #514 y #515 — Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; 403 de la API corregido. Verificado en vivo con Lorena.
+- LOCAL (sin subir) · rama `claude/redes-meta-y-admin-ux`, 12 commits: `ad8a36fe`, `8b5f0f42`, `989d3163`, `ac890212` (tarjetas META y Otras redes y blogs; `redes.localhost` solo en desarrollo), `62d9c26e`, `a02fe51b` (instrucciones con cupo dinámico), `c44f2ddf`, `34e78ef5`, `e0b4a7c4`, `5395e704` (pantalla de grupo rediseñada: redes como rectángulos, lista compacta de propuestas, móvil táctil), `602f4541`, `22ded3d3` (documentos). Archivos: `dashboard/page.tsx`, `dashboard/oportunidades-redes/page.tsx`, `api/social-opportunities/route.ts` (`DELETE ?platforms=`), `api/social-opportunities/generate/route.ts` (`dailyLimits`), `lib/product-routes.ts`, `globals.css`. Verificado: typecheck, pruebas y recorrido en navegador local (escritorio, tableta 768 y móvil 375). Falta antes de subir: «Hoy X de N», vista previa, errores visibles, recorte de Pinterest y manual.
+
 ## Claude — LISTA VIVA «SACAR REDES AL PÚBLICO» — 2026-10-11 — LEER ANTES DE TOCAR REDES
 
 Detalle y casillas en `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`; auditoría con archivo y línea en `AUDITORIA_REDES_2026-10-11.md`. Quien avance un punto lo marca en ese archivo. Orden de trabajo acordado con Milton: ir en orden, uno por uno.
