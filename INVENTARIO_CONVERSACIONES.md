@@ -1992,3 +1992,53 @@ el rango `a72153d..origin/main` (detalle técnico completo en Coordinación y, p
 Ninguna de las tres describe un árbol de git enredado ni ramas pisadas, así que no se agregó
 nada en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Sin dudas nuevas sin resolver encontradas por esta
 tarea en este rango, más allá de las ya anotadas en `TO-DO.md`.
+
+## Addendum — 2026-10-12 (tarea programada diaria de propagación)
+
+**Parte A:** sin reserva activa nueva. El rango revisado de Coordinación (`d71525b..origin/main`,
+19 commits, PRs #517–#520, #521–#525, #526–#533, #535 y #536) menciona una sola rama con trabajo
+sin subir: `claude/redes-meta-y-admin-ux`, en un worktree de la máquina de Milton
+(`/Users/miltondavila/Creador de articulos/.claude/worktrees/redes-lasolucionweb-live-review-9446b3`).
+Esta tarea corre en un entorno remoto sin acceso a ese filesystem, así que no pudo correr
+`git worktree list` sobre esa máquina; en su lugar se verificó con `git ls-remote --heads origin`
+que esa rama NO existe en el remoto (nunca se subió) y, según la propia bitácora de Coordinación
+("BITÁCORA REDES", 2026-10-12), sus 10 commits ya fueron aplicados sobre `main` por cherry-pick en
+el PR #532 (commit `1a4ce23`) — confirmado aquí con `git merge-base --is-ancestor 1a4ce23
+origin/main`: es ancestro. La rama local, si todavía existe en esa máquina, ya no bloquea a nadie:
+su contenido está en producción. No se puede confirmar desde este entorno si Milton ya la borró.
+
+**Parte B — nombres de conversación nuevos encontrados en `COORDINACION_CLAUDE_CODEX.md`** en el
+rango `d71525b..origin/main` (detalle técnico completo en Coordinación y, propagado, en
+`CONTROLADOR_DE_VERSIONES.md`; no se transcribe aquí para no duplicar):
+
+- `[Claude] - ENLACES NO CLICABLES EN THREADS Y BLUESKY` — 2026-10-11, PR #518 (commit
+  `2720acd`), CERRADO.
+- `[Claude] - TEXTO DE LA IA MAS LARGO QUE EL LIMITE DE BLUESKY/THREADS` — 2026-10-11, PR #519
+  (commit `a271267`), CERRADO.
+- `[Claude] - EL CUPO DIARIO LIMITA PUBLICACIONES, NO PROPUESTAS` — 2026-10-11, PR #520 (commit
+  `12ca715`), CERRADO.
+- `[Claude] - DIRECTOR CREATIVO DE IMAGENES V2 (GUIA DE ESTILO DE LORENA)` — 2026-10-11, PRs
+  #517, #521–#525 (commits `e386288`, `eaccdaa`, `a19f8a9`, `3094b9c`, `6c4afb8`, `79a6775`),
+  CERRADO (decisión final: prompt v2 corto; aplicado en producción el 2026-10-12 — ver PR #536).
+- `[Claude] - PUBLICACIONES EN CURSO: EL BOTON VACIO VA AL HISTORIAL` — 2026-10-11, PRs #526,
+  #527 (commits `206583a`, `b6dc2bb`), CERRADO Y ARCHIVADO.
+- `[Claude] - FIX PRECEDENCIA: PINTEREST/TUMBLR/BLUESKY EXIGIAN APROBACION DE PINTEREST EN EL
+  DOMINIO REDES` — 2026-10-11, PR #528 (commit `99ef017`), CERRADO.
+- `[Claude] - LISTA VIVA «SACAR REDES AL PUBLICO»` — 2026-10-11, PRs #529, #530 (commits
+  `7267e42`, `25542d0`): documentación viva, EN CURSO (ver `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`
+  para el estado detallado con casillas).
+- `[Claude] - PRUEBAS EN VIVO: LINKEDIN Y FACEBOOK PUBLICADOS Y VERIFICADOS` — 2026-10-11, PRs
+  #531, #533 (commits `8ce9341`, `504d991`), CERRADO.
+- `[Claude] - REDISEÑO DE REDES (META / OTRAS REDES Y BLOGS, PANTALLA DE GRUPO, MOVIL)` —
+  2026-10-11, PR #532 (commit `1a4ce23`), CERRADO Y EN PRODUCCIÓN.
+- `[Claude] - INSTAGRAM POR COMPOSIO CREA LA IMAGEN CON EL DIRECTOR CREATIVO` — 2026-10-11, PR
+  #535 (commit `a3778d2`), CERRADO.
+- `[Claude] - FIX TUMBLR (ID SIN TRUNCAR) + ASTERISCOS EN TEXTOS + WORKER RECIBE POSTPEER GBP;
+  PRUEBAS EN VIVO FINALES` — 2026-10-11/12, PR #536 (commit `beeb02b`), CERRADO.
+
+Ninguna de estas conversaciones describe un árbol de git enredado ni ramas pisadas, así que no se
+agregó nada en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Sin ideas sueltas nuevas para `TO-DO.md`: todo
+lo pendiente mencionado en este rango (Google Business publicando al instante, reutilizar imagen
+IA entre redes, unificar nombres, formatos sin dueño, rediseño de Administración, infografía en
+pausa, foto de la persona apagada, etc.) ya está anotado con casillas en
+`PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`, así que esta tarea no lo duplicó.
