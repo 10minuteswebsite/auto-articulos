@@ -1,5 +1,25 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — LISTA VIVA «SACAR REDES AL PÚBLICO» — 2026-10-11 — LEER ANTES DE TOCAR REDES
+
+Detalle y casillas en `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`; auditoría con archivo y línea en `AUDITORIA_REDES_2026-10-11.md`. Quien avance un punto lo marca en ese archivo. Orden de trabajo acordado con Milton: ir en orden, uno por uno.
+
+**A. Bloqueantes**
+1. Publicar una vez en cada red, con visto bueno de Milton antes de cada publicación y borrando las sobrantes: hecho Threads y Bluesky; faltan LinkedIn, Facebook, Instagram, Pinterest, Tumblr, Blogger y Google Business.
+2. Probar con una cuenta distinta a Lorena y sin aprobaciones en redes.lasolucionweb.com (hoy solo se probó con Lorena).
+3. Permisos al publicar: LinkedIn y X sin comprobación; Instagram sin bypass de administrador (`publish/route.ts`).
+4. Quitar el correo fijo `lorenalvarez30@gmail.com` de `generate/route.ts` (~línea 496).
+5. Pantalla de Redes rediseñada (solo en local): corregir «Hoy X de N», decidir la vista previa (quitar o hacerla fiel), mostrar errores de publicación con reintento, arreglar el recorte de Pinterest (800 pedidos / 500 publicados), actualizar el manual y subir con las tres auditorías.
+6. Activar el prompt nuevo de imágenes: Milton ejecuta `apply-director-prompt.yml` con `mode=reemplazar` (respaldo automático; `mode=restaurar` lo devuelve); verificar con una imagen real.
+
+**B. Importantes (primera semana):** unificar nombres y menú; decidir formatos de Instagram/Facebook que existen de verdad; un solo selector de grupo; eliminar `generate-all`; revisar el algoritmo de generación; worker por dominio o derechos del HUB en `enforce`.
+
+**C. Después:** rediseño del panel de Administración (en local, un solo commit grande); imágenes de la línea MCP (otro programador); infografía en pausa; foto de la persona apagada; detalles menores.
+
+**Hecho hoy en producción (PR #514–#516, #518–#525, #528):** Redes activa y abierta en el dominio redes; cupo = solo publicaciones; enlaces clicables en Threads/Bluesky; textos con el largo real; «Crear propuesta» sin 500; Director Creativo v2 y diagnósticos sin publicar; arreglo de precedencia en publicar.
+
+**Trabajo en LOCAL sin subir (no perder):** rama `claude/redes-meta-y-admin-ux`, worktree `/Users/miltondavila/Creador de articulos/.claude/worktrees/redes-lasolucionweb-live-review-9446b3` (tarjetas META / Otras redes y blogs en Inicio y en `/dashboard/oportunidades-redes?grupo=…`, instrucciones con cupo dinámico, redes como rectángulos, lista compacta de propuestas, versión móvil táctil, `redes.localhost` solo en desarrollo). Para verlo: PostgreSQL local (`brew services start postgresql@16`), base copia `autoarticulos_redes_ui`, servidor `redes-ui-local` (puerto 3011, config en `.claude/launch.json` que no se versiona) y abrir `http://redes.localhost:3011/dashboard`; iniciar sesión con la cuenta de prueba local que dio Milton (Lorena). No tocar el servidor del puerto 3001, que es de Codex.
+
 ## Claude — Fix: en redes.lasolucionweb.com Pinterest/Tumblr/Bluesky seguían exigiendo aprobación — 2026-10-11
 
 - Hallazgo (auditoría de Redes): en `social-opportunities/publish/route.ts` la línea `redesHost || platform === "pinterest" ? A : B` (introducida en el PR #515) se evalúa como `(redesHost || pinterest) ? A : B`. En el dominio redes, Pinterest, Tumblr y Bluesky comprobaban la aprobación de PINTEREST: una cuenta sin esa aprobación recibía 403 aunque «todas las redes estén abiertas». En otros dominios el comportamiento era correcto.
