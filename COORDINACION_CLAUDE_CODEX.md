@@ -22,6 +22,9 @@ Todo cambio de Redes —subido o solo en local— se anota en la «BITÁCORA RED
 
 ## BITÁCORA REDES (más reciente arriba)
 
+**2026-10-12**
+- PRODUCCIÓN · Prueba de publicación en LinkedIn (punto A1 de la lista) con la cuenta de Lorena, desde el navegador de Lorena en la Mac mini: propuesta creada con `POST /api/social-opportunities/generate` (1 propuesta), publicada con `POST /api/social-opportunities/publish`; el worker la confirmó a las 00:31:53 UTC (`urn:li:share:7515207578872619009`). Verificado abriendo el post en LinkedIn: texto completo, enlace acortado `lnkd.in` azul y clicable, imagen presente. Sin propuestas sobrantes. Sin cambios de código. Nota: el artículo elegido fue «Cómo elegir el mejor seguro de salud en Miami — versión 8821919-1» (parece duplicado/prueba).
+
 **2026-10-11**
 - PRODUCCIÓN · PR #529 — documentación: lista viva, pendientes, auditoría y traspaso (este bloque).
 - PRODUCCIÓN · PR #528 — fix `publish/route.ts`: la precedencia de `redesHost || platform === "pinterest" ? …` hacía que Pinterest, Tumblr y Bluesky exigieran la aprobación de Pinterest en el dominio redes; función pura `isNetworkApprovedForPublishing` + 3 pruebas. Verificado: pruebas 200/200 y Preview de Vercel.
