@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { type SocialPublishingPermissionUser, hasSocialPublishingApproval, hasSocialModuleAccess, openAllNetworks } from "./social-access";
+import { isNetworkApprovedForPublishing, type SocialPublishingPermissionUser, hasSocialPublishingApproval, hasSocialModuleAccess, openAllNetworks } from "./social-access";
 import { hasLegacySocialModuleAccess } from "@auto-articulos/shared";
 
 test("oculta difusión para un usuario sin aprobaciones de redes o blogs", () => {
@@ -128,4 +128,30 @@ test("otros dominios: las marcas por red de Administración no se tocan", () => 
   const user = { role: "user", allowInstagramPublishing: false };
   assert.equal(openAllNetworks(user, {}), user);
   assert.equal(openAllNetworks(user, {}).allowInstagramPublishing, false);
+});
+
+// Regresión (2026-10-11): `redesHost || platform === "pinterest" ? A : B` se leía como
+// `(redesHost || pinterest) ? A : B` y en redes.lasolucionweb.com Tumblr y Bluesky
+// comprobaban la aprobación de Pinterest.
+test("dominio redes: Pinterest, Tumblr y Bluesky quedan abiertos aunque no haya ninguna aprobación", () => {
+  for (const network of ["pinterest", "tumblr", "bluesky"] as const) {
+    assert.equal(isNetworkApprovedForPublishing({ role: "user" }, network, { redesHost: true }), true, network);
+  }
+});
+
+test("otros dominios: cada red usa SU propia aprobación, no la de otra", () => {
+  const onlyPinterest = { role: "user", allowPinterestPublishing: true };
+  assert.equal(isNetworkApprovedForPublishing(onlyPinterest, "pinterest"), true);
+  assert.equal(isNetworkApprovedForPublishing(onlyPinterest, "tumblr"), false);
+  assert.equal(isNetworkApprovedForPublishing(onlyPinterest, "bluesky"), false);
+  const onlyTumblr = { role: "user", allowTumblrPublishing: true };
+  assert.equal(isNetworkApprovedForPublishing(onlyTumblr, "tumblr"), true);
+  assert.equal(isNetworkApprovedForPublishing(onlyTumblr, "pinterest"), false);
+});
+
+test("los administradores pueden publicar en las tres redes y una cuenta inexistente no", () => {
+  for (const network of ["pinterest", "tumblr", "bluesky"] as const) {
+    assert.equal(isNetworkApprovedForPublishing({ role: "admin" }, network), true);
+    assert.equal(isNetworkApprovedForPublishing(null, network), false);
+  }
 });

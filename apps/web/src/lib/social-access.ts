@@ -130,6 +130,28 @@ export function hasSocialPublishingApproval(user: SocialPublishingPermissionUser
   return SOCIAL_PUBLISHING_PERMISSION_KEYS.some((key) => user[key] === true);
 }
 
+/**
+ * ¿Puede esta cuenta publicar en Pinterest, Tumblr o Bluesky? En redes.lasolucionweb.com todas
+ * las redes están abiertas; en otros dominios manda la aprobación de Administración (los
+ * administradores siempre pueden). Función pura para que la regla se pueda probar.
+ */
+export function isNetworkApprovedForPublishing(
+  user: {
+    role?: string | null;
+    allowPinterestPublishing?: boolean | null;
+    allowTumblrPublishing?: boolean | null;
+    allowBlueskyPublishing?: boolean | null;
+  } | null | undefined,
+  network: "pinterest" | "tumblr" | "bluesky",
+  context: SocialHostContext = {},
+): boolean {
+  if (context.redesHost) return true;
+  if (user?.role === "admin") return true;
+  const approval =
+    network === "pinterest" ? user?.allowPinterestPublishing : network === "tumblr" ? user?.allowTumblrPublishing : user?.allowBlueskyPublishing;
+  return approval === true;
+}
+
 /** Permiso individual de la red; los administradores siempre tienen acceso. */
 export async function canPublishToNetwork(
   userId: string,

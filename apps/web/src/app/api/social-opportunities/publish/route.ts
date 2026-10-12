@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
-import { canUseSocialModule, getSocialHostContext } from "@/lib/social-access";
+import { canUseSocialModule, getSocialHostContext, isNetworkApprovedForPublishing } from "@/lib/social-access";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerSocialWorkerNow } from "@/lib/trigger-worker";
 
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
 
     if (platform === "pinterest" || platform === "tumblr" || platform === "bluesky") {
       const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, allowPinterestPublishing: true, allowTumblrPublishing: true, allowBlueskyPublishing: true } });
-      const allowed = redesHost || platform === "pinterest" ? user?.role === "admin" || user?.allowPinterestPublishing : platform === "tumblr" ? user?.role === "admin" || user?.allowTumblrPublishing : user?.role === "admin" || user?.allowBlueskyPublishing;
+      const allowed = isNetworkApprovedForPublishing(user, platform, { redesHost });
       if (!allowed) return NextResponse.json({ error: `No tienes permiso para publicar en ${opp.platform}. Contacta al administrador.` }, { status: 403 });
     }
 
