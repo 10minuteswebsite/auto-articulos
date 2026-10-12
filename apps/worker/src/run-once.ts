@@ -155,9 +155,6 @@ async function main() {
       ...Array.from({ length: SYNC_LANE_CONCURRENCY }, () =>
         runLane("idiomas", processNextLanguageSync, deadline),
       ),
-      ...Array.from({ length: SYNC_LANE_CONCURRENCY }, () =>
-        runLane("perfil de negocio", processNextBusinessProfilePost, deadline),
-      ),
       ...Array.from({ length: TITLE_LANE_CONCURRENCY }, () =>
         runLane("títulos", processNext, deadline),
       ),
@@ -165,6 +162,9 @@ async function main() {
   }
   if (!isContentOnly) {
     lanes.push(runLane("redes sociales", processNextSocialPublish, deadline));
+    // Google Business Profile vive en el worker de Redes, que se dispara al instante al pulsar
+    // Publicar (antes esperaba al worker de contenido, de hasta 5 minutos).
+    lanes.push(runLane("perfil de negocio", processNextBusinessProfilePost, deadline));
   }
   const results = await Promise.all(lanes);
   const didAnyWork = results.some(Boolean);

@@ -1,4 +1,4 @@
-import { prisma } from "@auto-articulos/db";
+import { prisma, Prisma } from "@auto-articulos/db";
 import { createHash } from "node:crypto";
 import {
   decryptSecret,
@@ -99,6 +99,44 @@ async function buildBusinessProfileSummary(
 }
 
 /**
+ * Qué títulos puede tomar el carril de Google Business Profile.
+ *
+ * Solo los que la persona APROBÓ con el botón Publicar (la ruta `publish` deja su
+ * BusinessProfilePost en «pending»). Antes también tomaba cualquier artículo antiguo
+ * sin publicación, de cualquier cuenta conectada por PostPeer: el 2026-10-12 envió unos
+ * 160 artículos viejos de una cuenta apenas se conectó. El envío automático de artículos
+ * sin aprobar solo se conserva para la conexión propia antigua (con `locationName`).
+ */
+export function buildBusinessProfileCandidateWhere(
+  filterUserId: string | undefined,
+  filterArticleUrl: string | undefined,
+  postPeerReady: boolean,
+): Prisma.TitleWhereInput & { run: { user: { OR: unknown[] }; userId?: string }; OR: unknown[] } {
+  return {
+    status: "success",
+    articleUrl: { not: null },
+    ...(filterArticleUrl ? { articleUrl: { in: articleUrlVariants(filterArticleUrl) } } : {}),
+    summary: { not: null },
+    OR: [
+      { businessProfilePost: { status: "pending" } },
+      {
+        businessProfilePost: null,
+        run: { user: { businessProfileIntegration: { locationName: { not: null } } } },
+      },
+    ],
+    run: {
+      ...(filterUserId ? { userId: filterUserId } : {}),
+      user: {
+        OR: [
+          { businessProfileIntegration: { locationName: { not: null } } },
+          ...(postPeerReady ? [{ postPeerConnection: { status: "ACTIVE" as const } }] : []),
+        ],
+      },
+    },
+  };
+}
+
+/**
  * Procesa UNA publicación pendiente de enviar a Google Business Profile.
  * Devuelve true si hizo algo. Se "reserva" el título creando primero el
  * registro BusinessProfilePost (titleId es único): si otro proceso ya lo
@@ -111,25 +149,7 @@ export async function processNextBusinessProfilePost(
   filterArticleUrl?: string,
 ): Promise<boolean> {
   const candidate = await prisma.title.findFirst({
-    where: {
-      status: "success",
-      articleUrl: { not: null },
-      ...(filterArticleUrl ? { articleUrl: { in: articleUrlVariants(filterArticleUrl) } } : {}),
-      summary: { not: null },
-      OR: [
-        { businessProfilePost: null },
-        { businessProfilePost: { status: "pending" } },
-      ],
-      run: {
-        ...(filterUserId ? { userId: filterUserId } : {}),
-        user: {
-          OR: [
-            { businessProfileIntegration: { locationName: { not: null } } },
-            ...(POSTPEER_GBP_READY ? [{ postPeerConnection: { status: "ACTIVE" as const } }] : []),
-          ],
-        },
-      },
-    },
+    where: buildBusinessProfileCandidateWhere(filterUserId, filterArticleUrl, POSTPEER_GBP_READY),
     orderBy: { processedAt: "asc" },
     include: {
       businessProfilePost: true,
@@ -167,6 +187,13 @@ export async function processNextBusinessProfilePost(
       return true;
     }
   }
+
+  // Reserva atómica: dos workers a la vez no deben enviar la misma publicación.
+  const claimed = await prisma.businessProfilePost.updateMany({
+    where: { id: post.id, status: "pending" },
+    data: { status: "sending" },
+  });
+  if (claimed.count === 0) return true;
 
   try {
     const finalTitle = candidate.finalTitle ?? candidate.text;
