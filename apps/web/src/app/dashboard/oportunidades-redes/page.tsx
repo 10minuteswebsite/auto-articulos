@@ -524,7 +524,7 @@ export default function OportunidadesRedesPage() {
         >
           {cameFromHome ? "‹ Inicio" : "‹ Redes"}
         </button>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
+        <div className="rg-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
           <div style={{ minWidth: 0 }}>
             <h1 style={{ fontSize: 30, fontWeight: 600, color: "#1d1d1f", margin: 0, letterSpacing: "-0.03em", lineHeight: 1.15 }}>
               {openCard?.title ?? MENU_NAMES.redes}
@@ -532,6 +532,7 @@ export default function OportunidadesRedesPage() {
           </div>
           <button
             type="button"
+            className="rg-create"
             onClick={handleGenerateGroup}
             disabled={generatingAll || generatingNetwork !== null || groupConnectedCount === 0}
             title={groupConnectedCount === 0 ? "Conecta una red para empezar" : undefined}
@@ -540,34 +541,36 @@ export default function OportunidadesRedesPage() {
             {generatingAll ? "Creando propuestas..." : "Crear propuestas"}
           </button>
         </div>
+        <div style={{ marginTop: 14 }}>
         <MobileInstructions>
-          <p style={{ margin: "14px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", maxWidth: 760 }}>
+          <p style={{ margin: "0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", textAlign: "justify" }}>
             Aquí configuras las redes que difunden de forma inteligente el contenido de tu página web: el sistema
             toma tus artículos, prepara la publicación para cada red y publica{" "}
             <strong>{describeDailyLimits(groupRows, dailyLimits)}</strong>.
           </p>
           {groupConnectedCount === 0 ? (
-            <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", maxWidth: 760 }}>
+            <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", textAlign: "justify" }}>
               Aún no hay ninguna red conectada aquí. Pulsa <strong>Conectar</strong> en la que quieras activar y,
               al terminar, volverás a esta pantalla.
             </p>
           ) : (
             <>
-              <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", maxWidth: 760 }}>
+              <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", textAlign: "justify" }}>
                 Pulsa <strong>Crear propuesta</strong> en una red conectada, revisa la propuesta y decide si sale.
               </p>
               {groupConnectedCount < groupRows.length && (
-                <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#6e6e73", maxWidth: 760 }}>
+                <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#6e6e73", textAlign: "justify" }}>
                   Las redes sin conectar aún no están activas: pulsa <strong>Conectar</strong> para activarlas.
                 </p>
               )}
             </>
           )}
         </MobileInstructions>
+        </div>
       </div>
 
       {/* Redes del grupo */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 32 }}>
+      <div className="rn-grid" style={{ marginBottom: 28 }}>
         {groupRows.map((row) => {
           const connected = connectedNetworks[row.key];
           const limit = dailyLimits[row.key] ?? 1;
@@ -575,42 +578,42 @@ export default function OportunidadesRedesPage() {
           const percent = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 100;
           const busy = Boolean(generatingNetwork);
           return (
-            <div key={row.key} style={{ border: "1px solid #e5e5ea", borderRadius: 12, padding: "14px 16px", background: connected ? "#ffffff" : "#fafafa", display: "flex", flexDirection: "column", gap: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "4px 8px" }}>
-                <span style={{ fontSize: 15, fontWeight: 600, color: connected ? "#1d1d1f" : "#86868b" }}>{row.label}</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: connected ? "#16803c" : "#86868b" }}>
-                  <span aria-hidden="true" style={{ width: 7, height: 7, borderRadius: 999, background: connected ? "#16803c" : "#c7c7cc" }} />
+            <div key={row.key} className="rn-card" style={{ background: connected ? "#ffffff" : "#fafafa" }}>
+              <div className="rn-main">
+                <span className="rn-name" style={{ color: connected ? "#1d1d1f" : "#86868b" }}>{row.label}</span>
+                <span className="rn-status" style={{ color: connected ? "#16803c" : "#86868b" }}>
+                  <span aria-hidden="true" className="rn-dot" style={{ background: connected ? "#16803c" : "#c7c7cc" }} />
                   {connected ? "Conectada" : "Sin conectar"}
                 </span>
               </div>
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6e6e73", marginBottom: 6 }}>
-                  <span>Hoy</span>
+              <div className="rn-quota">
+                <div className="rn-quota-text">
+                  <span className="rn-quota-label">Hoy</span>
                   <span style={{ fontVariantNumeric: "tabular-nums" }}>{used} de {limit}</span>
                 </div>
-                <div style={{ height: 4, borderRadius: 999, background: "#e5e5ea", overflow: "hidden" }}>
-                  <div style={{ width: `${percent}%`, height: "100%", background: connected ? "#1d1d1f" : "#c7c7cc" }} />
-                </div>
+                <div className="rn-bar"><div style={{ width: `${percent}%`, height: "100%", background: connected ? "#1d1d1f" : "#c7c7cc" }} /></div>
               </div>
-              {connected ? (
-                <button type="button" disabled={busy} onClick={() => handleGenerate(row.platform)} style={disabledStyle({ ...compactSecondary, width: "100%" }, busy)}>
-                  {generatingNetwork === row.platform ? "Analizando..." : "Crear propuesta"}
-                </button>
-              ) : row.conexionId ? (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => {
-                    try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
-                    router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${row.conexionId}`);
-                  }}
-                  style={disabledStyle({ ...compactSecondary, width: "100%", color: "#0066cc" }, busy)}
-                >
-                  Conectar
-                </button>
-              ) : (
-                <span style={{ fontSize: 13, color: "#86868b" }}>No disponible</span>
-              )}
+              <div className="rn-action">
+                {connected ? (
+                  <button type="button" disabled={busy} onClick={() => handleGenerate(row.platform)} style={disabledStyle({ ...compactSecondary }, busy)}>
+                    {generatingNetwork === row.platform ? "Analizando..." : "Crear propuesta"}
+                  </button>
+                ) : row.conexionId ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
+                      router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${row.conexionId}`);
+                    }}
+                    style={disabledStyle({ ...compactSecondary, color: "#0066cc" }, busy)}
+                  >
+                    Conectar
+                  </button>
+                ) : (
+                  <span style={{ fontSize: 13, color: "#86868b" }}>No disponible</span>
+                )}
+              </div>
             </div>
           );
         })}
@@ -663,7 +666,7 @@ export default function OportunidadesRedesPage() {
               Propuestas <span style={{ color: "#6e6e73", fontWeight: 500 }}>({groupPending.length})</span>
             </h2>
             {groupPending.length > 0 && (
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <div className="rp-batch" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 <button type="button" onClick={handleDeleteAll} disabled={deletingAll || publishingAll} style={disabledStyle(compactDanger, deletingAll || publishingAll)}>
                   {deletingAll ? "Borrando..." : "Borrar todas"}
                 </button>
@@ -689,7 +692,7 @@ export default function OportunidadesRedesPage() {
                 const editing = editingId === opp.id;
                 const canPreview = opp.platform.startsWith("instagram") || opp.platform === "threads" || opp.platform === "linkedin";
                 return (
-                  <div key={opp.id} style={{ borderTop: "1px solid #e5e5ea", padding: "18px 0", display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div key={opp.id} className="rp-item" style={{ borderTop: "1px solid #e5e5ea", padding: "18px 0", display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div style={{ flex: "1 1 340px", minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
                         <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "#1d1d1f", background: "#f5f5f7", borderRadius: 999, padding: "3px 10px" }}>
@@ -710,8 +713,8 @@ export default function OportunidadesRedesPage() {
                         </p>
                       )}
                     </div>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-                      <button type="button" onClick={() => handlePublishOne(opp)} disabled={publishingId === opp.id} style={disabledStyle(compactPrimary, publishingId === opp.id)}>
+                    <div className="rp-actions" style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                      <button type="button" className="rp-publish" onClick={() => handlePublishOne(opp)} disabled={publishingId === opp.id} style={disabledStyle(compactPrimary, publishingId === opp.id)}>
                         {publishingId === opp.id ? "Publicando..." : "Publicar"}
                       </button>
                       {editing ? (
