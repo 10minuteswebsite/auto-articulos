@@ -159,13 +159,11 @@ export default function OportunidadesRedesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dailyLimits, setDailyLimits] = useState<Record<string, number>>({});
   const [openGroup, setOpenGroup] = useState<NetworkGroup | null>(null);
-  const [cameFromHome, setCameFromHome] = useState(false);
-  // Entrada directa desde las tarjetas del Inicio: /dashboard/oportunidades-redes?grupo=meta|otras
+  // Entrada directa por enlace antiguo o marcador: /dashboard/oportunidades-redes?grupo=meta|otras
   useEffect(() => {
     const grupo = new URLSearchParams(window.location.search).get("grupo");
     if (grupo === "meta" || grupo === "otras") {
       setOpenGroup(grupo);
-      setCameFromHome(true);
     }
   }, []);
   const [previewModal, setPreviewModal] = useState<{ loading: boolean; imageUrl: string | null; imageBase64: string | null; platform: string; title: string } | null>(null);
@@ -482,7 +480,8 @@ export default function OportunidadesRedesPage() {
     return (
       <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
         <div style={{ marginTop: 20, marginBottom: 20 }}>
-          <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>Elige dónde publicar</h2>
+          <h1 style={{ fontSize: 30, fontWeight: 600, color: "#1d1d1f", margin: "0 0 6px", letterSpacing: "-0.03em", lineHeight: 1.15 }}>{MENU_NAMES.redes}</h1>
+          <p style={{ margin: "0 0 16px", fontSize: 15, color: "#6e6e73" }}>Elige dónde publicar.</p>
           <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, 320px)", gap: 16, justifyContent: "start" }}>
             {GROUP_CARDS.map((card, i) => {
               const rows = NETWORK_ROWS.filter((row) => row.group === card.id && activeNetworks[row.key]);
@@ -526,12 +525,11 @@ export default function OportunidadesRedesPage() {
           type="button"
           onClick={() => {
             setMessage(null);
-            if (cameFromHome) router.push("/dashboard");
-            else setOpenGroup(null);
+            setOpenGroup(null);
           }}
           style={{ border: "none", background: "transparent", padding: 0, margin: "0 0 14px", fontSize: 14, color: "#0066cc", cursor: "pointer", fontFamily: "inherit" }}
         >
-          {cameFromHome ? "‹ Inicio" : "‹ Redes"}
+          ‹ Volver
         </button>
         <div className="rg-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
           <div style={{ minWidth: 0 }}>

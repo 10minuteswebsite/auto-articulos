@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { friendlyConnectionError } from "@/lib/composio-error-message";
+import { ConnectionGuide } from "./connection-ui";
+import { CONNECTION_GUIDES } from "@/lib/connection-guides";
 import { sitemapMessage, type SitemapOutcome } from "@/lib/composio-sitemap";
 import {
   sectionStyle,
@@ -84,6 +86,7 @@ const CHOOSE_NOTE: Record<string, string> = {
   pinterest: "Elige el tablero de esta cuenta donde se publicarán los Pins; los demás no se usarán.",
 };
 
+/** Pasos de Search Console y Analytics; las redes sociales usan la plantilla única de connection-guides.ts. */
 const CONNECTION_STEPS: Record<string, string[]> = {
   google_search_console: [
     "Abre Google en otra pestaña del mismo navegador.",
@@ -99,28 +102,13 @@ const CONNECTION_STEPS: Record<string, string[]> = {
     "Pulsa Aprobar y guardar.",
     "Pulsa Probar conexión y comprueba el mensaje verde.",
   ],
-  facebook: [
-    "Abre Facebook en otra pestaña del mismo navegador.",
-    "Confirma que estás dentro de la cuenta personal que administra tu Página de negocio.",
-    "Pulsa Nueva conexión y autoriza el acceso solicitado.",
-    "Elige la Página correcta, no tu perfil personal, y pulsa Aprobar y guardar.",
-    "Pulsa Probar conexión y comprueba el mensaje verde.",
-  ],
-  instagram: [
-    "Abre Instagram y Facebook en otra pestaña del mismo navegador.",
-    "Confirma que tu cuenta de Instagram es Business o Creator y está vinculada a tu Página de Facebook.",
-    "Pulsa Nueva conexión y autoriza el acceso solicitado.",
-    "Elige la cuenta de Instagram correcta y pulsa Aprobar y guardar.",
-    "Pulsa Probar conexión y comprueba el mensaje verde.",
-  ],
-  pinterest: [
-    "Abre Pinterest en otra pestaña del mismo navegador.",
-    "Confirma que estás dentro de la cuenta de Pinterest que quieres usar.",
-    "Pulsa Nueva conexión y autoriza el acceso solicitado.",
-    "Elige el tablero correcto y pulsa Aprobar y guardar.",
-    "Pulsa Probar conexión y comprueba el mensaje verde.",
-  ],
 };
+
+/** Guía de conexión de una app: plantilla única para las redes; pasos propios para Google. */
+function guideFor(app: string) {
+  if (CONNECTION_GUIDES[app]) return CONNECTION_GUIDES[app];
+  return CONNECTION_STEPS[app] ? { steps: CONNECTION_STEPS[app] } : null;
+}
 
 const STATUS_LABEL: Record<Connection["status"], { text: string; color: string }> = {
   NOT_CONNECTED: { text: "No conectada", color: "#6e6e73" },
@@ -364,16 +352,10 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
       ) : connections.length === 0 ? (
         <section style={inline ? { marginTop: 16, paddingTop: 14, borderTop: "1px solid #e5e5ea" } : sectionStyle}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "#1d1d1f" }}>ESTADO: No conectada</div>
-          <div role="note" style={{ marginTop: 10, padding: "10px 0", color: "#1d1d1f", fontSize: 14, lineHeight: 1.5 }}>
-            <strong>Te acompañamos para conectar tu cuenta</strong>
-            <p style={{ margin: "6px 0 0" }}>
-              No te preocupes: sigue estos pasos y podrás preparar tu cuenta antes de autorizarla. Si algo no
-              coincide, puedes detenerte antes de aceptar.
-            </p>
-            <ol style={{ margin: "6px 0 0", paddingLeft: 20 }}>
-              {(apps ?? ["instagram"]).flatMap((app) => CONNECTION_STEPS[app] ?? []).map((step) => <li key={step}>{step}</li>)}
-            </ol>
-          </div>
+          {(apps ?? ["instagram"]).map((app) => {
+            const guide = guideFor(app);
+            return guide ? <ConnectionGuide key={app} steps={guide.steps} ifFails={"ifFails" in guide ? guide.ifFails : undefined} signupUrl={"signupUrl" in guide ? guide.signupUrl : undefined} signupLabel={"signupLabel" in guide ? guide.signupLabel : undefined} /> : null;
+          })}
         </section>
       ) : (
         connections.map((connection) => {
@@ -434,21 +416,10 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                   Debes reconectar ahora. Pulsa «Nueva conexión» y autoriza el acceso.
                 </p>
               )}
-              {CONNECTION_STEPS[connection.app] && !(connection.status === "ACTIVE" && connection.selection && !choice) && (
-                <div
-                  role="note"
-                  style={{ marginTop: 10, padding: "10px 0", borderTop: "1px solid #e5e5ea", color: "#1d1d1f", fontSize: 13, lineHeight: 1.5 }}
-                >
-                  <strong>Te acompañamos para conectar tu cuenta</strong>
-                  <p style={{ margin: "6px 0 0" }}>
-                    No te preocupes: sigue estos pasos y podrás elegir exactamente dónde quieres publicar. Si algo
-                    no coincide, puedes detenerte antes de aceptar.
-                  </p>
-                  <ol style={{ margin: "6px 0 0", paddingLeft: 20 }}>
-                    {CONNECTION_STEPS[connection.app].map((step) => <li key={step}>{step}</li>)}
-                  </ol>
-                </div>
-              )}
+              {guideFor(connection.app) && !(connection.status === "ACTIVE" && connection.selection && !choice) && (() => {
+                const guide = guideFor(connection.app)!;
+                return <ConnectionGuide steps={guide.steps} ifFails={"ifFails" in guide ? guide.ifFails : undefined} signupUrl={"signupUrl" in guide ? guide.signupUrl : undefined} signupLabel={"signupLabel" in guide ? guide.signupLabel : undefined} />;
+              })()}
               {embedded && !inline && (
                 <p role="note" style={{ margin: "8px 0", padding: "8px 0", color: "#6e6e73", fontSize: 13, lineHeight: 1.45 }}>
                   <strong>Es una conexión adicional, en prueba.</strong> No reemplaza a la conexión de arriba: el sistema sigue usando esa,

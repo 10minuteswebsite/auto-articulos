@@ -13,7 +13,7 @@ export const MENU_NAMES = {
   /** /dashboard/oportunidades — artículos creados con la IA avanzada. */
   ia: "CONTENIDO GENERADO POR IA",
   /** /dashboard/oportunidades-redes — difusión en redes con IA. */
-  redes: "PUBLICA EN REDES SOCIALES Y EN BLOGS PÚBLICOS",
+  redes: "PUBLICACIÓN EN REDES SOCIALES Y BLOGS",
 } as const;
 
 /** Cómo se ven en el desplegable del menú, con su número de orden. */
@@ -31,7 +31,7 @@ export const MENU_LABELS_NUMBERED = {
 export const MENU_NAMES_ANTERIORES = {
   propios: ["Publica tus propios títulos", "Publicaciones propias", "Publicar"],
   ia: ["Publica contenido con ayuda de la IA avanzada", "Oportunidades SEO/AEO"],
-  redes: ["Difunde tu contenido en blogs externos y redes sociales", "Oportunidades para Redes Sociales"],
+  redes: ["Difunde tu contenido en blogs externos y redes sociales", "Oportunidades para Redes Sociales", "PUBLICA EN REDES SOCIALES Y EN BLOGS PÚBLICOS"],
 } as const;
 
 /**
