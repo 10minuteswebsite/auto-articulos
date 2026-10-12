@@ -7,13 +7,13 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 **Publicación real, red por red (una publicación por red, borrando las sobrantes)**
 - [x] Threads (enlace clicable verificado).
 - [x] Bluesky (enlace clicable verificado).
-- [x] LinkedIn · [x] Facebook · [x] Instagram con imagen IA del Director (2026-10-12) · [x] Pinterest (2026-10-12) · [x] Tumblr (2026-10-12; enlace del Historial arreglado en este lote) · [x] Blogger (2026-10-12) · [ ] Google Business (falta que el worker de contenido reciba `POSTPEER_GBP_CONSUMER_READY`; este lote lo añade; después probar, y de fondo publicar al instante desde el botón) — C, con visto bueno de M antes de cada publicación.
+- [x] LinkedIn · [x] Facebook · [x] Instagram con imagen IA del Director (2026-10-12) · [x] Pinterest (2026-10-12) · [x] Tumblr (2026-10-12; enlace del Historial arreglado en este lote) · [x] Blogger (2026-10-12) · [ ] Google Business (APARCADO: créditos de PostPeer sin pagar; falta que el worker de contenido reciba `POSTPEER_GBP_CONSUMER_READY`; este lote lo añade; después probar, y de fondo publicar al instante desde el botón) — C, con visto bueno de M antes de cada publicación.
 
 **Reglas de acceso y permisos**
 - [x] Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; seototal sin cambios (PR #514, #515, #528).
 - [ ] Probar con una cuenta que NO sea Lorena y sin aprobaciones en Administración (hoy solo se ha probado con Lorena) — C + M (hace falta una cuenta de prueba).
-- [ ] Permisos al publicar coherentes: LinkedIn y X no se comprueban; Instagram no deja pasar al administrador — C.
-- [ ] Quitar el correo fijo `lorenalvarez30@gmail.com` de `generate/route.ts:496` — C.
+- [x] Permisos al publicar coherentes: LinkedIn comprueba su aprobación e Instagram deja pasar al administrador (2026-10-12) — C.
+- [x] Quitar el correo fijo `lorenalvarez30@gmail.com` de `generate/route.ts` (2026-10-12) — C.
 
 **Pantalla de Redes (hoy solo en local, sin subir)**
 - [x] Corregir «Hoy X de N» (2026-10-12, en el PR del rediseño) — C.

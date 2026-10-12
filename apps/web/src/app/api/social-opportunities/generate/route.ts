@@ -494,13 +494,12 @@ async function getConnectedNetworks(userId: string) {
   const tumblrExpiresAt = await getFreshTumblrExpiry(tumblr, userId);
   const isAdmin = user?.role === "admin";
   const redesHost = Boolean((await getSocialHostContext()).redesHost);
-  const socialOverride = user?.email?.toLowerCase() === "lorenalvarez30@gmail.com";
   // X (Twitter) apagada a pedido explícito de Milton (30/8/2026): "no la
   // usaremos, salvo que la volvamos a solicitar". Se deja el resto del
   // código de X intacto (integración, publicación, historial) para poder
   // reactivarla fácil más adelante — solo se fuerza a `false` acá, el único
   // punto de donde sale si se muestra o no en Oportunidades en Redes.
-  const activeNetworks = { threads: Boolean(isAdmin || socialOverride || redesHost || user?.allowThreadsPublishing), x: false, linkedin: Boolean(isAdmin || socialOverride || redesHost || user?.allowLinkedInPublishing), instagram: Boolean(isAdmin || socialOverride || redesHost || user?.allowInstagramPublishing), facebookPage: Boolean(isAdmin || socialOverride || redesHost || user?.allowFacebookPublishing), pinterest: Boolean(isAdmin || socialOverride || redesHost || user?.allowPinterestPublishing), tumblr: Boolean(isAdmin || socialOverride || redesHost || user?.allowTumblrPublishing), bluesky: Boolean(isAdmin || redesHost || user?.allowBlueskyPublishing), blogger: Boolean(isAdmin || socialOverride || redesHost || user?.allowBloggerPublishing), googleBusiness: Boolean(isAdmin || socialOverride || redesHost || user?.allowGoogleBusinessPublishing) };
+  const activeNetworks = { threads: Boolean(isAdmin || redesHost || user?.allowThreadsPublishing), x: false, linkedin: Boolean(isAdmin || redesHost || user?.allowLinkedInPublishing), instagram: Boolean(isAdmin || redesHost || user?.allowInstagramPublishing), facebookPage: Boolean(isAdmin || redesHost || user?.allowFacebookPublishing), pinterest: Boolean(isAdmin || redesHost || user?.allowPinterestPublishing), tumblr: Boolean(isAdmin || redesHost || user?.allowTumblrPublishing), bluesky: Boolean(isAdmin || redesHost || user?.allowBlueskyPublishing), blogger: Boolean(isAdmin || redesHost || user?.allowBloggerPublishing), googleBusiness: Boolean(isAdmin || redesHost || user?.allowGoogleBusinessPublishing) };
   // Cupo diario de PUBLICACIONES por red que Administración le asignó a esta cuenta
   // (1 si no hay valor guardado; 0 bloquea). Se usa el formato principal de cada red.
   const limitsRaw = (await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } }))?.socialDailyLimits;

@@ -144,11 +144,24 @@ export async function POST(request: NextRequest) {
     if (platform.startsWith("instagram")) {
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { allowInstagramPublishing: true },
+        select: { role: true, allowInstagramPublishing: true },
       });
-      if (!redesHost && !user?.allowInstagramPublishing) {
+      if (!isNetworkApprovedForPublishing(user, "instagram", { redesHost })) {
         return NextResponse.json(
           { error: "No tienes permiso para publicar en Instagram. Contacta al administrador." },
+          { status: 403 }
+        );
+      }
+    }
+
+    if (platform === "linkedin") {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true, allowLinkedInPublishing: true },
+      });
+      if (!isNetworkApprovedForPublishing(user, "linkedin", { redesHost })) {
+        return NextResponse.json(
+          { error: "No tienes permiso para publicar en LinkedIn. Contacta al administrador." },
           { status: 403 }
         );
       }
