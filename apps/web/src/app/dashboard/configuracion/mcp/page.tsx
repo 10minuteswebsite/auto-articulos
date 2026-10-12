@@ -30,9 +30,8 @@ const guides = {
     "Deja vacío **Secreto del cliente OAuth**: ChatGPT usa PKCE y este cliente no necesita secreto.",
     "Pulsa **Entiendo y quiero continuar** (I understand and want to continue).",
     "Pulsa **Crear como plugin** (Create as a plugin).",
-    "Inicia sesión en SEO Total y aprueba el acceso.",
-    "Busca **SEO Total** en tus plugins y pulsa **Instalar**.",
-    "En un chat nuevo escribe **@** y elige **SEO Total**.",
+    "Si ChatGPT abre SEO Total, inicia sesión y pulsa **Autorizar**.",
+    "En un chat nuevo pulsa **+** → **Complementos** y selecciona **SEO Total**.",
     "Pega el **prompt** de abajo y envíalo.",
   ],
   Muse: [
