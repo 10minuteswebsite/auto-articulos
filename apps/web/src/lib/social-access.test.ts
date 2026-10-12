@@ -155,3 +155,15 @@ test("los administradores pueden publicar en las tres redes y una cuenta inexist
     assert.equal(isNetworkApprovedForPublishing(null, network), false);
   }
 });
+
+test("Instagram y LinkedIn: exigen su aprobación; el administrador y el dominio redes pasan", () => {
+  assert.equal(isNetworkApprovedForPublishing({ role: "user" }, "instagram"), false);
+  assert.equal(isNetworkApprovedForPublishing({ role: "user" }, "linkedin"), false);
+  assert.equal(isNetworkApprovedForPublishing({ role: "user", allowInstagramPublishing: true }, "instagram"), true);
+  assert.equal(isNetworkApprovedForPublishing({ role: "user", allowInstagramPublishing: true }, "linkedin"), false);
+  assert.equal(isNetworkApprovedForPublishing({ role: "user", allowLinkedInPublishing: true }, "linkedin"), true);
+  assert.equal(isNetworkApprovedForPublishing({ role: "admin" }, "instagram"), true);
+  assert.equal(isNetworkApprovedForPublishing({ role: "admin" }, "linkedin"), true);
+  assert.equal(isNetworkApprovedForPublishing({ role: "user" }, "instagram", { redesHost: true }), true);
+  assert.equal(isNetworkApprovedForPublishing({ role: "user" }, "linkedin", { redesHost: true }), true);
+});

@@ -138,17 +138,23 @@ export function hasSocialPublishingApproval(user: SocialPublishingPermissionUser
 export function isNetworkApprovedForPublishing(
   user: {
     role?: string | null;
+    allowInstagramPublishing?: boolean | null;
+    allowLinkedInPublishing?: boolean | null;
     allowPinterestPublishing?: boolean | null;
     allowTumblrPublishing?: boolean | null;
     allowBlueskyPublishing?: boolean | null;
   } | null | undefined,
-  network: "pinterest" | "tumblr" | "bluesky",
+  network: "instagram" | "linkedin" | "pinterest" | "tumblr" | "bluesky",
   context: SocialHostContext = {},
 ): boolean {
   if (context.redesHost) return true;
   if (user?.role === "admin") return true;
   const approval =
-    network === "pinterest" ? user?.allowPinterestPublishing : network === "tumblr" ? user?.allowTumblrPublishing : user?.allowBlueskyPublishing;
+    network === "instagram" ? user?.allowInstagramPublishing
+    : network === "linkedin" ? user?.allowLinkedInPublishing
+    : network === "pinterest" ? user?.allowPinterestPublishing
+    : network === "tumblr" ? user?.allowTumblrPublishing
+    : user?.allowBlueskyPublishing;
   return approval === true;
 }
 
