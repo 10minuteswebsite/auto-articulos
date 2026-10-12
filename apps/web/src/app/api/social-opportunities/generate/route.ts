@@ -82,12 +82,12 @@ async function generateGPTCopy(
   const isFacebookPage = platform === "facebook-page";
   const isPinterest = platform === "pinterest";
   const isBlogger = platform === "blogger";
-  const charLimit = isLinkedIn ? 1300 : isFacebookPage ? 700 : isInstagramFeedCaption ? 1000 : isPinterest ? 800 : isBlogger ? 1600 : platform === "bluesky" ? 170 : 360;
-  const maxTokens = isLinkedIn ? 700 : isFacebookPage ? 450 : isInstagramFeedCaption ? 550 : isPinterest ? 500 : isBlogger ? 800 : platform === "bluesky" ? 150 : 300;
+  const charLimit = isLinkedIn ? 1300 : isFacebookPage ? 700 : isInstagramFeedCaption ? 1000 : isPinterest ? 450 : isBlogger ? 1600 : platform === "bluesky" ? 170 : 360;
+  const maxTokens = isLinkedIn ? 700 : isFacebookPage ? 450 : isInstagramFeedCaption ? 550 : isPinterest ? 300 : isBlogger ? 800 : platform === "bluesky" ? 150 : 300;
   // Presupuesto real del texto de la IA en las redes cortas: el límite de la red
   // INCLUYE el enlace (~90 caracteres) y la IA suele pasarse (Bluesky: 365-407
   // caracteres para un tope de 300). Si se pasa, se le pide una sola vez que lo acorte.
-  const hardBudget = platform === "bluesky" ? 200 : platform === "x" ? 240 : platform === "threads" ? 400 : null;
+  const hardBudget = platform === "bluesky" ? 200 : platform === "x" ? 240 : platform === "threads" ? 400 : platform === "pinterest" ? 480 : null;
   const styleNote = isLinkedIn
     ? "Tono profesional pero cercano (LinkedIn), con más contexto y valor. Puedes usar párrafos cortos separados por saltos de línea."
     : isBlogger
