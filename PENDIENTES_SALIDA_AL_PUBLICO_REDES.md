@@ -11,13 +11,13 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 
 **Reglas de acceso y permisos**
 - [x] Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; seototal sin cambios (PR #514, #515, #528).
-- [ ] Probar con una cuenta que NO sea Lorena y sin aprobaciones en Administración (hoy solo se ha probado con Lorena) — C + M (hace falta una cuenta de prueba).
+- [x] Probar con una cuenta que NO sea Lorena y sin aprobaciones (hecho por Milton 2026-10-12, funciona) — C + M.
 - [x] Permisos al publicar coherentes: LinkedIn comprueba su aprobación e Instagram deja pasar al administrador (2026-10-12) — C.
 - [x] Quitar el correo fijo `lorenalvarez30@gmail.com` de `generate/route.ts` (2026-10-12) — C.
 
 **Pantalla de Redes (hoy solo en local, sin subir)**
 - [x] Corregir «Hoy X de N» (2026-10-12, en el PR del rediseño) — C.
-- [ ] Vista previa: decidir quitarla o hacerla fiel a lo que se publica — M decide, C ejecuta.
+- [~] Vista previa: APARCADA por decisión de Milton («no me interesa por ahora»); se retoma cuando él lo pida.
 - [x] Errores de publicación visibles en la pantalla del grupo, con reintento (2026-10-12) — C.
 - [x] Pinterest: el generador ya pide menos de 450 caracteres y no se recorta (2026-10-12) — C.
 - [x] Manual de usuario actualizado (2026-10-12, en el PR del rediseño) — C.
@@ -33,7 +33,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 - [ ] Unificar nombres: google-business / business-profile / googleBusiness; «Facebook Pages» vs «Facebook»; «oportunidad» vs «propuesta»; etiqueta del menú «1) PUBLICA EN REDES SOCIALES…» — C.
 - [ ] Formatos sin dueño: Administración da cupos a Instagram carrusel/reel/infografía y Facebook Story que la pantalla nunca genera; Instagram crea 2 propuestas por pulsación — decidir qué formatos existen — M.
 - [ ] Un solo selector de grupo (hoy el Inicio y `/dashboard/oportunidades-redes` muestran las mismas tarjetas) — C.
-- [ ] Eliminar la ruta huérfana `generate-all` — C.
+- [x] Eliminar la ruta huérfana `generate-all` (2026-10-12) — C.
 - [ ] Revisión del algoritmo de generación: elección del artículo, repetición entre redes, calidad y recorte del texto — C.
 - [ ] Worker que distinga dominio, o activar los derechos del HUB (`enforce`) — C + M.
 
