@@ -11,6 +11,7 @@ import {
   getGoogleAccessToken,
   queryGoogleSearchAnalytics,
   refreshTumblrToken,
+  stripMarkdownEmphasis,
 } from "@auto-articulos/shared";
 import { getGoogleAnalyticsSignals, summarizeGoogleAnalyticsSignals } from "@/lib/google-analytics-signals";
 import { getBingSignals } from "@/lib/bing-signals";
@@ -758,7 +759,7 @@ export async function POST(request: Request) {
               articleTitle: article.finalTitle || article.text,
               articleUrl: article.articleUrl || "",
               platform,
-              suggestedText: copyText,
+              suggestedText: stripMarkdownEmphasis(copyText),
               status: "pending",
             },
           });

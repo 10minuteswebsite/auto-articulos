@@ -113,3 +113,12 @@ export function buildSafeCaption(suggestedText: string, articleUrl: string, opti
 export function truncatePlainCaption(text: string, maxChars: number): string {
   return text.length > maxChars ? text.slice(0, maxChars - 3) + "..." : text;
 }
+
+/**
+ * Quita el énfasis Markdown (**negrita**, __negrita__) que la IA a veces deja
+ * en los textos. Ninguna red social lo interpreta: se vería como asteriscos
+ * sueltos (p. ej. «**Conoce tus opciones:**» en Instagram).
+ */
+export function stripMarkdownEmphasis(text: string): string {
+  return text.replace(/\*\*([^*\n]+?)\*\*/g, "$1").replace(/__([^_\n]+?)__/g, "$1");
+}

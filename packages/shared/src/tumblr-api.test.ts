@@ -4,6 +4,7 @@ import {
   createTumblrPhotoPost,
   exchangeTumblrAccessToken,
   getTumblrBlogs,
+  parseTumblrJson,
   requestTumblrRequestToken,
 } from "./tumblr-api";
 
@@ -57,4 +58,11 @@ test("firma las consultas de blogs y publicaciones con el token OAuth1", async (
   }
   assert.equal((calls[1].init?.method), "POST");
   assert.match(String((calls[1].init?.body as URLSearchParams).toString()), /type=photo/);
+});
+
+test("parseTumblrJson conserva intacto un ID de post que no cabe en un Number", () => {
+  const parsed = parseTumblrJson('{"response":{"id":830229251051716608,"state":"published"}}') as { response: { id: string } };
+  assert.equal(parsed.response.id, "830229251051716608");
+  const small = parseTumblrJson('{"response":{"id":12345}}') as { response: { id: number } };
+  assert.equal(small.response.id, 12345);
 });

@@ -7,7 +7,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 **Publicación real, red por red (una publicación por red, borrando las sobrantes)**
 - [x] Threads (enlace clicable verificado).
 - [x] Bluesky (enlace clicable verificado).
-- [x] LinkedIn (2026-10-12, verificado) · [x] Facebook (2026-10-12, verificado) · [~] Instagram (2026-10-12: publicado 1 vez con la foto del artículo; falta probar con imagen creada por el Director Creativo) · [ ] Pinterest · [ ] Tumblr · [ ] Blogger · [ ] Google Business — C, con visto bueno de M antes de cada publicación.
+- [x] LinkedIn · [x] Facebook · [x] Instagram con imagen IA del Director (2026-10-12) · [x] Pinterest (2026-10-12) · [x] Tumblr (2026-10-12; enlace del Historial arreglado en este lote) · [x] Blogger (2026-10-12) · [ ] Google Business (falta que el worker de contenido reciba `POSTPEER_GBP_CONSUMER_READY`; este lote lo añade; después probar, y de fondo publicar al instante desde el botón) — C, con visto bueno de M antes de cada publicación.
 
 **Reglas de acceso y permisos**
 - [x] Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; seototal sin cambios (PR #514, #515, #528).
@@ -24,10 +24,12 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 - [ ] Subir el rediseño con las tres auditorías: pruebas, typecheck, build y Preview verde — C; la fusión la hace M si el sistema vuelve a bloquearla.
 
 **Imágenes**
-- [ ] Instagram por Composio con imagen del Director Creativo: código en PR (2026-10-12); falta confirmar que el generador de imágenes IA está activo para Lorena y probar con 1 post — M + C.
-- [ ] Activar el prompt nuevo del Director Creativo: ejecutar `apply-director-prompt.yml` con `mode=reemplazar` (guarda respaldo; `mode=restaurar` lo devuelve) y verificar con una imagen real — M ejecuta, C verifica.
+- [x] Instagram por Composio con imagen del Director Creativo: PR #535, generador activo para Lorena y verificado con un post real (2026-10-12) — M + C.
+- [x] Activar el prompt nuevo del Director Creativo: `apply-director-prompt.yml` modo reemplazar ejecutado (2026-10-12); respaldo en `ai_social_image_prompt_backup` (`mode=restaurar` lo devuelve); verificado con imágenes reales de Instagram y Pinterest — M + C.
 
 ## B. Importantes (primera semana tras salir)
+- [ ] Google Business: publicar al instante desde el botón (llamada directa a PostPeer en `publish/route.ts`), sin cola de worker — C.
+- [ ] Reutilizar una imagen IA entre redes del mismo artículo/formato y guardar el costo por imagen — C.
 - [ ] Unificar nombres: google-business / business-profile / googleBusiness; «Facebook Pages» vs «Facebook»; «oportunidad» vs «propuesta»; etiqueta del menú «1) PUBLICA EN REDES SOCIALES…» — C.
 - [ ] Formatos sin dueño: Administración da cupos a Instagram carrusel/reel/infografía y Facebook Story que la pantalla nunca genera; Instagram crea 2 propuestas por pulsación — decidir qué formatos existen — M.
 - [ ] Un solo selector de grupo (hoy el Inicio y `/dashboard/oportunidades-redes` muestran las mismas tarjetas) — C.
