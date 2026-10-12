@@ -4237,3 +4237,219 @@ diaria de propagación (2026-10-11).
 - Responsable: Claude.
 - Estado: CERRADO según las entradas originales de Coordinación (sin acción destructiva, sin
   migración, sin deploy ejecutado por esta tarea de propagación).
+
+## Versión — 2026-10-11 — Redes: enlaces clicables, largo real de texto y cupo diario por publicación (PRs #518, #519, #520)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("Claude — Enlaces NO clicables en
+Threads/Bluesky (recorte + facets) — 2026-10-11", "Claude — Texto de la IA más largo que el
+límite de la red (Bluesky/Threads) — 2026-10-11" y "Claude — El cupo diario limita
+publicaciones, no propuestas — 2026-10-11") por la tarea programada diaria de propagación
+(2026-10-12).
+
+- **PR #518 (commit `2720acd`)** — Hallazgo de Milton en un post real de Threads: el enlace no
+  quedaba clicable. Causa 1: `buildSafeCaption` (`packages/shared/src/caption-limits.ts`) pegaba
+  la URL justo después de "..." al recortar un texto largo; arreglo: espacio obligatorio antes
+  de la URL, sin partir la última palabra. Causa 2: `createBlueskyPost` nunca enviaba `facets`;
+  arreglo: `buildBlueskyLinkFacets` (posiciones en bytes UTF-8). Lo ya publicado no se modifica.
+  Pruebas nuevas en `apps/worker/src/socialLinkContract.test.ts`. Sin schema ni migración.
+- **PR #519 (commit `a271267`)** — Evidencia en vivo (cuenta de Lorena, cupo 5): una pulsación en
+  Bluesky creó 5 propuestas de 365 a 407 caracteres, superando el límite real de la red (300,
+  incluyendo el enlace de ~90). Causa: el prompt pedía "menos de 360 caracteres" por igual a
+  Threads/X/Bluesky. Arreglo (`social-opportunities/generate/route.ts`): Bluesky pide 170
+  caracteres y `max_tokens` 150; si el texto excede el presupuesto real (400/240/200 según la
+  red), se pide una reescritura más corta antes de recortar con `buildSafeCaption`. Sin schema
+  ni migración.
+- **PR #520 (commit `12ca715`)** — Decisión de Milton: el cupo de Administración → Difusión debe
+  limitar cuántas veces se PUBLICA por día, no cuántas propuestas se crean. Antes, "Generar
+  propuestas" fallaba con el cupo lleno (Threads no dejaba crear propuestas aunque no se hubiera
+  publicado nada). Ahora cada pulsación crea 1 propuesta por red sin mirar el cupo, y el cupo se
+  comprueba al publicar (`publish/route.ts`, respaldado por `enforceSocialDailyLimit` en el
+  worker). Sin schema ni migración.
+- Manual de usuario: sin cambio de esta tarea de propagación — ninguno de los tres PRs tocó
+  `apps/web/src/content/manual-usuario.ts`; el texto actual de la sección de Redes (actualizado
+  por el PR #532, ver más abajo) ya describe el cupo como "Hoy X de N" sobre publicaciones, acorde
+  a este cambio.
+- Producción: las tres entradas de Coordinación describen hallazgos y arreglos verificados por
+  Milton/Lorena directamente en `redes.lasolucionweb.com`; esta tarea de propagación no tiene
+  acceso a Vercel para verificar el deployment de forma independiente.
+- Responsable: Claude.
+- Estado: CERRADO según las entradas originales de Coordinación.
+
+## Versión — 2026-10-11 — Director Creativo de imágenes v2: guía de estilo, modo híbrido y ajustes finales (PRs #517, #521, #522, #523, #524, #525)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` (bloques "Claude — Director Creativo de imágenes
+v2 (guía de estilo de Lorena) — 2026-10-11 — FASE 1 de 3", "Claude — Director Creativo v2:
+resultados del diagnóstico y vía para aplicarlo — FASE 2/3", "Claude — Director Creativo de
+imágenes: se CONSERVA el prompt del panel y se le AÑADE la guía — FASE 2/3" y "Claude — Director
+v2: el modo híbrido NO funcionó; se ajusta el v2 corto — 2026-10-11") por la tarea programada
+diaria de propagación (2026-10-12).
+
+- **PR #517 (commit `e386288`)** — Documentación: hoja de ruta de la revisión en vivo de Redes.
+- **PR #521 (commit `eaccdaa`)** — Fase 1: pedido de Milton de reformar el prompt de creación de
+  imágenes de SEO Total con la guía de estilo de Lorena (`guia-estilo-imagenes.md`), sabiendo que
+  la cuenta puede subir 2 logos y 3 fotos en Configuración → Contenido. Nuevo `directorPromptV2.ts`
+  (reglas de la guía generalizadas + materiales de marca + formato Pinterest 2:3);
+  `aiImageGenerator.ts` envía al director los logos y, si aplica, la foto de la persona
+  (`PERSON_PHOTO_RATE = 0`, la persona no aparece todavía); si la cuenta tiene activado el
+  generador de imágenes con IA, Pinterest también usa el director (si falla, cae a la foto del
+  artículo recortada; publicar nunca depende de la IA). Workflow manual
+  `diagnose-ai-image-prompt.yml` (compara director ACTUAL vs NUEVO sin publicar ni escribir en la
+  base). No cambia el prompt guardado en el panel. Sin schema ni migración.
+- **PR #522 (commit `a19f8a9`)** — Fase 2: diagnóstico con la cuenta de Lorena (gpt-image-2): el
+  director NUEVO supera al actual (titular condensado, gancho en pregunta, logo flotando, luz
+  natural), pero a veces generaba la escena sin personas; se agrega la regla 8 exigiendo personas
+  reales en primer plano.
+  Workflow `apply-director-prompt.yml` (`mode=aplicar|restaurar`), con copia exacta del prompt
+  anterior en `ai_social_image_prompt_backup` antes de escribir el nuevo.
+- **PR #523 (commit `3094b9c`)** — Corrige titulares sin sentido del director v2 ("cambiar de
+  salud") con una regla de titular completo; agrega el modo `mode=reemplazar` al workflow (solo
+  el v2 corto, con el mismo respaldo exacto).
+- **PR #524 (commit `6c4afb8`)** — Fase 2/3: para no perder el trabajo ya hecho en el prompt
+  guardado en el panel (`ai_social_image_prompt`, 20.733 caracteres: catálogo de etiquetas,
+  análisis de marca por el logo, anti-repetición), se prueba un modo híbrido:
+  `mergeDirectorPrompt(panel)` = prompt del panel + sección "GUÍA DE ESTILO VISUAL v2"
+  (idempotente, no duplica la sección). El workflow de diagnóstico gana un tercer brazo
+  `hibrido`. Nada aplicado aún en producción en este PR.
+- **PR #525 (commit `79a6775`)** — Evidencia del diagnóstico (9 imágenes): el brazo `hibrido` casi
+  no cambió nada (el prompt largo del panel manda y la guía se ignora) y el brazo `actual` repite
+  siempre las mismas etiquetas porque el código no pasa `RECENT_STYLE_HISTORY`. Decisión: se
+  descarta el híbrido y el v2 corto queda como candidato único, absorbiendo lo útil del prompt del
+  panel (máximo 6 palabras, OG como base, logo obligatorio, alto contraste, paleta del logo). La
+  regla 8 se endurece para exigir personas reales en primer plano.
+- Aplicación en producción: el v2 corto se activó recién el 2026-10-12 con `mode=reemplazar` (ver
+  la entrada de ese día más abajo); ninguno de estos seis PR cambió por sí solo el prompt guardado
+  en producción.
+- Pendiente anotado por las propias entradas de Coordinación (sin acción de esta tarea de
+  propagación): la infografía de Instagram pide "datos y números", lo que choca con la regla
+  "cero números" de la guía — Milton no ha decidido; y la foto de la persona (Lorena) sigue
+  apagada (`PERSON_PHOTO_RATE = 0`) hasta que se verifique que el rostro sale idéntico. Ambos
+  puntos ya están anotados en `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md` (sección C), por lo que
+  esta tarea no los duplica en `TO-DO.md`.
+- Manual de usuario: sin cambio — el Director Creativo se configura y aplica desde
+  Administración/workflows, no agrega una pantalla ni un flujo nuevo para el usuario final.
+- Responsable: Claude.
+- Estado: CERRADO (decisión final: v2 corto). Aplicación real en producción registrada en la
+  entrada del 2026-10-12, más abajo.
+
+## Versión — 2026-10-11 — Botón de Historial en publicaciones en curso + fix de precedencia Pinterest/Tumblr/Bluesky + documentación de salida al público (PRs #526, #527, #528, #529, #530)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("Claude — Publicaciones en curso: el botón vacío
+va al Historial — 2026-10-11", "Claude — CIERRE «Publicaciones en curso: botón al Historial» —
+2026-10-11", "Claude — Fix: en redes.lasolucionweb.com Pinterest/Tumblr/Bluesky seguían
+exigiendo aprobación — 2026-10-11", "Claude — LISTA VIVA «SACAR REDES AL PÚBLICO» — 2026-10-11"
+y la sección "REGLA PERMANENTE" / "ÍNDICE DE TRASPASO") por la tarea programada diaria de
+propagación (2026-10-12).
+
+- **PR #526 (commit `206583a`)** — Pedido de Milton: al terminar de publicar, la pantalla
+  `/dashboard/publicaciones-en-curso` decía "Ir a Publicar"; ahora, cuando no hay nada en curso,
+  dice "Ir al Historial" y lleva a `/dashboard/historial` (que ya muestra artículos y redes,
+  publicados o con error). Solo web, sin schema ni migración. **Manual actualizado por el propio
+  PR** (línea nueva en la sección de Publicaciones en curso de
+  `apps/web/src/content/manual-usuario.ts`): esta tarea de propagación no duplicó ese texto.
+- **PR #527 (commit `b6dc2bb`)** — Cierre documental del PR #526: fusionado con Preview de Vercel
+  en success, sin migración, capitanía de archivo liberada. Pendiente anotado: Milton todavía no
+  confirmó visualmente en producción.
+- **PR #528 (commit `99ef017`)** — Hallazgo de auditoría: en `social-opportunities/publish/route.ts`
+  la expresión `redesHost || platform === "pinterest" ? A : B` se evaluaba como
+  `(redesHost || pinterest) ? A : B`, así que en el dominio redes, Pinterest, Tumblr y Bluesky
+  comprobaban la aprobación de PINTEREST en vez de la propia: una cuenta sin esa aprobación
+  recibía 403 aunque "todas las redes estén abiertas" (bug introducido por el propio PR #515, ver
+  entrada anterior de este documento). En otros dominios el comportamiento ya era correcto.
+  Arreglo: función pura `isNetworkApprovedForPublishing` (`apps/web/src/lib/social-access.ts`) +
+  3 pruebas de regresión. Sin schema ni migración.
+- **PR #529 (commit `7267e42`)** — Documentación: primera versión de la lista viva "SACAR REDES AL
+  PÚBLICO" (bloqueantes, importantes y "después"), ahora en `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`
+  con casillas, más la auditoría `AUDITORIA_REDES_2026-10-11.md` y el documento de traspaso
+  `TRASPASO_REDES_SALIDA_AL_PUBLICO.md`.
+- **PR #530 (commit `25542d0`)** — Documentación: en `COORDINACION_CLAUDE_CODEX.md` se agrega un
+  "ÍNDICE DE TRASPASO" (dónde está cada cosa si Milton pide un traspaso) y una "REGLA PERMANENTE"
+  (orden de Milton, 2026-10-11): todo cambio de Redes, subido o solo en local, se anota en una
+  nueva sección "BITÁCORA REDES" en el mismo lote o commit del cambio; si un cambio no está en la
+  bitácora, se considera que no se hizo.
+- Producción: el fix del PR #528 corrige un bug que había llegado a producción con el PR #515
+  (2026-10-10); el resto de este lote es documentación interna. Esta tarea de propagación no
+  tiene acceso a Vercel para verificar deployments de forma independiente.
+- Responsable: Claude.
+- Estado: CERRADO según las entradas originales de Coordinación.
+
+## Versión — 2026-10-11/12 — Pruebas en vivo (LinkedIn, Facebook), rediseño completo de Redes, Instagram con Director Creativo vía Composio y fixes finales de Tumblr/asteriscos/Google Business (PRs #531, #532, #533, #535, #536)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "BITÁCORA REDES" (entradas 2026-10-11 y
+2026-10-12: pruebas de LinkedIn y Facebook, rediseño, Instagram por Composio y el lote final de
+arreglos) por la tarea programada diaria de propagación (2026-10-12).
+
+- **PR #531 (commit `8ce9341`)** — Prueba en vivo de publicación en LinkedIn (punto A1 de la
+  lista), cuenta de Lorena, desde su propio navegador en la Mac mini: 1 propuesta creada y
+  publicada; confirmada por el worker a las 00:31:53 UTC
+  (`urn:li:share:7515207578872619009`). Verificado abriendo el post: texto completo, enlace
+  acortado `lnkd.in` clicable, imagen presente. Sin cambios de código. Solo documentación.
+- **PR #532 (commit `1a4ce23`)** — Rediseño de Redes, **visible para el usuario final**: Inicio
+  pasa a mostrar las tarjetas **META** (Instagram, Threads y Facebook) y **Otras redes y blogs**
+  (LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business) en vez de una sola tarjeta de
+  Redes; la pantalla de grupo (`/dashboard/oportunidades-redes`) se rediseña con instrucciones
+  dinámicas según el cupo, una fila por red con "Hoy X de N" (contando solo el formato principal),
+  lista compacta de propuestas y versión móvil táctil; `redes.localhost`/`articulos.localhost`
+  solo se reconocen en desarrollo; nuevos parámetros `DELETE /api/social-opportunities?scope=pending&platforms=`
+  y `dailyLimits` en `GET …/generate`. Se aplicaron sobre `main` 10 commits locales previos de la
+  rama `claude/redes-meta-y-admin-ux` (cherry-pick) y se corrigió el conteo de "Hoy X de N" en el
+  mismo PR. Verificado: 201/201 pruebas, typecheck y build real de `apps/web`. **Manual
+  actualizado por el propio PR** (secciones "Inicio" y "${MENU_NAMES.redes}" de
+  `apps/web/src/content/manual-usuario.ts`): esta tarea de propagación no duplicó ese texto.
+  Decisión de Milton: producción debe verse igual que el local antes de seguir probando.
+- **PR #533 (commit `504d991`)** — Prueba en vivo de publicación en Facebook (punto A1), ya con la
+  pantalla nueva de Redes en producción: botón **Publicar** en la propuesta "Cómo acceder a
+  seguros de salud asequibles en Miami" (Página "Seguros de Salud y Vida USA"); confirmada a las
+  00:44:58 UTC (`postId` 122136161379384925). Verificado abriendo el post: texto completo, enlace
+  azul y clicable, imagen presente (ya no aparece el recuadro amarillo de un post antiguo del
+  21-sep). Sin cambios de código. Solo documentación.
+- **PR #535 (commit `a3778d2`)** — Causa: la prueba de Instagram del mismo día (00:53:38 UTC,
+  `instagram.com/p/DeX_c2Njd-b`) salió con la foto del artículo recortada a 4:5 en vez de la
+  imagen generada por IA, porque la ruta de publicación por Composio (`instagram-post`,
+  `apps/worker/src/socialPublish.ts`) nunca pasaba por el Director Creativo. Milton confirmó que
+  Instagram debe crear la imagen con el prompt nuevo. Arreglo: si la cuenta tiene activado el
+  generador de imágenes con IA, esa ruta ahora usa `generateAiSocialImage` (formato `post`, con
+  los logos y fotos de la cuenta) y guarda `aiImagePrompt`; si la IA falla, sigue cayendo a la foto
+  del artículo recortada (publicar nunca depende de la IA). Verificado en el PR: typecheck del
+  worker y 46/46 pruebas; la publicación real con imagen IA quedó verificada al día siguiente (ver
+  PR #536 / bitácora 2026-10-12). Manual: sin cambio — no agrega una pantalla ni un flujo nuevo
+  para el usuario, solo corrige qué imagen usa una ruta ya documentada.
+- **PR #536 (commit `beeb02b`, HEAD de `origin/main` al momento de esta propagación)** — Lote de
+  arreglos hallados en las pruebas en vivo con Lorena (una publicación por red, con visto bueno de
+  Milton antes de cada una): (1) **Tumblr**: `createTumblrPhotoPost` leía el ID del post como
+  número y perdía dígitos (`…716608` → `…716600`, enlace del Historial roto); `parseTumblrJson`
+  ahora lo conserva como texto (`packages/shared/src/tumblr-api.ts` + prueba nueva); los enlaces de
+  posts antiguos de Tumblr ya guardados con el ID truncado no se pueden recuperar. (2) Texto con
+  asteriscos `**…**` sueltos visibles en Instagram: nueva `stripMarkdownEmphasis`
+  (`packages/shared/src/caption-limits.ts` + prueba) aplicada a todo texto generado
+  (`generate/route.ts`). (3) `.github/workflows/worker.yml` pasa `POSTPEER_GBP_CONSUMER_READY` al
+  worker de contenido (quien procesa Google Business Profile); la variable del repositorio quedó
+  en `true`, autorizado por Milton. Verificado: typecheck de `apps/web` y del worker limpios, 221
+  pruebas, build de producción. Manual: sin cambio visible para el usuario.
+  - Pruebas en vivo documentadas en el mismo PR (sin cambio de código adicional): Instagram OK con
+    imagen del Director (`instagram.com/p/DeYCMxkG0v0`, 1080×1350); Pinterest OK (pin
+    `1132725743811671875`, 2:3, imagen IA); Tumblr publicado OK (enlace del Historial roto por el
+    bug del punto 1, corregido en este mismo lote); Blogger OK
+    (`segurosdesaludyvida.blogspot.com/2026/10/opciones-considerar-cuando-tu-medico-ya.html`);
+    Google Business quedó pendiente de que `worker.yml` recibiera la variable (resuelto en este
+    mismo PR, falta la publicación real de prueba).
+  - Prompt del Director Creativo aplicado en producción: `apply-director-prompt.yml` se ejecutó en
+    modo "aplicar" (por error del valor por defecto del workflow) y luego en modo "reemplazar" →
+    el prompt v2 corto (4.055 caracteres) quedó activo; el prompt original se conservó en
+    `ai_social_image_prompt_backup` (`mode=restaurar` lo devuelve). El generador de imágenes con IA
+    quedó activado para la cuenta de Lorena.
+- Producción: todas las pruebas de este lote se hicieron en vivo directamente en
+  `redes.lasolucionweb.com`/`seototal.lasolucionweb.com` con la cuenta de Lorena; esta tarea de
+  propagación no tiene acceso a Vercel ni a las cuentas reales para verificar de forma
+  independiente.
+- Pendiente anotado por las propias entradas de Coordinación (ya recogido en
+  `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`, sección B, sin duplicar en `TO-DO.md`): Google Business
+  debería publicar al instante desde el botón (llamada directa a PostPeer en `publish/route.ts`)
+  en vez de por cola de worker; e idea de reutilizar una imagen IA entre redes del mismo
+  artículo/formato para ahorrar costo.
+- Responsable: Claude.
+- Estado: CERRADO según las entradas originales de Coordinación. Las únicas casillas de "A.
+  Bloqueantes" de `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md` sin marcar al cierre de este rango son
+  la publicación real de prueba en Google Business, probar con una cuenta distinta a Lorena sin
+  aprobaciones, revisar los permisos de LinkedIn/X/Instagram al publicar, quitar el correo fijo de
+  `generate/route.ts` y subir el rediseño de la pantalla de grupo (ya subido en el PR #532 de este
+  mismo lote) — ver el detalle con casillas en ese documento, que esta tarea no duplica.
