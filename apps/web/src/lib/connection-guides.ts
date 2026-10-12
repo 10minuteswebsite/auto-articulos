@@ -11,7 +11,14 @@ export interface ConnectionGuideContent {
 
 const PROBAR = "Pulsa Probar conexión y comprueba el mensaje verde.";
 
-function oauthGuide(red: string, cuenta: string, cuartoPaso: string, signupUrl?: string): ConnectionGuideContent {
+const SI_FALLA = "revisa que estés dentro de la cuenta correcta y que hayas aceptado todos los permisos; luego pulsa «Nueva conexión» otra vez. Si sigue igual, avisa a soporte.";
+
+/**
+ * PLANTILLA ÚNICA de conexión (pedido de Milton, 2026-10-12): todas las redes y blogs muestran la misma
+ * caja, la misma introducción y los mismos 6 pasos; solo cambian el nombre de la red, la cuenta que hay
+ * que confirmar y el paso de «destino» (elegir tablero/blog/Página o ver la conexión exitosa).
+ */
+function oauthGuide(red: string, cuenta: string, cuartoPaso: string, signupUrl?: string, ifFails: string = SI_FALLA): ConnectionGuideContent {
   return {
     steps: [
       `Antes de empezar, asegúrate de tener una cuenta activa de ${red}. Si todavía no la tienes, puedes crearla con el enlace que aparece debajo.`,
@@ -21,6 +28,7 @@ function oauthGuide(red: string, cuenta: string, cuartoPaso: string, signupUrl?:
       `Lee los permisos y acéptalos si todo está correcto. ${cuartoPaso}`,
       `Para terminar, pulsa «Probar conexión». Si ves el mensaje verde, ya está: SEO TOTAL podrá usar esta conexión.`,
     ],
+    ifFails,
     signupUrl,
     signupLabel: `Crear una cuenta de ${red}`,
   };
@@ -42,16 +50,9 @@ export const CONNECTION_GUIDES: Record<string, ConnectionGuideContent> = {
     ],
     ifFails: "revisa que tu sitio esté verificado en Bing Webmaster Tools y vuelve a intentarlo.",
   },
-  "business-profile": {
-    steps: [
-      "Abre Google en otra pestaña del mismo navegador.",
-      "Confirma que estás dentro de la cuenta de Google que administra tu Perfil de Negocio y que tu ficha está verificada.",
-      "Pulsa Nueva conexión y autoriza el acceso solicitado.",
-      "Vuelve aquí y comprueba la pantalla de Conexión exitosa.",
-      PROBAR,
-    ],
-    ifFails: "una ficha sin verificar no puede recibir publicaciones; verifícala en Google y vuelve a intentarlo.",
-  },
+  "business-profile": oauthGuide("Google Business Profile", "la cuenta de Google que administra tu Perfil de Negocio (con la ficha verificada)", "Vuelve aquí y comprueba la pantalla de Conexión exitosa.", "https://www.google.com/business/", "una ficha sin verificar no puede recibir publicaciones; verifícala en Google y vuelve a intentarlo."),
+  instagram: oauthGuide("Instagram", "tu cuenta profesional de Instagram (Business o Creator) vinculada a tu Página de Facebook", "Elige la cuenta de Instagram correcta y pulsa Aprobar y guardar.", "https://www.instagram.com/accounts/emailsignup/"),
+  facebook: oauthGuide("Facebook", "la cuenta personal que administra tu Página de negocio", "Elige la Página correcta (no tu perfil personal) y pulsa Aprobar y guardar.", "https://www.facebook.com/pages/create"),
   bluesky: {
     steps: [
       "Abre Bluesky en otra pestaña del mismo navegador y entra en Configuración → Privacidad y seguridad → Contraseñas de aplicación.",

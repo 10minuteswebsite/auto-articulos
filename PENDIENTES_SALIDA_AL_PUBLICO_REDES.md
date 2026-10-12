@@ -30,10 +30,10 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 ## B. Importantes (primera semana tras salir)
 - [x] Google Business: ya sale en ~40 s desde el worker de Redes (se dispara al pulsar Publicar) — C.
 - [ ] Reutilizar una imagen IA entre redes del mismo artículo/formato y guardar el costo por imagen — C.
-- [ ] Instrucciones de conexión estándar (pedido de Milton, 2026-10-12): todas las redes y blogs (Instagram, Facebook, Threads, LinkedIn, Pinterest, Tumblr, Bluesky, Blogger, Google Business) deben tener las MISMAS instrucciones paso a paso y el mismo formato en Configuración → Conexiones; hoy Instagram trae unas distintas (p. ej. «Autorizas directamente en Meta…» junto al botón de Composio). Hay que auditar el texto de cada sección, definir una plantilla única (pasos, qué pasa si falla, estado) y aplicarla a todas, con el manual actualizado — C.
-- [ ] Unificar nombres: google-business / business-profile / googleBusiness; «Facebook Pages» vs «Facebook»; «oportunidad» vs «propuesta»; etiqueta del menú «1) PUBLICA EN REDES SOCIALES…» — C.
+- [x] Instrucciones de conexión estándar: plantilla única de 6 pasos + «Si falla» para todas las redes y blogs; Bluesky en el mismo formato (2026-10-12) — C.
+- [~] Unificar nombres: hecho el nombre del menú y de la tarjeta («PUBLICACIÓN EN REDES SOCIALES Y BLOGS»); falta «oportunidad» vs «propuesta», «Facebook Pages» vs «Facebook» y google-business / business-profile en los textos — C.
 - [ ] Formatos sin dueño: Administración da cupos a Instagram carrusel/reel/infografía y Facebook Story que la pantalla nunca genera; Instagram crea 2 propuestas por pulsación — decidir qué formatos existen — M.
-- [ ] Tarjeta única en el Inicio (pedido de Milton, 2026-10-12): las tarjetas META y «Otras redes y blogs» pasan a estar dentro de UNA sola tarjeta llamada «Publicación en Redes Sociales y Blogs»; al entrar se elige el grupo (META / Otras redes y blogs). Esto sustituye al punto «un solo selector de grupo» (hoy el Inicio y `/dashboard/oportunidades-redes` muestran las mismas dos tarjetas). Hay que revisar también el nombre en el menú y en el manual — C.
+- [x] Tarjeta única en el Inicio «PUBLICACIÓN EN REDES SOCIALES Y BLOGS» con META y Otras redes y blogs dentro (2026-10-12) — C.
 - [x] Eliminar la ruta huérfana `generate-all` (2026-10-12) — C.
 - [ ] Revisión del algoritmo de generación: elección del artículo, repetición entre redes, calidad y recorte del texto — C.
 - [ ] Worker que distinga dominio, o activar los derechos del HUB (`enforce`) — C + M.
