@@ -20,7 +20,9 @@ function OAuthConsentContent() {
   const canPublish = params.scope?.split(" ").includes("oportunidades:publicar") ?? false;
   const requester = isChatGPT ? "ChatGPT" : "Alexa";
   const consentDescription = isChatGPT
-    ? "ChatGPT solicita acceso de solo lectura a tu contenido inteligente y al estado de publicaciones. No podrá crear contenido ni publicar artículos."
+    ? canPublish
+      ? "ChatGPT solicita acceso a tu contenido inteligente y permiso para crear y publicar artículos cuando se lo ordenes."
+      : "ChatGPT solicita acceso de solo lectura a tu contenido inteligente y al estado de publicaciones."
     : canPublish
       ? "Alexa solicita acceso a tu contenido inteligente y, si lo autorizas explícitamente, podrá iniciar publicaciones usando las mismas reglas y límites de tu cuenta."
       : "Alexa solicita acceso de solo lectura a tu contenido inteligente y al estado de publicaciones.";
