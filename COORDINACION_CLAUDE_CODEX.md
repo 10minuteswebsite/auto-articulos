@@ -11393,3 +11393,53 @@ ninguna duda sin resolver para Milton en este rango (las dos decisiones pendient
 quedaron anotadas en `TO-DO.md` como corresponde, ya que no requieren una respuesta urgente).
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-12
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-11 (commit
+`d71525b`). Se revisó el rango `d71525b..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 132
+líneas agregadas (0 eliminadas, confirmado con `git diff --stat`), correspondientes a 19 commits
+nuevos / PRs #517 a #536 — ÍNDICE DE TRASPASO de Redes, REGLA PERMANENTE de bitácora, la nueva
+sección BITÁCORA REDES (entradas 2026-10-11 y 2026-10-12) y la LISTA VIVA «SACAR REDES AL
+PÚBLICO», además de los bloques individuales de Director Creativo v2, enlaces clicables, cupo
+diario, fix de precedencia Pinterest/Tumblr/Bluesky y el cierre del botón "Ir al Historial".
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 4 entradas nuevas, agrupando los 19 commits de este rango por
+  tema — "Redes: enlaces clicables, largo real de texto y cupo diario por publicación (PRs #518,
+  #519, #520)", "Director Creativo de imágenes v2: guía de estilo, modo híbrido y ajustes finales
+  (PRs #517, #521–#525)", "Botón de Historial + fix de precedencia Pinterest/Tumblr/Bluesky +
+  documentación de salida al público (PRs #526–#530)" y "Pruebas en vivo (LinkedIn, Facebook),
+  rediseño completo de Redes, Instagram con Director Creativo vía Composio y fixes finales de
+  Tumblr/asteriscos/Google Business (PRs #531, #532, #533, #535, #536)". Cada entrada detalla
+  archivos, verificación y estado; se señaló en cada caso cuándo el manual ya fue actualizado por
+  el propio PR (#526 y #532) para no duplicarlo.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios por esta tarea — los cambios visibles para
+  el usuario final de este rango (el botón "Ir al Historial" del PR #526 y el rediseño completo de
+  Redes del PR #532: tarjetas META / Otras redes y blogs, pantalla de grupo, "Hoy X de N") ya
+  fueron documentados en el manual por esos mismos PR. El resto del rango (Director Creativo v2,
+  límites de texto, cupo, fix de precedencia, Instagram por Composio, fixes de Tumblr/asteriscos)
+  no agrega pantallas ni flujos nuevos para el usuario; son correcciones internas o ajustes de
+  calidad de imagen/texto sobre comportamiento ya documentado.
+- `INVENTARIO_CONVERSACIONES.md`: nuevo addendum. Parte A sin reserva activa nueva — se verificó
+  con `git ls-remote --heads origin` que la rama `claude/redes-meta-y-admin-ux` (mencionada como
+  "trabajo local sin subir") nunca se subió al remoto, y con `git merge-base --is-ancestor` que
+  sus 10 commits ya llegaron a `origin/main` por cherry-pick en el PR #532: no bloquea a nadie.
+  Parte B con 11 entradas nuevas (una por PR o grupo de PRs del mismo tema).
+- `TO-DO.md`: sin cambios — se revisó cada idea "para más adelante" mencionada en este rango
+  (Google Business publicando al instante, reutilizar imagen IA entre redes, unificar nombres,
+  formatos sin dueño, eliminar `generate-all`, revisar el algoritmo de generación, rediseño de
+  Administración, infografía en pausa, foto de la persona apagada) y todas ya están anotadas con
+  casillas en `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md` (secciones B y C): agregarlas aquí también
+  habría sido duplicar.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguno de los 19 commits de este rango
+  describe un árbol de git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. No quedó
+ninguna duda nueva sin resolver para Milton en este rango — las decisiones pendientes que
+aparecen en el texto de Coordinación (infografía de Instagram, foto de la persona, formatos de
+Instagram/Facebook, etc.) ya estaban anotadas con casillas en `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`
+antes de esta corrida.
+
+Responsable: Claude (tarea programada diaria de propagación).
