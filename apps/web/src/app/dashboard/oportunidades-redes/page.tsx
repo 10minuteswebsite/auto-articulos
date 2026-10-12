@@ -121,12 +121,15 @@ function platformLabel(platform: string): string {
   return labels[platform.trim().toLowerCase()] ?? platform;
 }
 
-/** ¿Esta propuesta pertenece a esa red de la lista? (Instagram y Facebook agrupan varios formatos.) */
-function belongsToRow(rowKey: string, rowPlatform: string, oppPlatform: string): boolean {
-  const value = oppPlatform.trim().toLowerCase();
-  if (rowKey === "instagram") return value.startsWith("instagram");
-  if (rowKey === "facebookPage") return value.startsWith("facebook");
-  return value === rowPlatform;
+/**
+ * Formato cuyo cupo muestra la tarjeta de cada red: el mismo que Administración controla como
+ * «principal» (Instagram → publicación, Facebook → publicación en la Página). «Hoy X de N» cuenta
+ * solo ese formato para que X y N hablen de lo mismo.
+ */
+function limitFormatOf(rowKey: string, rowPlatform: string): string {
+  if (rowKey === "instagram") return "instagram-post";
+  if (rowKey === "facebookPage") return "facebook-page";
+  return rowPlatform;
 }
 
 const GROUP_CARDS: ReadonlyArray<{ id: NetworkGroup; title: string; hint: string }> = [
@@ -507,7 +510,7 @@ export default function OportunidadesRedesPage() {
 
   const todayKey = new Date().toDateString();
   const publishedTodayFor = (rowKey: string, rowPlatform: string) =>
-    opportunities.filter((o) => o.status === "published" && o.publishedAt && new Date(o.publishedAt).toDateString() === todayKey && belongsToRow(rowKey, rowPlatform, o.platform)).length;
+    opportunities.filter((o) => o.status === "published" && o.publishedAt && new Date(o.publishedAt).toDateString() === todayKey && o.platform.trim().toLowerCase() === limitFormatOf(rowKey, rowPlatform)).length;
 
   return (
     <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto", paddingBottom: 40 }}>
