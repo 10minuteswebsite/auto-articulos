@@ -15,6 +15,9 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 - [ ] Permisos al publicar coherentes: LinkedIn y X no se comprueban; Instagram no deja pasar al administrador — C.
 - [ ] Quitar el correo fijo `lorenalvarez30@gmail.com` de `generate/route.ts:496` — C.
 
+**Marca en las redes (decidido por Milton el 2026-10-12: opción 1)**
+- [ ] Facebook (y posiblemente Instagram/Pinterest) muestran «Publicado por Composio»: es el nombre de la app de Meta de Composio. Decisión: usar NUESTRA app de Meta dentro de Composio con nombre de marca (p. ej. «SEO Total»). Pasos: (1) Meta for Developers: reutilizar la app ya aprobada («AUTO ARTICULOS REDES SOCIALES») y renombrarla; agregar como URI de redirección la que da Composio — M. (2) Composio → Auth Configs → crear Facebook (y Instagram) con «usar mi propia app OAuth» (Client ID y Secret de esa app) — M. (3) Pegar el nuevo `auth_config_id` en Administración → Composio (pantalla `/dashboard/composio`) — M. (4) Reconectar Facebook e Instagram en la cuenta de Lorena y volver a publicar para comprobar la etiqueta — C. Referencia: `FASE_0_ARQUITECTURA_CONEXION_COMPOSIO.md`, decisión D1.
+
 **Pantalla de Redes (hoy solo en local, sin subir)**
 - [x] Corregir «Hoy X de N» (2026-10-12, en el PR del rediseño) — C.
 - [ ] Vista previa: decidir quitarla o hacerla fiel a lo que se publica — M decide, C ejecuta.
