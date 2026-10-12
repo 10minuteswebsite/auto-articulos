@@ -7,7 +7,10 @@ import { buildBusinessProfileCandidateWhere } from "./businessProfilePublish";
 test("Google Business solo toma lo aprobado (pending) o, con conexión propia antigua, lo automático", () => {
   const where = buildBusinessProfileCandidateWhere(undefined, undefined, true);
   const [approved, legacy] = where.OR as Array<Record<string, unknown>>;
-  assert.deepEqual(approved, { businessProfilePost: { status: "pending" } });
+  assert.deepEqual(approved, {
+    businessProfilePost: { status: "pending" },
+    socialOpportunities: { some: { platform: "google-business", status: "queued" } },
+  });
   assert.equal(legacy.businessProfilePost, null);
   // Sin la conexión propia con locationName, la rama «sin publicación» no puede coincidir.
   assert.deepEqual(legacy.run, { user: { businessProfileIntegration: { locationName: { not: null } } } });

@@ -8,7 +8,7 @@ import {
 } from "@auto-articulos/shared";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
-import { getArticleOpenGraphImage } from "./socialPublish";
+import { enforceSocialDailyLimit, getArticleOpenGraphImage } from "./socialPublish";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
@@ -118,7 +118,12 @@ export function buildBusinessProfileCandidateWhere(
     ...(filterArticleUrl ? { articleUrl: { in: articleUrlVariants(filterArticleUrl) } } : {}),
     summary: { not: null },
     OR: [
-      { businessProfilePost: { status: "pending" } },
+      // Aprobada con el botón Publicar: envío «pending» Y su propuesta sigue en cola (una propuesta
+      // descartada o cancelada nunca debe enviarse aunque su envío haya quedado «pending»).
+      {
+        businessProfilePost: { status: "pending" },
+        socialOpportunities: { some: { platform: "google-business", status: "queued" } },
+      },
       {
         businessProfilePost: null,
         run: { user: { businessProfileIntegration: { locationName: { not: null } } } },
@@ -196,6 +201,11 @@ export async function processNextBusinessProfilePost(
   if (claimed.count === 0) return true;
 
   try {
+    // Segunda barrera del cupo diario (la ruta Publicar ya lo comprobó): solo para publicaciones
+    // aprobadas desde Redes, no para el envío automático de la conexión propia antigua.
+    if (candidate.socialOpportunities.length > 0) {
+      await enforceSocialDailyLimit(candidate.run.userId, "google-business");
+    }
     const finalTitle = candidate.finalTitle ?? candidate.text;
     const summary = candidate.summary ?? "";
     const gbpSummary = await buildBusinessProfileSummary(finalTitle, summary);
