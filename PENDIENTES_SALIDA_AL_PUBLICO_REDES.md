@@ -32,7 +32,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 - [ ] Reutilizar una imagen IA entre redes del mismo artículo/formato y guardar el costo por imagen — C.
 - [ ] Unificar nombres: google-business / business-profile / googleBusiness; «Facebook Pages» vs «Facebook»; «oportunidad» vs «propuesta»; etiqueta del menú «1) PUBLICA EN REDES SOCIALES…» — C.
 - [ ] Formatos sin dueño: Administración da cupos a Instagram carrusel/reel/infografía y Facebook Story que la pantalla nunca genera; Instagram crea 2 propuestas por pulsación — decidir qué formatos existen — M.
-- [ ] Un solo selector de grupo (hoy el Inicio y `/dashboard/oportunidades-redes` muestran las mismas tarjetas) — C.
+- [ ] Tarjeta única en el Inicio (pedido de Milton, 2026-10-12): las tarjetas META y «Otras redes y blogs» pasan a estar dentro de UNA sola tarjeta llamada «Publicación en Redes Sociales y Blogs»; al entrar se elige el grupo (META / Otras redes y blogs). Esto sustituye al punto «un solo selector de grupo» (hoy el Inicio y `/dashboard/oportunidades-redes` muestran las mismas dos tarjetas). Hay que revisar también el nombre en el menú y en el manual — C.
 - [x] Eliminar la ruta huérfana `generate-all` (2026-10-12) — C.
 - [ ] Revisión del algoritmo de generación: elección del artículo, repetición entre redes, calidad y recorte del texto — C.
 - [ ] Worker que distinga dominio, o activar los derechos del HUB (`enforce`) — C + M.
