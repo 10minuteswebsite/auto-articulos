@@ -31,7 +31,7 @@ Ruta: /dashboard
 
 Inicio es tu centro de operaciones. **Si tu cuenta tiene activa la vista por productos** (ver «El menú»), Inicio muestra en cambio dos tarjetas, **${PRODUCT_NAMES.ARTICULOS}** y **${PRODUCT_NAMES.REDES}**; lo que sigue describe el Inicio estándar:
 - **Para cuentas nuevas (sin artículos aún):** Muestra de forma exclusiva el Asistente de Configuración Inicial, sin menú ni accesos directos, para que completes tu puesta a punto sin distracciones.
-- **Para cuentas ya configuradas:** Muestra únicamente el título **Acciones posibles** y tres tarjetas: **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}** y **${MENU_NAMES.redes}**. En móvil se muestran en una sola columna para que cada acción sea fácil de pulsar.
+- **Para cuentas ya configuradas:** Muestra únicamente el título **Acciones posibles** y las tarjetas de cada acción: **${MENU_NAMES.propios}**, **${MENU_NAMES.ia}** y, para las redes, dos tarjetas: **META** (Instagram, Threads y Facebook) y **Otras redes y blogs** (LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business). En redes.lasolucionweb.com el Inicio muestra solo esas dos tarjetas de redes. En móvil se muestran en una sola columna para que cada acción sea fácil de pulsar.
 - La tarjeta de **${MENU_NAMES.redes}** se muestra **siempre**, tanto en Inicio como en el menú y en **Comienza Aquí**. Administración puede activar **SEO Total Redes** aunque la cuenta todavía no tenga ninguna red configurada; en ese caso la persona puede entrar al producto y verá las opciones para configurar sus conexiones. Las autorizaciones de cada red se aplican aparte al generar o publicar contenido. Los administradores, y los administradores que están usando una cuenta ajena para dar soporte, siempre la tienen.
 - **Actualización 2026-10-07:** por ahora, **${MENU_NAMES.redes}** está reservado únicamente a los administradores y a dos cuentas piloto (Lorena Alvarez y Zulmad). Ninguna otra cuenta ve la tarjeta ni puede entrar a /dashboard/oportunidades-redes por URL directa, aunque tenga un permiso individual antiguo marcado como habilitado en Administración → Usuarios. **Excepción por dirección (2026-10-10):** en redes.lasolucionweb.com la sección está siempre activa (quién entra lo decide el HUB); la reserva anterior solo rige en seototal.lasolucionweb.com. En redes.lasolucionweb.com además todas las cuentas tienen todas las redes abiertas, sin depender de las marcas por red de Administración.
 - Las estadísticas no ocupan espacio en Inicio: se consultan desde **Publicaciones → Estadísticas**, junto al historial.
@@ -207,13 +207,13 @@ Nada se publica sin que tú lo mandes. Las sugerencias ayudan a decidir, pero la
 
 ## ${MENU_NAMES.redes}
 
-**Este módulo está en prueba.** Todavía no está disponible para todas las cuentas: se está activando poco a poco. Si no aparece en tu menú, no es que te falte algo por configurar.
-
-**Actualización (2026-10-05):** por ahora este módulo está apagado para todas las cuentas que no son de administrador (se probó habilitarlo para todos y se revirtió el mismo día); solo las cuentas administradoras pueden entrar a esta pantalla. Si a tu cuenta no le aparece esta opción en el menú, es por este apagado temporal, no por un error ni por falta de configuración de tu parte.
+**Disponibilidad (2026-10-12):** en **redes.lasolucionweb.com** esta sección está activa para todas las cuentas y todas las redes están abiertas; quién entra lo decide la plataforma de facturación (HUB). En **seototal.lasolucionweb.com** sigue reservada a los administradores y a dos cuentas piloto.
 
 Ruta: /dashboard/oportunidades-redes
 
-Aquí puedes revisar propuestas de contenido para redes sociales. Las propuestas pendientes se pueden aprobar, editar o descartar explicando el motivo. Si algo falla, abre el detalle del error para ver qué ocurrió antes de intentarlo otra vez. El botón **Borrar todas las oportunidades**, junto a "Publicar todo el lote", elimina de una vez todas las propuestas pendientes (pide confirmación antes de borrar y no se puede deshacer).
+**Cómo está organizada.** Al entrar ves dos tarjetas: **META** (Instagram, Threads y Facebook) y **Otras redes y blogs** (LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business); las mismas tarjetas aparecen en Inicio. Al abrir una ves: una explicación breve de lo que hace el sistema y cuántas publicaciones por día publica en cada red según el cupo que te asignó Administración; **una fila por cada red** con su estado (Conectada o Sin conectar), cuántas llevas hoy frente al cupo («Hoy 0 de 2») y un botón, **Crear propuesta** si la red está conectada o **Conectar** si no lo está; y debajo la lista de **Propuestas** pendientes de ese grupo. El botón **Crear propuestas**, arriba, prepara una propuesta en cada red conectada del grupo (se desactiva mientras no haya ninguna conectada).
+
+**Cada propuesta** muestra la red, el artículo, un extracto del texto y los botones **Publicar**, **Editar** (cambia el texto y luego **Guardar**), **Vista previa** (solo en algunas redes) y **Descartar** (pide el motivo). Arriba de la lista, **Publicar todas** y **Borrar todas** actúan solo sobre las propuestas del grupo abierto; borrar pide confirmación y no se puede deshacer. Si algo falla, abre el detalle del error en Historial antes de intentarlo otra vez.
 
 Consejo: edita el texto si necesitas adaptar el tono a tu marca antes de aprobarlo.
 
@@ -374,7 +374,7 @@ Sobre publicaciones en redes sociales, Historial tiene además dos botones separ
 
 Ruta: /dashboard/oportunidades-redes
 
-Este módulo propone textos para publicar en las redes que tengas conectadas. Puede usar datos de Google Search Console cuando está conectado; si no, trabaja con artículos recientes. Revisa cada propuesta, edítala si quieres, guarda los cambios y luego apruébala o descártala explicando el motivo. Antes de publicar, puedes revisar una vista previa cuando esté disponible.
+La pantalla se organiza en dos grupos, **META** y **Otras redes y blogs** (ver la descripción de arriba). Este módulo propone textos para publicar en las redes que tengas conectadas. Puede usar datos de Google Search Console cuando está conectado; si no, trabaja con artículos recientes. Revisa cada propuesta, edítala si quieres, guarda los cambios y luego apruébala o descártala explicando el motivo. Antes de publicar, puedes revisar una vista previa cuando esté disponible.
 
 Para Instagram puedes proponer Story, Post (imagen normal de feed), Reel-image, Carrusel e Infografía. Para Facebook Page, además del post normal, también hay Historia (Story). Si tu cuenta tiene activado el generador de imágenes con IA (lo activa el administrador), la imagen de Story/Post/Historia se genera a partir de la imagen del artículo, tu logo y tu foto de perfil en vez de usar la imagen del artículo tal cual.
 

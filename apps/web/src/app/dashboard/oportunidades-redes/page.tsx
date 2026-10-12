@@ -9,7 +9,6 @@ import {
   disabledStyle,
   h2Style,
   secondaryButtonStyle,
-  sectionStyle,
 } from "@/components/dashboard-ui";
 import type { CSSProperties } from "react";
 
@@ -60,6 +59,84 @@ const fallbackStages = [
   "Guardando propuestas",
 ];
 
+type NetworkGroup = "meta" | "otras";
+
+/** Redes de la pantalla, agrupadas: META (Instagram, Threads, Facebook) y el resto. */
+const NETWORK_ROWS = [
+  { key: "instagram", platform: "instagram", label: "Instagram", conexionId: "instagram", group: "meta" },
+  { key: "threads", platform: "threads", label: "Threads", conexionId: "threads", group: "meta" },
+  { key: "facebookPage", platform: "facebook-page", label: "Facebook", conexionId: "facebook", group: "meta" },
+  { key: "linkedin", platform: "linkedin", label: "LinkedIn", conexionId: "linkedin", group: "otras" },
+  { key: "pinterest", platform: "pinterest", label: "Pinterest", conexionId: "pinterest", group: "otras" },
+  { key: "tumblr", platform: "tumblr", label: "Tumblr", conexionId: "tumblr", group: "otras" },
+  { key: "bluesky", platform: "bluesky", label: "Bluesky", conexionId: "bluesky", group: "otras" },
+  { key: "blogger", platform: "blogger", label: "Blogger", conexionId: "blogger", group: "otras" },
+  { key: "googleBusiness", platform: "google-business", label: "Google Business Profile", conexionId: "business-profile", group: "otras" },
+  { key: "x", platform: "x", label: "X (Twitter)", conexionId: null, group: "otras" },
+] as const;
+
+/** A qué grupo pertenece una propuesta según su red (instagram-post, facebook-story, threads…). */
+function groupOfPlatform(platform: string): NetworkGroup {
+  const value = platform.trim().toLowerCase();
+  return value === "threads" || value.startsWith("instagram") || value.startsWith("facebook") ? "meta" : "otras";
+}
+
+/** Redacta lo que publica el sistema: «1 publicación por día» o «por día: Instagram 5, Threads 5 y Facebook 1». */
+function describeDailyLimits(rows: ReadonlyArray<{ key: string; label: string }>, limits: Record<string, number>): string {
+  const items = rows.map((row) => ({ label: row.label, limit: limits[row.key] ?? 1 }));
+  if (items.length === 0) return "1 publicación por día";
+  const first = items[0].limit;
+  if (items.every((item) => item.limit === first)) {
+    return first === 0 ? "ninguna publicación (Administración la tiene en 0)" : `${first} ${first === 1 ? "publicación" : "publicaciones"} por día en cada red`;
+  }
+  const parts = items.map((item) => `${item.label} ${item.limit}`);
+  const list = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} y ${parts[parts.length - 1]}` : parts[0];
+  return `por día: ${list}`;
+}
+
+/** Botones compactos de esta pantalla (los estándar de la plataforma son demasiado grandes aquí). */
+const compactPrimary: CSSProperties = { height: 34, padding: "0 16px", borderRadius: 8, border: "1px solid #1d1d1f", background: "#1d1d1f", color: "#ffffff", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", margin: 0, minHeight: 0 };
+const compactSecondary: CSSProperties = { ...compactPrimary, border: "1px solid #d2d2d7", background: "#ffffff", color: "#1d1d1f" };
+const compactDanger: CSSProperties = { ...compactPrimary, border: "1px solid transparent", background: "transparent", color: "#ff3b30", padding: "0 8px" };
+
+/** Nombre legible de la red de una propuesta (instagram-post → «Instagram · Post»). */
+function platformLabel(platform: string): string {
+  const labels: Record<string, string> = {
+    threads: "Threads",
+    x: "X",
+    linkedin: "LinkedIn",
+    pinterest: "Pinterest",
+    tumblr: "Tumblr",
+    bluesky: "Bluesky",
+    blogger: "Blogger",
+    "google-business": "Google Business",
+    "facebook-page": "Facebook",
+    "facebook-story": "Facebook · Story",
+    "instagram-post": "Instagram · Post",
+    "instagram-story": "Instagram · Story",
+    "instagram-reel-image": "Instagram · Reel",
+    "instagram-carousel": "Instagram · Carrusel",
+    "instagram-infografia": "Instagram · Infografía",
+  };
+  return labels[platform.trim().toLowerCase()] ?? platform;
+}
+
+/**
+ * Formato cuyo cupo muestra la tarjeta de cada red: el mismo que Administración controla como
+ * «principal» (Instagram → publicación, Facebook → publicación en la Página). «Hoy X de N» cuenta
+ * solo ese formato para que X y N hablen de lo mismo.
+ */
+function limitFormatOf(rowKey: string, rowPlatform: string): string {
+  if (rowKey === "instagram") return "instagram-post";
+  if (rowKey === "facebookPage") return "facebook-page";
+  return rowPlatform;
+}
+
+const GROUP_CARDS: ReadonlyArray<{ id: NetworkGroup; title: string; hint: string }> = [
+  { id: "meta", title: "META", hint: "Instagram, Threads y Facebook" },
+  { id: "otras", title: "Otras redes y blogs", hint: "LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business" },
+];
+
 export default function OportunidadesRedesPage() {
   const router = useRouter();
   const [opportunities, setOpportunities] = useState<SocialOpportunity[]>([]);
@@ -77,6 +154,18 @@ export default function OportunidadesRedesPage() {
   const [publishingAll, setPublishingAll] = useState(false);
   const [message, setMessage] = useState<{ kind: "success" | "error" | "info"; text: string } | null>(null);
   const [skipModal, setSkipModal] = useState<{ opp: SocialOpportunity; reason: string; customReason: string } | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [dailyLimits, setDailyLimits] = useState<Record<string, number>>({});
+  const [openGroup, setOpenGroup] = useState<NetworkGroup | null>(null);
+  const [cameFromHome, setCameFromHome] = useState(false);
+  // Entrada directa desde las tarjetas del Inicio: /dashboard/oportunidades-redes?grupo=meta|otras
+  useEffect(() => {
+    const grupo = new URLSearchParams(window.location.search).get("grupo");
+    if (grupo === "meta" || grupo === "otras") {
+      setOpenGroup(grupo);
+      setCameFromHome(true);
+    }
+  }, []);
   const [previewModal, setPreviewModal] = useState<{ loading: boolean; imageUrl: string | null; imageBase64: string | null; platform: string; title: string } | null>(null);
 
   useEffect(() => {
@@ -129,6 +218,7 @@ export default function OportunidadesRedesPage() {
         const effectiveConnections = { threads: Boolean(data.threads), x: Boolean(data.x), linkedin: Boolean(data.linkedin), instagram: Boolean(data.instagram), facebookPage: Boolean(data.facebookPage), pinterest: Boolean(data.pinterest), tumblr: Boolean(data.tumblr), bluesky: Boolean(data.bluesky), blogger: Boolean(data.blogger), googleBusiness: Boolean(data.googleBusiness) };
         setConnectedNetworks(effectiveConnections);
         setActiveNetworks(data.activeNetworks ?? effectiveConnections);
+        setDailyLimits(data.dailyLimits ?? {});
         setStoriesUnavailable({ instagram: Boolean(data.hideInstagramStories), facebook: Boolean(data.hideFacebookStories) });
       }
     } catch {
@@ -177,20 +267,28 @@ export default function OportunidadesRedesPage() {
     }
   }
 
-  async function handleGenerateAll() {
+  /** Crea propuestas para todas las redes conectadas del grupo abierto (una por red). */
+  async function handleGenerateGroup() {
+    if (!openGroup) return;
+    const networks = NETWORK_ROWS.filter((row) => row.group === openGroup && row.key !== "x" && activeNetworks[row.key] && connectedNetworks[row.key]).map((row) => row.platform);
+    if (networks.length === 0) {
+      setMessage({ kind: "info", text: "Todavía no hay ninguna red conectada en este grupo. Usa «Configurar» en la red que quieras activar." });
+      return;
+    }
     setGeneratingAll(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/social-opportunities/generate-all", {
+      const res = await fetch("/api/social-opportunities/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ networks }),
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage({ kind: "success", text: data.message || "Contenido preparado para todas las redes." });
+        setMessage({ kind: "success", text: data.message || "Propuestas generadas con éxito." });
         loadOpportunities();
       } else {
-        setMessage({ kind: "error", text: data.error || "Error al preparar las publicaciones." });
+        setMessage({ kind: "error", text: data.error || "Error al generar propuestas." });
       }
     } catch (err: any) {
       setMessage({ kind: "error", text: err.message });
@@ -245,7 +343,7 @@ export default function OportunidadesRedesPage() {
   }
 
   async function handlePublishAll() {
-    const pendingOpps = opportunities.filter((o) => o.status === "pending");
+    const pendingOpps = opportunities.filter((o) => o.status === "pending" && (!openGroup || groupOfPlatform(o.platform) === openGroup));
     if (pendingOpps.length === 0) {
       setMessage({ kind: "info", text: "No hay publicaciones pendientes para procesar." });
       return;
@@ -322,11 +420,13 @@ export default function OportunidadesRedesPage() {
   const [deletingAll, setDeletingAll] = useState(false);
 
   async function handleDeleteAll() {
-    if (!window.confirm("¿Borrar todas las publicaciones pendientes? Esta acción no se puede deshacer.")) return;
+    const groupTitle = GROUP_CARDS.find((card) => card.id === openGroup)?.title;
+    if (!window.confirm(`¿Borrar todas las publicaciones pendientes${groupTitle ? ` de ${groupTitle}` : ""}? Esta acción no se puede deshacer.`)) return;
     setDeletingAll(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/social-opportunities?scope=pending", { method: "DELETE" });
+      const platforms = Array.from(new Set(opportunities.filter((o) => o.status === "pending" && (!openGroup || groupOfPlatform(o.platform) === openGroup)).map((o) => o.platform)));
+      const res = await fetch(`/api/social-opportunities?scope=pending${openGroup ? `&platforms=${encodeURIComponent(platforms.join(","))}` : ""}`, { method: "DELETE" });
       if (res.ok) {
         setMessage({ kind: "info", text: "Se borraron todas las oportunidades pendientes." });
         loadOpportunities();
@@ -366,141 +466,163 @@ export default function OportunidadesRedesPage() {
 
   if (loading || connectionsLoading) return null;
 
-  return (
-    <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
-      {/* Panel Superior */}
-      <div
-        style={{
-          ...sectionStyle,
-          // Pedido explícito de Milton (1/10/2026): sin el rectángulo
-          // exterior del `.panel` estándar en esta pantalla en particular.
-          border: "none",
-          padding: "20px 0 24px",
-          marginBottom: 20,
-          marginTop: 0,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            gap: 16,
-          }}
-        >
-          <div>
-            <p className="eyebrow" style={{ margin: "0 0 6px" }}>Difusión Social</p>
-            <h1
-              style={{
-                fontSize: 26,
-                fontWeight: 600,
-                color: "#1d1d1f",
-                margin: "0 0 6px 0",
-                letterSpacing: "-0.03em",
-              }}
-            >
-              {MENU_NAMES.redes}
-            </h1>
-            <MobileInstructions>
-              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                <strong style={{ fontWeight: 600 }}>Ya tienes esta sección disponible.</strong> Abajo aparece un botón
-                por cada red: si ya está conectada, pulsa <strong>Crear oportunidad</strong> para generar una
-                propuesta a partir de tus artículos; si aparece en gris con <strong>Configurar</strong>, esa red
-                todavía no está activada — actívala ahí mismo y vuelves aquí solo al terminar.
-              </p>
-              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                Un artículo publicado en tu web solo lo encuentra quien lo busca. En redes sociales lo ve gente que todavía no te estaba buscando, y cada visita que llega desde ahí es una señal más para Google de que tu contenido interesa.
-              </p>
-              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                Aquí el sistema toma artículos que ya publicaste y prepara la publicación adaptada a cada red: el texto, la imagen y el formato que esa red necesita.
-              </p>
-              <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                Tú revisas cada propuesta y decides cuál sale y a qué red. No se publica todo ni todo el tiempo: el sistema reparte las publicaciones a lo largo de los días para que tu presencia crezca sin parecer spam y sin que las redes te penalicen.
-              </p>
-              {!connectedNetworks.threads && !connectedNetworks.x && !connectedNetworks.linkedin && !connectedNetworks.instagram && !connectedNetworks.facebookPage && !connectedNetworks.pinterest && !connectedNetworks.tumblr && !connectedNetworks.bluesky && !connectedNetworks.blogger && !connectedNetworks.googleBusiness && !loading && !connectionsLoading && (
-                <p style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f" }}>
-                  Todavía no tienes ninguna red conectada, así que no hay dónde publicar. Pulsa cualquiera de los
-                  botones grises de abajo para configurar esa red; en cuanto conectes una, vuelves aquí solo y ya
-                  puedes crear propuestas.
-                </p>
-              )}
-            </MobileInstructions>
-          </div>
+  const groupPending = openGroup ? pendingList.filter((o) => groupOfPlatform(o.platform) === openGroup) : pendingList;
+  const openCard = GROUP_CARDS.find((card) => card.id === openGroup);
+  const groupRows = NETWORK_ROWS.filter((row) => row.group === openGroup && activeNetworks[row.key]);
+  const groupConnectedCount = groupRows.filter((row) => connectedNetworks[row.key]).length;
 
-          <div
-            style={{
-              width: "100%",
-              marginTop: 18,
-              paddingTop: 16,
-              borderTop: "1px solid #e5e5ea",
-            }}
-          >
-            {connectionsLoading ? (
-              <span className="muted" style={{ fontSize: 13, padding: "9px 0" }}>
-                Preparando las redes conectadas...
-              </span>
-            ) : (
-              <>
+  // Pantalla inicial: solo las tarjetas (mismo estándar que las de Inicio). El resto aparece al entrar.
+  if (!openGroup) {
+    return (
+      <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
+        <div style={{ marginTop: 20, marginBottom: 20 }}>
+          <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>Elige dónde publicar</h2>
+          <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, 320px)", gap: 16, justifyContent: "start" }}>
+            {GROUP_CARDS.map((card, i) => {
+              const rows = NETWORK_ROWS.filter((row) => row.group === card.id && activeNetworks[row.key]);
+              if (rows.length === 0) return null;
+              const connectedCount = rows.filter((row) => connectedNetworks[row.key]).length;
+              const pendingCount = pendingList.filter((o) => groupOfPlatform(o.platform) === card.id).length;
+              return (
                 <button
-                  onClick={handleGenerateAll}
-                  disabled={generatingAll || generatingNetwork !== null}
-                  style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginBottom: 16 }}
+                  key={card.id}
+                  type="button"
+                  className="inicio-action-card"
+                  onClick={() => { setMessage(null); setOpenGroup(card.id); }}
+                  style={{ display: "flex", width: 320, height: 320, boxSizing: "border-box", padding: 22, flexDirection: "column", justifyContent: "space-between", textAlign: "left", fontFamily: "inherit", cursor: "pointer", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}
                 >
-                  {generatingAll ? "Generando propuestas..." : "Generar propuestas para redes y blogs"}
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <p style={{ margin: 0, fontSize: 12, fontWeight: 700, lineHeight: 1.2, color: "#6e6e73", letterSpacing: "0.02em" }}>{String(i + 1).padStart(2, "0")}</p>
+                    <p style={{ margin: "20px 0 0", fontSize: 18, fontWeight: 700, color: "#1d1d1f", lineHeight: 1.3, textTransform: "uppercase" }}>{card.title}</p>
+                    <p style={{ margin: "10px 0 0", fontSize: 13, lineHeight: 1.5, color: "#6e6e73" }}>{card.hint}</p>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 12, lineHeight: 1.4, color: "#6e6e73" }}>
+                    {connectedCount} de {rows.length} conectadas{pendingCount > 0 ? ` · ${pendingCount} propuesta${pendingCount === 1 ? "" : "s"} pendiente${pendingCount === 1 ? "" : "s"}` : ""}
+                  </p>
                 </button>
-                <div>
-                {([
-                ["threads", "threads", "Threads", "threads"], ["x", "x", "X (Twitter)", null], ["linkedin", "linkedin", "LinkedIn", "linkedin"], ["instagram", "instagram", "Instagram", "instagram"], ["facebookPage", "facebook-page", "Facebook", "facebook"], ["pinterest", "pinterest", "Pinterest", "pinterest"], ["tumblr", "tumblr", "Tumblr", "tumblr"], ["bluesky", "bluesky", "Bluesky", "bluesky"], ["blogger", "blogger", "Blogger", "blogger"], ["googleBusiness", "google-business", "Google Business Profile", "business-profile"],
-                ] as const).map(([key, platform, label, conexionId]) => {
-                if (!activeNetworks[key]) return null;
-                const connected = connectedNetworks[key];
-                const busy = Boolean(generatingNetwork);
-                const unavailable = !connected;
-                const actionStyle: CSSProperties = { border: "none", background: "transparent", padding: 0, fontSize: 14, color: unavailable ? "#86868b" : "#0066cc", cursor: busy ? "wait" : "pointer", fontFamily: "inherit" };
-                return <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid #e5e5ea" }}>
-                  <span style={{ fontSize: 15, color: unavailable ? "#86868b" : "#1d1d1f" }}>{label}</span>
-                  {unavailable && conexionId ? (
-                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => {
-                      try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
-                      router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`);
-                    }}>Configurar ›</button>
-                  ) : unavailable ? (
-                    <span style={{ fontSize: 14, color: "#86868b" }}>No disponible</span>
-                  ) : (
-                    <button type="button" disabled={busy} style={disabledStyle(actionStyle, busy)} onClick={() => handleGenerate(platform)}>{generatingNetwork === platform ? "Analizando..." : "Crear oportunidad"}</button>
-                  )}
-                </div>;
-                })}
-                </div>
-              </>
-            )}
-            {pendingList.length > 0 && (
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
-                <button
-                  onClick={handleDeleteAll}
-                  disabled={deletingAll || publishingAll}
-                  className="secondary"
-                  style={disabledStyle(
-                    { ...secondaryButtonStyle, ...uniformButtonSize, color: "#ff3b30", whiteSpace: "nowrap" },
-                    deletingAll || publishingAll,
-                  )}
-                >
-                  {deletingAll ? "Borrando..." : "Borrar todas las oportunidades"}
-                </button>
-                <button
-                  onClick={handlePublishAll}
-                  disabled={publishingAll || deletingAll}
-                  style={{ ...buttonStyle, ...uniformButtonSize, marginTop: 0, whiteSpace: "nowrap" }}
-                >
-                  {publishingAll ? "Publicando..." : "Publicar todo el lote"}
-                </button>
-              </div>
-            )}
+              );
+            })}
           </div>
         </div>
+      </div>
+    );
+  }
 
-        {generating && (
+  const todayKey = new Date().toDateString();
+  const publishedTodayFor = (rowKey: string, rowPlatform: string) =>
+    opportunities.filter((o) => o.status === "published" && o.publishedAt && new Date(o.publishedAt).toDateString() === todayKey && o.platform.trim().toLowerCase() === limitFormatOf(rowKey, rowPlatform)).length;
+
+  return (
+    <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto", paddingBottom: 40 }}>
+      {/* Cabecera */}
+      <div style={{ padding: "8px 0 24px" }}>
+        <button
+          type="button"
+          onClick={() => {
+            setMessage(null);
+            if (cameFromHome) router.push("/dashboard");
+            else setOpenGroup(null);
+          }}
+          style={{ border: "none", background: "transparent", padding: 0, margin: "0 0 14px", fontSize: 14, color: "#0066cc", cursor: "pointer", fontFamily: "inherit" }}
+        >
+          {cameFromHome ? "‹ Inicio" : "‹ Redes"}
+        </button>
+        <div className="rg-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{ fontSize: 30, fontWeight: 600, color: "#1d1d1f", margin: 0, letterSpacing: "-0.03em", lineHeight: 1.15 }}>
+              {openCard?.title ?? MENU_NAMES.redes}
+            </h1>
+          </div>
+          <button
+            type="button"
+            className="rg-create"
+            onClick={handleGenerateGroup}
+            disabled={generatingAll || generatingNetwork !== null || groupConnectedCount === 0}
+            title={groupConnectedCount === 0 ? "Conecta una red para empezar" : undefined}
+            style={disabledStyle(compactPrimary, generatingAll || generatingNetwork !== null || groupConnectedCount === 0)}
+          >
+            {generatingAll ? "Creando propuestas..." : "Crear propuestas"}
+          </button>
+        </div>
+        <div style={{ marginTop: 14 }}>
+        <MobileInstructions>
+          <p style={{ margin: "0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", textAlign: "justify" }}>
+            Aquí configuras las redes que difunden de forma inteligente el contenido de tu página web: el sistema
+            toma tus artículos, prepara la publicación para cada red y publica{" "}
+            <strong>{describeDailyLimits(groupRows, dailyLimits)}</strong>.
+          </p>
+          {groupConnectedCount === 0 ? (
+            <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", textAlign: "justify" }}>
+              Aún no hay ninguna red conectada aquí. Pulsa <strong>Conectar</strong> en la que quieras activar y,
+              al terminar, volverás a esta pantalla.
+            </p>
+          ) : (
+            <>
+              <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", textAlign: "justify" }}>
+                Pulsa <strong>Crear propuesta</strong> en una red conectada, revisa la propuesta y decide si sale.
+              </p>
+              {groupConnectedCount < groupRows.length && (
+                <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.55, color: "#6e6e73", textAlign: "justify" }}>
+                  Las redes sin conectar aún no están activas: pulsa <strong>Conectar</strong> para activarlas.
+                </p>
+              )}
+            </>
+          )}
+        </MobileInstructions>
+        </div>
+      </div>
+
+      {/* Redes del grupo */}
+      <div className="rn-grid" style={{ marginBottom: 28 }}>
+        {groupRows.map((row) => {
+          const connected = connectedNetworks[row.key];
+          const limit = dailyLimits[row.key] ?? 1;
+          const used = publishedTodayFor(row.key, row.platform);
+          const percent = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 100;
+          const busy = Boolean(generatingNetwork);
+          return (
+            <div key={row.key} className="rn-card" style={{ background: connected ? "#ffffff" : "#fafafa" }}>
+              <div className="rn-main">
+                <span className="rn-name" style={{ color: connected ? "#1d1d1f" : "#86868b" }}>{row.label}</span>
+                <span className="rn-status" style={{ color: connected ? "#16803c" : "#86868b" }}>
+                  <span aria-hidden="true" className="rn-dot" style={{ background: connected ? "#16803c" : "#c7c7cc" }} />
+                  {connected ? "Conectada" : "Sin conectar"}
+                </span>
+              </div>
+              <div className="rn-quota">
+                <div className="rn-quota-text">
+                  <span className="rn-quota-label">Hoy</span>
+                  <span style={{ fontVariantNumeric: "tabular-nums" }}>{used} de {limit}</span>
+                </div>
+                <div className="rn-bar"><div style={{ width: `${percent}%`, height: "100%", background: connected ? "#1d1d1f" : "#c7c7cc" }} /></div>
+              </div>
+              <div className="rn-action">
+                {connected ? (
+                  <button type="button" disabled={busy} onClick={() => handleGenerate(row.platform)} style={disabledStyle({ ...compactSecondary }, busy)}>
+                    {generatingNetwork === row.platform ? "Analizando..." : "Crear propuesta"}
+                  </button>
+                ) : row.conexionId ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      try { sessionStorage.setItem("volverA", "/dashboard/oportunidades-redes"); } catch {}
+                      router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${row.conexionId}`);
+                    }}
+                    style={disabledStyle({ ...compactSecondary, color: "#0066cc" }, busy)}
+                  >
+                    Conectar
+                  </button>
+                ) : (
+                  <span style={{ fontSize: 13, color: "#86868b" }}>No disponible</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {generating && (
           <div
             role="status"
             aria-live="polite"
@@ -530,132 +652,81 @@ export default function OportunidadesRedesPage() {
             </div>
           </div>
         )}
-      </div>
 
       {message && (
-        <div
-          style={{
-            padding: "0 0 16px",
-            marginBottom: 4,
-            fontSize: 13,
-            fontWeight: 500,
-            color: message.kind === "success" ? "#16803c" : message.kind === "error" ? "#ff3b30" : "#6e6e73",
-          }}
-        >
+        <div style={{ padding: "0 0 16px", fontSize: 13, fontWeight: 500, color: message.kind === "success" ? "#16803c" : message.kind === "error" ? "#ff3b30" : "#6e6e73" }}>
           {message.text}
         </div>
       )}
 
+      {/* Propuestas */}
       {loading ? (
-        <div className="muted" style={{ textAlign: "center", padding: 40 }}>
-          Cargando propuestas...
-        </div>
+        <div className="muted" style={{ textAlign: "center", padding: 40 }}>Cargando propuestas...</div>
       ) : (
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 4 }}>
             <h2 style={{ ...h2Style, margin: 0, fontSize: 18 }}>
-              Propuestas Pendientes ({pendingList.length})
+              Propuestas <span style={{ color: "#6e6e73", fontWeight: 500 }}>({groupPending.length})</span>
             </h2>
+            {groupPending.length > 0 && (
+              <div className="rp-batch" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <button type="button" onClick={handleDeleteAll} disabled={deletingAll || publishingAll} style={disabledStyle(compactDanger, deletingAll || publishingAll)}>
+                  {deletingAll ? "Borrando..." : "Borrar todas"}
+                </button>
+                <button type="button" onClick={handlePublishAll} disabled={publishingAll || deletingAll} style={disabledStyle(compactPrimary, publishingAll || deletingAll)}>
+                  {publishingAll ? "Publicando..." : "Publicar todas"}
+                </button>
+              </div>
+            )}
           </div>
 
-          {pendingList.length === 0 ? (
-            <section style={{ ...sectionStyle, padding: "16px 0 24px" }}>
-              <p className="muted" style={{ margin: 0 }}>
-                No tienes propuestas pendientes. Usa los botones de arriba para generarlas.
-              </p>
-              <button
-                onClick={() => router.push("/dashboard/publicaciones-en-curso")}
-                className="secondary"
-                style={{ ...secondaryButtonStyle, ...uniformButtonSize, marginTop: 14 }}
-              >
-                Ver progreso de las publicaciones
-              </button>
-            </section>
+          {groupPending.length === 0 ? (
+            <div style={{ borderTop: "1px solid #e5e5ea", padding: "28px 0", color: "#6e6e73", fontSize: 14 }}>
+              Aún no hay propuestas. Pulsa <strong style={{ color: "#1d1d1f" }}>Crear propuestas</strong> y el sistema las prepara a partir de tus artículos.
+              <div style={{ marginTop: 12 }}>
+                <button type="button" onClick={() => router.push("/dashboard/publicaciones-en-curso")} style={compactSecondary}>
+                  Ver progreso de las publicaciones
+                </button>
+              </div>
+            </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
-              {pendingList.map((opp) => {
-                const isQueuedOrProcessing = false;
+            <div>
+              {groupPending.map((opp) => {
+                const editing = editingId === opp.id;
+                const canPreview = opp.platform.startsWith("instagram") || opp.platform === "threads" || opp.platform === "linkedin";
                 return (
-                  <div key={opp.id} style={sectionStyle}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
-                      <div>
-                        <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "#6e6e73" }}>
-                          {opp.platform} · {opp.status === "published" ? "Publicado" : opp.status === "processing" ? "Publicando..." : "Pendiente"}
+                  <div key={opp.id} className="rp-item" style={{ borderTop: "1px solid #e5e5ea", padding: "18px 0", display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div style={{ flex: "1 1 340px", minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "#1d1d1f", background: "#f5f5f7", borderRadius: 999, padding: "3px 10px" }}>
+                          {platformLabel(opp.platform)}
+                        </span>
+                        <a href={opp.articleUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#0066cc", textDecoration: "none" }}>Ver artículo ↗</a>
+                      </div>
+                      <h4 style={{ color: "#1d1d1f", margin: "0 0 6px", fontSize: 15, fontWeight: 600, lineHeight: 1.35 }}>{opp.articleTitle}</h4>
+                      {editing ? (
+                        <textarea
+                          value={opp.suggestedText}
+                          onChange={(e) => handleTextChange(opp.id, e.target.value)}
+                          style={{ width: "100%", minHeight: 110, padding: 10, borderRadius: 8, background: "#ffffff", color: "#1d1d1f", border: "1px solid #d2d2d7", fontSize: 14, fontFamily: "inherit", resize: "vertical", boxSizing: "border-box" }}
+                        />
+                      ) : (
+                        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "#424245", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", whiteSpace: "pre-line" }}>
+                          {opp.suggestedText}
                         </p>
-                        <h4 style={{ color: "#1d1d1f", margin: "0 0 4px 0", fontSize: 16, fontWeight: 600 }}>
-                          {opp.articleTitle}
-                        </h4>
-                        <a
-                          href={opp.articleUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="link-button"
-                          style={{ fontSize: 12 }}
-                        >
-                          Ver artículo original &rarr;
-                        </a>
-                      </div>
-
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        {!isQueuedOrProcessing && (
-                          <>
-                            {(opp.platform.startsWith("instagram") || opp.platform === "threads" || opp.platform === "linkedin") && (
-                              <button
-                                onClick={() => handlePreview(opp)}
-                                className="secondary"
-                                style={{ ...secondaryButtonStyle, ...uniformButtonSize }}
-                              >
-                                Preview
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleSaveText(opp)}
-                              className="secondary"
-                              style={{ ...secondaryButtonStyle, ...uniformButtonSize }}
-                            >
-                              Guardar
-                            </button>
-                            <button
-                              onClick={() => handlePublishOne(opp)}
-                              disabled={publishingId === opp.id}
-                              style={{ ...buttonStyle, ...uniformButtonSize, marginTop: 0 }}
-                            >
-                              {publishingId === opp.id ? "Publicando..." : "Publicar"}
-                            </button>
-                            <button
-                              onClick={() => handleSkipOne(opp)}
-                              className="secondary"
-                              style={{ ...secondaryButtonStyle, ...uniformButtonSize, color: "#ff3b30" }}
-                            >
-                              Descartar
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      )}
                     </div>
-
-                    <div style={{ marginTop: 14 }}>
-                      <label style={{ display: "block", color: "#6e6e73", fontSize: 12, marginBottom: 4 }}>
-                        Texto de la publicación:
-                      </label>
-                      <textarea
-                        value={opp.suggestedText}
-                        onChange={(e) => handleTextChange(opp.id, e.target.value)}
-                        disabled={isQueuedOrProcessing}
-                        style={{
-                          width: "100%",
-                          minHeight: 90,
-                          padding: 10,
-                          borderRadius: 10,
-                          background: "#ffffff",
-                          color: "#1d1d1f",
-                          border: "1px solid #d2d2d7",
-                          fontSize: 14,
-                          fontFamily: "inherit",
-                          resize: "vertical",
-                          boxSizing: "border-box",
-                        }}
-                      />
+                    <div className="rp-actions" style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                      <button type="button" className="rp-publish" onClick={() => handlePublishOne(opp)} disabled={publishingId === opp.id} style={disabledStyle(compactPrimary, publishingId === opp.id)}>
+                        {publishingId === opp.id ? "Publicando..." : "Publicar"}
+                      </button>
+                      {editing ? (
+                        <button type="button" onClick={async () => { await handleSaveText(opp); setEditingId(null); }} style={compactSecondary}>Guardar</button>
+                      ) : (
+                        <button type="button" onClick={() => setEditingId(opp.id)} style={compactSecondary}>Editar</button>
+                      )}
+                      {canPreview && <button type="button" onClick={() => handlePreview(opp)} style={compactSecondary}>Vista previa</button>}
+                      <button type="button" onClick={() => handleSkipOne(opp)} style={compactDanger}>Descartar</button>
                     </div>
                   </div>
                 );

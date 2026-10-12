@@ -27,6 +27,11 @@ export function productOfHost(hostname: string | null | undefined): HostProductS
   const host = (hostname ?? "").toLowerCase().split(":")[0];
   if (host === "articulos.lasolucionweb.com") return "ARTICULOS";
   if (host === "redes.lasolucionweb.com") return "REDES";
+  // Solo en desarrollo: permite ver cada dominio en local (http://redes.localhost:3011).
+  if (process.env.NODE_ENV !== "production") {
+    if (host === "articulos.localhost") return "ARTICULOS";
+    if (host === "redes.localhost") return "REDES";
+  }
   return "COMPARTIDO";
 }
 

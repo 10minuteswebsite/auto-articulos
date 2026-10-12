@@ -118,3 +118,17 @@ test("cada carpeta de dashboard tiene una decisión explícita de producto", () 
   assert.deepEqual(folders.filter((folder) => !expected.has(folder)), []);
   for (const folder of folders) assert.equal(productOfPath(`/dashboard/${folder}`), expected.get(folder), folder);
 });
+
+test("en desarrollo, redes.localhost y articulos.localhost se tratan como sus dominios; en producción no", () => {
+  const previous = process.env.NODE_ENV;
+  try {
+    (process.env as Record<string, string>).NODE_ENV = "development";
+    assert.equal(productOfHost("redes.localhost:3011"), "REDES");
+    assert.equal(productOfHost("articulos.localhost"), "ARTICULOS");
+    (process.env as Record<string, string>).NODE_ENV = "production";
+    assert.equal(productOfHost("redes.localhost:3011"), "COMPARTIDO");
+    assert.equal(productOfHost("redes.lasolucionweb.com"), "REDES");
+  } finally {
+    (process.env as Record<string, string | undefined>).NODE_ENV = previous;
+  }
+});
