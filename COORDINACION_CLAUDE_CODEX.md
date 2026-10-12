@@ -1,5 +1,23 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Codex — CIERRE Y ARCHIVO «PROMPT MCP CON PROGRAMACIÓN AUTÓNOMA» — 2026-10-12
+
+- Estado: CERRADO Y ARCHIVADO. Capitanía liberada. Sin migraciones.
+- PR #554 fusionada en `main` (`9bea1d8e`): mejora el prompt copiable de
+  Asistentes IA para crear tres tareas diarias a las 07:00, 12:00 y 19:00,
+  mantenerlas activas hasta «detente», solicitar credenciales solo mediante el
+  campo seguro del asistente y reponer oportunidades automáticamente cuando
+  falten.
+- La reposición usa `crear_oportunidades`; si Google Search Console, la
+  generación o la publicación falla, el asistente debe informar el problema y
+  no fingir que completó el cupo.
+- El cambio solo modifica el prompt mostrado en
+  `apps/web/src/app/dashboard/configuracion/mcp/page.tsx`. No crea un
+  programador dentro de SEO Total ni añade migraciones.
+- Anteriores correcciones MCP relacionadas: PR #541 (OAuth ChatGPT), #542
+  (pasos finales ChatGPT), #543 (tres horarios) y #544 (reposición).
+
+
 ## ÍNDICE DE TRASPASO — Redes (cuando Milton pida un «traspaso»)
 
 Si Milton pide un traspaso, un mensaje de traspaso o «por si las moscas»: entrega el contenido de `TRASPASO_REDES_SALIDA_AL_PUBLICO.md` completado con el estado vivo (comandos al final). Dónde está cada cosa:

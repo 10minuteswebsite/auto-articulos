@@ -6,6 +6,19 @@ Antes de modificar código, cambiar de rama, crear un commit, ejecutar una migra
 
 ## Fuente de verdad
 
+## Versión — 2026-10-12 — cierre del prompt MCP autónomo (PR #554)
+
+- Commit: `9bea1d8e` en `main`.
+- Estado: FUSIONADA Y ARCHIVADA; sin migraciones. El estado de Vercel no se
+  comprobó en esta sesión.
+- Cambio: prompt de Asistentes IA con tres horarios diarios, continuidad hasta
+  «detente», credenciales solo por flujo seguro y reposición autónoma de
+  oportunidades.
+- Verificación: `git diff --check` limpio antes del commit; PR fusionada.
+- Pendiente operativo: la creación y ejecución de tareas depende de que el
+  asistente externo soporte tareas programadas. SEO Total no las ejecuta por sí
+  solo.
+
 - La versión funcional completa restaurada parte del estado de `main` anterior al desliz de versión: commit `eec36697`.
 - No se debe restaurar un snapshot parcial ni reemplazar `main` sin comparar primero el árbol completo.
 - Los cambios locales sin commit pertenecen al usuario y no se deben sobrescribir ni publicar sin autorización.
