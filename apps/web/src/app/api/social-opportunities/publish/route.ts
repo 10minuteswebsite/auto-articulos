@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@auto-articulos/db";
+import { prisma, Prisma } from "@auto-articulos/db";
+import { resolveSocialDailyLimit } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { canUseSocialModule, getSocialHostContext, isNetworkApprovedForPublishing } from "@/lib/social-access";
 import { requireProductAccess } from "@/lib/require-product-access";
@@ -7,6 +8,37 @@ import { triggerSocialWorkerNow } from "@/lib/trigger-worker";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+/**
+ * Reserva el cupo y deja la propuesta en cola EN UN SOLO PASO, bajo un bloqueo por usuario y red:
+ * dos clics casi simultáneos no pueden pasar ambos la comprobación y superar el cupo.
+ */
+async function queueWithinDailyLimit(
+  opp: { id: string; platform: string },
+  userId: string,
+  dailyLimit: number,
+  data: Prisma.SocialOpportunityUpdateInput,
+): Promise<boolean> {
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  return prisma.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe("SELECT pg_advisory_xact_lock(hashtext($1))", `daily-limit:${userId}:${opp.platform}`);
+    const used = await tx.socialOpportunity.count({
+      where: {
+        userId,
+        platform: opp.platform,
+        id: { not: opp.id },
+        OR: [{ status: "published", publishedAt: { gte: dayStart } }, { status: { in: ["queued", "processing"] } }],
+      },
+    });
+    if (used >= dailyLimit) return false;
+    await tx.socialOpportunity.update({ where: { id: opp.id }, data });
+    return true;
+  });
+}
+
+const DAILY_LIMIT_MESSAGE = (platform: string, limit: number) =>
+  `Ya llegaste al cupo de publicaciones de hoy en ${platform} (${limit}). Esta propuesta queda pendiente para otro día, o puedes ajustar el cupo en Administración.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,9 +109,7 @@ export async function POST(request: NextRequest) {
     // La propuesta queda pendiente para publicarla otro día. El worker repite
     // esta comprobación como respaldo.
     const limitsRaw = (await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } }))?.socialDailyLimits;
-    const dailyLimits = (limitsRaw && typeof limitsRaw === "object" && !Array.isArray(limitsRaw)) ? limitsRaw as Record<string, unknown> : {};
-    const rawLimit = dailyLimits[opp.platform];
-    const dailyLimit = typeof rawLimit === "number" && Number.isInteger(rawLimit) && rawLimit >= 0 ? rawLimit : 1;
+    const dailyLimit = resolveSocialDailyLimit(limitsRaw, opp.platform);
     const dayStart = new Date();
     dayStart.setHours(0, 0, 0, 0);
     const usedToday = await prisma.socialOpportunity.count({
@@ -92,7 +122,7 @@ export async function POST(request: NextRequest) {
     });
     if (usedToday >= dailyLimit) {
       return NextResponse.json(
-        { error: `Ya llegaste al cupo de publicaciones de hoy en ${opp.platform} (${dailyLimit}). Esta propuesta queda pendiente para otro día, o puedes ajustar el cupo en Administración.` },
+        { error: DAILY_LIMIT_MESSAGE(opp.platform, dailyLimit) },
         { status: 400 },
       );
     }
@@ -107,12 +137,15 @@ export async function POST(request: NextRequest) {
       if (user?.role !== "admin" && !redesHost && !user?.allowGoogleBusinessPublishing) {
         return NextResponse.json({ error: "No tienes permiso para publicar en Google Business Profile. Contacta al administrador." }, { status: 403 });
       }
+      // Primero se reserva el cupo y se encola; solo entonces se aprueba el envío (BusinessProfilePost
+      // en «pending»), para que nunca quede una publicación aprobada sin cupo.
+      const reserved = await queueWithinDailyLimit(opp, userId, dailyLimit, { status: "queued", progressPercent: 1, progressStage: "En cola, esperando al worker de Google Business Profile", errorLog: null, startedAt: new Date(), finishedAt: null });
+      if (!reserved) return NextResponse.json({ error: DAILY_LIMIT_MESSAGE(opp.platform, dailyLimit) }, { status: 400 });
       await prisma.businessProfilePost.upsert({
         where: { titleId: opp.titleId },
         create: { titleId: opp.titleId, summary: "", ctaUrl: opp.articleUrl, status: "pending" },
         update: { status: "pending", googleResponse: null, sentAt: null },
       });
-      await prisma.socialOpportunity.update({ where: { id }, data: { status: "queued", progressPercent: 1, progressStage: "En cola, esperando al worker de Google Business Profile", errorLog: null, startedAt: new Date(), finishedAt: null } });
       await triggerSocialWorkerNow();
       return NextResponse.json({ success: true, message: "Publicación encolada para Google Business Profile mediante PostPeer." });
     }
@@ -206,9 +239,7 @@ export async function POST(request: NextRequest) {
       if (!allowed) return NextResponse.json({ error: `No tienes permiso para publicar en ${opp.platform}. Contacta al administrador.` }, { status: 403 });
     }
 
-    await prisma.socialOpportunity.update({
-      where: { id },
-      data: {
+    const queued = await queueWithinDailyLimit(opp, userId, dailyLimit, {
         status: "queued",
         progressPercent: 1,
         progressStage: "En cola, esperando al worker",
@@ -219,8 +250,8 @@ export async function POST(request: NextRequest) {
         // como atascado casi al instante). Ver cleanup.ts.
         startedAt: new Date(),
         finishedAt: null,
-      },
-    });
+      });
+    if (!queued) return NextResponse.json({ error: DAILY_LIMIT_MESSAGE(opp.platform, dailyLimit) }, { status: 400 });
 
     // Esperar el dispatch garantiza que Vercel no cierre la función antes de
     // enviar la corrida a GitHub Actions. El estado ya está guardado, por lo
