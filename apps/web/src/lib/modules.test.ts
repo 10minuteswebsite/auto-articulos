@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { SYSTEM_MODULES, getEffectiveDisabledModules } from "./modules";
+import { SYSTEM_MODULES, canSeeSocialModule, getEffectiveDisabledModules } from "./modules";
 
 const enabled = (id: string) => JSON.stringify({ [id]: "enabled" });
 
@@ -67,11 +67,17 @@ test("Redes queda reservada a las cuentas permitidas", () => {
     ["oportunidades-redes"],
   );
   assert.equal(disabled.includes("oportunidades-redes"), true);
+  // Cambio de decisión (Milton, 2026-10-12): «Dárselo a esta cuenta» abre Redes en seototal
+  // aunque la cuenta no esté en la lista piloto. Sin ese interruptor, sigue oculta.
   assert.equal(
     getEffectiveDisabledModules(
       { role: "user", name: "Hector Travasillo", disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }) },
       ["oportunidades-redes"],
     ).includes("oportunidades-redes"),
+    false,
+  );
+  assert.equal(
+    getEffectiveDisabledModules({ role: "user", name: "Hector Travasillo", disabledModules: null }, ["oportunidades-redes"]).includes("oportunidades-redes"),
     true,
   );
   assert.equal(getEffectiveDisabledModules({ role: "user", name: "Lorena Alvarez", disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }) }, ["oportunidades-redes"]).includes("oportunidades-redes"), false);
@@ -91,4 +97,22 @@ test("Redes: en el dominio redes no se oculta por el apagado global ni por la li
 test("Redes: en el dominio redes, 'Deshabilitado' por cuenta sigue ocultándolo", () => {
   const user = { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) };
   assert.ok(getEffectiveDisabledModules(user, [], { redesHost: true }).includes("oportunidades-redes"));
+});
+
+// Interruptor del administrador en seototal: «Dárselo a esta cuenta» debe funcionar
+// aunque la cuenta no esté en la lista piloto fija.
+test("seototal: 'Habilitado' abre Redes a una cuenta fuera de la lista piloto", () => {
+  const user = { role: "user", name: "Cuenta Nueva", email: "nueva@example.com" };
+  assert.equal(canSeeSocialModule(user), false);
+  assert.equal(canSeeSocialModule({ ...user, disabledModules: enabled("oportunidades-redes") }), true);
+  assert.equal(
+    getEffectiveDisabledModules({ ...user, disabledModules: enabled("oportunidades-redes") }, ["oportunidades-redes"]).includes("oportunidades-redes"),
+    false,
+  );
+  assert.equal(getEffectiveDisabledModules(user, ["oportunidades-redes"]).includes("oportunidades-redes"), true);
+});
+
+test("seototal: 'Quitado' sigue ocultando Redes aunque la cuenta sea piloto", () => {
+  const pilot = { role: "user", name: "Lorena Alvarez", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) };
+  assert.equal(getEffectiveDisabledModules(pilot, []).includes("oportunidades-redes"), true);
 });
