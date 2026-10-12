@@ -207,5 +207,13 @@ export async function createTumblrPhotoPost(
     body,
   });
   if (!response.ok) throw new Error(`No se pudo crear el post de Tumblr: ${await response.text()}`);
-  return response.json() as Promise<{ response?: { id?: string | number; post_url?: string } }>;
+  // Los IDs de post de Tumblr superan 2^53: response.json() los redondea
+  // (…716608 pasaba a …716600 y el enlace del Historial quedaba roto). Se
+  // leen como texto y se convierten a string antes de parsear.
+  return parseTumblrJson(await response.text()) as { response?: { id?: string | number; post_url?: string } };
+}
+
+/** Parsea JSON de Tumblr conservando como string los enteros de "id" que no caben en un Number. */
+export function parseTumblrJson(text: string): unknown {
+  return JSON.parse(text.replace(/("id"\s*:\s*)(\d{16,})/g, '$1"$2"'));
 }
