@@ -7,7 +7,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 **Publicación real, red por red (una publicación por red, borrando las sobrantes)**
 - [x] Threads (enlace clicable verificado).
 - [x] Bluesky (enlace clicable verificado).
-- [x] LinkedIn (2026-10-12, verificado) · [ ] Facebook · [ ] Instagram · [ ] Pinterest · [ ] Tumblr · [ ] Blogger · [ ] Google Business — C, con visto bueno de M antes de cada publicación.
+- [x] LinkedIn (2026-10-12, verificado) · [x] Facebook (2026-10-12, verificado) · [ ] Instagram · [ ] Pinterest · [ ] Tumblr · [ ] Blogger · [ ] Google Business — C, con visto bueno de M antes de cada publicación.
 
 **Reglas de acceso y permisos**
 - [x] Redes siempre activa y todas las redes abiertas en redes.lasolucionweb.com; seototal sin cambios (PR #514, #515, #528).
