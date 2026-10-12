@@ -4,6 +4,7 @@ import {
   decryptSecret,
   disconnectPostPeerIntegration,
   getPostPeerOAuthUrl,
+  getPostPeerOAuthUrlWithProfileRecovery,
   listPostPeerIntegrations,
   testPostPeerConnection,
   type PostPeerPlatform,
@@ -132,21 +133,35 @@ export async function disconnectPostPeerSocialConnection(userId: string, platfor
 export async function startPostPeerBusinessConnection(userId: string, redirectUri: string): Promise<string> {
   const apiKey = await getPostPeerApiKey();
   if (!apiKey) throw new Error("PostPeer aún no está configurado por el administrador.");
-  let connection = await prisma.postPeerConnection.findUnique({ where: { userId } });
-  let profileId = connection?.profileId;
-  if (!profileId) {
-    profileId = await createPostPeerProfile(apiKey, `Auto Artículos - ${userId}`);
-    connection = await prisma.postPeerConnection.upsert({
+  const connection = await prisma.postPeerConnection.findUnique({ where: { userId } });
+  const newProfileName = `Auto Artículos - ${userId}`;
+  const withProfile = (profileId: string) => {
+    const callback = new URL(redirectUri);
+    callback.searchParams.set("profileId", profileId);
+    return callback.toString();
+  };
+  try {
+    let profileId = connection?.profileId;
+    let recovered = false;
+    let url: string;
+    if (profileId) {
+      ({ url, profileId, recovered } = await getPostPeerOAuthUrlWithProfileRecovery(apiKey, "googlebusiness", { profileId, redirectUri: withProfile, newProfileName }));
+    } else {
+      profileId = await createPostPeerProfile(apiKey, newProfileName);
+      url = await getPostPeerOAuthUrl(apiKey, "googlebusiness", { profileId, redirectUri: withProfile(profileId) });
+    }
+    await prisma.postPeerConnection.upsert({
       where: { userId },
       create: { userId, profileId, accountId: `pending-${profileId}`, status: "PENDING" },
-      update: { profileId, status: "PENDING", lastError: null },
+      // Si el perfil anterior ya no servía, la cuenta guardada tampoco: se reinicia con el perfil nuevo.
+      update: recovered ? { profileId, accountId: `pending-${profileId}`, status: "PENDING", lastError: null } : { profileId, status: "PENDING", lastError: null },
     });
-  } else {
-    await prisma.postPeerConnection.update({ where: { userId }, data: { status: "PENDING", lastError: null } });
+    return url;
+  } catch (error) {
+    // Deja el motivo real visible en /api/postpeer/status en vez de solo «No se pudo completar».
+    if (connection) await prisma.postPeerConnection.update({ where: { userId }, data: { lastError: error instanceof Error ? error.message : String(error) } });
+    throw error;
   }
-  const callback = new URL(redirectUri);
-  callback.searchParams.set("profileId", profileId);
-  return getPostPeerOAuthUrl(apiKey, "googlebusiness", { profileId, redirectUri: callback.toString() });
 }
 
 export async function completePostPeerBusinessConnection(profileId: string): Promise<"connected" | "missing" | "error"> {

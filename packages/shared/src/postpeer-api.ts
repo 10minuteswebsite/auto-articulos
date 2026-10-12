@@ -68,6 +68,26 @@ export async function getPostPeerOAuthUrl(
   return data.url;
 }
 
+/**
+ * Pide el enlace de autorización con el perfil guardado. Si PostPeer lo rechaza
+ * (p. ej. 500 porque el perfil ya no existe para la clave vigente), crea un
+ * perfil nuevo y reintenta una vez. Devuelve la URL y el perfil realmente usado.
+ */
+export async function getPostPeerOAuthUrlWithProfileRecovery(
+  apiKey: string,
+  platform: PostPeerPlatform,
+  params: { profileId: string; redirectUri: (profileId: string) => string; newProfileName: string },
+): Promise<{ url: string; profileId: string; recovered: boolean }> {
+  try {
+    const url = await getPostPeerOAuthUrl(apiKey, platform, { profileId: params.profileId, redirectUri: params.redirectUri(params.profileId) });
+    return { url, profileId: params.profileId, recovered: false };
+  } catch {
+    const profileId = await createPostPeerProfile(apiKey, params.newProfileName);
+    const url = await getPostPeerOAuthUrl(apiKey, platform, { profileId, redirectUri: params.redirectUri(profileId) });
+    return { url, profileId, recovered: true };
+  }
+}
+
 export async function createPostPeerProfile(apiKey: string, name: string): Promise<string> {
   const data = await postPeerFetch<{ profile?: { id?: string } }>(apiKey, "/profiles", {
     method: "POST",
