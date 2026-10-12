@@ -5,6 +5,8 @@ import { createMcpAccessToken, MCP_ACCESS_TOKEN_TTL_MS, verifyMcpAccessToken } f
 export const MCP_SCOPES = ["oportunidades:leer", "oportunidades:publicar", "offline_access"] as const;
 const CODE_TTL_MS = 5 * 60 * 1000;
 const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const CHATGPT_CLIENT_ID = "chatgpt-auto-articulos-v1";
+const CHATGPT_REDIRECT_PREFIX = "https://chatgpt.com/connector/oauth/";
 
 export type OAuthClient = {
   clientId: string;
@@ -27,7 +29,13 @@ function configuredClient(idEnv: string, redirectEnv: string, secretEnv?: string
 export function oauthClients(): OAuthClient[] {
   return [
     configuredClient("OAUTH_ALEXA_CLIENT_ID", "OAUTH_ALEXA_REDIRECT_URIS", "OAUTH_ALEXA_CLIENT_SECRET"),
-    configuredClient("OAUTH_CHATGPT_CLIENT_ID", "OAUTH_CHATGPT_REDIRECT_URIS"),
+    {
+      // ChatGPT asks the user for a client ID when DCR/CIMD are unavailable.
+      // Keep this public PKCE client usable even when optional env configuration
+      // has not been added; the redirect path is owned by chatgpt.com.
+      clientId: CHATGPT_CLIENT_ID,
+      redirectUris: configuredClient("OAUTH_CHATGPT_CLIENT_ID", "OAUTH_CHATGPT_REDIRECT_URIS")?.redirectUris ?? [],
+    },
   ].filter((client): client is OAuthClient => client !== null);
 }
 
@@ -66,7 +74,8 @@ export function validateAuthorizeRequest(params: URLSearchParams, origin: string
   if (params.get("response_type") !== "code") throw new OAuthError("unsupported_response_type", "Solo se admite response_type=code.");
   const client = clientId ? oauthClient(clientId) : null;
   if (!client) throw new OAuthError("unauthorized_client", "Cliente OAuth no reconocido.");
-  if (!redirectUri || !client.redirectUris.includes(redirectUri)) throw new OAuthError("invalid_request", "redirect_uri no autorizado.");
+  const isChatGptRedirect = client.clientId === CHATGPT_CLIENT_ID && redirectUri?.startsWith(CHATGPT_REDIRECT_PREFIX);
+  if (!redirectUri || (!client.redirectUris.includes(redirectUri) && !isChatGptRedirect)) throw new OAuthError("invalid_request", "redirect_uri no autorizado.");
   if (resource !== `${origin}/api/mcp`) throw new OAuthError("invalid_target", "El recurso MCP no coincide.");
   if (!codeChallenge || params.get("code_challenge_method") !== "S256") throw new OAuthError("invalid_request", "Se requiere PKCE S256.");
   return { clientId: client.clientId, redirectUri, resource, codeChallenge, scopes: parseScopes(params.get("scope")), state: params.get("state") };
