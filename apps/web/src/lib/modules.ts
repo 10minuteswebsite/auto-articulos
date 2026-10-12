@@ -107,10 +107,12 @@ export type ModuleAccessOverrides = Record<string, ModuleAccessOverride>;
 export type SocialHostContext = { redesHost?: boolean };
 
 /**
- * En seototal.lasolucionweb.com Redes queda reservada temporalmente a
- * administradores y a las dos cuentas piloto. En redes.lasolucionweb.com
- * (producto dominado por el HUB) siempre está activa: quién entra lo decide
- * el HUB, no esta lista.
+ * En seototal.lasolucionweb.com Redes está reservada a administradores, a las
+ * dos cuentas piloto de siempre y a cualquier cuenta a la que el administrador
+ * haya puesto «Dárselo a esta cuenta» (override «enabled» del módulo). Antes ese
+ * interruptor no tenía efecto fuera de la lista fija. En
+ * redes.lasolucionweb.com (producto dominado por el HUB) siempre está activa:
+ * quién entra lo decide el HUB, no esta lista.
  */
 export function canSeeSocialModule(
   user: {
@@ -119,11 +121,13 @@ export function canSeeSocialModule(
     firstName?: string | null;
     lastName?: string | null;
     email?: string | null;
+    disabledModules?: string | null;
   },
   context: SocialHostContext = {},
 ): boolean {
   if (user.role === "admin") return true;
   if (context.redesHost) return true;
+  if (parseUserModuleOverrides(user.disabledModules)["oportunidades-redes"] === "enabled") return true;
   const identity = [user.name, user.firstName, user.lastName, user.email]
     .filter(Boolean)
     .join(" ")

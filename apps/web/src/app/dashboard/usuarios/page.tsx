@@ -30,7 +30,7 @@ import {
   type PlatformDomain,
 } from "@auto-articulos/shared";
 import { trialDaysRemaining } from "@/lib/trial";
-import { canSeeSocialModule, SYSTEM_MODULES } from "@/lib/modules";
+import { SYSTEM_MODULES } from "@/lib/modules";
 import UserProductsPanel from "./UserProductsPanel";
 
 interface UserRow {
@@ -2932,7 +2932,6 @@ function UserCard({
             <div style={{ display: "grid", gap: 6 }}>
               {SYSTEM_MODULES.map((mod) => {
                 const acceso = moduleOverrides[mod.id] ?? "inherit";
-                const socialAllowed = canSeeSocialModule(user);
                 return (
                   <label
                     key={mod.id}
@@ -2977,10 +2976,10 @@ function UserCard({
                       >
                         <option value="inherit">Según la config. general</option>
                         <option value="enabled">
-                          {mod.id === "oportunidades-redes" && !socialAllowed ? "Quitárselo a esta cuenta" : "Dárselo a esta cuenta"}
+                          Dárselo a esta cuenta
                         </option>
                         <option value="disabled">
-                          {mod.id === "oportunidades-redes" && !socialAllowed ? "Quitado de esta cuenta" : "Quitárselo a esta cuenta"}
+                          Quitárselo a esta cuenta
                         </option>
                       </select>
                     </span>
