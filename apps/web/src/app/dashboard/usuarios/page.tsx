@@ -202,7 +202,8 @@ function Section({
   );
 }
 
-// Formatos de difusión con límite diario. La clave es la misma `platform`
+// Formatos de difusión con límite diario. Solo los que el sistema genera y publica (quitados el
+// 2026-10-12: carrusel, reel e infografía de Instagram y Story de Facebook, que nunca se crean). La clave es la misma `platform`
 // que usa el worker (enforceSocialDailyLimit); una clave sin valor guardado
 // equivale a 1 por día.
 const SOCIAL_GROUPS: {
@@ -217,10 +218,7 @@ const SOCIAL_GROUPS: {
         label: "Instagram",
         formats: [
           ["instagram-post", "Publicación"],
-          ["instagram-carousel", "Carrusel"],
-          ["instagram-reel-image", "Reel con imagen"],
           ["instagram-story", "Story"],
-          ["instagram-infografia", "Infografía"],
         ],
       },
       {
@@ -228,7 +226,6 @@ const SOCIAL_GROUPS: {
         label: "Facebook",
         formats: [
           ["facebook-page", "Publicación en la Página"],
-          ["facebook-story", "Story"],
         ],
       },
       { id: "threads", label: "Threads", formats: [["threads", "Publicación"]] },

@@ -32,7 +32,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 - [ ] Reutilizar una imagen IA entre redes del mismo artículo/formato y guardar el costo por imagen — C.
 - [x] Instrucciones de conexión estándar: plantilla única de 6 pasos + «Si falla» para todas las redes y blogs; Bluesky en el mismo formato (2026-10-12) — C.
 - [x] Unificar nombres: menú/tarjeta, «propuesta» y «Facebook» en los textos visibles (2026-10-12); los nombres internos no se cambian — C.
-- [ ] Formatos sin dueño: Administración da cupos a Instagram carrusel/reel/infografía y Facebook Story que la pantalla nunca genera; Instagram crea 2 propuestas por pulsación — decidir qué formatos existen — M.
+- [x] Formatos sin dueño: quitados de Administración carrusel, reel, infografía de Instagram y Story de Facebook (2026-10-12, decisión de Milton) — C.
 - [x] Tarjeta única en el Inicio «PUBLICACIÓN EN REDES SOCIALES Y BLOGS» con META y Otras redes y blogs dentro (2026-10-12) — C.
 - [x] Eliminar la ruta huérfana `generate-all` (2026-10-12) — C.
 - [ ] Revisión del algoritmo de generación: elección del artículo, repetición entre redes, calidad y recorte del texto — C.
