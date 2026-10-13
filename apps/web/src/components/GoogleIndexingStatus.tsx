@@ -11,6 +11,15 @@ import type { TitleRow } from "@/types/dashboard";
 // muestran los estados POSITIVOS confirmados (✓ enviado / ✓ indexado / ✓
 // enviado a Bing) y errores reales; el silencio es el estado normal de
 // "todavía no, pero va a pasar".
+function fechaCorta(valor: string | Date) {
+  return new Date(valor).toLocaleString("es-US", {
+    day: "numeric",
+    month: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
   // Leer siempre las props actuales. El estado se actualiza después de
   // "Comprobar indexación" y una copia inicial con useState dejaba visible
@@ -41,9 +50,13 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
 
   return (
     <div style={{ marginTop: 7, fontSize: 12 }}>
-      {title.lastSitemapSentAt && (
+      {title.lastSitemapSentAt ? (
         <div style={{ color: "#16803c" }}>
-          {`✓ Sitemap enviado: ${new Date(title.lastSitemapSentAt).toLocaleString("es-US")}`}
+          {`✓ Sitemap enviado a Google · ${fechaCorta(title.lastSitemapSentAt)}`}
+        </div>
+      ) : (
+        <div style={{ color: "#6e6e73" }}>
+          Sitemap: se enviará a Google en el próximo envío diario.
         </div>
       )}
       {title.businessProfilePost && (
@@ -67,16 +80,14 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
                 : "Publicando en Google Business Profile..."}
         </div>
       )}
-      {(status === "error" || indexed || status === "inspection_pending") && (
-        <div style={{ color: status === "error" ? "#ff3b30" : indexed ? "#16803c" : "#8a4b08" }}>
+      {(status === "error" || indexed) && (
+        <div style={{ color: status === "error" ? "#ff3b30" : "#16803c" }}>
           {status === "error"
             ? "Google: no se pudo consultar la indexación"
-            : indexed
-              ? "✓ Indexada en Google"
-              : "Google todavía no confirma la indexación"}
+            : "✓ Indexada en Google"}
         </div>
       )}
-      {message && (status === "error" || status === "inspection_pending") && (
+      {message && status === "error" && (
         <div style={{ color: "#6e6e73", marginTop: 2 }}>{message}</div>
       )}
       {/* Bing Indexing Status.
@@ -91,58 +102,10 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
       {title.bingIndexingStatus &&
         title.bingIndexingStatus !== "not_configured" &&
         title.bingIndexingStatus !== "error" && (
-        <div
-          style={{
-            marginTop: 6,
-            padding: "6px 10px",
-            borderRadius: 6,
-            fontSize: 12,
-            background:
-              title.bingIndexingStatus === "error"
-                ? "#fff2f1"
-                : title.bingIndexingStatus === "submitted"
-                  ? "rgba(52, 199, 89, 0.1)"
-                  : "#f5f5f7",
-            border: `1px solid ${
-              title.bingIndexingStatus === "error"
-                ? "rgba(255, 59, 48, 0.25)"
-                : title.bingIndexingStatus === "submitted"
-                  ? "rgba(52, 199, 89, 0.25)"
-                  : "rgba(0, 0, 0, 0.07)"
-            }`,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              color:
-                title.bingIndexingStatus === "error" ? "#ff3b30" : "#16803c",
-              fontWeight: 600,
-            }}
-          >
-            <span style={{ fontSize: 14 }}>
-              {title.bingIndexingStatus === "error" ? "✗" : "✓"}
-            </span>
-            <span>
-              {title.bingIndexingStatus === "error"
-                ? "Bing: error al solicitar indexación"
-                : title.bingIndexingStatus === "submitted"
-                  ? "Indexación instantánea solicitada a Bing"
-                  : `Bing: ${title.bingIndexingStatus}`}
-            </span>
-          </div>
-          {title.bingIndexingMessage && (
-            <div style={{ color: "#6e6e73", marginTop: 3, paddingLeft: 20 }}>
-              {title.bingIndexingMessage}
-            </div>
-          )}
-          {title.bingIndexingAt && (
-            <div style={{ color: "#6e6e73", marginTop: 2, paddingLeft: 20, fontSize: 11 }}>
-              {new Date(title.bingIndexingAt).toLocaleString("es-US")}
-            </div>
-          )}
+        <div style={{ color: title.bingIndexingStatus === "submitted" ? "#16803c" : "#6e6e73" }}>
+          {title.bingIndexingStatus === "submitted"
+            ? `✓ Aviso enviado a Bing${title.bingIndexingAt ? ` · ${fechaCorta(title.bingIndexingAt)}` : ""}`
+            : `Bing: ${title.bingIndexingStatus}`}
         </div>
       )}
     </div>

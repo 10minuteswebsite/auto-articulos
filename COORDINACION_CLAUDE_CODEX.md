@@ -31,6 +31,14 @@
 - Verificación: 2/2 pruebas nuevas; las 23 pruebas que fallan en `apps/web` ya fallaban antes (falta `evaluateProductAccess` en el paquete `shared` instalado), ajenas a este cambio. Pendiente en producción: tras el despliegue, la próxima renovación de ChatGPT debe aparecer como `POST /api/oauth2/token` **200** sin pasar por `authorize`.
 - Aparte, sin tocar: hoy `GET /api/composio/options` devuelve 502 en seototal (visto en los logs); y el aviso de créditos de imagen del 12/10 era el estado real de la cuenta.
 
+## Claude — «Tarjeta de indexación del Historial: mensajes claros» — 2026-10-13 — PR #573
+
+- Estado: PR #573 abierto desde `claude/analisis-imagen-resultados-f025d2`, subido por Claude con autorización de Milton (el Reparador no pudo). Capitanía reclamada por Claude; se libera al fusionar. Sin migración.
+- Qué cambia: `GoogleIndexingStatus.tsx` queda en renglones cortos sin repetir. Sitemap: «se enviará a Google en el próximo envío diario» o «✓ Sitemap enviado a Google · fecha». Se quita el aviso naranja «Google todavía no confirma» y su mensaje repetido (orden de Milton del 13/8). Bing: un renglón «✓ Aviso enviado a Bing · fecha». Google solo muestra «✓ Indexada» o el error real en rojo.
+- Dinámico: `historial/page.tsx` consulta `/api/runs` cada 60 s (pestaña visible) mientras haya artículos publicados sin sitemap enviado, para que el «✓ Enviado» aparezca solo.
+- Manual: `content/manual-usuario.ts` (sección Historial).
+- Verificación: tsc sin errores en los archivos tocados. NO se vio en pantalla.
+
 ## Claude — CIERRE «Fix: el wizard no sale (adelatallada.com) y Paso 6 en gris» — 2026-10-13
 
 - Estado: CERRADO Y ARCHIVADO. PR #557 fusionada en `main` (`eb551d8f`), Vercel success. Sin migración. Capitanía liberada.
