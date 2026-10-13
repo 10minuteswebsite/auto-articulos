@@ -139,6 +139,22 @@ export async function GET() {
     socialTodayByUser.set(row.userId, acc);
   }
 
+  // Imágenes creadas con IA (cada una deja guardado su prompt): hoy y en el mes de Florida. Es un
+  // conteo exacto; el costo = cantidad × el precio por imagen que cobra el proveedor (fal.ai).
+  const floridaDate = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+  const startOfMonth = startOfSocialDay(new Date(`${floridaDate.slice(0, 7)}-01T12:00:00Z`));
+  const aiImageRows = await prisma.socialOpportunity.findMany({
+    where: { aiImagePrompt: { not: null }, finishedAt: { gte: startOfMonth } },
+    select: { userId: true, finishedAt: true },
+  });
+  const aiImagesByUser = new Map<string, { today: number; month: number }>();
+  for (const row of aiImageRows) {
+    const acc = aiImagesByUser.get(row.userId) ?? { today: 0, month: 0 };
+    acc.month += 1;
+    if (row.finishedAt && row.finishedAt >= startOfDay) acc.today += 1;
+    aiImagesByUser.set(row.userId, acc);
+  }
+
   const publishedByUser = new Map(
     publishedCounts.map((row) => [row.userId, Number(row.count)]),
   );
@@ -187,6 +203,7 @@ export async function GET() {
         connectedDomain,
         articlesPublished: publishedByUser.get(u.id) ?? 0,
         socialPublishedToday: socialTodayByUser.get(u.id) ?? {},
+        aiImages: aiImagesByUser.get(u.id) ?? { today: 0, month: 0 },
       };
     }),
   });

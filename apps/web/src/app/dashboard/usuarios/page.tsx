@@ -45,6 +45,7 @@ interface UserRow {
   dailyArticleLimit: number | null;
   socialDailyLimits: Record<string, number>;
   socialPublishedToday?: Record<string, number>;
+  aiImages?: { today: number; month: number };
   maxTitlesPerBatch: number;
   platformDomain: string;
   contentLanguage: string;
@@ -3115,6 +3116,14 @@ function UserCard({
                 />
                 Generador de imágenes con IA (Instagram Story/Reel)
               </label>
+          </Row>
+          <Row label="Imágenes creadas con IA">
+            <span style={{ fontSize: 13, color: "#1d1d1f" }}>
+              Hoy: <strong>{user.aiImages?.today ?? 0}</strong> · Este mes: <strong>{user.aiImages?.month ?? 0}</strong>
+            </span>
+            <span style={{ display: "block", fontSize: 11, color: "#6e6e73", marginTop: 4 }}>
+              Conteo exacto (día y mes de Florida). El costo es la cantidad por el precio de cada imagen en fal.ai.
+            </span>
           </Row>
           <Row label="Créditos de imagen">
               <label style={permissionLabelStyle}>
