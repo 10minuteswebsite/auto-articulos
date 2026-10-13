@@ -224,7 +224,8 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
   const pickedOption = options.find((option) => option.id === selected);
   const pendingDestination = Boolean(dest) && connected && !expired && Boolean(dest?.pendingKey ? connection?.[dest.pendingKey] : !savedDestId);
   const state: ConnectionState = savedName ? "success" : pendingSelection ? "pending" : !connected ? "disconnected" : expired ? "expired" : pendingDestination ? "pending" : "connected";
-  const guide = CONNECTION_GUIDES[config.id];
+  // En Instagram y Facebook la guía de conexión la muestra el bloque de Composio (vía por defecto de todas las cuentas).
+  const guide = hideUnlessConnectedOrAdmin ? undefined : CONNECTION_GUIDES[config.id];
   const connectLink = (
     <a href={config.connectPath ?? `${base}/connect`} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
       {CONNECTION_LABELS.connect}
