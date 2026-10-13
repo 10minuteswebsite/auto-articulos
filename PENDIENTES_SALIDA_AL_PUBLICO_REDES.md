@@ -29,7 +29,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 
 ## B. Importantes (primera semana tras salir)
 - [x] Google Business: ya sale en ~40 s desde el worker de Redes (se dispara al pulsar Publicar) — C.
-- [ ] Reutilizar una imagen IA entre redes del mismo artículo/formato y guardar el costo por imagen — C.
+- [x] Imagen IA entre redes: reutilizar descartado (solo IG 4:5 y Pinterest 2:3 usan IA, formatos distintos); costo por imagen: conteo por usuario (hoy/mes) en Administración (2026-10-12) — C.
 - [x] Instrucciones de conexión estándar: plantilla única de 6 pasos + «Si falla» para todas las redes y blogs; Bluesky en el mismo formato (2026-10-12) — C.
 - [x] Unificar nombres: menú/tarjeta, «propuesta» y «Facebook» en los textos visibles (2026-10-12); los nombres internos no se cambian — C.
 - [x] Formatos sin dueño: quitados de Administración carrusel, reel, infografía de Instagram y Story de Facebook (2026-10-12, decisión de Milton) — C.
