@@ -85,9 +85,8 @@ export default function InicioPage() {
   const checkWizardStatus = useCallback(async () => {
     try {
       const currentHostProduct = productOfHost(window.location.hostname);
-      const [credRes, catRes, meRes, googleRes, configurationRes, composioRes] = await Promise.all([
+      const [credRes, meRes, googleRes, configurationRes, composioRes] = await Promise.all([
         fetch("/api/credentials", { cache: "no-store" }),
-        fetch("/api/categories", { cache: "no-store" }),
         fetch("/api/me", { cache: "no-store" }),
         fetch("/api/search-integrations/google", { cache: "no-store" }),
         fetch("/api/configuration-status", { cache: "no-store" }),
@@ -95,7 +94,6 @@ export default function InicioPage() {
       ]);
 
       const credData = credRes.ok ? await credRes.json() : {};
-      const catData = catRes.ok ? await catRes.json() : {};
       const meData = meRes.ok ? await meRes.json() : {};
       const googleData = googleRes.ok ? await googleRes.json() : {};
       const configurationData = configurationRes.ok ? await configurationRes.json() : null;
@@ -105,7 +103,10 @@ export default function InicioPage() {
         : null;
 
       const step1 = Boolean(credData.configured);
-      const step2 = Array.isArray(catData.categories) && catData.categories.length > 0;
+      // Las categorías son opcionales en el onboarding (mismo criterio que
+      // OnboardingWizard desde el 7/10/2026): una web nueva puede no tener
+      // ninguna. Exigirlas aquí dejaba el wizard en pantalla para siempre
+      // aunque sus 4 pasos ya figuraran completos (cuenta adelatallada.com).
       setProductView(isProductViewEnabled(meData?.disabledModules));
       setDisabledModules(Array.isArray(meData?.disabledModules) ? meData.disabledModules : []);
       setProducts(meData?.products ?? null);
@@ -118,7 +119,7 @@ export default function InicioPage() {
       // posterior al wizard sin fingir una conexión OAuth real de Google.
       const complete = process.env.NEXT_PUBLIC_LOCAL_DEMO === "true"
         ? true
-        : step1 && step2 && step3 && step4;
+        : step1 && step3 && step4;
 
       // El asistente de cuatro pasos pertenece a SEO TOTAL ARTÍCULOS. En
       // Redes no debe bloquear el Inicio ni mostrar instrucciones de artículos.

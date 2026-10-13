@@ -1,5 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Fix: el wizard no sale (adelatallada.com) y Paso 6 en gris — 2026-10-13
+
+- Síntoma: la cuenta adelatallada.com conectó Search Console en el wizard y no salía de él; los botones del Paso 6 se veían grises.
+- Causa (código, sin leer la base de producción): el 7/10 (`c5e862e7`) el wizard pasó a tratar las categorías como opcionales, pero el Inicio (`dashboard/page.tsx`) y `configuracion/inicial/page.tsx` seguían exigir `categories.length > 0` para dar la configuración por completa. Una web sin categorías veía los 4 pasos en verde y el Inicio mantenía el wizard para siempre. El dato de categorías de esa cuenta no se pudo leer (producción bloqueada); queda por confirmar con ella.
+- Réplica: `configuracion/inicial` además ignoraba GSC por Composio (solo miraba Google directo). `PreValidationGuard` y `/api/pre-validation` siguen exigiendo categorías para Publicar/Oportunidades (decisión aparte: publicar sí necesita categoría).
+- Paso 6: la tarjeta usaba `activeStep === 6` (el máximo es 5), quedaba siempre «pendiente» con opacidad 0,65; ahora `isActive={allCoreDone}` y el botón 02 deja el texto gris.
+- Archivos: `dashboard/page.tsx`, `dashboard/configuracion/inicial/page.tsx`, `components/OnboardingWizard.tsx`, `content/manual-usuario.ts`. Sin migración. Capitanía reclamada y liberada al fusionar. Verificación: tsc sin errores en esos archivos.
+
 ## Codex — CIERRE Y ARCHIVO «PROMPT MCP CON PROGRAMACIÓN AUTÓNOMA» — 2026-10-12
 
 - Estado: CERRADO Y ARCHIVADO. Capitanía liberada. Sin migraciones.

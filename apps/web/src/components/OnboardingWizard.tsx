@@ -1776,7 +1776,7 @@ export default function OnboardingWizard({
             title="Tu cuenta está lista para publicar"
             subtitle="Elige si quieres publicar tus propios títulos o dejar que la IA avanzada encuentre oportunidades y prepare contenido para ti."
             isDone={step5Done}
-            isActive={activeStep === 6}
+            isActive={allCoreDone}
             badgeText={
               step5Done
                 ? "Publicación inteligente en marcha"
@@ -1839,8 +1839,8 @@ export default function OnboardingWizard({
                       href="/dashboard/oportunidades"
                       style={{
                         background: "#f5f5f7",
-                        color: "#6e6e73",
-                        border: "1px solid rgba(60, 60, 67, 0.12)",
+                        color: "#1d1d1f",
+                        border: "1px solid rgba(60, 60, 67, 0.16)",
                         textDecoration: "none",
                         padding: "16px 18px",
                         borderRadius: 14,
@@ -1853,7 +1853,7 @@ export default function OnboardingWizard({
                     >
                       <span style={{ fontSize: 12, letterSpacing: "0.08em", color: "#8e8e93" }}>02</span>
                       <span>{MENU_NAMES.ia} →</span>
-                      <span style={{ fontSize: 12, fontWeight: 500, color: "#8e8e93" }}>Descubre temas que tu audiencia busca</span>
+                      <span style={{ fontSize: 12, fontWeight: 500, color: "#6e6e73" }}>Descubre temas que tu audiencia busca</span>
                     </Link>
                     <Link
                       href="/dashboard/publicar"
