@@ -12,6 +12,7 @@ import {
   queryGoogleSearchAnalytics,
   refreshTumblrToken,
   stripMarkdownEmphasis,
+  startOfSocialDay,
 } from "@auto-articulos/shared";
 import { getGoogleAnalyticsSignals, summarizeGoogleAnalyticsSignals } from "@/lib/google-analytics-signals";
 import { getBingSignals } from "@/lib/bing-signals";
@@ -661,8 +662,7 @@ export async function POST(request: Request) {
     // genera con su propio clic ("Crear oportunidad" por red), así que sin
     // esto, pedir Threads y después LinkedIn el mismo día terminaba
     // recogiendo el mismo artículo top-1 para ambas — nada lo impedía antes.
-    const todayStart = new Date();
-    todayStart.setUTCHours(0, 0, 0, 0);
+    const todayStart = startOfSocialDay();
     const todaysOpportunities = await prisma.socialOpportunity.findMany({
       where: { userId, status: { not: "skipped" }, createdAt: { gte: todayStart } },
       select: { titleId: true, articleUrl: true },
@@ -699,8 +699,8 @@ export async function POST(request: Request) {
         {
           error:
             pendingCount > 0
-              ? `Ya tenés ${pendingCount} propuesta${pendingCount === 1 ? "" : "s"} pendiente${pendingCount === 1 ? "" : "s"} sin publicar — no se generan más hasta que se publiquen o se descarten. Revisá la lista de "Propuestas Pendientes" más abajo.`
-              : "No hay artículos nuevos disponibles. Todos los artículos publicados ya tienen una oportunidad generada.",
+              ? `Ya tienes ${pendingCount} propuesta${pendingCount === 1 ? "" : "s"} pendiente${pendingCount === 1 ? "" : "s"} sin publicar — no se generan más hasta que se publiquen o se descarten. Revisa la lista de «Propuestas» más abajo.`
+              : "No hay artículos nuevos disponibles. Todos los artículos publicados ya tienen una propuesta generada.",
         },
         { status: 400 }
       );
