@@ -11,7 +11,7 @@ const FACEBOOK: OAuthNetworkConfig = {
   accountKey: "facebookPageName",
   admin: {
     title: "Credenciales de la aplicación Meta",
-    help: "App ID y App Secret de la aplicación Meta que tiene habilitado Facebook Pages API.",
+    help: "App ID y App Secret de la aplicación Meta que tiene habilitada la API de Páginas de Facebook.",
     idLabel: "App ID",
     secretLabel: "App Secret",
     keys: { shown: "appId", raw: "rawAppId", bodyId: "appId", bodySecret: "appSecret" },
