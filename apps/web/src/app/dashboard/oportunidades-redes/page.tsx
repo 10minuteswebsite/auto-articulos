@@ -428,11 +428,11 @@ export default function OportunidadesRedesPage() {
       const platforms = Array.from(new Set(opportunities.filter((o) => o.status === "pending" && (!openGroup || groupOfPlatform(o.platform) === openGroup)).map((o) => o.platform)));
       const res = await fetch(`/api/social-opportunities?scope=pending${openGroup ? `&platforms=${encodeURIComponent(platforms.join(","))}` : ""}`, { method: "DELETE" });
       if (res.ok) {
-        setMessage({ kind: "info", text: "Se borraron todas las oportunidades pendientes." });
+        setMessage({ kind: "info", text: "Se borraron todas las propuestas pendientes." });
         loadOpportunities();
       } else {
         const data = await res.json().catch(() => ({}));
-        setMessage({ kind: "error", text: data.error || "No se pudieron borrar las oportunidades." });
+        setMessage({ kind: "error", text: data.error || "No se pudieron borrar las propuestas." });
       }
     } catch (err: any) {
       setMessage({ kind: "error", text: err.message });

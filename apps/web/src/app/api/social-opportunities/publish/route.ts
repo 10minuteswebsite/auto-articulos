@@ -267,7 +267,7 @@ export async function POST(request: NextRequest) {
         : platform === "linkedin"
         ? "Publicación encolada. El sistema publicará en LinkedIn en segundo plano."
         : platform === "facebook-page"
-        ? "Publicación encolada. El sistema publicará en Facebook Pages en segundo plano."
+        ? "Publicación encolada. El sistema publicará en Facebook en segundo plano."
         : platform === "facebook-story"
         ? "Publicación encolada. El sistema generará la imagen y publicará la Historia en Facebook en segundo plano."
         : platform === "pinterest"

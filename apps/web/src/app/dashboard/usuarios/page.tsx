@@ -225,7 +225,7 @@ const SOCIAL_GROUPS: {
       },
       {
         id: "facebook",
-        label: "Facebook Pages",
+        label: "Facebook",
         formats: [
           ["facebook-page", "Publicación en la Página"],
           ["facebook-story", "Story"],

@@ -27,7 +27,7 @@ const MIN_API_KEY_LENGTH = 10;
 export const COMPOSIO_APPS = [
   { id: "google_search_console", label: "Google Search Console", toolkit: "google_search_console" },
   { id: "google_analytics", label: "Google Analytics", toolkit: "google_analytics" },
-  { id: "facebook", label: "Facebook Pages", toolkit: "facebook" },
+  { id: "facebook", label: "Facebook", toolkit: "facebook" },
   { id: "instagram", label: "Instagram", toolkit: "instagram" },
   { id: "pinterest", label: "Pinterest", toolkit: "pinterest" },
 ] as const;
