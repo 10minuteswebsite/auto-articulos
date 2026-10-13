@@ -35,7 +35,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 - [x] Formatos sin dueño: quitados de Administración carrusel, reel, infografía de Instagram y Story de Facebook (2026-10-12, decisión de Milton) — C.
 - [x] Tarjeta única en el Inicio «PUBLICACIÓN EN REDES SOCIALES Y BLOGS» con META y Otras redes y blogs dentro (2026-10-12) — C.
 - [x] Eliminar la ruta huérfana `generate-all` (2026-10-12) — C.
-- [ ] Revisión del algoritmo de generación: elección del artículo, repetición entre redes, calidad y recorte del texto — C.
+- [x] Revisión del algoritmo de generación (2026-10-12): selección con señales reales y sin repetir; corregidos el «hoy» (Florida) y los mensajes en español neutro — C.
 - [ ] Worker que distinga dominio, o activar los derechos del HUB (`enforce`) — C + M.
 
 ## C. Después (no bloquea)
