@@ -36,7 +36,7 @@ Leyenda: [ ] pendiente · [x] hecho · Responsable: **M** = Milton, **C** = Clau
 - [x] Tarjeta única en el Inicio «PUBLICACIÓN EN REDES SOCIALES Y BLOGS» con META y Otras redes y blogs dentro (2026-10-12) — C.
 - [x] Eliminar la ruta huérfana `generate-all` (2026-10-12) — C.
 - [x] Revisión del algoritmo de generación (2026-10-12): selección con señales reales y sin repetir; corregidos el «hoy» (Florida) y los mensajes en español neutro — C.
-- [ ] Worker que distinga dominio, o activar los derechos del HUB (`enforce`) — C + M.
+- [~] Worker por dominio / derechos del HUB (2026-10-12): auditado; `product_enforcement` está en `off` por defecto y publicar queda abierto a todos. Activar `enforce` es una decisión de negocio para cuando el HUB envíe los derechos — M.
 
 ## C. Después (no bloquea)
 - [ ] Rediseño del panel de Administración (se hará en local y en un solo commit grande) — C.
