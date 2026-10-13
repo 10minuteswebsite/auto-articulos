@@ -4466,3 +4466,199 @@ arreglos) por la tarea programada diaria de propagación (2026-10-12).
   aprobaciones, revisar los permisos de LinkedIn/X/Instagram al publicar, quitar el correo fijo de
   `generate/route.ts` y subir el rediseño de la pantalla de grupo (ya subido en el PR #532 de este
   mismo lote) — ver el detalle con casillas en ese documento, que esta tarea no duplica.
+
+## Versión — 2026-10-12 — Limpieza, permisos coherentes y calidad de publicación en Redes (PRs #538, #539, #540)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "BITÁCORA REDES" (entradas 2026-10-12)
+por la tarea programada diaria de propagación (2026-10-13).
+
+- **PR #538 (commit `cbfc753`)** — Permisos al publicar coherentes y sin correo fijo: Instagram ya
+  deja pasar al administrador y LinkedIn ahora comprueba su propia aprobación
+  (`allowLinkedInPublishing`) en `publish/route.ts`, con `isNetworkApprovedForPublishing` ampliada
+  a `instagram` y `linkedin` (`apps/web/src/lib/social-access.ts` + prueba); en
+  redes.lasolucionweb.com siguen abiertas todas las redes. Eliminado el correo fijo
+  `lorenalvarez30@gmail.com` (`socialOverride`) de `generate/route.ts`: Lorena sigue funcionando
+  por el dominio redes y por sus aprobaciones. X sigue apagada por decisión de Milton. Verificado:
+  typecheck, 202 pruebas web, build. Manual: sin cambio visible.
+- **PR #539 (commit `104896b`)** — Pinterest: el generador pedía 800 caracteres y se recortaba a
+  500 con «...»; ahora pide menos de 450 (reescribe una vez si pasa de 480) y menos tokens
+  (`generate/route.ts`). Errores de publicación visibles: la pantalla del grupo
+  (`oportunidades-redes/page.tsx`) muestra «Publicaciones con error» (últimas 24 h) con el motivo
+  en español (`friendlyPublishError`) y botón **Reintentar**. **Manual actualizado por el propio
+  PR** (`manual-usuario.ts`): esta tarea de propagación no duplicó ese texto. Verificado:
+  typecheck, pruebas y build antes de subir.
+- **PR #540 (commit `563f04f`)** — Eliminada la ruta huérfana
+  `apps/web/src/app/api/social-opportunities/generate-all/route.ts` (ningún código la llamaba
+  desde el rediseño; solo la citaban documentos). Aparcados por Milton: Google Business (créditos
+  de PostPeer) y Vista previa. Prueba con una cuenta distinta de Lorena y sin aprobaciones: hecha
+  por Milton, funciona. Verificado: typecheck, pruebas, build. Manual: sin cambio visible (la ruta
+  no se usaba desde ninguna pantalla).
+- Responsable: Claude.
+- Estado: PRODUCCIÓN, cerrado.
+
+## Versión — 2026-10-12 — Google Business Profile: incidente de artículos sin aprobar, límites blindados y cierre verificado (PRs #537, #547, #548, #549)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "BITÁCORA REDES" (entradas 2026-10-12)
+por la tarea programada diaria de propagación (2026-10-13).
+
+- **PR #537 (commit `874b692`)** — Google Business no conectaba: la clave de API de PostPeer
+  estaba borrada (Milton la volvió a guardar en `/dashboard/postpeer`) y, con la clave puesta,
+  `GET /connect/googlebusiness` seguía respondiendo «PostPeer respondió 500» con el perfil guardado
+  de Lorena (registros de Vercel). Arreglo: `getPostPeerOAuthUrlWithProfileRecovery`
+  (`packages/shared/src/postpeer-api.ts` + 2 pruebas) crea un perfil nuevo y reintenta si el
+  guardado falla; `startPostPeerBusinessConnection` (`apps/web/src/lib/postpeer.ts`) lo usa,
+  reinicia la cuenta guardada si cambió de perfil y deja el error real en `lastError` (visible en
+  `/api/postpeer/status`). Contexto aparcado en la misma entrada: la conexión de Lorena con
+  PostPeer había fallado antes por créditos sin pagar ($30 por 1.000 créditos, 1 crédito = 1
+  publicación); se retoma cuando se recarguen. Verificado: typecheck web y worker, pruebas, build.
+  Manual: sin cambio visible. Pendiente: reconectar Google Business desde la cuenta de Lorena y
+  publicar la propuesta pendiente (resuelto por los PR #547–#549 de este mismo grupo).
+- **PR #547 (commit `521fd02`)** — INCIDENTE Y ARREGLO: Google Business Profile publicaba
+  artículos viejos sin aprobar. El carril «perfil de negocio»
+  (`apps/worker/src/businessProfilePublish.ts`) tomaba cualquier artículo sin publicación de una
+  cuenta con conexión PostPeer ACTIVE, de más antiguo a más nuevo. Al conectarse Lorena (15:31 hora
+  de Nueva York) y con `POSTPEER_GBP_CONSUMER_READY=true` el worker de contenido hizo 163 unidades
+  de trabajo en ~80 s antes de que lo cancelara (cantidad exacta enviada vs. con error: sin
+  registro; revisar la ficha de Google de Lorena y el uso de créditos de PostPeer). Acciones
+  inmediatas: run cancelado y variable puesta en `false`. Arreglo: (1)
+  `buildBusinessProfileCandidateWhere` solo toma títulos con `BusinessProfilePost` en «pending»
+  (aprobados con el botón Publicar); el envío automático sin aprobar queda solo para la conexión
+  propia antigua con `locationName`; (2) reserva atómica pending→sending para que dos workers no
+  envíen lo mismo; (3) el carril pasó del worker de contenido al worker de Redes (`run-once.ts`),
+  que se dispara al instante al pulsar Publicar. Pruebas nuevas (`businessProfileCandidate.test.ts`).
+  La variable sigue en `false` hasta que Milton autorice volver a encenderla y probar con una sola
+  publicación (autorizado en el PR #549 de este mismo grupo).
+- **PR #548 (commit `34434ad`)** — Límites de publicación blindados (pedido de Milton, «que
+  respete los límites»): (1) regla única `resolveSocialDailyLimit`
+  (`packages/shared/src/social-limits.ts` + pruebas): sin valor o inválido = 1, 0 bloquea; la usan
+  la ruta Publicar y el worker; (2) `publish/route.ts`: la reserva del cupo y el paso a «en cola»
+  ocurren en una sola transacción con bloqueo por usuario y red (`queueWithinDailyLimit`), así dos
+  clics simultáneos no superan el cupo; en Google Business se reserva ANTES de aprobar el envío;
+  (3) Google Business también comprueba el cupo en el worker (`enforceSocialDailyLimit` exportada);
+  (4) el carril de Google Business exige además que la propuesta siga en cola (una propuesta
+  descartada con su envío «pending» no se publica). Nota sin resolver: el «día» se corta a
+  medianoche UTC en web y worker (8 p. m. en Florida); decisión pendiente de Milton. Verificado:
+  typecheck, 205 + 20 + 5 pruebas.
+- **PR #549 (commit `803a18c`)** — Google Business Profile CERRADO Y VERIFICADO: con el código de
+  los PR #547 y #548 en `main` y `POSTPEER_GBP_CONSUMER_READY=true`, la propuesta «Calificar para
+  Obamacare como inmigrante en EE. UU.» de Lorena (que había quedado en error por atascada) se
+  reintentó con el botón **Reintentar** y quedó «Publicado en Google Business Profile mediante
+  PostPeer» en unos 40 s, desde el worker de Redes. El worker procesó exactamente 1 unidad de
+  trabajo del carril (sin artículos viejos). Conexión de Lorena en PostPeer: ACTIVE (reconectada
+  por Milton a las 15:31 hora de Nueva York). La variable queda en `true`. Solo documentación, sin
+  cambio de código.
+- Responsable: Claude.
+- Estado: CERRADO. La única nota sin resolver de este grupo es la decisión de Milton sobre el
+  corte del «día» del cupo diario (medianoche UTC vs. hora de Florida), anotada arriba sin
+  duplicarla.
+
+## Versión — 2026-10-12 — Conexión por Composio para todas las cuentas y acceso ampliado de administrador (PRs #545, #546)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "BITÁCORA REDES" (entradas 2026-10-12)
+por la tarea programada diaria de propagación (2026-10-13).
+
+- **PR #546 (commit `97612b9`)** — Instagram, Facebook y Pinterest se conectan por Composio para
+  TODAS las cuentas (pedido de Milton). Causa: la cuenta #35 al conectar Instagram fue al inicio
+  de sesión directo de Meta, que responde «Función no disponible» (no hay app de Meta aprobada);
+  el camino Composio exigía el módulo opt-in «Conexión por Composio» (solo Lorena y Zulmad lo
+  tenían). Cambios: `composio-access.ts` (`isOpenComposioApp`), `api/composio/_access.ts` y
+  `callback/route.ts` (las tres redes abiertas; en el dominio redes se aplican todas las redes
+  abiertas), `OAuthNetworkSection.tsx` + `InstagramSection`/`FacebookSection` (el bloque de conexión
+  directa con Meta solo se ve a administradores o a quien ya la tiene conectada),
+  `apps/worker/src/socialPublish.ts` (Pinterest también por Composio para todos, como Facebook e
+  Instagram). **Manual actualizado por el propio PR**: esta tarea de propagación no duplicó ese
+  texto. Verificado: typecheck, pruebas web (205) y worker (20), build. Pendiente: que las cuentas
+  #35 y #18 conecten Instagram por Composio y se verifique.
+- **PR #545 (commit `37d1b7b`)** — Interruptor del administrador en seototal: «Dárselo a esta
+  cuenta» (Redes) ahora abre el módulo y la tarjeta del Inicio a cualquier cuenta, no solo a la
+  lista piloto fija (administrador, «zulmad», «lorena alvarez»). `canSeeSocialModule`
+  (`apps/web/src/lib/modules.ts`) consulta el override `oportunidades-redes = enabled`;
+  «Quitárselo» sigue ganando; sin interruptor se mantiene la lista piloto. En la ficha de
+  Administración (`usuarios/page.tsx`) se quitó el cambio de rótulos «Quitárselo/Quitado» que
+  aparecía para cuentas fuera de la lista. Cambio de decisión pedido por Milton (usuarios #18
+  Aranzazu Gomez Baldor y #35 Yolanda Landinez ya tenían «Habilitado» y las 9 redes aprobadas, pero
+  no veían la tarjeta). Prueba existente actualizada. Verificado: typecheck, pruebas, build.
+  **Manual: ya reflejaba este comportamiento** (sección "${MENU_NAMES.redes}" de
+  `manual-usuario.ts`, nota fechada 2026-10-12 sobre «Dárselo a esta cuenta») — esta tarea de
+  propagación no duplicó ese texto.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN, cerrado. Pendiente anotado arriba (verificar conexión de las cuentas #35 y
+  #18 por Composio) sin duplicarlo en `TO-DO.md`.
+
+## Versión — 2026-10-12 — Rediseño final de Redes: tarjeta única, instrucciones de conexión estándar y nombre unificado (PRs #551, #552, #553)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "BITÁCORA REDES" (entradas 2026-10-12)
+por la tarea programada diaria de propagación (2026-10-13).
+
+- **PR #551 (commit `a7ed4af`)** y **PR #552 (commit `4ecd0f8`)** — Solo documentación, sin cambio
+  de código: anotan como pendientes de la lista B (pedido de Milton) la tarjeta única «Publicación
+  en Redes Sociales y Blogs» en el Inicio (sustituye al punto «un solo selector de grupo») y las
+  instrucciones de conexión estándar para todas las redes y blogs (Instagram tenía instrucciones
+  distintas); el PR #552 además marca como hecha la casilla del rediseño (PR #532). Detalle con
+  casillas en `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md` — esta tarea de propagación no lo duplicó en
+  `TO-DO.md`.
+- **PR #553 (commit `0f3ea7e`)** — Implementa los tres puntos de la lista B: (1) TARJETA ÚNICA en
+  el Inicio «PUBLICACIÓN EN REDES SOCIALES Y BLOGS» (`dashboard/page.tsx`) que lleva a
+  `/dashboard/oportunidades-redes`, donde se elige META u Otras redes y blogs; el botón de regreso
+  del grupo ahora es «‹ Volver» y la pantalla de elección tiene título
+  (`oportunidades-redes/page.tsx`); los enlaces `?grupo=meta|otras` siguen funcionando. (2)
+  INSTRUCCIONES DE CONEXIÓN ESTÁNDAR: una sola plantilla (`lib/connection-guides.ts`, `oauthGuide`:
+  6 pasos, enlace para crear la cuenta y «Si falla») para Threads, LinkedIn, Pinterest, Tumblr,
+  Blogger, Instagram, Facebook y Google Business; `ComposioConnect.tsx` ya no tiene pasos propios
+  para esas redes y usa el mismo componente `ConnectionGuide`; Bluesky conserva sus pasos
+  (contraseña de aplicación) en el mismo formato. (3) NOMBRE ÚNICO: `MENU_NAMES.redes` =
+  «PUBLICACIÓN EN REDES SOCIALES Y BLOGS» (menú, pantallas, manual); el nombre anterior pasó a
+  `MENU_NAMES_ANTERIORES`. **Manual actualizado por el propio PR**: esta tarea de propagación no
+  duplicó ese texto. Verificado: typecheck, pruebas y build antes de subir. Pendiente de la lista B
+  en este tema: unificar «oportunidad/propuesta» y «Facebook/Facebook Pages» dentro de los textos
+  (anotado en `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`, sin duplicar en `TO-DO.md`).
+- Responsable: Claude.
+- Estado: PRODUCCIÓN, cerrado.
+
+## Versión — 2026-10-12 — Asistentes IA: prompt MCP con programación autónoma mejorado (PR #554, archivado en PR #555)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "Codex — CIERRE Y ARCHIVO «PROMPT MCP CON
+PROGRAMACIÓN AUTÓNOMA»" (2026-10-12) por la tarea programada diaria de propagación (2026-10-13).
+
+- **PR #554 (commit `9bea1d8e`, cerrado y archivado por el PR #555 commit `f989f30`)** — Mejora el
+  prompt copiable de Asistentes IA (`apps/web/src/app/dashboard/configuracion/mcp/page.tsx`) para
+  crear tres tareas diarias a las 07:00, 12:00 y 19:00, mantenerlas activas hasta «detente»,
+  solicitar credenciales solo mediante el campo seguro del asistente y reponer oportunidades
+  automáticamente cuando falten, usando `crear_oportunidades`; si Google Search Console, la
+  generación o la publicación falla, el asistente debe informar el problema y no fingir que
+  completó el cupo. Solo cambia el texto del prompt mostrado en esa pantalla: no crea un
+  programador dentro de SEO Total ni añade migraciones. Anteriores correcciones MCP relacionadas:
+  PR #541 (OAuth ChatGPT), #542 (pasos finales ChatGPT), #543 (tres horarios) y #544 (reposición).
+  Manual: la sección "Asistentes IA" de `manual-usuario.ts` ya describe el flujo de forma genérica
+  (generar/copiar token, copiar prompt, autorización para publicar sin aprobación paso a paso) sin
+  detallar los horarios exactos del prompt; esta tarea de propagación no encontró un cambio de
+  pantalla o flujo nuevo que requiera actualizar el manual.
+- Responsable: Claude.
+- Estado: CERRADO Y ARCHIVADO según la propia entrada de Coordinación. Capitanía liberada. Sin
+  migraciones.
+
+## Decisión registrada — 2026-10-12 — Seguridad del repositorio: se queda público (responsable: David del Sacramento)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "SEGURIDAD DEL REPOSITORIO — DECISIÓN DE
+MILTON" (2026-10-12) por la tarea programada diaria de propagación (2026-10-13). Se registra aquí
+porque documenta una decisión y una auditoría de solo lectura sobre el repositorio, sin que exista
+todavía un commit/deployment de código para ella; el detalle con casillas vive en
+`ENCARGO_SEGURIDAD_REPO_DAVID.md`, que esta tarea no duplica.
+
+- **Decisión de Milton:** el repositorio `10minuteswebsite/auto-articulos` se queda PÚBLICO (plan
+  Free). Pasarlo a privado costaría ~$96/mes con el uso actual (~14.500 min/mes de Actions, 90 %
+  del Worker de Auto Artículos) y ~$212/mes con el doble; la alternativa, un runner propio en la
+  Mac mini, dejaría la producción dependiendo de esa máquina. No se hace por ahora.
+- **Responsable:** David del Sacramento, como jefe de sistemas, debe tomar las medidas para
+  proteger el activo (encargo completo con casillas en `ENCARGO_SEGURIDAD_REPO_DAVID.md`).
+- **Auditoría de solo lectura (2026-10-12):** historial sin claves reconocibles; sin `.env`
+  reales; ningún workflow usa `pull_request_target`; permisos de Actions por defecto en solo
+  lectura. Huecos encontrados: `main` sin protección de rama; secret scanning, push protection y
+  Dependabot apagados; logs de workflows públicos (los de diagnóstico y arreglos puntuales podrían
+  imprimir datos de usuarios); sin `LICENSE` ni `SECURITY.md`; 2FA sin verificar; acciones de
+  terceros sin fijar a SHA.
+- No hubo ninguna acción destructiva, migración ni cambio de configuración de GitHub ejecutado por
+  esta tarea de propagación: solo se registra la decisión ya tomada por Milton.
+- Responsable: David del Sacramento (encargo). Registro: Claude (tarea programada diaria de
+  propagación).
+- Estado: ABIERTO — encargo activo, sin fecha de cierre todavía.
