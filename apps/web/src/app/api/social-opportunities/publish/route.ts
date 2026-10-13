@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@auto-articulos/db";
-import { resolveSocialDailyLimit } from "@auto-articulos/shared";
+import { resolveSocialDailyLimit, startOfSocialDay } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { canUseSocialModule, getSocialHostContext, isNetworkApprovedForPublishing } from "@/lib/social-access";
 import { requireProductAccess } from "@/lib/require-product-access";
@@ -19,8 +19,7 @@ async function queueWithinDailyLimit(
   dailyLimit: number,
   data: Prisma.SocialOpportunityUpdateInput,
 ): Promise<boolean> {
-  const dayStart = new Date();
-  dayStart.setHours(0, 0, 0, 0);
+  const dayStart = startOfSocialDay();
   return prisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe("SELECT pg_advisory_xact_lock(hashtext($1))", `daily-limit:${userId}:${opp.platform}`);
     const used = await tx.socialOpportunity.count({
@@ -110,8 +109,7 @@ export async function POST(request: NextRequest) {
     // esta comprobación como respaldo.
     const limitsRaw = (await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } }))?.socialDailyLimits;
     const dailyLimit = resolveSocialDailyLimit(limitsRaw, opp.platform);
-    const dayStart = new Date();
-    dayStart.setHours(0, 0, 0, 0);
+    const dayStart = startOfSocialDay();
     const usedToday = await prisma.socialOpportunity.count({
       where: {
         userId,
