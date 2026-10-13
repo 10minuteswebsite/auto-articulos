@@ -30,3 +30,4 @@ export * from "./composio-connection-state";
 export const MAX_ATTEMPTS = 3;
 export * from "./friendly-error";
 export * from "./social-limits";
+export * from "./social-day";

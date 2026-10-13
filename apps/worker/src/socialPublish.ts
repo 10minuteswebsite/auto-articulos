@@ -30,6 +30,7 @@ import {
   methodFor,
   friendlyPublishError,
   resolveSocialDailyLimit,
+  startOfSocialDay,
 } from "@auto-articulos/shared";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
@@ -86,7 +87,7 @@ async function updateSocialProgress(
 export async function enforceSocialDailyLimit(userId: string, platform: string): Promise<void> {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { socialDailyLimits: true } });
   const limit = resolveSocialDailyLimit(user?.socialDailyLimits, platform);
-  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const start = startOfSocialDay();
   const published = await prisma.socialOpportunity.count({ where: { userId, platform, status: "published", publishedAt: { gte: start } } });
   if (published >= limit) throw new Error(`Límite diario alcanzado para ${platform}: ${limit} publicación(es).`);
 }

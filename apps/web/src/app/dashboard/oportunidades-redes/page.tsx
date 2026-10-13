@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { friendlyPublishError } from "@auto-articulos/shared/src/friendly-error";
+import { startOfSocialDay } from "@auto-articulos/shared/src/social-day";
 import { MENU_NAMES } from "@/lib/menu-names";
 import MobileInstructions from "@/components/MobileInstructions";
 import { useRouter } from "next/navigation";
@@ -513,9 +514,9 @@ export default function OportunidadesRedesPage() {
     );
   }
 
-  const todayKey = new Date().toDateString();
+  const dayStart = startOfSocialDay().getTime();
   const publishedTodayFor = (rowKey: string, rowPlatform: string) =>
-    opportunities.filter((o) => o.status === "published" && o.publishedAt && new Date(o.publishedAt).toDateString() === todayKey && o.platform.trim().toLowerCase() === limitFormatOf(rowKey, rowPlatform)).length;
+    opportunities.filter((o) => o.status === "published" && o.publishedAt && new Date(o.publishedAt).getTime() >= dayStart && o.platform.trim().toLowerCase() === limitFormatOf(rowKey, rowPlatform)).length;
 
   return (
     <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto", paddingBottom: 40 }}>

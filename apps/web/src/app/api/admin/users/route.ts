@@ -9,6 +9,7 @@ import {
   DEFAULT_DAILY_ARTICLE_LIMIT,
   isPlatformDomain,
   PLATFORM_DOMAIN_VALUES,
+  startOfSocialDay,
 } from "@auto-articulos/shared";
 import { auditLog } from "@/lib/audit";
 import { ensureDefaultEntitlements } from "@/lib/product-access";
@@ -125,8 +126,7 @@ export async function GET() {
 
   // Publicaciones de difusión ya hechas hoy, por usuario y plataforma, con el
   // mismo corte de día que usa el worker (enforceSocialDailyLimit).
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
+  const startOfDay = startOfSocialDay();
   const socialToday = await prisma.socialOpportunity.groupBy({
     by: ["userId", "platform"],
     where: { status: "published", publishedAt: { gte: startOfDay } },
