@@ -11482,3 +11482,58 @@ Instagram/Facebook, etc.) ya estaban anotadas con casillas en `PENDIENTES_SALIDA
 antes de esta corrida.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-13
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-12 (commit
+`3d39434`). Se revisó el rango `3d39434..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 39
+líneas agregadas (0 eliminadas, confirmado con `git diff --stat`), correspondientes a 14 commits
+nuevos / PRs #537 a #553 y #555 — el cierre y archivo de Codex del prompt MCP con programación
+autónoma (PR #554/#555), la nueva sección «SEGURIDAD DEL REPOSITORIO» (decisión de Milton de
+dejar el repo público, con encargo a David del Sacramento) y 14 entradas nuevas en la BITÁCORA
+REDES del 2026-10-12.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 6 entradas nuevas, agrupando los 13 commits de código/docs de
+  Redes y el PR #554/#555 de Asistentes IA por tema — "Limpieza, permisos coherentes y calidad de
+  publicación en Redes (PRs #538, #539, #540)", "Google Business Profile: incidente de artículos
+  sin aprobar, límites blindados y cierre verificado (PRs #537, #547, #548, #549)", "Conexión por
+  Composio para todas las cuentas y acceso ampliado de administrador (PRs #545, #546)", "Rediseño
+  final de Redes: tarjeta única, instrucciones de conexión estándar y nombre unificado (PRs #551,
+  #552, #553)", "Asistentes IA: prompt MCP con programación autónoma mejorado (PR #554, archivado
+  en PR #555)" y una entrada de "Decisión registrada" (no es un commit de código) para la
+  Seguridad del repositorio. Cada entrada detalla archivos, verificación y estado; se señaló en
+  cada caso cuándo el manual ya fue actualizado por el propio PR (#539, #546, #553) o ya reflejaba
+  el comportamiento nuevo (#545) para no duplicarlo.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios por esta tarea — los cambios visibles para
+  el usuario final de este rango (tarjeta única, instrucciones de conexión estándar y nombre
+  unificado del PR #553; Composio para todas las cuentas del PR #546; errores visibles + reintento
+  de Pinterest del PR #539) ya fueron documentados en el manual por esos mismos PR, y el
+  comportamiento ampliado de «Dárselo a esta cuenta» (PR #545) ya estaba descrito en la sección
+  "${MENU_NAMES.redes}" con una nota fechada 2026-10-12. El resto del rango (incidente y límites de
+  Google Business, permisos al publicar, ruta huérfana eliminada, el prompt de Asistentes IA, la
+  decisión de seguridad del repositorio) no agrega pantallas ni flujos nuevos para el usuario; son
+  correcciones internas, decisiones de infraestructura o ajustes de texto de un prompt ya descrito
+  de forma genérica en el manual.
+- `INVENTARIO_CONVERSACIONES.md`: sin cambios — ninguna entrada de este rango reserva un
+  archivo/rama nueva ni introduce el nombre de una conversación en formato «[AGENTE] - [NOMBRE DEL
+  PROBLEMA]»; la única mención de capitanía (sección «SEGURIDAD DEL REPOSITORIO») quedó reclamada
+  y liberada en el mismo commit, sin dejar una reserva activa que verificar contra
+  `git worktree list`.
+- `TO-DO.md`: sin cambios — las dos «PENDIENTE AÑADIDO» de este rango (instrucciones de conexión
+  estándar y tarjeta única en el Inicio) ya están marcadas `[x]` en
+  `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md` (líneas 33 y 36), y el pendiente de unificar «oportunidad
+  / propuesta» y «Facebook / Facebook Pages» del PR #553 ya está anotado `[~]` en el mismo
+  documento (línea 34): agregarlos aquí habría sido duplicar.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguno de los 14 commits de este rango
+  describe un árbol de git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. No quedó
+ninguna duda nueva sin resolver para Milton en este rango: la única decisión pendiente que
+aparece en el texto de Coordinación (dónde cortar el «día» del cupo diario de Redes, medianoche
+UTC vs. hora de Florida, PR #548) ya estaba anotada como pendiente de Milton en la propia entrada
+de Coordinación antes de esta corrida, y queda igual de visible en la nueva entrada de
+`CONTROLADOR_DE_VERSIONES.md`.
+
+Responsable: Claude (tarea programada diaria de propagación).
