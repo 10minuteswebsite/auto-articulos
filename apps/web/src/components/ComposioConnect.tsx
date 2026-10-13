@@ -375,10 +375,14 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
               : STATUS_LABEL[connection.status];
           const isBusy = busy === connection.app;
           if (inline && showInactiveActions && connection.status !== "ACTIVE") {
+            const inactiveGuide = guideFor(connection.app);
             return (
-              <button key={connection.app} type="button" onClick={() => connect(connection.app)} disabled={busy !== null} style={{ ...secondaryButtonStyle, marginTop: 12 }}>
-                {isBusy ? "Abriendo…" : `Nueva conexión de ${connection.app === "facebook" ? "Facebook" : connection.app === "pinterest" ? "Pinterest" : "Instagram"}`}
-              </button>
+              <div key={connection.app}>
+                {inactiveGuide && <ConnectionGuide steps={inactiveGuide.steps} ifFails={"ifFails" in inactiveGuide ? inactiveGuide.ifFails : undefined} signupUrl={"signupUrl" in inactiveGuide ? inactiveGuide.signupUrl : undefined} signupLabel={"signupLabel" in inactiveGuide ? inactiveGuide.signupLabel : undefined} />}
+                <button type="button" onClick={() => connect(connection.app)} disabled={busy !== null} style={{ ...secondaryButtonStyle, marginTop: 12 }}>
+                  {isBusy ? "Abriendo…" : `Nueva conexión de ${connection.app === "facebook" ? "Facebook" : connection.app === "pinterest" ? "Pinterest" : "Instagram"}`}
+                </button>
+              </div>
             );
           }
           const isSuccessful = connection.status === "ACTIVE" && Boolean(connection.selection) && !choice;
