@@ -26,21 +26,29 @@ export default function ConfiguracionInicialPage() {
     let cancelled = false;
     async function check() {
       try {
-        const [credRes, catRes, meRes, googleRes] = await Promise.all([
+        const [credRes, meRes, googleRes, composioRes] = await Promise.all([
           fetch("/api/credentials", { cache: "no-store" }),
-          fetch("/api/categories", { cache: "no-store" }),
           fetch("/api/me", { cache: "no-store" }),
           fetch("/api/search-integrations/google", { cache: "no-store" }),
+          fetch("/api/composio/status", { cache: "no-store" }),
         ]);
         const credData = credRes.ok ? await credRes.json() : {};
-        const catData = catRes.ok ? await catRes.json() : {};
         const meData = meRes.ok ? await meRes.json() : {};
         const googleData = googleRes.ok ? await googleRes.json() : {};
         const step1 = Boolean(credData.configured);
-        const step2 = Array.isArray(catData.categories) && catData.categories.length > 0;
         const step3 = typeof meData.contentLanguage === "string" && meData.contentLanguage.trim().length > 0;
-        const step4 = Boolean(googleData.connected && googleData.siteUrl);
-        if (!cancelled) setWizardComplete(step1 && step2 && step3 && step4);
+        // Mismo criterio que el Inicio y el asistente: Search Console cuenta si
+        // está conectado por Google directo O por Composio con propiedad elegida.
+        const composioData = composioRes.ok ? await composioRes.json() : null;
+        const composioGsc = Array.isArray(composioData?.connections)
+          ? composioData.connections.find((c: { app: string }) => c.app === "google_search_console")
+          : null;
+        const step4 = Boolean(
+          (googleData.connected && googleData.siteUrl) ||
+            (composioGsc?.status === "ACTIVE" && composioGsc.selection),
+        );
+        // Las categorías son opcionales en el onboarding (ver OnboardingWizard).
+        if (!cancelled) setWizardComplete(step1 && step3 && step4);
       } catch {
         if (!cancelled) setWizardComplete(false);
       }
