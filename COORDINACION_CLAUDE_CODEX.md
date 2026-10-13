@@ -1,6 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
-## Claude — Fix: el wizard no sale (adelatallada.com) y Paso 6 en gris — 2026-10-13
+## Claude — CIERRE «Fix: el wizard no sale (adelatallada.com) y Paso 6 en gris» — 2026-10-13
+
+- Estado: CERRADO Y ARCHIVADO. PR #557 fusionada en `main` (`eb551d8f`), Vercel success. Sin migración. Capitanía liberada.
+- Verificado en producción por Milton y Claude con la cuenta de Adela Tallada (adelatallada.com): el Inicio ya sale del wizard y muestra las tres acciones.
+- NO verificado en pantalla: el Paso 6 activo (`isActive={allCoreDone}`) y el botón 02 sin gris; solo se ve al terminar el Paso 4 en una cuenta nueva. Comprobado solo por código y tipos. Seguimiento: mirarlo con la próxima cuenta nueva.
+- Pendiente de decisión de Milton: `PreValidationGuard` y `/api/pre-validation` siguen exigiendo categorías para Publicar/Oportunidades; una cuenta sin categorías saldrá del wizard pero Publicar le pedirá sincronizarlas.
+- Observación sin resolver: en el Inicio de Adela no se veía el menú de navegación; no se confirmó si es normal.
 
 - Síntoma: la cuenta adelatallada.com conectó Search Console en el wizard y no salía de él; los botones del Paso 6 se veían grises.
 - Causa (código, sin leer la base de producción): el 7/10 (`c5e862e7`) el wizard pasó a tratar las categorías como opcionales, pero el Inicio (`dashboard/page.tsx`) y `configuracion/inicial/page.tsx` seguían exigiendo `categories.length > 0` para dar la configuración por completa. Una web sin categorías veía los 4 pasos en verde y el Inicio mantenía el wizard para siempre. El dato de categorías de esa cuenta no se pudo leer (producción bloqueada); queda por confirmar con ella.
