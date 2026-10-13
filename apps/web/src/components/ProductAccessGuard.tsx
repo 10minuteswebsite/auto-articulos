@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PRODUCT_NAMES } from "@/lib/menu-names";
-import { productOfPath } from "@/lib/product-routes";
+import { HUB_URL, productOfPath } from "@/lib/product-routes";
 import {
   evaluatePageGate,
   graceNotices,
@@ -52,9 +52,12 @@ export default function ProductAccessGuard({ children }: { children: ReactNode }
           {venció
             ? `Tu periodo de gracia de ${name} ya terminó. `
             : `Tu cuenta no tiene ${name} activo. `}
-          Para volver a usarlo, contacta al administrador. No se ha perdido ninguno de tus datos.
+          Para volver a usarlo, activa o renueva tu acceso en el HUB. No se ha perdido ninguno de tus datos.
         </p>
-        <Link href="/dashboard" style={{ display: "inline-block", padding: "10px 20px", background: "#1d1d1f", color: "#ffffff", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none" }}>
+        <a href={HUB_URL} style={{ display: "inline-block", padding: "10px 20px", background: "#1d1d1f", color: "#ffffff", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none", marginRight: 10 }}>
+          Ir al HUB para activar o renovar
+        </a>
+                <Link href="/dashboard" style={{ display: "inline-block", padding: "10px 20px", background: "#ffffff", color: "#1d1d1f", border: "1px solid #d2d2d7", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none" }}>
           Volver a Inicio
         </Link>
       </div>

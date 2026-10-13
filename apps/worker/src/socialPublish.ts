@@ -1613,7 +1613,7 @@ export async function processNextSocialPublish(filterUserId?: string, filterArti
     // preparar/publicar el destino. En `shadow` solo registra; en `enforce`
     // evita iniciar destinos nuevos y deja el trabajo visible como error.
     if (!(await checkSocialProductAccess(job.userId, job.platform))) {
-      throw new Error("Publicación detenida: la cuenta no tiene acceso vigente a Redes.");
+      throw new Error("Publicación detenida: tu acceso a Redes no está vigente. Actívalo o renuévalo en el HUB (https://hub.lasolucionweb.net) y vuelve a pulsar Reintentar.");
     }
 
     await enforceSocialDailyLimit(job.userId, job.platform);
