@@ -2,6 +2,27 @@
 
 Última actualización: 2026-09-08, por Claude.
 
+## Checkpoint activo — migración de login al Hub (2026-10-14, Codex)
+
+Se preparó la separación segura entre usuarios del Hub y acceso administrativo
+legacy. `/login` ahora es una puerta de transición hacia el Hub; el formulario
+local queda en `/admin-login` (solo cuentas con rol `admin`). Las cookies nuevas llevan un origen HMAC firmado
+(`hub` o `legacy`), las cookies antiguas de tres segmentos siguen funcionando
+como legacy y el menú global del Hub solo se muestra para sesiones verificadas
+con origen `hub`.
+
+Archivos principales: `apps/web/src/lib/session.ts`,
+`apps/web/src/lib/session.test.ts`, `apps/web/src/middleware.ts`,
+`apps/web/src/app/auth/hub/route.ts`, `apps/web/src/app/dashboard/layout.tsx`,
+`apps/web/src/app/login/page.tsx`, `apps/web/src/app/admin-login/page.tsx` y
+`apps/web/src/app/api/auth/login/route.ts`.
+
+Auditoría local: 88 pruebas web, typecheck, build de producción y
+`git diff --check` correctos. Sin migración, OAuth, secretos ni datos tocados.
+No se ha desplegado todavía; queda la prueba funcional autenticada y la
+autorización explícita de producción. Los cambios locales preexistentes del
+checkout se conservaron.
+
 ## Cierre final — auditoría editorial y enlaces (20/9/2026, Codex)
 
 Trabajo documentado y archivado. PR #187 quedó fusionado a `main` y la

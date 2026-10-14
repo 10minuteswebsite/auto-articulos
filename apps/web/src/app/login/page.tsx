@@ -12,16 +12,88 @@ import { QrCodeDisplay } from "@/components/QrCodeDisplay";
 // servidores; ver PLATFORM_SERVERS en packages/shared para el enlace
 // específico de tagcrush, usado una vez dentro del dashboard.
 const FORGOT_PASSWORD_URL = PLATFORM_SERVERS.net.helpUrl;
+const HUB_URL = process.env.NEXT_PUBLIC_HUB_URL || "https://hub.lasolucionweb.net";
 
 export default function LoginPage() {
   return (
     <Suspense fallback={null}>
-      <LoginContent />
+      <HubMigrationPage />
     </Suspense>
   );
 }
 
-function LoginContent() {
+/**
+ * Login administrativo/legacy, conservado fuera de la puerta pública de
+ * transición. No se muestra desde /login para evitar que usuarios del Hub
+ * sigan creando sesiones locales por accidente.
+ */
+export function LegacyLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent adminOnly />
+    </Suspense>
+  );
+}
+
+function HubMigrationPage() {
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px 16px",
+        boxSizing: "border-box",
+      }}
+    >
+      <section
+        style={{
+          width: "100%",
+          maxWidth: 560,
+          padding: "clamp(28px, 6vw, 52px)",
+          borderRadius: 22,
+          boxShadow: "0 2px 40px rgba(0, 0, 0, 0.08)",
+          textAlign: "center",
+          boxSizing: "border-box",
+        }}
+      >
+        <div style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "#86868b", fontWeight: 600 }}>
+          LA SOLUCIÓN IA
+        </div>
+        <h1 style={{ margin: "14px 0 12px", color: "#1d1d1f", fontSize: "clamp(28px, 6vw, 40px)", lineHeight: 1.1, letterSpacing: "-0.03em" }}>
+          Entra desde el Hub
+        </h1>
+        <p style={{ margin: "0 auto 24px", maxWidth: 440, color: "#6e6e73", fontSize: 16, lineHeight: 1.5 }}>
+          Para acceder a SEO TOTAL y a tus demás aplicaciones, inicia sesión en el Hub de LA SOLUCIÓN IA.
+        </p>
+        {error && (
+          <p role="alert" style={{ margin: "0 0 18px", padding: "10px 12px", borderRadius: 10, background: "#fff7e6", color: "#8a4b08", fontSize: 13, lineHeight: 1.4 }}>
+            No se pudo completar el acceso desde el Hub. Vuelve a intentarlo desde el botón principal.
+          </p>
+        )}
+        <a
+          href={`${HUB_URL}/dashboard`}
+          style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 46, padding: "12px 20px", borderRadius: 10, background: "#1d1d1f", color: "#ffffff", fontWeight: 600, fontSize: 14, textDecoration: "none", boxSizing: "border-box", width: "100%" }}
+        >
+          Ir al Hub
+        </a>
+        <p style={{ margin: "22px 0 0", color: "#86868b", fontSize: 12, lineHeight: 1.5 }}>
+          ¿Eres administrador de SEO TOTAL?{" "}
+          <a href="/admin-login" style={{ color: "#0066cc", textDecoration: "none" }}>
+            Acceso administrativo
+          </a>
+        </p>
+      </section>
+    </main>
+  );
+}
+
+function LoginContent({ adminOnly = false }: { adminOnly?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -56,7 +128,7 @@ function LoginContent() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, ...(adminOnly ? { adminOnly: true } : {}) }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -194,6 +266,7 @@ function LoginContent() {
               boxSizing: "border-box",
             }}
           >
+            {adminOnly && <input type="hidden" name="adminOnly" value="true" />}
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2 }}>
               <h1
                 style={{

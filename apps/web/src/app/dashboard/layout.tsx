@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
 import DashboardNav from "@/components/DashboardNav";
 import FloatingAssistant from "@/components/FloatingAssistant";
-import LogoutButton from "@/components/LogoutButton";
 import ModuleGuard from "@/components/ModuleGuard";
-import StopImpersonationButton from "@/components/StopImpersonationButton";
 import TrialBlockedScreen from "@/components/TrialBlockedScreen";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
+import EcosystemHeader from "@/components/EcosystemHeader";
+import AppBreadcrumbs from "@/components/AppBreadcrumbs";
 import { displayName, getSessionContext } from "@/lib/current-user";
 import { hasTrialAccess } from "@/lib/trial";
 import { getMaintenanceMode } from "@/lib/maintenance";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,6 +20,12 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const { user, actingAdmin } = await getSessionContext();
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("host")?.split(":")[0].toLowerCase() ?? "";
+  const showHubNavigation = requestHeaders.get("x-auth-source") === "hub";
+  const product = host.startsWith("redes.")
+    ? { hubLabel: "Redes Totales", appLabel: "SEO TOTAL" }
+    : { hubLabel: "Auto Artículos", appLabel: "SEO TOTAL" };
   const blocked = !actingAdmin && user.role !== "admin" && !hasTrialAccess(user);
   const maintenance = await getMaintenanceMode();
 
@@ -27,45 +34,32 @@ export default async function DashboardLayout({
   }
 
   return (
-    <main
-      className="dashboard-main shell"
-      style={{
-        maxWidth: 1120,
-        margin: "0 auto",
-        padding: "28px 24px 64px",
-        boxSizing: "border-box",
-        position: "relative",
-      }}
-    >
+    <>
+      {showHubNavigation && (
+        <EcosystemHeader
+          email={user.email}
+          isAdmin={user.role === "admin" || Boolean(actingAdmin)}
+          actingAdminName={actingAdmin ? displayName(actingAdmin) : undefined}
+          actingUserName={actingAdmin ? displayName(user) : undefined}
+          product={product}
+        />
+      )}
+      <main
+        className="dashboard-main shell"
+        style={{
+          maxWidth: 1120,
+          margin: "0 auto",
+          padding: "18px 24px 64px",
+          boxSizing: "border-box",
+          position: "relative",
+        }}
+      >
       <style>{`
         @media (max-width: 639px) {
-          .topbar { display: flex !important; margin-bottom: 12px !important; align-items: center !important; }
-          .topbar-title { flex: 1; }
-          .topbar-title .eyebrow { display: block; font-size: 9px !important; margin-top: 2px !important; letter-spacing: 0.06em !important; }
-          .topbar-title h1 { font-size: 21px !important; }
-          .session-actions { display: none !important; }
           .dashboard-nav { position: absolute !important; top: 18px; right: 16px; margin: 0 !important; z-index: 20; }
           .dashboard-main > nav { margin-top: 0 !important; margin-bottom: 22px !important; }
           .dashboard-main {
             padding: 20px 16px 44px !important;
-          }
-          .topbar {
-            align-items: stretch !important;
-            gap: 14px !important;
-          }
-          .topbar-title h1 {
-            font-size: 23px !important;
-          }
-          .session-actions {
-            width: 100%;
-            justify-content: space-between !important;
-            gap: 8px !important;
-          }
-          .session-user {
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
           }
         }
         @media (min-width: 768px) and (max-width: 1023px) {
@@ -119,101 +113,17 @@ export default async function DashboardLayout({
           }
         }
       `}</style>
-      <div
-        className="topbar"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 12,
-          marginBottom: 18,
-        }}
-      >
-        <div className="topbar-title">
-          <h1
-            style={{
-              fontSize: 26,
-              fontWeight: 600,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              color: "#1d1d1f",
-            }}
-          >
-            LA SOLUCIÓN IA
-          </h1>
-          <p className="eyebrow" style={{ margin: "4px 0 0" }}>
-            SEO TOTAL
-          </p>
-        </div>
-        <div
-          className="session-actions"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            flexWrap: "wrap",
-            justifyContent: "flex-end",
-          }}
-        >
-          {actingAdmin ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-end",
-                gap: 2,
-                maxWidth: "100%",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 12,
-                  color: "#6e6e73",
-                  wordBreak: "break-word",
-                  textAlign: "right",
-                }}
-              >
-                {displayName(actingAdmin)}
-              </span>
-              <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#8a4b08",
-                  wordBreak: "break-word",
-                  textAlign: "right",
-                }}
-              >
-                Actuando como: {displayName(user)}
-              </span>
-            </div>
-          ) : (
-            <span
-              className="session-user"
-              style={{
-                fontSize: 13,
-                color: "#6e6e73",
-                fontWeight: 500,
-                wordBreak: "break-word",
-              }}
-            >
-              {displayName(user)}
-            </span>
-          )}
-          {actingAdmin && <StopImpersonationButton />}
-          <LogoutButton />
-        </div>
-      </div>
       {blocked ? (
         <TrialBlockedScreen />
       ) : (
         <>
           <DashboardNav />
+          <AppBreadcrumbs productLabel={product.hubLabel} />
           <ModuleGuard>{children}</ModuleGuard>
           <FloatingAssistant />
         </>
       )}
-    </main>
+      </main>
+    </>
   );
 }

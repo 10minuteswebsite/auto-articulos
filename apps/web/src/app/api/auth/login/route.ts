@@ -7,8 +7,9 @@ export async function POST(request: NextRequest) {
   const payload = contentType.includes("application/json")
     ? await request.json()
     : Object.fromEntries((await request.formData()).entries());
-  const { email, password } = payload as { email?: unknown; password?: unknown };
+  const { email, password, adminOnly } = payload as { email?: unknown; password?: unknown; adminOnly?: unknown };
   const nativeForm = !contentType.includes("application/json");
+  const adminOnlyLogin = adminOnly === true || adminOnly === "true";
 
   if (typeof email !== "string" || typeof password !== "string") {
     return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
@@ -16,8 +17,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const user = await verifyCredentials(email, password);
-    if (!user) {
-      if (nativeForm) return NextResponse.redirect(new URL("/login?error=1", request.url), 303);
+    if (!user || (adminOnlyLogin && user.role !== "admin")) {
+      if (nativeForm) return NextResponse.redirect(new URL("/admin-login?error=1", request.url), 303);
       const response = NextResponse.json({ error: "Correo o contraseña incorrectos" }, { status: 401 });
       response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
       response.headers.set("Pragma", "no-cache");

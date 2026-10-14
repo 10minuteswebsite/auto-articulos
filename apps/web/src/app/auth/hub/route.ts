@@ -7,9 +7,19 @@ import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
 export const runtime = "nodejs";
 
 const HUB_BASE_URL = "https://hub.lasolucionweb.net";
-const APP_SLUG = "seo-total";
+const LEGACY_APP_SLUG = "seo-total";
+const HUB_APP_SLUGS = new Set(["seo-total", "auto-redes"]);
 
 export async function GET(request: NextRequest) {
+  // The Hub keeps `seo-total` as a compatibility slug for existing
+  // entitlements. `auto-redes` is the separate Redes Totales product. Both
+  // products intentionally share this bridge while the application keeps one
+  // operational database and session implementation.
+  const appSlug = request.nextUrl.searchParams.get("app") || LEGACY_APP_SLUG;
+  if (!HUB_APP_SLUGS.has(appSlug)) {
+    return NextResponse.redirect(new URL("/login?error=hub_app", request.url));
+  }
+
   const code = request.nextUrl.searchParams.get("code") ?? "";
   if (!/^[A-Za-z0-9_-]{40,80}$/.test(code)) {
     return NextResponse.redirect(new URL("/login?error=hub_code", request.url));
@@ -28,7 +38,7 @@ export async function GET(request: NextRequest) {
       "x-platform-client-id": clientId,
       Authorization: `Bearer ${clientSecret}`,
     },
-    body: JSON.stringify({ code, app: APP_SLUG }),
+    body: JSON.stringify({ code, app: appSlug }),
     cache: "no-store",
   });
   const launch = (await exchange.json().catch(() => ({}))) as {
@@ -76,8 +86,11 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const token = await createSessionToken(user.id);
-  const response = NextResponse.redirect(new URL("/dashboard", request.url), 303);
+  // Esta cookie conserva el origen del acceso para que la aplicación pueda
+  // mostrar el menú del Hub únicamente cuando la entrada vino del Hub.
+  const token = await createSessionToken(user.id, "hub");
+  const destination = appSlug === "auto-redes" ? "/dashboard/oportunidades-redes" : "/dashboard";
+  const response = NextResponse.redirect(new URL(destination, request.url), 303);
   response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
   response.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,

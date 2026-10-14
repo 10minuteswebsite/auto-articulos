@@ -1,5 +1,76 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## CHECKPOINT — MIGRACIÓN DE LOGIN ARTÍCULOS AL HUB — 2026-10-14 — Codex
+
+### Objetivo
+
+Durante la migración de usuarios, `https://articulos.lasolucionweb.net/login`
+deja de ser la entrada normal de usuarios y se convierte en una puerta clara
+hacia `https://hub.lasolucionweb.net/dashboard`. El acceso administrativo
+local se conserva en `/admin-login`, separado del acceso de usuarios del Hub.
+
+### Diagnóstico confirmado
+
+- La cookie de sesión no distinguía su origen: una sesión creada por el Hub y
+  una creada por el login local eran indistinguibles.
+- El `EcosystemHeader` se renderizaba para cualquier sesión válida, aunque el
+  usuario hubiese entrado por el login legacy.
+- Las cookies antiguas de tres segmentos se mantienen válidas y se clasifican
+  como `legacy`; no se obliga a cerrar sesión ni se cambia la base de datos.
+
+### Implementación preparada
+
+- `apps/web/src/lib/session.ts`: origen firmado `hub`/`legacy` dentro del
+  payload HMAC; compatibilidad con cookies antiguas; la renovación conserva
+  el origen verificado.
+- `apps/web/src/middleware.ts`: valida el token y propaga el origen verificado
+  como `x-auth-source`; nunca confía en una cabecera enviada por el cliente.
+- `apps/web/src/app/auth/hub/route.ts`: las sesiones iniciadas por el Hub se
+  crean con origen `hub`.
+- `apps/web/src/app/dashboard/layout.tsx`: el menú global del Hub y la franja
+  de impersonificación solo se renderizan cuando el middleware confirmó
+  `x-auth-source=hub`.
+- `apps/web/src/app/login/page.tsx`: puerta de transición al Hub, con enlace
+  administrativo separado y mensaje explícito.
+- `apps/web/src/app/admin-login/page.tsx`: conserva el formulario de acceso
+  administrativo/local y la API exige que la cuenta tenga rol `admin`.
+- `apps/web/src/app/api/auth/login/route.ts`: los errores del formulario local
+  regresan a `/admin-login`, no a la puerta del Hub.
+- `apps/web/src/lib/session.test.ts`: pruebas de sesiones Hub, legacy nuevas y
+  cookies antiguas.
+
+### Triple auditoría local
+
+- Funcional: 88 pruebas web pasan; las 2 nuevas cubren el origen firmado y la
+  compatibilidad legacy.
+- Regresión: `npm run typecheck --workspace=apps/web` pasa y `git diff --check`
+  pasa. No hay schema Prisma, migración, OAuth ni secretos modificados.
+- Integración: `npm run build --workspace=apps/web` pasa y genera las rutas
+  `/login`, `/admin-login` y `/auth/hub`. Next solo muestra la advertencia
+  existente sobre la futura convención `proxy` para middleware.
+
+### Estado y control de despliegue
+
+- **Código:** preparado en el checkout actual, junto con cambios locales
+  previos que no fueron tocados ni sobrescritos.
+- **Producción:** todavía no se publicó este cambio. Requiere autorización
+  explícita después de la prueba funcional.
+- **Migraciones/datos:** ninguna.
+- **Prueba pendiente antes de publicar:** abrir `/login` como usuario normal,
+  comprobar llegada al Hub; abrir `/admin-login` y comprobar login local; abrir
+  una aplicación desde Hub y comprobar menú/franja de impersonificación; usar
+  una sesión legacy y confirmar que no aparece el menú del Hub.
+- **Rollback:** revertir el commit de este cambio; no hay migración ni cambios
+  irreversibles de datos.
+
+### Regla duradera
+
+No se debe volver a decidir el origen por email, host, query string o una
+cabecera del navegador. La única fuente válida es el origen incluido en la
+cookie HMAC verificada por middleware. Cualquier cambio futuro en login,
+impersonificación o navegación debe añadir una prueba de regresión y actualizar
+este checkpoint y `docs/brain/` antes de desplegar.
+
 ## Incidente `Load failed` en oportunidades — Rafael Zuzolo — 2026-10-01
 
 - **Síntoma:** en producción, la cuenta de Rafael Zuzolo mostraba `Load failed` al ejecutar “Analizar contenido”; la carga inicial sí funcionaba.

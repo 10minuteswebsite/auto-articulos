@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "repository": "auto-articulos",
+  "standard": "CLAUDE_CODE_CEREBRO_STANDARD",
+  "status": "active_checkpoint",
+  "audit_scripts_available": false,
+  "note": "La coordinación versionada y estos estados son la memoria durable del flujo de migración de autenticación.",
+  "tasks": [
+    {
+      "task_id": "TASK-20261014-articulos-login-hub",
+      "state": "tasks/TASK-20261014-articulos-login-hub/state.json"
+    }
+  ]
+}

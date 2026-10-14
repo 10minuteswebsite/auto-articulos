@@ -6,12 +6,14 @@ import {
   createSessionToken,
   verifyMcpAccessToken,
   verifyImpersonationToken,
+  verifySessionContext,
   verifySessionToken,
 } from "./lib/session";
 import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
 
 const PUBLIC_PATHS = [
   "/login",
+  "/admin-login",
   "/acerca-de",
   "/privacidad",
   "/terminos",
@@ -67,7 +69,9 @@ export async function middleware(request: NextRequest) {
   }
 
   const token = request.cookies.get(SESSION_COOKIE)?.value;
-  const userId = await verifySessionToken(token);
+  const session = await verifySessionContext(token);
+  const userId = session?.userId ?? null;
+  const authSource = session?.source ?? "legacy";
 
   if (!userId) {
     if (pathname.startsWith("/api")) {
@@ -87,6 +91,7 @@ export async function middleware(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", userId);
+  requestHeaders.set("x-auth-source", authSource);
 
   const impersonationToken = request.cookies.get(IMPERSONATION_COOKIE)?.value;
   const impersonation = await verifyImpersonationToken(impersonationToken);
@@ -109,11 +114,11 @@ export async function middleware(request: NextRequest) {
   if (token) {
     try {
       const parts = token.split(".");
-      if (parts.length === 3) {
+      if (parts.length === 3 || parts.length === 4) {
         const expiresStr = parts[1];
         const remaining = Number(expiresStr) - Date.now();
         if (remaining > 0 && remaining < SESSION_TTL_MS / 2) {
-          const newToken = await createSessionToken(userId);
+          const newToken = await createSessionToken(userId, authSource);
           response.cookies.set(SESSION_COOKIE, newToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
