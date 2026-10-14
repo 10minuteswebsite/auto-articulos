@@ -1,15 +1,21 @@
 # HANDOFF — Auto Artículos
 
-Última actualización: 2026-09-08, por Claude.
+Última actualización: 2026-10-14, por Codex.
 
 ## Checkpoint activo — migración de login al Hub (2026-10-14, Codex)
 
-Se preparó la separación segura entre usuarios del Hub y acceso administrativo
+Se desplegó la separación segura entre usuarios del Hub y acceso administrativo
 legacy. `/login` ahora es una puerta de transición hacia el Hub; el formulario
 local queda en `/admin-login` (solo cuentas con rol `admin`). Las cookies nuevas llevan un origen HMAC firmado
 (`hub` o `legacy`), las cookies antiguas de tres segmentos siguen funcionando
 como legacy y el menú global del Hub solo se muestra para sesiones verificadas
 con origen `hub`.
+
+Producción: deployment Vercel `dpl_EQGWnPrKem4wDVg9dLtKdXyisAxL`, estado
+`READY`, publicado el 2026-10-14 en el proyecto
+`la-solucion-web/auto-articulos-web`. Smoke checks: `/login` y
+`/admin-login` responden 200 con sus superficies correctas y `/dashboard` sin
+sesión redirige a `/login`. El build remoto generó 86 rutas.
 
 Archivos principales: `apps/web/src/lib/session.ts`,
 `apps/web/src/lib/session.test.ts`, `apps/web/src/middleware.ts`,
@@ -19,9 +25,9 @@ Archivos principales: `apps/web/src/lib/session.ts`,
 
 Auditoría local: 88 pruebas web, typecheck, build de producción y
 `git diff --check` correctos. Sin migración, OAuth, secretos ni datos tocados.
-No se ha desplegado todavía; queda la prueba funcional autenticada y la
-autorización explícita de producción. Los cambios locales preexistentes del
-checkout se conservaron.
+La comprobación autenticada de entrada desde Hub y de sesión legacy queda para
+una sesión real del usuario; no se registran credenciales. Los cambios locales
+preexistentes del checkout se conservaron fuera del checkpoint.
 
 ## Cierre final — auditoría editorial y enlaces (20/9/2026, Codex)
 

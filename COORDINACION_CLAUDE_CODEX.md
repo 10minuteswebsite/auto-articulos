@@ -51,15 +51,20 @@ local se conserva en `/admin-login`, separado del acceso de usuarios del Hub.
 
 ### Estado y control de despliegue
 
-- **Código:** preparado en el checkout actual, junto con cambios locales
-  previos que no fueron tocados ni sobrescritos.
-- **Producción:** todavía no se publicó este cambio. Requiere autorización
-  explícita después de la prueba funcional.
+- **Código:** checkpoint Git `ff9652b2` (`fix: route legacy article login through Hub`).
+  Los cambios locales previos que no pertenecían a esta tarea quedaron fuera del
+  commit y no fueron tocados ni sobrescritos.
+- **Producción:** desplegado el 2026-10-14 en Vercel como
+  `dpl_EQGWnPrKem4wDVg9dLtKdXyisAxL`, estado `READY`. El deployment quedó
+  publicado en los dominios productivos asociados, incluyendo
+  `https://articulos.lasolucionweb.net`.
 - **Migraciones/datos:** ninguna.
-- **Prueba pendiente antes de publicar:** abrir `/login` como usuario normal,
-  comprobar llegada al Hub; abrir `/admin-login` y comprobar login local; abrir
-  una aplicación desde Hub y comprobar menú/franja de impersonificación; usar
-  una sesión legacy y confirmar que no aparece el menú del Hub.
+- **Verificación productiva:** `/login` muestra la puerta «Entra desde el Hub»;
+  `/admin-login` muestra el formulario administrativo separado; una petición
+  sin sesión a `/dashboard` responde `307` hacia `/login`; el build remoto
+  terminó correctamente con 86 rutas. La prueba autenticada de entrada desde
+  el Hub y una sesión legacy requiere una sesión de usuario real y queda como
+  comprobación funcional manual, sin solicitar ni registrar credenciales.
 - **Rollback:** revertir el commit de este cambio; no hay migración ni cambios
   irreversibles de datos.
 

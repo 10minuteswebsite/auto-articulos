@@ -23,13 +23,27 @@
     "production deployment"
   ],
   "decision": "La cookie HMAC verificada es la única fuente de verdad del origen de autenticación; Hub y legacy no se infieren por email, host ni cabecera del cliente. La ruta administrativa exige rol admin.",
-  "status": "implemented_local_not_deployed",
+  "status": "deployed_verified_public_smoke",
   "tests": {
     "web_tests": "88 passed, 0 failed, 1 skipped integration test requiring TITLE_GENERATION_TEST_DATABASE_URL",
     "typecheck": "passed",
     "build": "passed",
     "git_diff_check": "passed"
   },
-  "next_safe_action": "Probar /login, /admin-login, una entrada desde Hub y una sesión legacy autenticada; solicitar autorización explícita antes de producción.",
+  "deployment": {
+    "provider": "Vercel",
+    "project": "la-solucion-web/auto-articulos-web",
+    "deployment_id": "dpl_EQGWnPrKem4wDVg9dLtKdXyisAxL",
+    "status": "READY",
+    "date": "2026-10-14",
+    "production_domains": ["articulos.lasolucionweb.net"]
+  },
+  "verification": {
+    "login_public": "passed: /login shows Hub transition",
+    "admin_login_public": "passed: /admin-login shows local admin form",
+    "protected_dashboard": "passed: unauthenticated /dashboard returns 307 to /login",
+    "remote_build": "passed: 86 routes generated"
+  },
+  "next_safe_action": "Run the authenticated smoke test from an existing Hub session and confirm that Hub-origin sessions show the ecosystem header while legacy admin sessions do not.",
   "secrets_or_pii": "none"
 }
