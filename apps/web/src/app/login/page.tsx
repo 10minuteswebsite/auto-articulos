@@ -76,8 +76,9 @@ function HubMigrationPage() {
             No se pudo completar el acceso desde el Hub. Vuelve a intentarlo desde el botón principal.
           </p>
         )}
+        {/* The protected dashboard would bypass the Hub's public login screen. */}
         <a
-          href={`${HUB_URL}/dashboard`}
+          href={`${HUB_URL}/login`}
           style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 46, padding: "12px 20px", borderRadius: 10, background: "#1d1d1f", color: "#ffffff", fontWeight: 600, fontSize: 14, textDecoration: "none", boxSizing: "border-box", width: "100%" }}
         >
           Ir al Hub
