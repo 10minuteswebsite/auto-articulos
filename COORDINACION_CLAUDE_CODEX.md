@@ -2,7 +2,7 @@
 
 ## Claude — Redes: una sola llave de permisos en seototal (quitar la lista fija de cuentas) — 2026-10-14
 
-- Estado: PR abierto, SIN fusionar a propósito (ver «Antes de fusionar»). Sin migración. Capitanía: no reclamada por ser un cambio de lógica pura de web sin tocar worker (reclamar al fusionar según el protocolo).
+- Estado: PR [#569](https://github.com/10minuteswebsite/auto-articulos/pull/569) abierto, SIN fusionar a propósito (ver «Antes de fusionar»). Sin migración. Capitanía reclamada por Claude; se libera al fusionar.
 - Orden de Milton: las cuentas sin el módulo de Redes aparecían como si pudieran usarlo en seototal; limpiar el sistema de permisos y que mande el interruptor de Administración, sin forzar por código.
 - Hallazgo (código): `canSeeSocialModule` (`apps/web/src/lib/modules.ts`) tenía una lista fija por identidad («zulmad», «lorena alvarez») heredada de las órdenes de restringir Redes (`e8efd6e4`, `480abb4b`); el texto del selector decía que «Heredar» abre Redes con una red aprobada, cosa falsa en el código; y `/api/me` y `canUseSocialModule` leían nombre y correo solo para esa lista.
 - Cambio: regla única fuera de redes.lasolucionweb.com = administrador, o «Habilitado» en el selector «Módulo de Redes». Heredar y Deshabilitado = cerrado; las redes aprobadas ya no abren el módulo, solo deciden dónde publica quien lo tiene. redes.lasolucionweb.com no cambia (siempre activa, manda el HUB). Archivos: `modules.ts`, `social-access.ts`, `api/me/route.ts`, `dashboard/usuarios/page.tsx` (texto del selector), pruebas `modules.test.ts` y `social-access.test.ts`, manual.
