@@ -1,13 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
-## Claude — Fix «artículos se publican en /news/ y no en /categ/» — 2026-10-14
+## Claude — CIERRE Fix «artículos se publican en /news/ y no en /categ/» — 2026-10-14
 
-- Estado: FUSIONADO (PR #572, `3f823154`, 2026-10-14, Vercel success). Sin migración. Capitanía liberada por Claude. Falta la prueba real de la URL.
+- Estado: CERRADO Y ARCHIVADO. PR #572 fusionado (`3f823154`, Vercel success). Sin migración. Capitanía liberada.
+- VERIFICADO EN PRODUCCIÓN (2026-10-14, cuenta de pruebas Lorena Álvarez, un artículo con el worker ya desplegado): `https://www.segurosdesaludyvida.com/categ/documentos-para-cambiar-tu-seguro-de-salud-en-florida` (HTTP 200, Historial 1/1 publicado). Los artículos anteriores siguen en `/news/`; solo cambian los nuevos. Milton decidió dejar el artículo de prueba publicado.
 - Síntoma (Milton): los artículos salen en `/news/...` (ej. segurosdesaludyvida.com) y deben salir bajo la ruta de categoría.
 - Causa: el worker fijaba siempre el «Tipo» del panel en «Noticias» (valor 2, `ARTICLE_TYPE_NOTICIAS`).
 - Comprobado en el panel real (cuenta Seguros de Salud y Vida, sesión de Milton): `#type` solo tiene «Noticias» (2) y «Solo Etiquetas/Categorias» (31); con 31 el formulario muestra los mismos campos que con 2. Milton indicó que debe usarse «Solo Etiquetas/Categorias».
 - Cambio: `apps/worker/src/automation/10minutesWebsite.ts` usa `ARTICLE_TYPE_ETIQUETAS_CATEGORIAS = "31"` en los dos puntos (`selectOption("#type")`). Manual actualizado (`manual-usuario.ts`).
-- NO verificado: una publicación real con el tipo 31 (la URL final). Probar con el worker de pruebas tras el despliegue y comprobar que la URL ya no lleva `/news/`. El worker tarda ~media hora en desplegar.
 
 ## Claude — Redes: una sola llave de permisos en seototal (quitar la lista fija de cuentas) — 2026-10-14
 
