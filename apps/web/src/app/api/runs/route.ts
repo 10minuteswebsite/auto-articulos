@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { startOfSocialDay } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
@@ -197,8 +198,8 @@ export async function POST(request: NextRequest) {
     });
   }
   if (user.dailyArticleLimit !== null) {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    // El «día» corta a medianoche de Florida, no a la del servidor (UTC).
+    const startOfDay = startOfSocialDay();
     const publishedToday = await prisma.title.count({
       where: {
         status: "success",

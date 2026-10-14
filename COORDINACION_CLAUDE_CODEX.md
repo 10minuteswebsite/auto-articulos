@@ -1,5 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Fix «Nancy Cruz: sin cupo para publicar artículos sin haber publicado hoy» — 2026-10-14
+
+- Estado: PR abierto, sin fusionar. Sin migración. Capitanía reclamada con `migration-coordinator.sh claim "Claude"`.
+- Hipótesis por código (NO comprobada con datos reales de Nancy: sin acceso a la base desde esta sesión): el cupo diario de artículos contaba desde medianoche del servidor (UTC) en `api/runs`, `api/dashboard-stats` y `api/opportunities/execute-batch|execute-all`. Cualquier usuario de América que publica después de las 8 p. m. de Florida ve esas publicaciones como «de hoy» a la mañana siguiente. Es general, no de Nancy.
+- Arreglo: esos cuatro sitios usan `startOfSocialDay()` (medianoche de Florida, decisión de Milton 2026-10-12). Manual actualizado. Verificación: el typecheck local resuelve `@auto-articulos/shared` al repo principal (trampa del `node_modules` enlazado), así que la validación real es la de CI.
+- Pendiente: confirmar con la base de producción cuántos `Title` con `status=success` tiene Nancy desde 00:00 UTC y su `dailyArticleLimit` (si fuera 0 o ya estuviera lleno, la causa sería otra).
+
 ## Claude — Fix «MCP/ChatGPT: Internal error y nueva autorización» (OAuth refresh) — 2026-10-14
 
 - Capitanía reclamada y liberada al fusionar (`migration-coordinator.sh claim "Claude"`). Sin migración. Estado: PR abierto, sin fusionar.

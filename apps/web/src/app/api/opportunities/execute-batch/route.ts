@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
-import { platformProductNameOrNeutral } from "@auto-articulos/shared";
+import { platformProductNameOrNeutral, startOfSocialDay } from "@auto-articulos/shared";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
 
@@ -140,8 +140,8 @@ export async function POST(request: NextRequest) {
   }
 
   const now = new Date();
-  const startOfDay = new Date(now);
-  startOfDay.setHours(0, 0, 0, 0);
+  // El «día» corta a medianoche de Florida, no a la del servidor (UTC).
+  const startOfDay = startOfSocialDay(now);
   const startOfMonth = new Date(
     now.getFullYear(),
     now.getMonth(),

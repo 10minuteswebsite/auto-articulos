@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { startOfSocialDay } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 
@@ -14,6 +15,8 @@ export async function GET() {
   const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const now = new Date();
   const today = startOfDay(now);
+  // Cupo diario: medianoche de Florida (igual que /api/runs), no la del servidor (UTC).
+  const quotaDayStart = startOfSocialDay(now);
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const daysBack = 14;
   const chartStart = new Date(today);
@@ -45,7 +48,7 @@ export async function GET() {
       },
     }),
     prisma.title.count({
-      where: { run: { userId }, status: "success", processedAt: { gte: today } },
+      where: { run: { userId }, status: "success", processedAt: { gte: quotaDayStart } },
     }),
     prisma.title.findFirst({
       where: { run: { userId }, status: "success" },
