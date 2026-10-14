@@ -223,7 +223,7 @@ Consejo: edita el texto si necesitas adaptar el tono a tu marca antes de aprobar
 
 Ruta: /dashboard/historial
 
-Historial conserva las ejecuciones anteriores y el estado de los títulos. Puedes revisar cuáles se publicaron, cuáles tuvieron error y los mensajes asociados. También muestra información disponible sobre publicaciones en redes e intentos de indexación.
+Historial conserva las ejecuciones anteriores y el estado de los títulos. Puedes revisar cuáles se publicaron, cuáles tuvieron error y los mensajes asociados. También muestra información disponible sobre publicaciones en redes e intentos de indexación. Bajo cada artículo ves el estado del sitemap: «se enviará a Google en el próximo envío diario» mientras espera, y «✓ Sitemap enviado a Google» con la fecha cuando ya salió; esa línea se actualiza sola, sin recargar la página.
 
 En articulos.lasolucionweb.com (.com o .net) el Historial muestra solo artículos y en redes.lasolucionweb.com (.com o .net) solo publicaciones en redes; en seototal muestra ambos.
 

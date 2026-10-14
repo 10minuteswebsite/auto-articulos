@@ -175,6 +175,20 @@ function HistorialEjecuciones() {
     loadRuns();
   }, [loadRuns]);
 
+  // Mientras algún artículo publicado espere el envío diario del sitemap, se
+  // vuelve a consultar cada minuto (solo con la pestaña visible) para que el
+  // "✓ Sitemap enviado" aparezca solo, sin recargar la página.
+  const hayPendientes = runs.some((run) =>
+    run.titles.some((t) => t.status === "success" && !t.lastSitemapSentAt),
+  );
+  useEffect(() => {
+    if (!hayPendientes) return;
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") loadRuns();
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [hayPendientes, loadRuns]);
+
   async function handleDeleteHistory() {
     setDeleting(true);
     setDeleteError(null);
