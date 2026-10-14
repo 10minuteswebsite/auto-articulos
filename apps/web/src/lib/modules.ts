@@ -107,34 +107,21 @@ export type ModuleAccessOverrides = Record<string, ModuleAccessOverride>;
 export type SocialHostContext = { redesHost?: boolean };
 
 /**
- * En seototal.lasolucionweb.com Redes está reservada a administradores, a las
- * dos cuentas piloto de siempre y a cualquier cuenta a la que el administrador
- * haya puesto «Dárselo a esta cuenta» (override «enabled» del módulo). Antes ese
- * interruptor no tenía efecto fuera de la lista fija. En
+ * REGLA ÚNICA de Redes fuera de redes.lasolucionweb.com (p. ej. seototal):
+ * la ve el administrador y SOLO la cuenta a la que el administrador puso
+ * «Habilitado» (interruptor «Módulo de Redes» en Administración → Usuarios).
+ * «Heredar» y «Deshabilitado» no la abren. No hay listas fijas de cuentas ni
+ * correos en el código: quien decide es el interruptor. En
  * redes.lasolucionweb.com (producto dominado por el HUB) siempre está activa:
- * quién entra lo decide el HUB, no esta lista.
+ * quién entra lo decide el HUB.
  */
 export function canSeeSocialModule(
-  user: {
-    role?: string | null;
-    name?: string | null;
-    firstName?: string | null;
-    lastName?: string | null;
-    email?: string | null;
-    disabledModules?: string | null;
-  },
+  user: { role?: string | null; disabledModules?: string | null },
   context: SocialHostContext = {},
 ): boolean {
   if (user.role === "admin") return true;
   if (context.redesHost) return true;
-  if (parseUserModuleOverrides(user.disabledModules)["oportunidades-redes"] === "enabled") return true;
-  const identity = [user.name, user.firstName, user.lastName, user.email]
-    .filter(Boolean)
-    .join(" ")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("es");
-  return identity.includes("zulmad") || identity.includes("lorena alvarez");
+  return parseUserModuleOverrides(user.disabledModules)["oportunidades-redes"] === "enabled";
 }
 
 /**

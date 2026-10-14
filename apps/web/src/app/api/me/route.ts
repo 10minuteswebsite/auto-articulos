@@ -88,10 +88,6 @@ export async function GET() {
       allowGoogleBusinessPublishing: networks.allowGoogleBusinessPublishing,
       socialPublishingApproved: Boolean(actingAdmin) || hasSocialModuleAccess({
         role: user.role,
-        name: user.name,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
         disabledModules: user.disabledModules,
         allowInstagramPublishing: user.allowInstagramPublishing,
         allowFacebookPublishing: user.allowFacebookPublishing,

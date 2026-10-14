@@ -99,12 +99,13 @@ test("Redes: en el dominio redes, 'Deshabilitado' por cuenta sigue ocultándolo"
   assert.ok(getEffectiveDisabledModules(user, [], { redesHost: true }).includes("oportunidades-redes"));
 });
 
-// Interruptor del administrador en seototal: «Dárselo a esta cuenta» debe funcionar
-// aunque la cuenta no esté en la lista piloto fija.
-test("seototal: 'Habilitado' abre Redes a una cuenta fuera de la lista piloto", () => {
+// Interruptor del administrador en seototal: es la ÚNICA llave (sin listas fijas).
+test("seototal: solo 'Habilitado' abre Redes; Heredar y Deshabilitado no", () => {
   const user = { role: "user", name: "Cuenta Nueva", email: "nueva@example.com" };
   assert.equal(canSeeSocialModule(user), false);
   assert.equal(canSeeSocialModule({ ...user, disabledModules: enabled("oportunidades-redes") }), true);
+  assert.equal(canSeeSocialModule({ ...user, disabledModules: JSON.stringify({ "oportunidades-redes": "inherit" }) }), false);
+  assert.equal(canSeeSocialModule({ ...user, disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) }), false);
   assert.equal(
     getEffectiveDisabledModules({ ...user, disabledModules: enabled("oportunidades-redes") }, ["oportunidades-redes"]).includes("oportunidades-redes"),
     false,
@@ -112,7 +113,15 @@ test("seototal: 'Habilitado' abre Redes a una cuenta fuera de la lista piloto", 
   assert.equal(getEffectiveDisabledModules(user, ["oportunidades-redes"]).includes("oportunidades-redes"), true);
 });
 
-test("seototal: 'Quitado' sigue ocultando Redes aunque la cuenta sea piloto", () => {
-  const pilot = { role: "user", name: "Lorena Alvarez", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) };
-  assert.equal(getEffectiveDisabledModules(pilot, []).includes("oportunidades-redes"), true);
+test("seototal: ningún nombre abre Redes por sí solo (antes Lorena y Zulmad estaban fijas en el código)", () => {
+  for (const name of ["Lorena Alvarez", "Zulmad"]) {
+    const user = { role: "user", name, disabledModules: null };
+    assert.equal(canSeeSocialModule(user), false);
+    assert.ok(getEffectiveDisabledModules(user, []).includes("oportunidades-redes"));
+  }
+});
+
+test("seototal: 'Deshabilitado' oculta Redes", () => {
+  const user = { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) };
+  assert.equal(getEffectiveDisabledModules(user, []).includes("oportunidades-redes"), true);
 });

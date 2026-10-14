@@ -47,12 +47,6 @@ export async function canUseSocialModule(userId: string): Promise<boolean> {
     where: { id: userId },
     select: {
       role: true,
-      // La lista de cuentas piloto decide por identidad: sin estos campos la
-      // identidad queda vacía y toda cuenta no administradora recibe 403.
-      name: true,
-      firstName: true,
-      lastName: true,
-      email: true,
       disabledModules: true,
       allowInstagramPublishing: true,
       allowFacebookPublishing: true,
@@ -71,10 +65,6 @@ export async function canUseSocialModule(userId: string): Promise<boolean> {
 
 export type SocialModuleAccessUser = {
   role?: string | null;
-  name?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  email?: string | null;
   disabledModules?: string | null;
 } & SocialPublishingPermissionUser;
 
@@ -83,10 +73,9 @@ export type SocialModuleAccessUser = {
  * aprobar o quitar el módulo entero de Redes para una cuenta, aparte de
  * decidir luego qué redes concretas ve. Vive como override del módulo
  * "oportunidades-redes" (mismo mecanismo que los demás módulos opt-in), con
- * una sola diferencia: sin decisión explícita del administrador («Heredar»),
- * se mantiene el comportamiento histórico — visible en cuanto la cuenta
- * tenga al menos una red aprobada — para no quitarle el acceso a nadie que
- * ya lo tenía.
+ * una sola diferencia: sin «Habilitado» explícito no se entra en seototal;
+ * las redes aprobadas solo deciden DÓNDE puede publicar una cuenta que ya
+ * tiene el módulo, nunca le dan el módulo.
  */
 export function hasSocialModuleAccess(
   user: SocialModuleAccessUser,

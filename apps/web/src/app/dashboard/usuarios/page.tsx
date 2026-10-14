@@ -207,6 +207,9 @@ function Section({
 // 2026-10-12: carrusel, reel e infografía de Instagram y Story de Facebook, que nunca se crean). La clave es la misma `platform`
 // que usa el worker (enforceSocialDailyLimit); una clave sin valor guardado
 // equivale a 1 por día.
+/** Módulos con su propio interruptor único: no se repiten en la lista general ni en el apagado global. */
+const SINGLE_SWITCH_MODULES = ["oportunidades-redes"];
+
 const SOCIAL_GROUPS: {
   title: string;
   networks: { id: string; label: string; formats: [string, string][] }[];
@@ -1612,7 +1615,7 @@ export default function UsuariosPage() {
               borderTop: "1px solid #d2d2d7",
             }}
           >
-            {SYSTEM_MODULES.map((mod) => {
+            {SYSTEM_MODULES.filter((mod) => !SINGLE_SWITCH_MODULES.includes(mod.id)).map((mod) => {
               const isHidden = globalDisabledModules.includes(mod.id);
               return (
                 <div
@@ -2928,7 +2931,7 @@ function UserCard({
               verá. Se guarda con <strong>Guardar cambios</strong>.
             </p>
             <div style={{ display: "grid", gap: 6 }}>
-              {SYSTEM_MODULES.map((mod) => {
+              {SYSTEM_MODULES.filter((mod) => !SINGLE_SWITCH_MODULES.includes(mod.id)).map((mod) => {
                 const acceso = moduleOverrides[mod.id] ?? "inherit";
                 return (
                   <label
@@ -3018,26 +3021,26 @@ function UserCard({
             <div>
               <strong style={{ fontSize: 14 }}>Módulo de Redes (DIFUSIÓN SOCIAL)</strong>
               <p style={{ margin: "4px 0 0", fontSize: 12, color: "#6e6e73", maxWidth: 440 }}>
-                Controla si esta cuenta ve la pantalla completa, antes de elegir qué redes concretas puede usar
-                abajo. <strong>Heredar</strong> mantiene el comportamiento de siempre: la ve en cuanto tenga al menos
-                una red aprobada.
+                Es el ÚNICO interruptor de Redes para esta cuenta en seototal: <strong>Activado</strong> la deja entrar;
+                <strong> Desactivado</strong> la mantiene fuera. Las redes de abajo no la abren: solo deciden en cuáles puede
+                publicar. Se guarda con <strong>Guardar cambios</strong>.
               </p>
             </div>
-            <select
-              value={moduleOverrides["oportunidades-redes"] ?? "inherit"}
-              onChange={(e) =>
-                setModuleOverrides((prev) => ({
-                  ...prev,
-                  "oportunidades-redes": e.target.value as "inherit" | "enabled" | "disabled",
-                }))
-              }
-              disabled={savingPermissions}
-              style={{ fontSize: 13, padding: "8px 10px", minHeight: 36, cursor: "pointer" }}
-            >
-              <option value="inherit">Heredar (según redes aprobadas)</option>
-              <option value="enabled">Habilitado para esta cuenta</option>
-              <option value="disabled">Deshabilitado para esta cuenta</option>
-            </select>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={moduleOverrides["oportunidades-redes"] === "enabled"}
+                onChange={(e) =>
+                  setModuleOverrides((prev) => ({
+                    ...prev,
+                    "oportunidades-redes": e.target.checked ? "enabled" : "inherit",
+                  }))
+                }
+                disabled={savingPermissions}
+                style={{ accentColor: "#1d1d1f", width: 20, height: 20 }}
+              />
+              {moduleOverrides["oportunidades-redes"] === "enabled" ? "Activado" : "Desactivado"}
+            </label>
           </div>
           {SOCIAL_GROUPS.map((group) => (
             <div key={group.title} style={{ marginTop: 14 }}>
