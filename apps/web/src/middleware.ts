@@ -20,8 +20,6 @@ const PUBLIC_PATHS = [
   "/api/auth/login",
   "/api/auth/trial-signup",
   "/auth/hub",
-  "/api/debug/instagram-errors",
-  "/api/debug/activate-instagram",
   "/api/oauth2/authorize",
   "/api/oauth2/token",
   "/.well-known/oauth-authorization-server",
