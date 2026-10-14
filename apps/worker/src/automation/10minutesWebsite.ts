@@ -298,7 +298,10 @@ function resolveBaseUrl(platformDomain?: string | null): string {
   return platformBaseUrl(platformDomain);
 }
 
-const ARTICLE_TYPE_NOTICIAS = "2";
+// Valor de #type "Solo Etiquetas/Categorias" (el otro tipo del panel es
+// "Noticias", valor 2, que publica bajo /news/). Los artículos deben ir bajo
+// la ruta de categoría, así que este es el tipo que se fija siempre.
+const ARTICLE_TYPE_ETIQUETAS_CATEGORIAS = "31";
 const NAV_TIMEOUT_MS = 30_000;
 // La conexión del wizard debe resolver si las credenciales sirven casi de
 // inmediato. Una espera larga deja al usuario mirando un progreso ambiguo y
@@ -411,7 +414,7 @@ async function logFormFieldsSnapshot(
  * tiempo en vivo en el dashboard mientras corre.
  *
  * Flujo mapeado en vivo el 28/7/2026 junto al usuario en el dashboard real:
- * login -> /dashboard/direct-articles -> tipo "Noticias" -> "Usar ChatGPT"
+ * login -> /dashboard/direct-articles -> tipo "Solo Etiquetas/Categorias" -> "Usar ChatGPT"
  * (genera título/resumen/contenido) -> "Usar contenido" -> generar imagen con
  * IA -> "Guardar cambios".
  */
@@ -630,7 +633,7 @@ export async function fetchLanguages(
     // Categoría ya elegidos (mismo requisito que createArticleDraft) — se
     // toma la primera categoría real de la cuenta, no importa cuál, ya que
     // nunca se llega a generar ningún artículo con ella.
-    await page.selectOption("#type", ARTICLE_TYPE_NOTICIAS, {
+    await page.selectOption("#type", ARTICLE_TYPE_ETIQUETAS_CATEGORIAS, {
       timeout: NAV_TIMEOUT_MS,
     });
     const firstCategoryId = await page
@@ -765,7 +768,7 @@ async function createArticleDraft(
   });
 
   try {
-    await page.selectOption("#type", ARTICLE_TYPE_NOTICIAS, {
+    await page.selectOption("#type", ARTICLE_TYPE_ETIQUETAS_CATEGORIAS, {
       timeout: NAV_TIMEOUT_MS,
     });
   } catch {
