@@ -111,7 +111,7 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
     description:
       "Propósito: analizar Google Search Console y otras señales reales de internet para proponer contenido inteligente agrupado por categoría, a partir de lo que la cuenta YA tiene indexado.\n" +
       "Cuándo usarla: el usuario quiere que la IA analice datos reales de su sitio (no una descripción manual) y tiene Google Search Console conectado.\n" +
-      "Cuándo NO usarla: si no hay Search Console conectado (verifica con ver_integraciones), o si el usuario prefiere describir su negocio con sus palabras — en ese caso usa crear_titulos_con_ia. No repitas el análisis antes de 3 días salvo que el usuario insista explícitamente (forzar=true).\n" +
+      "Cuándo NO usarla: si no hay Search Console conectado (verifica con ver_integraciones), o si el usuario prefiere describir su negocio con sus palabras — en ese caso usa crear_titulos_con_ia. Si Search Console figura sin conectar, NO intentes conectarlo ni diagnosticarlo: avisa que se conecta en Configuración → Conexiones y ofrece crear_titulos_con_ia. No repitas el análisis antes de 3 días salvo que el usuario insista explícitamente (forzar=true).\n" +
       "Contexto necesario: Google Search Console conectado y categorías sincronizadas (confirma con ver_estado_configuracion o listar_categorias).\n" +
       "Siguiente paso típico: listar_oportunidades para revisar lo generado, luego publicar_categoria o publicar_oportunidades_seleccionadas.",
     inputSchema: {

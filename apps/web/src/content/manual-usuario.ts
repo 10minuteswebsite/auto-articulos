@@ -335,6 +335,8 @@ Conecta cualquier asistente de inteligencia artificial (Claude, ChatGPT, Meta MU
 3. Sigue las **Instrucciones para conectar tu asistente**: elige tu IA (Claude, ChatGPT, Muse u Otra IA) y completa cada paso tal cual aparece, con los campos exactos de esa IA; el texto del encabezado ya incluye tu token y se copia con un botón. Después copia también el bloque de **Prompt para tu asistente** con el botón **Copiar prompt**, y pégalo como instrucciones (o primer mensaje) de tu asistente de IA. Ese texto ya incluye la dirección del servidor, el token, la lista de herramientas disponibles y las reglas de seguridad y una autorización para que, según la orden que le des, cree y publique artículos en automático sin pedirte aprobación en cada paso. Para borrar, descartar o cancelar contenido sí te pide confirmación.
 4. Pulsa **Revocar** si quieres desconectar todos los asistentes sin generar uno nuevo.
 
+Tu asistente de IA maneja lo que SEO TOTAL le permite hacer: crear títulos, publicar y revisar el estado de tu cuenta. No conecta ni repara Google Search Console, Analytics, Bing ni tus redes: eso lo haces tú en Configuración → Conexiones. Si algo aparece «sin conectar», te lo dirá y seguirá con lo que sí puede hacer, sin pedirte contraseñas ni que vuelvas a autorizar.
+
 Si usas ChatGPT, la conexión se renueva sola cada hora sin pedirte volver a autorizar. Hasta el 14 de octubre de 2026 esa renovación fallaba, y por eso ChatGPT pedía autorizar de nuevo (o mostraba «Internal error») en las tareas programadas. Si todavía te lo pide una vez tras la corrección, autoriza una última vez y no debería repetirse.
 
 La protección de publicación no depende solo de las instrucciones del asistente:
