@@ -4662,3 +4662,128 @@ todavía un commit/deployment de código para ella; el detalle con casillas vive
 - Responsable: David del Sacramento (encargo). Registro: Claude (tarea programada diaria de
   propagación).
 - Estado: ABIERTO — encargo activo, sin fecha de cierre todavía.
+
+## Versión — 2026-10-13 — CIERRE: fix del wizard que no sale (adelatallada.com) y Paso 6 en gris (PR #557, cierre #558)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "Claude — CIERRE «Fix: el wizard no sale
+(adelatallada.com) y Paso 6 en gris»" (2026-10-13) por la tarea programada diaria de propagación
+(2026-10-14).
+
+- **PR #557 (commit `eb551d8`), cerrada y archivada por el PR #558 (commit `b51ffde`)** — Síntoma:
+  la cuenta adelatallada.com conectó Search Console en el asistente y no salía de él; los botones
+  del Paso 6 se veían grises. Causa (revisada por código, sin leer la base de producción): el
+  7/10 (`c5e862e7`) el asistente pasó a tratar las categorías como opcionales, pero
+  `dashboard/page.tsx` y `configuracion/inicial/page.tsx` seguían exigiendo `categories.length > 0`
+  para dar la configuración por completa, así que una web sin categorías veía los 4 pasos en verde
+  y el Inicio mantenía el asistente para siempre. `configuracion/inicial` además ignoraba Google
+  Search Console conectado por Composio (solo miraba la vía directa de Google). El Paso 6 usaba
+  `activeStep === 6` (el máximo es 5) y quedaba siempre «pendiente» con opacidad 0,65; ahora usa
+  `isActive={allCoreDone}` y el botón 02 deja el texto gris. Archivos:
+  `dashboard/page.tsx`, `dashboard/configuracion/inicial/page.tsx`,
+  `components/OnboardingWizard.tsx`, `content/manual-usuario.ts` (actualizado por el propio PR).
+  Verificación: `tsc` sin errores en esos archivos.
+- Estado: FUSIONADA en `main`, Vercel success, sin migración, capitanía reclamada y liberada al
+  fusionar. **Verificado en producción** por Milton y Claude con la cuenta de Adela Tallada
+  (adelatallada.com): el Inicio ya sale del asistente y muestra las tres acciones.
+- **No verificado en pantalla:** el Paso 6 activo y el botón 02 sin gris; solo se ve al terminar
+  el Paso 4 en una cuenta nueva, y hasta ahora solo se comprobó por código y tipos. Seguimiento:
+  mirarlo con la próxima cuenta nueva que pase por el asistente.
+- **Pendiente de decisión de Milton** (anotado aquí, sin duplicar en `TO-DO.md`): `PreValidationGuard`
+  y `/api/pre-validation` siguen exigiendo categorías para Publicar/Oportunidades; una cuenta sin
+  categorías saldrá del asistente pero Publicar le pedirá sincronizarlas.
+- **Observación sin resolver:** en el Inicio de Adela no se veía el menú de navegación; no se
+  confirmó si es normal o es otro síntoma. Queda para revisar en la próxima verificación con esa
+  cuenta.
+- Responsable: Claude.
+- Estado: CERRADO Y ARCHIVADO según la propia entrada de Coordinación.
+
+## Versión — 2026-10-13 — Ajustes finales de Redes: conexión, nombres, cupos y algoritmo (PRs #556, #559, #560, #561, #562)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "BITÁCORA REDES" (entradas 2026-10-12,
+subidas el 2026-10-13) por la tarea programada diaria de propagación (2026-10-14).
+
+- **PR #556 (commit `9ef3125`)** — Corrección de las instrucciones estándar: en Instagram y
+  Facebook, con la cuenta sin conectar, `ComposioConnect.tsx` solo pintaba el botón «Nueva conexión
+  de…» sin la guía; ahora la caja de guía aparece sobre el botón, y `OAuthNetworkSection.tsx` no
+  repite su propia guía cuando está oculto el bloque directo de Meta. Es una corrección interna de
+  una pantalla ya descrita en el manual (instrucciones de conexión estándar, PR #553): esta tarea
+  de propagación no encontró texto nuevo que agregar al manual. Verificación: typecheck, pruebas,
+  build.
+- **PR #559 (commit `fbb3167`)** — Nombres unificados en los textos visibles: «oportunidades» →
+  «propuestas» en los mensajes de borrado de la pantalla de Redes, y «Facebook Pages» → «Facebook»
+  en la ayuda de credenciales de administrador y en la lista de apps de Composio. Los nombres
+  internos (rutas, `facebook-pages`) no cambian a propósito. El manual ya usa «propuesta» como
+  término estándar en la sección de Redes; no se encontró una pantalla del manual que todavía diga
+  «Facebook Pages» para el usuario final, así que esta tarea no tocó `manual-usuario.ts`.
+  Verificación: typecheck, pruebas, build.
+- **PR #560 (commit `8ee3e1d`)** — El «día» del cupo de publicaciones corta a medianoche de
+  Florida (America/New_York con horario de verano) en vez de medianoche UTC:
+  `packages/shared/src/social-day.ts` (`startOfSocialDay`, con pruebas), usado por la ruta
+  Publicar, el worker (`enforceSocialDailyLimit`), el conteo de Administración (`admin/users`) y el
+  contador «Hoy X de N» de la pantalla de Redes. Es un cambio de huso horario interno sobre un
+  contador que el manual ya describe de forma genérica («Hoy 0 de 2»); no agrega pantalla ni texto
+  nuevo. Verificación: typecheck, pruebas, build.
+- **PR #561 (commit `cefc327`)** — Formatos sin dueño fuera de Administración (decisión de
+  Milton): se quitaron de `usuarios/page.tsx` (`SOCIAL_GROUPS`) los cupos de Instagram carrusel,
+  reel con imagen e infografía, y de Story de Facebook, porque la pantalla de Redes nunca los
+  genera. Los valores ya guardados no se borran de la base hasta que se vuelva a guardar la ficha.
+  Quedan Instagram publicación y Story, Facebook Página, Threads, X, LinkedIn, Pinterest, Bluesky,
+  Google Business, Tumblr y Blogger. **Manual actualizado por esta tarea de propagación**: la lista
+  de ejemplo de formatos en la sección de Administración (`manual-usuario.ts`) todavía nombraba
+  Carrusel, Reel e Infografía como ejemplo de Instagram; se agregó una nota fechada aclarando que
+  esos tres cupos y el de Story de Facebook ya no están en la ficha, sin borrar el texto anterior.
+  Verificación: typecheck, pruebas, build.
+- **PR #562 (commit `78803af`)** — Revisión del algoritmo de generación (lista B, punto 4): la
+  elección ya usaba Search Console, Analytics y Bing con tendencia y evitaba repetir artículo el
+  mismo día entre redes; se corrigió que el «hoy» del filtro anti-repetición usaba medianoche UTC
+  (ahora `startOfSocialDay()`, Florida) y se pasaron los mensajes de error a español neutro
+  («Ya tienes… Revisa…», «propuesta» en vez de «oportunidad») en `generate/route.ts`. **Manual
+  actualizado por el propio PR**: esta tarea de propagación no duplicó ese texto. Pendiente de la
+  revisión original: calidad del texto por red (se mide con publicaciones reales, no con código).
+  Verificación: typecheck, pruebas, build.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN, cerrado. Sin pendientes nuevos sin anotar.
+
+## Versión — 2026-10-13 — Administración: conteo de imágenes con IA y auditoría del worker por dominio (PRs #563, #564)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "BITÁCORA REDES" (entradas 2026-10-12,
+subidas el 2026-10-13) por la tarea programada diaria de propagación (2026-10-14).
+
+- **PR #563 (commit `16cecdb`)** — Punto 5(b) de la lista B: costo por imagen. Sin migración;
+  `api/admin/users` cuenta las imágenes con IA por usuario (propuestas con `aiImagePrompt` y
+  `finishedAt` de hoy y del mes, día y mes de Florida) y la ficha de Administración agrega la fila
+  **«Imágenes creadas con IA»** con «Hoy» y «Este mes». El precio por imagen no lo devuelve fal.ai,
+  así que el costo = cantidad × precio de fal.ai (no se inventa una cifra). Punto 5(a), reutilizar
+  imagen IA entre redes, quedó descartado con evidencia: solo Instagram (4:5) y Pinterest (2:3)
+  crean imagen con IA y en formatos distintos; las demás redes usan la foto del artículo. **Manual
+  actualizado por esta tarea de propagación**: se agregó una nota fechada en la sección de
+  Administración describiendo la nueva fila «Imágenes creadas con IA» de la ficha de usuario, sin
+  tocar el texto existente. Verificación: typecheck, pruebas, build.
+- **PR #564** — Solo documentación, sin cambio de código: auditoría (decisión de negocio) del
+  punto 6 de la lista B. `apps/worker/src/product-access.ts` solo comprueba el derecho de producto
+  REDES si el ajuste `product_enforcement` está en `shadow` o `enforce`; por defecto está en `off`
+  y deja publicar a todos. Pasarlo a `enforce` bloquearía a las cuentas sin derecho registrado
+  desde el HUB; es una decisión de negocio que se toma cuando la facturación del HUB envíe los
+  derechos (ver `RUNBOOK_CORTE.md` y `GUIA_ADMIN_DERECHOS.md`). Hasta entonces queda en `off`. Lista
+  B cerrada salvo esta decisión, que no se duplica en `TO-DO.md` porque ya queda anotada como
+  decisión pendiente aquí y en la propia Coordinación.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (PR #563), cerrado; PR #564 es auditoría/documentación, sin deployment propio.
+
+## Versión — 2026-10-13 — Aviso de acceso terminado manda al HUB para activar o renovar (PR #565)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, sección "BITÁCORA REDES" (entrada 2026-10-12,
+subida el 2026-10-13, pregunta de Milton) por la tarea programada diaria de propagación
+(2026-10-14).
+
+- **PR #565 (commit `169672e`)** — `ProductAccessGuard.tsx` ahora muestra el botón «Ir al HUB para
+  activar o renovar» (`HUB_URL`) en vez de «contacta al administrador» cuando el acceso a un
+  producto terminó, y el worker (`socialPublish.ts`) detiene la publicación con un mensaje que
+  manda al HUB. **No es visible todavía para ningún usuario real**: solo se activa cuando el
+  interruptor `product_enforcement` esté en `enforce`; hoy está en `off` (ver PR #564 arriba). Por
+  eso esta tarea de propagación no tocó `manual-usuario.ts` — documentar una pantalla que nadie
+  puede ver hoy dejaría al manual describiendo algo que no ocurre en producción; se debe propagar
+  al manual cuando `product_enforcement` pase de `off`. Verificación: typecheck, pruebas, build.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (código fusionado), pero COMPORTAMIENTO INACTIVO hasta que se active el
+  interruptor `product_enforcement`.
