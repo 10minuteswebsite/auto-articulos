@@ -15,7 +15,7 @@
 - Estado: CERRADO Y ARCHIVADO. PR #571 fusionado por Milton en `main`. Sin migración. Capitanía liberada.
 - Causa: `productOfHost` (`apps/web/src/lib/product-routes.ts`) solo reconocía los dominios `.com`; en `articulos.lasolucionweb.net` y `redes.lasolucionweb.net` el Historial salía mezclado. Ahora acepta `.com` y `.net` (prueba en `product-routes.test.ts`, 17/17; manual actualizado).
 - Efectos esperados: los `.net` aíslan productos como los `.com` (rutas del otro producto redirigen o dan 404) y `redes.lasolucionweb.net` abre todas las redes. Sin tocar: el detalle de eventos del Historial de Redes pide `/api/titles/{id}/events` (ruta de Artículos) y no carga en el host de Redes; ya ocurría en `.com`.
-- NO verificado en producción (las URLs piden login): comprobar con una cuenta que cada `.net` muestra solo lo suyo y que seototal sigue mostrando ambos.
+- VERIFICADO EN PRODUCCIÓN por Milton (2026-10-14): cada Historial `.net` muestra solo lo suyo. Sin pendientes.
 
 ## Claude — Redes: una sola llave de permisos en seototal (quitar la lista fija de cuentas) — 2026-10-14
 
