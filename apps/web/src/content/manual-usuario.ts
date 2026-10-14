@@ -160,7 +160,7 @@ Ruta: /dashboard/publicar
 
 Usa **${MENU_NAMES.propios}** para convertir tus títulos en artículos. Los títulos los puedes poner de dos maneras, y las dos llegan al mismo lugar: la caja **Títulos**.
 
-1. Elige una categoría. Es la sección de tu sitio donde se publicarán los artículos.
+1. Elige una categoría. Es la sección de tu sitio donde se publicarán los artículos. Los artículos se crean en el panel con el tipo «Solo Etiquetas/Categorias», para que queden bajo la ruta de su categoría y no bajo «Noticias».
 2. Elige el idioma del lote. Solo afecta ese lote; no modifica tu configuración general.
 3. En la sección **Títulos** elige cómo quieres tenerlos:
    - **Poner títulos a mano:** escribe o pega un título por línea (por ejemplo, los que preparaste en otra herramienta).

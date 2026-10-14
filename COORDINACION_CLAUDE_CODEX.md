@@ -9,6 +9,16 @@
 - **MIGRACIÓN (aplicar ANTES de fusionar, protocolo 2026-09-08):** `packages/db/prisma/migrations/20261014120000_add_user_city_timezone/migration.sql` = `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "city" TEXT; ... "timeZone" TEXT;` (columnas nulas, sin pérdida de datos, idempotente; `country` ya existía). Milton la aplica en el SQL Editor de Supabase.
 - Verificación final: `prisma generate`, typecheck de `apps/web` limpio, 208/208 pruebas web, 5/5 `social-day.test.ts`, build web OK, `git diff --check` limpio. Sin verificar en navegador (no hay base local). Las REDES siguen con corte de Florida (decisión del 12/10).
 
+## Claude — Fix «artículos se publican en /news/ y no en /categ/» — 2026-10-14
+
+- Estado: PR abierto, sin fusionar. Sin migración. Capitanía reclamada por Claude (`migration-coordinator.sh claim "Claude"`); se libera al fusionar.
+- Síntoma (Milton): los artículos salen en `/news/...` (ej. segurosdesaludyvida.com) y deben salir bajo la ruta de categoría.
+- Causa: el worker fijaba siempre el «Tipo» del panel en «Noticias» (valor 2, `ARTICLE_TYPE_NOTICIAS`).
+- Comprobado en el panel real (cuenta Seguros de Salud y Vida, sesión de Milton): `#type` solo tiene «Noticias» (2) y «Solo Etiquetas/Categorias» (31); con 31 el formulario muestra los mismos campos que con 2. Milton indicó que debe usarse «Solo Etiquetas/Categorias».
+- Cambio: `apps/worker/src/automation/10minutesWebsite.ts` usa `ARTICLE_TYPE_ETIQUETAS_CATEGORIAS = "31"` en los dos puntos (`selectOption("#type")`). Manual actualizado (`manual-usuario.ts`).
+- DESTINO: Milton quiere subir varios cambios en un solo lote. PR #572 queda ABIERTO y SIN fusionar a propósito, entregado al Reparador del árbol principal para incluirlo en el lote unificado (3 archivos, un solo tema, sin migración; se puede integrar o revertir por separado).
+- NO verificado: una publicación real con el tipo 31 (la URL final). Probar con el worker de pruebas tras el despliegue y comprobar que la URL ya no lleva `/news/`. El worker tarda ~media hora en desplegar.
+
 ## Claude — Redes: una sola llave de permisos en seototal (quitar la lista fija de cuentas) — 2026-10-14
 
 - Estado: PR [#569](https://github.com/10minuteswebsite/auto-articulos/pull/569) abierto, SIN fusionar a propósito (ver «Antes de fusionar»). Sin migración. Capitanía reclamada por Claude; se libera al fusionar.
