@@ -3,7 +3,6 @@ import { prisma } from "@auto-articulos/db";
 import { decryptSecret, encryptSecret } from "@auto-articulos/shared";
 import { requireAdmin } from "@/lib/current-user";
 import { auditLog } from "@/lib/audit";
-import { redesProfile, REDES_PUBLISHING_FIELDS } from "@/lib/redes-profile";
 import { diaCeroActive } from "@/lib/shared-cookies";
 import { getTrialRuleEnabled, setTrialRuleEnabled } from "@/lib/trial-rule-setting";
 import { getAccessRouterEnabled, setAccessRouterEnabled } from "@/lib/access-router-setting";
@@ -15,8 +14,8 @@ export const dynamic = "force-dynamic";
  *
  * GET  → estado + simulación (SOLO LECTURA).
  * POST {action:"apply", confirm:"DIA CERO"} → hace, con respaldo, TODO esto:
- *   1. Enciende los permisos de Redes (los 10 allow*Publishing + módulo oportunidades-redes) a los
- *      usuarios no administradores. NO toca a quien tiene el módulo deshabilitado A PROPÓSITO.
+ *   1. (Retirado el 2026-10-14) Ya NO enciende Redes a nadie: el acceso a Redes lo decide solo el
+ *      interruptor «Módulo de Redes» de cada ficha. `revert` sigue restaurando respaldos antiguos.
  *   2. Quita el indicador de «prueba de 7 días» (isTrialSignup=false, trialStartedAt=null,
  *      trialUnlocked=true) a los usuarios no administradores: quedan gratis.
  *   3. Apaga la regla de los 7 días y enciende el router de acceso.
@@ -36,19 +35,6 @@ type Backup = {
   flags: { trialRuleEnabled: boolean; accessRouterEnabled: boolean };
 };
 
-/** true si el módulo de Redes está deshabilitado a propósito (objeto con "disabled" o array histórico que lo contiene). */
-function moduleDisabledOnPurpose(raw: string | null | undefined): boolean {
-  if (!raw) return false;
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed.includes("oportunidades-redes");
-    if (parsed && typeof parsed === "object") return (parsed as Record<string, unknown>)["oportunidades-redes"] === "disabled";
-  } catch {
-    // JSON inválido: no se considera una decisión deliberada
-  }
-  return false;
-}
-
 async function readBackup(): Promise<Backup | null> {
   const row = await prisma.systemSetting.findUnique({ where: { key: BACKUP_KEY } });
   if (!row?.encryptedValue) return null;
@@ -61,32 +47,11 @@ async function readBackup(): Promise<Backup | null> {
   return JSON.parse(raw) as Backup;
 }
 
-const redesSelect = {
-  id: true,
-  role: true,
-  disabledModules: true,
-  ...Object.fromEntries(REDES_PUBLISHING_FIELDS.map((f) => [f, true])),
-} as const;
-
 async function loadNonAdmins() {
   return prisma.user.findMany({
     where: { role: { not: "admin" } },
-    select: { ...redesSelect, isTrialSignup: true, trialStartedAt: true, trialUnlocked: true },
+    select: { id: true, role: true, isTrialSignup: true, trialStartedAt: true, trialUnlocked: true },
   });
-}
-
-function planRedes(users: Awaited<ReturnType<typeof loadNonAdmins>>) {
-  const toChange: typeof users = [];
-  let disabledOnPurpose = 0;
-  for (const user of users) {
-    if (moduleDisabledOnPurpose(user.disabledModules)) {
-      disabledOnPurpose++;
-      continue;
-    }
-    const rec = user as unknown as Record<string, unknown>;
-    if (REDES_PUBLISHING_FIELDS.some((f) => rec[f] !== true)) toChange.push(user);
-  }
-  return { toChange, disabledOnPurpose };
 }
 
 export async function GET() {
@@ -103,14 +68,13 @@ export async function GET() {
       getTrialRuleEnabled(),
       getAccessRouterEnabled(),
     ]);
-    const { toChange, disabledOnPurpose } = planRedes(users);
     return NextResponse.json(
       {
         applied: Boolean(backup),
         backup: { exists: Boolean(backup), savedAt: backup?.savedAt ?? null },
         simulation: {
-          redesUsersToChange: toChange.length,
-          redesModuleDisabledOnPurpose: disabledOnPurpose,
+          redesUsersToChange: 0,
+          redesModuleDisabledOnPurpose: 0,
           trialIndicatorUsers: users.filter((u) => u.isTrialSignup || u.trialStartedAt).length,
           adminsExcluded,
         },
@@ -145,14 +109,10 @@ export async function POST(request: NextRequest) {
       if (backup) return NextResponse.json({ error: "El Día Cero ya está aplicado. Si quieres repetirlo, primero pulsa Revertir." }, { status: 409 });
 
       const users = await loadNonAdmins();
-      const { toChange } = planRedes(users);
       const trialUsers = users.filter((u) => u.isTrialSignup || u.trialStartedAt);
       const saved: Backup = {
         savedAt: new Date().toISOString(),
-        redes: toChange.map((u) => {
-          const rec = u as unknown as Record<string, boolean | string | null>;
-          return { id: u.id, disabledModules: u.disabledModules, ...Object.fromEntries(REDES_PUBLISHING_FIELDS.map((f) => [f, rec[f] as boolean])) } as RedesBackup;
-        }),
+        redes: [],
         trial: trialUsers.map((u) => ({ id: u.id, isTrialSignup: u.isTrialSignup, trialStartedAt: u.trialStartedAt ? u.trialStartedAt.toISOString() : null, trialUnlocked: u.trialUnlocked })),
         flags: { trialRuleEnabled: await getTrialRuleEnabled(), accessRouterEnabled: await getAccessRouterEnabled() },
       };
@@ -161,17 +121,13 @@ export async function POST(request: NextRequest) {
       await prisma.systemSetting.upsert({ where: { key: BACKUP_KEY }, create: { key: BACKUP_KEY, encryptedValue }, update: { encryptedValue } });
       // 2) Datos, en una sola transacción.
       await prisma.$transaction([
-        ...toChange.map((u) => {
-          const patch = redesProfile({ role: u.role, disabledModules: u.disabledModules });
-          return prisma.user.update({ where: { id: u.id }, data: patch ?? {} });
-        }),
         ...trialUsers.map((u) => prisma.user.update({ where: { id: u.id }, data: { isTrialSignup: false, trialStartedAt: null, trialUnlocked: true } })),
       ]);
       // 3) Interruptores.
       await setTrialRuleEnabled(false);
       await setAccessRouterEnabled(true);
-      auditLog("dia_cero_applied", adminId, { redes: toChange.length, trial: trialUsers.length });
-      return NextResponse.json({ ok: true, changed: { redes: toChange.length, trial: trialUsers.length } });
+      auditLog("dia_cero_applied", adminId, { redes: 0, trial: trialUsers.length });
+      return NextResponse.json({ ok: true, changed: { redes: 0, trial: trialUsers.length } });
     }
 
     if (body?.action === "revert") {
