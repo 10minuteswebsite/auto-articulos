@@ -1,6 +1,5 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
-<<<<<<< HEAD
 ## Claude — Fix «artículos se publican en /news/ y no en /categ/» — 2026-10-14
 
 - Estado: PR abierto, sin fusionar. Sin migración. Capitanía reclamada por Claude (`migration-coordinator.sh claim "Claude"`); se libera al fusionar.
@@ -10,7 +9,7 @@
 - Cambio: `apps/worker/src/automation/10minutesWebsite.ts` usa `ARTICLE_TYPE_ETIQUETAS_CATEGORIAS = "31"` en los dos puntos (`selectOption("#type")`). Manual actualizado (`manual-usuario.ts`).
 - DESTINO: Milton quiere subir varios cambios en un solo lote. PR #572 queda ABIERTO y SIN fusionar a propósito, entregado al Reparador del árbol principal para incluirlo en el lote unificado (3 archivos, un solo tema, sin migración; se puede integrar o revertir por separado).
 - NO verificado: una publicación real con el tipo 31 (la URL final). Probar con el worker de pruebas tras el despliegue y comprobar que la URL ya no lleva `/news/`. El worker tarda ~media hora en desplegar.
-=======
+
 ## Claude — Historial mezclado en los dominios .net — 2026-10-14
 
 - Estado: PR en curso, sin migración. Capitanía reclamada por Claude (`migration-coordinator.sh claim`); se libera al fusionar.
@@ -18,7 +17,6 @@
 - Causa (código): `productOfHost` (`apps/web/src/lib/product-routes.ts`) solo reconocía `articulos.lasolucionweb.com` y `redes.lasolucionweb.com`; en los `.net` devolvía «COMPARTIDO» y el Historial mostraba ambas secciones. Todas las pantallas filtran por esa función, así que el arreglo es central.
 - Cambio: `productOfHost` acepta `.com` y `.net`; prueba añadida en `product-routes.test.ts` (17/17). Efecto colateral intencionado: `redes.lasolucionweb.net` pasa a comportarse como dominio Redes (todas las redes abiertas, menú de Redes), igual que `.com`.
 - Sin comprobar: producción (pendiente de despliegue).
->>>>>>> eff5a083 (fix(historial): reconocer articulos/redes .net para separar el historial por producto)
 
 ## Claude — Redes: una sola llave de permisos en seototal (quitar la lista fija de cuentas) — 2026-10-14
 
