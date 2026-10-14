@@ -1,5 +1,16 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Redes: una sola llave de permisos en seototal (quitar la lista fija de cuentas) — 2026-10-14
+
+- Estado: PR [#569](https://github.com/10minuteswebsite/auto-articulos/pull/569) abierto, SIN fusionar a propósito (ver «Antes de fusionar»). Sin migración. Capitanía reclamada por Claude; se libera al fusionar.
+- Orden de Milton: las cuentas sin el módulo de Redes aparecían como si pudieran usarlo en seototal; limpiar el sistema de permisos y que mande el interruptor de Administración, sin forzar por código.
+- Hallazgo (código): `canSeeSocialModule` (`apps/web/src/lib/modules.ts`) tenía una lista fija por identidad («zulmad», «lorena alvarez») heredada de las órdenes de restringir Redes (`e8efd6e4`, `480abb4b`); el texto del selector decía que «Heredar» abre Redes con una red aprobada, cosa falsa en el código; y `/api/me` y `canUseSocialModule` leían nombre y correo solo para esa lista.
+- Cambio: regla única fuera de redes.lasolucionweb.com = administrador, o «Habilitado» en el selector «Módulo de Redes». Heredar y Deshabilitado = cerrado; las redes aprobadas ya no abren el módulo, solo deciden dónde publica quien lo tiene. redes.lasolucionweb.com no cambia (siempre activa, manda el HUB). Archivos: `modules.ts`, `social-access.ts`, `api/me/route.ts`, `dashboard/usuarios/page.tsx` (texto del selector), pruebas `modules.test.ts` y `social-access.test.ts`, manual.
+- 2026-10-14 (después): lectura de producción (solo lectura, `/api/admin/users`): 107 de 108 cuentas no administradoras tenían «Habilitado» + las 9 redes (efecto de un cambio masivo tipo Día Cero; `/api/admin/dia-cero` responde 404 en producción y `DiaCeroPanel` no está montado en la pantalla). Milton decidió que ninguna debe tener Redes ahora (se activa a mano a quien quiera). Se reducen los actuadores solapados a UNO: interruptor Activado/Desactivado «Módulo de Redes» en la ficha; se quitó Redes de «Módulos de esta cuenta» y del apagado global (`SINGLE_SWITCH_MODULES` en `usuarios/page.tsx`).
+- Antes de fusionar: Lorena Alvarez y Zulmad dejan de entrar si su selector no está en «Habilitado». Comprobarlo en Administración (ficha de cada una) y ponerlo antes del despliegue.
+- Sin comprobar: los datos reales de producción (no se leyó la base). Si tras esto una cuenta sin interruptor sigue viendo Redes, mirar si el Día Cero (`/api/admin/dia-cero`) está aplicado: escribe «Habilitado» a todas las cuentas no administradoras y a las nuevas; se deshace con su botón Revertir, no con código.
+- Verificación: pruebas `modules.test.ts` + `social-access.test.ts` 32/32 (con `shared` del propio árbol); tsc sin errores nuevos en los archivos tocados (los demás errores de tipos ya existían por el `shared` instalado en `node_modules`). Desvío conocido: la regla legacy del worker (`hasLegacySocialModuleAccess`, solo con enforcement activo) sigue aceptando «Heredar + red aprobada»; es más permisiva que la web, no más estricta.
+
 ## Claude — Fix «MCP/ChatGPT: Internal error y nueva autorización» (OAuth refresh) — 2026-10-14
 
 - Capitanía reclamada y liberada al fusionar (`migration-coordinator.sh claim "Claude"`). Sin migración. Estado: PR abierto, sin fusionar.
