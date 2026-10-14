@@ -2042,3 +2042,33 @@ lo pendiente mencionado en este rango (Google Business publicando al instante, r
 IA entre redes, unificar nombres, formatos sin dueño, rediseño de Administración, infografía en
 pausa, foto de la persona apagada, etc.) ya está anotado con casillas en
 `PENDIENTES_SALIDA_AL_PUBLICO_REDES.md`, así que esta tarea no lo duplicó.
+
+## Addendum — 2026-10-14 (tarea programada diaria de propagación)
+
+**Parte A:** sin reserva activa nueva. El rango revisado de Coordinación (`8ee30ff..origin/main`,
+10 commits, PRs #556 a #565) incluye una capitanía (PR #557, fix del asistente/wizard) que la
+propia entrada de Coordinación dice "reclamada y liberada al fusionar": verificado en vivo con
+`git worktree list` en este entorno (solo este worktree, en `169672e`, ya con los 10 commits) y con
+`git merge-base --is-ancestor eb551d8 origin/main` / `--is-ancestor 169672e origin/main` (ambos
+devuelven que sí son ancestros): no queda ninguna reserva abierta que anotar en la tabla de Parte
+A.
+
+**Parte B — nombre de conversación nuevo encontrado en `COORDINACION_CLAUDE_CODEX.md`** en el
+rango `8ee30ff..origin/main` (detalle técnico completo en Coordinación y, propagado, en
+`CONTROLADOR_DE_VERSIONES.md`; no se transcribe aquí para no duplicar):
+
+- `[Claude] - FIX: EL WIZARD NO SALE (ADELATALLADA.COM) Y PASO 6 EN GRIS` — 2026-10-13, PR #557
+  (commit `eb551d8`), cierre y archivo en PR #558 (commit `b51ffde`), CERRADO Y ARCHIVADO.
+  Pendiente de decisión de Milton (categorías para Publicar/Oportunidades vía
+  `PreValidationGuard`) y una observación sin resolver (menú de navegación no visible en el Inicio
+  de Adela), ambas ya anotadas en Coordinación y en `CONTROLADOR_DE_VERSIONES.md` sin duplicar
+  aquí.
+
+Las otras 8 entradas del rango (PRs #556, #559–#565) son continuaciones de la misma «BITÁCORA
+REDES» / lista B que ya vienen identificadas por número de PR en Coordinación y propagadas por
+tema en `CONTROLADOR_DE_VERSIONES.md`; siguiendo el mismo criterio que la corrida anterior
+(2026-10-13), esta tarea no les inventó un nombre de conversación nuevo en formato «[AGENTE] -
+[NOMBRE DEL PROBLEMA]» porque no son proyectos nuevos y distintos, sino trabajo incremental sobre
+el mismo tema de Redes ya indexado. Ninguna de las 10 describe un árbol de git enredado ni ramas
+pisadas, así que no se agregó nada en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Sin ideas sueltas nuevas
+para `TO-DO.md` en este rango.
