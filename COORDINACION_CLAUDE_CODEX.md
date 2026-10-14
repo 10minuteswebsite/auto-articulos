@@ -10,6 +10,14 @@
 - DESTINO: Milton quiere subir varios cambios en un solo lote. PR #572 queda ABIERTO y SIN fusionar a propósito, entregado al Reparador del árbol principal para incluirlo en el lote unificado (3 archivos, un solo tema, sin migración; se puede integrar o revertir por separado).
 - NO verificado: una publicación real con el tipo 31 (la URL final). Probar con el worker de pruebas tras el despliegue y comprobar que la URL ya no lleva `/news/`. El worker tarda ~media hora en desplegar.
 
+## Claude — Historial mezclado en los dominios .net — 2026-10-14
+
+- Estado: PR en curso, sin migración. Capitanía reclamada por Claude (`migration-coordinator.sh claim`); se libera al fusionar.
+- Orden de Milton: `redes.lasolucionweb.net/dashboard/historial` debe mostrar solo Redes y `articulos.lasolucionweb.net/dashboard/historial` solo Artículos.
+- Causa (código): `productOfHost` (`apps/web/src/lib/product-routes.ts`) solo reconocía `articulos.lasolucionweb.com` y `redes.lasolucionweb.com`; en los `.net` devolvía «COMPARTIDO» y el Historial mostraba ambas secciones. Todas las pantallas filtran por esa función, así que el arreglo es central.
+- Cambio: `productOfHost` acepta `.com` y `.net`; prueba añadida en `product-routes.test.ts` (17/17). Efecto colateral intencionado: `redes.lasolucionweb.net` pasa a comportarse como dominio Redes (todas las redes abiertas, menú de Redes), igual que `.com`.
+- Sin comprobar: producción (pendiente de despliegue).
+
 ## Claude — Redes: una sola llave de permisos en seototal (quitar la lista fija de cuentas) — 2026-10-14
 
 - Estado: PR [#569](https://github.com/10minuteswebsite/auto-articulos/pull/569) abierto, SIN fusionar a propósito (ver «Antes de fusionar»). Sin migración. Capitanía reclamada por Claude; se libera al fusionar.

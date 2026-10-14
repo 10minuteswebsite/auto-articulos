@@ -11,6 +11,8 @@ test("el enlace de salida apunta al HUB oficial", () => {
 test("las direcciones de producto limitan la pantalla al producto correspondiente", () => {
   assert.equal(productOfHost("articulos.lasolucionweb.com"), "ARTICULOS");
   assert.equal(productOfHost("redes.lasolucionweb.com"), "REDES");
+  assert.equal(productOfHost("articulos.lasolucionweb.net"), "ARTICULOS");
+  assert.equal(productOfHost("redes.lasolucionweb.net"), "REDES");
   assert.equal(productOfHost("seototal.lasolucionweb.com"), "COMPARTIDO");
   assert.equal(productOfHost("localhost:3000"), "COMPARTIDO");
 });

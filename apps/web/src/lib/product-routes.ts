@@ -25,8 +25,9 @@ export const HUB_URL = "https://hub.lasolucionweb.net";
 /** Producto de la dirección pública desde la que el usuario está trabajando. */
 export function productOfHost(hostname: string | null | undefined): HostProductScope {
   const host = (hostname ?? "").toLowerCase().split(":")[0];
-  if (host === "articulos.lasolucionweb.com") return "ARTICULOS";
-  if (host === "redes.lasolucionweb.com") return "REDES";
+  // Cada producto responde en .com y en .net (el HUB y Tumblr usan .net).
+  if (host === "articulos.lasolucionweb.com" || host === "articulos.lasolucionweb.net") return "ARTICULOS";
+  if (host === "redes.lasolucionweb.com" || host === "redes.lasolucionweb.net") return "REDES";
   // Solo en desarrollo: permite ver cada dominio en local (http://redes.localhost:3011).
   if (process.env.NODE_ENV !== "production") {
     if (host === "articulos.localhost") return "ARTICULOS";
