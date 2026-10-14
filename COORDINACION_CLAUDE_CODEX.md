@@ -58,11 +58,19 @@ local se conserva en `/admin-login`, separado del acceso de usuarios del Hub.
   `dpl_EQGWnPrKem4wDVg9dLtKdXyisAxL`, estado `READY`. El deployment quedó
   publicado en los dominios productivos asociados, incluyendo
   `https://articulos.lasolucionweb.net`.
+- **Corrección posterior verificada:** el botón «Ir al Hub» de `/login` ahora
+  apunta a `/login` del Hub, no a `/dashboard`. Esto evita que el middleware
+  protegido salte directamente al dominio técnico de Auth0. Commit
+  `158bafb1`; deployment productivo final `dpl_ETvye9r9GafJfS773Xe7KBWzkxJN`,
+  estado `READY`, alias de Artículos confirmado.
 - **Migraciones/datos:** ninguna.
 - **Verificación productiva:** `/login` muestra la puerta «Entra desde el Hub»;
   `/admin-login` muestra el formulario administrativo separado; una petición
   sin sesión a `/dashboard` responde `307` hacia `/login`; el build remoto
-  terminó correctamente con 86 rutas. La prueba autenticada de entrada desde
+  terminó correctamente con 86 rutas. El enlace visible de `/login` fue
+  comprobado en navegador y muestra `hub.lasolucionweb.net/login`; esa ruta
+  muestra la pantalla propia del Hub con sus opciones de acceso. La prueba
+  autenticada de entrada desde
   el Hub y una sesión legacy requiere una sesión de usuario real y queda como
   comprobación funcional manual, sin solicitar ni registrar credenciales.
 - **Rollback:** revertir el commit de este cambio; no hay migración ni cambios

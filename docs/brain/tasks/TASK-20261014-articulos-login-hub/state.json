@@ -30,16 +30,18 @@
     "build": "passed",
     "git_diff_check": "passed"
   },
+  "code_checkpoint": "158bafb1",
   "deployment": {
     "provider": "Vercel",
     "project": "la-solucion-web/auto-articulos-web",
-    "deployment_id": "dpl_EQGWnPrKem4wDVg9dLtKdXyisAxL",
+    "deployment_id": "dpl_ETvye9r9GafJfS773Xe7KBWzkxJN",
     "status": "READY",
     "date": "2026-10-14",
     "production_domains": ["articulos.lasolucionweb.net"]
   },
   "verification": {
-    "login_public": "passed: /login shows Hub transition",
+    "login_public": "passed: /login shows Hub transition with href https://hub.lasolucionweb.net/login",
+    "hub_login_public": "passed: Hub /login renders its own login screen",
     "admin_login_public": "passed: /admin-login shows local admin form",
     "protected_dashboard": "passed: unauthenticated /dashboard returns 307 to /login",
     "remote_build": "passed: 86 routes generated"

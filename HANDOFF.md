@@ -17,6 +17,13 @@ Producción: deployment Vercel `dpl_EQGWnPrKem4wDVg9dLtKdXyisAxL`, estado
 `/admin-login` responden 200 con sus superficies correctas y `/dashboard` sin
 sesión redirige a `/login`. El build remoto generó 86 rutas.
 
+Corrección de transición publicada en el mismo día: commit `158bafb1`,
+deployment final `dpl_ETvye9r9GafJfS773Xe7KBWzkxJN` (`READY`). El botón «Ir al
+Hub» de Artículos fue verificado en navegador con destino
+`https://hub.lasolucionweb.net/login`, que muestra la pantalla propia del Hub;
+ya no envía al visitante directamente a `*.us.auth0.com` por entrar primero en
+`/dashboard`.
+
 Archivos principales: `apps/web/src/lib/session.ts`,
 `apps/web/src/lib/session.test.ts`, `apps/web/src/middleware.ts`,
 `apps/web/src/app/auth/hub/route.ts`, `apps/web/src/app/dashboard/layout.tsx`,
