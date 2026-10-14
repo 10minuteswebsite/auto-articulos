@@ -10,13 +10,12 @@
 - DESTINO: Milton quiere subir varios cambios en un solo lote. PR #572 queda ABIERTO y SIN fusionar a propósito, entregado al Reparador del árbol principal para incluirlo en el lote unificado (3 archivos, un solo tema, sin migración; se puede integrar o revertir por separado).
 - NO verificado: una publicación real con el tipo 31 (la URL final). Probar con el worker de pruebas tras el despliegue y comprobar que la URL ya no lleva `/news/`. El worker tarda ~media hora en desplegar.
 
-## Claude — Historial mezclado en los dominios .net — 2026-10-14
+## Claude — CIERRE «Historial mezclado en los dominios .net» — 2026-10-14
 
-- Estado: PR en curso, sin migración. Capitanía reclamada por Claude (`migration-coordinator.sh claim`); se libera al fusionar.
-- Orden de Milton: `redes.lasolucionweb.net/dashboard/historial` debe mostrar solo Redes y `articulos.lasolucionweb.net/dashboard/historial` solo Artículos.
-- Causa (código): `productOfHost` (`apps/web/src/lib/product-routes.ts`) solo reconocía `articulos.lasolucionweb.com` y `redes.lasolucionweb.com`; en los `.net` devolvía «COMPARTIDO» y el Historial mostraba ambas secciones. Todas las pantallas filtran por esa función, así que el arreglo es central.
-- Cambio: `productOfHost` acepta `.com` y `.net`; prueba añadida en `product-routes.test.ts` (17/17). Efecto colateral intencionado: `redes.lasolucionweb.net` pasa a comportarse como dominio Redes (todas las redes abiertas, menú de Redes), igual que `.com`.
-- Sin comprobar: producción (pendiente de despliegue).
+- Estado: CERRADO Y ARCHIVADO. PR #571 fusionado por Milton en `main`. Sin migración. Capitanía liberada.
+- Causa: `productOfHost` (`apps/web/src/lib/product-routes.ts`) solo reconocía los dominios `.com`; en `articulos.lasolucionweb.net` y `redes.lasolucionweb.net` el Historial salía mezclado. Ahora acepta `.com` y `.net` (prueba en `product-routes.test.ts`, 17/17; manual actualizado).
+- Efectos esperados: los `.net` aíslan productos como los `.com` (rutas del otro producto redirigen o dan 404) y `redes.lasolucionweb.net` abre todas las redes. Sin tocar: el detalle de eventos del Historial de Redes pide `/api/titles/{id}/events` (ruta de Artículos) y no carga en el host de Redes; ya ocurría en `.com`.
+- NO verificado en producción (las URLs piden login): comprobar con una cuenta que cada `.net` muestra solo lo suyo y que seototal sigue mostrando ambos.
 
 ## Claude — Redes: una sola llave de permisos en seototal (quitar la lista fija de cuentas) — 2026-10-14
 
