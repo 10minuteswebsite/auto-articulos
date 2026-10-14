@@ -225,6 +225,8 @@ Ruta: /dashboard/historial
 
 Historial conserva las ejecuciones anteriores y el estado de los títulos. Puedes revisar cuáles se publicaron, cuáles tuvieron error y los mensajes asociados. También muestra información disponible sobre publicaciones en redes e intentos de indexación.
 
+En articulos.lasolucionweb.com (.com o .net) el Historial muestra solo artículos y en redes.lasolucionweb.com (.com o .net) solo publicaciones en redes; en seototal muestra ambos.
+
 Si un artículo muestra un error, lee el mensaje antes de repetir la acción. Si el problema indica una conexión, revisa primero Configuración.
 
 ## Cómo funciona esta aplicación
