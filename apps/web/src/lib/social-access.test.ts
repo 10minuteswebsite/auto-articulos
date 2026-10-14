@@ -26,10 +26,10 @@ test("los administradores conservan acceso para soporte", () => {
 
 // Instancia superior del módulo (1/10/2026): el administrador aprueba o
 // quita la pantalla entera, aparte de qué redes concretas puede usar.
-test("módulo: sin decisión del administrador, se mantiene el comportamiento histórico", () => {
+test("módulo: sin 'Habilitado' del administrador no se entra, aunque haya redes aprobadas", () => {
   assert.equal(hasSocialModuleAccess({ role: "user" }), false);
   assert.equal(
-    hasSocialModuleAccess({ role: "user", name: "Hector Travasillo", allowBloggerPublishing: true }),
+    hasSocialModuleAccess({ role: "user", allowBloggerPublishing: true }),
     false,
   );
 });
@@ -38,7 +38,6 @@ test("módulo: 'Habilitado' lo muestra aunque no tenga ninguna red aprobada toda
   assert.equal(
     hasSocialModuleAccess({
       role: "user",
-      name: "Lorena Alvarez",
       disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }),
     }),
     true,
@@ -66,7 +65,7 @@ test("módulo: los administradores siempre lo tienen, incluso 'Deshabilitado'", 
   );
 });
 
-test("web y worker conservan la misma regla legacy de Redes", () => {
+test("web nunca es más permisiva que la regla legacy del worker", () => {
   const cases = [
     { role: "admin", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }), allowBloggerPublishing: false },
     { role: "user", disabledModules: null, allowBloggerPublishing: false },
@@ -77,20 +76,17 @@ test("web y worker conservan la misma regla legacy de Redes", () => {
     { role: "user", disabledModules: "{malformed", allowBloggerPublishing: true },
   ] as const;
   for (const user of cases) {
-    assert.equal(
-      // Cuenta piloto: la lista de identidad ya no interviene y se compara solo la regla legacy.
-      hasSocialModuleAccess({ ...user, name: "Lorena Alvarez" }),
-      hasLegacySocialModuleAccess({ role: user.role, disabledModules: user.disabledModules, approvals: [user.allowBloggerPublishing] }),
-      JSON.stringify(user),
-    );
+    const web = hasSocialModuleAccess({ ...user });
+    const legacy = hasLegacySocialModuleAccess({ role: user.role, disabledModules: user.disabledModules, approvals: [user.allowBloggerPublishing] });
+    assert.ok(!web || legacy, JSON.stringify(user));
   }
 });
 
 // Redes por dominio: en redes.lasolucionweb.com (HUB) siempre activo; en
-// seototal.lasolucionweb.com sigue la lista de cuentas piloto.
-test("dominio redes: cuenta cualquiera con redes aprobadas accede sin estar en la lista piloto", () => {
+// seototal.lasolucionweb.com solo abre el interruptor «Habilitado» de Administración.
+test("dominio redes: cuenta cualquiera con redes aprobadas accede sin necesitar el interruptor", () => {
   assert.equal(
-    hasSocialModuleAccess({ role: "user", name: "Hector Travasillo", allowBloggerPublishing: true }, { redesHost: true }),
+    hasSocialModuleAccess({ role: "user", allowBloggerPublishing: true }, { redesHost: true }),
     true,
   );
 });
@@ -105,13 +101,13 @@ test("dominio redes: 'Deshabilitado' explícito de Administración se respeta", 
   );
 });
 
-test("otros dominios: cuenta fuera de la lista piloto sigue sin acceso", () => {
+test("otros dominios: ningún nombre abre Redes; solo «Habilitado»", () => {
   assert.equal(
-    hasSocialModuleAccess({ role: "user", name: "Hector Travasillo", allowBloggerPublishing: true }, {}),
+    hasSocialModuleAccess({ role: "user", allowBloggerPublishing: true }, {}),
     false,
   );
   assert.equal(
-    hasSocialModuleAccess({ role: "user", name: "Lorena Alvarez", allowBloggerPublishing: true }, {}),
+    hasSocialModuleAccess({ role: "user", allowBloggerPublishing: true, disabledModules: JSON.stringify({ "oportunidades-redes": "enabled" }) }, {}),
     true,
   );
 });
@@ -121,7 +117,7 @@ test("dominio redes: todas las redes quedan abiertas aunque Administración no m
   assert.equal(opened.allowInstagramPublishing, true);
   assert.equal(opened.allowTumblrPublishing, true);
   assert.equal(hasSocialPublishingApproval(opened), true);
-  assert.equal(hasSocialModuleAccess({ role: "user", name: "Hector Travasillo" }, { redesHost: true }), true);
+  assert.equal(hasSocialModuleAccess({ role: "user" }, { redesHost: true }), true);
 });
 
 test("otros dominios: las marcas por red de Administración no se tocan", () => {

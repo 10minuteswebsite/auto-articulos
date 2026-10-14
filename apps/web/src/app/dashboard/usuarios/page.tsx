@@ -3019,8 +3019,9 @@ function UserCard({
               <strong style={{ fontSize: 14 }}>Módulo de Redes (DIFUSIÓN SOCIAL)</strong>
               <p style={{ margin: "4px 0 0", fontSize: 12, color: "#6e6e73", maxWidth: 440 }}>
                 Controla si esta cuenta ve la pantalla completa, antes de elegir qué redes concretas puede usar
-                abajo. <strong>Heredar</strong> mantiene el comportamiento de siempre: la ve en cuanto tenga al menos
-                una red aprobada.
+                abajo. Solo <strong>Habilitado</strong> la abre (fuera de redes.lasolucionweb.com);
+                <strong> Heredar</strong> y <strong>Deshabilitado</strong> la mantienen cerrada. Las redes aprobadas
+                de abajo no la abren: solo deciden en cuáles puede publicar.
               </p>
             </div>
             <select
@@ -3034,7 +3035,7 @@ function UserCard({
               disabled={savingPermissions}
               style={{ fontSize: 13, padding: "8px 10px", minHeight: 36, cursor: "pointer" }}
             >
-              <option value="inherit">Heredar (según redes aprobadas)</option>
+              <option value="inherit">Heredar (cerrado)</option>
               <option value="enabled">Habilitado para esta cuenta</option>
               <option value="disabled">Deshabilitado para esta cuenta</option>
             </select>
