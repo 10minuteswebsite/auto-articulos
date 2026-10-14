@@ -2,12 +2,11 @@
 
 ## Claude — Fix «artículos se publican en /news/ y no en /categ/» — 2026-10-14
 
-- Estado: PR abierto, sin fusionar. Sin migración. Capitanía reclamada por Claude (`migration-coordinator.sh claim "Claude"`); se libera al fusionar.
+- Estado: FUSIONADO (PR #572, `3f823154`, 2026-10-14, Vercel success). Sin migración. Capitanía liberada por Claude. Falta la prueba real de la URL.
 - Síntoma (Milton): los artículos salen en `/news/...` (ej. segurosdesaludyvida.com) y deben salir bajo la ruta de categoría.
 - Causa: el worker fijaba siempre el «Tipo» del panel en «Noticias» (valor 2, `ARTICLE_TYPE_NOTICIAS`).
 - Comprobado en el panel real (cuenta Seguros de Salud y Vida, sesión de Milton): `#type` solo tiene «Noticias» (2) y «Solo Etiquetas/Categorias» (31); con 31 el formulario muestra los mismos campos que con 2. Milton indicó que debe usarse «Solo Etiquetas/Categorias».
 - Cambio: `apps/worker/src/automation/10minutesWebsite.ts` usa `ARTICLE_TYPE_ETIQUETAS_CATEGORIAS = "31"` en los dos puntos (`selectOption("#type")`). Manual actualizado (`manual-usuario.ts`).
-- DESTINO: Milton quiere subir varios cambios en un solo lote. PR #572 queda ABIERTO y SIN fusionar a propósito, entregado al Reparador del árbol principal para incluirlo en el lote unificado (3 archivos, un solo tema, sin migración; se puede integrar o revertir por separado).
 - NO verificado: una publicación real con el tipo 31 (la URL final). Probar con el worker de pruebas tras el despliegue y comprobar que la URL ya no lleva `/news/`. El worker tarda ~media hora en desplegar.
 
 ## Claude — Redes: una sola llave de permisos en seototal (quitar la lista fija de cuentas) — 2026-10-14
