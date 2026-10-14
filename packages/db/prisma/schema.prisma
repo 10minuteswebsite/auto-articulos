@@ -61,6 +61,11 @@ model User {
   // automáticamente platformDomain: Europa -> "site", resto del mundo ->
   // "net" (ver apps/web/src/lib/countries.ts).
   country                           String?
+  // Ciudad y zona horaria (IANA, ej. "America/Bogota") que la propia persona declara en
+  // Configuración → Cuenta (aviso de una sola vez en el Inicio). La zona define dónde empieza y
+  // termina «hoy» para los cupos diarios de artículos; sin valor se usa la hora de Florida.
+  city                              String?
+  timeZone                          String?
   // Idioma en el que la IA debe redactar los artículos de este usuario en
   // 10minutesWebsite (independiente del idioma de la interfaz de esa
   // cuenta, que es lo que causaba selectores de botón rotos — ver

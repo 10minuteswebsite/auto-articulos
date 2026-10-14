@@ -56,6 +56,9 @@ export async function GET() {
       where: { id: userId },
       select: {
         contentLanguage: true,
+        country: true,
+        city: true,
+        timeZone: true,
         articleSignature: true,
         phone: true,
         imagePrompt: true,
@@ -177,6 +180,16 @@ export async function GET() {
       description: "El idioma en que la IA redactará tus artículos (español, inglés, etc.).",
       actionUrl: "/dashboard/configuracion?tab=platform#language",
       actionLabel: "Seleccionar idioma",
+    },
+    {
+      id: "location",
+      label: "Ciudad, país y zona horaria",
+      configured: Boolean(user?.country && user?.city && user?.timeZone),
+      required: false,
+      section: "platform",
+      description: "Tu ciudad, país y zona horaria: con ellos tu día de publicación empieza y termina a medianoche en tu hora, y tu cupo diario se renueva cuando corresponde.",
+      actionUrl: "/dashboard/configuracion/cuenta?ubicacion=1#ubicacion",
+      actionLabel: "Indicar mi ubicación",
     },
     {
       id: "image-credits",

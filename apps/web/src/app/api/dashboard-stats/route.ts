@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { countPublishedArticles } from "@/lib/article-quota";
 import { getCurrentUserId } from "@/lib/current-user";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 
@@ -14,7 +15,6 @@ export async function GET() {
   const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const now = new Date();
   const today = startOfDay(now);
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const daysBack = 14;
   const chartStart = new Date(today);
   chartStart.setDate(chartStart.getDate() - (daysBack - 1));
@@ -23,8 +23,7 @@ export async function GET() {
     user,
     totalPublished,
     totalAttempted,
-    publishedThisMonth,
-    publishedToday,
+    published,
     lastPublished,
     recentPublished,
     opportunityGroups,
@@ -37,16 +36,7 @@ export async function GET() {
     }),
     prisma.title.count({ where: { run: { userId }, status: "success" } }),
     prisma.title.count({ where: { run: { userId } } }),
-    prisma.title.count({
-      where: {
-        run: { userId },
-        status: "success",
-        processedAt: { gte: startOfMonth },
-      },
-    }),
-    prisma.title.count({
-      where: { run: { userId }, status: "success", processedAt: { gte: today } },
-    }),
+    countPublishedArticles(userId, now),
     prisma.title.findFirst({
       where: { run: { userId }, status: "success" },
       orderBy: { processedAt: "desc" },
@@ -135,9 +125,9 @@ export async function GET() {
     totalAttempted,
     successRate:
       totalAttempted > 0 ? Math.round((totalPublished / totalAttempted) * 100) : null,
-    publishedThisMonth,
+    publishedThisMonth: published.month,
     monthlyArticleLimit: user.monthlyArticleLimit,
-    publishedToday,
+    publishedToday: published.today,
     dailyArticleLimit: user.dailyArticleLimit,
     daysSinceLastPublish,
     streak,
