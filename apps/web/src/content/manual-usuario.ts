@@ -69,7 +69,7 @@ Si el administrador te oculta algún módulo, simplemente no aparece en el menú
 
 ### Día Cero
 
-En Administración, el botón Día Cero muestra primero una simulación. Si todo es correcto, escribe DIA CERO y pulsa Activar Día Cero. Después crea la variable DIA_CERO con valor on en Vercel y vuelve a desplegar. Si algo sale mal, pulsa Revertir y borra la variable.
+En Administración, el botón Día Cero muestra primero una simulación. Si todo es correcto, escribe DIA CERO y pulsa Activar Día Cero. El Día Cero ya no da acceso a Redes a nadie (desde el 2026-10-14): Redes solo se abre con el interruptor «Módulo de Redes» de cada ficha, y las cuentas nuevas nacen con Redes apagado. Después crea la variable DIA_CERO con valor on en Vercel y vuelve a desplegar. Si algo sale mal, pulsa Revertir y borra la variable.
 
 Ruta: /dashboard/configuracion
 
