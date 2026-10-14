@@ -17,6 +17,7 @@
  * tocar `route.ts` — ya itera sobre este array.
  */
 
+import { MCP_AUTOMATION_RULES } from "./automation";
 import { MCP_SCOPE_RULES } from "./scope";
 
 export type PromptArgument = { name: string; description: string; required?: boolean };
@@ -69,6 +70,18 @@ Espera a que elija un número o lo diga con sus palabras. Si después de elegir 
 7. Después de publicar, llama estado_de_publicaciones para confirmarle que se completó y darle el enlace real del artículo (puede tardar un momento en aparecer si todavía se está generando).
 
 ${MCP_SCOPE_RULES}`,
+  },
+
+  {
+    name: "programar_publicaciones",
+    title: "Programar publicaciones automáticas",
+    description:
+      "Úsalo cuando el usuario pida publicar de forma recurrente o automática ('un artículo a las 7, otro a las 12 y otro a las 19', 'publica todos los días', 'que se publique solo') o quiera cambiar, pausar o detener esa programación. Trae el flujo completo de cada ejecución, incluida la reposición de oportunidades cuando se acaban.",
+    arguments: [
+      { name: "horarios", description: "Horarios o cantidad que dijo el usuario, en sus palabras (opcional; por defecto 07:00, 12:00 y 19:00).", required: false },
+    ],
+    build: (args) =>
+      `${args.horarios ? `El usuario pidió esta programación, en sus palabras: "${args.horarios}". Aplícala exactamente.\n\n` : ""}${MCP_AUTOMATION_RULES}\n\n${MCP_SCOPE_RULES}`,
   },
 
   {
