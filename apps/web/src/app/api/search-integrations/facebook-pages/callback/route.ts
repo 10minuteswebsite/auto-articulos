@@ -7,6 +7,8 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredInstagramAppCredentials } from "@/lib/instagram-app-config";
 import { canPublishToNetwork } from "@/lib/social-access";
 import { FACEBOOK_PAGES_STATE_COOKIE } from "../connect/constants";
+import { clearCookie } from "@/lib/shared-cookies";
+import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -15,12 +17,12 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
 
   if (!(await canPublishToNetwork(userId, "facebook")) || !state || state !== cookieStore.get(FACEBOOK_PAGES_STATE_COOKIE)?.value || !code) {
-    return NextResponse.redirect(new URL(connectionReturnPath("facebook", "error"), request.url));
+    return NextResponse.redirect(new URL(connectionReturnPath("facebook", "error"), oauthReturnBase(request)));
   }
 
   try {
     const appCredentials = await getStoredInstagramAppCredentials();
-    const redirectUri = `${request.nextUrl.protocol}//${request.nextUrl.host}/api/search-integrations/facebook-pages/callback`;
+    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/facebook-pages/callback");
     const token = await exchangeCodeForMetaPageToken(code, redirectUri, appCredentials);
     const expiresAt = new Date(Date.now() + token.expiresInSeconds * 1000);
 
@@ -41,11 +43,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const response = NextResponse.redirect(new URL(connectionReturnPath("facebook", "connected"), request.url));
-    response.cookies.delete(FACEBOOK_PAGES_STATE_COOKIE);
+    const response = NextResponse.redirect(new URL(connectionReturnPath("facebook", "connected"), oauthReturnBase(request)));
+    clearCookie(response, FACEBOOK_PAGES_STATE_COOKIE, { path: "/" });
+    clearOAuthOrigin(response);
     return response;
   } catch (error) {
     console.error("Error en Facebook Pages OAuth callback:", error);
-    return NextResponse.redirect(new URL(connectionReturnPath("facebook", "error"), request.url));
+    return NextResponse.redirect(new URL(connectionReturnPath("facebook", "error"), oauthReturnBase(request)));
   }
 }

@@ -1,5 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Fix «enlaces de devolución (callbacks) que llegan a seototal» — 2026-10-14
+
+- Estado: PR abierto, sin fusionar. Sin migración. Orden de Milton: tras separar Artículos y Redes, botones de conexión devolvían a seototal.lasolucionweb en vez de al producto de origen.
+- Auditoría: los 11 callbacks con retorno único (Google, Analytics, Business Profile, Bing, Blogger, LinkedIn, Pinterest, Threads, Twitter) ya devolvían con `oauthReturnBase`. FALLABAN: **Instagram** (callback) y **Facebook Pages** (connect y callback) usaban `request.url` (siempre el host canónico seototal) y no recordaban el host de origen; Facebook además fijaba el redirect_uri a mano.
+- Arreglo: esos tres archivos usan `oauthCallbackUri`/`rememberOAuthOrigin`/`oauthReturnBase`/`clearOAuthOrigin`/`applyCookie` como Threads. Sin Día Cero el comportamiento es idéntico al anterior. Prueba nueva `oauth-callback-returns.test.ts` (12/12) impide volver a usar `request.url` en un callback.
+- Sin tocar y por decidir: Tumblr (callback fijo `redes.lasolucionweb.net`, red solo de Redes); Composio vuelve al host que inició; hosts `.net` no están en la lista permitida de OAuth (Google/GA/Bing/Business Profile usan el callback configurado = seototal si se inicia desde un `.net`); registrar callbacks `.net` en las consolas es decisión de Milton.
+- NO verificado en producción (requiere conectar una red desde cada host).
+
 ## Claude — Fix «Nancy Cruz: sin cupo para publicar artículos sin haber publicado hoy» — 2026-10-14
 
 - Estado (2026-10-14, corregido para el REPARADOR DEL ARBOL): PR #568 con 16 archivos finales, todos del cupo horario; se retiró `diagnose-nancy-cupo.js` (diagnóstico de un solo uso). Listo para revisión final y squash; SIN fusionar. La migración YA está aplicada en producción por Milton (Supabase, «Success. No rows returned»): no crear otra ni reaplicarla. Capitanía liberada al entregar.
