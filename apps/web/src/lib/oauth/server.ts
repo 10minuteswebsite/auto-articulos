@@ -104,7 +104,12 @@ export async function exchangeAuthorizationCode(input: { code: string; redirectU
   return issueTokens({ userId: record.userId, clientId: record.clientId, scopes: record.scopes, resource: record.resource });
 }
 
-async function issueTokens(data: { userId: string; clientId: string; scopes: string; resource: string }) {
+async function issueTokens(owner: { userId: string; clientId: string; scopes: string; resource: string }) {
+  // Se copian SOLO estos cuatro campos. Al renovar, `owner` llega como la fila
+  // completa del refresh token anterior; esparcirla (`...owner`) arrastraba su
+  // `id` y la creación del refresh nuevo chocaba con la fila vieja (P2002), así
+  // que toda renovación terminaba en 400 y quemaba el token.
+  const data = { userId: owner.userId, clientId: owner.clientId, scopes: owner.scopes, resource: owner.resource };
   const accessToken = await createMcpAccessToken(data.userId, data.scopes.split(" ").filter((scope) => scope !== "offline_access"));
   const refreshToken = randomSecret();
   await prisma.$transaction([
@@ -119,7 +124,14 @@ export async function refreshTokens(token: string, clientId: string) {
   if (!record || record.clientId !== clientId || record.revokedAt || record.expiresAt <= new Date()) throw new OAuthError("invalid_grant", "Refresh token inválido o vencido.");
   const revoked = await prisma.oAuthRefreshToken.updateMany({ where: { id: record.id, revokedAt: null }, data: { revokedAt: new Date() } });
   if (revoked.count !== 1) throw new OAuthError("invalid_grant", "Refresh token ya utilizado.");
-  return issueTokens(record);
+  try {
+    return await issueTokens(record);
+  } catch (error) {
+    // Si no se pudo emitir el par nuevo, el token viejo no debe quedar quemado:
+    // el cliente (ChatGPT) todavía no recibió ninguno nuevo y no podría reintentar.
+    await prisma.oAuthRefreshToken.updateMany({ where: { id: record.id }, data: { revokedAt: null } }).catch(() => {});
+    throw error;
+  }
 }
 
 export async function verifyOAuthAccessToken(token: string | undefined) {
