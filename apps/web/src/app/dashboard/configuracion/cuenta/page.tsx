@@ -14,6 +14,7 @@ import {
   readySectionStyle,
   disabledStyle,
 } from "@/components/dashboard-ui";
+import { COUNTRIES } from "@/lib/countries";
 import type { CategoryRow, LanguageRow, SyncStatus } from "@/types/dashboard";
 import {
   DEFAULT_PLATFORM_DOMAIN,
@@ -55,6 +56,11 @@ export default function ConfiguracionCuentaPage() {
   const [languageSyncing, setLanguageSyncing] = useState(false);
   const [contentLanguage, setContentLanguage] = useState("");
   const [savingLanguage, setSavingLanguage] = useState(false);
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [timeZone, setTimeZone] = useState("");
+  const [timeZones, setTimeZones] = useState<string[]>([]);
+  const [savingLocation, setSavingLocation] = useState(false);
   const [platformBase, setPlatformBase] = useState(
     PLATFORM_SERVERS[DEFAULT_PLATFORM_DOMAIN].baseUrl,
   );
@@ -108,6 +114,10 @@ export default function ConfiguracionCuentaPage() {
     if (meRes.ok) {
       const data = await meRes.json();
       setContentLanguage(data.contentLanguage ?? "");
+      setCountry(data.country ?? "");
+      setCity(data.city ?? "");
+      // Sin zona guardada se propone la del propio navegador, que es donde la persona está ahora.
+      setTimeZone(data.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone ?? "");
       if (typeof data.platformBaseUrl === "string" && data.platformBaseUrl) {
         setPlatformBase(data.platformBaseUrl);
       }
@@ -115,6 +125,11 @@ export default function ConfiguracionCuentaPage() {
         setPlatformDomain(data.platformDomain);
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const supported = (Intl as unknown as { supportedValuesOf?: (key: string) => string[] }).supportedValuesOf;
+    setTimeZones(supported ? supported("timeZone") : []);
   }, []);
 
   useEffect(() => {
@@ -224,6 +239,31 @@ export default function ConfiguracionCuentaPage() {
       setBanner({ type: "info", text: "Idioma de los artículos guardado." });
     } finally {
       setSavingLanguage(false);
+    }
+  }
+
+  async function handleSaveLocation() {
+    setSavingLocation(true);
+    setBanner(null);
+    try {
+      const res = await fetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ country, city, timeZone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setBanner({ type: "error", text: data.error ?? "Error al guardar tu ubicación" });
+        return;
+      }
+      // Si llegó desde el aviso del Inicio, vuelve allí: es una pregunta de un solo uso.
+      if (new URLSearchParams(window.location.search).get("ubicacion")) {
+        window.location.assign("/dashboard");
+        return;
+      }
+      setBanner({ type: "info", text: "Tu ubicación y zona horaria quedaron guardadas." });
+    } finally {
+      setSavingLocation(false);
     }
   }
 
@@ -575,6 +615,53 @@ export default function ConfiguracionCuentaPage() {
               )}
             </div>
           )}
+        </section>
+
+        {/* Ubicación: ciudad, país y zona horaria (define dónde empieza «hoy» en los cupos diarios) */}
+        <section id="ubicacion" style={sectionStyle}>
+          <h2 style={{ ...h2Style, margin: "0 0 6px" }}>Tu ubicación</h2>
+          <p style={{ fontSize: 13, color: "#6e6e73", marginBottom: 14 }}>
+            Indica en qué ciudad y país estás. Con tu zona horaria, tu día de publicación empieza y termina a medianoche en tu hora, y tu cupo diario se renueva cuando corresponde.
+          </p>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <select
+              aria-label="País"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              style={{ ...inputStyle, width: 220, maxWidth: "100%", height: 40 }}
+            >
+              <option value="">País...</option>
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>{c.name}</option>
+              ))}
+            </select>
+            <input
+              aria-label="Ciudad"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Ciudad"
+              maxLength={120}
+              style={{ ...inputStyle, width: 220, maxWidth: "100%", height: 40 }}
+            />
+            <select
+              aria-label="Zona horaria"
+              value={timeZone}
+              onChange={(e) => setTimeZone(e.target.value)}
+              style={{ ...inputStyle, width: 260, maxWidth: "100%", height: 40 }}
+            >
+              <option value="">Zona horaria...</option>
+              {(timeZone && !timeZones.includes(timeZone) ? [timeZone, ...timeZones] : timeZones).map((z) => (
+                <option key={z} value={z}>{z.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+            <button
+              onClick={handleSaveLocation}
+              disabled={savingLocation || !country || !city.trim() || !timeZone}
+              style={disabledStyle(secondaryButtonStyle, savingLocation || !country || !city.trim() || !timeZone)}
+            >
+              {savingLocation ? "Guardando..." : "Guardar ubicación"}
+            </button>
+          </div>
         </section>
 
         {/* Idioma Predeterminado de Redacción */}

@@ -38,3 +38,14 @@ export function startOfSocialMonth(now: Date = new Date(), timeZone: string = SO
   const local = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
   return startOfSocialDay(new Date(`${local.slice(0, 7)}-01T12:00:00Z`), timeZone);
 }
+
+/** ¿Es un identificador de zona horaria IANA que este entorno reconoce? */
+export function isValidTimeZone(value: unknown): value is string {
+  if (typeof value !== "string" || !value.trim()) return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+}

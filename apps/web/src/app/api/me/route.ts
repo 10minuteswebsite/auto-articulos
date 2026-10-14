@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
-import { platformBaseUrl } from "@auto-articulos/shared";
+import { isValidTimeZone, platformBaseUrl } from "@auto-articulos/shared";
+import { isValidCountryCode } from "@/lib/countries";
 import { getCurrentUser, getCurrentUserId, getActingAdmin, displayName } from "@/lib/current-user";
 
 import {
@@ -62,6 +63,9 @@ export async function GET() {
       articleSignature: user.articleSignature,
       clientLocations: user.clientLocations,
       businessLocations: user.businessLocations,
+      country: user.country,
+      city: user.city,
+      timeZone: user.timeZone,
       excludedTopics: user.excludedTopics,
       opportunitiesDisclosureAcceptedAt: user.opportunitiesDisclosureAcceptedAt,
       phone: user.phone,
@@ -130,6 +134,9 @@ export async function PATCH(request: NextRequest) {
     defaultPromptId?: string | null;
     clientLocations?: string | null;
     businessLocations?: string | null;
+    country?: string;
+    city?: string;
+    timeZone?: string;
     excludedTopics?: string | null;
     hasImageCredits?: boolean;
   } = {};
@@ -297,6 +304,26 @@ export async function PATCH(request: NextRequest) {
     }
   }
 
+  // Ubicación declarada por la persona (aviso de una sola vez del Inicio). Se guardan juntas: el
+  // país y la zona horaria son obligatorios; la ciudad es texto libre. La zona horaria decide dónde
+  // empieza «hoy» para los cupos diarios de artículos.
+  if ("country" in body || "city" in body || "timeZone" in body) {
+    const { country, city, timeZone } = body;
+    if (!isValidCountryCode(country)) {
+      return NextResponse.json({ error: "Elige tu país." }, { status: 400 });
+    }
+    const cleanCity = typeof city === "string" ? city.trim() : "";
+    if (!cleanCity || cleanCity.length > 120) {
+      return NextResponse.json({ error: "Escribe tu ciudad (máximo 120 caracteres)." }, { status: 400 });
+    }
+    if (!isValidTimeZone(timeZone)) {
+      return NextResponse.json({ error: "La zona horaria no es válida." }, { status: 400 });
+    }
+    data.country = country.toUpperCase();
+    data.city = cleanCity;
+    data.timeZone = timeZone;
+  }
+
   if ("hasImageCredits" in body) {
     // El usuario solo puede confirmar que YA tiene créditos (true). Que se
     // agoten sigue siendo exclusivo del worker (queue.ts), y únicamente tras
@@ -326,6 +353,9 @@ export async function PATCH(request: NextRequest) {
       businessLocations: true,
       excludedTopics: true,
       hasImageCredits: true,
+      country: true,
+      city: true,
+      timeZone: true,
     },
   });
 
