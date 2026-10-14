@@ -1,5 +1,15 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Fix «MCP/ChatGPT: Internal error y nueva autorización» (OAuth refresh) — 2026-10-14
+
+- Capitanía reclamada y liberada al fusionar (`migration-coordinator.sh claim "Claude"`). Sin migración. Estado: PR abierto, sin fusionar.
+- Síntoma (informe de la usuaria, hora España): a las 7:00, 12:00 y 21:17 ChatGPT mostraba `-32603 Internal error` y pedía autorizar de nuevo; la tarea quedaba desactivada.
+- CAUSA COMPROBADA con los logs reales de Vercel (proyecto `auto-articulos-web`, vista CDN Requests, hora ET = España − 6 h): en cada uno de esos instantes hay un `POST /api/oauth2/token` con **400** y ninguna llamada a `/api/mcp` (01:02 y 05:57 y 15:17 y 15:20 del 13/10, 01:01 y 06:00 del 14/10 en ET). Tras cada 400, la nueva autorización (`authorize` → `consent` → `token` 200) es el «Authentication requested». En 3 días de logs de `/api/mcp` no hay ningún 5xx ni «mcp: falló la herramienta»: el servidor nunca generó el `-32603`. Ninguna renovación (refresh) tuvo éxito jamás; solo funcionaban las autorizaciones nuevas.
+- Causa en código: `refreshTokens` llamaba `issueTokens(record)` con la fila completa del refresh anterior y `issueTokens` hacía `{ ...data, ... }`; al arrastrar `id`, el `create` del refresh nuevo chocaba con la fila vieja (P2002), la transacción fallaba y el handler respondía 400 genérico. Además el refresh viejo ya se había revocado antes, así que quedaba quemado.
+- Arreglo: `apps/web/src/lib/oauth/server.ts` copia solo `userId, clientId, scopes, resource` y, si la emisión falla, des-revoca el refresh viejo. Prueba de regresión `apps/web/src/lib/oauth/server.test.ts` (falla con el código anterior, pasa con el nuevo); se añade al script `test` de `apps/web/package.json`. Manual actualizado (`manual-usuario.ts`).
+- Verificación: 2/2 pruebas nuevas; las 23 pruebas que fallan en `apps/web` ya fallaban antes (falta `evaluateProductAccess` en el paquete `shared` instalado), ajenas a este cambio. Pendiente en producción: tras el despliegue, la próxima renovación de ChatGPT debe aparecer como `POST /api/oauth2/token` **200** sin pasar por `authorize`.
+- Aparte, sin tocar: hoy `GET /api/composio/options` devuelve 502 en seototal (visto en los logs); y el aviso de créditos de imagen del 12/10 era el estado real de la cuenta.
+
 ## Claude — CIERRE «Fix: el wizard no sale (adelatallada.com) y Paso 6 en gris» — 2026-10-13
 
 - Estado: CERRADO Y ARCHIVADO. PR #557 fusionada en `main` (`eb551d8f`), Vercel success. Sin migración. Capitanía liberada.
