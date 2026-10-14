@@ -1,5 +1,58 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## CHECKPOINT — LOGOUT GLOBAL HUB → PRODUCTOS — 2026-10-14 — Codex
+
+### Objetivo
+
+Cuando un tenant pulsa «Salir» en `hub.lasolucionweb.net`, no debe poder
+seguir viendo una sesión activa de Artículos o Redes en una pestaña antigua.
+El login administrativo/local de Artículos no se modifica.
+
+### Causa confirmada
+
+Hub y cada producto viven en hosts distintos. El logout OIDC de Auth0 solo
+borra la sesión del host del Hub; no puede borrar directamente cookies
+host-only de `articulos.lasolucionweb.net` o `redes.lasolucionweb.net`.
+
+### Corrección implementada
+
+- Hub: «Salir» usa `/api/auth/logout-products`, que inicia una cadena fija de
+  limpieza en Artículos y Redes y termina en `/auth/logout` de Auth0.
+- Artículos/Redes: `GET /api/auth/logout` limpia la sesión de producto y la
+  suplantación, permite continuar únicamente hacia los endpoints HTTPS
+  internos de logout conocidos y rechaza destinos arbitrarios.
+- El endpoint de logout quedó público e idempotente para poder limpiar una
+  cookie aunque ya no exista una sesión válida.
+- El logout local `POST` conserva su comportamiento anterior.
+
+### Seguridad y límites
+
+- No se acepta `returnTo` externo: se valida host, ruta, HTTPS y anidamiento.
+- No se cambian cookies de Auth0, credenciales, OAuth, base de datos ni
+  entitlements.
+- Esta solución cubre logout explícito desde el Hub; cerrar una pestaña o
+  revocar una sesión desde otro dispositivo requiere una política de
+  revocación server-side separada.
+
+### Verificación
+
+- Typecheck Hub: correcto.
+- Typecheck Artículos: correcto.
+- Suite web Artículos: 88 correctas, 0 fallos, 1 integración omitida por
+  `TITLE_GENERATION_TEST_DATABASE_URL` ausente.
+- Build Artículos: correcto, 86 rutas.
+- Build Cloudflare del Hub (`npm run build:cloudflare:production`): correcto.
+  El build estándar de Next no aplica al destino y quedó bloqueado por
+  Turbopack/`cloudflare:workers`; no hubo error TypeScript ni de la ruta nueva.
+- `git diff --check`: correcto en ambos repositorios.
+
+### Estado
+
+Código preparado y documentado, sin despliegue realizado en este checkpoint.
+Antes de producción: publicar ambos repositorios coordinadamente y verificar
+Hub → Artículos → Redes → Auth0, además de abrir una pestaña anterior de cada
+producto y confirmar que redirige a login.
+
 ## CHECKPOINT — MIGRACIÓN DE LOGIN ARTÍCULOS AL HUB — 2026-10-14 — Codex
 
 ### Objetivo

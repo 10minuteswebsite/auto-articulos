@@ -2,6 +2,28 @@
 
 Última actualización: 2026-10-14, por Codex.
 
+## Checkpoint activo — logout global iniciado desde Hub (2026-10-14)
+
+El logout del Hub ya tiene una ruta coordinadora preparada: limpia las
+cookies host-locales de Artículos y Redes mediante `/api/auth/logout` y luego
+continúa hacia el logout OIDC de Auth0. El endpoint de producto valida una
+allowlist de destinos HTTPS internos y mantiene el `POST` local existente.
+
+Archivos nuevos/modificados de esta tarea:
+
+- Hub: `src/app/api/auth/logout-products/route.ts` y
+  `src/app/(protected)/dashboard/logout-button.tsx`.
+- Auto Artículos: `apps/web/src/app/api/auth/logout/route.ts` y
+  `apps/web/src/middleware.ts`.
+
+Typecheck de ambos repositorios, suite web (88/88), build de Artículos (86
+rutas) y `npm run build:cloudflare:production` del Hub pasaron. El build
+estándar de Next del Hub no aplica al destino Cloudflare y falla al procesar
+`cloudflare:workers`; no se hizo deploy.
+
+Siguiente acción segura: commit/push selectivo de estos archivos en cada repo,
+publicar ambos servicios coordinadamente y probar logout con sesiones reales.
+
 ## Checkpoint activo — migración de login al Hub (2026-10-14, Codex)
 
 Se desplegó la separación segura entre usuarios del Hub y acceso administrativo

@@ -11,6 +11,8 @@
     "apps/web/src/app/login/page.tsx",
     "apps/web/src/app/admin-login/page.tsx",
     "apps/web/src/app/api/auth/login/route.ts",
+    "apps/web/src/app/api/auth/logout/route.ts",
+    "apps/web/src/middleware.ts",
     "COORDINACION_CLAUDE_CODEX.md",
     "HANDOFF.md",
     "docs/brain/INDEX.json",
@@ -23,7 +25,7 @@
     "production deployment"
   ],
   "decision": "La cookie HMAC verificada es la única fuente de verdad del origen de autenticación; Hub y legacy no se infieren por email, host ni cabecera del cliente. La ruta administrativa exige rol admin.",
-  "status": "deployed_verified_public_smoke",
+  "status": "logout_coordination_prepared_not_deployed",
   "tests": {
     "web_tests": "88 passed, 0 failed, 1 skipped integration test requiring TITLE_GENERATION_TEST_DATABASE_URL",
     "typecheck": "passed",
@@ -46,6 +48,15 @@
     "protected_dashboard": "passed: unauthenticated /dashboard returns 307 to /login",
     "remote_build": "passed: 86 routes generated"
   },
-  "next_safe_action": "Run the authenticated smoke test from an existing Hub session and confirm that Hub-origin sessions show the ecosystem header while legacy admin sessions do not.",
+  "next_safe_action": "Commit/push the coordinated Hub and product logout changes, deploy both services, then verify Hub logout clears Artículos and Redes tabs before Auth0 logout.",
+  "logout_checkpoint": {
+    "date": "2026-10-14",
+    "hub_route": "src/app/api/auth/logout-products/route.ts",
+    "product_route": "apps/web/src/app/api/auth/logout/route.ts",
+    "behavior": "Hub logout front-chains through Artículos and Redes product logout endpoints, then Auth0 logout",
+    "security": "Only HTTPS allowlisted logout destinations are accepted; external returnTo values are rejected",
+    "deployment": "not deployed",
+    "build_note": "Auto Artículos build passed; Hub Cloudflare production build passed. Generic Next/Webpack builds are not the Cloudflare pipeline and are not used as deployment evidence."
+  },
   "secrets_or_pii": "none"
 }
