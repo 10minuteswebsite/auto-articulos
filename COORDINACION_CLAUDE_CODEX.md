@@ -11559,3 +11559,58 @@ de Coordinación antes de esta corrida, y queda igual de visible en la nueva ent
 `CONTROLADOR_DE_VERSIONES.md`.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-14
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-13 (commit
+`8ee30ff`, "docs(coordinacion): cierre de la propagación diaria 2026-10-13"). Se revisó el rango
+`8ee30ff..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 22 líneas agregadas (0 eliminadas,
+confirmado con `git diff --stat`), correspondientes a 10 commits nuevos / PRs #556 a #565 — el
+cierre y archivo del fix del asistente/wizard que no salía en adelatallada.com (PR #557/#558) y 8
+entradas nuevas en la BITÁCORA REDES del 2026-10-12 (subidas el 2026-10-13).
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 4 entradas nuevas. "CIERRE: fix del wizard que no sale
+  (adelatallada.com) y Paso 6 en gris (PR #557, cierre #558)" con el detalle completo (verificado
+  en producción con la cuenta de Adela Tallada; lo no verificado en pantalla; la decisión pendiente
+  de Milton sobre `PreValidationGuard` y categorías; la observación sin resolver del menú de
+  navegación). "Ajustes finales de Redes: conexión, nombres, cupos y algoritmo (PRs #556, #559,
+  #560, #561, #562)". "Administración: conteo de imágenes con IA y auditoría del worker por
+  dominio (PRs #563, #564)". "Aviso de acceso terminado manda al HUB para activar o renovar (PR
+  #565)", señalando que ese cambio no es visible todavía para ningún usuario real porque
+  `product_enforcement` sigue en `off`.
+- `apps/web/src/content/manual-usuario.ts`: 2 notas nuevas, fechadas 2026-10-13, en la sección de
+  Administración. (1) La fila de *Difusión: redes sociales y blogs* ya no tiene cupo propio para
+  Instagram Carrusel, Reel con imagen e Infografía ni para la Story de Facebook (PR #561): se
+  agregó la aclaración sin borrar el ejemplo anterior de la lista de formatos. (2) La ficha de cada
+  usuario agrega la fila "Imágenes creadas con IA" con el conteo de Hoy y Este mes (PR #563). El
+  resto del rango no se propagó al manual: PR #557/#558 y PR #562 ya actualizaron
+  `manual-usuario.ts` en el propio PR; PR #556 es una corrección interna de una pantalla ya
+  descrita (instrucciones de conexión estándar); PR #559 (nombres unificados) no encontró ninguna
+  pantalla del manual que todavía dijera "Facebook Pages" para el usuario final; PR #560 (cupo a
+  medianoche de Florida) es un cambio de huso horario interno sobre un contador ya descrito de
+  forma genérica; PR #564 es solo documentación/decisión de negocio sin pantalla; PR #565 no es
+  visible para ningún usuario mientras `product_enforcement` esté en `off` (documentar ahora
+  dejaría al manual describiendo algo que no ocurre en producción).
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (ninguna reserva activa nueva; la capitanía
+  del PR #557 fue reclamada y liberada al fusionar, verificado contra `git worktree list` y `git
+  merge-base --is-ancestor`). Parte B: una entrada nueva, `[Claude] - FIX: EL WIZARD NO SALE
+  (ADELATALLADA.COM) Y PASO 6 EN GRIS` (PR #557/#558). Las otras 8 entradas del rango (PRs #556,
+  #559–#565) no se indexaron como conversaciones nuevas en Parte B porque son continuación de la
+  misma "BITÁCORA REDES" / lista B ya identificada por número de PR, siguiendo el mismo criterio
+  que la corrida del 2026-10-13.
+- `TO-DO.md`: sin cambios — no se encontró ninguna idea suelta nueva para más adelante en este
+  rango; la decisión pendiente sobre `PreValidationGuard`/categorías y la observación del menú de
+  navegación quedan anotadas en la propia entrada de Coordinación y en
+  `CONTROLADOR_DE_VERSIONES.md`, sin duplicarlas aquí.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguno de los 10 commits de este rango
+  describe un árbol de git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. No quedó
+ninguna duda nueva sin resolver para Milton en este rango más allá de las ya anotadas arriba
+(categorías para Publicar/Oportunidades tras el fix del asistente, y la observación del menú de
+navegación en adelatallada.com), que ya estaban anotadas en la propia entrada de Coordinación de
+esta misma corrida antes de propagarlas.
+
+Responsable: Claude (tarea programada diaria de propagación).
