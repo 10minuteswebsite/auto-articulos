@@ -1949,9 +1949,9 @@ falta revertirlo/aclararlo.
 
 ---
 
-# HISTORIAL ARCHIVADO DESDE COORDINACION_CLAUDE_CODEX.md — 2026-10-09
+# TRASLADADO DESDE COORDINACIÓN_CLAUDE_CODEX.md — 2026-10-14
 
-## Índice (76 entradas, en el orden del documento original)
+## Índice (89 entradas, en el orden del documento original)
 
 - MENSAJE DE CLAUDE PARA `CODEX - AUDITORIA A ALGORITMO DE PUBLICACIÓN DE ARTICULOS` (2026-09-04)
 - Canal de comunicación en vivo — Claude ↔ Codex, hasta cerrar el PR #42
@@ -1978,6 +1978,8 @@ falta revertirlo/aclararlo.
 - Claude (tarea programada diaria de propagación) — 2026-09-04
 - Claude (tarea programada diaria de propagación) — 2026-09-04, segunda corrida
 - Cierre Codex — Redes restringidas por allowlist — 2026-10-07
+- Codex — etiqueta de Redes por cuenta en Administración — 2026-10-07
+- Codex — AUDITORÍA ENLACES HISTORIAL TODAS LAS REDES — 2026-10-06
 - Codex — HISTORIAL ENLACE THREADS MALO — 2026-10-06
 - Cierre Codex — corrección de retornos OAuth de conexiones — 2026-09-24
 - Codex — CONTINUACIÓN LOCAL Y DESPLIEGUE AUTORIZADO — 2026-09-23
@@ -2008,6 +2010,7 @@ falta revertirlo/aclararlo.
 - Claude - BING WEBMASTER DIRECCION DE DEVOLUCION — enlaces — 2026-09-18
 - Reserva activa — CODEX - CREADOR DE TITULOS MUY ESTRICTO — REPARACIÓN DEL MOTOR
 - Cierre de reserva — CODEX - CREADOR DE TITULOS MUY ESTRICTO — 2026-09-18
+- Claude — CONEXION COMPOSIO, Fase 2a: capitanía de migración — 2026-09-18
 - Claude (tarea programada diaria de propagación) — 2026-09-19
 - Cierre — Claude - CREACION DE PUBLICACIONES PROPIAS — 2026-09-18
 - Claude — CONEXION COMPOSIO — TRASPASO A CODEX — 2026-09-19
@@ -2022,11 +2025,21 @@ falta revertirlo/aclararlo.
 - Claude - REPARACION DE ADMIN — 2026-09-26
 - Claude (tarea programada diaria de propagación) — 2026-09-27
 - Claude (tarea programada diaria de propagación) — 2026-09-29
+- Claude — REUBICACIÓN DE CATEGORÍA (sin capitanía, sin migración) — 2026-09-29
+- Capitanía — MCP: token personal de API + herramientas de panorama (2026-09-29)
+- Capitanía — MCP: reclamada de nuevo para fusionar PR #258 (2026-09-29)
+- Capitanía — MCP: URL del artículo en estado_de_publicaciones (2026-09-29)
+- Capitanía — MCP: crear_titulos_con_ia (2026-09-30)
+- Capitanía — MCP: copy neutro, capacidades dinámicas y Actualizaciones pendientes (2026-09-30)
 - Claude (tarea programada diaria de propagación) — 2026-09-30
+- Capitanía — MCP: asistente proactivo + fix real de bug de panel (2026-09-30)
+- Capitanía — MCP: prompts/list+get y descripciones estructuradas (2026-09-30)
+- Capitanía — MCP: sin jerga técnica hacia el usuario (2026-09-30)
 - Claude (tarea programada diaria de propagación) — 2026-10-01
 - Auditoría autónoma MCP — Codex — 2026-10-01
 - Claude (tarea programada diaria de propagación) — 2026-10-02
 - Claude (tarea programada diaria de propagación) — 2026-10-03
+- Claude (tarea programada diaria de propagación) — 2026-10-06
 - Claude (tarea programada diaria de propagación) — 2026-10-07
 - Claude (tarea programada diaria de propagación) — 2026-10-08
 
@@ -4047,6 +4060,35 @@ Estado: CERRADO, DESPLEGADO Y VERIFICADO.
 
 Responsable: Codex.
 
+## Codex — etiqueta de Redes por cuenta en Administración — 2026-10-07
+
+- Se ajustó `apps/web/src/app/dashboard/usuarios/page.tsx` para que el selector
+  del módulo `oportunidades-redes` muestre «Quitárselo a esta cuenta» para las
+  cuentas normales y conserve «Dárselo a esta cuenta» para administradores,
+  Zulmad y Lorena Alvarez.
+- El cambio es únicamente de interfaz; no modifica permisos individuales de
+  redes, schema, migraciones, datos ni producción.
+- Verificación: `git diff --check` OK. Typecheck pendiente porque este worktree
+  no contiene `node_modules`.
+
+Estado: PREPARADO LOCALMENTE; sin commit, PR ni deploy.
+
+Responsable: Codex.
+
+## Codex — AUDITORÍA ENLACES HISTORIAL TODAS LAS REDES — 2026-10-06
+
+- Se revisaron los enlaces de Historial para Threads, X, LinkedIn, Facebook,
+  Instagram, Pinterest, Tumblr, Bluesky, DEV.to, Blogger y Google Business.
+- X y LinkedIn dejaron de construir URLs directamente en la vista y ahora
+  usan `socialPostUrl`, igual que Threads.
+- `socialPostUrl` respeta URLs completas para todas las plataformas y añade el
+  alias `twitter` para X. Cuando un ID aislado no basta para formar un
+  permalink fiable, devuelve `null` en vez de mostrar un enlace incorrecto.
+- Se añadieron pruebas para URLs completas de Blogger, Pinterest y Tumblr,
+  el alias Twitter y el rechazo de IDs opacos sin URL.
+- `git diff --check` pendiente de ejecutar después de esta edición. No hubo
+  migración ni deploy.
+
 ## Codex — HISTORIAL ENLACE THREADS MALO — 2026-10-06
 
 - Se reclamó la capitanía local para corregir los enlaces públicos de Threads
@@ -5284,6 +5326,37 @@ La salud pública quedó verificada: `/login` y `/privacidad` 200, `/api/me` 401
 `/dashboard` y `/dashboard/oportunidades` redirigen a `/login`. Se libera la
 reserva de `codex/reparacion-del-motor`. Estado: CERRADA Y EN PRODUCCIÓN.
 
+## Claude — CONEXION COMPOSIO, Fase 2a: capitanía de migración — 2026-09-18
+
+**Capitán de migración:** Claude — revisará y aplicará el lote completo. Motivo: CONEXION COMPOSIO,
+Fase 2a (`FASE_0_ARQUITECTURA_CONEXION_COMPOSIO.md` §6, aprobada por Milton): dos enums y dos tablas
+nuevas (`IntegrationRoute`, `ComposioConnection`) con su migración
+`20260918230000_add_composio_connections`. Nadie más ejecuta Prisma ni el workflow «Migración manual»
+hasta su liberación.
+
+Antes de reclamarla se verificó que la capitanía anterior (PR #139) estaba liberada y que las
+migraciones de las otras tareas activas (`20260918190000_add_title_generation_requests` y
+`20260918190000_add_opportunity_evidence_cache`) ya estaban aplicadas. Rama
+`claude/composio-fase-2a` (worktree `.worktrees/conexion-composio`).
+
+Regla que cumple el lote: schema y migración SQL en el MISMO commit; solo añade (0 líneas
+eliminadas en `schema.prisma`); ninguna tabla ni columna existente cambia; el código tolera que las
+tablas no existan (P2021) y devuelve siempre la vía propia; el interruptor de vía para clientes está
+bloqueado en código (`COMPOSIO_ROUTING_ENABLED = false`) hasta la Fase 2b. Aplicación en Producción:
+solo por la vía nueva `safe_composio_connections` del workflow «Migración manual» (ejecuta únicamente
+ese SQL, idempotente) y después el paso de RLS que el workflow ya corre siempre.
+
+Estado: ACTIVA — pendiente de fusión, aplicación de la migración y verificación.
+
+**Capitán de migración liberó el lote:** Claude — 2026-09-19 00:59 UTC. Resultado: PR #151 fusionado a
+`main` (`484a579`); desplegado en Producción (Vercel success) y salud idéntica a la línea base.
+Migración `20260918230000_add_composio_connections` aplicada en Producción por el workflow «Migración
+manual» (corrida 35411144863, solo `safe_composio_connections`): «Script executed successfully»; el
+paso por defecto (`db push`) quedó omitido; el paso de RLS terminó con «todas las tablas de "public" ya
+tienen RLS activado». Capitanía liberada: ya puede correr Prisma o el workflow de migración cualquier
+otra tarea. Pendiente NO bloqueante: que Milton confirme en Administración → Composio que la sección
+«Vía de conexión por app» aparece sin el aviso «Falta aplicar la migración».
+
 ## Claude (tarea programada diaria de propagación) — 2026-09-19
 
 Punto de partida: la última entrada firmada por esta misma tarea era
@@ -6479,6 +6552,168 @@ No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta ta
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Claude — REUBICACIÓN DE CATEGORÍA (sin capitanía, sin migración) — 2026-09-29
+
+PR #259 (`claude/fix-categoria-reubicacion`), sin fusionar todavía. Extiende
+el fix de categoría de hoy (PR #257): en vez de solo aceptar/rechazar la
+categoría que el modelo eligió, `reasonAboutCategoryAssignment` reclasifica
+cada título contra la lista completa de categorías reales de la cuenta (una
+sola llamada por lote) y lo reubica en la correcta si existe. Motivo:
+Guillermo Martínez tiene 26 categorías reales; el fix anterior solo devolvió
+resultados en 2 porque rechazaba en vez de reubicar (títulos de alquiler
+propuestos en "Compra" se perdían en vez de aparecer en "Rentas", que sí
+existe). Triple auditado (detalle completo en el mensaje del commit
+`e8f98f99`): un bug propio de doble conteo del tope por categoría y una
+variable muerta que rompía `noUnusedLocals` se encontraron y corrigieron
+antes de subir.
+
+**No se reclamó capitanía de migración:** otra sesión la tenía activa en
+paralelo para un trabajo no relacionado (MCP/token de API); este cambio no
+toca la base de datos, así que no hacía falta esperar — solo se evitó
+cualquier comando de Prisma.
+
+Responsable: Claude. Estado: PR abierto, pendiente de fusión y
+reverificación con Guillermo Martínez.
+
+## Capitanía — MCP: token personal de API + herramientas de panorama (2026-09-29)
+
+**Capitán de migración:** Claude — reclamó el lote. Motivo: activar el
+servidor MCP entrante ya existente (`api/mcp/route.ts`, construido en
+agosto para Alexa+/ChatGPT vía OAuth) para que cualquier asistente de IA —
+Milton quiere probar primero con Meta MUSE — pueda operar su propia cuenta,
+autenticándose con un token personal generado y copiado desde
+Configuración → Asistentes IA (sin registro de cliente OAuth), más un
+prompt copiable listo para pegarle al asistente. Ampliado además el
+catálogo de tools con la fase 2 ya planificada en
+`MCP_ACCIONES_UNIVERSALES.md` (panorama/diagnóstico, todo de solo lectura).
+
+**Qué se hizo:**
+- Nuevo modelo `McpApiToken` (`packages/db/prisma/schema.prisma`) + migración
+  `20260929120000_add_mcp_api_token` — un token activo por usuario, se
+  guarda solo el hash (mismo esquema que `OAuthAccessToken`).
+- Endpoints `GET/POST/DELETE /api/configuracion/mcp-token` para
+  generar/consultar/revocar.
+- **Hallazgo importante durante la implementación:** el middleware
+  (`middleware.ts`) corre en Edge Runtime, y Prisma (`prisma-client-js` con
+  binarios nativos) no puede correr ahí — por eso la verificación del token
+  personal (que necesita consultar la base para poder revocarlo) no se pudo
+  resolver en el propio middleware como los otros dos métodos de auth
+  (OAuth firmado y sesión firmada, ambos sin base de datos). Se resolvió con
+  una ruta nodejs nueva, `/api/mcp/token-lookup`, que el middleware llama
+  por `fetch` interno server-a-server — el patrón que recomienda Vercel para
+  este split edge/node. Documentado en
+  `apps/web/src/app/api/mcp/token-lookup/route.ts` y
+  `apps/web/src/middleware.ts` (función `resolvePersonalToken`).
+- UI nueva en Configuración → Asistentes IA
+  (`/dashboard/configuracion/mcp`): generar/regenerar/revocar token, copiar
+  token, y copiar un prompt armado con la URL real del servidor y las
+  reglas de confirmación antes de publicar.
+- Reorganizado `apps/web/src/lib/mcp/tools.ts` en
+  `apps/web/src/lib/mcp/tools/` (`opportunities.ts` con las 5 tools
+  existentes movidas sin cambios, `account.ts` nuevo, `index.ts` que las
+  combina) para que sumar una función nueva sea agregar un archivo de
+  dominio, sin tocar el servidor ni el middleware — pedido explícito de
+  Milton de que el sistema sea "dinámico".
+- 6 tools nuevas de solo lectura en `account.ts`: `ver_resumen_cuenta`,
+  `ver_estado_configuracion`, `ver_integraciones`, `listar_categorias`,
+  `listar_idiomas`, `ver_limites_y_creditos` — todas reusan los mismos route
+  handlers que ya usa la web (`dashboard-stats`, `configuration-status`,
+  `languages`), sin reimplementar lógica.
+- Actualizado `MCP_ACCIONES_UNIVERSALES.md` (estado de implementación) y
+  `apps/web/src/content/manual-usuario.ts` (nueva sección "Asistentes IA").
+
+**Auditorías:** `npx tsc --noEmit` limpio en `apps/web` y `apps/worker`
+(worktree aislado `/private/tmp/mcp-token-personal-20260929`, `npm
+install`/`prisma generate` propios, sin enlazar `node_modules` del checkout
+principal); build de producción de `apps/web` completo sin errores, incluye
+`/dashboard/configuracion/mcp`; suite del worker 20/20 en verde (sin
+cambios ahí, se corrió para confirmar cero regresión); `git diff --check`
+limpio. **Pendiente, no verificado todavía:** aplicar la migración contra
+producción y probar en vivo con la cuenta de pruebas de Lorena Álvarez
+(generar el token real, llamar `/api/mcp` con `curl`) antes de darle luz
+verde a Milton para probarlo con MUSE — no hay base de datos local
+disponible en este entorno para probarlo antes.
+
+## Capitanía — MCP: reclamada de nuevo para fusionar PR #258 (2026-09-29)
+
+**Capitán de migración:** Claude — la capitanía anterior para este mismo
+lote (PR #258, token personal de API) se había liberado sola sin fusión
+mientras esperaba revisión de Milton; PR #259 se fusionó en el medio sin
+tocar la base. Se reclama de nuevo solo para fusionar #258 y aplicar su
+migración (`20260929120000_add_mcp_api_token`), con autorización explícita
+de Milton para operar en autónomo. Nadie más ejecuta Prisma hasta su
+liberación.
+
+## Capitanía — MCP: URL del artículo en estado_de_publicaciones (2026-09-29)
+
+**Capitán de migración:** Claude — reclamó el lote. Motivo: Milton está
+probando el MCP con Meta MUSE; pidió que la publicación devuelva el enlace
+del artículo. La publicación es asíncrona (se encola al worker), así que no
+hay URL en el momento de `confirmar=true` — se amplió `estado_de_publicaciones`
+para listar, por título, su `articleUrl` real (campo ya existente en
+`Title`) cuando el estado es `success`, o el mensaje de error cuando falló.
+Sin migración, sin cambios de schema.
+
+**Pedido relacionado, NO implementado a propósito:** MUSE también pidió
+`eliminar_oportunidades`. Bloqueado por el clasificador de modo automático
+de esta sesión (categoría "Irreversible Deletion") en dos intentos previos
+— no se reintentó por otra vía, queda documentado como pendiente si Milton
+decide ajustar los permisos de la sesión.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción de `apps/web`
+completo sin errores (worktree aislado
+`/private/tmp/mcp-url-articulo-20260929`). Cambio de un solo archivo
+(`apps/web/src/lib/mcp/tools/opportunities.ts`), sin tocar el resto.
+
+## Capitanía — MCP: crear_titulos_con_ia (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Milton notó que "Crear
+con la IA del sistema" (preguntas guiadas del panel Publicar, proyecto
+CREACION DE PUBLICACIONES PROPIAS) no estaba expuesto en el MCP. Nueva tool
+`crear_titulos_con_ia` en `apps/web/src/lib/mcp/tools/content-generation.ts`,
+reusa `POST /api/title-generation` (mismo cupo de 3 solicitudes/día, mismo
+filtro de repetidos, mismo prompt de administrador) — no reimplementa nada.
+Sin migración, sin cambios de schema.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción de `apps/web`
+completo sin errores (worktree aislado
+`/private/tmp/mcp-titulos-ia-20260930`).
+
+## Capitanía — MCP: copy neutro, capacidades dinámicas y Actualizaciones pendientes (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Milton pidió tres cosas
+sobre lo ya construido de MCP:
+
+1. **Copy de Configuración → Asistentes IA en español neutro** (usaba "vos"
+   rioplatense; reemplazado por "tú" en todo el texto y el prompt copiable).
+2. **Que sea dinámico:** nuevo endpoint público `GET /api/mcp/capabilities`
+   que lee directo del array `TOOLS` real (no una copia escrita a mano) —
+   la pantalla y el prompt copiable arman su lista de "qué puede hacer un
+   asistente hoy" desde ahí, así que la próxima tool que se agregue aparece
+   sola, sin editar esta pantalla.
+3. **Registro en Actualizaciones y en el manual del robot de ayuda:**
+   hallazgo importante — el hook `generate-product-update.ts` (que llena la
+   tabla `ProductUpdate`, la misma que lee el asistente de ayuda vía
+   `getCurrentProductKnowledge()`) necesita `OPENAI_API_KEY` y
+   `DATABASE_URL` reales, y todos los commits de MCP se hicieron en
+   worktrees aislados sin esas credenciales a propósito (protocolo de
+   seguridad) — el hook falló en silencio (visible como advertencia, nunca
+   bloqueó el commit) y **ninguna entrada de Actualizaciones se generó para
+   todo el trabajo de MCP**. Se agregó `scripts/add-product-update-20260930-mcp.ts`,
+   mismo patrón manual sin IA que ya usa el repo
+   (`add-product-update-20260922-interface.ts`), con las dos entradas que
+   faltan. **Pendiente de que Milton (u otra sesión con las credenciales
+   reales) lo corra una vez:** `npx tsx scripts/add-product-update-20260930-mcp.ts`.
+   También se amplió la sección "Asistentes IA" de
+   `apps/web/src/content/manual-usuario.ts` (el manual base que sí se
+   actualiza en cada PR) para mencionar `crear_titulos_con_ia` y el enlace
+   del artículo.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
+errores (worktree aislado `/private/tmp/mcp-copy-dinamica-20260930`). El
+script de Actualizaciones no se ejecutó (requiere credenciales reales que
+este entorno no tiene).
+
 ## Claude (tarea programada diaria de propagación) — 2026-09-30
 
 Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-09-29
@@ -6525,6 +6760,111 @@ Propagado por documento:
 No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Capitanía — MCP: asistente proactivo + fix real de bug de panel (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Motivo: Milton pasó una
+conversación real de un usuario con Meta MUSE (análisis honesto del propio
+MUSE, `analisis-mcp-seo-total.md`) donde el asistente quedó bloqueado y
+perdido. Se verificó cada causa contra el código real antes de tocar nada
+(no se asumió nada del reporte):
+
+1. **Bug real confirmado, no "falta de sincronización":**
+   `crear_oportunidades` nunca enviaba `panel` a `POST /api/opportunities`
+   (`apps/web/src/app/api/opportunities/route.ts:139`), que filtra
+   categorías por ese campo. En cuentas con un solo panel (`Category.panel`
+   default `""`) no se notaba; en cuentas multi-panel (como la del caso
+   real, 5 categorías con paneles propios) la consulta no encontraba
+   ninguna categoría — de ahí "Sincroniza tus categorías primero" con
+   categorías YA sincronizadas. Prueba adicional: `listar_categorias` (sin
+   filtro de panel) sí las mostraba bien — inconsistencia real entre dos
+   tools del mismo MCP. Fix: la tool ahora resuelve el panel igual que ya
+   lo hace `oportunidades/page.tsx` (primer panel real disponible entre las
+   categorías del usuario, si no hay uno fijado en la cuenta).
+2. **Confusión confirmada** entre `crear_oportunidades` (análisis de Search
+   Console) y `crear_titulos_con_ia` (a partir de una descripción del
+   negocio) — descripciones reescritas para desambiguar.
+3. **Comportamiento reactivo confirmado** en la transcripción real: el
+   primer mensaje del asistente fue una pregunta abierta en vez de un menú
+   numerado. Se reforzó `instructions` del `initialize`
+   (`apps/web/src/app/api/mcp/route.ts`) y el prompt copiable de
+   Configuración → Asistentes IA para que el asistente ofrezca
+   proactivamente el mismo menú numerado del Home real desde el primer
+   mensaje — pedido central de Milton.
+4. **Nueva tool `ver_manual_seo_total`** (solo lectura,
+   `apps/web/src/lib/mcp/tools/guidance.ts`): devuelve el manual real de la
+   plataforma (el mismo `BASE_USER_MANUAL` que ya alimenta al robot de
+   ayuda web, no un documento nuevo), con índice o filtro por tema. El
+   asistente la usa cuando no sabe cómo guiar, en vez de inventar.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
+errores (worktree aislado `/private/tmp/mcp-proactivo-20260930`). La
+función de búsqueda del manual se probó aparte con un script real contra
+`BASE_USER_MANUAL` (encontró un bug propio — buscaba solo en el título de
+cada sección, no en el contenido — corregido y reverificado antes de subir).
+Sin migración, sin cambios de schema.
+
+**Capitán de migración:** Claude — reclamó el lote. Motivo: registrar la
+entrada de Actualizaciones del lote "asistente proactivo" (PR #269), mismo
+patrón manual que el anterior (`add-product-update-20260930-mcp.ts`).
+
+## Capitanía — MCP: prompts/list+get y descripciones estructuradas (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Milton compartió un
+documento de buenas prácticas de MCP (`MCP_USAGE_GUIDANCE.md`) y pidió
+ejecutar las ideas alineadas a los objetivos ya en curso (usuario no se
+pierde, asistente proactivo). Dos cambios:
+
+1. **`prompts/list` / `prompts/get`** (`apps/web/src/lib/mcp/prompts.ts`,
+   integrado en `apps/web/src/app/api/mcp/route.ts`): capacidad del
+   protocolo MCP que el servidor nunca implementaba. En vez de que el
+   asistente improvise el orden de llamadas a partir de `tools/list`, el
+   servidor publica 3 "recetas" con nombre: `empezar` (menú numerado
+   inicial, mismo texto que ya vive en `instructions`), `publicar_contenido`
+   (el flujo completo que resuelve exactamente la ambigüedad
+   crear_oportunidades vs crear_titulos_con_ia donde se perdió el usuario
+   real con MUSE) y `diagnosticar_cuenta`. `initialize.capabilities` ahora
+   anuncia `prompts`, y las `instructions` le dicen al asistente que
+   revise `prompts/list` antes de improvisar.
+2. **Descripciones estructuradas en las 14 tools existentes**, formato
+   Propósito / Cuándo usarla / Cuándo NO usarla / Contexto necesario /
+   Siguiente paso típico — mismo criterio que ya se usó para desambiguar
+   `crear_oportunidades` vs `crear_titulos_con_ia` el 30/9, extendido a
+   todo el catálogo.
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
+errores (worktree aislado `/private/tmp/mcp-prompts-workflows-20260930`).
+Sin migración, sin cambios de schema. **Pendiente después de desplegar:**
+prueba real por `curl` de `prompts/list` y `prompts/get` contra producción
+(igual que se hizo con `tools/call` al lanzar el token personal).
+
+## Capitanía — MCP: sin jerga técnica hacia el usuario (2026-09-30)
+
+**Capitán de migración:** Claude — reclamó el lote. Milton revisó otra vez
+la transcripción real de MUSE y notó que el asistente le habló al usuario
+en términos técnicos ("listar_categorías necesita la conexión, aún no
+configurada de mi lado", mencionando tokens/conectores directamente) —
+lenguaje que una persona normal no entiende. Se agregó una regla explícita
+a `instructions` del `initialize` (`apps/web/src/app/api/mcp/route.ts`) y
+al prompt copiable de Configuración → Asistentes IA: nunca mencionar
+nombres técnicos de herramientas, tokens, APIs, conectores ni el estado
+interno de la conexión del asistente — traducir siempre a lenguaje
+cotidiano (qué le falta a la cuenta, qué botón tocar en la web).
+
+**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
+errores (worktree aislado `/private/tmp/mcp-sin-jerga-20260930`). Cambio de
+solo texto en 2 archivos. Sin migración, sin cambios de schema.
+
+**Nota aparte:** al reclamar este lote se encontró que la capitanía del
+lote anterior (`prompts/list+get`, PR #271) había quedado sin liberar por
+error — se liberó recién ahora, retroactivamente, ya verificado en
+producción.
+\n+## Recuperación segura de sincronización por panel/idioma — Codex — 2026-09-30
+\n+Se agregó fallback cuando el panel elegido devuelve cero categorías: se
+consulta el resto y se recupera automáticamente solo si existe un único panel
+con categorías. Si hay varios, no se mezclan sitios y se devuelve un mensaje
+accionable. No cambia schema ni requiere migración. Auditorías locales: worker
+build OK, tests 20/20, fallback 3/3, web build 85/85 rutas y diff limpio.
 
 ## Claude (tarea programada diaria de propagación) — 2026-10-01
 
@@ -6717,6 +7057,51 @@ Controlador, señalada desde el 2026-10-01) sigue abierta; este rango no trajo n
 novedad al respecto, así que no se repite de nuevo aquí para no sumar ruido — sigue vigente
 donde ya está anotada (entradas del 2026-10-01 y 2026-10-02 de este mismo documento,
 `CONTROLADOR_DE_VERSIONES.md` e `INVENTARIO_CONVERSACIONES.md`).
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
+
+Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-06
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-03
+(commit `d351feb`). Se revisó el rango `d351feb..origin/main` sobre
+`COORDINACION_CLAUDE_CODEX.md`: dos commits lo tocaron, ambos de Milton directamente sobre el
+documento — `f787bd9` ("feat: habilitar redes sociales para todos", agregó la entrada "Trabajo
+activo — HABILITAR REDES SOCIALES PARA TODOS — 2026-10-02") y `5f10b56` ("fix: deshabilitar
+redes sociales temporalmente", 2026-10-05), que **borró esa misma entrada** y la reemplazó por
+"Corrección — REDES SOCIALES OFF PARA TODOS — 2026-10-05". Esa edición no la hizo esta tarea de
+propagación (que nunca borra), sino un commit ajeno sobre el propio documento maestro; se deja
+anotado aquí por transparencia, sin revertirlo, porque el protocolo de no-destrucción de este
+documento aplica a cualquiera que lo edite, no solo a esta tarea.
+
+Se verificó contra el código real de `origin/main` cuál de las dos versiones sigue vigente:
+`apps/web/src/lib/modules.ts` tiene hoy `alwaysDisabled: true` en la entrada
+`oportunidades-redes`, confirmando que el estado final es "apagado para todos los no
+administradores" (commit `5f10b56`), no el "habilitado para todos" del commit `f787bd9` que ya
+fue revertido.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: entrada nueva "Versión — 2026-10-05 — módulo de Redes
+  Sociales: habilitado para todos y revertido el mismo día", con ambos commits (`f787bd9` y
+  `5f10b56`), la verificación contra el código vigente, y la falta de confirmación de
+  despliegue/Vercel en las entradas originales (esta tarea no tiene acceso a Vercel para
+  comprobarlo).
+- `apps/web/src/content/manual-usuario.ts`: nota nueva en la sección de
+  `${MENU_NAMES.redes}` (debajo de la frase "Este módulo está en prueba...") explicando que,
+  desde el 2026-10-05, el módulo está apagado para toda cuenta que no sea administradora, para
+  que el bot de ayuda no siga diciendo solo que "se está activando poco a poco" cuando en
+  realidad está deshabilitado a propósito.
+- `INVENTARIO_CONVERSACIONES.md`: sin cambios — ninguna de las dos entradas trae un nombre de
+  conversación en formato «[AGENTE] - [NOMBRE DEL PROBLEMA]» ni una reserva de archivo/rama
+  activa verificable (no hay ningún worktree abierto además del de esta misma tarea, según
+  `git worktree list`), así que no hay nada que indexar ahí todavía.
+- `TO-DO.md`: sin cambios — ninguna idea suelta nueva sin ejecutar en este rango.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — no se encontró ninguna mención nueva a
+  árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado (la edición
+  que borró y reemplazó una entrada se anotó arriba, en este mismo documento, por no calzar
+  exactamente en el tema de ese archivo).
 
 No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
 

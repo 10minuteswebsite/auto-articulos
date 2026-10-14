@@ -4194,9 +4194,9 @@ allowlist — 2026-10-07" y "Codex — etiqueta de Redes por cuenta en Administr
 
 ---
 
-# HISTORIAL ARCHIVADO DESDE COORDINACION_CLAUDE_CODEX.md — 2026-10-09
+# TRASLADADO DESDE COORDINACIÓN_CLAUDE_CODEX.md — 2026-10-14
 
-## Índice (98 entradas, en el orden del documento original)
+## Índice (93 entradas, en el orden del documento original)
 
 - SEGMENTO DE FIRMA CON DISCLOSURE (2026-09-09 — Claude)
 - MCP 10MWS — andamiaje de segunda línea de ejecución de publicación (2026-09-07/08)
@@ -4223,6 +4223,9 @@ allowlist — 2026-10-07" y "Codex — etiqueta de Redes por cuenta en Administr
 - CIERRE — 2026-09-04 (Créditos de imagen de Lorena Alvarez)
 - ESTADO PARA RETOMAR — AUDITORÍA LONG TAIL Y CANIBALIZACIÓN — 2026-09-04
 - CIERRE — 2026-09-04 — Reparación de canibalización y años contextuales
+- Cola de producción — enlaces de Historial — 2026-10-06
+- REPARACIÓN DE BUILD WEB — 2026-10-06
+- Corrección — REDES SOCIALES OFF PARA TODOS — 2026-10-05
 - ACLARACIÓN PARA PUBLICAR TÍTULOS PROPIOS — 2026-09-18
 - MEJORA FINAL DE LEGIBILIDAD EN TARJETAS — 2026-09-18
 - AJUSTE DE CONTRASTE EN TARJETAS — 2026-09-18
@@ -4247,6 +4250,7 @@ allowlist — 2026-10-07" y "Codex — etiqueta de Redes por cuenta en Administr
 - Estado actual — resumen pedido por Milton — 2026-09-08
 - Actualización — RENEW CONFIGURACION, pulido estilo Apple — 2026-09-08
 - AVISO — SOLAPE ENTRE CODEX (PR #65/#68) Y CLAUDE (PR #73, ya fusionado) — 2026-09-08
+- DECISIÓN DE MILTON — BUG NATALIA — 2026-09-08
 - CIERRE — BUG NATALIA — 2026-09-08
 - CERRADO — CODIGO QR PANTALLA DE INICIO — 2026-09-09/10
 - ARCHIVADO — Exclusión de Temas (QUE NO ESCRIBIR QUE NO TRATAR) — 2026-09-09
@@ -4260,7 +4264,6 @@ allowlist — 2026-10-07" y "Codex — etiqueta de Redes por cuenta en Administr
 - ARCHIVADO — CHECK DE NO INDEXACION — 2026-09-18
 - ARCHIVADO — BING WEBMASTER SITEMAP — 2026-09-18
 - CIERRE Y ARCHIVO — SIMPLIFICACION DEL SETUP INICIAL — 2026-09-18
-- Claude — CONEXION COMPOSIO, Fase 2a: capitanía de migración — 2026-09-18
 - Claude — NOMBRES EN EL MENU — 2026-09-20
 - Cierre — AUDITORÍA PUBLICACIÓN DEV.TO — 2026-09-20/21
 - OPERACIÓN LOCALHOST — CONFIGURACIÓN PERSISTENTE (2026-09-22 — Codex)
@@ -4284,17 +4287,9 @@ allowlist — 2026-10-07" y "Codex — etiqueta de Redes por cuenta en Administr
 - Claude — AUDITORIA DE CANIBALIZACION — 2026-09-29
 - Claude — TOPE DINAMICO POR CATEGORIA — 2026-09-29
 - Claude — HALLAZGO REAL EN PRODUCCION: CATEGORIA SIN RESPALDO DE CODIGO — 2026-09-29
-- Claude — REUBICACIÓN DE CATEGORÍA (sin capitanía, sin migración) — 2026-09-29
-- Capitanía — MCP: reclamada de nuevo para fusionar PR #258 (2026-09-29)
 - Claude — PERF: REUBICACIÓN DE CATEGORÍA EN UN SOLO PASO FINAL — 2026-09-29
 - Claude — CATEGORÍA "CHAT GPT" MAL ASIGNADA: NOMBRE EN VEZ DE ID — 2026-09-29
 - Claude — AUDITORÍA COMPLETA DEL ALGORITMO (3 PASADAS) — 2026-09-29
-- Capitanía — MCP: URL del artículo en estado_de_publicaciones (2026-09-29)
-- Capitanía — MCP: crear_titulos_con_ia (2026-09-30)
-- Capitanía — MCP: copy neutro, capacidades dinámicas y Actualizaciones pendientes (2026-09-30)
-- Capitanía — MCP: asistente proactivo + fix real de bug de panel (2026-09-30)
-- Capitanía — MCP: prompts/list+get y descripciones estructuradas (2026-09-30)
-- Capitanía — MCP: sin jerga técnica hacia el usuario (2026-09-30)
 - Cierre y archivo — CARMEN AGUILAR CONEXION GSC — 2026-10-02
 
 # SEGMENTO DE FIRMA CON DISCLOSURE (2026-09-09 — Claude)
@@ -6085,6 +6080,86 @@ Codex: `git diff --check` y el Preview de Vercel pasaron. El build local no pudo
 
 ---
 
+## Cola de producción — enlaces de Historial — 2026-10-06
+
+Milton pidió dejar este cambio en cola para producción. La corrección de
+enlaces de Historial para todas las redes/blogs permanece únicamente en el
+worktree local: **no subir, no crear PR y no desplegar todavía**.
+
+## REPARACIÓN DE BUILD WEB — 2026-10-06
+
+**Identidad:** CODEX - GPT-5 - REPARADOR DEL ARBOL PRINCIPAL.
+
+**Base:** `origin/main` en rama aislada
+`codex/reparar-typecheck-web-20261006`.
+
+**Causa 1:** `apps/web/src/lib/modules.test.ts` tenía un bloque de test sin
+cerrar; faltaba `});` antes del siguiente `test()`.
+
+**Causa 2:** `apps/web/src/app/dashboard/usuarios/page.tsx` referenciaba el
+estado inexistente `savingUserModules`. Se sustituyó por `savingAny`, el estado
+agregado existente para bloquear el guardado durante cualquier operación de
+permisos, módulos o límites.
+
+**Alcance excluido:** Blogger, Composio, PostPeer, callbacks, secretos,
+credenciales, schema Prisma, migraciones, middleware y `vercel.json` no fueron
+modificados.
+
+**Validación:** `prisma generate` correcto; typecheck web correcto después de
+regenerar Prisma; build worker correcto; pruebas worker 20/20 correctas.
+Las pruebas web ejecutaron 187 casos: 186 correctos, 1 fallo preexistente en
+la expectativa antigua de `oportunidades-redes`, que ahora está deshabilitado
+intencionalmente en `origin/main`. El build web no pudo terminar por un error
+de permisos del entorno al crear un proceso/puerto interno de Turbopack
+(`Operation not permitted`), no por estos dos archivos.
+
+**Estado:** commit local creado para conservar la reparación y su evidencia,
+pero **NO LISTO PARA PRODUCCIÓN** hasta repetir el build web en un entorno con
+permisos de procesos completos y resolver o actualizar separadamente el test
+preexistente de Redes Sociales. No hubo deploy ni cambios de producción.
+
+## Corrección — REDES SOCIALES OFF PARA TODOS — 2026-10-05
+
+Responsable: Codex. Corrección solicitada por Milton: pasar el selector
+universal de Redes Sociales a OFF y deshabilitarlo para todos los usuarios no
+administradores por ahora. El módulo `oportunidades-redes` ahora es
+`alwaysDisabled`; las excepciones antiguas no lo pueden reactivar. Los
+permisos individuales de cada red permanecen separados.
+
+### Continuación CONEXION POSTPEER 2 — 2026-09-22
+
+- Se confirmó el resultado de la prueba aislada de Lorena: el artículo exacto
+  `https://segurosdesaludyvida.com/news/comparativa-de-seguros-medicos-economicos-en-florida`
+  apareció como `GOOGLE-BUSINESS ✓ Publicado` en Historial, pero la publicación
+  visible no mostró imagen. No se volvió a publicar.
+- Causa identificada: `SocialOpportunity.imageUrl` estaba vacío para esa
+  oportunidad y el worker no tenía respaldo de lectura de la imagen real del
+  artículo. La generación de imagen IA no se reintroduce.
+- Cambio pendiente en PR: `apps/worker/src/businessProfilePublish.ts` ahora
+  usa primero `SocialOpportunity.imageUrl` y, si falta, obtiene la `og:image`
+  pública del artículo exacto mediante `getArticleOpenGraphImage`. Si tampoco
+  existe, falla antes de enviar la publicación; así GBP nunca publica sin foto.
+  No hay recorte, adaptación ni generación de imagen.
+- Commit: `ee9df8e` (`fix(gbp): use article og image fallback`).
+- PR: #211, https://github.com/miltondavila-ux/auto-articulos/pull/211
+  contra `main`. Checks observados: Vercel pasó como `Skipped - Not affected` y
+  Vercel Preview Comments pasó. No hubo merge, deployment ni nueva publicación.
+- Validaciones realizadas: TypeScript del worker (`npx tsc --noEmit -p
+  apps/worker/tsconfig.json`) OK; `git diff --check` OK. El hook de commit
+  informó que no pudo ejecutar el generador de actualización por falta de
+  `DATABASE_URL`, pero el commit sí quedó creado; no se ejecutó migración.
+- Archivos tocados: `apps/worker/src/businessProfilePublish.ts` y este
+  documento. No se añadieron conexiones ni se modificó Configuración →
+  Conexiones.
+- Deployment: ninguno. Prueba posterior: pendiente de merge/deploy y de una
+  única autorización explícita; no ejecutar otra publicación hasta que exista
+  autorización. La prueba deberá activar `POSTPEER_GBP_CONSUMER_READY` solo para
+  Lorena, usar el URL exacto de la oportunidad y confirmar imagen + artículo
+  exacto como `Publicado` en Historial.
+- Bloqueos restantes: revisión/merge del PR, autorización explícita de
+  deployment y después una única prueba productiva controlada. Si desaparece de
+  la cola sin Historial confirmado, revisar logs y no repetir publicación.
+
 ## ACLARACIÓN PARA PUBLICAR TÍTULOS PROPIOS — 2026-09-18
 
 La explicación de **Publica tus propios títulos** ahora aclara que este acceso
@@ -7018,6 +7093,19 @@ para escribir este aviso.** Ninguna migración involucrada.
 capitanía de `opportunity-analysis.ts`/`api/opportunities/route.ts`
 reclamada en este momento por esta conversación.
 
+## DECISIÓN DE MILTON — BUG NATALIA — 2026-09-08
+
+Milton indicó expresamente que la ausencia de la cuenta de Natalia en la
+base local no debe trabar esta corrección. Para este caso, la validación
+funcional se hará sobre el caso real controlado, sin copiar a local su
+contraseña, tokens, credenciales OAuth ni datos privados. Se mantienen
+obligatorias la auditoría estática, la auditoría de regresión y la
+verificación de integración/Producción; la limitación de la prueba local
+queda documentada como excepción autorizada por Milton para este usuario.
+
+Codex: solución preparada en `c162119`, rama
+`codex/fix-natalia-category-login-20260908`; no fusionada todavía.
+
 ## CIERRE — BUG NATALIA — 2026-09-08
 
 La corrección fue fusionada mediante el PR #82 y desplegada en Producción
@@ -7492,37 +7580,6 @@ HTTP 200 y producción `dpl_7XmpajPXMfJoBWqsNN5eKqhHD2tA` Ready con
 Reservas liberadas. No quedan acciones de implementación pendientes en este
 lote. Estado final: **ARCHIVADA — EN PRODUCCIÓN Y VERIFICADA**. Responsable:
 Codex.
-## Claude — CONEXION COMPOSIO, Fase 2a: capitanía de migración — 2026-09-18
-
-**Capitán de migración:** Claude — revisará y aplicará el lote completo. Motivo: CONEXION COMPOSIO,
-Fase 2a (`FASE_0_ARQUITECTURA_CONEXION_COMPOSIO.md` §6, aprobada por Milton): dos enums y dos tablas
-nuevas (`IntegrationRoute`, `ComposioConnection`) con su migración
-`20260918230000_add_composio_connections`. Nadie más ejecuta Prisma ni el workflow «Migración manual»
-hasta su liberación.
-
-Antes de reclamarla se verificó que la capitanía anterior (PR #139) estaba liberada y que las
-migraciones de las otras tareas activas (`20260918190000_add_title_generation_requests` y
-`20260918190000_add_opportunity_evidence_cache`) ya estaban aplicadas. Rama
-`claude/composio-fase-2a` (worktree `.worktrees/conexion-composio`).
-
-Regla que cumple el lote: schema y migración SQL en el MISMO commit; solo añade (0 líneas
-eliminadas en `schema.prisma`); ninguna tabla ni columna existente cambia; el código tolera que las
-tablas no existan (P2021) y devuelve siempre la vía propia; el interruptor de vía para clientes está
-bloqueado en código (`COMPOSIO_ROUTING_ENABLED = false`) hasta la Fase 2b. Aplicación en Producción:
-solo por la vía nueva `safe_composio_connections` del workflow «Migración manual» (ejecuta únicamente
-ese SQL, idempotente) y después el paso de RLS que el workflow ya corre siempre.
-
-Estado: ACTIVA — pendiente de fusión, aplicación de la migración y verificación.
-
-**Capitán de migración liberó el lote:** Claude — 2026-09-19 00:59 UTC. Resultado: PR #151 fusionado a
-`main` (`484a579`); desplegado en Producción (Vercel success) y salud idéntica a la línea base.
-Migración `20260918230000_add_composio_connections` aplicada en Producción por el workflow «Migración
-manual» (corrida 35411144863, solo `safe_composio_connections`): «Script executed successfully»; el
-paso por defecto (`db push`) quedó omitido; el paso de RLS terminó con «todas las tablas de "public" ya
-tienen RLS activado». Capitanía liberada: ya puede correr Prisma o el workflow de migración cualquier
-otra tarea. Pendiente NO bloqueante: que Milton confirme en Administración → Composio que la sección
-«Vía de conexión por app» aparece sin el aviso «Falta aplicar la migración».
-
 ## Claude — NOMBRES EN EL MENU — 2026-09-20
 
 **Pedido de Milton:** renombrar tres opciones del menú «Publicaciones» y propagarlas de forma
@@ -8572,39 +8629,6 @@ reverificación en producción con Guillermo Martínez.
 (sin migración), respaldo determinista de afinidad de categoría + triple
 auditoría — pendiente de fusión y reverificación con Guillermo Martínez.
 
-## Claude — REUBICACIÓN DE CATEGORÍA (sin capitanía, sin migración) — 2026-09-29
-
-PR #259 (`claude/fix-categoria-reubicacion`), sin fusionar todavía. Extiende
-el fix de categoría de hoy (PR #257): en vez de solo aceptar/rechazar la
-categoría que el modelo eligió, `reasonAboutCategoryAssignment` reclasifica
-cada título contra la lista completa de categorías reales de la cuenta (una
-sola llamada por lote) y lo reubica en la correcta si existe. Motivo:
-Guillermo Martínez tiene 26 categorías reales; el fix anterior solo devolvió
-resultados en 2 porque rechazaba en vez de reubicar (títulos de alquiler
-propuestos en "Compra" se perdían en vez de aparecer en "Rentas", que sí
-existe). Triple auditado (detalle completo en el mensaje del commit
-`e8f98f99`): un bug propio de doble conteo del tope por categoría y una
-variable muerta que rompía `noUnusedLocals` se encontraron y corrigieron
-antes de subir.
-
-**No se reclamó capitanía de migración:** otra sesión la tenía activa en
-paralelo para un trabajo no relacionado (MCP/token de API); este cambio no
-toca la base de datos, así que no hacía falta esperar — solo se evitó
-cualquier comando de Prisma.
-
-Responsable: Claude. Estado: PR abierto, pendiente de fusión y
-reverificación con Guillermo Martínez.
-
-## Capitanía — MCP: reclamada de nuevo para fusionar PR #258 (2026-09-29)
-
-**Capitán de migración:** Claude — la capitanía anterior para este mismo
-lote (PR #258, token personal de API) se había liberado sola sin fusión
-mientras esperaba revisión de Milton; PR #259 se fusionó en el medio sin
-tocar la base. Se reclama de nuevo solo para fusionar #258 y aplicar su
-migración (`20260929120000_add_mcp_api_token`), con autorización explícita
-de Milton para operar en autónomo. Nadie más ejecuta Prisma hasta su
-liberación.
-
 ## Claude — PERF: REUBICACIÓN DE CATEGORÍA EN UN SOLO PASO FINAL — 2026-09-29
 
 Milton probó en vivo (cuenta Guillermo Martínez) el commit anterior
@@ -8720,181 +8744,6 @@ categoría/canibalización en sí. Queda pendiente si Milton lo prioriza.
 con Node (falso positivo → false, caso real → true).
 
 **Responsable:** Claude. **Estado:** PR #263 abierto, pendiente de fusión.
-
-## Capitanía — MCP: URL del artículo en estado_de_publicaciones (2026-09-29)
-
-**Capitán de migración:** Claude — reclamó el lote. Motivo: Milton está
-probando el MCP con Meta MUSE; pidió que la publicación devuelva el enlace
-del artículo. La publicación es asíncrona (se encola al worker), así que no
-hay URL en el momento de `confirmar=true` — se amplió `estado_de_publicaciones`
-para listar, por título, su `articleUrl` real (campo ya existente en
-`Title`) cuando el estado es `success`, o el mensaje de error cuando falló.
-Sin migración, sin cambios de schema.
-
-**Pedido relacionado, NO implementado a propósito:** MUSE también pidió
-`eliminar_oportunidades`. Bloqueado por el clasificador de modo automático
-de esta sesión (categoría "Irreversible Deletion") en dos intentos previos
-— no se reintentó por otra vía, queda documentado como pendiente si Milton
-decide ajustar los permisos de la sesión.
-
-**Auditorías:** `npx tsc --noEmit` limpio, build de producción de `apps/web`
-completo sin errores (worktree aislado
-`/private/tmp/mcp-url-articulo-20260929`). Cambio de un solo archivo
-(`apps/web/src/lib/mcp/tools/opportunities.ts`), sin tocar el resto.
-
-## Capitanía — MCP: crear_titulos_con_ia (2026-09-30)
-
-**Capitán de migración:** Claude — reclamó el lote. Milton notó que "Crear
-con la IA del sistema" (preguntas guiadas del panel Publicar, proyecto
-CREACION DE PUBLICACIONES PROPIAS) no estaba expuesto en el MCP. Nueva tool
-`crear_titulos_con_ia` en `apps/web/src/lib/mcp/tools/content-generation.ts`,
-reusa `POST /api/title-generation` (mismo cupo de 3 solicitudes/día, mismo
-filtro de repetidos, mismo prompt de administrador) — no reimplementa nada.
-Sin migración, sin cambios de schema.
-
-**Auditorías:** `npx tsc --noEmit` limpio, build de producción de `apps/web`
-completo sin errores (worktree aislado
-`/private/tmp/mcp-titulos-ia-20260930`).
-
-## Capitanía — MCP: copy neutro, capacidades dinámicas y Actualizaciones pendientes (2026-09-30)
-
-**Capitán de migración:** Claude — reclamó el lote. Milton pidió tres cosas
-sobre lo ya construido de MCP:
-
-1. **Copy de Configuración → Asistentes IA en español neutro** (usaba "vos"
-   rioplatense; reemplazado por "tú" en todo el texto y el prompt copiable).
-2. **Que sea dinámico:** nuevo endpoint público `GET /api/mcp/capabilities`
-   que lee directo del array `TOOLS` real (no una copia escrita a mano) —
-   la pantalla y el prompt copiable arman su lista de "qué puede hacer un
-   asistente hoy" desde ahí, así que la próxima tool que se agregue aparece
-   sola, sin editar esta pantalla.
-3. **Registro en Actualizaciones y en el manual del robot de ayuda:**
-   hallazgo importante — el hook `generate-product-update.ts` (que llena la
-   tabla `ProductUpdate`, la misma que lee el asistente de ayuda vía
-   `getCurrentProductKnowledge()`) necesita `OPENAI_API_KEY` y
-   `DATABASE_URL` reales, y todos los commits de MCP se hicieron en
-   worktrees aislados sin esas credenciales a propósito (protocolo de
-   seguridad) — el hook falló en silencio (visible como advertencia, nunca
-   bloqueó el commit) y **ninguna entrada de Actualizaciones se generó para
-   todo el trabajo de MCP**. Se agregó `scripts/add-product-update-20260930-mcp.ts`,
-   mismo patrón manual sin IA que ya usa el repo
-   (`add-product-update-20260922-interface.ts`), con las dos entradas que
-   faltan. **Pendiente de que Milton (u otra sesión con las credenciales
-   reales) lo corra una vez:** `npx tsx scripts/add-product-update-20260930-mcp.ts`.
-   También se amplió la sección "Asistentes IA" de
-   `apps/web/src/content/manual-usuario.ts` (el manual base que sí se
-   actualiza en cada PR) para mencionar `crear_titulos_con_ia` y el enlace
-   del artículo.
-
-**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
-errores (worktree aislado `/private/tmp/mcp-copy-dinamica-20260930`). El
-script de Actualizaciones no se ejecutó (requiere credenciales reales que
-este entorno no tiene).
-
-## Capitanía — MCP: asistente proactivo + fix real de bug de panel (2026-09-30)
-
-**Capitán de migración:** Claude — reclamó el lote. Motivo: Milton pasó una
-conversación real de un usuario con Meta MUSE (análisis honesto del propio
-MUSE, `analisis-mcp-seo-total.md`) donde el asistente quedó bloqueado y
-perdido. Se verificó cada causa contra el código real antes de tocar nada
-(no se asumió nada del reporte):
-
-1. **Bug real confirmado, no "falta de sincronización":**
-   `crear_oportunidades` nunca enviaba `panel` a `POST /api/opportunities`
-   (`apps/web/src/app/api/opportunities/route.ts:139`), que filtra
-   categorías por ese campo. En cuentas con un solo panel (`Category.panel`
-   default `""`) no se notaba; en cuentas multi-panel (como la del caso
-   real, 5 categorías con paneles propios) la consulta no encontraba
-   ninguna categoría — de ahí "Sincroniza tus categorías primero" con
-   categorías YA sincronizadas. Prueba adicional: `listar_categorias` (sin
-   filtro de panel) sí las mostraba bien — inconsistencia real entre dos
-   tools del mismo MCP. Fix: la tool ahora resuelve el panel igual que ya
-   lo hace `oportunidades/page.tsx` (primer panel real disponible entre las
-   categorías del usuario, si no hay uno fijado en la cuenta).
-2. **Confusión confirmada** entre `crear_oportunidades` (análisis de Search
-   Console) y `crear_titulos_con_ia` (a partir de una descripción del
-   negocio) — descripciones reescritas para desambiguar.
-3. **Comportamiento reactivo confirmado** en la transcripción real: el
-   primer mensaje del asistente fue una pregunta abierta en vez de un menú
-   numerado. Se reforzó `instructions` del `initialize`
-   (`apps/web/src/app/api/mcp/route.ts`) y el prompt copiable de
-   Configuración → Asistentes IA para que el asistente ofrezca
-   proactivamente el mismo menú numerado del Home real desde el primer
-   mensaje — pedido central de Milton.
-4. **Nueva tool `ver_manual_seo_total`** (solo lectura,
-   `apps/web/src/lib/mcp/tools/guidance.ts`): devuelve el manual real de la
-   plataforma (el mismo `BASE_USER_MANUAL` que ya alimenta al robot de
-   ayuda web, no un documento nuevo), con índice o filtro por tema. El
-   asistente la usa cuando no sabe cómo guiar, en vez de inventar.
-
-**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
-errores (worktree aislado `/private/tmp/mcp-proactivo-20260930`). La
-función de búsqueda del manual se probó aparte con un script real contra
-`BASE_USER_MANUAL` (encontró un bug propio — buscaba solo en el título de
-cada sección, no en el contenido — corregido y reverificado antes de subir).
-Sin migración, sin cambios de schema.
-
-**Capitán de migración:** Claude — reclamó el lote. Motivo: registrar la
-entrada de Actualizaciones del lote "asistente proactivo" (PR #269), mismo
-patrón manual que el anterior (`add-product-update-20260930-mcp.ts`).
-
-## Capitanía — MCP: prompts/list+get y descripciones estructuradas (2026-09-30)
-
-**Capitán de migración:** Claude — reclamó el lote. Milton compartió un
-documento de buenas prácticas de MCP (`MCP_USAGE_GUIDANCE.md`) y pidió
-ejecutar las ideas alineadas a los objetivos ya en curso (usuario no se
-pierde, asistente proactivo). Dos cambios:
-
-1. **`prompts/list` / `prompts/get`** (`apps/web/src/lib/mcp/prompts.ts`,
-   integrado en `apps/web/src/app/api/mcp/route.ts`): capacidad del
-   protocolo MCP que el servidor nunca implementaba. En vez de que el
-   asistente improvise el orden de llamadas a partir de `tools/list`, el
-   servidor publica 3 "recetas" con nombre: `empezar` (menú numerado
-   inicial, mismo texto que ya vive en `instructions`), `publicar_contenido`
-   (el flujo completo que resuelve exactamente la ambigüedad
-   crear_oportunidades vs crear_titulos_con_ia donde se perdió el usuario
-   real con MUSE) y `diagnosticar_cuenta`. `initialize.capabilities` ahora
-   anuncia `prompts`, y las `instructions` le dicen al asistente que
-   revise `prompts/list` antes de improvisar.
-2. **Descripciones estructuradas en las 14 tools existentes**, formato
-   Propósito / Cuándo usarla / Cuándo NO usarla / Contexto necesario /
-   Siguiente paso típico — mismo criterio que ya se usó para desambiguar
-   `crear_oportunidades` vs `crear_titulos_con_ia` el 30/9, extendido a
-   todo el catálogo.
-
-**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
-errores (worktree aislado `/private/tmp/mcp-prompts-workflows-20260930`).
-Sin migración, sin cambios de schema. **Pendiente después de desplegar:**
-prueba real por `curl` de `prompts/list` y `prompts/get` contra producción
-(igual que se hizo con `tools/call` al lanzar el token personal).
-
-## Capitanía — MCP: sin jerga técnica hacia el usuario (2026-09-30)
-
-**Capitán de migración:** Claude — reclamó el lote. Milton revisó otra vez
-la transcripción real de MUSE y notó que el asistente le habló al usuario
-en términos técnicos ("listar_categorías necesita la conexión, aún no
-configurada de mi lado", mencionando tokens/conectores directamente) —
-lenguaje que una persona normal no entiende. Se agregó una regla explícita
-a `instructions` del `initialize` (`apps/web/src/app/api/mcp/route.ts`) y
-al prompt copiable de Configuración → Asistentes IA: nunca mencionar
-nombres técnicos de herramientas, tokens, APIs, conectores ni el estado
-interno de la conexión del asistente — traducir siempre a lenguaje
-cotidiano (qué le falta a la cuenta, qué botón tocar en la web).
-
-**Auditorías:** `npx tsc --noEmit` limpio, build de producción completo sin
-errores (worktree aislado `/private/tmp/mcp-sin-jerga-20260930`). Cambio de
-solo texto en 2 archivos. Sin migración, sin cambios de schema.
-
-**Nota aparte:** al reclamar este lote se encontró que la capitanía del
-lote anterior (`prompts/list+get`, PR #271) había quedado sin liberar por
-error — se liberó recién ahora, retroactivamente, ya verificado en
-producción.
-\n+## Recuperación segura de sincronización por panel/idioma — Codex — 2026-09-30
-\n+Se agregó fallback cuando el panel elegido devuelve cero categorías: se
-consulta el resto y se recupera automáticamente solo si existe un único panel
-con categorías. Si hay varios, no se mezclan sitios y se devuelve un mensaje
-accionable. No cambia schema ni requiere migración. Auditorías locales: worker
-build OK, tests 20/20, fallback 3/3, web build 85/85 rutas y diff limpio.
 
 ## Cierre y archivo — CARMEN AGUILAR CONEXION GSC — 2026-10-02
 

@@ -1,14 +1,16 @@
-# NORMA DE MANTENIMIENTO AUTOMÁTICO DEL DOCUMENTO (2026-10-09, pedido explícito de Milton)
+# NORMA DE MANTENIMIENTO AUTOMÁTICO DEL DOCUMENTO (2026-10-14, pedido explícito de Milton)
 
-1. Este documento solo guarda: (a) reglas y protocolos vigentes, que no se modifican sin pedido expreso de Milton; (b) trabajo activo y entradas recientes que aún no están cerradas; (c) decisiones pendientes de Milton.
-2. Al cerrar una entrada, se MUEVE completa y sin editar al destino que le corresponde, y aquí queda solo una línea de puntero:
+1. Este documento solo guarda reglas y protocolos vigentes. Esas reglas no se modifican sin pedido expreso de Milton.
+2. Lo demás no vive aquí: ni trabajo activo, ni reservas, ni historial. Al cerrar o registrar cualquier entrada, se traslada completa y sin editar a su destino:
+   - Trabajo activo, reservas y capitanías → `INVENTARIO_CONVERSACIONES.md` (Parte A para reservas; sección «TRASLADADO DESDE COORDINACIÓN» para lo demás)
    - Versiones, despliegues, PRs cerrados, incidentes de producción → `CONTROLADOR_DE_VERSIONES.md`
-   - Conversaciones, reservas y responsables → `INVENTARIO_CONVERSACIONES.md` (Parte B)
+   - Conversaciones cerradas y su identidad → `INVENTARIO_CONVERSACIONES.md` (Parte B)
    - Hallazgos de árbol de git, ramas, merges, sobrescrituras → `REPARADOR_DEL_ARBOL_PRINCIPAL.md`
    - Ideas sueltas sin ejecutar → `TO-DO.md`
-3. Cada traslado deja un índice (título y fecha) en el documento destino. Nunca se borra contenido: antes de confirmar, se verifica que cada línea movida exista en el destino.
-4. Referencia de tamaño: unas 1.000 líneas. Si el documento crece por encima, se archiva en la misma corrida.
+3. Cada traslado deja un índice (título y fecha) en el destino. Nunca se borra contenido: antes de confirmar, se verifica que cada línea movida exista en el destino.
+4. Referencia de tamaño: este documento debe quedarse en el tamaño de sus reglas. Si algo que no es regla aparece aquí, se traslada en la misma corrida.
 5. La tarea programada diaria de propagación aplica esta norma en cada corrida. Si algo es ambiguo, se deja anotado para decisión de Milton y no se mueve.
+6. Quien busque «Trabajo activo» en este documento debe ir a `INVENTARIO_CONVERSACIONES.md`.
 
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
@@ -1023,115 +1025,6 @@ leer esta entrada y actualizar Coordinación, Inventario de Conversaciones y
 Controlador de Versiones si cambia la referencia publicada. Esta entrada es
 aditiva: no se deben borrar las anteriores.
 
-## Codex — etiqueta de Redes por cuenta en Administración — 2026-10-07
-
-- Se ajustó `apps/web/src/app/dashboard/usuarios/page.tsx` para que el selector
-  del módulo `oportunidades-redes` muestre «Quitárselo a esta cuenta» para las
-  cuentas normales y conserve «Dárselo a esta cuenta» para administradores,
-  Zulmad y Lorena Alvarez.
-- El cambio es únicamente de interfaz; no modifica permisos individuales de
-  redes, schema, migraciones, datos ni producción.
-- Verificación: `git diff --check` OK. Typecheck pendiente porque este worktree
-  no contiene `node_modules`.
-
-Estado: PREPARADO LOCALMENTE; sin commit, PR ni deploy.
-
-Responsable: Codex.
-
-## Codex — AUDITORÍA ENLACES HISTORIAL TODAS LAS REDES — 2026-10-06
-
-- Se revisaron los enlaces de Historial para Threads, X, LinkedIn, Facebook,
-  Instagram, Pinterest, Tumblr, Bluesky, DEV.to, Blogger y Google Business.
-- X y LinkedIn dejaron de construir URLs directamente en la vista y ahora
-  usan `socialPostUrl`, igual que Threads.
-- `socialPostUrl` respeta URLs completas para todas las plataformas y añade el
-  alias `twitter` para X. Cuando un ID aislado no basta para formar un
-  permalink fiable, devuelve `null` en vez de mostrar un enlace incorrecto.
-- Se añadieron pruebas para URLs completas de Blogger, Pinterest y Tumblr,
-  el alias Twitter y el rechazo de IDs opacos sin URL.
-- `git diff --check` pendiente de ejecutar después de esta edición. No hubo
-  migración ni deploy.
-
-## Cola de producción — enlaces de Historial — 2026-10-06
-
-Milton pidió dejar este cambio en cola para producción. La corrección de
-enlaces de Historial para todas las redes/blogs permanece únicamente en el
-worktree local: **no subir, no crear PR y no desplegar todavía**.
-
-## REPARACIÓN DE BUILD WEB — 2026-10-06
-
-**Identidad:** CODEX - GPT-5 - REPARADOR DEL ARBOL PRINCIPAL.
-
-**Base:** `origin/main` en rama aislada
-`codex/reparar-typecheck-web-20261006`.
-
-**Causa 1:** `apps/web/src/lib/modules.test.ts` tenía un bloque de test sin
-cerrar; faltaba `});` antes del siguiente `test()`.
-
-**Causa 2:** `apps/web/src/app/dashboard/usuarios/page.tsx` referenciaba el
-estado inexistente `savingUserModules`. Se sustituyó por `savingAny`, el estado
-agregado existente para bloquear el guardado durante cualquier operación de
-permisos, módulos o límites.
-
-**Alcance excluido:** Blogger, Composio, PostPeer, callbacks, secretos,
-credenciales, schema Prisma, migraciones, middleware y `vercel.json` no fueron
-modificados.
-
-**Validación:** `prisma generate` correcto; typecheck web correcto después de
-regenerar Prisma; build worker correcto; pruebas worker 20/20 correctas.
-Las pruebas web ejecutaron 187 casos: 186 correctos, 1 fallo preexistente en
-la expectativa antigua de `oportunidades-redes`, que ahora está deshabilitado
-intencionalmente en `origin/main`. El build web no pudo terminar por un error
-de permisos del entorno al crear un proceso/puerto interno de Turbopack
-(`Operation not permitted`), no por estos dos archivos.
-
-**Estado:** commit local creado para conservar la reparación y su evidencia,
-pero **NO LISTO PARA PRODUCCIÓN** hasta repetir el build web en un entorno con
-permisos de procesos completos y resolver o actualizar separadamente el test
-preexistente de Redes Sociales. No hubo deploy ni cambios de producción.
-
-## Corrección — REDES SOCIALES OFF PARA TODOS — 2026-10-05
-
-Responsable: Codex. Corrección solicitada por Milton: pasar el selector
-universal de Redes Sociales a OFF y deshabilitarlo para todos los usuarios no
-administradores por ahora. El módulo `oportunidades-redes` ahora es
-`alwaysDisabled`; las excepciones antiguas no lo pueden reactivar. Los
-permisos individuales de cada red permanecen separados.
-
-### Continuación CONEXION POSTPEER 2 — 2026-09-22
-
-- Se confirmó el resultado de la prueba aislada de Lorena: el artículo exacto
-  `https://segurosdesaludyvida.com/news/comparativa-de-seguros-medicos-economicos-en-florida`
-  apareció como `GOOGLE-BUSINESS ✓ Publicado` en Historial, pero la publicación
-  visible no mostró imagen. No se volvió a publicar.
-- Causa identificada: `SocialOpportunity.imageUrl` estaba vacío para esa
-  oportunidad y el worker no tenía respaldo de lectura de la imagen real del
-  artículo. La generación de imagen IA no se reintroduce.
-- Cambio pendiente en PR: `apps/worker/src/businessProfilePublish.ts` ahora
-  usa primero `SocialOpportunity.imageUrl` y, si falta, obtiene la `og:image`
-  pública del artículo exacto mediante `getArticleOpenGraphImage`. Si tampoco
-  existe, falla antes de enviar la publicación; así GBP nunca publica sin foto.
-  No hay recorte, adaptación ni generación de imagen.
-- Commit: `ee9df8e` (`fix(gbp): use article og image fallback`).
-- PR: #211, https://github.com/miltondavila-ux/auto-articulos/pull/211
-  contra `main`. Checks observados: Vercel pasó como `Skipped - Not affected` y
-  Vercel Preview Comments pasó. No hubo merge, deployment ni nueva publicación.
-- Validaciones realizadas: TypeScript del worker (`npx tsc --noEmit -p
-  apps/worker/tsconfig.json`) OK; `git diff --check` OK. El hook de commit
-  informó que no pudo ejecutar el generador de actualización por falta de
-  `DATABASE_URL`, pero el commit sí quedó creado; no se ejecutó migración.
-- Archivos tocados: `apps/worker/src/businessProfilePublish.ts` y este
-  documento. No se añadieron conexiones ni se modificó Configuración →
-  Conexiones.
-- Deployment: ninguno. Prueba posterior: pendiente de merge/deploy y de una
-  única autorización explícita; no ejecutar otra publicación hasta que exista
-  autorización. La prueba deberá activar `POSTPEER_GBP_CONSUMER_READY` solo para
-  Lorena, usar el URL exacto de la oportunidad y confirmar imagen + artículo
-  exacto como `Publicado` en Historial.
-- Bloqueos restantes: revisión/merge del PR, autorización explícita de
-  deployment y después una única prueba productiva controlada. Si desaparece de
-  la cola sin Historial confirmado, revisar logs y no repetir publicación.
-
 ## PROTECCIÓN PERMANENTE — RENEW CONFIGURACION — 2026-09-07
 
 Identidad exacta: proyecto `RENEW CONFIGURACION`, dentro de la continuación
@@ -1175,19 +1068,6 @@ revisar esta sección primero y documentar el motivo, el diff y las tres
 auditorías requeridas.
 Estado: APROBADA POR MILTON — PROTEGIDA PERMANENTEMENTE.
 
-## DECISIÓN DE MILTON — BUG NATALIA — 2026-09-08
-
-Milton indicó expresamente que la ausencia de la cuenta de Natalia en la
-base local no debe trabar esta corrección. Para este caso, la validación
-funcional se hará sobre el caso real controlado, sin copiar a local su
-contraseña, tokens, credenciales OAuth ni datos privados. Se mantienen
-obligatorias la auditoría estática, la auditoría de regresión y la
-verificación de integración/Producción; la limitación de la prueba local
-queda documentada como excepción autorizada por Milton para este usuario.
-
-Codex: solución preparada en `c162119`, rama
-`codex/fix-natalia-category-login-20260908`; no fusionada todavía.
-
 ## Claude — CATEGORÍA ESPECÍFICA VS GENERAL: REGLA GENERALIZADA — 2026-09-29
 
 **Hallazgo real (Milton probando en vivo, cuenta Guillermo Martínez):** 7 de
@@ -1215,57 +1095,13 @@ producción con Guillermo Martínez.
 
 **Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión.
 
-## Claude (tarea programada diaria de propagación) — 2026-10-06
-
-Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-03
-(commit `d351feb`). Se revisó el rango `d351feb..origin/main` sobre
-`COORDINACION_CLAUDE_CODEX.md`: dos commits lo tocaron, ambos de Milton directamente sobre el
-documento — `f787bd9` ("feat: habilitar redes sociales para todos", agregó la entrada "Trabajo
-activo — HABILITAR REDES SOCIALES PARA TODOS — 2026-10-02") y `5f10b56` ("fix: deshabilitar
-redes sociales temporalmente", 2026-10-05), que **borró esa misma entrada** y la reemplazó por
-"Corrección — REDES SOCIALES OFF PARA TODOS — 2026-10-05". Esa edición no la hizo esta tarea de
-propagación (que nunca borra), sino un commit ajeno sobre el propio documento maestro; se deja
-anotado aquí por transparencia, sin revertirlo, porque el protocolo de no-destrucción de este
-documento aplica a cualquiera que lo edite, no solo a esta tarea.
-
-Se verificó contra el código real de `origin/main` cuál de las dos versiones sigue vigente:
-`apps/web/src/lib/modules.ts` tiene hoy `alwaysDisabled: true` en la entrada
-`oportunidades-redes`, confirmando que el estado final es "apagado para todos los no
-administradores" (commit `5f10b56`), no el "habilitado para todos" del commit `f787bd9` que ya
-fue revertido.
-
-Propagado por documento:
-
-- `CONTROLADOR_DE_VERSIONES.md`: entrada nueva "Versión — 2026-10-05 — módulo de Redes
-  Sociales: habilitado para todos y revertido el mismo día", con ambos commits (`f787bd9` y
-  `5f10b56`), la verificación contra el código vigente, y la falta de confirmación de
-  despliegue/Vercel en las entradas originales (esta tarea no tiene acceso a Vercel para
-  comprobarlo).
-- `apps/web/src/content/manual-usuario.ts`: nota nueva en la sección de
-  `${MENU_NAMES.redes}` (debajo de la frase "Este módulo está en prueba...") explicando que,
-  desde el 2026-10-05, el módulo está apagado para toda cuenta que no sea administradora, para
-  que el bot de ayuda no siga diciendo solo que "se está activando poco a poco" cuando en
-  realidad está deshabilitado a propósito.
-- `INVENTARIO_CONVERSACIONES.md`: sin cambios — ninguna de las dos entradas trae un nombre de
-  conversación en formato «[AGENTE] - [NOMBRE DEL PROBLEMA]» ni una reserva de archivo/rama
-  activa verificable (no hay ningún worktree abierto además del de esta misma tarea, según
-  `git worktree list`), así que no hay nada que indexar ahí todavía.
-- `TO-DO.md`: sin cambios — ninguna idea suelta nueva sin ejecutar en este rango.
-- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — no se encontró ninguna mención nueva a
-  árboles de git enredados, ramas pisadas o commits mezclados en el rango revisado (la edición
-  que borró y reemplazó una entrada se anotó arriba, en este mismo documento, por no calzar
-  exactamente en el tema de ese archivo).
-
-No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea.
-
-Responsable: Claude (tarea programada diaria de propagación).
-
 ---
 
-## Historial archivado
+## Historial trasladado
 
-Lo cerrado se movió sin editar a los documentos de destino. Cada uno tiene su propio índice al final, titulado «HISTORIAL ARCHIVADO DESDE COORDINACION_CLAUDE_CODEX.md — 2026-10-09»:
+Lo que no es regla se movió sin editar a los documentos de destino. Cada uno tiene su propio índice al final, con el título «TRASLADADO DESDE COORDINACIÓN — 2026-10-14»:
 
-- Versiones, despliegues e incidentes: `CONTROLADOR_DE_VERSIONES.md` (98 entradas)
-- Conversaciones y reservas: `INVENTARIO_CONVERSACIONES.md` (76 entradas)
-- Árbol de git y ramas: `REPARADOR_DEL_ARBOL_PRINCIPAL.md` (8 entradas)
+- Trabajo activo, reservas y conversaciones: `INVENTARIO_CONVERSACIONES.md` (89 entradas)
+- Versiones, despliegues e incidentes: `CONTROLADOR_DE_VERSIONES.md` (93 entradas)
+- Árbol de git y ramas: `REPARADOR_DEL_ARBOL_PRINCIPAL.md` (7 entradas)
+

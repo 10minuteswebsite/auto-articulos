@@ -334,9 +334,9 @@ con lo que la base real ya tiene), nadie debería correr `migrate.yml` con `acce
 
 ---
 
-# HISTORIAL ARCHIVADO DESDE COORDINACION_CLAUDE_CODEX.md — 2026-10-09
+# TRASLADADO DESDE COORDINACIÓN_CLAUDE_CODEX.md — 2026-10-14
 
-## Índice (8 entradas, en el orden del documento original)
+## Índice (7 entradas, en el orden del documento original)
 
 - INCIDENTE — `TO-DO.md` se sobrescribe entre sesiones sin commitear (Claude-5, 2026-09-07)
 - Actualización [2026-09-08] Claude — movido a worktree aislado, commit, PR abierto
@@ -345,7 +345,6 @@ con lo que la base real ya tiene), nadie debería correr `migrate.yml` con `acce
 - Incidente interceptado — otra sobrescritura de `TO-DO.md` (Claude, 2026-09-08)
 - RECUPERACIÓN DE CONTENIDO PERDIDO EN MERGE — 2026-09-09 (tarea programada diaria de propagación)
 - RECUPERACIÓN DE CONTENIDO PERDIDO EN MERGE — 2026-09-21 (tarea programada diaria de propagación)
-- Capitanía — MCP: token personal de API + herramientas de panorama (2026-09-29)
 
 ## INCIDENTE — `TO-DO.md` se sobrescribe entre sesiones sin commitear (Claude-5, 2026-09-07)
 
@@ -825,62 +824,3 @@ política de privacidad, ya estaba marcada como pendiente por el propio
 proyecto y se reflejó en `TO-DO.md`).
 
 Responsable: Claude (tarea programada diaria de propagación).
-
-## Capitanía — MCP: token personal de API + herramientas de panorama (2026-09-29)
-
-**Capitán de migración:** Claude — reclamó el lote. Motivo: activar el
-servidor MCP entrante ya existente (`api/mcp/route.ts`, construido en
-agosto para Alexa+/ChatGPT vía OAuth) para que cualquier asistente de IA —
-Milton quiere probar primero con Meta MUSE — pueda operar su propia cuenta,
-autenticándose con un token personal generado y copiado desde
-Configuración → Asistentes IA (sin registro de cliente OAuth), más un
-prompt copiable listo para pegarle al asistente. Ampliado además el
-catálogo de tools con la fase 2 ya planificada en
-`MCP_ACCIONES_UNIVERSALES.md` (panorama/diagnóstico, todo de solo lectura).
-
-**Qué se hizo:**
-- Nuevo modelo `McpApiToken` (`packages/db/prisma/schema.prisma`) + migración
-  `20260929120000_add_mcp_api_token` — un token activo por usuario, se
-  guarda solo el hash (mismo esquema que `OAuthAccessToken`).
-- Endpoints `GET/POST/DELETE /api/configuracion/mcp-token` para
-  generar/consultar/revocar.
-- **Hallazgo importante durante la implementación:** el middleware
-  (`middleware.ts`) corre en Edge Runtime, y Prisma (`prisma-client-js` con
-  binarios nativos) no puede correr ahí — por eso la verificación del token
-  personal (que necesita consultar la base para poder revocarlo) no se pudo
-  resolver en el propio middleware como los otros dos métodos de auth
-  (OAuth firmado y sesión firmada, ambos sin base de datos). Se resolvió con
-  una ruta nodejs nueva, `/api/mcp/token-lookup`, que el middleware llama
-  por `fetch` interno server-a-server — el patrón que recomienda Vercel para
-  este split edge/node. Documentado en
-  `apps/web/src/app/api/mcp/token-lookup/route.ts` y
-  `apps/web/src/middleware.ts` (función `resolvePersonalToken`).
-- UI nueva en Configuración → Asistentes IA
-  (`/dashboard/configuracion/mcp`): generar/regenerar/revocar token, copiar
-  token, y copiar un prompt armado con la URL real del servidor y las
-  reglas de confirmación antes de publicar.
-- Reorganizado `apps/web/src/lib/mcp/tools.ts` en
-  `apps/web/src/lib/mcp/tools/` (`opportunities.ts` con las 5 tools
-  existentes movidas sin cambios, `account.ts` nuevo, `index.ts` que las
-  combina) para que sumar una función nueva sea agregar un archivo de
-  dominio, sin tocar el servidor ni el middleware — pedido explícito de
-  Milton de que el sistema sea "dinámico".
-- 6 tools nuevas de solo lectura en `account.ts`: `ver_resumen_cuenta`,
-  `ver_estado_configuracion`, `ver_integraciones`, `listar_categorias`,
-  `listar_idiomas`, `ver_limites_y_creditos` — todas reusan los mismos route
-  handlers que ya usa la web (`dashboard-stats`, `configuration-status`,
-  `languages`), sin reimplementar lógica.
-- Actualizado `MCP_ACCIONES_UNIVERSALES.md` (estado de implementación) y
-  `apps/web/src/content/manual-usuario.ts` (nueva sección "Asistentes IA").
-
-**Auditorías:** `npx tsc --noEmit` limpio en `apps/web` y `apps/worker`
-(worktree aislado `/private/tmp/mcp-token-personal-20260929`, `npm
-install`/`prisma generate` propios, sin enlazar `node_modules` del checkout
-principal); build de producción de `apps/web` completo sin errores, incluye
-`/dashboard/configuracion/mcp`; suite del worker 20/20 en verde (sin
-cambios ahí, se corrió para confirmar cero regresión); `git diff --check`
-limpio. **Pendiente, no verificado todavía:** aplicar la migración contra
-producción y probar en vivo con la cuenta de pruebas de Lorena Álvarez
-(generar el token real, llamar `/api/mcp` con `curl`) antes de darle luz
-verde a Milton para probarlo con MUSE — no hay base de datos local
-disponible en este entorno para probarlo antes.
