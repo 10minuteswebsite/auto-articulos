@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
-import { redesProfile } from "@/lib/redes-profile";
 import {
   decryptSecret,
   encryptSecret,
@@ -719,10 +718,8 @@ export async function POST(request: NextRequest) {
 
   const passwordHash = await bcrypt.hash(password, 12);
   const initialPasswordEncrypted = encryptSecret(password);
-  const diaCeroApplied = Boolean(await prisma.systemSetting.findUnique({ where: { key: "dia_cero_backup" }, select: { key: true } }));
   const user = await prisma.user.create({
     data: {
-      ...(diaCeroApplied && role !== "admin" ? redesProfile() : {}),
       email: normalizedEmail,
       name:
         typeof name === "string" && name.trim()
