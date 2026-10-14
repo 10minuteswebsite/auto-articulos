@@ -1,5 +1,15 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — CIERRE «Enredo Artículos/Redes: tarjeta de Redes visible al venir del HUB» — 2026-10-14
+
+- Estado: CERRADO Y ARCHIVADO por orden de Milton. Solo documentación en este PR; ningún cambio de código. Sin migración.
+- Síntoma: al llegar desde el HUB, el Inicio de Artículos mostraba la tarjeta de Redes, y el Historial mezclaba los dos productos.
+- Hallazgo (código + producción de solo lectura): en `articulos.lasolucionweb.com` el Inicio ya filtraba por dominio (`productOfHost` + `hasProductFor` en `dashboard/page.tsx`). En cualquier otro dominio el producto es «compartido» y se muestra todo. El router de acceso (`access-router.ts`) deja a propósito en el dominio canónico a quien tiene los dos derechos.
+- Causa más probable (no confirmada con la cuenta de Milton, que es administrador y ve el asistente de configuración): el enlace del HUB llega a un dominio `.net`, que `productOfHost` no reconocía. Eso lo corrigió el PR #571 (ver «CIERRE Historial mezclado en los dominios .net»): ahora acepta `.com` y `.net`.
+- NO verificado: que, tras #571, el Inicio y el Historial salgan separados al entrar desde el HUB con una cuenta con ambos derechos. Comprobar con una cuenta de prueba (no se pudo entrar al HUB: pide inicio de sesión).
+- NO hecho: «todos los históricos colapsados». Propuesta no aplicada: sección de Historial en `<details>` cerrado por defecto en `dashboard/historial/page.tsx`, ya filtrada por producto. Queda como pendiente si Milton lo confirma.
+- Si tras #571 el HUB aún deja en `seototal.…` o `10minuteswebsite.*` con la tarjeta de Redes: la regla de `access-router.ts` («con ambos derechos, no redirigir») habría que cambiarla, y para eso hace falta saber qué parámetro manda el HUB al pulsar Artículos o Redes.
+
 ## Claude — Fix «Nancy Cruz: sin cupo para publicar artículos sin haber publicado hoy» — 2026-10-14
 
 - Estado (2026-10-14, corregido para el REPARADOR DEL ARBOL): PR #568 con 16 archivos finales, todos del cupo horario; se retiró `diagnose-nancy-cupo.js` (diagnóstico de un solo uso). Listo para revisión final y squash; SIN fusionar. La migración YA está aplicada en producción por Milton (Supabase, «Success. No rows returned»): no crear otra ni reaplicarla. Capitanía liberada al entregar.
