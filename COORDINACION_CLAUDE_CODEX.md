@@ -3,9 +3,9 @@
 ## Claude — Fix «Nancy Cruz: sin cupo para publicar artículos sin haber publicado hoy» — 2026-10-14
 
 - Estado: PR abierto, sin fusionar. Sin migración. Capitanía reclamada con `migration-coordinator.sh claim "Claude"`.
-- Hipótesis por código (NO comprobada con datos reales de Nancy: sin acceso a la base desde esta sesión): el cupo diario de artículos contaba desde medianoche del servidor (UTC) en `api/runs`, `api/dashboard-stats` y `api/opportunities/execute-batch|execute-all`. Cualquier usuario de América que publica después de las 8 p. m. de Florida ve esas publicaciones como «de hoy» a la mañana siguiente. Es general, no de Nancy.
-- Arreglo: esos cuatro sitios usan `startOfSocialDay()` (medianoche de Florida, decisión de Milton 2026-10-12). Manual actualizado. Verificación: el typecheck local resuelve `@auto-articulos/shared` al repo principal (trampa del `node_modules` enlazado), así que la validación real es la de CI.
-- Pendiente: confirmar con la base de producción cuántos `Title` con `status=success` tiene Nancy desde 00:00 UTC y su `dailyArticleLimit` (si fuera 0 o ya estuviera lleno, la causa sería otra).
+- CAUSA CONFIRMADA con datos de producción (Supabase, tropicalhomecruz@gmail.com): límites 5 diario / 300 mensual / 20 lote (normales); sus 5 artículos «de hoy» se publicaron el 14/10 entre 02:09 y 02:18 UTC = 13/10 22:09 en Florida. El cupo contaba por día UTC, así que a la mañana siguiente seguían contando como de hoy. Mismo patrón el 12/10. Afecta a cualquiera que publique de noche en América.
+- Arreglo definitivo (sin parches): `apps/web/src/lib/article-quota.ts` (`countPublishedArticles`) es el ÚNICO lugar que cuenta publicados hoy/mes; lo usan `api/runs`, `api/dashboard-stats`, `opportunities/execute-batch` y `execute-all` (antes cada una calculaba por su cuenta con la hora del servidor). Día y mes cortan en hora de Florida (`startOfSocialDay`, nuevo `startOfSocialMonth` en `packages/shared/src/social-day.ts`). Pruebas: 5/5 en `social-day.test.ts`, incluido el caso Nancy. Manual actualizado. Typecheck local no válido (node_modules enlazado al repo principal); validación real en CI. Sin migración.
+- Seguridad: el panel y las pantallas muestran el mismo conteo que aplica la ruta, así que no pueden discrepar.
 
 ## Claude — Fix «MCP/ChatGPT: Internal error y nueva autorización» (OAuth refresh) — 2026-10-14
 

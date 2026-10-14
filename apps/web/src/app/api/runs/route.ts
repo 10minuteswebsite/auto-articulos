@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
-import { startOfSocialDay } from "@auto-articulos/shared";
+import { countPublishedArticles } from "@/lib/article-quota";
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
@@ -180,35 +180,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const publicados = await countPublishedArticles(userId);
   if (user.monthlyArticleLimit !== null) {
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-    const publishedThisMonth = await prisma.title.count({
-      where: {
-        status: "success",
-        processedAt: { gte: startOfMonth },
-        run: { userId },
-      },
-    });
     cupos.push({
-      disponible: user.monthlyArticleLimit - publishedThisMonth,
+      disponible: user.monthlyArticleLimit - publicados.month,
       tope: user.monthlyArticleLimit,
       motivo: "tu límite mensual",
     });
   }
   if (user.dailyArticleLimit !== null) {
-    // El «día» corta a medianoche de Florida, no a la del servidor (UTC).
-    const startOfDay = startOfSocialDay();
-    const publishedToday = await prisma.title.count({
-      where: {
-        status: "success",
-        processedAt: { gte: startOfDay },
-        run: { userId },
-      },
-    });
     cupos.push({
-      disponible: user.dailyArticleLimit - publishedToday,
+      disponible: user.dailyArticleLimit - publicados.today,
       tope: user.dailyArticleLimit,
       motivo: "tu límite diario",
     });
