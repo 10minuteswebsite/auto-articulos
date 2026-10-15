@@ -1,5 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Fix «Google Business Profile no aparece conectado (check) en Conexiones» — 2026-10-14
+
+- Estado: PRODUCCIÓN al fusionar el PR de este cambio (sin migración). Capitanía reclamada al empezar y liberada al entregar.
+- CAUSA: `GET /api/configuration-status` (`apps/web/src/app/api/configuration-status/route.ts`) marcaba `business-profile` como configurado solo si existía `BusinessProfileIntegration.locationName` (la conexión histórica directa con Google). Las cuentas conectadas por PostPeer (la vía actual, p. ej. Lorena, ACTIVE) tienen `PostPeerConnection` y no esa fila, así que la pantalla de la conexión mostraba «Conectado» pero la tarjeta de Conexiones (`ConexionesView.tsx`, que pinta el ✓ con ese estado) no. Afectaba a TODOS los usuarios conectados por PostPeer; Threads ya tenía la misma regla (`postPeerThreads`).
+- ARREGLO: `configured = locationName || PostPeerConnection.status === "ACTIVE"`, la misma regla que usa `BusinessProfileSection`. Sin cambio de texto ni de manual.
+- Verificación: sin errores de tipos nuevos en el archivo; comprobación en producción pendiente tras el despliegue (Lorena y otra cuenta con Google Business).
+
 ## Claude — Fix «Nancy Cruz: sin cupo para publicar artículos sin haber publicado hoy» — 2026-10-14
 
 - Estado (2026-10-14, corregido para el REPARADOR DEL ARBOL): PR #568 con 16 archivos finales, todos del cupo horario; se retiró `diagnose-nancy-cupo.js` (diagnóstico de un solo uso). Listo para revisión final y squash; SIN fusionar. La migración YA está aplicada en producción por Milton (Supabase, «Success. No rows returned»): no crear otra ni reaplicarla. Capitanía liberada al entregar.
