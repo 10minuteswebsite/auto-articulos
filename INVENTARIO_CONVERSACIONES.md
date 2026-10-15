@@ -2072,3 +2072,55 @@ tema en `CONTROLADOR_DE_VERSIONES.md`; siguiendo el mismo criterio que la corrid
 el mismo tema de Redes ya indexado. Ninguna de las 10 describe un árbol de git enredado ni ramas
 pisadas, así que no se agregó nada en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Sin ideas sueltas nuevas
 para `TO-DO.md` en este rango.
+
+## Addendum — 2026-10-15 (tarea programada diaria de propagación)
+
+**Parte A:** sin reserva activa nueva. El rango revisado de Coordinación (`309ba18..origin/main`,
+14 commits, PRs #566 a #589) son 10 entradas distintas en `COORDINACION_CLAUDE_CODEX.md`, todas con
+capitanía "reclamada y liberada al fusionar" o ya cerrada/archivada según su propio texto.
+Verificado en vivo: `git worktree list` en este entorno muestra un único worktree (en `748c3de`,
+ya con los 14 commits del rango) y `git merge-base --is-ancestor <commit> origin/main` devuelve que
+sí son ancestros para los 14 commits del rango (`748c3de`, `2e2f856`, `bab324f`, `f6c7256`,
+`3daa39c`, `c2758bf`, `c939d19`, `99fa993`, `e59f10b`, `62b8044`, `547d30b`, `3f82315`, `5cd2657`,
+`dc4203f`): no queda ninguna reserva abierta que anotar en la tabla de Parte A.
+
+**Parte B — nombres de conversación nuevos encontrados en `COORDINACION_CLAUDE_CODEX.md`** en el
+rango `309ba18..origin/main` (detalle técnico completo en Coordinación y, propagado, en
+`CONTROLADOR_DE_VERSIONES.md`; no se transcribe aquí para no duplicar):
+
+- `[Claude] - MCP: ALCANCE DEL ASISTENTE Y PUBLICACIÓN AUTOMÁTICA RECURRENTE` — 2026-10-14, PR
+  #581 (commit `748c3de`), PRODUCCIÓN. Pendiente de decisión de Milton (discrepancia
+  Search Console/Composio entre `configuration-status` y el MCP), ya anotada en Coordinación y en
+  `CONTROLADOR_DE_VERSIONES.md` sin duplicar aquí.
+- `[Claude] - FIX MCP/CHATGPT: INTERNAL ERROR AL RENOVAR (OAUTH REFRESH)` — 2026-10-14, PR #566
+  (commit `dc4203f`), PRODUCCIÓN.
+- `[Claude] - BANDA DE PROGRESO EN OPORTUNIDADES DE REDES` — 2026-10-14, PRs #586/#587 (commits
+  `3daa39c`/`f6c7256`), CERRADO Y ARCHIVADO.
+- `[Claude] - FIX GOOGLE BUSINESS PROFILE NO APARECE CONECTADO EN CONEXIONES` — 2026-10-14, PR
+  #584 (commit `c2758bf`), PRODUCCIÓN.
+- `[Claude] - FIX NANCY CRUZ: SIN CUPO SIN HABER PUBLICADO HOY` — 2026-10-14, PR #568 (commit
+  `99fa993`), PRODUCCIÓN (incluye migración de ciudad/zona horaria, ya aplicada por Milton).
+- `[Claude] - FIX ARTÍCULOS SE PUBLICAN EN /NEWS/ Y NO EN /CATEG/` — 2026-10-14, PR #572 (commit
+  `3f82315`), PRODUCCIÓN. Pendiente sin verificar (según la propia entrada): una publicación real
+  confirmando que la URL final ya no lleva `/news/`.
+- `[Claude] - CIERRE HISTORIAL MEZCLADO EN LOS DOMINIOS .NET` — 2026-10-14, PRs #571/#575 (commits
+  `547d30b`/`e59f10b`), CERRADO Y ARCHIVADO.
+- `[Claude] - REDES: UNA SOLA LLAVE DE PERMISOS EN SEOTOTAL (SIN LISTA FIJA DE CUENTAS)` —
+  2026-10-14, PRs #569/#570 (commits `5cd2657`/`c939d19`), PRODUCCIÓN.
+- `[Claude] - TARJETA DE INDEXACIÓN DEL HISTORIAL: MENSAJES CLAROS` — 2026-10-13/14, PR #573
+  (commit `62b8044`), PRODUCCIÓN.
+- `[Claude] - FIX: INICIO DE REDES CON DOS TARJETAS` — 2026-10-14, PR #588 (commit `2e2f856`),
+  PRODUCCIÓN. Manual actualizado por esta tarea de propagación (ver `manual-usuario.ts` y
+  `CONTROLADOR_DE_VERSIONES.md`), porque el PR no lo había tocado.
+
+**Observación sin acción (anotada también en el cierre de Coordinación de esta corrida):** el
+commit `bab324f` (PR #589, "el Historial enlaza al perfil de Google Business en publicaciones
+publicadas") está fusionado en `main` pero no tiene ninguna entrada en
+`COORDINACION_CLAUDE_CODEX.md`; por eso esta tarea de propagación no le creó nombre de conversación
+ni entrada en `CONTROLADOR_DE_VERSIONES.md` — no hay texto fuente que propagar. Queda para que
+Milton decida si corresponde documentarlo.
+
+Ninguna de las 10 entradas describe un árbol de git enredado ni ramas pisadas, así que no se
+agregó nada en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Sin ideas sueltas nuevas para `TO-DO.md` en
+este rango (el pendiente de Search Console/Composio y el de la URL `/news/` ya quedan anotados
+arriba y en `CONTROLADOR_DE_VERSIONES.md`, sin duplicarlos aquí).
