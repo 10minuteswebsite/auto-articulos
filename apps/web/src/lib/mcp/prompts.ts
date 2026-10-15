@@ -17,6 +17,9 @@
  * tocar `route.ts` — ya itera sobre este array.
  */
 
+import { MCP_AUTOMATION_RULES } from "./automation";
+import { MCP_SCOPE_RULES } from "./scope";
+
 export type PromptArgument = { name: string; description: string; required?: boolean };
 
 export type PromptDef = {
@@ -61,9 +64,24 @@ Espera a que elija un número o lo diga con sus palabras. Si después de elegir 
 4. Si NO hay oportunidades pendientes, decide entre estas dos — no le preguntes cuál quiere por nombre técnico, decide vos con esta regla:
    - Si la cuenta tiene Google Search Console conectado (confírmalo con ver_integraciones) y el usuario quiere que la IA analice datos reales de su sitio: usa crear_oportunidades.
    - Si el usuario prefiere describir su negocio (a quién le vende, sobre qué tema, qué busca el cliente) o no tiene Search Console: usa crear_titulos_con_ia, pidiéndole cliente_tipo, tema y deseo_cliente antes de llamarla.
+   - Si ver_integraciones muestra Search Console «sin conectar», no lo investigues ni intentes conectarlo: dile que se conecta en Configuración → Conexiones y sigue con crear_titulos_con_ia.
 5. Antes de publicar, llama la herramienta de publicación correspondiente (publicar_categoria, publicar_oportunidades_seleccionadas o publicar_titulos_en_categoria) SIEMPRE con confirmar=false primero. Muéstrale al usuario exactamente qué se va a publicar y espera su confirmación explícita.
 6. Solo con un "sí" inequívoco, vuelve a llamar la misma herramienta con confirmar=true.
-7. Después de publicar, llama estado_de_publicaciones para confirmarle que se completó y darle el enlace real del artículo (puede tardar un momento en aparecer si todavía se está generando).`,
+7. Después de publicar, llama estado_de_publicaciones para confirmarle que se completó y darle el enlace real del artículo (puede tardar un momento en aparecer si todavía se está generando).
+
+${MCP_SCOPE_RULES}`,
+  },
+
+  {
+    name: "programar_publicaciones",
+    title: "Programar publicaciones automáticas",
+    description:
+      "Úsalo cuando el usuario pida publicar de forma recurrente o automática ('un artículo a las 7, otro a las 12 y otro a las 19', 'publica todos los días', 'que se publique solo') o quiera cambiar, pausar o detener esa programación. Trae el flujo completo de cada ejecución, incluida la reposición de oportunidades cuando se acaban.",
+    arguments: [
+      { name: "horarios", description: "Horarios o cantidad que dijo el usuario, en sus palabras (opcional; por defecto 07:00, 12:00 y 19:00).", required: false },
+    ],
+    build: (args) =>
+      `${args.horarios ? `El usuario pidió esta programación, en sus palabras: "${args.horarios}". Aplícala exactamente.\n\n` : ""}${MCP_AUTOMATION_RULES}\n\n${MCP_SCOPE_RULES}`,
   },
 
   {
@@ -79,7 +97,9 @@ Espera a que elija un número o lo diga con sus palabras. Si después de elegir 
 3. ver_integraciones — qué tiene conectado y qué no.
 4. ver_limites_y_creditos — cupos y créditos de imagen.
 
-Resume todo en lenguaje claro, priorizando lo que requiere acción del usuario sobre lo que ya está bien. Si algo obligatorio falta, dile el paso exacto para resolverlo (o remite a ver_manual_seo_total si no estás seguro del paso exacto en la web).`,
+Resume todo en lenguaje claro, priorizando lo que requiere acción del usuario sobre lo que ya está bien. Si algo obligatorio falta, dile el paso exacto para resolverlo (o remite a ver_manual_seo_total si no estás seguro del paso exacto en la web).
+
+${MCP_SCOPE_RULES}`,
   },
 ];
 

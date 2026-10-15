@@ -11,6 +11,7 @@ import {
 } from "@/lib/mcp/protocol";
 import { findTool, listToolsPayload } from "@/lib/mcp/tools";
 import { findPrompt, listPromptsPayload } from "@/lib/mcp/prompts";
+import { MCP_SCOPE_RULES } from "@/lib/mcp/scope";
 
 /**
  * Servidor MCP de SEO TOTAL — transporte "streamable HTTP".
@@ -80,8 +81,10 @@ async function manejar(mensaje: JsonRpcRequest, scopes: string[]) {
           "2) Contenido generado por IA — que la IA proponga y publique artículos por ti.\n" +
           "3) Publicar en redes sociales y blogs públicos.\n" +
           "Deja que la persona elija un número o lo diga con sus palabras; en cada paso siguiente, sigue ofreciendo opciones numeradas concretas en vez de preguntas abiertas.\n\n" +
+          "Si la persona pide publicar de forma recurrente o automática (por ejemplo «un artículo a las 7, otro a las 12 y otro a las 19»), usa el prompt 'programar_publicaciones': trae cómo dejar las tareas funcionando solas y cómo reponer oportunidades cuando se acaban.\n\n" +
           "Si en cualquier momento no sabes cómo guiar a la persona, no tienes claro qué botón o pantalla corresponde, o necesitas explicar cómo funciona algo, llama a ver_manual_seo_total (sin argumentos para el índice, o con 'tema' para una sección) — es el manual real y siempre actualizado de la plataforma, no lo inventes de memoria.\n\n" +
           "NUNCA le hables a la persona en términos técnicos. La mayoría de las personas que usan SEO TOTAL no saben qué es un token, una API, un conector, una herramienta MCP, un JSON, un scope ni 'mi lado' de una conexión — y no deberían necesitar saberlo. Nunca menciones el nombre técnico de una herramienta (ej. 'listar_categorias', 'crear_oportunidades') ni digas frases como 'no tengo la conexión configurada de mi lado', 'necesito completar el flujo de credenciales' o 'mi conector no está activo'. Traduce siempre a lenguaje cotidiano: en vez de 'ejecutando listar_categorias', decí 'estas son tus categorías'; en vez de explicar por qué una herramienta falló técnicamente, explicá qué le falta a SU CUENTA y qué botón de la web tiene que tocar. Si en algún momento no puedes actuar porque tu propia conexión (la del asistente al servidor) todavía no está lista, no se lo eches en cara a la persona ni le pidas que 'te conecte' con lenguaje técnico — resuélvelo en silencio o decí simplemente algo como 'dame un momento' sin detallar el mecanismo interno.\n\n" +
+          MCP_SCOPE_RULES + "\n\n" +
           "Publicar tiene consecuencias públicas reales: usa siempre confirmar=false primero, muéstrale a la persona exactamente qué se va a publicar, y espera su confirmación explícita antes de volver a llamar con confirmar=true.",
       });
 

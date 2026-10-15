@@ -1,6 +1,7 @@
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { toolText, type ToolDef } from "./shared";
+import { MCP_UNCONNECTED_NOTE } from "../scope";
 
 /**
  * Fase 2 del catálogo (`MCP_ACCIONES_UNIVERSALES.md`, "Panorama y
@@ -100,7 +101,7 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
       "Cuándo usarla: antes de crear_oportunidades (para confirmar que Search Console está conectado), o cuando el usuario pregunta por una red social o buscador puntual.\n" +
       "Cuándo NO usarla: para el panorama general de configuración obligatoria (usa ver_estado_configuracion, que ya incluye esto resumido).\n" +
       "Contexto necesario: ninguno.\n" +
-      "Siguiente paso típico: si falta una integración que el usuario necesita, indícale que se conecta desde Configuración → Conexiones (no puedes conectarla vos desde el chat).",
+      "Siguiente paso típico: si falta una integración que el usuario necesita, indícale que se conecta desde Configuración → Conexiones (no puedes conectarla vos desde el chat) Tampoco la pruebes ni la diagnostiques: informa y continúa con lo que sí puedes hacer.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     requiredScope: "oportunidades:leer",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
@@ -110,7 +111,8 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
       const relevantes = checks.filter((c) => c.section === "seo" || c.section === "social");
       if (relevantes.length === 0) return toolText("No hay integraciones para mostrar.");
       const lineas = relevantes.map((c) => `- ${c.label}: ${c.configured ? "conectada" : "sin conectar"}`);
-      return toolText(lineas.join("\n"));
+      const hayFaltantes = relevantes.some((c) => !c.configured);
+      return toolText(hayFaltantes ? `${lineas.join("\n")}\n\n${MCP_UNCONNECTED_NOTE}` : lineas.join("\n"));
     },
   },
 
