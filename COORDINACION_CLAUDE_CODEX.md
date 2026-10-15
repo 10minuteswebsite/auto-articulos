@@ -11691,3 +11691,5 @@ Responsable: Claude (tarea programada diaria de propagación).
 
 - **Capitán de migración:** Claude — reclamo. Motivo: Inicio de Redes con dos tarjetas (META y Otras redes), solo apps/web. Sin migración.
 - Cambio: en el servidor de Redes el Inicio muestra META y Otras redes y blogs (igual que Oportunidades de Redes); cada una abre su grupo con `?grupo=meta|otras`.
+
+- **Capitán de migración liberó el lote:** Claude. Resultado: PR 588 fusionado por Milton el 2026-10-15; Inicio de Redes con dos tarjetas (META y Otras redes), sin migración. Falta confirmación visual en redes.lasolucionweb.net/dashboard.
