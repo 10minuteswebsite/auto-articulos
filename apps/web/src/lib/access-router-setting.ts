@@ -2,7 +2,7 @@ import { prisma } from "@auto-articulos/db";
 import { decryptSecret, encryptSecret } from "@auto-articulos/shared";
 
 /*
- * Interruptor del «router de acceso» (Día Cero): cuando está ENCENDIDO, quien entra
+ * Interruptor del «router de acceso»: cuando está ENCENDIDO, quien entra
  * por una dirección que no le corresponde se redirige a la suya (o a la plataforma
  * de facturación si no tiene ninguna). Por defecto APAGADO = todo como hoy.
  * Un error leyendo el interruptor = apagado: un fallo técnico nunca redirige a nadie.

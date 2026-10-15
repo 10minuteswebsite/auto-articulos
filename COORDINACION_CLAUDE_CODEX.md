@@ -1,5 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Quitar el «Día Cero» del código — 2026-10-14
+
+- Estado: PR abierto, sin fusionar. Sin migración. Orden de Milton: el Día Cero ya se ejecutó; no deben seguir saliendo referencias.
+- Qué se quita: la ruta `api/admin/dia-cero`, el componente `DiaCeroPanel` (no estaba montado), el apartado «Día Cero» del manual y los comentarios con el nombre. Los documentos históricos (`*DIA_CERO*.md`) NO se tocan.
+- Cambio de comportamiento (debe ser CERO en producción): ya no existe la variable `DIA_CERO`. El dominio de cookies compartido (`.lasolucionweb.com`) y el retorno único de OAuth (callback canónico seototal) rigen ahora **por entorno: producción de Vercel** (`isProductionEnv`: `VERCEL_ENV`, o `NODE_ENV` fuera de Vercel). Local y previews quedan como antes (cookie ligada al host). `SHARED_COOKIE_DOMAIN` y `OAUTH_CANONICAL_ORIGIN` explícitos siguen mandando. Producción estaba con el interruptor encendido (comprobado: el `redirect_uri` canónico es seototal), por lo que el efecto es el mismo.
+- RIESGO: si Vercel no expone `VERCEL_ENV` ni `NODE_ENV=production` en producción, las cookies volverían a ligarse al host y el retorno OAuth se apagaría. Verificar tras el despliegue: iniciar sesión en `redes.` y comprobar que `articulos.` te reconoce, y que el `redirect_uri` de una conexión sigue siendo el canónico. Después se puede borrar la variable `DIA_CERO` de Vercel.
+- Verificación: pruebas `shared-cookies` y `oauth-redirect` actualizadas; ver resultado del PR.
+
 ## Claude — Fix «Nancy Cruz: sin cupo para publicar artículos sin haber publicado hoy» — 2026-10-14
 
 - Estado (2026-10-14, corregido para el REPARADOR DEL ARBOL): PR #568 con 16 archivos finales, todos del cupo horario; se retiró `diagnose-nancy-cupo.js` (diagnóstico de un solo uso). Listo para revisión final y squash; SIN fusionar. La migración YA está aplicada en producción por Milton (Supabase, «Success. No rows returned»): no crear otra ni reaplicarla. Capitanía liberada al entregar.

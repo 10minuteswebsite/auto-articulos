@@ -31,7 +31,7 @@ export async function getTrialRuleEnabled(): Promise<boolean> {
   }
 }
 
-/** Como hasTrialAccess, pero respetando el interruptor (desde el Día Cero los 7 días de prueba se eliminan). */
+/** Como hasTrialAccess, pero respetando el interruptor (si se apaga, los 7 días de prueba se eliminan). */
 export async function checkTrialAccess(user: Parameters<typeof hasTrialAccess>[0]): Promise<boolean> {
   return hasTrialAccess(user, await getTrialRuleEnabled());
 }

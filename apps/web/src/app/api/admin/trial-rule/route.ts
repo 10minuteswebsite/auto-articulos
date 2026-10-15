@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Regla de la prueba de 7 días. `enabled: true` (por defecto) = comportamiento de
- * hoy; `enabled: false` = la regla se elimina (decisión de Milton para el Día Cero,
+ * hoy; `enabled: false` = la regla se elimina (decisión de Milton,
  * cuando el HUB pasa a ser la única fuente de acceso). Reversible, no borra datos.
  */
 export async function GET() {

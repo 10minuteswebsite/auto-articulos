@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { applyCookie, clearCookie, diaCeroActive } from "./shared-cookies";
+import { applyCookie, clearCookie, isProductionEnv } from "./shared-cookies";
 
 // Hosts de SEO Total: el principal y los dos productos (decisión de Milton
 // 2026-10-02: subdominios en el .com, sin «seototal.»; Mario crea el DNS).
@@ -39,7 +39,7 @@ export function getOAuthRedirectUri(
  * RETORNO ÚNICO DE OAUTH (proyecto «SEPARACION DE SEO TOTAL»).
  *
  * Objetivo de Milton: NO volver a tocar ninguna consola de proveedor. Con el
- * interruptor DIA_CERO=on (o OAUTH_CANONICAL_ORIGIN explícito):
+ * producción (o OAUTH_CANONICAL_ORIGIN explícito):
  *  - Todos los `connect` (inicien en seototal., articulos. o redes.) le dicen al
  *    proveedor que vuelva a la dirección de SIEMPRE (el origen canónico), que es
  *    la que ya está registrada.
@@ -47,7 +47,7 @@ export function getOAuthRedirectUri(
  *    .com) y, al terminar el callback, se devuelve al usuario a ese host.
  * Apagado (sin variables): todo se comporta exactamente como antes.
  */
-export const DIA_CERO_CANONICAL_ORIGIN = "https://seototal.lasolucionweb.com";
+export const CANONICAL_OAUTH_ORIGIN = "https://seototal.lasolucionweb.com";
 export const OAUTH_ORIGIN_COOKIE = "oauth_return_origin";
 
 type Env = Record<string, string | undefined>;
@@ -60,10 +60,10 @@ export function canonicalOAuthOrigin(env: Env = process.env): string | null {
       const url = new URL(explicit);
       if (url.protocol === "https:") return url.origin;
     } catch {
-      // valor inválido: se ignora y se decide por DIA_CERO
+      // valor inválido: se ignora y se decide por el entorno
     }
   }
-  return diaCeroActive(env) ? DIA_CERO_CANONICAL_ORIGIN : null;
+  return isProductionEnv(env) ? CANONICAL_OAUTH_ORIGIN : null;
 }
 
 /** redirect_uri que se envía al proveedor: canónico si el retorno único está activo; si no, el host de la petición (como siempre). */
