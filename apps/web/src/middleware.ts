@@ -98,14 +98,14 @@ export async function middleware(request: NextRequest) {
   const userId = await verifySessionToken(token);
 
   if (!userId) {
-    if (pathname.startsWith("/api")) {
+    if (pathname.startsWith("/api") && pathname !== TUMBLR_CALLBACK_PATH) {
       return NextResponse.json(
         { error: "No autenticado" },
         { status: 401, headers: NO_CACHE_HEADERS },
       );
     }
     const loginUrl = new URL("/login", request.url);
-    if (pathname === "/oauth/autorizar") {
+    if (pathname === "/oauth/autorizar" || pathname === TUMBLR_CALLBACK_PATH) {
       loginUrl.searchParams.set("returnTo", `${pathname}${request.nextUrl.search}`);
     }
     const response = NextResponse.redirect(loginUrl);
