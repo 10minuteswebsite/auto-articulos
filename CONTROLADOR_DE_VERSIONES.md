@@ -4787,3 +4787,234 @@ subida el 2026-10-13, pregunta de Milton) por la tarea programada diaria de prop
 - Responsable: Claude.
 - Estado: PRODUCCIÓN (código fusionado), pero COMPORTAMIENTO INACTIVO hasta que se active el
   interruptor `product_enforcement`.
+
+## Versión — 2026-10-14 — MCP: alcance del asistente y publicación automática recurrente (PR #581)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: el asistente no debe
+diagnosticar ni conectar integraciones — 2026-10-14", por la tarea programada diaria de
+propagación (2026-10-15).
+
+- **PR #581 (commit `748c3de`)** — Caso: cuenta de Angel Quintela, `ver_integraciones` decía
+  «Search Console: sin conectar» aunque la pantalla lo mostraba conectado, y el asistente (ChatGPT)
+  se puso a diagnosticar Google en vez de seguir. Decisión de Milton: Search Console no es asunto
+  del MCP; se define el ALCANCE del asistente (maneja lo que SEO TOTAL permite, no conecta ni
+  repara integraciones) en `lib/mcp/scope.ts`, instrucciones del servidor (`api/mcp/route.ts`),
+  prompts `publicar_contenido` y `diagnosticar_cuenta`, descripciones de `ver_integraciones` y
+  `crear_oportunidades`, prompt copiable de `configuracion/mcp/page.tsx` y manual. Prueba
+  `lib/mcp/scope.test.ts` (2/2).
+- Añadido en el mismo PR: publicación automática y recurrente guiada por el prompt
+  (`lib/mcp/automation.ts`, nuevo flujo MCP `programar_publicaciones`); el usuario dice horarios y
+  cantidad una vez (por defecto 07:00, 12:00 y 19:00) y cada ejecución comprueba cuenta y cupo,
+  publica un pendiente y repone con `crear_oportunidades` o `crear_titulos_con_ia` según haya
+  Search Console. Sin programador dentro de SEO TOTAL (decisión previa de Milton). Pruebas
+  `scope.test.ts` 4/4.
+- **Pendiente de decisión de Milton (anotado aquí, sin duplicar en `TO-DO.md`)**: la discrepancia
+  de fondo entre `configuration-status`/`/api/opportunities` (que resuelven Search Console con
+  `resolveSearchConsoleForUser`) y el MCP (`ver_estado_indexacion`, que solo lee la conexión
+  antigua); una cuenta conectada solo por Composio y fuera del piloto
+  `COMPOSIO_PILOT_USERS_GOOGLE_SEARCH_CONSOLE` se ve conectada en pantalla y «sin conectar» en el
+  MCP. Verificado en Vercel que solo existe esa variable piloto.
+- Verificado con git (2026-10-15): `748c3de` es ancestro de `origin/main`
+  (`git merge-base --is-ancestor`); el texto original de la entrada en Coordinación decía «Estado:
+  PR abierto, sin fusionar» en el momento de escribirse, pero ya está fusionado.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (fusionado en `main`).
+
+## Versión — 2026-10-14 — Fix «MCP/ChatGPT: Internal error y nueva autorización» (OAuth refresh) (PR #566)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — Fix «MCP/ChatGPT: Internal error
+y nueva autorización» (OAuth refresh) — 2026-10-14", por la tarea programada diaria de propagación
+(2026-10-15).
+
+- **PR #566 (commit `dc4203f`)** — Síntoma (hora España): a las 7:00, 12:00 y 21:17 ChatGPT
+  mostraba `-32603 Internal error` y pedía autorizar de nuevo. CAUSA comprobada con logs reales de
+  Vercel: cada vez había un `POST /api/oauth2/token` con **400** y ninguna llamada a `/api/mcp`
+  (ninguna renovación tuvo éxito jamás, solo las autorizaciones nuevas). Causa en código:
+  `refreshTokens` llamaba `issueTokens(record)` con la fila completa del refresh anterior; al
+  arrastrar `id`, el `create` del refresh nuevo chocaba con la fila vieja (P2002) y el handler
+  respondía 400 genérico; además el refresh viejo ya se había revocado antes, quedando quemado.
+- Arreglo: `apps/web/src/lib/oauth/server.ts` copia solo `userId, clientId, scopes, resource` y, si
+  la emisión falla, des-revoca el refresh viejo. Prueba de regresión `oauth/server.test.ts` (falla
+  con el código anterior, pasa con el nuevo). Manual actualizado por el propio PR.
+- Verificación: 2/2 pruebas nuevas. Pendiente en producción: la próxima renovación de ChatGPT debe
+  verse como `POST /api/oauth2/token` **200** sin pasar por `authorize`.
+- Aparte, sin tocar: `GET /api/composio/options` devolvía 502 en seototal el día del informe.
+- Verificado con git (2026-10-15): `dc4203f` es ancestro de `origin/main`; el texto original de la
+  entrada decía «Estado: PR abierto, sin fusionar», pero ya está fusionado.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (fusionado en `main`).
+
+## Versión — 2026-10-14 — Banda de progreso azul en Oportunidades de Redes (PRs #586, #587)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — Banda de progreso en
+Oportunidades de Redes — 2026-10-14", por la tarea programada diaria de propagación (2026-10-15).
+
+- **PR #586 (commit `3daa39c`)** — El botón «Crear propuestas» del grupo y el «Crear propuesta» de
+  cada red, en `oportunidades-redes/page.tsx`, muestran la misma banda azul que «Analizar» de
+  Oportunidades de artículos (etapa, contador, barra, aviso de no cerrar). Antes el botón del grupo
+  no mostraba nada y el de cada red era una versión gris con el contador congelado en el del grupo.
+  Manual actualizado por el propio PR. Cierre y archivo en PR #587 (commit `f6c7256`).
+- Verificación: sin errores de tipos nuevos; comprobación visual en producción pendiente según la
+  propia entrada de Coordinación.
+- Responsable: Claude.
+- Estado: CERRADO Y ARCHIVADO según la propia entrada de Coordinación (ya fusionado en `main`).
+
+## Versión — 2026-10-14 — Fix «Google Business Profile no aparece conectado en Conexiones» (PR #584)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — Fix «Google Business Profile no
+aparece conectado (check) en Conexiones» — 2026-10-14", por la tarea programada diaria de
+propagación (2026-10-15).
+
+- **PR #584 (commit `c2758bf`)** — CAUSA: `GET /api/configuration-status` marcaba
+  `business-profile` como configurado solo si existía `BusinessProfileIntegration.locationName`
+  (la conexión histórica directa con Google); las cuentas conectadas por PostPeer (vía actual, p.
+  ej. Lorena, ACTIVE) tienen `PostPeerConnection` y no esa fila, así que la conexión mostraba
+  «Conectado» pero la tarjeta de Conexiones (`ConexionesView.tsx`) no. Afectaba a TODOS los
+  usuarios conectados por PostPeer; Threads ya tenía la misma regla.
+- ARREGLO: `configured = locationName || PostPeerConnection.status === "ACTIVE"`, la misma regla
+  que usa `BusinessProfileSection`. Sin cambio de texto ni de manual.
+- Verificación: sin errores de tipos nuevos; comprobación en producción pendiente (Lorena y otra
+  cuenta con Google Business), según la propia entrada de Coordinación.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (fusionado en `main`, confirmado con git).
+
+## Versión — 2026-10-14 — Fix «Nancy Cruz: sin cupo para publicar artículos sin haber publicado hoy» (PR #568)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — Fix «Nancy Cruz: sin cupo para
+publicar artículos sin haber publicado hoy» — 2026-10-14", por la tarea programada diaria de
+propagación (2026-10-15).
+
+- **PR #568 (commit `99fa993`)** — CAUSA CONFIRMADA con datos de producción (Supabase,
+  tropicalhomecruz@gmail.com): límites 5 diario / 300 mensual / 20 lote (normales); sus 5 artículos
+  «de hoy» se publicaron el 14/10 entre 02:09 y 02:18 UTC = 13/10 22:09 en Florida. El cupo contaba
+  por día UTC, así que a la mañana siguiente seguían contando como de hoy (mismo patrón el 12/10;
+  afecta a cualquiera que publique de noche en América).
+- Arreglo definitivo: `apps/web/src/lib/article-quota.ts` (`countPublishedArticles`) es el ÚNICO
+  lugar que cuenta publicados hoy/mes (lo usan `api/runs`, `api/dashboard-stats`,
+  `opportunities/execute-batch` y `execute-all`). Día y mes cortan a medianoche en la zona horaria
+  DECLARADA por la persona (`User.timeZone`); sin ella, hora de Florida (`startOfSocialDay`,
+  nuevos `startOfSocialMonth` e `isValidTimeZone` en `packages/shared/src/social-day.ts`).
+- Decisión de Milton: ciudad y país en Configuración con aviso de una sola vez en el Inicio y
+  regreso al Inicio al guardar. Implementado: aviso `location`, sección «Tu ubicación» en
+  `configuracion/cuenta/page.tsx`, `PATCH /api/me` valida país/ciudad/zona. Manual actualizado por
+  el propio PR.
+- **Migración ya aplicada en producción por Milton** (Supabase, «Success. No rows returned»):
+  `packages/db/prisma/migrations/20261014120000_add_user_city_timezone/migration.sql`. No crear
+  otra ni reaplicarla.
+- Verificación: `prisma generate`, typecheck limpio, 208/208 pruebas web, 5/5 `social-day.test.ts`,
+  build OK. Las REDES siguen con corte de Florida (decisión del 12/10).
+- Verificado con git (2026-10-15): `99fa993` es ancestro de `origin/main`; el texto original de la
+  entrada decía «SIN fusionar... listo para revisión final y squash», pero ya está fusionado.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (fusionado en `main`).
+
+## Versión — 2026-10-14 — Fix «artículos se publican en /news/ y no en /categ/» (PR #572)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — Fix «artículos se publican en
+/news/ y no en /categ/» — 2026-10-14", por la tarea programada diaria de propagación (2026-10-15).
+
+- **PR #572 (commit `3f82315`)** — Síntoma (Milton): los artículos salen en `/news/...` (ej.
+  segurosdesaludyvida.com) y deben salir bajo la ruta de categoría. Causa: el worker fijaba siempre
+  el «Tipo» del panel en «Noticias» (valor 2). Comprobado en el panel real (cuenta Seguros de Salud
+  y Vida): `#type` solo tiene «Noticias» (2) y «Solo Etiquetas/Categorias» (31); Milton indicó usar
+  31.
+- Cambio: `apps/worker/src/automation/10minutesWebsite.ts` usa
+  `ARTICLE_TYPE_ETIQUETAS_CATEGORIAS = "31"` en los dos puntos (`selectOption("#type")`). Manual
+  actualizado por el propio PR.
+- La propia entrada de Coordinación decía que Milton quería subirlo en un lote junto con otros
+  cambios, vía el Reparador del árbol principal; verificado con git que terminó fusionado solo,
+  como commit independiente (`3f82315`).
+- NO verificado según la entrada original: una publicación real con el tipo 31 confirmando que la
+  URL final ya no lleva `/news/`. Pendiente de probar con el worker de pruebas tras el despliegue.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (fusionado en `main`, confirmado con git).
+
+## Versión — 2026-10-14 — Cierre «Historial mezclado en los dominios .net» (PRs #571, #575)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — CIERRE «Historial mezclado en los
+dominios .net» — 2026-10-14", por la tarea programada diaria de propagación (2026-10-15).
+
+- **PR #571 (commit `547d30b`)** — Causa: `productOfHost`
+  (`apps/web/src/lib/product-routes.ts`) solo reconocía dominios `.com`; en
+  `articulos.lasolucionweb.net` y `redes.lasolucionweb.net` el Historial salía mezclado. Ahora
+  acepta `.com` y `.net` (prueba `product-routes.test.ts`, 17/17). Manual actualizado por el propio
+  PR. Cierre documentado en PR #575 (commit `e59f10b`).
+- Efectos esperados: los `.net` aíslan productos como los `.com`; `redes.lasolucionweb.net` abre
+  todas las redes. Sin tocar: el detalle de eventos del Historial de Redes pide
+  `/api/titles/{id}/events` (ruta de Artículos) y no carga en el host de Redes; ya ocurría en
+  `.com`.
+- NO verificado en producción (las URLs piden login), según la propia entrada de Coordinación:
+  comprobar con una cuenta que cada `.net` muestra solo lo suyo y que seototal sigue mostrando
+  ambos.
+- Responsable: Claude.
+- Estado: CERRADO Y ARCHIVADO según la propia entrada de Coordinación (ya fusionado en `main`).
+
+## Versión — 2026-10-14 — Redes: una sola llave de permisos en seototal y cierre de puertas que la reabrían (PRs #569, #570)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — Redes: una sola llave de permisos
+en seototal (quitar la lista fija de cuentas) — 2026-10-14", por la tarea programada diaria de
+propagación (2026-10-15).
+
+- **PR #569 (commit `5cd2657`)** — Orden de Milton: las cuentas sin el módulo de Redes aparecían
+  como si pudieran usarlo en seototal. Hallazgo: `canSeeSocialModule`
+  (`apps/web/src/lib/modules.ts`) tenía una lista fija por identidad heredada de órdenes previas; el
+  texto del selector decía que «Heredar» abre Redes con una red aprobada, cosa falsa en el código.
+  Cambio: regla única fuera de redes.lasolucionweb.com = administrador, o «Habilitado» en el
+  selector «Módulo de Redes»; redes.lasolucionweb.com no cambia (siempre activa, manda el HUB).
+  Archivos: `modules.ts`, `social-access.ts`, `api/me/route.ts`, `dashboard/usuarios/page.tsx`,
+  pruebas `modules.test.ts` y `social-access.test.ts`. Manual actualizado por el propio PR.
+- Lectura de producción (solo lectura) mostró 107/108 cuentas no administradoras con «Habilitado» +
+  las 9 redes (efecto de un cambio masivo tipo Día Cero). Milton decidió apagar Redes a todas salvo
+  administradores, Yolanda Landinez, Lorena Alvarez y Zulmad, a mano por ficha; se redujo a UN solo
+  interruptor por cuenta («Módulo de Redes»).
+- **PR #570 (commit `c939d19`)** — Cierre de puertas que reabrían Redes por código (auditoría
+  pedida por Milton): (1) el Día Cero ya no da permisos de Redes; (2) las cuentas nuevas ya no
+  nacen con Redes «Habilitado» ni con las 9 redes (se borró `lib/redes-profile.ts`); (3) se
+  borraron 4 rutas de depuración sin llamadores que escribían permisos de Instagram sin comprobar
+  administrador o sin sesión (`debug/activate-instagram`, `admin/activate-instagram`,
+  `admin/configure-instagram`, `debug/instagram-errors`) y se quitaron las dos públicas del
+  middleware. Tres auditorías (funcional, regresión, integración con build de Vercel en verde)
+  documentadas en la propia entrada de Coordinación.
+- Antes de fusionar, la entrada pedía comprobar que Lorena Alvarez y Zulmad seguían entrando con su
+  selector en «Habilitado»; según la propia entrada, eso quedaba pendiente de hacer antes del
+  despliegue.
+- Verificado con git (2026-10-15): `5cd2657` y `c939d19` son ancestros de `origin/main`; el texto
+  original decía «PR #569 abierto, SIN fusionar a propósito» y que el PR #570 se subiría «por PR
+  normal y squash, sin push directo a main», pero ambos ya están fusionados en `main`.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (ambos PRs fusionados en `main`).
+
+## Versión — 2026-10-13/14 — «Tarjeta de indexación del Historial: mensajes claros» (PR #573)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — «Tarjeta de indexación del
+Historial: mensajes claros» — 2026-10-13 — PR #573", por la tarea programada diaria de propagación
+(2026-10-15).
+
+- **PR #573 (commit `62b8044`)** — `GoogleIndexingStatus.tsx` queda en renglones cortos sin
+  repetir. Sitemap: «se enviará a Google en el próximo envío diario» o «✓ Sitemap enviado a Google
+  · fecha». Se quita el aviso naranja «Google todavía no confirma» (orden de Milton del 13/8).
+  Bing: un renglón «✓ Aviso enviado a Bing · fecha». Google solo muestra «✓ Indexada» o el error
+  real en rojo. `historial/page.tsx` consulta `/api/runs` cada 60 s mientras haya artículos
+  publicados sin sitemap enviado. Manual actualizado por el propio PR.
+- Verificación: tsc sin errores en los archivos tocados. NO se vio en pantalla, según la propia
+  entrada de Coordinación.
+- Verificado con git (2026-10-15): `62b8044` es ancestro de `origin/main`; el texto original decía
+  que el PR estaba «abierto»/«se libera al fusionar», pero ya está fusionado.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (fusionado en `main`).
+
+## Versión — 2026-10-14 — Inicio de Redes con dos tarjetas (META y Otras redes) (PR #588)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "[Claude] - FIX: INICIO DE REDES CON DOS
+TARJETAS — 2026-10-14", por la tarea programada diaria de propagación (2026-10-15).
+
+- **PR #588 (commit `2e2f856`)** — Motivo: Inicio de Redes con dos tarjetas (META y Otras redes),
+  solo `apps/web`. Cambio: en el servidor de Redes (`redes.lasolucionweb.com`/`/dashboard/redes`)
+  el Inicio muestra META y Otras redes y blogs (igual que Oportunidades de Redes); cada una abre su
+  grupo con `?grupo=meta|otras`. Sin migración.
+- Este PR no tocó `apps/web/src/content/manual-usuario.ts`; la sección «Inicio» del manual todavía
+  decía «En redes.lasolucionweb.com el Inicio muestra solo esa tarjeta de redes» (una sola
+  tarjeta). **Manual actualizado por esta tarea de propagación** con una nota fechada aclarando el
+  cambio, sin borrar el texto anterior (ver detalle en `manual-usuario.ts`).
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (fusionado en `main`, confirmado con git).
