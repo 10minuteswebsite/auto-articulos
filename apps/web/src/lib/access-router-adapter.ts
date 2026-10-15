@@ -3,7 +3,7 @@ import { hasProductAccess } from "./product-access";
 import { getAccessRouterEnabled } from "./access-router-setting";
 
 /*
- * ADAPTADOR del router de acceso (Día Cero). La lógica pura la escribió Codex en
+ * ADAPTADOR del router de acceso. La lógica pura la escribió Codex en
  * access-router.ts; aquí se le da lo que necesita:
  *  - los DERECHOS reales, calculados con hasProductAccess (la misma regla que
  *    usan las APIs y el worker, incluida la regla de «tener alguna red aprobada»),

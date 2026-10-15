@@ -47,7 +47,7 @@ test("normaliza mayúsculas, pero no acepta comodines literales ni host vacío",
   delete process.env.SEO_TOTAL_OAUTH_ALLOWED_HOSTS;
 });
 
-// ── Retorno único (DIA_CERO) ─────────────────────────────────────────────────
+// ── Retorno único (producción) ─────────────────────────────────────────────────
 import {
   canonicalOAuthOrigin,
   isAllowedOAuthHost,
@@ -70,21 +70,21 @@ test("retorno único apagado: el redirect_uri sale del host de la petición, com
   assert.equal(oauthReturnBase(r, {}), r.url); // ignora la cookie
 });
 
-test("DIA_CERO=on: el redirect_uri es SIEMPRE el canónico (la dirección ya registrada)", () => {
-  assert.equal(canonicalOAuthOrigin({ DIA_CERO: "on" }), "https://seototal.lasolucionweb.com");
+test("en producción: el redirect_uri es SIEMPRE el canónico (la dirección ya registrada)", () => {
+  assert.equal(canonicalOAuthOrigin({ VERCEL_ENV: "production" }), "https://seototal.lasolucionweb.com");
   for (const host of ["seototal", "articulos", "redes"]) {
     assert.equal(
-      oauthCallbackUri(req(`https://${host}.lasolucionweb.com/api/x`), "/api/search-integrations/linkedin/callback", { DIA_CERO: "on" }),
+      oauthCallbackUri(req(`https://${host}.lasolucionweb.com/api/x`), "/api/search-integrations/linkedin/callback", { VERCEL_ENV: "production" }),
       "https://seototal.lasolucionweb.com/api/search-integrations/linkedin/callback",
     );
   }
-  assert.equal(canonicalOAuthOrigin({ DIA_CERO: "on", OAUTH_CANONICAL_ORIGIN: "https://otro.example.com/ruta" }), "https://otro.example.com");
+  assert.equal(canonicalOAuthOrigin({ VERCEL_ENV: "production", OAUTH_CANONICAL_ORIGIN: "https://otro.example.com/ruta" }), "https://otro.example.com");
   assert.equal(canonicalOAuthOrigin({ OAUTH_CANONICAL_ORIGIN: "http://inseguro.example.com" }), null); // solo https
   assert.equal(canonicalOAuthOrigin({ OAUTH_CANONICAL_ORIGIN: "no es url" }), null);
 });
 
 test("el retorno vuelve al host recordado solo si está permitido", () => {
-  const env = { DIA_CERO: "on" };
+  const env = { VERCEL_ENV: "production" };
   const ok = req("https://seototal.lasolucionweb.com/cb", `a=1; ${OAUTH_ORIGIN_COOKIE}=redes.lasolucionweb.com; b=2`);
   assert.equal(oauthReturnBase(ok, env), "https://redes.lasolucionweb.com");
   const mayus = req("https://seototal.lasolucionweb.com/cb", `${OAUTH_ORIGIN_COOKIE}=ARTICULOS.LASOLUCIONWEB.COM`);
@@ -105,14 +105,14 @@ test("rememberOAuthOrigin/clearOAuthOrigin escriben la cookie solo con el retorn
   rememberOAuthOrigin(off, req("https://redes.lasolucionweb.com/x"), {});
   assert.equal(off.headers.get("set-cookie"), null);
   const on = mk();
-  rememberOAuthOrigin(on, req("https://redes.lasolucionweb.com/x"), { DIA_CERO: "on" });
+  rememberOAuthOrigin(on, req("https://redes.lasolucionweb.com/x"), { VERCEL_ENV: "production" });
   const all = on.headers.getSetCookie();
   assert.match(all[0], new RegExp(`^${OAUTH_ORIGIN_COOKIE}=redes\\.lasolucionweb\\.com; .*Domain=\\.lasolucionweb\\.com`));
   const evil = mk();
-  rememberOAuthOrigin(evil, req("https://evil.example.com/x"), { DIA_CERO: "on" });
+  rememberOAuthOrigin(evil, req("https://evil.example.com/x"), { VERCEL_ENV: "production" });
   assert.equal(evil.headers.get("set-cookie"), null);
   const clr = mk();
-  clearOAuthOrigin(clr, { DIA_CERO: "on" });
+  clearOAuthOrigin(clr, { VERCEL_ENV: "production" });
   assert.equal(clr.headers.getSetCookie().length, 2); // las dos variantes
 });
 

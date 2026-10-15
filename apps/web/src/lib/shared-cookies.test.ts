@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { clearCookieHeaders, diaCeroActive, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
+import { clearCookieHeaders, isProductionEnv, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
 
 test("el dominio compartido solo vale si es válido; si no, todo queda como hoy", () => {
   assert.equal(sharedCookieDomain({}), undefined);
@@ -38,11 +38,12 @@ test("el valor se codifica (no puede inyectar atributos)", () => {
   assert.equal(serializeCookie("s", "a; Domain=evil.com", {}), "s=a%3B%20Domain%3Devil.com; Path=/");
 });
 
-test("DIA_CERO=on activa el dominio por defecto; el explícito manda; apagado = como hoy", () => {
-  assert.equal(diaCeroActive({}), false);
-  assert.equal(diaCeroActive({ DIA_CERO: "off" }), false);
-  assert.equal(diaCeroActive({ DIA_CERO: " ON " }), true);
-  assert.equal(sharedCookieDomain({ DIA_CERO: "on" }), ".lasolucionweb.com");
-  assert.equal(sharedCookieDomain({ DIA_CERO: "on", SHARED_COOKIE_DOMAIN: ".otro.com" }), ".otro.com");
-  assert.equal(sharedCookieDomain({ DIA_CERO: "off" }), undefined);
+test("en producción rige el dominio por defecto; el explícito manda; fuera de producción = ligada al host", () => {
+  assert.equal(isProductionEnv({}), false);
+  assert.equal(isProductionEnv({ NODE_ENV: "production" }), true);
+  assert.equal(isProductionEnv({ VERCEL_ENV: "preview", NODE_ENV: "production" }), false);
+  assert.equal(isProductionEnv({ VERCEL_ENV: " Production " }), true);
+  assert.equal(sharedCookieDomain({ VERCEL_ENV: "production" }), ".lasolucionweb.com");
+  assert.equal(sharedCookieDomain({ VERCEL_ENV: "production", SHARED_COOKIE_DOMAIN: ".otro.com" }), ".otro.com");
+  assert.equal(sharedCookieDomain({ VERCEL_ENV: "preview" }), undefined);
 });

@@ -32,7 +32,7 @@ export default async function DashboardLayout({
       ? "SEO TOTAL REDES"
       : "SEO TOTAL";
   const blocked = !actingAdmin && user.role !== "admin" && !(await checkTrialAccess(user));
-  // Router de acceso (Día Cero): apagado por defecto. Nunca para administradores ni al «Acceder como».
+  // Router de acceso: apagado por defecto. Nunca para administradores ni al «Acceder como».
   if (!actingAdmin && user.role !== "admin") {
     const target = await resolveAccessRedirect(user, requestHeaders.get("host"));
     if (target) redirect(target);
