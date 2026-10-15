@@ -10,7 +10,7 @@ export async function GET() {
     const denied = await requireProductAccess(userId, "REDES", "/api/social-opportunities");
     if (denied) return denied;
     if (!(await canUseSocialModule(userId))) return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
-    const [opportunities, tumblrIntegration, composioConnections] = await Promise.all([
+    const [opportunities, tumblrIntegration, composioConnections, postPeerGbp, gbpIntegration] = await Promise.all([
       prisma.socialOpportunity.findMany({
         where: { userId },
         orderBy: { createdAt: "desc" },
@@ -27,7 +27,15 @@ export async function GET() {
         },
         select: { app: true },
       }),
+      prisma.postPeerConnection.findUnique({ where: { userId }, select: { accountName: true } }),
+      prisma.businessProfileIntegration.findUnique({ where: { userId }, select: { locationTitle: true } }),
     ]);
+    // Google no devuelve un enlace por publicación: se lleva al perfil público
+    // del negocio, donde aparecen las publicaciones.
+    const gbpName = (gbpIntegration?.locationTitle || postPeerGbp?.accountName || "").trim();
+    const gbpProfileUrl = gbpName
+      ? `https://www.google.com/search?q=${encodeURIComponent(gbpName)}`
+      : null;
     const composioApps = new Set(composioConnections.map((connection) => connection.app));
     const history = opportunities.filter((opportunity) => {
       if (opportunity.platform === "facebook-story" && composioApps.has("facebook")) return false;
@@ -48,6 +56,14 @@ export async function GET() {
               ? opportunity.postId
               : `https://www.tumblr.com/${tumblrIntegration.blogIdentifier}/${opportunity.postId}`),
         };
+      }
+      if (
+        opportunity.status === "published" &&
+        opportunity.platform === "google-business" &&
+        !/^https?:\/\//i.test(opportunity.postId ?? "") &&
+        gbpProfileUrl
+      ) {
+        return { ...opportunity, postId: gbpProfileUrl };
       }
       return opportunity;
     });
