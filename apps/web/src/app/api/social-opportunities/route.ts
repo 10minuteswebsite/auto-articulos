@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { extractPostPeerPostUrl } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { canUseSocialModule } from "@/lib/social-access";
-import { getBusinessProfileUrl } from "@/lib/business-profile-url";
 import { requireProductAccess } from "@/lib/require-product-access";
 
 export async function GET() {
@@ -11,7 +11,7 @@ export async function GET() {
     const denied = await requireProductAccess(userId, "REDES", "/api/social-opportunities");
     if (denied) return denied;
     if (!(await canUseSocialModule(userId))) return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
-    const [opportunities, tumblrIntegration, composioConnections, gbpProfileUrl] = await Promise.all([
+    const [opportunities, tumblrIntegration, composioConnections, gbpPosts] = await Promise.all([
       prisma.socialOpportunity.findMany({
         where: { userId },
         orderBy: { createdAt: "desc" },
@@ -28,10 +28,16 @@ export async function GET() {
         },
         select: { app: true },
       }),
-      getBusinessProfileUrl(userId),
+      prisma.businessProfilePost.findMany({
+        where: { title: { run: { userId } }, status: "sent" },
+        select: { titleId: true, googleResponse: true },
+      }),
     ]);
-    // Google no devuelve un enlace por publicación: el Historial lleva a la
-    // ficha pública que el usuario guardó en Conexiones.
+    // Publicaciones anteriores al arreglo guardaron el postId vacío; el enlace
+    // real sigue en la respuesta de PostPeer que se guardó al publicar.
+    const gbpUrlByTitle = new Map(
+      gbpPosts.map((post) => [post.titleId, extractPostPeerPostUrl(post.googleResponse)] as const),
+    );
     const composioApps = new Set(composioConnections.map((connection) => connection.app));
     const history = opportunities.filter((opportunity) => {
       if (opportunity.platform === "facebook-story" && composioApps.has("facebook")) return false;
@@ -56,10 +62,10 @@ export async function GET() {
       if (
         opportunity.status === "published" &&
         opportunity.platform === "google-business" &&
-        !/^https?:\/\//i.test(opportunity.postId ?? "") &&
-        gbpProfileUrl
+        !/^https?:\/\//i.test(opportunity.postId ?? "")
       ) {
-        return { ...opportunity, postId: gbpProfileUrl };
+        const url = opportunity.titleId ? gbpUrlByTitle.get(opportunity.titleId) : null;
+        if (url) return { ...opportunity, postId: url };
       }
       return opportunity;
     });
