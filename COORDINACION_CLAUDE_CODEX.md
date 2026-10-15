@@ -11686,3 +11686,8 @@ navegación en adelatallada.com), que ya estaban anotadas en la propia entrada d
 esta misma corrida antes de propagarlas.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## [Claude] - FIX: INICIO DE REDES CON DOS TARJETAS — 2026-10-14
+
+- **Capitán de migración:** Claude — reclamo. Motivo: Inicio de Redes con dos tarjetas (META y Otras redes), solo apps/web. Sin migración.
+- Cambio: en el servidor de Redes el Inicio muestra META y Otras redes y blogs (igual que Oportunidades de Redes); cada una abre su grupo con `?grupo=meta|otras`.

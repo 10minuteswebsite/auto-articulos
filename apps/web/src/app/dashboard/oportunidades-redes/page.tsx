@@ -160,6 +160,11 @@ export default function OportunidadesRedesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dailyLimits, setDailyLimits] = useState<Record<string, number>>({});
   const [openGroup, setOpenGroup] = useState<NetworkGroup | null>(null);
+  // Las tarjetas del Inicio enlazan aquí con ?grupo=meta|otras para abrir ese grupo directo.
+  useEffect(() => {
+    const grupo = new URLSearchParams(window.location.search).get("grupo");
+    if (grupo === "meta" || grupo === "otras") setOpenGroup(grupo);
+  }, []);
   // Entrada directa por enlace antiguo o marcador: /dashboard/oportunidades-redes?grupo=meta|otras
   useEffect(() => {
     const grupo = new URLSearchParams(window.location.search).get("grupo");

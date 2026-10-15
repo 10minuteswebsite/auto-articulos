@@ -172,7 +172,16 @@ export default function InicioPage() {
     return true;
   }
 
-  const visibleQuickLinks = QUICK_LINKS.filter((link) => hasProductFor(link.href));
+  // En el servidor de Redes el inicio muestra las mismas dos tarjetas que la
+  // pantalla de Oportunidades de Redes (META y Otras redes), no una sola.
+  const visibleQuickLinks = QUICK_LINKS.filter((link) => hasProductFor(link.href)).flatMap((link) =>
+    hostProduct === "REDES" && link.href === "/dashboard/oportunidades-redes"
+      ? [
+          { href: "/dashboard/oportunidades-redes?grupo=meta", label: "META", description: "Instagram, Threads y Facebook" },
+          { href: "/dashboard/oportunidades-redes?grupo=otras", label: "Otras redes y blogs", description: "LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business" },
+        ]
+      : [link],
+  );
   const visibleProductCards = PRODUCT_CARDS.filter((card) => hasProductFor(card.href));
 
   useEffect(() => {
