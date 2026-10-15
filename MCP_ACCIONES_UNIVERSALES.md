@@ -252,6 +252,16 @@ No implementar herramientas para:
   solicitudes/día. Pedido de Milton al notar que esa función faltaba en el
   catálogo. No publica nada por sí sola — se combina con
   `publicar_titulos_en_categoria`.
+- **Sumado 15/10/2026 (estilos de escritura):** `listar_estilos_escritura` y
+  parámetro opcional `estilo` (por nombre) en `publicar_oportunidades_seleccionadas`,
+  `publicar_categoria` y `publicar_titulos_en_categoria`, que se traduce al
+  `promptId` real de las rutas. STANDARD lo genera 10minutesWebsite (sin
+  prompt); los otros cuatro son prompts propios. Sin `estilo` se usa el de la
+  cuenta (`defaultPromptId`). `ver_preferencias_contenido` muestra el estilo por
+  defecto. Una coincidencia dudosa se reporta, no se adivina.
+  También `cambiar_estilo_escritura_por_defecto` (cambia `defaultPromptId`
+  por `PATCH /api/me`; `STANDARD` = sin prompt; exige comprobante y solo si la
+  persona lo pide). Con esto sí se puede volver a STANDARD desde el MCP.
 - **Sumado 14/10/2026 (Redes):** `ver_redes_sociales`, `generar_propuestas_sociales`
   (por nombre de red o todas), `publicar_propuestas_sociales` (grupal, un
   comprobante para todas), `cancelar_propuesta_social` y

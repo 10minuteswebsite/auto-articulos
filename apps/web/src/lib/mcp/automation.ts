@@ -21,6 +21,8 @@ EN CADA EJECUCIÓN, sin pedirme aprobación:
 4. Si NO quedan títulos pendientes, repón antes de publicar: si ver_integraciones muestra Search Console conectado, usa crear_oportunidades (no repitas el análisis antes de 3 días); si Search Console no está conectado, o crear_oportunidades responde que no puede o que ya se hizo, usa crear_titulos_con_ia con la categoría que tenga menos títulos pendientes y mis datos guardados, y publica uno con publicar_titulos_en_categoria (mismo método: confirmar=false y luego confirmar=true). Hay un máximo de 3 usos de crear_titulos_con_ia por día: si se acaba, dilo.
 5. Llama estado_de_publicaciones y avísame en una sola línea: título, estado y enlace real. Si todavía se está generando, dilo así, no inventes el enlace.
 
+ESTILO DE ESCRITURA: los artículos se escriben con el estilo de mi cuenta. Si te pido uno concreto (STANDARD, comparativos, estadísticos, guías o problema-solución), úsalo con el parámetro estilo al publicar; confirma los nombres con listar_estilos_escritura. Si no te pido ninguno, no lo cambies y no lo menciones. Puedes cambiar el estilo por defecto de mi cuenta con cambiar_estilo_escritura_por_defecto, pero SOLO si yo te lo pido, y pídeme confirmación antes de hacerlo (afecta a todos mis artículos, también en la web). Si quiero un estilo solo para un artículo, usa el parámetro estilo y no cambies el de la cuenta.
+
 SI ALGO FALLA: dime qué falló en lenguaje cotidiano y qué botón tocar, y no finjas que publicaste. Si la conexión caducó o pide autorizar de nuevo, avísame para que lo haga yo; no te quedes en silencio ni desactives las tareas por tu cuenta. Nunca me pidas contraseñas ni tokens en el chat.`;
 
 /**
