@@ -17,7 +17,7 @@
  * tocar `route.ts` — ya itera sobre este array.
  */
 
-import { MCP_AUTOMATION_RULES } from "./automation";
+import { MCP_AUTOMATION_RULES, MCP_SOCIAL_AUTOMATION_RULES, MCP_SOCIAL_RULES } from "./automation";
 import { MCP_SCOPE_RULES } from "./scope";
 
 export type PromptArgument = { name: string; description: string; required?: boolean };
@@ -83,6 +83,30 @@ ${MCP_SCOPE_RULES}`,
     ],
     build: (args) =>
       `${args.horarios ? `El usuario pidió esta programación, en sus palabras: "${args.horarios}". Aplícala exactamente.\n\n` : ""}${MCP_AUTOMATION_RULES}\n\n${MCP_SCOPE_RULES}`,
+  },
+
+  {
+    name: "publicar_en_redes",
+    title: "Publicar en redes sociales y blogs",
+    description:
+      "Úsalo cuando el usuario quiera publicar en redes sociales o blogs ('publica en Facebook', 'sube esto a LinkedIn e Instagram', 'publica en todas mis redes', 'genera propuestas para Pinterest'). Trae el orden exacto: ver redes, generar propuestas por nombre o en grupo, publicar con comprobante y confirmar el estado.",
+    arguments: [
+      { name: "redes", description: "Redes que dijo el usuario, en sus palabras (opcional; vacío = todas las conectadas).", required: false },
+    ],
+    build: (args) =>
+      `${args.redes ? `El usuario quiere publicar en: "${args.redes}".\n\n` : ""}${MCP_SOCIAL_RULES}\n\n${MCP_SCOPE_RULES}`,
+  },
+
+  {
+    name: "automatizar_redes",
+    title: "Programar publicaciones automáticas en redes",
+    description:
+      "Úsalo cuando el usuario pida publicar en redes de forma recurrente o automática ('publica en Facebook a las 9 y en LinkedIn a las 12', 'todos los días en todas mis redes') o quiera cambiar, pausar o detener esa programación.",
+    arguments: [
+      { name: "programacion", description: "Redes y horarios que dijo el usuario, en sus palabras (opcional; por defecto todas las conectadas a las 10:00).", required: false },
+    ],
+    build: (args) =>
+      `${args.programacion ? `El usuario pidió esta programación, en sus palabras: "${args.programacion}". Aplícala exactamente.\n\n` : ""}${MCP_SOCIAL_AUTOMATION_RULES}\n\n${MCP_SCOPE_RULES}`,
   },
 
   {

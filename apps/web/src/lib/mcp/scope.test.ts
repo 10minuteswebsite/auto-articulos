@@ -42,3 +42,28 @@ test("el flujo programar_publicaciones existe y respeta los horarios pedidos", (
   assert.ok(texto.includes("uno a las 7, otro a las 12 y otro a las 19"));
   assert.ok(texto.includes(MCP_AUTOMATION_RULES) && texto.includes(MCP_SCOPE_RULES));
 });
+
+import { MCP_SOCIAL_AUTOMATION_RULES, MCP_SOCIAL_RULES } from "./automation";
+
+test("las reglas de Redes solo nombran herramientas que existen y respetan las reglas de cupo y confirmación", () => {
+  const dir = join(__dirname, "tools");
+  const existentes = new Set(
+    readdirSync(dir).filter((f) => f.endsWith(".ts")).flatMap((f) =>
+      [...readFileSync(join(dir, f), "utf8").matchAll(/^\s+name: "([a-z_]+)"/gm)].map((m) => m[1]),
+    ),
+  );
+  const usadas = new Set(MCP_SOCIAL_AUTOMATION_RULES.match(/\b(?:ver|listar|generar|publicar|cancelar|eliminar)_[a-z_]+/g) ?? []);
+  assert.ok(usadas.size >= 6);
+  for (const nombre of usadas) assert.ok(existentes.has(nombre), `${nombre} no existe en el catálogo`);
+  assert.match(MCP_SOCIAL_RULES, /El cupo diario limita las publicaciones, no las propuestas/);
+  assert.match(MCP_SOCIAL_RULES, /confirmar=false/);
+  assert.ok(MCP_SOCIAL_AUTOMATION_RULES.includes(MCP_SOCIAL_RULES));
+});
+
+test("los flujos de Redes existen y respetan lo que pidió el usuario", () => {
+  const publicar = PROMPTS.find((p) => p.name === "publicar_en_redes")!;
+  assert.ok(publicar.build({ redes: "Facebook y LinkedIn" }).includes("Facebook y LinkedIn"));
+  const automatizar = PROMPTS.find((p) => p.name === "automatizar_redes")!;
+  const texto = automatizar.build({ programacion: "Facebook a las 9 y LinkedIn a las 12" });
+  assert.ok(texto.includes("Facebook a las 9 y LinkedIn a las 12") && texto.includes(MCP_SOCIAL_AUTOMATION_RULES));
+});

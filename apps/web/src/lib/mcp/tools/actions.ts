@@ -9,7 +9,7 @@ import { GET as socialHistoryRoute } from "@/app/api/social-opportunities/route"
 import { consumeConfirmation, issueConfirmation } from "../confirmation";
 import { jsonRequest, readRoute, toolText, type ToolDef } from "./shared";
 
-async function confirmOrPreview(input: { userId: string; toolName: string; operation: unknown; confirmar: unknown; confirmacion: unknown; preview: string }) {
+export async function confirmOrPreview(input: { userId: string; toolName: string; operation: unknown; confirmar: unknown; confirmacion: unknown; preview: string }) {
   if (input.confirmar !== true) {
     const token = await issueConfirmation({ userId: input.userId, toolName: input.toolName, operation: input.operation });
     return { confirmed: false, text: `${input.preview}\n\nPide confirmación explícita y vuelve a llamar con confirmar=true y confirmacion="${token}".` };

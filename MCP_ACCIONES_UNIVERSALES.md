@@ -262,4 +262,12 @@ No implementar herramientas para:
   También `cambiar_estilo_escritura_por_defecto` (cambia `defaultPromptId`
   por `PATCH /api/me`; `STANDARD` = sin prompt; exige comprobante y solo si la
   persona lo pide). Con esto sí se puede volver a STANDARD desde el MCP.
+- **Sumado 14/10/2026 (Redes):** `ver_redes_sociales`, `generar_propuestas_sociales`
+  (por nombre de red o todas), `publicar_propuestas_sociales` (grupal, un
+  comprobante para todas), `cancelar_propuesta_social` y
+  `eliminar_propuestas_sociales`. Reusan las rutas de
+  `/api/social-opportunities/*` (mismos permisos y cupo diario por red; el cupo
+  limita publicaciones, no propuestas). Nombres y alias en
+  `lib/mcp/social-networks.ts`. Flujos con nombre: `publicar_en_redes` y
+  `automatizar_redes`. X/Twitter sigue apagada.
 

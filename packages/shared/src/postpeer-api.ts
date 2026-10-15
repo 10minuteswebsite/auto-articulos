@@ -27,6 +27,24 @@ export interface PostPeerPostResult {
   message?: string;
 }
 
+/**
+ * Enlace real de la publicación dentro de la respuesta de PostPeer
+ * (`platforms[].platformPostUrl`). Acepta el objeto o el JSON guardado como texto.
+ */
+export function extractPostPeerPostUrl(result: unknown): string | null {
+  let value = result;
+  if (typeof value === "string") {
+    try { value = JSON.parse(value); } catch { return null; }
+  }
+  const platforms = (value as PostPeerPostResult | null)?.platforms;
+  if (!Array.isArray(platforms)) return null;
+  for (const item of platforms) {
+    const url = item?.platformPostUrl?.trim();
+    if (url && /^https?:\/\//i.test(url)) return url;
+  }
+  return null;
+}
+
 function requireApiKey(apiKey: string): string {
   const value = apiKey.trim();
   if (!value) throw new Error("Falta la clave de API de PostPeer.");
