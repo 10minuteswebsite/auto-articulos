@@ -252,3 +252,12 @@ No implementar herramientas para:
   solicitudes/día. Pedido de Milton al notar que esa función faltaba en el
   catálogo. No publica nada por sí sola — se combina con
   `publicar_titulos_en_categoria`.
+- **Sumado 14/10/2026 (Redes):** `ver_redes_sociales`, `generar_propuestas_sociales`
+  (por nombre de red o todas), `publicar_propuestas_sociales` (grupal, un
+  comprobante para todas), `cancelar_propuesta_social` y
+  `eliminar_propuestas_sociales`. Reusan las rutas de
+  `/api/social-opportunities/*` (mismos permisos y cupo diario por red; el cupo
+  limita publicaciones, no propuestas). Nombres y alias en
+  `lib/mcp/social-networks.ts`. Flujos con nombre: `publicar_en_redes` y
+  `automatizar_redes`. X/Twitter sigue apagada.
+

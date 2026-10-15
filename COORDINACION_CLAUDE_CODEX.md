@@ -1,5 +1,15 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — MCP Redes: generar y publicar propuestas por nombre o en grupo desde un asistente de IA — 2026-10-14
+
+- Capitanía reclamada y liberada al fusionar (`migration-coordinator.sh claim "Claude"`). Sin migración. Estado: PR abierto, SIN fusionar (Milton durmiendo; fusiona con su orden). Capitanía del PR #581 (`748c3dec`, alcance + publicación automática de artículos, en producción) liberada.
+- Pedido de Milton: analizar Redes e incorporarlo al MCP para generar propuestas por nombre o en grupo y publicarlas desde un asistente.
+- Análisis (solo lectura de rutas): `GET generate` = redes conectadas y cupo diario; `POST generate {networks:[…]}` = genera por red (sin lista = todas las conectadas); `POST publish {id}` = publica con cupo y permisos; `POST cancel {id}`; `DELETE ?scope=pending&platforms=…` = borra pendientes sin tocar historial. X/Twitter apagada. Instagram genera varios formatos (el principal es `instagram-post`).
+- Herramientas nuevas (`lib/mcp/tools/social-actions.ts`): `ver_redes_sociales`, `generar_propuestas_sociales`, `publicar_propuestas_sociales` (grupal, máx. 10, un comprobante), `cancelar_propuesta_social`, `eliminar_propuestas_sociales`. Publicar/cancelar/eliminar exigen comprobante (`confirmOrPreview`, ahora exportado de `actions.ts`). Nombres/alias en `lib/mcp/social-networks.ts`; un nombre desconocido se reporta, no se ignora.
+- Flujos y prompt: `publicar_en_redes` y `automatizar_redes` (`lib/mcp/prompts.ts`, texto único en `lib/mcp/automation.ts`); la pantalla `configuracion/mcp` muestra un prompt propio de Redes en `redes.lasolucionweb.com` (antes copiaba el de Artículos) y añade las reglas de Redes en el host combinado. Manual y `MCP_ACCIONES_UNIVERSALES.md` actualizados.
+- Reglas de Milton respetadas: el cupo limita publicaciones, no propuestas; una propuesta por red por pedido; el asistente no borra propuestas por su cuenta; sin pruebas con publicación real.
+- Verificación: 16/16 pruebas MCP (nombres/alias, elección de la propuesta pendiente, comprobante obligatorio, herramientas citadas existen); `tsc` sin errores nuevos (los de `startOfSocialDay` y `mcpPublishConfirmation` ya existían por el paquete compartido local desactualizado). NO probado en vivo con un asistente real ni publicando: hace falta una prueba con la cuenta de Lorena con el visto bueno de Milton (una publicación por red; borrar propuestas sobrantes).
+
 ## Claude — MCP: el asistente no debe diagnosticar ni conectar integraciones — 2026-10-14
 
 - Capitanía reclamada y liberada al fusionar. Sin migración. Estado: PR abierto, sin fusionar. (La capitanía del fix OAuth, PR #566 `dc4203f0`, se liberó con `migration-coordinator.sh release`.)
