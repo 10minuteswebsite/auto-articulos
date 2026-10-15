@@ -1049,7 +1049,7 @@ function HistorialRedes() {
                             className="link-button"
                             style={{ color: "#16803c" }}
                           >
-                            Ver en la red social &rarr;
+                            Ver artículo en la red social &rarr;
                           </a>
                         )}
                         {opp.status === "published" && !socialPostUrl(opp.platform, opp.postId) && opp.platform.startsWith("instagram") && opp.postId && (
@@ -1059,7 +1059,7 @@ function HistorialRedes() {
                             className="link-button"
                             style={{ color: "#16803c", background: "transparent", border: 0, padding: 0, cursor: "pointer", font: "inherit" }}
                           >
-                            Ver en la red social &rarr;
+                            Ver artículo en la red social &rarr;
                           </button>
                         )}
                       </div>

@@ -5,6 +5,7 @@ import {
   getGoogleAccessToken,
   createLocalPost,
   createPostPeerPost,
+  extractPostPeerPostUrl,
 } from "@auto-articulos/shared";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
@@ -270,7 +271,7 @@ export async function processNextBusinessProfilePost(
         progressPercent: 100,
         progressStage: rejected ? "Google Business Profile rechazó la publicación" : "Publicado en Google Business Profile mediante PostPeer",
         errorLog: rejected ? JSON.stringify(result) : null,
-        postId: (result as { id?: string; url?: string }).url || (result as { id?: string }).id || null,
+        postId: extractPostPeerPostUrl(result) || (result as { id?: string; url?: string }).url || (result as { postId?: string }).postId || (result as { id?: string }).id || null,
         publishedAt: rejected ? null : new Date(),
         finishedAt: new Date(),
       },

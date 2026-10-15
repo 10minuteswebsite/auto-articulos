@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createPostPeerPost, getPostPeerOAuthUrl, getPostPeerOAuthUrlWithProfileRecovery, listPostPeerIntegrations } from "./postpeer-api";
+import { createPostPeerPost, extractPostPeerPostUrl, getPostPeerOAuthUrl, getPostPeerOAuthUrlWithProfileRecovery, listPostPeerIntegrations } from "./postpeer-api";
 
 const originalFetch = globalThis.fetch;
 
@@ -71,4 +71,13 @@ test("con un perfil válido no crea otro perfil", async () => {
   });
   assert.equal(result.recovered, false);
   assert.equal(creates, 0);
+});
+
+test("extractPostPeerPostUrl lee el enlace real del objeto o del JSON guardado", () => {
+  const result = { success: true, platforms: [{ platform: "googlebusiness", platformPostUrl: "https://posts.gle/abc" }] };
+  assert.equal(extractPostPeerPostUrl(result), "https://posts.gle/abc");
+  assert.equal(extractPostPeerPostUrl(JSON.stringify(result)), "https://posts.gle/abc");
+  assert.equal(extractPostPeerPostUrl({ platforms: [{ platformPostUrl: "javascript:x" }] }), null);
+  assert.equal(extractPostPeerPostUrl("no es json"), null);
+  assert.equal(extractPostPeerPostUrl({ id: "1" }), null);
 });
