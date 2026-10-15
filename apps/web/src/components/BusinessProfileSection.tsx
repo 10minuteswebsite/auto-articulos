@@ -37,6 +37,8 @@ export default function BusinessProfileSection() {
   const [data, setData] = useState<BusinessProfileData | null>(null);
   const [postPeer, setPostPeer] = useState<PostPeerStatus | null>(null);
   const [selected, setSelected] = useState("");
+  const [profileUrl, setProfileUrl] = useState("");
+  const [savingUrl, setSavingUrl] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loadingLocations, setLoadingLocations] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -98,6 +100,26 @@ export default function BusinessProfileSection() {
     setMessage(res.ok ? { ok: true, text: "Ficha de Google Business Profile guardada." } : { ok: false, text: friendlyConnectionError(value.error, "No se pudo guardar la ficha. Inténtalo de nuevo.") });
     setSaving(false);
     if (res.ok) void load();
+  }
+
+  useEffect(() => {
+    fetch("/api/business-profile/profile-url")
+      .then((r) => r.json())
+      .then((v: { url?: string | null }) => setProfileUrl(v.url ?? ""))
+      .catch(() => {});
+  }, []);
+
+  async function saveProfileUrl() {
+    setSavingUrl(true);
+    setMessage(null);
+    const res = await fetch("/api/business-profile/profile-url", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: profileUrl }),
+    });
+    const value = await res.json().catch(() => ({}));
+    setMessage(res.ok ? { ok: true, text: profileUrl.trim() ? "Enlace de tu ficha guardado." : "Enlace de tu ficha quitado." } : { ok: false, text: value.error || "No se pudo guardar el enlace." });
+    setSavingUrl(false);
   }
 
   async function disconnect(postPeerConnection: boolean) {
@@ -182,6 +204,14 @@ export default function BusinessProfileSection() {
             value={postPeerConnected ? (postPeer?.accountName ?? "Google Business Profile") : (data?.locationTitle ?? data?.locationName ?? null)}
             rows={accountRows}
           />
+          <div style={{ marginTop: 12 }}>
+            <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px" }}>Enlace de tu ficha en Google</p>
+            <p style={{ color: "#6e6e73", fontSize: 14, lineHeight: 1.5, margin: "0 0 8px" }}>Busca tu negocio en Google, pulsa Compartir, copia el enlace (https://share.google/…) y pégalo aquí. El Historial lo usará para llevarte a tu ficha.</p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <input type="url" aria-label="Enlace de tu ficha en Google" value={profileUrl} onChange={(e) => setProfileUrl(e.target.value)} placeholder="https://share.google/…" style={{ ...CONNECTION_SELECT_STYLE, flex: "1 1 260px" }} />
+              <button type="button" onClick={saveProfileUrl} disabled={savingUrl} style={disabledStyle({ ...buttonStyle, marginTop: 0 }, savingUrl)}>{savingUrl ? "Guardando…" : "Guardar enlace"}</button>
+            </div>
+          </div>
           <ConnectionActions
             network="business-profile"
             endpoint="/api/business-profile/test"

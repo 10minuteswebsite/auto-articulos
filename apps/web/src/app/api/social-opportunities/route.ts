@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { canUseSocialModule } from "@/lib/social-access";
+import { getBusinessProfileUrl } from "@/lib/business-profile-url";
 import { requireProductAccess } from "@/lib/require-product-access";
 
 export async function GET() {
@@ -10,7 +11,7 @@ export async function GET() {
     const denied = await requireProductAccess(userId, "REDES", "/api/social-opportunities");
     if (denied) return denied;
     if (!(await canUseSocialModule(userId))) return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
-    const [opportunities, tumblrIntegration, composioConnections, postPeerGbp, gbpIntegration] = await Promise.all([
+    const [opportunities, tumblrIntegration, composioConnections, gbpProfileUrl] = await Promise.all([
       prisma.socialOpportunity.findMany({
         where: { userId },
         orderBy: { createdAt: "desc" },
@@ -27,15 +28,10 @@ export async function GET() {
         },
         select: { app: true },
       }),
-      prisma.postPeerConnection.findUnique({ where: { userId }, select: { accountName: true } }),
-      prisma.businessProfileIntegration.findUnique({ where: { userId }, select: { locationTitle: true } }),
+      getBusinessProfileUrl(userId),
     ]);
-    // Google no devuelve un enlace por publicación: se lleva al perfil público
-    // del negocio, donde aparecen las publicaciones.
-    const gbpName = (gbpIntegration?.locationTitle || postPeerGbp?.accountName || "").trim();
-    const gbpProfileUrl = gbpName
-      ? `https://www.google.com/search?q=${encodeURIComponent(gbpName)}`
-      : null;
+    // Google no devuelve un enlace por publicación: el Historial lleva a la
+    // ficha pública que el usuario guardó en Conexiones.
     const composioApps = new Set(composioConnections.map((connection) => connection.app));
     const history = opportunities.filter((opportunity) => {
       if (opportunity.platform === "facebook-story" && composioApps.has("facebook")) return false;
