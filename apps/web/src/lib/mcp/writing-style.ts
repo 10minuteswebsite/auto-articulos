@@ -56,7 +56,7 @@ export async function resolveStyleArg(input: unknown): Promise<{ promptId?: stri
     // forzar STANDARD desde aquí si la cuenta tiene otro por defecto. Se dice claro en vez de usar otro.
     const user = await prisma.user.findUnique({ where: { id: await getCurrentUserId() }, select: { defaultPrompt: { select: { name: true } } } });
     return user?.defaultPrompt
-      ? { error: `Esta cuenta tiene como estilo por defecto «${user.defaultPrompt.name}», así que no puedo usar STANDARD desde aquí. Dile a la persona que lo cambie en Configuración → Contenido, o elige uno de los estilos disponibles (listar_estilos_escritura).` }
+      ? { error: `Esta cuenta tiene como estilo por defecto «${user.defaultPrompt.name}», así que no puedo usar STANDARD desde aquí. Si la persona quiere STANDARD, puedes cambiar el estilo por defecto de la cuenta con cambiar_estilo_escritura_por_defecto (pidiéndole confirmación), o elegir uno de los estilos disponibles (listar_estilos_escritura).` }
       : {};
   }
   if (match.kind === "match") return { promptId: match.style.id, label: match.style.name };

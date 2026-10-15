@@ -259,4 +259,7 @@ No implementar herramientas para:
   prompt); los otros cuatro son prompts propios. Sin `estilo` se usa el de la
   cuenta (`defaultPromptId`). `ver_preferencias_contenido` muestra el estilo por
   defecto. Una coincidencia dudosa se reporta, no se adivina.
+  También `cambiar_estilo_escritura_por_defecto` (cambia `defaultPromptId`
+  por `PATCH /api/me`; `STANDARD` = sin prompt; exige comprobante y solo si la
+  persona lo pide). Con esto sí se puede volver a STANDARD desde el MCP.
 

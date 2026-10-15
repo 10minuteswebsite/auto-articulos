@@ -40,3 +40,13 @@ test("las tres herramientas de publicar aceptan estilo y lo envían como promptI
   assert.equal((src.match(/promptId: style\.promptId/g) ?? []).length >= 6, true);
   assert.match(src, /operation = \{ groupId: grupo\.id, \.\.\.\(style\.promptId/);
 });
+
+test("el asistente puede cambiar el estilo por defecto, pero siempre con comprobante y solo si la persona lo pide", () => {
+  const src = readFileSync(join(__dirname, "tools", "writing-styles.ts"), "utf8");
+  assert.match(src, /name: "cambiar_estilo_escritura_por_defecto"/);
+  assert.match(src, /issueConfirmation/);
+  assert.match(src, /consumeConfirmation/);
+  assert.match(src, /defaultPromptId: targetId/);
+  const rules = readFileSync(join(__dirname, "automation.ts"), "utf8");
+  assert.match(rules, /cambiar_estilo_escritura_por_defecto, pero SOLO si yo te lo pido/);
+});
