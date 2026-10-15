@@ -36,7 +36,6 @@ const PUBLIC_PATHS = [
 /** Endpoint del servidor MCP; se autentica con Bearer, no con cookie. */
 const MCP_PATH = "/api/mcp";
 const TUMBLR_CALLBACK_PATH = "/api/search-integrations/tumblr/callback";
-const TUMBLR_CANONICAL_ORIGIN = "https://redes.lasolucionweb.net";
 
 const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
@@ -57,11 +56,11 @@ const CANONICAL_LOGIN_URL = "https://www.seototal.lasolucionweb.com/login";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Tumblr OAuth1 puede devolver al callback predeterminado de Vercel. Solo
-  // ese callback en un host no canónico puede pasar sin sesión para que la
-  // ruta lo redirija al dominio del Hub; en el .net la autenticación normal
-  // agrega x-user-id antes de ejecutar el callback.
-  if (pathname === TUMBLR_CALLBACK_PATH && request.nextUrl.origin !== TUMBLR_CANONICAL_ORIGIN) {
+  // Tumblr OAuth1 vuelve siempre a una dirección fija (.net), distinta de la
+  // que inició la conexión, así que no hay cookie de sesión. La ruta identifica
+  // a la persona con el token temporal guardado en el servidor (un token
+  // desconocido o caducado termina en la pantalla de error de la conexión).
+  if (pathname === TUMBLR_CALLBACK_PATH) {
     return NextResponse.next();
   }
 
@@ -98,14 +97,14 @@ export async function middleware(request: NextRequest) {
   const userId = await verifySessionToken(token);
 
   if (!userId) {
-    if (pathname.startsWith("/api") && pathname !== TUMBLR_CALLBACK_PATH) {
+    if (pathname.startsWith("/api")) {
       return NextResponse.json(
         { error: "No autenticado" },
         { status: 401, headers: NO_CACHE_HEADERS },
       );
     }
     const loginUrl = new URL("/login", request.url);
-    if (pathname === "/oauth/autorizar" || pathname === TUMBLR_CALLBACK_PATH) {
+    if (pathname === "/oauth/autorizar") {
       loginUrl.searchParams.set("returnTo", `${pathname}${request.nextUrl.search}`);
     }
     const response = NextResponse.redirect(loginUrl);
