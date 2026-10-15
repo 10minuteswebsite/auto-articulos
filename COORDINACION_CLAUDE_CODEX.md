@@ -2,7 +2,7 @@
 
 ## Claude — Banda de progreso en Oportunidades de Redes — 2026-10-14
 
-- Estado: PR abierto, sin fusionar. Sin migración. Capitanía reclamada por Claude (`migration-coordinator.sh claim "Claude"`); se libera al fusionar.
+- Estado: CERRADO Y ARCHIVADO. PR #586 fusionado en `main`. Sin migración. Capitanía liberada.
 - Cambio (solo UI, `oportunidades-redes/page.tsx` y manual): el botón «Crear propuestas» del grupo y el «Crear propuesta» de cada red muestran la misma banda azul que «Analizar» de Oportunidades de artículos (etapa, contador, barra, aviso de no cerrar). Antes el botón del grupo no mostraba nada y la de cada red era una versión gris (con contador congelado en el del grupo).
 - Verificación: sin errores de tipos nuevos (el único es el del enlace de node_modules del worktree); comprobación visual en producción pendiente.
 
