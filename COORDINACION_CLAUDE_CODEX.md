@@ -11699,3 +11699,65 @@ Responsable: Claude (tarea programada diaria de propagación).
 
 - **Capitán de migración:** Claude — reclamo. Motivo: Inicio de Redes con dos tarjetas (META y Otras redes), solo apps/web. Sin migración.
 - Cambio: en el servidor de Redes el Inicio muestra META y Otras redes y blogs (igual que Oportunidades de Redes); cada una abre su grupo con `?grupo=meta|otras`.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-15
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-14 (commit
+`309ba18`, "docs(coordinacion): cierre de la propagación diaria 2026-10-14"). Se revisó el rango
+`309ba18..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 85 líneas agregadas (0 eliminadas
+netas, confirmado con `git diff --stat`; dos commits de cierre dentro del propio rango,
+`f6c7256` y `e59f10b`, reescribieron el estado de entradas creadas en ese mismo rango — no texto
+que ya existiera antes de `309ba18`), correspondientes a 14 commits nuevos / PRs #566 a #589: 10
+entradas nuevas y distintas en Coordinación.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 10 entradas nuevas, una por cada entrada nueva de Coordinación
+  (PRs #581, #566, #586/#587, #584, #568, #572, #571/#575, #569/#570, #573, #588). Cada una cita
+  el o los commits y, donde el texto original de la entrada en Coordinación todavía decía "PR
+  abierto, sin fusionar" o similar (#581, #566, #568, #572, #569, #570, #573 — texto escrito antes
+  de que Milton fusionara), se agregó la verificación real hecha hoy con
+  `git merge-base --is-ancestor <commit> origin/main`: los 14 commits del rango ya son ancestros
+  de `origin/main`, es decir, ya están en PRODUCCIÓN aunque el texto de la entrada original diga
+  lo contrario. No se reescribió ninguna palabra de las entradas originales en Coordinación; la
+  verificación se agregó solo en `CONTROLADOR_DE_VERSIONES.md`.
+- `apps/web/src/content/manual-usuario.ts`: 1 nota nueva, fechada 2026-10-14, en la sección
+  Inicio. El PR #588 (Inicio de Redes con dos tarjetas: META y Otras redes) no tocó el manual, que
+  todavía decía "En redes.lasolucionweb.com el Inicio muestra solo esa tarjeta de redes"; se
+  agregó la aclaración del cambio sin borrar el texto anterior. El resto del rango no se propagó
+  al manual porque cada PR que tenía un cambio visible ya actualizó `manual-usuario.ts` en el
+  propio PR (#581, #586, #570, #568, #573, #571, #572, #569, #566 todos tocaron el archivo
+  directamente); verificado comparando qué commits del rango tocaron `manual-usuario.ts`.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (ninguna reserva activa nueva; las 10
+  capitanías del rango fueron reclamadas y liberadas al fusionar o ya están cerradas/archivadas,
+  verificado contra `git worktree list` — un solo worktree en este entorno — y `git merge-base
+  --is-ancestor` para los 14 commits). Parte B: 10 entradas nuevas, una por cada entrada nueva de
+  Coordinación (mismos PRs listados arriba), siguiendo el mismo criterio de la corrida anterior:
+  sí se indexan porque cada una describe un problema o proyecto distinto y nombrado, no una lista
+  numerada de continuación como la "BITÁCORA REDES" del 2026-10-13.
+- `TO-DO.md`: sin cambios — no se encontró ninguna idea suelta nueva para más adelante en este
+  rango que no estuviera ya anotada como decisión pendiente en la propia entrada de Coordinación
+  (discrepancia Search Console/Composio del MCP; publicación real pendiente de confirmar para el
+  tipo 31 del worker), así que no se duplicó en `TO-DO.md`.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguna de las 10 entradas del rango describe
+  un árbol de git enredado, ramas pisadas o commits mezclados.
+
+**Duda sin resolver, anotada para que Milton decida (sin acción tomada):** el commit `bab324f`
+(PR #589, "fix(redes): el Historial enlaza al perfil de Google Business en publicaciones
+publicadas", ya fusionado en `origin/main`, confirmado con `git merge-base --is-ancestor`) no tiene
+ninguna entrada propia en `COORDINACION_CLAUDE_CODEX.md` ni tocó `manual-usuario.ts`. Como esta
+tarea solo propaga lo que ya está escrito en Coordinación, no se le inventó una entrada nueva en
+ningún documento — no había texto fuente de dónde propagar. Si el cambio es visible para el
+usuario final (el enlace del Historial en publicaciones de Google Business), falta documentarlo en
+algún lado; queda anotado aquí, en `CONTROLADOR_DE_VERSIONES.md` y en `INVENTARIO_CONVERSACIONES.md`
+para que quien corresponda lo revise.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea (la migración de
+ciudad/zona horaria del PR #568 ya estaba aplicada en producción por Milton antes de este rango; no
+se tocó de nuevo). No quedó ninguna duda nueva sin resolver para Milton más allá de la ya anotada
+arriba (el commit #589 sin documentar) y de las que ya estaban anotadas en las propias entradas de
+Coordinación de este rango (discrepancia Search Console/Composio del MCP; la URL `/news/` pendiente
+de confirmar tras el despliegue del PR #572; comprobar en Administración que Lorena Alvarez y
+Zulmad siguen entrando tras el PR #569/#570).
+
+Responsable: Claude (tarea programada diaria de propagación).
