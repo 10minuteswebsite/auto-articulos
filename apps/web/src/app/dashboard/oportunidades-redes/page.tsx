@@ -186,14 +186,14 @@ export default function OportunidadesRedesPage() {
   }, [opportunities]);
 
   useEffect(() => {
-    if (!generating) return;
+    if (!generating && !generatingAll) return;
     setGenerateSeconds(0);
     const timer = window.setInterval(
       () => setGenerateSeconds((s) => s + 1),
       1000,
     );
     return () => window.clearInterval(timer);
-  }, [generating]);
+  }, [generating, generatingAll]);
 
   async function loadOpportunities(showLoading = false) {
     if (showLoading) setLoading(true);
@@ -627,36 +627,34 @@ export default function OportunidadesRedesPage() {
         })}
       </div>
 
-      {generating && (
-          <div
-            role="status"
-            aria-live="polite"
-            style={{
-              marginTop: 16,
-              padding: 0,
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", marginBottom: 10 }}>
-              <strong style={{ fontSize: 13, color: "#1d1d1f" }}>
-                {stages[currentStage]}
-              </strong>
-              <span style={{ fontSize: 12, color: "#6e6e73", fontVariantNumeric: "tabular-nums" }}>
-                {elapsed}
-              </span>
-            </div>
-            <div style={{ height: 6, borderRadius: 999, background: "rgba(0,0,0,0.06)", overflow: "hidden" }}>
-              <div style={{ width: `${progress}%`, height: "100%", background: "#1d1d1f", transition: "width 1s linear" }} />
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 8, marginTop: 12 }}>
-              {stages.map((stage, index) => (
-                <div key={stage} style={{ display: "flex", gap: 6, alignItems: "center", color: index <= currentStage ? "#1d1d1f" : "#86868b", fontSize: 12, fontWeight: index === currentStage ? 600 : 400 }}>
-                  <span aria-hidden="true">{index < currentStage ? "✓" : index === currentStage ? "●" : "○"}</span>
-                  <span>{stage}</span>
-                </div>
-              ))}
-            </div>
+      {(generating || generatingAll) && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ marginTop: 16, marginBottom: 16, padding: 16, border: "1px solid #b8caf7", borderRadius: 10, background: "#f3f6ff" }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", marginBottom: 10 }}>
+            <strong style={{ fontSize: 14, color: "#24458f" }}>{stages[currentStage]}</strong>
+            <span style={{ minWidth: 52, textAlign: "center", padding: "4px 8px", borderRadius: 999, background: "#dfe8ff", color: "#24458f", fontSize: 12, fontVariantNumeric: "tabular-nums", fontWeight: 700 }}>
+              {elapsed}
+            </span>
           </div>
-        )}
+          <div aria-hidden="true" style={{ height: 8, borderRadius: 999, background: "#dfe5f2", overflow: "hidden" }}>
+            <div style={{ width: `${progress}%`, height: "100%", borderRadius: 999, background: "linear-gradient(90deg, #2f5fdb, #4dd8e8)", transition: "width 1s linear" }} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 8, marginTop: 12 }}>
+            {stages.map((stage, index) => (
+              <div key={stage} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: index < currentStage ? "#15803d" : index === currentStage ? "#24458f" : "#8a97ab", fontWeight: index === currentStage ? 600 : 400 }}>
+                <span aria-hidden="true">{index < currentStage ? "✓" : index === currentStage ? "●" : "○"}</span>
+                <span>{stage}</span>
+              </div>
+            ))}
+          </div>
+          <p style={{ margin: "12px 0 0", fontSize: 12, color: "#6e6e73" }}>
+            El tiempo depende de la cantidad de datos. No cierres esta página mientras termina el análisis.
+          </p>
+        </div>
+      )}
 
       {message && (
         <div style={{ padding: "0 0 16px", fontSize: 13, fontWeight: 500, color: message.kind === "success" ? "#16803c" : message.kind === "error" ? "#ff3b30" : "#6e6e73" }}>

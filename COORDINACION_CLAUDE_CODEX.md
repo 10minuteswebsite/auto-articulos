@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Banda de progreso en Oportunidades de Redes — 2026-10-14
+
+- Estado: PR abierto, sin fusionar. Sin migración. Capitanía reclamada por Claude (`migration-coordinator.sh claim "Claude"`); se libera al fusionar.
+- Cambio (solo UI, `oportunidades-redes/page.tsx` y manual): el botón «Crear propuestas» del grupo y el «Crear propuesta» de cada red muestran la misma banda azul que «Analizar» de Oportunidades de artículos (etapa, contador, barra, aviso de no cerrar). Antes el botón del grupo no mostraba nada y la de cada red era una versión gris (con contador congelado en el del grupo).
+- Verificación: sin errores de tipos nuevos (el único es el del enlace de node_modules del worktree); comprobación visual en producción pendiente.
+
 ## Claude — Fix «Google Business Profile no aparece conectado (check) en Conexiones» — 2026-10-14
 
 - Estado: PRODUCCIÓN al fusionar el PR de este cambio (sin migración). Capitanía reclamada al empezar y liberada al entregar.
