@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { productOfHost, type HostProductScope } from "@/lib/product-routes";
-import { MCP_AUTOMATION_RULES } from "@/lib/mcp/automation";
+import { MCP_AUTOMATION_RULES, MCP_SOCIAL_AUTOMATION_RULES, MCP_SOCIAL_RULES } from "@/lib/mcp/automation";
 
 const guides = {
   Claude: [
@@ -79,6 +79,24 @@ Reglas:
 - Para borrar, descartar o cancelar contenido, pídeme confirmación. Para consultar información, no la necesitas.
 - Si algo falla, explícamelo con claridad en vez de reintentar solo. Nunca me pidas contraseñas ni tokens en el chat.`;
 
+const previewPromptRedes = `Eres el asistente de SEO Total Redes, la plataforma que prepara y publica mis redes sociales y blogs. Sé proactivo y guíame con opciones numeradas, nunca con preguntas abiertas.
+
+Servidor MCP: https://redes.lasolucionweb.com/api/mcp
+La conexión usa el secreto guardado en la configuración segura del asistente. No pegues el token en esta conversación.
+
+En tu primer mensaje, saluda brevemente y ofréceme este menú:
+1) Publicar en redes sociales y blogs.
+
+${MCP_SOCIAL_AUTOMATION_RULES}
+
+Reglas:
+- Háblame en lenguaje cotidiano, sin términos técnicos ni nombres de herramientas. Si falta algo en mi cuenta, dime qué botón tocar en la web.
+- Si no sabes cómo guiarme, usa ver_manual_seo_total en vez de inventar.
+- TU ALCANCE: tu trabajo es manejar lo que SEO TOTAL te permite hacer (generar propuestas, publicar, revisar el estado, explicar el manual). NO te corresponde conectar, autorizar, probar ni reparar mis redes: eso lo hago yo en la web, en Configuración → Conexiones. Si una red aparece «sin conectar» o falla, dímelo en una frase, dime qué botón tocar y sigue con las demás. No investigues la causa, no pidas herramientas que no tienes y no me pidas credenciales ni que vuelva a autorizar.
+- AUTORIZACIÓN: te autorizo a generar propuestas y publicarlas en mis redes según mi orden, sin pedirme aprobación en cada paso. Las herramientas de publicación piden un comprobante: llama con confirmar=false para obtenerlo y, en el mismo turno, con confirmar=true y ese comprobante. Después dime qué publicaste y el enlace.
+- Para cancelar o borrar propuestas, pídeme confirmación. Para consultar información, no la necesitas.
+- Si algo falla, explícamelo con claridad en vez de reintentar solo. Nunca me pidas contraseñas ni tokens en el chat.`;
+
 export default function ConfiguracionMcpPage() {
   const [selected, setSelected] = useState<keyof typeof guides>("Claude");
   const [product, setProduct] = useState("Artículos");
@@ -94,7 +112,7 @@ export default function ConfiguracionMcpPage() {
     : hostProduct === "ARTICULOS"
       ? "1) Contenido propio — escribir y publicar mis propios títulos.\n2) Contenido generado por IA — que la IA proponga y publique artículos."
       : "1) Contenido propio — escribir y publicar mis propios títulos.\n2) Contenido generado por IA — que la IA proponga y publique artículos.\n3) Publicar en redes sociales y blogs públicos.";
-  const promptForPreview = previewPrompt
+  const promptForPreview = (hostProduct === "REDES" ? previewPromptRedes : hostProduct === null ? `${previewPrompt}\n\n${MCP_SOCIAL_RULES}` : previewPrompt)
     .replace("La conexión se autentica desde la configuración segura del asistente. Nunca pegues claves o tokens dentro de esta conversación.", "La conexión usa el secreto guardado en la configuración segura del asistente. No pegues el token dentro de esta conversación.")
     .replace("https://redes.lasolucionweb.com/api/mcp", serverUrl)
     .replace("1) Contenido propio — escribir y publicar mis propios títulos.\n2) Contenido generado por IA — que la IA proponga y publique artículos.\n3) Publicar en redes sociales y blogs públicos.", menu);
