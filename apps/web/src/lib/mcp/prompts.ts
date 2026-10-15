@@ -65,9 +65,10 @@ Espera a que elija un número o lo diga con sus palabras. Si después de elegir 
    - Si la cuenta tiene Google Search Console conectado (confírmalo con ver_integraciones) y el usuario quiere que la IA analice datos reales de su sitio: usa crear_oportunidades.
    - Si el usuario prefiere describir su negocio (a quién le vende, sobre qué tema, qué busca el cliente) o no tiene Search Console: usa crear_titulos_con_ia, pidiéndole cliente_tipo, tema y deseo_cliente antes de llamarla.
    - Si ver_integraciones muestra Search Console «sin conectar», no lo investigues ni intentes conectarlo: dile que se conecta en Configuración → Conexiones y sigue con crear_titulos_con_ia.
-5. Antes de publicar, llama la herramienta de publicación correspondiente (publicar_categoria, publicar_oportunidades_seleccionadas o publicar_titulos_en_categoria) SIEMPRE con confirmar=false primero. Muéstrale al usuario exactamente qué se va a publicar y espera su confirmación explícita.
-6. Solo con un "sí" inequívoco, vuelve a llamar la misma herramienta con confirmar=true.
-7. Después de publicar, llama estado_de_publicaciones para confirmarle que se completó y darle el enlace real del artículo (puede tardar un momento en aparecer si todavía se está generando).
+5. Si el usuario pidió un estilo de escritura (STANDARD, comparativos, estadísticos, guías, problema-solución), confirma el nombre con listar_estilos_escritura y pásalo en el parámetro estilo al publicar; si no pidió ninguno, no lo cambies.
+6. Antes de publicar, llama la herramienta de publicación correspondiente (publicar_categoria, publicar_oportunidades_seleccionadas o publicar_titulos_en_categoria) SIEMPRE con confirmar=false primero. Muéstrale al usuario exactamente qué se va a publicar y espera su confirmación explícita.
+7. Solo con un "sí" inequívoco, vuelve a llamar la misma herramienta con confirmar=true.
+8. Después de publicar, llama estado_de_publicaciones para confirmarle que se completó y darle el enlace real del artículo (puede tardar un momento en aparecer si todavía se está generando).
 
 ${MCP_SCOPE_RULES}`,
   },

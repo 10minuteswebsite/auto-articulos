@@ -252,3 +252,11 @@ No implementar herramientas para:
   solicitudes/día. Pedido de Milton al notar que esa función faltaba en el
   catálogo. No publica nada por sí sola — se combina con
   `publicar_titulos_en_categoria`.
+- **Sumado 15/10/2026 (estilos de escritura):** `listar_estilos_escritura` y
+  parámetro opcional `estilo` (por nombre) en `publicar_oportunidades_seleccionadas`,
+  `publicar_categoria` y `publicar_titulos_en_categoria`, que se traduce al
+  `promptId` real de las rutas. STANDARD lo genera 10minutesWebsite (sin
+  prompt); los otros cuatro son prompts propios. Sin `estilo` se usa el de la
+  cuenta (`defaultPromptId`). `ver_preferencias_contenido` muestra el estilo por
+  defecto. Una coincidencia dudosa se reporta, no se adivina.
+

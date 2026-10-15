@@ -23,6 +23,7 @@ import { consumeConfirmation, issueConfirmation } from "../confirmation";
 import { DELETE as borrarOportunidadesRoute, GET as listarOportunidadesRoute, POST as analizarOportunidadesRoute } from "@/app/api/opportunities/route";
 import { POST as ejecutarOportunidadRoute } from "@/app/api/opportunities/execute/route";
 import { POST as publicarTitulosRoute } from "@/app/api/runs/route";
+import { resolveStyleArg, STYLE_PROP } from "../writing-style";
 
 export const OPPORTUNITY_TOOLS: ToolDef[] = [
   {
@@ -174,6 +175,7 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
         confirmar: { type: "boolean", description: "false para previsualizar; true únicamente tras confirmación explícita y con el comprobante de la vista previa." },
         confirmacion: { type: "string", description: "Comprobante de la vista previa. Obligatorio al confirmar=true." },
         desactivar_indexacion: { type: "boolean", description: "Si true, no solicita indexación automática." },
+        estilo: STYLE_PROP,
       },
       required: ["ids_titulos"],
       additionalProperties: false,
@@ -194,15 +196,17 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
       }
       const category = groups[0].category?.name ?? "sin categoría";
       const titles = matching.map(({ title }) => title.text);
-      const operation = { ids, disableIndexing: Boolean(args.desactivar_indexacion) };
+      const style = await resolveStyleArg(args.estilo);
+      if (style.error) return toolText(style.error, true);
+      const operation = { ids, disableIndexing: Boolean(args.desactivar_indexacion), ...(style.promptId ? { promptId: style.promptId } : {}) };
       if (args.confirmar !== true) {
         const confirmation = await issueConfirmation({ userId, toolName: "publicar_oportunidades_seleccionadas", operation });
-        return toolText(`Sin publicar todavía. Se crearán ${titles.length} artículo(s) en "${category}":\n${titles.map((title) => `- ${title}`).join("\n")}\n\nPide confirmación explícita y vuelve a llamar con confirmar=true y confirmacion="${confirmation}".`);
+        return toolText(`Sin publicar todavía. Se crearán ${titles.length} artículo(s) en "${category}"${style.label ? ` con el estilo «${style.label}»` : ""}:\n${titles.map((title) => `- ${title}`).join("\n")}\n\nPide confirmación explícita y vuelve a llamar con confirmar=true y confirmacion="${confirmation}".`);
       }
       const confirmed = await consumeConfirmation({ userId, toolName: "publicar_oportunidades_seleccionadas", operation, token: args.confirmacion });
       if (!confirmed) return toolText("La confirmación expiró, ya fue usada o no corresponde exactamente a esta vista previa. Genera una vista previa nueva antes de publicar.", true);
       const { ok, data } = await readRoute(await ejecutarOportunidadRoute(jsonRequest("/api/opportunities/execute", {
-        type: "titles", ids, disableIndexing: Boolean(args.desactivar_indexacion),
+        type: "titles", ids, disableIndexing: Boolean(args.desactivar_indexacion), ...(style.promptId ? { promptId: style.promptId } : {}),
       })));
       return ok
         ? toolText(`Publicación iniciada para ${titles.length} título(s) de "${category}". Puedes consultar el avance con estado_de_publicaciones.`)
@@ -227,6 +231,7 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
         confirmar: { type: "boolean", description: "false para previsualizar; true únicamente tras confirmación explícita y con el comprobante de la vista previa." },
         confirmacion: { type: "string", description: "Comprobante de la vista previa. Obligatorio al confirmar=true." },
         desactivar_indexacion: { type: "boolean", description: "Si true, no solicita indexación automática." },
+        estilo: STYLE_PROP,
       },
       required: ["categoria", "titulos"],
       additionalProperties: false,
@@ -240,15 +245,17 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
       const userId = await getCurrentUserId();
       const categories = await prisma.category.findMany({ where: { userId, platform: "10minutesWebsite", source: { not: "archived" }, name: { equals: categoryName, mode: "insensitive" } }, select: { id: true, name: true } });
       if (categories.length !== 1) return toolText(`No encontré una categoría exacta llamada "${categoryName}". Usa las categorías existentes antes de publicar.`, true);
-      const operation = { categoryId: categories[0].id, titles, disableIndexing: Boolean(args.desactivar_indexacion) };
+      const style = await resolveStyleArg(args.estilo);
+      if (style.error) return toolText(style.error, true);
+      const operation = { categoryId: categories[0].id, titles, disableIndexing: Boolean(args.desactivar_indexacion), ...(style.promptId ? { promptId: style.promptId } : {}) };
       if (args.confirmar !== true) {
         const confirmation = await issueConfirmation({ userId, toolName: "publicar_titulos_en_categoria", operation });
-        return toolText(`Sin publicar todavía. Se crearán ${titles.length} artículo(s) en "${categories[0].name}":\n${titles.map((title) => `- ${title}`).join("\n")}\n\nPide confirmación explícita y vuelve a llamar con confirmar=true y confirmacion="${confirmation}".`);
+        return toolText(`Sin publicar todavía. Se crearán ${titles.length} artículo(s) en "${categories[0].name}"${style.label ? ` con el estilo «${style.label}»` : ""}:\n${titles.map((title) => `- ${title}`).join("\n")}\n\nPide confirmación explícita y vuelve a llamar con confirmar=true y confirmacion="${confirmation}".`);
       }
       const confirmed = await consumeConfirmation({ userId, toolName: "publicar_titulos_en_categoria", operation, token: args.confirmacion });
       if (!confirmed) return toolText("La confirmación expiró, ya fue usada o no corresponde exactamente a esta vista previa. Genera una vista previa nueva antes de publicar.", true);
       const { ok, data } = await readRoute(await publicarTitulosRoute(jsonRequest("/api/runs", {
-        titlesText: titles.join("\n"), categoryId: categories[0].id, disableIndexing: Boolean(args.desactivar_indexacion),
+        titlesText: titles.join("\n"), categoryId: categories[0].id, disableIndexing: Boolean(args.desactivar_indexacion), ...(style.promptId ? { promptId: style.promptId } : {}),
       })));
       return ok
         ? toolText(`Publicación iniciada para ${titles.length} título(s) en "${categories[0].name}". Puedes consultar el avance con estado_de_publicaciones.`)
@@ -272,6 +279,7 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
           type: "string",
           description: "Nombre de la categoría a publicar, tal como se lo dijo el usuario.",
         },
+        estilo: STYLE_PROP,
         confirmar: {
           type: "boolean",
           description:
@@ -316,7 +324,9 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
       const grupo = grupos[0];
       const nombre = grupo.category?.name ?? "sin nombre";
       const titulos = grupo.titles.map((t) => t.text);
-      const operation = { groupId: grupo.id };
+      const style = await resolveStyleArg(args.estilo);
+      if (style.error) return toolText(style.error, true);
+      const operation = { groupId: grupo.id, ...(style.promptId ? { promptId: style.promptId } : {}) };
 
       if (titulos.length === 0) {
         return toolText(`La categoría "${nombre}" no tiene títulos para publicar.`, true);
@@ -328,7 +338,7 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
       if (args.confirmar !== true) {
         const confirmation = await issueConfirmation({ userId, toolName: "publicar_categoria", operation });
         return toolText(
-          `Sin publicar todavía. La categoría "${nombre}" tiene ${titulos.length} ${titulos.length === 1 ? "título" : "títulos"}:\n${titulos.map((t) => `- ${t}`).join("\n")}\n\nLéele estos títulos al usuario y pregúntale si confirma la publicación. Si dice que sí, vuelve a llamar a esta herramienta con confirmar=true y confirmacion="${confirmation}".`,
+          `Sin publicar todavía${style.label ? ` (estilo «${style.label}»)` : ""}. La categoría "${nombre}" tiene ${titulos.length} ${titulos.length === 1 ? "título" : "títulos"}:\n${titulos.map((t) => `- ${t}`).join("\n")}\n\nLéele estos títulos al usuario y pregúntale si confirma la publicación. Si dice que sí, vuelve a llamar a esta herramienta con confirmar=true y confirmacion="${confirmation}".`,
         );
       }
 
@@ -337,7 +347,7 @@ export const OPPORTUNITY_TOOLS: ToolDef[] = [
 
       const { ok, data } = await readRoute(
         await ejecutarOportunidadRoute(
-          jsonRequest("/api/opportunities/execute", { type: "group", id: grupo.id }),
+          jsonRequest("/api/opportunities/execute", { type: "group", id: grupo.id, ...(style.promptId ? { promptId: style.promptId } : {}) }),
         ),
       );
       if (!ok) {

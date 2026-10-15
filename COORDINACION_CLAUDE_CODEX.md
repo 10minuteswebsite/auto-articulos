@@ -1,5 +1,14 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — MCP: estilos de escritura (Prompt) — 2026-10-15
+
+- Capitanía: la misma de «MCP Redes» (PR #593, sin migración); no se ejecuta Prisma. Estado: PR abierto, sin fusionar.
+- Problema (Milton): en Publicar hay 5 estilos de escritura (STANDARD, comparativos, estadísticos, guías, problema-solución) y el MCP no los contemplaba: publicaba siempre con el de la cuenta y el asistente no podía verlos ni elegirlos.
+- Evidencia: las rutas de la web (`opportunities/execute`, `execute-batch`, `execute-all`, `runs`) aceptan `promptId` y, sin él, usan `User.defaultPromptId`; ninguna herramienta MCP lo enviaba (cero menciones de estilos en `lib/mcp`). STANDARD no es un prompt: lo genera directamente 10minutesWebsite (sin `promptId`); los otros 4 son filas de `Prompt` propias de SEO TOTAL.
+- Cambios: `lib/mcp/writing-style.ts` (nombre → `promptId`, sin adivinar coincidencias dudosas), herramienta `listar_estilos_escritura`, parámetro `estilo` en `publicar_oportunidades_seleccionadas`, `publicar_categoria` y `publicar_titulos_en_categoria` (el `promptId` entra en el comprobante de confirmación), estilo por defecto en `ver_preferencias_contenido`, reglas en `lib/mcp/automation.ts` y en el flujo `publicar_contenido`, manual y catálogo.
+- Límite conocido: sin `promptId` las rutas usan el estilo por defecto de la cuenta, así que si la cuenta tiene uno propio por defecto NO se puede forzar STANDARD desde el MCP; el asistente lo dice y remite a Configuración → Contenido (no se tocaron las rutas de publicación).
+- Verificación: 11/11 pruebas MCP (nombres cortos/acentos, STANDARD aparte, ambigüedad, `estilo` en las 3 herramientas); `tsc` sin errores nuevos. NO probado en vivo publicando con cada estilo.
+
 ## Claude — MCP: el asistente no debe diagnosticar ni conectar integraciones — 2026-10-14
 
 - Capitanía reclamada y liberada al fusionar. Sin migración. Estado: PR abierto, sin fusionar. (La capitanía del fix OAuth, PR #566 `dc4203f0`, se liberó con `migration-coordinator.sh release`.)

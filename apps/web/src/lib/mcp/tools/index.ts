@@ -6,6 +6,7 @@ import { HISTORY_TOOLS } from "./history";
 import { PREFERENCE_TOOLS } from "./preferences";
 import { SOCIAL_TOOLS } from "./social";
 import { ACTION_TOOLS } from "./actions";
+import { WRITING_STYLE_TOOLS } from "./writing-styles";
 import { INDEXING_TOOLS } from "./indexing";
 import type { ToolDef } from "./shared";
 
@@ -19,7 +20,7 @@ import type { ToolDef } from "./shared";
  * sumarlo acá abajo. Ni `app/api/mcp/route.ts` ni `middleware.ts` cambian
  * nunca por esto.
  */
-export const TOOLS: ToolDef[] = [...OPPORTUNITY_TOOLS, ...ACCOUNT_TOOLS, ...CONTENT_GENERATION_TOOLS, ...GUIDANCE_TOOLS, ...HISTORY_TOOLS, ...PREFERENCE_TOOLS, ...SOCIAL_TOOLS, ...ACTION_TOOLS, ...INDEXING_TOOLS];
+export const TOOLS: ToolDef[] = [...OPPORTUNITY_TOOLS, ...ACCOUNT_TOOLS, ...CONTENT_GENERATION_TOOLS, ...GUIDANCE_TOOLS, ...HISTORY_TOOLS, ...PREFERENCE_TOOLS, ...SOCIAL_TOOLS, ...WRITING_STYLE_TOOLS, ...ACTION_TOOLS, ...INDEXING_TOOLS];
 
 const duplicateNames = TOOLS.map((tool) => tool.name).filter((name, index, all) => all.indexOf(name) !== index);
 if (duplicateNames.length > 0) {

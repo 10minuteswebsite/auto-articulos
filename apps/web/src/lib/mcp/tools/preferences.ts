@@ -12,13 +12,14 @@ export const PREFERENCE_TOOLS: ToolDef[] = [
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     handler: async () => {
       const userId = await getCurrentUserId();
-      const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { contentLanguage: true, articleSignature: true, clientLocations: true, businessLocations: true, excludedTopics: true } });
+      const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { contentLanguage: true, articleSignature: true, clientLocations: true, businessLocations: true, excludedTopics: true, defaultPrompt: { select: { name: true } } } });
       return toolText([
         `Idioma: ${user.contentLanguage ?? "no configurado"}`,
         `Firma: ${user.articleSignature ? "configurada" : "no configurada"}`,
         `Ubicaciones de clientes: ${user.clientLocations || "no configuradas"}`,
         `Ubicaciones del negocio: ${user.businessLocations || "no configuradas"}`,
         `Segmento de no publicar: ${user.excludedTopics || "no configurado"}`,
+        `Estilo de escritura por defecto: ${user.defaultPrompt?.name ?? "STANDARD (10minutesWebsite)"}`,
       ].join("\n"));
     },
   },
