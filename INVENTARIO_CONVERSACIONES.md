@@ -2179,3 +2179,11 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - Deployment verificado: `dpl_9P62g85S79rBK8sfUN1HCocdoUnw` (`READY`).
 - Se verificaron por HTTP el HUB, `/api/*` y el error controlado de `/auth/hub`.
 - Punto 2 cerrado. Pendiente: una prueba real del intercambio de código HUB con cuenta autorizada.
+
+## [Codex] — AUDITORÍA UI ARTÍCULOS — 2026-10-16
+
+- Solicitud: restaurar el menú administrativo desaparecido y alinear shell global y menú interno con Superlinks.
+- Punto cero: producción `dpl_8fRv54Y6o9DBgxA1AMCk2ahqvmAx`, SHA `55fa3876b85eba0c6902c3ba82126f3ff9daea8c`, `main`, sin ramas/worktrees adicionales.
+- Hallazgo: faltaban shell global y origen Hub verificable; `Volver al HUB` aparecía duplicado y el grupo local se llamaba `Administración`.
+- Acción preparada: shell `Admin Hub`, grupo `Admin Artículos`, contexto firmado y guardas de rol conservadas.
+- Estado: pendiente despliegue y verificación real.

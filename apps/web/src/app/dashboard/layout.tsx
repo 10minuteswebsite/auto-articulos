@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DashboardNav from "@/components/DashboardNav";
+import EcosystemHeader from "@/components/EcosystemHeader";
 import FloatingAssistant from "@/components/FloatingAssistant";
 import LogoutButton from "@/components/LogoutButton";
 import ModuleGuard from "@/components/ModuleGuard";
@@ -25,6 +26,7 @@ export default async function DashboardLayout({
 }) {
   const { user, actingAdmin } = await getSessionContext();
   const requestHeaders = await headers();
+  const showHubNavigation = requestHeaders.get("x-auth-source") === "hub";
   const hostProduct = productOfHost(requestHeaders.get("host"));
   const productTitle = hostProduct === "ARTICULOS"
     ? "SEO TOTAL ARTÍCULOS"
@@ -44,6 +46,8 @@ export default async function DashboardLayout({
   }
 
   return (
+    <>
+      {showHubNavigation && <EcosystemHeader email={user.email} isAdmin={user.role === "admin" || Boolean(actingAdmin)} actingAdmin={Boolean(actingAdmin)} />}
     <main
       className="dashboard-main shell"
       style={{
@@ -136,7 +140,7 @@ export default async function DashboardLayout({
           }
         }
       `}</style>
-      <div
+      {!showHubNavigation && <div
         className="topbar"
         style={{
           display: "flex",
@@ -221,12 +225,12 @@ export default async function DashboardLayout({
           {actingAdmin && <StopImpersonationButton />}
           <LogoutButton />
         </div>
-      </div>
+      </div>}
       {blocked ? (
         <TrialBlockedScreen />
       ) : (
         <>
-          <DashboardNav />
+          <DashboardNav showHubNavigation={showHubNavigation} />
           <ProductAccessGuard>
             <ModuleGuard>{children}</ModuleGuard>
           </ProductAccessGuard>
@@ -234,5 +238,6 @@ export default async function DashboardLayout({
         </>
       )}
     </main>
+    </>
   );
 }

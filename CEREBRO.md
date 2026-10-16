@@ -16,6 +16,14 @@ Usar un modelo mixto y conservador:
 - `.net` es una familia válida de producto además de `.com`; cada familia emite su propia cookie de sesión porque el navegador no permite compartir una cookie `.com` desde `.net`.
 - No se cambiarán de entrada las URLs de las consolas OAuth ni se reconectarán integraciones existentes.
 
+## Decisión UI — shell compartido y administración de Artículos — 2026-10-16
+
+- La referencia real es el shell servido por `superlinks.lasolucionweb.net`, no una copia histórica del checkout.
+- Se restaura el encabezado global del Hub en sesiones emitidas por `/auth/hub`; el origen se conserva en una cookie firmada ligada al usuario y se propaga por middleware.
+- El menú propio de Artículos no duplica el acceso al Hub. Su grupo administrativo se etiqueta `Admin Artículos` y sigue sujeto al rol local `admin`/suplantación.
+- El botón global de la plataforma se etiqueta `Admin Hub`, siguiendo la referencia viva de Superlinks.
+- Login nativo y logout eliminan el contexto Hub para evitar que una sesión anterior altere la navegación actual.
+
 ## Reparaciones previstas
 
 1. Excluir callbacks y APIs de cualquier redirección humana al HUB.

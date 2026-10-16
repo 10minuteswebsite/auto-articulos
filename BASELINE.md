@@ -31,3 +31,11 @@ No se intentará compartir una cookie entre `.com` y `.net`: cada familia usa su
 ## Proveedores
 
 Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocarán consolas externas si la verificación manual demuestra que falta una URL. Las conexiones existentes no dependen del callback para renovar o publicar sus tokens.
+
+## Baseline visual y de navegación — Artículos — 2026-10-16
+
+- El shell de referencia es el de `superlinks.lasolucionweb.net`: encabezado global del Hub separado del menú interno del producto.
+- En sesiones Hub, el encabezado global debe mostrar `LA SOLUCIÓN IA`, `Aplicaciones`, `Facturación`, `Perfil`, `Admin Hub` solo para administradores y `Salir`.
+- El menú interno de Artículos conserva sus módulos y muestra el grupo administrativo como `Admin Artículos` solo para administradores.
+- `Volver al HUB` no se duplica en el menú interno cuando el encabezado global ya ofrece `Aplicaciones`.
+- El origen Hub se prueba con un contexto firmado ligado al mismo `userId`; un contexto ausente o inválido conserva el shell legacy y no concede permisos.

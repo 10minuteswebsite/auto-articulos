@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCredentials } from "@/lib/auth";
-import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
-import { applyCookie } from "@/lib/shared-cookies";
+import { createSessionToken, HUB_SESSION_CONTEXT_COOKIE, SESSION_COOKIE } from "@/lib/session";
+import { applyCookie, clearCookie } from "@/lib/shared-cookies";
 
 export async function POST(request: NextRequest) {
   const contentType = request.headers.get("content-type") ?? "";
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ ok: true });
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
     response.headers.set("Pragma", "no-cache");
+    clearCookie(response, HUB_SESSION_CONTEXT_COOKIE, { path: "/" });
     applyCookie(response, SESSION_COOKIE, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
       });
+      clearCookie(redirect, HUB_SESSION_CONTEXT_COOKIE, { path: "/" });
       return redirect;
     }
     return response;

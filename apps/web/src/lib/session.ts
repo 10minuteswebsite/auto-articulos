@@ -2,6 +2,7 @@ const SESSION_COOKIE = "auto_articulos_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 días
 
 const IMPERSONATION_COOKIE = "auto_articulos_impersonation";
+const HUB_SESSION_CONTEXT_COOKIE = "auto_articulos_hub_context";
 // Más corta que la sesión normal: es un estado de acceso elevado (un admin
 // operando la cuenta de otro usuario), así que conviene que expire sola
 // aunque el admin no la cierre explícitamente.
@@ -69,6 +70,32 @@ export async function verifySessionToken(token: string | undefined | null): Prom
   );
 
   return valid ? userId : null;
+}
+
+/** Contexto firmado que identifica una sesión emitida por el Hub. */
+export async function createHubSessionContextToken(userId: string): Promise<string> {
+  const payload = `hubctx.${userId}`;
+  const signatureBuf = await crypto.subtle.sign("HMAC", await getKey(), new TextEncoder().encode(payload));
+  return `${payload}.${toBase64Url(signatureBuf)}`;
+}
+
+export async function verifyHubSessionContextToken(token: string | undefined | null): Promise<string | null> {
+  if (!token) return null;
+  const parts = token.split(".");
+  if (parts.length !== 3 || parts[0] !== "hubctx" || !parts[1]) return null;
+  const [prefix, userId, signature] = parts;
+  try {
+    const payload = `${prefix}.${userId}`;
+    const valid = await crypto.subtle.verify(
+      "HMAC",
+      await getKey(),
+      fromBase64Url(signature).buffer as ArrayBuffer,
+      new TextEncoder().encode(payload),
+    );
+    return valid ? userId : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Access token OAuth para el recurso MCP, separado del token de cookie web. */
@@ -141,4 +168,4 @@ export async function verifyImpersonationToken(
   return valid ? { adminUserId, targetUserId } : null;
 }
 
-export { SESSION_COOKIE, SESSION_TTL_MS, IMPERSONATION_COOKIE, IMPERSONATION_TTL_MS, MCP_ACCESS_TOKEN_TTL_MS };
+export { SESSION_COOKIE, SESSION_TTL_MS, IMPERSONATION_COOKIE, IMPERSONATION_TTL_MS, HUB_SESSION_CONTEXT_COOKIE, MCP_ACCESS_TOKEN_TTL_MS };

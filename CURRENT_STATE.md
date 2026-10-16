@@ -6,9 +6,9 @@ Fecha de auditoría: 2026-10-16 (America/New_York)
 
 - Repositorio canónico: `https://github.com/10minuteswebsite/auto-articulos`.
 - Rama única autorizada: `main`.
-- Commit productivo actual de `main`: `fae041b976ad54721992fa198dfe43d0dabb8681`.
+- Commit productivo actual de `main`: `55fa3876b85eba0c6902c3ba82126f3ff9daea8c`.
 - Producción: Vercel, proyecto `la-solucion-web/auto-articulos-web`.
-- Deployment observado: `dpl_FEgVvQXhJ7iDfxXsYn5TFYWCDuAR`.
+- Deployment observado: `dpl_8fRv54Y6o9DBgxA1AMCk2ahqvmAx`.
 - Estado: `READY`, objetivo `production`.
 - Alias: `seototal`, `articulos` y `redes`, en `.lasolucionweb.com` y `.lasolucionweb.net`.
 
@@ -69,3 +69,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Publicado en Vercel: commit `7112c1ac0a3c840640027cd93b094243ceebd980`, deployment `dpl_kzmJfxq2E2fS41QWAVKx76Jkgv8V` (`READY`).
 - Verificación E2E posterior: el clic del HUB terminó en `https://redes.lasolucionweb.net/dashboard/oportunidades-redes`, con sesión activa y encabezado `SEO TOTAL REDES`.
 - No se modificaron secretos, datos, proveedores ni la configuración DNS.
+
+## Punto cero UI — shell Hub y Admin Artículos — 2026-10-16
+
+- Producción auditada directamente: `articulos.lasolucionweb.net/dashboard/usuarios` mostraba solo el menú interno (`Inicio`, `Publicaciones`, `Configuración`, `Volver al HUB`) y no mostraba el shell global del Hub.
+- Referencia funcional auditada: `superlinks.lasolucionweb.net` separa el shell global (`Aplicaciones`, `Facturación`, `Perfil`, `Admin Hub`, `Salir`) del menú interno de la aplicación.
+- Causa en `main` productivo: el shell compartido y la propagación verificable del origen de sesión Hub habían sido retirados; el menú interno seguía dependiendo del rol local y conservaba `Volver al HUB` como duplicado.
+- Regla de seguridad: `Admin Artículos` solo se renderiza para `role === "admin"` o una sesión de administración activa; las APIs de administración mantienen su guardia independiente.
+- Cambio preparado: contexto Hub firmado, shell global condicionado a ese contexto, eliminación del enlace Hub duplicado en sesiones Hub, y renombrado del grupo a `Admin Artículos`.

@@ -5126,3 +5126,12 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - **Evidencia:** clic real desde el HUB → `https://redes.lasolucionweb.net/dashboard/oportunidades-redes`, sesión activa y encabezado `SEO TOTAL REDES`.
 - **Pruebas:** build y typecheck correctos; suite web 222 correctas, un fallo MCP preexistente y una integración omitida por falta de base de datos de prueba.
 - **Estado:** PRODUCCIÓN, CERRADO. No se tocaron secretos, datos, DNS ni proveedores externos.
+
+## Versión — 2026-10-16 — shell Hub y Admin Artículos
+
+- **Punto cero:** producción `dpl_8fRv54Y6o9DBgxA1AMCk2ahqvmAx` (`READY`) servía `55fa3876b85eba0c6902c3ba82126f3ff9daea8c` desde `main`; un worktree y árbol limpio antes de editar.
+- **Hallazgo:** Artículos no mostraba el shell global del Hub; `main` había retirado el componente compartido y no propagaba un origen Hub verificable.
+- **Cambio:** restaurar shell global según Superlinks, emitir/verificar contexto Hub firmado, ocultar `Volver al HUB` duplicado en sesiones Hub y renombrar el grupo local a `Admin Artículos`.
+- **Seguridad:** `Admin Hub` y `Admin Artículos` siguen condicionados a administración; no se cambiaron roles ni datos.
+- **Validación:** typecheck y build OK; pruebas focalizadas 12/12; suite amplia con 222 pass y 1 expectativa MCP preexistente fallida.
+- **Estado:** pendiente publicar y verificar visualmente con una sesión Hub real.

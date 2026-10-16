@@ -11871,3 +11871,13 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - **E2E:** HUB → Redes terminó en `/dashboard/oportunidades-redes`, sesión activa y encabezado `SEO TOTAL REDES`; no volvió a `/login`.
 - **Validación:** build y typecheck correctos; 222 pruebas correctas, un fallo preexistente de expectativas MCP y una integración omitida por falta de `TITLE_GENERATION_TEST_DATABASE_URL`.
 - **Estado:** CERRADO. Sin cambios en secretos, datos, DNS ni consolas de proveedores.
+
+## Codex — restauración del shell Hub y menú Admin Artículos — 2026-10-16
+
+- **Punto cero real:** `main` y producción Vercel `auto-articulos-web` estaban alineados en `55fa3876b85eba0c6902c3ba82126f3ff9daea8c`, deployment `dpl_8fRv54Y6o9DBgxA1AMCk2ahqvmAx`, `READY`; sin ramas ni worktrees adicionales.
+- **Evidencia:** `articulos.lasolucionweb.net` no mostraba el shell global del Hub; `superlinks.lasolucionweb.net` sí separaba shell global y menú de aplicación.
+- **Causa:** el componente de shell y la señal verificable de sesión Hub habían sido retirados en la línea productiva; el menú local conservaba un enlace Hub duplicado.
+- **Acción:** se prepara el shell global con `Admin Hub`, el grupo local `Admin Artículos`, contexto firmado ligado al usuario y limpieza del contexto en login nativo/logout.
+- **Guardas:** no se otorgan permisos por CSS ni por presencia del menú; las APIs continúan usando `requireAdmin`/rol local.
+- **Validación local:** build/typecheck OK; 12 pruebas focalizadas OK; la única falla de suite completa es la expectativa MCP histórica ya desfasada respecto del catálogo actual.
+- **Estado:** esperando publicación y comprobación productiva autenticada.
