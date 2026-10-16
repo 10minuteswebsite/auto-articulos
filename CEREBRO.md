@@ -35,6 +35,12 @@ Usar un modelo mixto y conservador:
 - Código final: `02b87b4f51a180a87460ce313b246199302fa5ca`; deployment `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR` (`READY`).
 - Se detectó y neutralizó una edición local concurrente que reintroducía el shell antiguo; no se usó `git reset`, no se crearon ramas ni worktrees y el árbol final quedó limpio.
 
+## Corrección de regresión concurrente — 2026-10-16
+
+- El commit `babd61c1` demostró el riesgo operativo: un proceso paralelo reescribió la paleta canónica de `app-subbar` en `main` y generó una regresión visual.
+- La respuesta correcta fue corregir hacia delante desde ese estado, no usarlo como verdad ni hacer rollback de la funcionalidad administrativa.
+- Estado vigente: código `82d33d878efabacce5b2af68eb4277c81ae18f0f`, deployment `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7` (`READY`), producción comprobada.
+
 ## Reparaciones previstas
 
 1. Excluir callbacks y APIs de cualquier redirección humana al HUB.

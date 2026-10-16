@@ -49,3 +49,8 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - `app-subbar`: `min-height: 52px`, ancho `min(100% - 40px, 1160px)`, fondo `#eef5ff`, línea inferior `#d8e4f2`; contexto con línea `#b9cde3` y texto `#60758e`; enlaces `11px/650`, color `#526579`, activo `#dceafb`.
 - `Admin Artículos`: botón delineado con radio 9px; el submenu usa blanco, borde `#d8e4f2`, radio 10px, sombra tenue, enlaces `12px/600–650` y se ancla a la derecha cuando el grupo está al borde del viewport.
 - Si una edición local vuelve a blanco/gris o agrega el distintivo `L` al shell, se considera discrepancia y debe compararse contra la URL viva antes de continuar.
+
+### Corrección de regresión registrada — 2026-10-16
+
+- `babd61c1` reintrodujo temporalmente el shell blanco/gris en `main`; no es referencia válida ni debe promoverse.
+- El estado canónico vigente queda fijado por `82d33d878efabacce5b2af68eb4277c81ae18f0f` y por el deployment productivo `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7` (`READY`).

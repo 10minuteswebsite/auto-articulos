@@ -11913,3 +11913,9 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - Verificación real: AX confirmó las tres opciones del submenu y la pantalla de Administración siguió cargando; typecheck/build/diff-check OK.
 - Durante el cierre apareció un diff local concurrente que restauraba el shell antiguo. Se documentó, se re-aplicaron los valores canónicos y el árbol quedó limpio; no se hizo `reset`, ni se usaron ramas/worktrees.
 - Estado: PRODUCCIÓN, CERRADO.
+
+### Addendum — regresión concurrente detectada y corregida — 2026-10-16
+
+- Un proceso paralelo publicó `babd61c1` directamente en `main` y cambió la `app-subbar` azul a blanco/gris. Ese commit y su deployment `dpl_G5w46PMjrfE5Eyt2g472jUP2cFEF` quedan documentados como regresión, no como verdad.
+- Se corrigió hacia delante en `main` con `82d33d878efabacce5b2af68eb4277c81ae18f0f`.
+- Deployment final verificado: `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`, `READY`; evidencia visual y AX en producción OK.

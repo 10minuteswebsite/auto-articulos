@@ -108,3 +108,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Evidencia E2E: recarga con caché nueva, comparación visual lado a lado y apertura real de `Admin Artículos`; AX confirmó `Usuarios`, `Composio` y `PostPeer`, sin regresión funcional.
 - Verificación local: typecheck y build de producción OK; `git diff --check` OK; árbol final limpio en `main`.
 - Incidente de control: se detectó una edición local concurrente que intentó devolver la subbarra a blanco/gris; se re-aplicó el estado canónico sin `reset` destructivo y se dejó registrado aquí.
+
+## Corrección de regresión concurrente — 2026-10-16
+
+- Después del cierre documental apareció en `main` el commit concurrente `babd61c1`, que cambió la `app-subbar` de `#eef5ff/#d8e4f2` a blanco/gris y redujo los estados activos al estilo antiguo.
+- Ese commit produjo el deployment `dpl_G5w46PMjrfE5Eyt2g472jUP2cFEF`; no se acepta como punto cero porque contradice la comparación viva con Superlinks.
+- Corrección posterior publicada en `main`: `82d33d878efabacce5b2af68eb4277c81ae18f0f`.
+- Deployment productivo corregido: `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`, `READY`, aliases de Artículos activos.
+- Verificación final: barra azul clara, contexto azul, `Admin Artículos` delineado, submenu completo dentro del viewport y AX con `Usuarios`, `Composio`, `PostPeer`.

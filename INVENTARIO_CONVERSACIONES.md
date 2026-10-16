@@ -7,6 +7,11 @@
 - Código final: `02b87b4f51a180a87460ce313b246199302fa5ca`; deployment `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR` (`READY`).
 - Incidencia: una edición local concurrente reintrodujo temporalmente valores antiguos; se re-aplicó el estado productivo canónico sin reset destructivo y se confirmó árbol limpio.
 
+## Addendum de regresión — 2026-10-16
+
+- `babd61c1` fue una edición concurrente que reintrodujo blanco/gris en `DashboardNav`.
+- Corrección vigente: `82d33d878efabacce5b2af68eb4277c81ae18f0f`; deployment `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7` (`READY`).
+
 Este documento tiene un propósito distinto al de `COORDINACION_CLAUDE_CODEX.md`:
 responder, en cualquier momento, **quién es dueño de cada problema/proyecto,
 quién tiene un archivo o rama tomada ahora mismo, y de quién es cada commit**.

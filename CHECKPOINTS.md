@@ -43,6 +43,14 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Verificación E2E: desde la tarjeta del HUB se llegó a `https://redes.lasolucionweb.net/dashboard/oportunidades-redes`; sesión activa de Mario Davila y encabezado `SEO TOTAL REDES`; no volvió a `/login`.
 - Estado: CERRADO.
 
+## Checkpoint 8 — reparación de regresión concurrente — 2026-10-16
+
+- Incidente: `babd61c1` cambió la subbarra canónica azul a blanco/gris y produjo `dpl_G5w46PMjrfE5Eyt2g472jUP2cFEF`; se identifica como regresión, no como baseline.
+- Corrección publicada en `main`: `82d33d878efabacce5b2af68eb4277c81ae18f0f`.
+- Deployment corregido: `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`, `READY`, aliases productivos activos.
+- Evidencia: comparación final con Superlinks, fondo `#eef5ff`, línea `#d8e4f2`, estados activos azules, submenu completo y AX con sus tres opciones.
+- Estado: CERRADO; árbol final limpio y sin ramas/worktrees creados.
+
 ## Checkpoint 6 — paridad visual con Superlinks — 2026-10-16
 
 - Alcance: corregir únicamente la composición y estilos del menú de aplicación y su submenú, usando Superlinks como referencia productiva.
