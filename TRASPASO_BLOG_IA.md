@@ -67,7 +67,9 @@ Cómo probarlo en local: `cd apps/blog && npx tsx src/node/seed.ts && npx tsx sr
 **NO hecho todavía (pendiente, en orden):**
 1. ~~QR de WhatsApp~~ HECHO (`apps/blog/src/qr.ts`, usa `qrcode` núcleo JS; se probó que la matriz coincide con la librería de referencia; NO se escaneó con un celular real: probarlo).
 2. Despliegue real: `wrangler.toml`, D1 real, R2 para imágenes, Custom Hostnames (Fase 0.2–0.4; necesita la cuenta de Cloudflare de Milton).
-3. Conexión con SEO Total: tercer publisher + cola propia en el worker, generación y persistencia del cuerpo del artículo, alojamiento de imágenes (ver hallazgos).
+3. Conexión con SEO Total — PARCIAL. HECHO en local: cliente firmado (`packages/shared/src/blog-ia-client.ts`), publisher (`apps/worker/src/automation/blogIaPublisher.ts`, probado de punta a punta contra el blog real en `apps/blog/src/e2e.test.ts`), modelo `BlogIaBlog` + valor `BLOG` en `PublishMethod` (migración `20261016120000_add_blog_ia`, aditiva e idempotente, probada en un Postgres desechable: se aplica dos veces y los usuarios existentes siguen en BROWSER), cola `apps/worker/src/blogIaQueue.ts` y 7 líneas en `queue.ts` (rama `BLOG`, igual en espíritu a la de MCP; BROWSER no cambia). El worker completo compila sin errores. FALTA: eventos de suspensión/reactivación desde la suscripción, alojamiento de imágenes (R2; hoy el artículo sale sin portada si no hay `imageUrl`) y pruebas de la cola contra una base real (solo está tipada, no ejecutada).
+   - **Decisión pendiente de Milton:** prompt por defecto si la cuenta no tiene ninguno (aquí no existe el flujo «estándar» de 10minutesWebsite); hoy `DEFAULT_BLOG_PROMPT` en `blogIaQueue.ts`.
+   - **Al subir:** la migración debe aplicarse ANTES o junto con el código (incidente 2026-09; `ALTER TYPE … ADD VALUE` en el SQL Editor de Supabase). Variables nuevas del worker: `BLOG_IA_API_URL`, `BLOG_IA_SECRET`.
 4. Wizard de 4 pasos y análisis de marca del sitio del cliente (Fase 2).
 5. Pruebas de accesibilidad automáticas, Core Web Vitals, límites/costes y piloto (Fase 4).
 6. Cabeceras de seguridad adicionales (CSP) y límite de tasa en la API.
