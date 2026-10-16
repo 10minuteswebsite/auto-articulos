@@ -11780,3 +11780,49 @@ de confirmar tras el despliegue del PR #572; comprobar en Administración que Lo
 Zulmad siguen entrando tras el PR #569/#570).
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-16
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-15 (commit
+`b51c7d8`, "docs(coordinacion): cierre de la propagacion diaria 2026-10-15"). Se revisó el rango
+`b51c7d8..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 19 líneas agregadas, 0 eliminadas
+(confirmado con `git diff --stat`), correspondientes a 2 commits que tocan este documento
+(`334d59d`, `81c40c8`; PRs #593 y #594) de un total de 6 commits nuevos en el rango — los otros 4
+(`e44b9e1`, `aa8e332`, `d7f99e6`, `a7632fd`) no agregan nada a Coordinación: 2 entradas nuevas y
+distintas.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 2 entradas nuevas, una por cada entrada nueva de Coordinación
+  (PR #593, PR #594). Ambas citan sus commits y, como el texto original de la entrada en
+  Coordinación todavía decía "PR abierto, SIN fusionar" (#593, con la nota "Milton durmiendo;
+  fusiona con su orden") o "PR abierto, sin fusionar" (#594) — texto escrito antes de que Milton
+  fusionara —, se agregó la verificación real hecha hoy con `git merge-base --is-ancestor <commit>
+  origin/main`: los dos commits del rango ya son ancestros de `origin/main`, es decir, ya están en
+  PRODUCCIÓN aunque el texto de las entradas originales diga lo contrario. No se reescribió
+  ninguna palabra de las entradas originales en Coordinación; la verificación se agregó solo en
+  `CONTROLADOR_DE_VERSIONES.md`.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios — verificado con `git log -- ruta` que
+  ambos PRs del rango (#593 y #594) ya tocaron el manual directamente en su propio commit, así que
+  no hacía falta propagar nada.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (ninguna reserva activa nueva; las 2
+  capitanías del rango fueron reclamadas y liberadas al fusionar o comparten una capitanía ya
+  liberada, verificado contra `git worktree list` — un solo worktree en este entorno — y `git
+  merge-base --is-ancestor` para los 2 commits). Parte B: 2 entradas nuevas, una por cada entrada
+  nueva de Coordinación (mismos PRs listados arriba), porque cada una describe un proyecto
+  distinto y nombrado (MCP de Redes por asistente de IA; MCP de estilos de escritura), no una
+  continuación de una lista ya indexada.
+- `TO-DO.md`: sin cambios — no se encontró ninguna idea suelta nueva para más adelante en este
+  rango; las dos pruebas en vivo pendientes mencionadas en las propias entradas (publicar con la
+  cuenta de Lorena para #593; probar cada estilo de escritura para #594) ya están anotadas como
+  verificación pendiente en la propia entrada de Coordinación y en `CONTROLADOR_DE_VERSIONES.md`,
+  no son ideas sueltas para agregar a `TO-DO.md`.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguna de las 2 entradas del rango describe
+  un árbol de git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. No quedó
+ninguna duda nueva sin resolver para Milton más allá de las que ya estaban anotadas en las propias
+entradas de Coordinación de este rango (prueba en vivo con la cuenta de Lorena para #593; probar
+publicando con cada estilo de escritura para #594).
+
+Responsable: Claude (tarea programada diaria de propagación).
