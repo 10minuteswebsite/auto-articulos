@@ -7,22 +7,26 @@ Fecha: 2026-10-16
 Se trabajará en modo mixto:
 
 - `.com`: dominio canónico de sesión, HUB y OAuth.
-- `.net`: alias de compatibilidad para entrada humana; se normalizará al `.com` equivalente antes de iniciar sesión u OAuth.
+- `.net`: alias de entrada humana y familia válida de producto; cuando una sesión se emite desde `.net`, su cookie se fija dentro de `.lasolucionweb.net`.
 - `seototal.lasolucionweb.com/api/*`: callback técnico conservado aunque las rutas humanas de `seototal` pasen al HUB.
 
 En el Punto 1, la redirección se aplica solo sin sesión. Una sesión existente conserva su dashboard temporalmente para que el retorno de `/auth/hub` no entre en un bucle; el Punto 2 resolverá la sesión compartida y el destino canónico posterior.
 
-El Punto 2 ya corrigió la emisión de sesión de `/auth/hub`: con `DIA_CERO=on`, `applyCookie` fija la cookie para `.lasolucionweb.com` y elimina la variante host-only. Todavía falta probar un intercambio real con una cuenta autorizada del HUB.
+El Punto 2 ya corrigió la emisión de sesión de `/auth/hub`: con `DIA_CERO=on`, `applyCookie` fija la cookie en la familia del host que recibió el callback y elimina la variante host-only. Todavía falta probar un intercambio real con una cuenta autorizada del HUB.
 
-No se intentará compartir cookies entre `.com` y `.net`: el navegador no permite una cookie de dominio `.com` puesta desde `.net`.
+No se intentará compartir una cookie entre `.com` y `.net`: cada familia usa su propio dominio porque el navegador no permite una cookie `.com` puesta desde `.net`.
 
 ## Flujos que no deben romperse
 
 1. Las integraciones existentes no deben reconectarse por este cambio.
 2. Un callback técnico debe conservar la sesión y volver al producto de origen.
-3. Una entrada desde el HUB debe crear una sesión válida en los subdominios `.com`.
+3. Una entrada desde el HUB debe crear una sesión válida en los subdominios de la familia que recibió el callback (`.com` o `.net`).
 4. `/api/*` no debe redirigirse al HUB por una regla de navegación humana.
 5. Un callback inválido o sin sesión debe devolver un error controlado.
+
+## Corrección de lanzamiento HUB a Redes — 2026-10-16
+
+`/auth/hub` selecciona el dominio de cookie según `request.nextUrl.hostname`. Esto conserva el comportamiento `.com` y permite que `redes.lasolucionweb.net` establezca una sesión válida después de canjear el código de un solo uso.
 
 ## Proveedores
 

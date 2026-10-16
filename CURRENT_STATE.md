@@ -6,9 +6,9 @@ Fecha de auditoría: 2026-10-16 (America/New_York)
 
 - Repositorio canónico: `https://github.com/10minuteswebsite/auto-articulos`.
 - Rama única autorizada: `main`.
-- Commit actual de `main`: `c73e7b9445e05d2fef8774fec4b9cc158978ba69`.
+- Commit productivo actual de `main`: `fae041b976ad54721992fa198dfe43d0dabb8681`.
 - Producción: Vercel, proyecto `la-solucion-web/auto-articulos-web`.
-- Deployment observado: `dpl_BcZSYWxq6LeXet6owNzFk53Qf63X`.
+- Deployment observado: `dpl_FEgVvQXhJ7iDfxXsYn5TFYWCDuAR`.
 - Estado: `READY`, objetivo `production`.
 - Alias: `seototal`, `articulos` y `redes`, en `.lasolucionweb.com` y `.lasolucionweb.net`.
 
@@ -25,16 +25,16 @@ Comprobado directamente contra los seis dominios:
 
 - El retorno OAuth canónico actual usa `https://seototal.lasolucionweb.com`.
 - La allowlist OAuth actual contiene los hosts `.com`, no los `.net`.
-- La cookie compartida actual es `.lasolucionweb.com`; no puede compartirse con `.net`.
-- `/auth/hub` crea actualmente la cookie de sesión con `response.cookies.set`, no con `applyCookie`.
+- La cookie compartida se emite dentro de la familia del host actual: `.lasolucionweb.com` o `.lasolucionweb.net`.
+- `/auth/hub` usa `applyCookie` y selecciona la familia correcta para no intentar fijar una cookie `.com` desde `.net`.
 - Instagram directo todavía construye sus redirecciones finales con `request.url`.
 - `/api/*` sigue siendo técnico y no debe convertirse en redirección al HUB.
 
 ## Confirmado y no confirmado
 
-Confirmado: estado HTTP, aliases, deployment, commit actual de `main` y hallazgos estáticos del código.
+Confirmado: estado HTTP, aliases, deployment, commit productivo exacto de `main` y hallazgos estáticos del código.
 
-No confirmado: Vercel no expone en la inspección consultada el commit exacto que produjo el deployment; tampoco se han verificado desde este repositorio las URLs registradas en las consolas OAuth externas.
+No confirmado: tampoco se han verificado desde este repositorio las URLs registradas en las consolas OAuth externas.
 
 No se inició ninguna conexión OAuth real ni se modificaron cuentas, proveedores, variables o datos.
 
@@ -60,3 +60,10 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Deployment productivo verificado: `dpl_9P62g85S79rBK8sfUN1HCocdoUnw`, estado `READY`.
 - Verificación HTTP: entradas humanas siguen al HUB, `/api/*` sigue en 401 sin sesión y `/auth/hub` sin código devuelve `hub_code` sin ser capturado.
 - No se probaron cuentas reales del HUB ni se tocaron proveedores externos.
+
+## Incidente — lanzamiento HUB → Redes en `.net` — 2026-10-16
+
+- Reproducción real: la tarjeta `AUTOMATIZA TUS REDES SOCIALES` generó el enlace correcto con `app=auto-redes`, pero terminó en `https://redes.lasolucionweb.net/login`.
+- Causa: producción tenía `DIA_CERO=on` y el callback `/auth/hub` emitía `Domain=.lasolucionweb.com` aunque la respuesta salía de `redes.lasolucionweb.net`; el navegador rechaza ese dominio de cookie desde `.net`.
+- Corrección: `cookieEnvForHost()` selecciona `.lasolucionweb.net` para Redes `.net` y conserva `.lasolucionweb.com` para hosts `.com`; se añadió prueba para ambas familias.
+- No se modificaron secretos, datos, proveedores ni la configuración DNS.

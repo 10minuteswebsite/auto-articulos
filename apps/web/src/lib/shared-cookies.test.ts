@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { applyCookie, clearCookieHeaders, diaCeroActive, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
+import { applyCookie, clearCookieHeaders, cookieEnvForHost, diaCeroActive, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
 
 test("el dominio compartido solo vale si es válido; si no, todo queda como hoy", () => {
   assert.equal(sharedCookieDomain({}), undefined);
@@ -54,4 +54,10 @@ test("DIA_CERO=on activa el dominio por defecto; el explícito manda; apagado = 
   assert.equal(sharedCookieDomain({ DIA_CERO: "on" }), ".lasolucionweb.com");
   assert.equal(sharedCookieDomain({ DIA_CERO: "on", SHARED_COOKIE_DOMAIN: ".otro.com" }), ".otro.com");
   assert.equal(sharedCookieDomain({ DIA_CERO: "off" }), undefined);
+});
+
+test("el callback del HUB usa el dominio de la familia que lo está sirviendo", () => {
+  assert.equal(cookieEnvForHost("redes.lasolucionweb.net", { DIA_CERO: "on" }).SHARED_COOKIE_DOMAIN, ".lasolucionweb.net");
+  assert.equal(cookieEnvForHost("redes.lasolucionweb.com", { DIA_CERO: "on" }).SHARED_COOKIE_DOMAIN, ".lasolucionweb.com");
+  assert.equal(cookieEnvForHost("redes.lasolucionweb.net:443", { DIA_CERO: "on" }).SHARED_COOKIE_DOMAIN, ".lasolucionweb.net");
 });

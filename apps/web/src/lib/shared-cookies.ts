@@ -31,6 +31,22 @@ type Env = Record<string, string | undefined>;
 /** Dominio por defecto del Día Cero (los tres subdominios de SEO Total viven bajo él). */
 export const DIA_CERO_COOKIE_DOMAIN = ".lasolucionweb.com";
 
+/**
+ * Selecciona el dominio compartido de la familia de hosts que está emitiendo
+ * la cookie. El HUB puede abrir Redes en `.net` o en `.com`; un servidor `.net`
+ * no puede fijar una cookie para `.com` porque el navegador la rechaza.
+ */
+export function cookieEnvForHost(hostname: string, env: Env = process.env): Env {
+  const host = hostname.trim().toLowerCase().split(":", 1)[0];
+  if (host.endsWith(".lasolucionweb.net")) {
+    return { ...env, SHARED_COOKIE_DOMAIN: ".lasolucionweb.net" };
+  }
+  if (host.endsWith(".lasolucionweb.com")) {
+    return { ...env, SHARED_COOKIE_DOMAIN: ".lasolucionweb.com" };
+  }
+  return env;
+}
+
 /** ¿Está activo el interruptor único del Día Cero (variable DIA_CERO=on)? */
 export function diaCeroActive(env: Env = process.env): boolean {
   const raw = env.DIA_CERO?.trim().toLowerCase();

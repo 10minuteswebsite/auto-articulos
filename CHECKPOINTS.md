@@ -32,3 +32,11 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Tests: pruebas dirigidas 18/18, typecheck y build de producción OK. Suite completa: 221 correctas, 1 fallo preexistente de expectativas MCP y 1 integración omitida por falta de `TITLE_GENERATION_TEST_DATABASE_URL`.
 - Producción: entradas al HUB, APIs sin sesión y error controlado de `/auth/hub` verificados por HTTP.
 - Estado: PUNTO 2 CERRADO; pendiente prueba real autorizada del intercambio HUB.
+
+## Checkpoint 3 — reparación del lanzamiento HUB → Redes `.net`
+
+- Punto cero verificado antes de editar: repositorio `miltondavila-ux/auto-articulos`, `main`, SHA productivo `fae041b976ad54721992fa198dfe43d0dabb8681`, Vercel `auto-articulos-web`, deployment `dpl_FEgVvQXhJ7iDfxXsYn5TFYWCDuAR` (`READY`), árbol limpio y un único worktree.
+- Hallazgo: el callback `redes.lasolucionweb.net/auth/hub` heredaba `Domain=.lasolucionweb.com` por `DIA_CERO=on`; el navegador rechazaba la cookie y el dashboard volvía a `/login`.
+- Cambio: `cookieEnvForHost()` selecciona `.lasolucionweb.net` o `.lasolucionweb.com` según el host del callback; se añadió prueba dirigida.
+- Validación local: build y typecheck correctos; suite web `222` correctas, `1` fallo preexistente de expectativas MCP; la prueba de integración de generación de títulos quedó omitida por no existir `TITLE_GENERATION_TEST_DATABASE_URL`.
+- Estado: pendiente publicar desde `main` y repetir el clic real del HUB hasta `redes.lasolucionweb.net/dashboard/oportunidades-redes`.
