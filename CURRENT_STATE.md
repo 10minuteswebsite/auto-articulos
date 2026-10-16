@@ -2,6 +2,15 @@
 
 Fecha de auditoría: 2026-10-16 (America/New_York)
 
+## Punto cero vigente — prompts por producto — 2026-10-16 17:00 (America/New_York)
+
+- Task ID: `MCP-PROMPTS-POR-PRODUCTO-20261016`. Commit de código servido: `4836deaf` (`4836deaf3645db7215a3a9c30fd47580f95a5e92`, squash del PR #606; padre `4a736c60`). Deployment: `dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx`, `READY`, origen git, creado 2026-10-16 20:48Z.
+- Árbol de `main` = árbol verificado antes de publicar (`03af7339`); diff contra `4a736c60` = 7 archivos (151 añadidas, 52 quitadas, todas de la pantalla/prompts del MCP).
+- Comportamiento publicado: la pantalla de Asistentes IA muestra el prompt de Redes en `redes`, el de Artículos en `articulos` y, en el host combinado, el de Artículos más la sección de Redes. La automatización se propone, la persona la acepta una vez y corre sola sin aprobar cada publicación; frecuencia por defecto: Artículos 3 al día (07:00, 12:00, 19:00), Redes 1 al día por red (10:00) o solo las redes elegidas con su horario.
+- Comprobado en producción por HTTP: seis dominios (`/login` 200, salvo `seototal.com` 307 al HUB; `/` y `/dashboard` 307; `/api/mcp` sin token 401; `/dashboard/configuracion/mcp` sin sesión 307); `POST /api/oauth2/token` con refresh falso → `invalid_grant` 400.
+- NO verificado todavía: la pantalla `/dashboard/configuracion/mcp` por host con una sesión real (requiere iniciar sesión). Pendiente de confirmar con la cuenta de Lorena; el host `seototal` queda pendiente de decisión de Milton.
+- Siguiente punto de partida: `main` más reciente; leer este archivo, `BASELINE.md` (Contrato MCP) y Checkpoint 11.
+
 ## Punto cero vigente — MCP en producción — 2026-10-16 16:40 (America/New_York)
 
 - Task ID: `MCP-REDES-CLARIDAD-20261016`. Repositorio `10minuteswebsite/auto-articulos`, rama única `main`.

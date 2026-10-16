@@ -166,3 +166,10 @@ Los siete archivos activos del Harness comparten ahora el mismo punto cero produ
 - Estilos de escritura: STANDARD lo genera 10minutesWebsite (sin `promptId`); los otros 4 son filas `Prompt` propias; sin `promptId` las rutas usan `User.defaultPromptId`. El asistente puede elegir un estilo por artículo o cambiar el por defecto (con comprobante).
 - Lección de proceso: `src/lib/mcp.test.ts` falló en `main` por mis PR #581/#593 y se rotuló «preexistente» en otros checkpoints; antes de publicar se corre `npm test` completo, no solo `src/lib/mcp/*`. Un `git push` directo a `main` fue bloqueado por el clasificador (CI bypass); se publica por un PR sobre la rama existente, sin forzar y sin ramas nuevas, con contenido idéntico al verificado.
 
+## Decisión — prompts por producto y automatización con aceptación única — 2026-10-16 (Task `MCP-PROMPTS-POR-PRODUCTO-20261016`)
+
+- Decisión de Milton: el MCP es UNO para Artículos y Redes, pero las órdenes (prompts) van separadas y cada dominio muestra el suyo. Error propio previo: se había decidido sin preguntar que cada dominio mostrara solo su producto en #593 y luego un prompt unificado; se corrigió a lo que Milton pidió. Regla: no asumir, preguntar.
+- Confirmación (aclarada): no es aprobar cada publicación; es que el asistente proponga el plan de automatización y el usuario lo acepte una vez. Después corre solo, salvo que el usuario pida aprobar cada publicación.
+- Frecuencia por defecto: Artículos 3 al día a horas distintas; Redes 1 al día por red, o solo algunas redes con su horario.
+- La línea «Servidor MCP» se quitó de los prompts (cambia por dominio y el asistente ya está conectado).
+

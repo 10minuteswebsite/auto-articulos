@@ -8,6 +8,12 @@ Antes de modificar código, cambiar de rama, crear un commit, ejecutar una migra
 
 La fuente funcional vigente es la producción verificada, no una entrada histórica del registro: `main` en `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`, servido por Vercel como `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE` (`READY`). El árbol de trabajo autorizado es único y no se crean ramas ni worktrees. Los registros anteriores se conservan como historial y deben leerse como tales.
 
+## Versión — 2026-10-16 — MCP: prompts por producto (PR #606)
+
+- Task ID: `MCP-PROMPTS-POR-PRODUCTO-20261016`. Commit: `4836deaf3645db7215a3a9c30fd47580f95a5e92` en `main` (squash; padre `4a736c60`). Deployment: `dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx`, `READY`, git.
+- Alcance: pantalla y textos del MCP (`prompts-por-producto.ts`, `automation.ts`, `configuracion/mcp/page.tsx`, manual) y prueba nueva. Sin migración ni cambios de rutas.
+- Verificación: árbol de `main` idéntico al verificado; HTTP de los seis dominios; la pantalla por host con sesión real, pendiente. Checkpoint 11.
+
 ## Versión — 2026-10-16 — MCP: claridad de Redes y corrección de prueba (PR #601)
 
 - Task ID: `MCP-REDES-CLARIDAD-20261016`.
