@@ -23,6 +23,7 @@ Usar un modelo mixto y conservador:
 - El menú propio de Artículos no duplica el acceso al Hub. Su grupo administrativo se etiqueta `Admin Artículos` y sigue sujeto al rol local `admin`/suplantación.
 - El botón global de la plataforma se etiqueta `Admin Hub`, siguiendo la referencia viva de Superlinks.
 - Login nativo y logout eliminan el contexto Hub para evitar que una sesión anterior altere la navegación actual.
+- Las pantallas `ADMIN` no pertenecen a Artículos ni Redes, pero sí deben permanecer visibles para una cuenta administradora dentro de cualquiera de esos hosts. El clasificador de producto sigue devolviendo `ADMIN`; la excepción vive solo en el menú, antes del filtro visual, y no modifica autorización.
 
 ## Reparaciones previstas
 
@@ -68,3 +69,12 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 - Producción: deployment `dpl_kzmJfxq2E2fS41QWAVKx76Jkgv8V` (`READY`).
 - Evidencia E2E: la tarjeta del HUB llegó a `https://redes.lasolucionweb.net/dashboard/oportunidades-redes` con sesión activa y encabezado `SEO TOTAL REDES`.
 - Estado final: cerrado y documentado en `CURRENT_STATE.md`, `BASELINE.md` y `CHECKPOINTS.md`.
+
+## Punto 4 completado — shell y administración de Artículos
+
+- El shell global y el grupo local `Admin Artículos` quedaron publicados en `main`.
+- La regresión residual no era de sesión ni de hidratación: el filtro de host ocultaba las rutas `ADMIN` y dejaba el grupo sin elementos.
+- La regla durable es: administración transversal visible para administradores; autorización de datos independiente y server-side.
+- Código: `02861df21487a0704268b30946e8021f866972c9`.
+- Producción: `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`.
+- Evidencia: menú visible y desplegable verificado en vivo en `articulos.lasolucionweb.net`.

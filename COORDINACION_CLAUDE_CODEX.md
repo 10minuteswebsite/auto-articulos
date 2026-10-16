@@ -11881,3 +11881,14 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - **Guardas:** no se otorgan permisos por CSS ni por presencia del menú; las APIs continúan usando `requireAdmin`/rol local.
 - **Validación local:** build/typecheck OK; 12 pruebas focalizadas OK; la única falla de suite completa es la expectativa MCP histórica ya desfasada respecto del catálogo actual.
 - **Estado:** esperando publicación y comprobación productiva autenticada.
+
+## Codex — cierre del menú Admin Artículos en producción — 2026-10-16
+
+- **Punto cero:** producción `dpl_BdeLPGhpYcUJj3d1MEwV4TgQ39C8`, `READY`, SHA `97454ab2577a4e7c28568cee27249a14a2b6c16b`; se trabajó directamente en `main`, sin crear ramas ni worktrees.
+- **Causa raíz nueva y confirmada:** no era una regresión del shell ni del contexto Hub. `DashboardNav` clasificaba `/dashboard/usuarios`, `/dashboard/composio` y `/dashboard/postpeer` como `ADMIN`, y el filtro del host de Artículos los ocultaba antes de construir el grupo.
+- **Cambio mínimo:** para una sesión con `role === "admin"` o suplantación activa, las rutas `ADMIN` se conservan visibles en el menú. `isVisibleInProduct()` sigue clasificándolas fuera de los productos y las APIs siguen protegidas.
+- **Commit publicado:** `02861df21487a0704268b30946e8021f866972c9`.
+- **Deployment productivo:** `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`.
+- **Verificación E2E:** `articulos.lasolucionweb.net/dashboard` tras recarga completa mostró el shell global (`Aplicaciones`, `Facturación`, `Perfil`, `Admin Hub`, identidad, `Salir`) y `Admin Artículos`; al abrirlo mostró `Usuarios`, `Composio` y `PostPeer`.
+- **Pruebas:** typecheck OK; build de producción del lote OK; suite amplia 224 correctas y 1 expectativa MCP histórica fallida, sin relación con este cambio.
+- **Estado:** CERRADO; no quedan cambios locales funcionales pendientes.

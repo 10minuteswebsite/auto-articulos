@@ -5135,3 +5135,14 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - **Seguridad:** `Admin Hub` y `Admin Artículos` siguen condicionados a administración; no se cambiaron roles ni datos.
 - **Validación:** typecheck y build OK; pruebas focalizadas 12/12; suite amplia con 222 pass y 1 expectativa MCP preexistente fallida.
 - **Estado:** pendiente publicar y verificar visualmente con una sesión Hub real.
+
+## Versión — 2026-10-16 — cierre productivo Admin Artículos
+
+- **Punto cero:** producción `dpl_BdeLPGhpYcUJj3d1MEwV4TgQ39C8`, `READY`, commit `97454ab2577a4e7c28568cee27249a14a2b6c16b`; `main` y el único worktree estaban limpios antes de la corrección.
+- **Causa raíz:** el filtro de host de `DashboardNav` ocultaba las rutas clasificadas como `ADMIN` en `articulos`, dejando vacío el grupo aunque la sesión tuviera rol administrativo.
+- **Corrección:** las entradas `ADMIN` permanecen visibles para `isAdmin`; las guardas de servidor y API no cambiaron.
+- **Commit publicado:** `02861df21487a0704268b30946e8021f866972c9` en `main`.
+- **Deployment:** `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`, aliases productivos activos.
+- **Evidencia:** recarga real de `articulos.lasolucionweb.net/dashboard`; `Admin Artículos` se ve y abre `Usuarios`, `Composio` y `PostPeer`; shell global conforme a Superlinks.
+- **Validación:** typecheck OK, `git diff --check` OK, suite `224 pass / 1 fail` por expectativa MCP preexistente y no relacionada.
+- **Estado:** PRODUCCIÓN, CERRADO.

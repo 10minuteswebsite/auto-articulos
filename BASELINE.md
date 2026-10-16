@@ -39,3 +39,4 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - El menú interno de Artículos conserva sus módulos y muestra el grupo administrativo como `Admin Artículos` solo para administradores.
 - `Volver al HUB` no se duplica en el menú interno cuando el encabezado global ya ofrece `Aplicaciones`.
 - El origen Hub se prueba con un contexto firmado ligado al mismo `userId`; un contexto ausente o inválido conserva el shell legacy y no concede permisos.
+- Las rutas administrativas son transversales al host de producto: el filtro visual de Artículos/Redes no puede ocultarlas para un administrador. Su visibilidad sigue dependiendo del rol o suplantación; esta excepción no concede acceso y las APIs conservan sus guardas.

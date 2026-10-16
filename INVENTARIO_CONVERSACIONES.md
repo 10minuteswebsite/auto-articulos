@@ -2187,3 +2187,12 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - Hallazgo: faltaban shell global y origen Hub verificable; `Volver al HUB` aparecía duplicado y el grupo local se llamaba `Administración`.
 - Acción preparada: shell `Admin Hub`, grupo `Admin Artículos`, contexto firmado y guardas de rol conservadas.
 - Estado: pendiente despliegue y verificación real.
+
+### Codex — cierre Admin Artículos — 2026-10-16
+
+- Solicitud: restaurar el shell heredado del Hub y el menú administrativo de Artículos conforme al patrón vivo de Superlinks.
+- Causa raíz confirmada después del primer despliegue: el filtro por host ocultaba todas las rutas `ADMIN` en `articulos`, por lo que el grupo administrativo se eliminaba al quedar vacío. No era una discrepancia de producción ni un problema de permisos de API.
+- Corrección publicada en `main`: `02861df21487a0704268b30946e8021f866972c9`.
+- Deployment: `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`.
+- Evidencia en vivo: `Admin Artículos` visible y desplegable con `Usuarios`, `Composio` y `PostPeer`; shell global visible y alineado con Superlinks.
+- Estado: PRODUCCIÓN, CERRADO. No se crearon ramas ni worktrees; no se cambiaron roles, datos ni secretos.

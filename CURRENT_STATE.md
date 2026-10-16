@@ -6,9 +6,9 @@ Fecha de auditoría: 2026-10-16 (America/New_York)
 
 - Repositorio canónico: `https://github.com/10minuteswebsite/auto-articulos`.
 - Rama única autorizada: `main`.
-- Commit productivo actual de `main`: `55fa3876b85eba0c6902c3ba82126f3ff9daea8c`.
+- Commit funcional productivo verificado: `02861df21487a0704268b30946e8021f866972c9`.
 - Producción: Vercel, proyecto `la-solucion-web/auto-articulos-web`.
-- Deployment observado: `dpl_8fRv54Y6o9DBgxA1AMCk2ahqvmAx`.
+- Deployment funcional observado: `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`.
 - Estado: `READY`, objetivo `production`.
 - Alias: `seototal`, `articulos` y `redes`, en `.lasolucionweb.com` y `.lasolucionweb.net`.
 
@@ -76,4 +76,13 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Referencia funcional auditada: `superlinks.lasolucionweb.net` separa el shell global (`Aplicaciones`, `Facturación`, `Perfil`, `Admin Hub`, `Salir`) del menú interno de la aplicación.
 - Causa en `main` productivo: el shell compartido y la propagación verificable del origen de sesión Hub habían sido retirados; el menú interno seguía dependiendo del rol local y conservaba `Volver al HUB` como duplicado.
 - Regla de seguridad: `Admin Artículos` solo se renderiza para `role === "admin"` o una sesión de administración activa; las APIs de administración mantienen su guardia independiente.
-- Cambio preparado: contexto Hub firmado, shell global condicionado a ese contexto, eliminación del enlace Hub duplicado en sesiones Hub, renombrado del grupo a `Admin Artículos` y rol administrativo inicial entregado desde el servidor para evitar una carrera de hidratación.
+- Cambio publicado: contexto Hub firmado, shell global condicionado a ese contexto, eliminación del enlace Hub duplicado en sesiones Hub, renombrado del grupo a `Admin Artículos`, rol administrativo inicial entregado desde el servidor y excepción explícita para que las rutas `ADMIN` no sean ocultadas por el filtro visual de Artículos/Redes.
+
+## Cierre productivo — menú Admin Artículos — 2026-10-16
+
+- Causa raíz confirmada: `DashboardNav` sí recibía el rol administrativo, pero `isVisibleInProduct()` clasifica las rutas administrativas como `ADMIN`; al ejecutarse el filtro en `articulos.lasolucionweb.net`, las tres entradas quedaban ocultas y el grupo desaparecía por estar vacío.
+- Corrección: las rutas `ADMIN` se mantienen visibles para administradores o sesiones de administración activa; no se cambió la regla general que mantiene Administración fuera de los módulos de producto para cuentas normales.
+- Commit funcional: `02861df21487a0704268b30946e8021f866972c9`.
+- Deployment productivo: `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`, `main`, aliases de Artículos activos.
+- Evidencia E2E: en `https://articulos.lasolucionweb.net/dashboard`, tras recarga completa, se observaron `Admin Artículos` y su menú expandido con `Usuarios`, `Composio` y `PostPeer`; el shell global mostró `Aplicaciones`, `Facturación`, `Perfil`, `Admin Hub`, identidad y `Salir`.
+- Validación: typecheck OK; build previo del lote OK; suite amplia `224 pass / 1 fail` por expectativa MCP preexistente y no relacionada (`mcp.test.ts` espera tres prompts, el catálogo actual expone seis).

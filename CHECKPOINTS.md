@@ -50,4 +50,15 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Causa: `main` productivo había retirado `EcosystemHeader` y el contexto de sesión Hub; `DashboardNav` mantenía `Volver al HUB` y el grupo `Administración`.
 - Corrección: contexto Hub firmado y ligado al usuario, shell global restaurado, `Admin Hub` global, `Admin Artículos` interno, rol admin inicial desde servidor y sin enlace Hub duplicado en sesiones Hub.
 - Validación local: typecheck OK, build de producción OK, pruebas focalizadas de sesión/cookies/redirección 12/12 OK. Suite completa: 222 pass y 1 fallo preexistente de expectativas MCP.
-- Estado: listo para publicar desde `main`; falta registrar el SHA/deployment final y repetir verificación visual autenticada.
+- Estado: corregido, publicado y verificado en producción; el registro final está en el Checkpoint 5.
+
+## Checkpoint 5 — corrección del filtro administrativo transversal — 2026-10-16
+
+- Punto cero operativo: producción `dpl_BdeLPGhpYcUJj3d1MEwV4TgQ39C8`, `READY`, commit `97454ab2577a4e7c28568cee27249a14a2b6c16b`, con el shell ya restaurado pero sin `Admin Artículos` estable.
+- Causa raíz: las entradas `/dashboard/usuarios`, `/dashboard/composio` y `/dashboard/postpeer` se clasifican como `ADMIN`; el filtro por host de `DashboardNav` las ocultaba siempre en `articulos`, vaciando el grupo aunque el usuario fuera administrador.
+- Corrección: `DashboardNav` conserva las entradas `ADMIN` para `isAdmin`; no se alteró `isVisibleInProduct()` ni se relajaron las guardas de API.
+- Commit publicado: `02861df21487a0704268b30946e8021f866972c9` en `main`.
+- Deployment productivo: `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`, aliases `.com` y `.net` activos.
+- Verificación E2E: recarga completa de `https://articulos.lasolucionweb.net/dashboard`; shell global visible, `Admin Artículos` visible y desplegable con `Usuarios`, `Composio` y `PostPeer`.
+- Validación local: typecheck OK; suite `224 pass / 1 fail` por la expectativa MCP preexistente y no relacionada; `git diff --check` OK.
+- Estado: CERRADO.
