@@ -62,6 +62,46 @@ const fallbackStages = [
   "Guardando propuestas",
 ];
 
+const networkLogoStyles: Record<string, { color: string; background: string; mark: string }> = {
+  threads: { color: "#1d1d1f", background: "#f2f2f7", mark: "@" },
+  linkedin: { color: "#ffffff", background: "#0a66c2", mark: "in" },
+  instagram: { color: "#ffffff", background: "#d62976", mark: "◎" },
+  "facebook-page": { color: "#ffffff", background: "#1877f2", mark: "f" },
+  pinterest: { color: "#ffffff", background: "#e60023", mark: "P" },
+  tumblr: { color: "#ffffff", background: "#36465d", mark: "t" },
+  bluesky: { color: "#ffffff", background: "#1185fe", mark: "✦" },
+  devto: { color: "#ffffff", background: "#1d1d1f", mark: "dev" },
+  blogger: { color: "#ffffff", background: "#f57c00", mark: "B" },
+  "google-business": { color: "#1a73e8", background: "#e8f0fe", mark: "G" },
+};
+
+function NetworkLogo({ platform }: { platform: string }) {
+  const style = networkLogoStyles[platform] ?? { color: "#1d1d1f", background: "#f2f2f7", mark: "•" };
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 24,
+        height: 24,
+        flex: "0 0 24px",
+        borderRadius: 7,
+        background: style.background,
+        color: style.color,
+        fontSize: style.mark === "dev" ? 7 : style.mark === "in" ? 11 : 14,
+        fontWeight: 700,
+        lineHeight: 1,
+        letterSpacing: style.mark === "dev" ? "-0.04em" : 0,
+        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+      }}
+    >
+      {style.mark}
+    </span>
+  );
+}
+
 export default function OportunidadesRedesPage() {
   const router = useRouter();
   const [opportunities, setOpportunities] = useState<SocialOpportunity[]>([]);
@@ -372,7 +412,6 @@ export default function OportunidadesRedesPage() {
     <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
       {/* Panel Superior */}
       <div
-        className="panel"
         style={{
           ...sectionStyle,
           padding: "20px 0 24px",
@@ -438,19 +477,30 @@ export default function OportunidadesRedesPage() {
                   disabled={generatingAll || generatingNetwork !== null}
                   style={{ ...buttonStyle, ...uniformButtonSize, width: "100%", marginBottom: 16 }}
                 >
-                  {generatingAll ? "Generando para todas las redes..." : "📲 Generar 1 por cada red (Todas)"}
+                  {generatingAll ? "Generando para todas las redes..." : "Generar 1 por cada red (todas)"}
                 </button>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
+                <div>
                 {([
-                ["threads", "threads", "Threads"], ["x", "x", "X (Twitter)"], ["linkedin", "linkedin", "LinkedIn"], ["instagram", "instagram", "Instagram"], ["facebookPage", "facebook-page", "Facebook"], ["pinterest", "pinterest", "Pinterest"], ["tumblr", "tumblr", "Tumblr"], ["bluesky", "bluesky", "Bluesky"], ["devto", "devto", "DEV.to"], ["blogger", "blogger", "Blogger"], ["googleBusiness", "google-business", "Google Business Profile"],
-                ] as const).map(([key, platform, label]) => {
+                ["threads", "threads", "Threads", "threads"], ["x", "x", "X (Twitter)", null], ["linkedin", "linkedin", "LinkedIn", "linkedin"], ["instagram", "instagram", "Instagram", "instagram"], ["facebookPage", "facebook-page", "Facebook", "facebook"], ["pinterest", "pinterest", "Pinterest", "pinterest"], ["tumblr", "tumblr", "Tumblr", "tumblr"], ["bluesky", "bluesky", "Bluesky", "bluesky"], ["devto", "devto", "DEV.to", "devto"], ["blogger", "blogger", "Blogger", "blogger"], ["googleBusiness", "google-business", "Google Business Profile", "business-profile"],
+                ] as const).map(([key, platform, label, conexionId]) => {
                 if (!activeNetworks[key]) return null;
                 const connected = connectedNetworks[key];
                 const busy = Boolean(generatingNetwork);
                 const unavailable = !connected;
-                return <button key={key} type="button" onClick={() => handleGenerate(platform)} disabled={busy || unavailable} className="secondary" style={disabledStyle({ ...secondaryButtonStyle, ...uniformButtonSize, width: "100%", border: "1px solid #d2d2d7", background: unavailable ? "#f5f5f7" : "#ffffff", color: unavailable ? "#86868b" : "#1d1d1f", justifyContent: "center" }, busy || unavailable)}>
-                  {generatingNetwork === platform ? "Analizando..." : unavailable ? "· Configurar " + label : "✓ " + label + " · Crear oportunidad"}
-                </button>;
+                const actionStyle: CSSProperties = { border: "none", background: "transparent", padding: 0, fontSize: 14, color: unavailable ? "#86868b" : "#0066cc", cursor: busy ? "wait" : "pointer", fontFamily: "inherit" };
+                return <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid #e5e5ea" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 10, minWidth: 0, fontSize: 15, color: unavailable ? "#86868b" : "#1d1d1f" }}>
+                    <NetworkLogo platform={platform} />
+                    {label}
+                  </span>
+                  {unavailable && conexionId ? (
+                    <button type="button" disabled={busy} style={actionStyle} onClick={() => router.push(`/dashboard/configuracion/conexiones?vista=difusion&conexion=${conexionId}`)}>Configurar ›</button>
+                  ) : unavailable ? (
+                    <span style={{ fontSize: 14, color: "#86868b" }}>No disponible</span>
+                  ) : (
+                    <button type="button" disabled={busy} style={actionStyle} onClick={() => handleGenerate(platform)}>{generatingNetwork === platform ? "Analizando..." : "Crear oportunidad"}</button>
+                  )}
+                </div>;
                 })}
                 </div>
               </>
@@ -481,7 +531,7 @@ export default function OportunidadesRedesPage() {
         </div>
 
         {!connectedNetworks.threads && !connectedNetworks.x && !connectedNetworks.linkedin && !connectedNetworks.instagram && !connectedNetworks.facebookPage && !connectedNetworks.pinterest && !connectedNetworks.tumblr && !connectedNetworks.bluesky && !connectedNetworks.devto && !connectedNetworks.blogger && !connectedNetworks.googleBusiness && !loading && !connectionsLoading && (
-          <div className="notice" style={{ marginTop: 14 }}>
+          <div style={{ marginTop: 14, fontSize: 14, lineHeight: 1.5, color: "#6e6e73" }}>
             <p style={{ margin: 0 }}>
               Todavía no tienes ninguna red social conectada, así que no hay
               dónde publicar. Conecta al menos una y vuelve aquí: las propuestas
@@ -512,10 +562,7 @@ export default function OportunidadesRedesPage() {
             aria-live="polite"
             style={{
               marginTop: 16,
-              padding: 16,
-              border: "1px solid #e5e5ea",
-              borderRadius: 14,
-              background: "#f5f5f7",
+              padding: 0,
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", marginBottom: 10 }}>
@@ -544,14 +591,11 @@ export default function OportunidadesRedesPage() {
       {message && (
         <div
           style={{
-            padding: "12px 16px",
-            borderRadius: 12,
-            marginBottom: 20,
+            padding: "0 0 16px",
+            marginBottom: 4,
             fontSize: 13,
             fontWeight: 500,
-            background: message.kind === "success" ? "#f2faf4" : message.kind === "error" ? "#fff2f1" : "#f5f5f7",
             color: message.kind === "success" ? "#16803c" : message.kind === "error" ? "#ff3b30" : "#6e6e73",
-            border: `1px solid ${message.kind === "success" ? "rgba(52, 199, 89, 0.25)" : message.kind === "error" ? "rgba(255, 59, 48, 0.25)" : "#e5e5ea"}`,
           }}
         >
           {message.text}
@@ -571,7 +615,7 @@ export default function OportunidadesRedesPage() {
           </div>
 
           {pendingList.length === 0 ? (
-            <section style={{ ...sectionStyle, textAlign: "center", padding: 32 }}>
+            <section style={{ ...sectionStyle, padding: "16px 0 24px" }}>
               <p className="muted" style={{ margin: 0 }}>
                 No tienes propuestas pendientes. Usa los botones de arriba para generarlas.
               </p>
@@ -588,37 +632,12 @@ export default function OportunidadesRedesPage() {
               {pendingList.map((opp) => {
                 const isQueuedOrProcessing = false;
                 return (
-                  <div key={opp.id} className="panel" style={sectionStyle}>
+                  <div key={opp.id} style={sectionStyle}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
                       <div>
-                        <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              padding: "2px 8px",
-                              borderRadius: 999,
-                              fontSize: 11,
-                              fontWeight: 600,
-                              textTransform: "uppercase",
-                              background: "#f5f5f7",
-                              color: "#1d1d1f",
-                            }}
-                          >
-                            {opp.platform}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 500,
-                              padding: "2px 8px",
-                              borderRadius: 999,
-                              background: opp.status === "published" ? "rgba(52, 199, 89, 0.1)" : "#f5f5f7",
-                              color: opp.status === "published" ? "#16803c" : "#6e6e73",
-                            }}
-                          >
-                            {opp.status === "published" ? "✓ Publicado" : opp.status === "processing" ? "Publicando..." : "Pendiente"}
-                          </span>
-                        </div>
+                        <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "#6e6e73" }}>
+                          {opp.platform} · {opp.status === "published" ? "Publicado" : opp.status === "processing" ? "Publicando..." : "Pendiente"}
+                        </p>
                         <h4 style={{ color: "#1d1d1f", margin: "0 0 4px 0", fontSize: 16, fontWeight: 600 }}>
                           {opp.articleTitle}
                         </h4>

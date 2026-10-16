@@ -10391,3 +10391,175 @@ reemplaza el ejemplo puntual de Flow House, ilustrada con dos casos reales
 producción con Guillermo Martínez.
 
 **Responsable:** Claude. **Estado:** PR abierto, pendiente de fusión.
+## CIERRE — MÓDULO DE PROGRAMACIÓN AUTOMÁTICA — 2026-10-01
+
+**Identidad:** MODULO DE PROGRAMACION.
+
+**Proyecto:** diseño conceptual de dos programadores automáticos: uno para
+artículos y otro para publicaciones en redes sociales.
+
+**Resultado:** el diseño queda cancelado y no se implementará. Milton decidió
+que estas funciones serán cubiertas por asistentes de IA disponibles en el
+mercado.
+
+**Trabajo realizado:** se documentaron y revisaron reglas de activación,
+consentimiento de IA, límites diarios, horarios aleatorios, oportunidades
+SEO/AEO, reintentos, protección contra duplicados, bloqueo de publicaciones
+manuales, correos de éxito, controles administrativos y auditoría de fallos.
+
+**Código y producción:** no se modificó código, no se crearon migraciones,
+no se hicieron despliegues y no quedan cambios propios que integrar.
+
+**Decisión:** no continuar con arquitectura ni programación de este módulo.
+La documentación se conserva únicamente como referencia histórica para evitar
+perder el análisis realizado.
+
+**Estado:** ARCHIVADO por decisión de Milton.
+
+## Claude-2 — AVISO ROJO UNIFICADO DE RECONEXIÓN GSC — 2026-10-01
+
+**Contexto:** seguimiento del PR #256 (caso real Flor Méndez, Search Console
+devolviendo "User does not have sufficient permission for site..."). Milton
+preguntó por qué no aparecía aviso rojo y pidió unificar protocolo: el mismo
+aviso de "Reconectar Search Console" debe cubrir también accesos rotos
+reales, no solo la migración pendiente a Composio.
+
+**Nota de numeración:** al reclamar vi la capitanía activa a nombre de
+"Claude" con un motivo que yo no escribí ("MCP autónomo..."), reclamada
+2026-10-01T14:40:30Z, commit_base b24a2520 — corresponde a la sesión en el
+worktree `/private/tmp/mcp-autonomous-20261001`. Me numero **Claude-2** para
+esta tarea. No toqué esa área ni esa capitanía.
+
+**Trabajo realizado (worktree `.worktrees/gsc-reconnect-banner`, desde
+`origin/main`, sin tocar el árbol de Milton):**
+- `SearchIntegration` suma `lastAccessError`/`lastAccessErrorAt` (mismo
+  patrón que `lastSitemapSyncError`).
+- `POST /api/opportunities` graba el error real ahí cuando Search Console
+  falla (ver #256); se limpia en el próximo uso exitoso o al reconectar
+  (`PATCH /api/search-integrations/google`).
+- `GET /api/configuration-status` dispara el mismo check
+  `google-search-console-reconnect` por esta causa nueva, con la
+  descripción incluyendo el motivo real de Google, independiente del
+  interruptor piloto de Composio.
+- Manual de usuario actualizado.
+
+**Incidente propio durante el trabajo (corregido, documentado para quien
+lea esto después):** al enlazar `node_modules` del worktree copiando
+entradas del repo principal, `@prisma/client` quedó enlazado al directorio
+REAL del repo principal (no un enlace propio) — `prisma generate` escribió
+ahí y sobrescribió momentáneamente el cliente compartido con mi schema
+todavía sin migrar. Detectado de inmediato, revertido regenerando el
+cliente del repo principal contra su propio `schema.prisma` sin tocar
+(commit base intacto, confirmado limpio), y luego reemplazado el enlace del
+worktree por una copia real aislada antes de volver a generar. Ver
+[[protocolo-capitan-obligatorio]] — el enlace de `node_modules` necesita
+también cubrir `@prisma/client`, no solo `@auto-articulos/*`.
+
+**Verificación:** `npm run typecheck` limpio (cero errores) en el worktree
+aislado.
+
+**Estado:** PR #282 abierto, **pendiente de fusión** — incluye migración,
+no desplegar hasta coordinar con la capitanía activa de MCP (liberación o
+confirmación de Milton de que no colisiona).
+
+**Responsable:** Claude-2.
+
+## AUDITORÍA DE PENDIENTES PARA SUBIR — 2026-10-05
+
+Revisión realizada por **CODEX - GPT-5 - REPARADOR DEL ARBOL PRINCIPAL** sobre
+el estado actual de `origin/main`, worktrees y ramas locales.
+
+### Estado base
+
+- `origin/main` actual: `5f10b560` — `fix: deshabilitar redes sociales temporalmente`.
+- El checkout principal contiene únicamente cambios documentales/locales sin
+  commit; no se autoriza subirlos como código productivo.
+- La capitanía activa registrada es de Claude, con motivo documental sobre el
+  incidente `lastAccessErrorAt`; no representa por sí sola un lote de código
+  listo para producción.
+
+### Candidatos reales para revisión independiente
+
+1. **`CLAUDE - POSTPEER GBP ENRUTAMIENTO`**
+   - Rama: `claude/postpeer-gbp-enrutamiento`.
+   - Commit: `bee71e2c`.
+   - Añade `POSTPEER_GBP_USER_IDS`, pasa las variables al worker y limita
+     PostPeer→Google Business Profile a usuarios autorizados.
+   - No crea migraciones.
+   - Estado: **NO SUBIR DIRECTAMENTE**. Debe rebasarse o transplantarse sobre
+     el `origin/main` actual y pasar auditoría propia.
+
+2. **`CODEX - ME CLIENT`**
+   - Rama: `codex/me-client`.
+   - Commit: `d213296f`.
+   - Añade cache compartida para `/api/me`, `ModuleGuard` y
+     `ProductAccessGuard`, con pruebas específicas.
+   - No crea migraciones.
+   - Estado: **NO SUBIR DIRECTAMENTE**. Debe rebasarse sobre el `origin/main`
+     actual y validarse sin arrastrar la base antigua de la rama.
+
+### Ramas que no deben subirse como lote
+
+- `codex/apply-hub-entitlement` y `codex/admin-switches-panel`: divergen
+  ampliamente y contienen eliminaciones masivas de archivos; requieren una
+  extracción selectiva, no un merge completo.
+- `codex/redes-dia-cero-script`: contiene únicamente scripts SQL auxiliares;
+  no se ejecuta ni se publica automáticamente.
+- `codex/control-x023`, `codex/dia-cero-v3-docs`, `codex/audit-routes`,
+  `codex/bloque4-documentos`, `codex/diseno-callback-unico`, y demás ramas de
+  auditoría/control: son documentación o pruebas, no entregas productivas.
+- `codex/mcp-autonomous-20261001`: lote MCP ya integrado y publicado; no
+  volver a subirlo.
+- `claude/gsc-reconnect-banner`: su código ya está integrado en `main` como
+  `f58a97f`; no duplicarlo.
+
+### Regla de integración
+
+Ningún candidato se considera listo para producción solo por tener commits
+locales. Cada uno debe tener rama nueva desde `origin/main`, diff selectivo,
+pruebas propias y PR independiente. No se debe fusionar ninguna rama antigua
+completa que arrastre eliminaciones o cambios de otros proyectos.
+
+## AUDITORÍA DOCUMENTAL DE IDEAS PENDIENTES — 2026-10-06
+
+**Identidad exacta:** `CODEX - GPT-5 - TO DO`
+
+**Acción:** revisión de solo lectura de `TO-DO.md`, historial reciente y
+documentación de coordinación para distinguir ideas vigentes de funciones ya
+construidas. No se modificó código, migraciones, producción ni el estado de
+ningún ítem.
+
+**Corrección de la auditoría (misma fecha):** la "Máquina alternativa de
+creación de artículos" NO es un pendiente. Ya está implementada: existe
+`generateCustomArticle`, la selección de prompts en Publicar y Oportunidades,
+la administración de prompts y los commits de Creación de Publicaciones
+Propias (`0facb494`, `3f8123e1`, `7a514a16`). Se retira de cualquier
+recomendación futura.
+
+**Conclusión para Milton:** la oportunidad estratégica sin desarrollo
+equivalente sigue siendo el **Reparador de artículos publicados**: detectar
+canibalización con evidencia de Search Console/Bing/GA4 y proponer o ejecutar
+cambios de contenido sin cambiar títulos. Las mejoras actuales previenen
+nuevos duplicados en Oportunidades, pero no reparan de forma general el
+inventario histórico. La programación automática fue archivada por decisión
+de Milton; no recomendarla como próximo proyecto.
+
+**Estado:** auditoría terminada; esta conversación permanece pausada hasta una
+orden explícita para abrir un proyecto técnico independiente.
+
+## DECISIÓN DE MILTON — DESCARTAR CÓDIGO PENDIENTE ANTIGUO — 2026-10-06
+
+Milton declara obsoletos y fuera de la cola de producción los siguientes
+lotes. No deben auditarse, rebasarse, fusionarse ni desplegarse:
+
+- `CLAUDE - POSTPEER GBP ENRUTAMIENTO` — `bee71e2c`.
+- `CODEX - ME CLIENT` — `d213296f`.
+- `CLAUDE - ME CLIENT SIN FORCE` — `d226286d`.
+- `CLAUDE - APPLY HUB FIX` — `e2bc2eff`.
+- `CLAUDE - EXCLUSION TEMAS` — `69655213`.
+- `CLAUDE - FIX BUILD EXCLUDEDTOPICS` — `880c163b`.
+- `CLAUDE - PINTEREST COMPOSIO` — `7b7ae19f`.
+
+Los commits permanecen como historial recuperable; esta decisión solo impide
+su utilización en producción. La eliminación física de ramas o worktrees
+requiere una orden separada con objetivos exactos.

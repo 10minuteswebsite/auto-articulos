@@ -1,0 +1,58 @@
+## DECISIÓN DE MILTON — WORKTREES — 2026-09-02
+
+| Proyecto | Conversación | Estado | Acción |
+|---|---|---|---|
+| Resolución de conexión web | `RESOLUCION DE CONEXION WEB` | CULMINADO | No tocar; archivar cuando se autorice |
+| Límites globales de artículos | `LIMITES GLOBALES DE ARTICULOS` | PAUSADO | No tocar |
+| Callbacks de Meta Threads | `META THREADS CALLBACKS` | ACTIVO | No tocar; continúa en su conversación |
+| Tabla pública accesible grave | `TABLA PUBLICA ACCESIBLE GRAVE` | CULMINADO/ARCHIVADO | No reabrir |
+
+Nota: el worktree de Tabla Pública conserva solo un desfase de
+`package-lock.json` generado por dependencias; no es código del proyecto.
+
+## INVENTARIO DE CONVERSACIONES — 2026-09-03
+
+Identidad exacta:
+`CODEX - GPT-5 - VERIFICACION DE API'S DE GOOGLE`
+
+Proyecto: verificación de OAuth y acceso a las APIs de Google para Auto
+Artículos.
+Motivo de creación: revisar si Search Console, Analytics y Business Profile
+están aprobadas y detectar bloqueos antes del envío.
+Objetivo: dejar evidencia verificable del estado real y de la siguiente acción.
+Alcance: Google Cloud APIs, Google Auth Platform, cliente OAuth, soporte GBP y
+páginas públicas del dominio `seototal.lasolucionweb.com`.
+Exclusiones: no se guardaron cambios, no se envió una solicitud y no se
+modificó producción.
+Archivos y commits: esta entrada y el registro correspondiente en
+`COORDINACION_CLAUDE_CODEX.md`; sin commit de código.
+Estado: ACTIVO — auditoría completada; aprobación pendiente.
+Producción: el sitio carga, pero sus textos públicos aún no reflejan los tres
+servicios.
+Conversaciones relacionadas: migración OAuth al dominio propio y solicitudes
+GBP de los casos `7-6783000042063` y `2-7941000041573`.
+Responsable: CODEX — GPT-5.
+Siguiente acción: Milton debe autorizar cada guardado/envío; después desplegar
+las páginas corregidas y completar la verificación OAuth.
+Decisión de Milton: pendiente.
+
+Actualización 2026-09-03: `sc-domain:lasolucionweb.com` abre el panel de
+Search Console para `10minuteswebsite@gmail.com` sin «Propiedad no verificada».
+La propiedad raíz está verificada; esto no equivale a aprobación de OAuth ni
+de Business Profile.
+
+Lote aislado 2026-09-03: rama/worktree `codex/google-api-verification`, commit
+`7908b01`, con las páginas públicas y callbacks de Google del dominio nuevo.
+No está integrado en `main` ni publicado; requiere revisión y despliegue.
+Vercel CLI no está autenticado y la credencial local de GitHub es inválida,
+por lo que el deployment queda pendiente de acceso autorizado.
+Se creó `docs/GOOGLE_OAUTH_VERIFICATION_PACKET.md` con la información exacta
+para completar la verificación y un checklist de cierre.
+Se ejecutaron tres reauditorías tras la preparación. El typecheck y el build
+completo pasan con dependencias limpias en el worktree aislado; producción y
+Google siguen pendientes de despliegue/guardado y de la revisión GBP.
+La reauditoría posterior a la reparación de dependencias confirma el mismo
+estado: lote compilable y sin cambios en `main`, pero verificación, deployment,
+scopes y casos GBP aún pendientes.
+Revalidación 2026-09-03: no hubo cambios externos; Google, Vercel/GitHub y los
+casos GBP mantienen el estado pendiente registrado.
