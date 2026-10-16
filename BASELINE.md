@@ -2,6 +2,17 @@
 
 Fecha: 2026-10-16
 
+## Punto cero vigente — producción verificada — 2026-10-16
+
+- Repositorio: `https://github.com/10minuteswebsite/auto-articulos`.
+- Única rama y checkout autorizado: `main`; sin ramas ni worktrees adicionales.
+- Verdad funcional: código `57ac8e28346c6f8823f80338660745cd9a3a24b9` servido por Vercel.
+- Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases de Artículos activos.
+- UI vigente comprobada en producción: menú de aplicación San Francisco `14px/400`; título `SEO Total Artículos` `15px/700`; contexto `Artículos con IA` `14px/400`; submenú administrativo `13px/500–600`.
+- Evidencia: DOM autenticado de `articulos.lasolucionweb.net/dashboard/usuarios` después de recarga real; no se modificaron rutas, permisos, datos ni secretos.
+
+Las secciones posteriores que mencionen otros commits o deployments son registros históricos y no sustituyen este punto cero.
+
 ## Regla de dominios
 
 Se trabajará en modo mixto:
@@ -57,7 +68,7 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 
 - Corrección definitiva vigente tras la segunda interferencia: `964444a576b9f1e49bcf568981370f03b6769064`, deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL` (`READY`).
 
-### Corrección de verdad funcional — 2026-10-16
+### Corrección de verdad funcional histórica — supersedida por el punto cero vigente — 2026-10-16
 
 - La comparación viva final contradice la paleta azul documentada arriba: Superlinks servido muestra `app-subbar` blanca/gris. Esa evidencia de producción supersede las métricas azules históricas.
 - Valores vigentes en Artículos: fondo `#ffffff`, línea `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, activo `#f2f2f4`, submenú con borde `#e7e7eb` y sombra tenue.

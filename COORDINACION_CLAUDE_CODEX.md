@@ -1,5 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Punto cero documental vigente — 2026-10-16
+
+- Repositorio: `10minuteswebsite/auto-articulos`; trabajo autorizado únicamente en `main`, sin ramas ni worktrees.
+- Código que producción sirve: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment Vercel verificado: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases de Artículos activos.
+- Evidencia productiva: menú San Francisco `14px/400`, título `15px/700`, contexto `14px/400`, submenú `13px/500–600`.
+- Las entradas cronológicas anteriores siguen siendo memoria de decisiones e incidentes; no sustituyen este punto cero.
+
 ## Claude — MCP: estilos de escritura (Prompt) — 2026-10-15
 
 - Capitanía: la misma de «MCP Redes» (PR #593, sin migración); no se ejecuta Prisma. Estado: PR abierto, sin fusionar.

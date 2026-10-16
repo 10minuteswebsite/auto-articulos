@@ -6,9 +6,9 @@ Fecha de auditoría: 2026-10-16 (America/New_York)
 
 - Repositorio canónico: `https://github.com/10minuteswebsite/auto-articulos`.
 - Rama única autorizada: `main`.
-- Commit funcional productivo verificado: `02861df21487a0704268b30946e8021f866972c9`.
+- Commit funcional productivo verificado: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
 - Producción: Vercel, proyecto `la-solucion-web/auto-articulos-web`.
-- Deployment funcional observado: `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`.
+- Deployment funcional observado: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`.
 - Estado: `READY`, objetivo `production`.
 - Alias: `seototal`, `articulos` y `redes`, en `.lasolucionweb.com` y `.lasolucionweb.net`.
 
@@ -96,7 +96,7 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Deployment productivo verificado: `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
 - Evidencia visual E2E: producción mostró ambas barras separadas y el submenú `Admin Artículos` abierto con `Usuarios`, `Composio` y `PostPeer`, sin regresión de la pantalla de Administración.
 
-## Paridad visual final contra Superlinks — 2026-10-16
+## Paridad visual final contra Superlinks — histórico, supersedido por la verificación vigente — 2026-10-16
 
 - Referencia comparada en vivo: `https://superlinks.lasolucionweb.net/app/` y `https://articulos.lasolucionweb.net/dashboard/usuarios`, en el mismo navegador y viewport.
 - Ajuste global: `EcosystemHeader` usa las métricas del shell productivo de Superlinks: barra sticky de 64px, contenedor máximo de 1280px, paddings responsive 16/24/32px, enlaces globales 14px/400, estado activo `#f3f4f6`, `Admin Hub` plano y `Salir` delineado.
@@ -125,14 +125,19 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Verificación final en vivo: barra global y `app-subbar` comparadas con Superlinks; `Admin Artículos` abierto sin recorte; AX confirma `Usuarios`, `Composio` y `PostPeer`.
 - Regla operativa: ningún proceso paralelo puede modificar `DashboardNav` durante una tarea; cualquier commit que reintroduzca blanco/gris se considera regresión y no punto cero.
 
-## Verdad funcional vigente — corrección final contra producción — 2026-10-16
+## Verdad funcional vigente — corrección final contra producción — actualización posterior — 2026-10-16
 
 - La referencia vigente es la URL viva `https://superlinks.lasolucionweb.net/app/`; allí la `app-subbar` es blanca, con línea gris clara, contexto gris y estados activos gris claro. Las secciones azules anteriores de este documento quedan supersedidas por esta comprobación visual.
 - `DashboardNav` quedó alineado con esa referencia: fondo `#ffffff`, borde `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, estado activo `#f2f2f4`, submenú con borde `#e7e7eb` y sombra tenue.
-- Código vigente en `main`: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`.
-- Deployment productivo: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ`, `READY`.
+- Código vigente en `main`: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`.
 - Verificación fresca en `https://articulos.lasolucionweb.net/dashboard`: barra blanca/gris visible y `Admin Artículos` expandido con `Usuarios`, `Composio` y `PostPeer` en AX; no se cambiaron rutas, permisos ni datos.
 - Validación local: typecheck y build de producción OK; `git diff --check` OK. `npm test` queda en `224 pass / 1 fail` por expectativa MCP preexistente y no relacionada. `npm run verify` requiere `DATABASE_URL` y Docker, ausentes en este entorno.
+
+## Propagación documental del punto cero — 2026-10-16
+
+- Este archivo y los otros seis documentos activos del Harness quedan alineados con el código productivo `57ac8e28` y el deployment `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`.
+- Las referencias anteriores permanecen únicamente como historial de cambios, regresiones y correcciones; no son base para trabajo nuevo.
 
 ## Corrección vigente del submenú — 2026-10-16
 

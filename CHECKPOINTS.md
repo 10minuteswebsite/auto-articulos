@@ -137,3 +137,13 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Validación: typecheck OK, build local OK, build Vercel compilado OK, `git diff --check` OK; comparación visual y AX en vivo OK; submenu confirma `Usuarios`, `Composio`, `PostPeer`.
 - Control de concurrencia: apareció un diff local no registrado que reintroducía blanco/gris; se corrigió re-aplicando el estándar sin reset destructivo. Árbol final limpio, `main` único, sin ramas ni worktrees creados.
 - Estado: CERRADO.
+
+## Checkpoint 13 — propagación completa del punto cero documental — 2026-10-16
+
+- Repositorio: `10minuteswebsite/auto-articulos`; rama única `main`; un único worktree; árbol limpio antes de editar documentación.
+- Punto cero productivo: código `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases de Artículos activos.
+- Evidencia: DOM real autenticado confirmó menú San Francisco `14px/400`, título `15px/700`, contexto `14px/400` y submenú `13px/500–600`.
+- Alcance documental: `BASELINE.md`, `CURRENT_STATE.md`, `CEREBRO.md`, `CHECKPOINTS.md`, `CONTROLADOR_DE_VERSIONES.md`, `COORDINACION_CLAUDE_CODEX.md` e `INVENTARIO_CONVERSACIONES.md`.
+- Regla: referencias anteriores quedan preservadas como historial etiquetado; ningún commit o deployment histórico reemplaza este punto cero.
+- Estado: DOCUMENTACIÓN SINCRONIZADA.

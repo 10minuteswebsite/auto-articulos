@@ -6,6 +6,8 @@ Antes de modificar código, cambiar de rama, crear un commit, ejecutar una migra
 
 ## Fuente de verdad
 
+La fuente funcional vigente es la producción verificada, no una entrada histórica del registro: `main` en `57ac8e28346c6f8823f80338660745cd9a3a24b9`, servido por Vercel como `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`). El árbol de trabajo autorizado es único y no se crean ramas ni worktrees. Los registros anteriores se conservan como historial y deben leerse como tales.
+
 ## Versión — 2026-10-12 — cierre del prompt MCP autónomo (PR #554)
 
 - Commit: `9bea1d8e` en `main`.
@@ -5208,3 +5210,9 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - Código servido: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
 - Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`.
 - Evidencia: recarga autenticada y DOM productivo confirmaron familia, tamaños y pesos; el submenú sigue `13px/500–600`.
+
+### Sincronización completa del Harness — 2026-10-16
+
+- Se alinearon los siete documentos activos con producción: código `57ac8e28`, deployment `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`).
+- Se corrigieron encabezados que todavía presentaban commits/deployments históricos como vigentes.
+- Se conservaron las entradas históricas para trazabilidad; no se borraron incidentes ni verificaciones previas.

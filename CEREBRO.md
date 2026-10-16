@@ -26,7 +26,14 @@ Usar un modelo mixto y conservador:
 - Las pantallas `ADMIN` no pertenecen a Artículos ni Redes, pero sí deben permanecer visibles para una cuenta administradora dentro de cualquiera de esos hosts. El clasificador de producto sigue devolviendo `ADMIN`; la excepción vive solo en el menú, antes del filtro visual, y no modifica autorización.
 - La composición visual canónica de Artículos es la de Superlinks: `EcosystemHeader` global arriba y `DashboardNav` como `app-subbar` separado. La identidad/contexto del producto no se mezcla con el contenido; `Admin Artículos` conserva su acceso desplegable, pero adopta el botón delineado y el submenú del estándar.
 
-## Punto 6 completado — paridad pixel a pixel del shell
+## Punto cero vigente — producción verificada — 2026-10-16
+
+- La versión funcional que debe tomarse como base es `57ac8e28346c6f8823f80338660745cd9a3a24b9` en `main`.
+- Está servida por Vercel en `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`), con aliases de Artículos activos.
+- La comprobación viva confirmó menú interno San Francisco `14px/400`, título `15px/700`, contexto `14px/400` y submenú `13px/500–600`.
+- Todo código o documento que contradiga estos valores debe compararse primero contra producción; los commits anteriores de este archivo son historial, no punto de partida.
+
+## Punto 6 histórico — paridad pixel a pixel del shell — supersedido por el punto cero vigente
 
 - La verdad visual se comprobó en las URLs públicas vivas de Superlinks y Artículos, usando el mismo navegador y viewport; no se infirió desde un checkout histórico.
 - Se igualaron métricas de margen, espaciado, alturas, tipografía, estados activos, líneas, colores y radios del encabezado global y de `app-subbar`.
@@ -126,3 +133,7 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 - La identidad del producto queda en `SEO Total Artículos` `15px`; el contexto `Artículos con IA` queda en `14px/400`.
 - Código y producción: `57ac8e28346c6f8823f80338660745cd9a3a24b9`, deployment `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`).
 - La comprobación viva confirma la familia efectiva y conserva el submenú administrativo previamente fijado en `13px/500–600`.
+
+## Propagación documental completada — 2026-10-16
+
+Los siete archivos activos del Harness comparten ahora el mismo punto cero productivo, la misma evidencia y la misma regla de precedencia: producción verificada primero; historial solo como contexto.

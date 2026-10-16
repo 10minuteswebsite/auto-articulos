@@ -1,11 +1,23 @@
 # Inventario de conversaciones
 
-## Registro operativo — paridad visual Artículos/Superlinks — 2026-10-16
+## Registro operativo vigente — propagación del punto cero — 2026-10-16
+
+- Repositorio activo: `10minuteswebsite/auto-articulos`; rama única `main`; no se crean ramas ni worktrees.
+- Verdad productiva: `57ac8e28346c6f8823f80338660745cd9a3a24b9`, deployment `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`).
+- Este inventario, Coordinación, CEREBRO, Baseline, Current State, Checkpoints y Controlador quedan alineados con esa referencia.
+- Las entradas que siguen son históricas y conservan reservas, conversaciones, checkpoints y decisiones previas para trazabilidad; no autorizan reutilizar checkouts antiguos.
+
+## Registro histórico — paridad visual Artículos/Superlinks — 2026-10-16
 
 - Solicitud atendida: comparar pixel a pixel los menús de Artículos con Superlinks y corregir márgenes, espaciado, letras, líneas y colores.
 - Resultado durable: `CURRENT_STATE.md`, `BASELINE.md`, `CEREBRO.md`, `CHECKPOINTS.md`, `CONTROLADOR_DE_VERSIONES.md` y `COORDINACION_CLAUDE_CODEX.md` registran el mismo punto cero visual y la misma evidencia productiva.
 - Código final: `02b87b4f51a180a87460ce313b246199302fa5ca`; deployment `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR` (`READY`).
 - Incidencia: una edición local concurrente reintrodujo temporalmente valores antiguos; se re-aplicó el estado productivo canónico sin reset destructivo y se confirmó árbol limpio.
+
+## Cierre documental — 2026-10-16
+
+- El punto cero queda definido por producción observada y por el commit exacto que la sirve, no por una captura, un checkout antiguo o una entrada histórica.
+- La funcionalidad administrativa, la navegación y las métricas tipográficas verificadas se conservan; solo se actualizó la referencia documental vigente.
 
 ## Addendum de regresión — 2026-10-16
 
