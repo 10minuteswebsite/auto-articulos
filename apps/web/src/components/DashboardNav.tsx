@@ -331,17 +331,17 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
   }
 
   const linkStyle = (active: boolean): CSSProperties => ({
-    padding: "8px 14px",
-    fontSize: 13,
-    fontWeight: active ? 600 : 500,
+    padding: "8px 12px",
+    fontSize: 14,
+    fontWeight: active ? 500 : 400,
     textDecoration: "none",
-    color: active ? "#1d1d1f" : "#6e6e73",
-    background: active ? "#f5f5f7" : "transparent",
+    color: active ? "#030712" : "#6b7280",
+    background: active ? "#f3f4f6" : "transparent",
     borderRadius: 10,
     boxShadow: "none",
     whiteSpace: "nowrap",
     flexShrink: 0,
-    transition: "all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
+    transition: "background 0.15s ease, color 0.15s ease",
     border: "none",
     cursor: "pointer",
     fontFamily: "inherit",
@@ -367,9 +367,92 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
   // siempre conservan el menú inicial para poder administrar la plataforma.
   if (hideForSetup && !isAdmin) return null;
 
+  const appName = hostProduct === "REDES" ? "SEO Total Redes" : "SEO Total Artículos";
+  const appContext = hostProduct === "REDES" ? "Difusión social" : "Artículos con IA";
+
   return (
-    <nav className="dashboard-nav" style={{ position: "relative", marginTop: 18, marginBottom: 28 }}>
+    <nav
+      className="dashboard-nav app-subbar"
+      aria-label="Navegación de la aplicación"
+      style={{ position: "relative", margin: 0 }}
+    >
       <style>{`
+        .dashboard-nav.app-subbar {
+          min-height: 52px;
+          border-bottom: 1px solid #e7e7eb !important;
+          background: #ffffff;
+        }
+        .dashboard-nav .app-subbar-inner {
+          width: min(100% - 40px, 1160px);
+          min-height: 52px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          box-sizing: border-box;
+        }
+        .dashboard-nav .app-identity {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+          flex-shrink: 0;
+        }
+        .dashboard-nav .app-brand {
+          color: #1d1d1f;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+        .dashboard-nav .app-context {
+          padding-left: 12px;
+          border-left: 1px solid #d2d2d7;
+          color: #86868b;
+          font-size: 11px;
+          white-space: nowrap;
+        }
+        .dashboard-nav .nav-desktop-row {
+          flex: 1 1 auto;
+          justify-content: flex-end;
+          min-width: 0;
+          margin: 0;
+          padding: 0;
+          border: 0;
+          background: transparent;
+        }
+        .dashboard-nav .nav-link,
+        .dashboard-nav .nav-group-button {
+          border-radius: 9px !important;
+        }
+        .dashboard-nav .nav-link:hover,
+        .dashboard-nav .nav-group-button:hover {
+          background: #f9fafb !important;
+          color: #030712 !important;
+        }
+        .dashboard-nav .nav-admin-button {
+          border: 1px solid #d1d5db !important;
+          background: #ffffff !important;
+          color: #4b5563 !important;
+        }
+        .dashboard-nav .nav-admin-button:hover,
+        .dashboard-nav .nav-admin-button[aria-expanded="true"] {
+          border-color: #d1d5db !important;
+          background: #f3f4f6 !important;
+          color: #030712 !important;
+        }
+        .dashboard-nav .nav-dropdown {
+          border-radius: 10px !important;
+          border-color: #e5e7eb !important;
+          box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12) !important;
+        }
+        .dashboard-nav .nav-dropdown-link {
+          border-radius: 8px !important;
+        }
+        .dashboard-nav .nav-mobile-toggle {
+          border-radius: 9px !important;
+        }
         @media (min-width: 1180px) {
           .nav-mobile-toggle { display: none !important; }
           .nav-mobile-menu { display: none !important; }
@@ -380,12 +463,24 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
           .nav-mobile-menu { border-radius: 12px !important; }
         }
         @media (max-width: 1179px) {
+          .dashboard-nav .app-subbar-inner { flex-wrap: wrap; padding: 10px 0; }
+          .dashboard-nav .app-identity { flex: 1 1 auto; }
           .nav-mobile-toggle { width: 48px !important; margin-left: auto; }
           .nav-mobile-menu { left: auto !important; right: 0 !important; width: min(320px, calc(100vw - 32px)); }
         }
+        @media (max-width: 420px) {
+          .dashboard-nav .app-subbar-inner { width: min(100% - 28px, 620px); }
+          .dashboard-nav .app-context { display: none; }
+        }
       `}</style>
 
-      <button
+      <div className="app-subbar-inner">
+        <div className="app-identity">
+          <Link className="app-brand" href="/dashboard">{appName}</Link>
+          <span className="app-context">{appContext}</span>
+        </div>
+
+        <button
         type="button"
         className="nav-mobile-toggle"
         onClick={() => setOpen((v) => !v)}
@@ -408,14 +503,14 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
           transition: "all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
           fontFamily: "inherit",
         }}
-      >
+        >
         <span
           style={{ fontSize: 22, lineHeight: 1, opacity: 0.75, flexShrink: 0 }}
           aria-hidden="true"
         >
           {open ? "×" : "☰"}
         </span>
-      </button>
+        </button>
 
       {open && (
         <div
@@ -518,6 +613,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
               >
                 <button
                   type="button"
+                  className={`nav-group-button ${entry.group === "administracion" ? "nav-admin-button" : ""}`}
                   onClick={() => setOpenGroup((prev) => (prev === entry.group ? null : entry.group))}
                   aria-expanded={expanded}
                   aria-haspopup="menu"
@@ -545,6 +641,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
                 {expanded && (
                   <div
                     role="menu"
+                    className="nav-dropdown"
                     style={{
                       position: "absolute",
                       top: "calc(100% + 8px)",
@@ -567,6 +664,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
                           key={tab.href}
                           href={tab.href}
                           role="menuitem"
+                          className="nav-dropdown-link"
                           onClick={() => setOpenGroup(null)}
                           title={
                             hiddenGlobally(tab)
@@ -606,6 +704,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
             <Link
               key={entry.href}
               href={entry.href}
+              className="nav-link"
               title={
                 hiddenGlobally(entry)
                   ? "Módulo en mantenimiento / oculto globalmente para usuarios"
@@ -623,6 +722,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
             </Link>
           );
         })}
+      </div>
       </div>
     </nav>
   );

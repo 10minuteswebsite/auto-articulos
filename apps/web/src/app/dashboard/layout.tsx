@@ -48,6 +48,12 @@ export default async function DashboardLayout({
   return (
     <>
       {showHubNavigation && <EcosystemHeader email={user.email} isAdmin={user.role === "admin" || Boolean(actingAdmin)} actingAdmin={Boolean(actingAdmin)} />}
+      {showHubNavigation && !blocked && (
+        <DashboardNav
+          showHubNavigation
+          initialIsAdmin={user.role === "admin" || Boolean(actingAdmin)}
+        />
+      )}
     <main
       className="dashboard-main shell"
       style={{
@@ -230,7 +236,11 @@ export default async function DashboardLayout({
         <TrialBlockedScreen />
       ) : (
         <>
-          <DashboardNav showHubNavigation={showHubNavigation} initialIsAdmin={user.role === "admin" || Boolean(actingAdmin)} />
+          {!showHubNavigation && (
+            <DashboardNav
+              initialIsAdmin={user.role === "admin" || Boolean(actingAdmin)}
+            />
+          )}
           <ProductAccessGuard>
             <ModuleGuard>{children}</ModuleGuard>
           </ProductAccessGuard>
