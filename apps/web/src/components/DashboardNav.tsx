@@ -261,6 +261,10 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
   }, [openGroup]);
 
   function isVisible(tab: TabItem): boolean {
+    // La administración es transversal al producto alojado. En un host de
+    // Artículos/Redes no debe desaparecer por el filtro de pantallas de
+    // producto; solo se controla por la identidad administrativa.
+    if (isAdmin && productOfPath(hrefPath(tab.href)) === "ADMIN") return true;
     if (hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(hrefPath(tab.href)), hostProduct)) return false;
     if (isAdmin) return true;
     if (tab.id && disabledModules.includes(tab.id)) return false;
