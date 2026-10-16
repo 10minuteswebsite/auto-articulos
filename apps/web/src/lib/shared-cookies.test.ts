@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { clearCookieHeaders, diaCeroActive, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
+import { applyCookie, clearCookieHeaders, diaCeroActive, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
 
 test("el dominio compartido solo vale si es válido; si no, todo queda como hoy", () => {
   assert.equal(sharedCookieDomain({}), undefined);
@@ -23,6 +23,15 @@ test("con dominio: fija con Domain y borra la variante ligada al host", () => {
   assert.match(h[0], /^s=abc;/);
   assert.doesNotMatch(h[1], /Domain=/);
   assert.match(h[1], /^s=; .*Max-Age=0/);
+});
+
+test("applyCookie escribe la cookie compartida en una respuesta real", () => {
+  const response = { headers: new Headers(), cookies: { set: () => { throw new Error("no debe usar cookies.set con dominio activo"); } } };
+  applyCookie(response, "s", "abc", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 }, { DIA_CERO: "on" });
+  const headers = response.headers.getSetCookie();
+  assert.equal(headers.length, 2);
+  assert.match(headers[0], /^s=abc; .*Domain=\.lasolucionweb\.com/);
+  assert.match(headers[1], /^s=; .*Max-Age=0/);
 });
 
 test("cerrar sesión borra las dos variantes", () => {
