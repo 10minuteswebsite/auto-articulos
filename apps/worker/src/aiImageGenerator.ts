@@ -33,7 +33,7 @@
 // y limpios, confirmado en vivo el 22/8/2026.
 
 import sharp from "sharp";
-import { put } from "@vercel/blob";
+import { list, put } from "@vercel/blob";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret } from "@auto-articulos/shared";
 import { DIRECTOR_PROMPT_V2 } from "./directorPromptV2";
@@ -499,6 +499,56 @@ export interface AiImageResult {
   prompt: string;
 }
 
+/**
+ * Cuidado de tokens (CUIDADO_DE_TOKENS.md, regla 4): la imagen IA ya pagada se guarda junto con
+ * su prompt apenas se genera, y un reintento la reutiliza en vez de pagarla otra vez. Antes
+ * `imageUrl`/`aiImagePrompt` solo se guardaban si la publicación salía bien, así que un fallo
+ * después de generar tiraba la imagen y el reintento la volvía a pagar.
+ */
+const REUSE_MAX_AGE_MS = 48 * 60 * 60 * 1000;
+
+export function isReusableAiImage(
+  data: { imageUrl?: unknown; prompt?: unknown; createdAt?: unknown } | null | undefined,
+  now: number,
+): data is { imageUrl: string; prompt: string; createdAt: number } {
+  return Boolean(
+    data &&
+      typeof data.imageUrl === "string" && data.imageUrl.startsWith("https://") &&
+      typeof data.prompt === "string" && data.prompt.length > 0 &&
+      typeof data.createdAt === "number" && now - data.createdAt >= 0 && now - data.createdAt <= REUSE_MAX_AGE_MS,
+  );
+}
+
+async function findReusableAiImage(pathPrefix: string): Promise<AiImageResult | null> {
+  try {
+    const { blobs } = await list({ prefix: `${pathPrefix}/reuse.json`, limit: 1 });
+    if (!blobs[0]) return null;
+    const res = await fetch(blobs[0].url, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { imageUrl?: unknown; prompt?: unknown; createdAt?: unknown };
+    if (!isReusableAiImage(data, Date.now())) return null;
+    const head = await fetch(data.imageUrl, { method: "HEAD", signal: AbortSignal.timeout(10000) });
+    if (!head.ok) return null;
+    console.log(`[AI Image] Reutilizada la imagen ya generada (sin gasto nuevo): ${data.imageUrl}`);
+    return { imageUrl: data.imageUrl, prompt: data.prompt };
+  } catch {
+    return null;
+  }
+}
+
+async function saveReusableAiImage(pathPrefix: string, imageUrl: string, prompt: string): Promise<void> {
+  try {
+    await put(`${pathPrefix}/reuse.json`, JSON.stringify({ imageUrl, prompt, createdAt: Date.now() }), {
+      access: "public",
+      contentType: "application/json",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    });
+  } catch (err) {
+    console.warn("[AI Image] No se pudo guardar el registro de reutilización (no es grave):", err);
+  }
+}
+
 export async function generateAiSocialImage(params: {
   articleTitle: string;
   articleSummary: string;
@@ -517,6 +567,13 @@ export async function generateAiSocialImage(params: {
   systemPromptOverride?: string | null;
 }): Promise<AiImageResult | null> {
   if (!OPENAI_IMAGE_API_KEY) return null;
+
+  // Las pruebas de diagnóstico (forcePerson / systemPromptOverride) siempre generan de nuevo.
+  const canReuse = params.forcePerson === undefined && !params.systemPromptOverride;
+  if (canReuse) {
+    const reused = await findReusableAiImage(params.pathPrefix);
+    if (reused) return reused;
+  }
 
   const target = FORMAT_TARGET[params.format];
   const formatLabel = FORMAT_LABEL[params.format];
@@ -657,6 +714,7 @@ export async function generateAiSocialImage(params: {
         `etiquetas: ${decision.tagString} — texto: "${decision.message}"` +
         `${logoUrls.length > 0 ? ` +logo(${logoUrls.length})` : ""}${personUrl ? " +persona" : ""}`,
     );
+    if (canReuse) await saveReusableAiImage(params.pathPrefix, blob.url, prompt);
     return { imageUrl: blob.url, prompt };
   } catch (err) {
     console.warn("[AI Image] Fallo generando imagen con IA:", err);
