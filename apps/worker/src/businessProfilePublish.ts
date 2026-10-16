@@ -118,7 +118,9 @@ export function buildBusinessProfileCandidateWhere(
     status: "success",
     articleUrl: { not: null },
     ...(filterArticleUrl ? { articleUrl: { in: articleUrlVariants(filterArticleUrl) } } : {}),
-    summary: { not: null },
+    // El resumen NO se exige en lo aprobado con Publicar: Oportunidades Redes propone artículos que
+    // pueden no tener resumen guardado, y exigirlo aquí dejaba la propuesta en 1 % para siempre sin
+    // ningún error (el worker nunca la veía). Sin resumen se usa el título (ver processNext...).
     OR: [
       // Aprobada con el botón Publicar: envío «pending» Y su propuesta sigue en cola (una propuesta
       // descartada o cancelada nunca debe enviarse aunque su envío haya quedado «pending»).
@@ -128,6 +130,8 @@ export function buildBusinessProfileCandidateWhere(
       },
       {
         businessProfilePost: null,
+        // El envío automático antiguo sí necesita un resumen real: nadie lo aprobó uno a uno.
+        summary: { not: null },
         run: { user: { businessProfileIntegration: { locationName: { not: null } } } },
       },
     ],
@@ -209,7 +213,7 @@ export async function processNextBusinessProfilePost(
       await enforceSocialDailyLimit(candidate.run.userId, "google-business");
     }
     const finalTitle = candidate.finalTitle ?? candidate.text;
-    const summary = candidate.summary ?? "";
+    const summary = candidate.summary?.trim() || finalTitle;
     const gbpSummary = await buildBusinessProfileSummary(finalTitle, summary);
     // GBP debe usar estrictamente la imagen real del artículo: primero la
     // imagen guardada en la oportunidad y, si falta, la og:image del artículo.
