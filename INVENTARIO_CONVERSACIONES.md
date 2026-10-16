@@ -7,6 +7,12 @@
 - Este inventario, Coordinación, CEREBRO, Baseline, Current State, Checkpoints y Controlador quedan alineados con esa referencia.
 - Las entradas que siguen son históricas y conservan reservas, conversaciones, checkpoints y decisiones previas para trazabilidad; no autorizan reutilizar checkouts antiguos.
 
+## Claude (Sonnet 5.5) — MCP: un prompt por producto — 2026-10-16
+
+- Conversación «PROBLEMAS CON MCP ARTICULOS»; Task ID `MCP-PROMPTS-POR-PRODUCTO-20261016`; responsable Claude, a pedido de Milton.
+- Archivos: `apps/web/src/lib/mcp/prompts-por-producto.ts` (+ prueba), `apps/web/src/app/dashboard/configuracion/mcp/page.tsx`, `apps/web/src/content/manual-usuario.ts`, documentos.
+- Protegido: rutas y herramientas del MCP, OAuth, publicación. Resultado esperado: Redes muestra el prompt de Redes, Artículos el de Artículos. Estado: en publicación (PR).
+
 ## Claude (Sonnet 5.5) — MCP: claridad de Redes para asistentes + corrección de prueba — 2026-10-16
 
 - Conversación: «PROBLEMAS CON MCP ARTICULOS» (responsable: Claude, a pedido de Milton Dávila). Task ID: `MCP-REDES-CLARIDAD-20261016`.

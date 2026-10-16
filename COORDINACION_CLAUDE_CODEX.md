@@ -1,5 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — MCP: un prompt por producto en la pantalla de Asistentes IA — 2026-10-16
+
+- Task ID: `MCP-PROMPTS-POR-PRODUCTO-20261016`. Punto de partida: `main` = `4a736c60` (documentos del cierre MCP-REDES-CLARIDAD sobre el código `4bbf565a`, producción `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR`). Protocolo Harness-Mario: cambio mínimo sobre `main`, publicado por PR sobre la rama existente, sin ramas nuevas. Sin migración.
+- Orden de Milton: el MCP es uno solo para Artículos y Redes, pero las órdenes deben ser separadas: quien entra por Redes ve el prompt de Redes y quien entra por Artículos ve el de Artículos. (Antes de esto se me pidió un prompt unificado y luego se corrigió a este; la mezcla de prompts por dominio ya existía desde #593.)
+- Cambio: `lib/mcp/prompts-por-producto.ts` (`MCP_PROMPT_ARTICULOS`, `MCP_PROMPT_REDES`) y `configuracion/mcp/page.tsx` elige por host (`redes` → Redes, `articulos` → Artículos, host combinado → Artículos + sección de Redes como antes). Los prompts ya no llevan la línea «Servidor MCP» (cambia por dominio y el asistente ya está conectado) y ahora incluyen la automatización, el estilo de escritura (solo Artículos) y el reintento de errores (solo Redes).
+- Sin cambiar a propósito: la confirmación (autorización permanente con comprobante); Milton pidió que el prompt «pida confirmación» pero no eligió variante, queda pendiente de su decisión.
+- Verificación local: prueba nueva `prompts-por-producto.test.ts` (nombra solo herramientas existentes, Artículos no trae Redes y viceversa, alcance/comprobante/sin credenciales); suite completa 230 pruebas, 207 correctas y 23 fallos del paquete `shared` local desactualizado (ajenos). Pendiente verificar en producción tras el despliegue y cerrar los 7 documentos.
+
 ## Claude — Google Business: PostPeer `success:false`/`error` ya cuenta como fallo — 2026-10-16
 
 - Task ID: `GMB-FALLO-POSTPEER-20261016`. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni cambios de workflows. Estado: PR abierto, SIN fusionar; producción no cambia hasta fusionar. Punto de partida: `main` = `4bbf565a`.
