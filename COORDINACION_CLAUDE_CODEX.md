@@ -11929,3 +11929,10 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - Deployment: `dpl_7D26RkGkKTYrvsg4A6LfDKVcCPr5`, `READY`.
 - Evidencia: recarga fresca de `articulos.lasolucionweb.net/dashboard`; barra global y subbarra visibles, `Admin Artículos` expandido y AX con `Usuarios`, `Composio`, `PostPeer`.
 - Sin cambios de funcionalidad, rutas, permisos, datos o secretos.
+
+### Corrección final de paridad live — 2026-10-16
+
+- La comparación visual directa con Superlinks confirmó que la subbarra servida es blanca/gris, no azul.
+- Valores vigentes: fondo `#ffffff`, borde `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, activo `#f2f2f4`; márgenes, espaciado, alturas, tipografía, radios y sombra quedaron alineados.
+- `main`: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`; producción: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ`, `READY`.
+- AX y captura productiva confirman `Admin Artículos` abierto con `Usuarios`, `Composio` y `PostPeer`.

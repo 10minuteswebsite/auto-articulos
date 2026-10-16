@@ -100,11 +100,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 
 - Referencia comparada en vivo: `https://superlinks.lasolucionweb.net/app/` y `https://articulos.lasolucionweb.net/dashboard/usuarios`, en el mismo navegador y viewport.
 - Ajuste global: `EcosystemHeader` usa las métricas del shell productivo de Superlinks: barra sticky de 64px, contenedor máximo de 1280px, paddings responsive 16/24/32px, enlaces globales 14px/400, estado activo `#f3f4f6`, `Admin Hub` plano y `Salir` delineado.
-- Ajuste de aplicación: `DashboardNav` usa `app-subbar` de 52px, ancho `min(100% - 40px, 1160px)`, fondo `#eef5ff`, línea `#d8e4f2`, contexto `#60758e` y enlaces `11px/650` con estado activo `#dceafb`.
+- Ajuste de aplicación: `DashboardNav` usa `app-subbar` de 52px, ancho `min(100% - 40px, 1160px)`, fondo `#ffffff`, línea `#e7e7eb`, contexto `#86868b` y enlaces `11px/650` con estado activo `#f2f2f4`.
 - Submenú: superficie blanca, borde `#d8e4f2`, radio 10px, sombra discreta, enlaces 12px y anclaje derecho para que `Admin Artículos` no se recorte en el viewport.
 - El distintivo `L` y el contorno de `Admin Hub` se eliminaron porque no aparecen en el shell actualmente servido por Superlinks.
-- Código final publicado: `02b87b4f51a180a87460ce313b246199302fa5ca`.
-- Deployment productivo: `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR`, estado `READY`, aliases de Artículos activos.
+- Código final publicado: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`.
+- Deployment productivo: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ`, estado `READY`, aliases de Artículos activos.
 - Evidencia E2E: recarga con caché nueva, comparación visual lado a lado y apertura real de `Admin Artículos`; AX confirmó `Usuarios`, `Composio` y `PostPeer`, sin regresión funcional.
 - Verificación local: typecheck y build de producción OK; `git diff --check` OK; árbol final limpio en `main`.
 - Incidente de control: se detectó una edición local concurrente que intentó devolver la subbarra a blanco/gris; se re-aplicó el estado canónico sin `reset` destructivo y se dejó registrado aquí.
@@ -129,7 +129,7 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 
 - La referencia vigente es la URL viva `https://superlinks.lasolucionweb.net/app/`; allí la `app-subbar` es blanca, con línea gris clara, contexto gris y estados activos gris claro. Las secciones azules anteriores de este documento quedan supersedidas por esta comprobación visual.
 - `DashboardNav` quedó alineado con esa referencia: fondo `#ffffff`, borde `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, estado activo `#f2f2f4`, submenú con borde `#e7e7eb` y sombra tenue.
-- Código vigente en `main`: `364ed6decaa735c0fe9d81901f590417f2c99b82`.
-- Deployment productivo: `dpl_7D26RkGkKTYrvsg4A6LfDKVcCPr5`, `READY`.
+- Código vigente en `main`: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`.
+- Deployment productivo: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ`, `READY`.
 - Verificación fresca en `https://articulos.lasolucionweb.net/dashboard`: barra blanca/gris visible y `Admin Artículos` expandido con `Usuarios`, `Composio` y `PostPeer` en AX; no se cambiaron rutas, permisos ni datos.
 - Validación local: typecheck y build de producción OK; `git diff --check` OK. `npm test` queda en `224 pass / 1 fail` por expectativa MCP preexistente y no relacionada. `npm run verify` requiere `DATABASE_URL` y Docker, ausentes en este entorno.

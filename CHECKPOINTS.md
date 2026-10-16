@@ -69,6 +69,15 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Evidencia final: comparación con Superlinks y submenu de `Admin Artículos` completo, sin regresión visual ni funcional.
 - Estado: CERRADO; no se harán más cambios de código en esta tarea.
 
+## Checkpoint 10 — punto cero visual confirmado contra Superlinks live — 2026-10-16
+
+- Referencia: `https://superlinks.lasolucionweb.net/app/`, comprobada visualmente en producción.
+- Estado canónico: subbarra blanca/gris (`#ffffff`, `#e7e7eb`, `#86868b`, `#6e6e73`, `#f2f2f4`); las métricas azules de checkpoints históricos quedan supersedidas.
+- Código vigente en `main`: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`.
+- Deployment productivo: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ`, `READY`.
+- Evidencia: captura lado a lado, recarga productiva y submenú `Admin Artículos` abierto con `Usuarios`, `Composio` y `PostPeer`; typecheck y diff-check OK.
+- Estado: CERRADO.
+
 ## Checkpoint 6 — paridad visual con Superlinks — 2026-10-16
 
 - Alcance: corregir únicamente la composición y estilos del menú de aplicación y su submenú, usando Superlinks como referencia productiva.

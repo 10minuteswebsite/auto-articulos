@@ -2228,3 +2228,9 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - Deployment: `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
 - Verificación: producción mostró el shell alineado y el submenú con `Usuarios`, `Composio` y `PostPeer`.
 - Estado: PRODUCCIÓN, CERRADO.
+
+### Corrección final de paridad live — 2026-10-16
+
+- El referente activo de Superlinks fue recapturado directamente; su subbarra es blanca/gris.
+- Se fijó el punto cero vigente en `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`, deployment `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ` (`READY`).
+- Comparación confirmada: márgenes, espaciado, letras, líneas, colores, radios, botón administrativo y submenú; AX muestra `Usuarios`, `Composio` y `PostPeer`.

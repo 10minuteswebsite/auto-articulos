@@ -63,6 +63,14 @@ añadirse al final, sin borrar ni reescribir entradas anteriores. Una versión n
 se considera publicada ni estable solo porque exista un commit: debe tener
 deployment identificable y verificación posterior.
 
+### Corrección final de paridad live — 2026-10-16
+
+- Referencia comprobada directamente: `https://superlinks.lasolucionweb.net/app/`.
+- Punto cero visual vigente: subbarra blanca/gris; fondo `#ffffff`, línea `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, activo `#f2f2f4`; no se usa la paleta azul histórica.
+- Código publicado en `main`: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`.
+- Deployment productivo: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ`, `READY`, aliases de Artículos activos.
+- Evidencia: comparación visual lado a lado, recarga de producción y submenú abierto con `Usuarios`, `Composio` y `PostPeer`; typecheck y `git diff --check` OK.
+
 ### Versión base registrada
 
 ```text

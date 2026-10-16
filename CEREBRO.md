@@ -110,5 +110,5 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 
 - La autoridad visual fue la producción viva de Superlinks, no los estilos heredados ni los documentos previos. La lectura final muestra `app-subbar` blanca/gris, no azul.
 - Se corrigió `DashboardNav` sin tocar rutas, permisos, APIs ni datos: fondo `#ffffff`, borde `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, activo `#f2f2f4` y submenú de superficie blanca.
-- `main`: `364ed6decaa735c0fe9d81901f590417f2c99b82`; producción: `dpl_7D26RkGkKTYrvsg4A6LfDKVcCPr5` (`READY`).
+- `main`: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`; producción: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ` (`READY`).
 - E2E real: `articulos.lasolucionweb.net/dashboard` cargó la barra y el submenú `Usuarios`, `Composio`, `PostPeer`; typecheck/build OK.
