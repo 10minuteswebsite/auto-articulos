@@ -173,4 +173,4 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 ## Rescate de títulos y anti-canibalización — 2026-10-16
 
 - Causa probada de la republicación de «Aspectos clave para comprar propiedades en Orlando desde Medellín» (cuenta Antonio Aguirre): rescate prematuro de un título recién reclamado. El primer artículo es válido y sigue publicado; la segunda corrida terminó en error de título duplicado.
-- Código en producción: PR #599, commit `2de420bb3037cd940b370a24a03faea8516689fe`. Verificado el bloqueo web (`409 ALREADY_PUBLISHED`) y el arranque del worker; pendiente observar la guardia del worker con un repetido real.
+- Código en producción: PR #599, commit `2de420bb3037cd940b370a24a03faea8516689fe`. Verificado el bloqueo web (`409 ALREADY_PUBLISHED`) y el arranque del worker; corrida real del worker `38959171399` en `success`, sin falsos rescates, confirmada por Milton. Solo queda sin provocar en vivo el repetido ante el worker (cubierto por pruebas).
