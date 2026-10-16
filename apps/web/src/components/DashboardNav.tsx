@@ -291,9 +291,13 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
   }
 
   const baseEntries = productView ? PRODUCT_ENTRIES : BASE_ENTRIES;
+  const adminGroup: TabGroup = {
+    ...ADMIN_GROUP,
+    label: hostProduct === "REDES" ? "Admin Redes" : "Admin Artículos",
+  };
   const rawEntries: NavEntry[] = [
     ...baseEntries,
-    ...(isAdmin ? [ADMIN_GROUP] : []),
+    ...(isAdmin ? [adminGroup] : []),
     ...(!showHubNavigation ? [HUB_ENTRY] : []),
   ];
 
