@@ -14,6 +14,10 @@ import { notifyGoogle } from "./googleIndexing";
 import { notifyBing } from "./bingIndexing";
 import { runPatriciaFix } from "./fix-patricia";
 import { processMcpRunTitle } from "./mcpQueue";
+import {
+  findAlreadyPublishedForTitle,
+  removePublishedOpportunity,
+} from "./publishedGuard";
 
 
 export async function markTitleError(titleId: string, message: string) {
@@ -240,7 +244,14 @@ async function processRunTitle(
   // en pending puede cambiarlo a processing y aumentar los intentos.
   const claimed = await prisma.title.updateMany({
     where: { id: nextTitle.id, status: "pending" },
-    data: { status: "processing", attempts: { increment: 1 } },
+    // `processedAt` se marca al reclamar: es la señal de "esto está vivo" que
+    // el rescate de títulos atascados necesita desde el primer segundo (ver
+    // stuckTitle.ts, caso Antonio Aguirre 16/10/2026).
+    data: {
+      status: "processing",
+      attempts: { increment: 1 },
+      processedAt: new Date(),
+    },
   });
   if (claimed.count !== 1) return false;
 
@@ -255,6 +266,32 @@ async function processRunTitle(
   };
 
   await onStep(`Intento ${updated.attempts} de ${MAX_ATTEMPTS}...`);
+
+  // Verificación anti-canibalización lo más temprano posible: antes de iniciar
+  // sesión en el sitio, redactar con OpenAI, generar imagen o FAQ. Si este
+  // mismo tema ya está publicado en el sitio de la cuenta, no se vuelve a
+  // publicar ni se devuelve a Oportunidades.
+  if (run.category.name !== "FIX_PATRICIA") {
+    const alreadyPublished = await findAlreadyPublishedForTitle({
+      userId: run.userId,
+      siteDomain: run.category.siteDomain,
+      titleId: nextTitle.id,
+      text: nextTitle.text,
+    }).catch(() => null);
+    if (alreadyPublished) {
+      const message = `No se publicó porque este tema ya está publicado en tu sitio: "${
+        alreadyPublished.finalTitle || alreadyPublished.text
+      }" → ${alreadyPublished.articleUrl}. Se evita repetirlo para no canibalizar tu propio contenido.`;
+      await onStep(message);
+      await markTitleError(nextTitle.id, message);
+      await removePublishedOpportunity({
+        userId: run.userId,
+        categoryId: run.categoryId,
+        text: nextTitle.text,
+      }).catch(() => {});
+      return true;
+    }
+  }
 
   try {
     const username = decryptSecret(credential.encryptedUsername);
@@ -373,6 +410,13 @@ async function processRunTitle(
       },
     });
     await onStep("Artículo publicado con éxito.");
+    // Si el rescate de atascados se adelantó y devolvió este tema a
+    // Oportunidades mientras se publicaba, se retira: ya está publicado.
+    await removePublishedOpportunity({
+      userId: run.userId,
+      categoryId: run.categoryId,
+      text: nextTitle.text,
+    }).catch(() => {});
     await notifyGoogle(nextTitle.id, run.userId);
     await notifyBing(nextTitle.id, run.userId);
     // await notifyThreads(nextTitle.id, run.userId); // Desactivado por solicitud: las publicaciones a redes ahora se controlan desde el módulo de Oportunidades Redes.

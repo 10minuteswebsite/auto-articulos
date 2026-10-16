@@ -5,6 +5,7 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
+import { loadPublishedTitles, splitAlreadyPublished } from "@/lib/published-titles";
 
 // Bug de consumo de datos encontrado el 30/7/2026: este endpoint se
 // consulta con polling frecuente (Inicio) y en cada visita al Historial, y
@@ -85,6 +86,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: "No se encontraron títulos" },
       { status: 400 },
+    );
+  }
+
+  // Verificación anti-canibalización al encolar: lo que ya figura publicado en
+  // el sitio de la cuenta no se vuelve a publicar (el worker repite este
+  // chequeo antes de gastar generación).
+  const { fresh: titlesFrescos, repeated: yaPublicados } = splitAlreadyPublished(
+    titles,
+    await loadPublishedTitles(userId, account.selectedSiteDomain),
+  );
+  if (titlesFrescos.length === 0) {
+    return NextResponse.json(
+      {
+        error: `Estos temas ya están publicados en tu sitio y no se vuelven a publicar para no canibalizar tu propio contenido: ${yaPublicados
+          .map((t) => `"${t.text}" → ${t.articleUrl}`)
+          .join(" | ")}`,
+        code: "ALREADY_PUBLISHED",
+        yaPublicados,
+      },
+      { status: 409 },
     );
   }
 
@@ -198,7 +219,7 @@ export async function POST(request: NextRequest) {
 
   // Manda el cupo más estrecho de todos.
   const cupoMasEstrecho = cupos.reduce((a, b) => (b.disponible < a.disponible ? b : a));
-  const permitidos = Math.max(0, Math.min(titles.length, cupoMasEstrecho.disponible));
+  const permitidos = Math.max(0, Math.min(titlesFrescos.length, cupoMasEstrecho.disponible));
 
   if (permitidos === 0) {
     const contextoMensual =
@@ -219,8 +240,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Lo que no cabe se deja fuera, pero se devuelve para poder decírselo.
-  const descartados = titles.slice(permitidos);
-  const titulosAPublicar = titles.slice(0, permitidos);
+  const descartados = titlesFrescos.slice(permitidos);
+  const titulosAPublicar = titlesFrescos.slice(0, permitidos);
   const avisoDeCupo =
     descartados.length > 0
       ? `Seleccionaste ${titles.length} artículos y tu cupo disponible era de ${cupoMasEstrecho.disponible}. Se enviaron a publicar ${permitidos}. Los ${descartados.length} restantes quedaron pendientes para cuando se renueve ese cupo.`
@@ -261,6 +282,7 @@ export async function POST(request: NextRequest) {
     run,
     avisoDeCupo,
     descartados,
+    yaPublicados,
     workerStarted: worker.started,
     workerAlreadyActive: worker.alreadyActive ?? false,
     workerWarning: worker.reason

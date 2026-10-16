@@ -1009,7 +1009,19 @@ async function createArticleDraft(
       await injectContentIntoEditor(page, contentHtml, onStep);
     }
 
-    return { summary, contentHtml, finalTitle: customArticle.title };
+    // Caso real 16/10/2026 (Antonio Aguirre): esta ruta devolvía el título
+    // sin pasar por el chequeo de duplicados, así que un tema ya publicado
+    // gastaba imagen y FAQ en cada intento antes de que el sitio lo rechazara
+    // al guardar. Se corre la MISMA validación remota del sitio ahora, antes
+    // de generar la imagen.
+    const resolvedCustomTitle = await resolveDuplicateTitleEarly(
+      page,
+      customArticle.title,
+      requestedContentLanguage,
+      onStep,
+    );
+
+    return { summary, contentHtml, finalTitle: resolvedCustomTitle };
   }
 
   await page.getByRole("button", { name: TEXT_USAR_CHATGPT }).click();

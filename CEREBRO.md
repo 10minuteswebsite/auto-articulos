@@ -149,3 +149,10 @@ Los siete archivos activos del Harness comparten ahora el mismo punto cero produ
 - La tarjeta de Redes ya estaba visible en el Hub; el defecto real en la aplicación era que el grupo se llamaba `Admin Artículos` también dentro de Redes.
 - `DashboardNav` ahora deriva el nombre del grupo del host, sin duplicar componentes ni alterar las guardas: `Admin Redes` en Redes y `Admin Artículos` en Artículos.
 - Código y deployment verificados: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`, `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`).
+
+## Decisión — anti-canibalización al publicar y rescate seguro — 2026-10-16
+
+- La verificación de canibalización ya no vive solo al proponer (Oportunidades). Se repite al encolar (`/api/runs`), al listar Oportunidades y en el worker, antes de abrir el sitio o gastar OpenAI/imagen/FAQ.
+- Regla de coincidencia: texto normalizado EXACTO (sin mayúsculas, tildes ni puntuación) contra `text` y `finalTitle` de artículos ya publicados con enlace del mismo sitio. No se usa similitud difusa contra lo publicado: bloqueó de más en la cuenta de Lorena (7/9/2026).
+- Rescate de atascados: sin evidencia de inactividad no se declara muerto un título; el cierre exige `status = processing` en la misma transacción. Un título que termina en éxito retira su oportunidad restaurada.
+- Evidencia de la causa: ver `COORDINACION_CLAUDE_CODEX.md`, reclamo del 2026-10-16.

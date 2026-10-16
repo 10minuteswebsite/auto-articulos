@@ -5230,3 +5230,9 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - Código: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
 - Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
 - Verificación: shell de Hub, subbarra de Redes y submenú `Usuarios`, `Composio`, `PostPeer` comprobados en `redes.lasolucionweb.net`; tarjeta de Redes comprobada en el Hub.
+
+## Versión — 2026-10-16 — rescate prematuro y guardia anti-canibalización (caso Antonio Aguirre)
+
+- Estado: EN REVISIÓN (PR a `main`); sin migraciones. Se completa con commit y deployment al verificar en producción.
+- Causa corregida: el rescate de títulos atascados daba por muerto un título recién reclamado y lo devolvía a Oportunidades mientras se publicaba; la oportunidad se republicaba y chocaba con el título existente.
+- Defensa añadida: coincidencia exacta normalizada contra lo ya publicado (nunca similitud difusa) al listar Oportunidades, al encolar y en el worker antes de iniciar sesión o generar nada; chequeo remoto de duplicado también en la ruta de prompt propio, antes de la imagen.
