@@ -290,7 +290,16 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
     return tab.label;
   }
 
-  const baseEntries = productView ? PRODUCT_ENTRIES : BASE_ENTRIES;
+  // En los hosts de producto la aplicación ya está determinada por el dominio:
+  // Redes no puede mostrar el grupo de Artículos, aunque la vista por productos
+  // esté activa para la cuenta. La vista completa por productos solo aplica al
+  // host compartido, donde la persona sí puede cambiar entre ambos productos.
+  const hostProductEntries = hostProduct === "REDES"
+    ? PRODUCT_ENTRIES.filter((entry) => !isGroup(entry) || entry.group === "redes" || entry.group === "configuracion")
+    : hostProduct === "ARTICULOS"
+      ? PRODUCT_ENTRIES.filter((entry) => !isGroup(entry) || entry.group === "articulos" || entry.group === "configuracion")
+      : null;
+  const baseEntries = hostProductEntries ?? (productView ? PRODUCT_ENTRIES : BASE_ENTRIES);
   const adminGroup: TabGroup = {
     ...ADMIN_GROUP,
     label: hostProduct === "REDES" ? "Admin Redes" : "Admin Artículos",
