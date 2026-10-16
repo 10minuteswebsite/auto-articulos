@@ -11859,3 +11859,15 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - **Pruebas:** dirigidas 18/18, typecheck/build correctos; suite completa 221 correctas, 1 fallo preexistente de MCP y 1 integración omitida por falta de base de datos de prueba.
 - **Limitación:** no se ejecutó un intercambio real con cuenta/código HUB porque requiere una cuenta autorizada; no se tocaron consolas externas.
 - **Estado:** PUNTO 2 CERRADO. Siguiente autorización: prueba real del retorno HUB y después auditoría de callbacks/proveedores.
+
+## Codex — Corrección lanzamiento HUB → Redes `.net` — 2026-10-16
+
+- **Punto cero:** producción Vercel `auto-articulos-web` servía `fae041b976ad54721992fa198dfe43d0dabb8681`; el checkout fue sincronizado a `main`, con un único worktree y árbol limpio antes de editar.
+- **Incidente observado:** desde la tarjeta `AUTOMATIZA TUS REDES SOCIALES`, el HUB generaba `app=auto-redes` correctamente, pero `redes.lasolucionweb.net` terminaba en `/login`.
+- **Causa:** `DIA_CERO=on` hacía que `/auth/hub` emitiera `Domain=.lasolucionweb.com` desde un host `.net`; el navegador rechazaba la cookie.
+- **Corrección:** `cookieEnvForHost()` selecciona `.lasolucionweb.net` o `.lasolucionweb.com` según `request.nextUrl.hostname`; se añadió cobertura dirigida para ambas familias.
+- **Código publicado:** `7112c1ac0a3c840640027cd93b094243ceebd980`.
+- **Producción verificada:** `dpl_kzmJfxq2E2fS41QWAVKx76Jkgv8V` (`READY`). Después de sincronizar la documentación, `dpl_7p9V232KeKeNMKLsePvCyVoChZ6B` (`READY`) sirve `ca8850bbee925fcbe91f25a5d4f4f6ca6dcb0e2b`.
+- **E2E:** HUB → Redes terminó en `/dashboard/oportunidades-redes`, sesión activa y encabezado `SEO TOTAL REDES`; no volvió a `/login`.
+- **Validación:** build y typecheck correctos; 222 pruebas correctas, un fallo preexistente de expectativas MCP y una integración omitida por falta de `TITLE_GENERATION_TEST_DATABASE_URL`.
+- **Estado:** CERRADO. Sin cambios en secretos, datos, DNS ni consolas de proveedores.

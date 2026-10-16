@@ -13,7 +13,7 @@ Usar un modelo mixto y conservador:
 - Las rutas humanas de `seototal` podrán ir al HUB.
 - `/api/*` seguirá atendiendo callbacks técnicos.
 - `.com` será el dominio canónico.
-- `.net` será una puerta de entrada compatible que se normaliza al `.com` equivalente antes de crear sesión o iniciar OAuth.
+- `.net` es una familia válida de producto además de `.com`; cada familia emite su propia cookie de sesión porque el navegador no permite compartir una cookie `.com` desde `.net`.
 - No se cambiarán de entrada las URLs de las consolas OAuth ni se reconectarán integraciones existentes.
 
 ## Reparaciones previstas
@@ -24,6 +24,7 @@ Usar un modelo mixto y conservador:
 4. Corregir Instagram directo para devolver al origen permitido.
 5. Revisar Bing y los demás callbacks directos para que no envíen a `seototal` sin sesión ni acepten destinos arbitrarios.
 6. Mantener Tumblr y Composio según su flujo técnico actual, verificando sus destinos reales.
+7. En `/auth/hub`, seleccionar el dominio de cookie según el host que recibió el callback (`.com` o `.net`).
 
 ## Alternativa no elegida ahora
 
@@ -50,3 +51,12 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 - Con `DIA_CERO=on`, la sesión emitida por el HUB es válida en los subdominios `.com` y elimina la cookie host-only antigua.
 - Deployment verificado: `dpl_9P62g85S79rBK8sfUN1HCocdoUnw`.
 - Próximo punto: probar el retorno con una cuenta/código real del HUB autorizado; no se deben cambiar consolas de proveedores sin evidencia.
+
+## Punto 3 completado — lanzamiento HUB → Redes en `.net`
+
+- Hallazgo productivo: `redes.lasolucionweb.net/auth/hub` heredaba `Domain=.lasolucionweb.com` por `DIA_CERO=on`. El navegador rechazaba la cookie y el dashboard devolvía al usuario a `/login`.
+- Decisión durable: `cookieEnvForHost()` fija `.lasolucionweb.net` cuando el callback llega por `.net` y conserva `.lasolucionweb.com` para `.com`.
+- Código: `7112c1ac0a3c840640027cd93b094243ceebd980`.
+- Producción: deployment `dpl_kzmJfxq2E2fS41QWAVKx76Jkgv8V` (`READY`).
+- Evidencia E2E: la tarjeta del HUB llegó a `https://redes.lasolucionweb.net/dashboard/oportunidades-redes` con sesión activa y encabezado `SEO TOTAL REDES`.
+- Estado final: cerrado y documentado en `CURRENT_STATE.md`, `BASELINE.md` y `CHECKPOINTS.md`.

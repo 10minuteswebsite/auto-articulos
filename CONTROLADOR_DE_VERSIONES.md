@@ -5114,3 +5114,15 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - **Verificación:** 18/18 pruebas dirigidas, typecheck/build OK; HTTP productivo conserva HUB, APIs y error controlado de `/auth/hub`.
 - **Suite amplia:** 221 pass, un fallo preexistente en expectativas MCP y una integración omitida por falta de base de datos de prueba.
 - **Estado:** PRODUCCIÓN, PUNTO 2 CERRADO; queda pendiente probar un código real del HUB.
+
+## Versión — 2026-10-16 — reparación del lanzamiento HUB → Redes `.net`
+
+- **Repositorio:** `10minuteswebsite/auto-articulos`, rama `main`.
+- **Problema:** la tarjeta `AUTOMATIZA TUS REDES SOCIALES` llegaba a `/login` porque el callback emitía una cookie `.com` desde `redes.lasolucionweb.net`.
+- **Cambio:** `cookieEnvForHost()` selecciona el dominio de cookie de la familia del host (`.lasolucionweb.net` o `.lasolucionweb.com`). Se conserva el callback `app=auto-redes` y el destino `/dashboard/oportunidades-redes`.
+- **Commit de código:** `7112c1ac0a3c840640027cd93b094243ceebd980`.
+- **Deployment funcional:** `dpl_kzmJfxq2E2fS41QWAVKx76Jkgv8V`, `READY`.
+- **Deployment final alineado con documentación:** `dpl_7p9V232KeKeNMKLsePvCyVoChZ6B`, `READY`, commit `ca8850bbee925fcbe91f25a5d4f4f6ca6dcb0e2b`.
+- **Evidencia:** clic real desde el HUB → `https://redes.lasolucionweb.net/dashboard/oportunidades-redes`, sesión activa y encabezado `SEO TOTAL REDES`.
+- **Pruebas:** build y typecheck correctos; suite web 222 correctas, un fallo MCP preexistente y una integración omitida por falta de base de datos de prueba.
+- **Estado:** PRODUCCIÓN, CERRADO. No se tocaron secretos, datos, DNS ni proveedores externos.
