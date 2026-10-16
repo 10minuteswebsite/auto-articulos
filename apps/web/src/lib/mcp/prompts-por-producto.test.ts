@@ -48,3 +48,14 @@ test("la automatización se propone y el usuario la acepta una vez; después cor
     assert.match(texto, /sin pedirme aprobación en cada publicación; solo te pediré aprobar cada publicación si yo te lo pido/);
   }
 });
+
+test("por defecto: Redes una vez al día por red (o solo algunas redes con su horario) y Artículos tres al día a horas distintas", () => {
+  for (const texto of [MCP_PROMPT_REDES, MCP_SOCIAL_AUTOMATION_RULES]) {
+    assert.match(texto, /una publicación al día en cada red conectada/);
+    assert.match(texto, /solo algunas redes, cada una con su propio horario/);
+  }
+  for (const texto of [MCP_PROMPT_ARTICULOS, MCP_AUTOMATION_RULES]) {
+    assert.match(texto, /tres artículos al día, cada uno a una hora distinta/);
+    assert.match(texto, /07:00, 12:00 y 19:00/);
+  }
+});
