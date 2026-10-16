@@ -109,9 +109,8 @@ export default function EcosystemHeader({
           font-weight: 500;
         }
         .ecosystem-header .global-nav a[href*="/admin/"] {
-          margin-left: 4px;
-          border: 1px solid #e5e7eb;
-          color: #4b5563;
+          margin-left: 0;
+          color: #6b7280;
         }
         .ecosystem-header .global-account {
           order: 0;
@@ -180,24 +179,6 @@ export default function EcosystemHeader({
             whiteSpace: "nowrap",
           }}
         >
-          <span
-            className="global-brand-mark"
-            aria-hidden="true"
-            style={{
-              width: 32,
-              height: 32,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 12,
-              background: "#030712",
-              color: "#ffffff",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            L
-          </span>
           LA SOLUCIÓN IA
         </a>
 
@@ -223,7 +204,7 @@ export default function EcosystemHeader({
             Perfil
           </a>
           {isAdmin && (
-            <a href={`${HUB_URL}/admin`} style={{ ...headerLinkStyle, marginLeft: 4, border: "1px solid #e5e7eb", color: "#4b5563" }}>
+            <a href={`${HUB_URL}/admin`} style={{ ...headerLinkStyle, marginLeft: 0, color: "#6b7280" }}>
               Admin Hub
             </a>
           )}
