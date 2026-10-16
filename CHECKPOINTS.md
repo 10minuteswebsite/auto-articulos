@@ -48,6 +48,6 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Punto cero: producción `dpl_8fRv54Y6o9DBgxA1AMCk2ahqvmAx`, SHA `55fa3876b85eba0c6902c3ba82126f3ff9daea8c`, `READY`, `main`, árbol local limpio antes de editar.
 - Evidencia previa: Artículos no mostraba el shell global del Hub; Superlinks sí mostraba la separación global/producto y el acceso administrativo de plataforma.
 - Causa: `main` productivo había retirado `EcosystemHeader` y el contexto de sesión Hub; `DashboardNav` mantenía `Volver al HUB` y el grupo `Administración`.
-- Corrección: contexto Hub firmado y ligado al usuario, shell global restaurado, `Admin Hub` global, `Admin Artículos` interno y sin enlace Hub duplicado en sesiones Hub.
+- Corrección: contexto Hub firmado y ligado al usuario, shell global restaurado, `Admin Hub` global, `Admin Artículos` interno, rol admin inicial desde servidor y sin enlace Hub duplicado en sesiones Hub.
 - Validación local: typecheck OK, build de producción OK, pruebas focalizadas de sesión/cookies/redirección 12/12 OK. Suite completa: 222 pass y 1 fallo preexistente de expectativas MCP.
 - Estado: listo para publicar desde `main`; falta registrar el SHA/deployment final y repetir verificación visual autenticada.

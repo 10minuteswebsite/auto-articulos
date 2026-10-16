@@ -230,7 +230,7 @@ export default async function DashboardLayout({
         <TrialBlockedScreen />
       ) : (
         <>
-          <DashboardNav showHubNavigation={showHubNavigation} />
+          <DashboardNav showHubNavigation={showHubNavigation} initialIsAdmin={user.role === "admin" || Boolean(actingAdmin)} />
           <ProductAccessGuard>
             <ModuleGuard>{children}</ModuleGuard>
           </ProductAccessGuard>

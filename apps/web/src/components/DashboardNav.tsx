@@ -126,9 +126,9 @@ const ADMIN_GROUP: TabGroup = {
   ],
 };
 
-export default function DashboardNav({ showHubNavigation = false }: { showHubNavigation?: boolean }) {
+export default function DashboardNav({ showHubNavigation = false, initialIsAdmin = false }: { showHubNavigation?: boolean; initialIsAdmin?: boolean }) {
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
   const [disabledModules, setDisabledModules] = useState<string[]>([]);
   const [globalDisabledModules, setGlobalDisabledModules] = useState<string[]>([]);
   const [products, setProducts] = useState<ProductsInfo | null>(null);
@@ -176,14 +176,17 @@ export default function DashboardNav({ showHubNavigation = false }: { showHubNav
         if (!cancelled) {
           // Los administradores necesitan conservar el menú para supervisar y
           // configurar el sistema aunque su propia cuenta esté incompleta.
-          setIsAdmin(meData?.role === "admin" || Boolean(meData?.isActingAdmin));
+          setIsAdmin(initialIsAdmin || meData?.role === "admin" || Boolean(meData?.isActingAdmin));
           const localDemo = process.env.NEXT_PUBLIC_LOCAL_DEMO === "true";
           const isRedesHost = productOfHost(window.location.hostname) === "REDES";
           setHideForSetup(!isRedesHost && !localDemo && !(step1 && step2 && step3 && step4));
         }
       })
       .catch(() => {
-        if (!cancelled) setHideForSetup(false);
+        if (!cancelled) {
+          setIsAdmin(initialIsAdmin);
+          setHideForSetup(false);
+        }
       });
     return () => {
       cancelled = true;
@@ -197,7 +200,7 @@ export default function DashboardNav({ showHubNavigation = false }: { showHubNav
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
+        setIsAdmin(initialIsAdmin || data?.role === "admin" || Boolean(data?.isActingAdmin));
         setProductView(isProductViewEnabled(data?.disabledModules));
         setProducts(data?.products ?? null);
         if (Array.isArray(data?.disabledModules)) {
@@ -208,7 +211,7 @@ export default function DashboardNav({ showHubNavigation = false }: { showHubNav
         }
       })
       .catch(() => {
-        setIsAdmin(false);
+        setIsAdmin(initialIsAdmin);
         setDisabledModules([]);
         setGlobalDisabledModules([]);
         setProducts(null);
@@ -228,7 +231,7 @@ export default function DashboardNav({ showHubNavigation = false }: { showHubNav
     } catch {
       setLastProduct(null);
     }
-  }, [pathname]);
+  }, [pathname, initialIsAdmin]);
 
   useEffect(() => {
     setOpen(false);
