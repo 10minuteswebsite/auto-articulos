@@ -1,5 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Proyecto BLOG IA: blueprint guardado y arranque de Fase 0 — 2026-10-15
+
+- Capitanía reclamada por Claude (`migration-coordinator.sh claim "Claude"`), solo documentación, sin migración. Se libera al fusionar. Estado: PR abierto, sin fusionar.
+- Documento maestro del proyecto: `MASTER_BLUEPRINT_BLOG_IA_SEO_TOTAL.md` (raíz del repo, copia fiel del `.md` de Milton, v1.0 del 15/10/2026). **Es la fuente de verdad: releerlo antes de cada lote.** Seguimiento del proyecto y bitácora: `TRASPASO_BLOG_IA.md`.
+- Regla central del blueprint: BLOG IA es un NUEVO DESTINO DE SALIDA del pipeline editorial existente; no duplica generación, aprobación, programación ni publicación. Infraestructura pública independiente en Cloudflare; SEO Total sigue en Vercel. Fase 0 (auditoría y validación) es obligatoria antes de programar.
+- AVISO: el repo es PÚBLICO (decisión del 12/10, ver «SEGURIDAD DEL REPOSITORIO»). El blueprint no contiene secretos, pero es visible; si Milton lo quiere privado, se mueve fuera del repo.
+
 ## Claude — MCP: estilos de escritura (Prompt) — 2026-10-15
 
 - Capitanía: la misma de «MCP Redes» (PR #593, sin migración); no se ejecuta Prisma. Estado: PR abierto, sin fusionar.
