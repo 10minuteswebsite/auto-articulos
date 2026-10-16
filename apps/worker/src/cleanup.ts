@@ -1,4 +1,5 @@
 import { prisma } from "@auto-articulos/db";
+import { isTitleStuck, STUCK_PROCESSING_MS } from "./stuckTitle";
 
 // El usuario pidió explícitamente (31/7/2026) mantener la base lo más
 // liviana posible: el log completo (con capturas de diagnóstico en base64)
@@ -29,23 +30,33 @@ export async function cleanupOldEvents(): Promise<number> {
 // de error visible para el usuario. Al inicio de cada corrida, se detectan
 // títulos "processing" cuyo último evento es de hace rato y se recuperan:
 // se reintentan si quedan intentos, o se marcan como error si no.
-const STUCK_PROCESSING_MS = 10 * 60 * 1000; // 10 minutos
 const OPPORTUNITY_RETRY_NOTE =
   "No se publicó en el primer intento y quedó disponible en Oportunidades para reintentarlo.";
 
-async function finalizeStuckTitle(titleId: string, message: string) {
-  await prisma.$transaction(async (tx) => {
+// Devuelve true solo si ESTA llamada fue quien cerró el título. Si el worker
+// original terminó (o avanzó) entre la lectura y este punto, el título ya no
+// está en "processing" y no se toca nada — antes se cerraba igual y se
+// devolvía a Oportunidades un artículo que sí se estaba publicando (caso
+// Antonio Aguirre, 16/10/2026).
+async function finalizeStuckTitle(titleId: string, message: string): Promise<boolean> {
+  return prisma.$transaction(async (tx) => {
     const title = await tx.title.findUnique({
       where: { id: titleId },
       select: { runId: true, text: true },
     });
-    if (!title) return;
+    if (!title) return false;
 
     const run = await tx.run.findUnique({
       where: { id: title.runId },
       select: { userId: true, categoryId: true },
     });
-    if (!run) return;
+    if (!run) return false;
+
+    const closed = await tx.title.updateMany({
+      where: { id: titleId, status: "processing" },
+      data: { status: "error", errorMessage: message, processedAt: new Date() },
+    });
+    if (closed.count !== 1) return false;
 
     const group = await tx.opportunityGroup.upsert({
       where: { userId_categoryId: { userId: run.userId, categoryId: run.categoryId } },
@@ -73,25 +84,28 @@ async function finalizeStuckTitle(titleId: string, message: string) {
       });
     }
 
-    await tx.title.update({
-      where: { id: titleId },
-      data: { status: "error", errorMessage: message, processedAt: new Date() },
-    });
+    return true;
   });
 }
 
 export async function recoverStuckTitles(): Promise<number> {
   const stuckTitles = await prisma.title.findMany({
     where: { status: "processing" },
-    include: { events: { orderBy: { createdAt: "desc" }, take: 1 } },
+    include: {
+      events: { orderBy: { createdAt: "desc" }, take: 1 },
+      run: { select: { createdAt: true } },
+    },
   });
 
   let recovered = 0;
   for (const title of stuckTitles) {
-    const lastActivity = title.events[0]?.createdAt ?? title.processedAt;
+    // Sin evidencia de inactividad no se declara muerto (ver stuckTitle.ts).
     if (
-      lastActivity &&
-      Date.now() - lastActivity.getTime() < STUCK_PROCESSING_MS
+      !isTitleStuck([
+        title.events[0]?.createdAt,
+        title.processedAt,
+        title.run.createdAt,
+      ])
     ) {
       continue; // probablemente sigue corriendo de verdad, no tocar
     }
@@ -103,7 +117,7 @@ export async function recoverStuckTitles(): Promise<number> {
     // cierra como error recuperable y se conserva la oportunidad para que el
     // usuario decida cuándo reintentarlo, evitando un estado "running"
     // infinito o una oportunidad desaparecida.
-    await finalizeStuckTitle(title.id, message);
+    if (!(await finalizeStuckTitle(title.id, message))) continue;
     const remaining = await prisma.title.count({
       where: { runId: title.runId, status: { in: ["pending", "processing"] } },
     });

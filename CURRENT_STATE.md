@@ -169,3 +169,8 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Código productivo: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
 - Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
 - Verificación real: Redes `.net` mostró shell global, `SEO Total Redes`, `Difusión social`, `Admin Redes` y su submenú completo; el Hub mantuvo visible `AUTOMATIZA TUS REDES SOCIALES`.
+
+## Rescate de títulos y anti-canibalización — 2026-10-16
+
+- Causa probada de la republicación de «Aspectos clave para comprar propiedades en Orlando desde Medellín» (cuenta Antonio Aguirre): rescate prematuro de un título recién reclamado. El primer artículo es válido y sigue publicado; la segunda corrida terminó en error de título duplicado.
+- Código en revisión (PR); el estado en producción se registra al fusionar y verificar.

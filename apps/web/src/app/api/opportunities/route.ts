@@ -16,7 +16,8 @@ import {
   readFreshOpportunityEvidenceCache,
   writeOpportunityEvidenceCache,
 } from "@/lib/opportunity-evidence-cache";
-import { platformProductNameOrNeutral } from "@auto-articulos/shared";
+import { findPublishedTitleMatch, platformProductNameOrNeutral } from "@auto-articulos/shared";
+import { loadPublishedTitles } from "@/lib/published-titles";
 
 // El análisis puede consultar varias fuentes y procesar hasta 20 lotes de
 // evidencia contra el modelo. Sin este límite explícito Vercel aplica el
@@ -69,11 +70,25 @@ async function collectDeepGoogleEvidence(
 }
 
 async function list(userId: string, siteDomain?: string | null) {
-  return prisma.opportunityGroup.findMany({
-    where: { userId, ...(siteDomain ? { category: { siteDomain } } : {}) },
-    orderBy: [{ impressions: "desc" }, { createdAt: "desc" }],
-    include: { category: true, titles: { orderBy: { createdAt: "asc" } } },
-  });
+  const [groups, published] = await Promise.all([
+    prisma.opportunityGroup.findMany({
+      where: { userId, ...(siteDomain ? { category: { siteDomain } } : {}) },
+      orderBy: [{ impressions: "desc" }, { createdAt: "desc" }],
+      include: { category: true, titles: { orderBy: { createdAt: "asc" } } },
+    }),
+    loadPublishedTitles(userId, siteDomain),
+  ]);
+  // Nunca se ofrece como oportunidad un tema que ya figura publicado (caso
+  // Antonio Aguirre 16/10/2026: un rescate prematuro devolvió a esta lista un
+  // artículo que sí se publicó, y se volvió a publicar).
+  return groups
+    .map((group) => ({
+      ...group,
+      titles: group.titles.filter(
+        (title) => !findPublishedTitleMatch(title.text, published),
+      ),
+    }))
+    .filter((group) => group.titles.length > 0);
 }
 
 export async function GET() {

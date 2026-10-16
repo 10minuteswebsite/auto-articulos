@@ -11977,3 +11977,11 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - Deployment productivo: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`.
 - Evidencia real: recarga de `articulos.lasolucionweb.net/dashboard/usuarios`, menú abierto, AX con `Usuarios`, `Composio`, `PostPeer` y DOM calculado en `13px/600` y `13px/500`.
 - Estado: PRODUCCIÓN, CERRADO.
+
+## Reclamo de capitán — rescate prematuro y guardia anti-canibalización — 2026-10-16
+
+- **Capitán de migración:** Claude — revisará y aplicará el lote completo. Motivo: fix rescate prematuro de títulos y guardia anti-canibalización al publicar (caso Antonio Aguirre 16/10). Nadie más ejecuta Prisma hasta su liberación.
+- Sin migraciones de base de datos en este lote.
+- Causa probada (producción, historial admin de Antonio Aguirre + logs de GitHub Actions): a las `17:14:45Z`, el shard de mantenimiento de la corrida `38938094773` imprimió «Recuperados 1 título(s) atascado(s)» sobre un título recién reclamado (sin eventos y con `processedAt` vacío); lo cerró como error, creó la oportunidad (`opportunityCreatedAt = 17:14:45.186Z`) y detuvo el lote, mientras el worker original publicó el artículo a las `17:17:07Z`. A las `19:20:58Z` la oportunidad restaurada se publicó otra vez y el sitio rechazó el título duplicado.
+- Cambios: `stuckTitle.ts` (sin evidencia de inactividad no hay rescate), `processedAt` al reclamar (queue y mcpQueue), cierre condicionado a `status = processing` en `finalizeStuckTitle`, retiro de la oportunidad restaurada al publicar, guardia de tema ya publicado en el worker antes de iniciar sesión/redactar (`publishedGuard.ts`), la misma guardia al encolar en `/api/runs` y al listar Oportunidades, y `resolveDuplicateTitleEarly()` también en la ruta de prompt propio.
+- Estado: PENDIENTE de fusión y verificación en producción (se actualiza abajo al cerrar).

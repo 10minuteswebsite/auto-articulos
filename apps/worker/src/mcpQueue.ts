@@ -115,7 +115,12 @@ export async function processMcpRunTitle(
 
   const claimed = await prisma.title.updateMany({
     where: { id: nextTitle.id, status: "pending" },
-    data: { status: "processing", attempts: { increment: 1 } },
+    data: {
+      status: "processing",
+      attempts: { increment: 1 },
+      // Señal de vida desde el reclamo (ver stuckTitle.ts).
+      processedAt: new Date(),
+    },
   });
   if (claimed.count !== 1) return false;
 
