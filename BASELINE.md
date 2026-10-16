@@ -46,7 +46,7 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 
 - Superlinks es la referencia servida; no se usa una captura ni un checkout antiguo como fuente visual.
 - Shell global: `min-height: 64px`, contenedor máximo `1280px`, padding horizontal `16px` (<640px), `24px` (640–1023px) y `32px` (≥1024px); enlaces `14px`, peso `400`, línea `20px`; activo `#f3f4f6`; `Admin Hub` sin botón delineado; `Salir` con borde `#d1d5db` y radio 8px.
-- `app-subbar`: `min-height: 52px`, ancho `min(100% - 40px, 1160px)`, fondo `#ffffff`, línea inferior `#e7e7eb`; contexto con línea `#d2d2d7` y texto `#86868b`; enlaces `11px/650`, color `#6e6e73`, activo `#f2f2f4`.
+- `app-subbar`: `min-height: 52px`, ancho `min(100% - 40px, 1160px)`, fondo `#ffffff`, línea inferior `#e7e7eb`; título del producto `15px/700`; contexto `14px/400` con línea `#d2d2d7` y texto `#86868b`; enlaces del menú `14px/400`, pila San Francisco, color `#6e6e73`, activo `#f2f2f4`.
 - `Admin Artículos`: botón delineado con radio 9px; el submenu usa blanco, borde `#e7e7eb`, radio 10px, sombra tenue, enlaces `13px/500–600` y se ancla a la derecha cuando el grupo está al borde del viewport.
 - Si una edición local vuelve a azul histórico o agrega el distintivo `L` al shell, se considera discrepancia y debe compararse contra la URL viva antes de continuar.
 
@@ -71,3 +71,10 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Código publicado: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
 - Deployment productivo: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`, aliases de Artículos activos.
 - Evidencia E2E: tras recarga real, `Admin Artículos` mostró `Usuarios`, `Composio` y `PostPeer`; el DOM calculó `13px`, pesos `600/500`, filas de `31px` y padding `8px 10px`.
+
+### Tipografía del menú de aplicación — 2026-10-16
+
+- Cambio solicitado: menú de aplicación en San Francisco `14px` Regular; título `SEO Total Artículos` en `15px`; contexto `Artículos con IA` en `14px` Regular.
+- Código servido: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases de Artículos activos.
+- Evidencia E2E: DOM productivo confirmó menú `14px/400`, título `15px/700`, contexto `14px/400` y familia `-apple-system, system-ui, SF Pro Text, SF Pro Display, Segoe UI, sans-serif`.

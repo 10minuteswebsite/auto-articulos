@@ -141,3 +141,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Código productivo: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
 - Deployment: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`.
 - Evidencia real: `articulos.lasolucionweb.net/dashboard/usuarios` recargado; DOM calculado `Usuarios` `13px/600`, `Composio` y `PostPeer` `13px/500`, filas `31px`; captura visual con el submenú abierto.
+
+## Tipografía vigente del menú de aplicación — 2026-10-16
+
+- Menú horizontal de Artículos: pila San Francisco, `14px`, peso `400`.
+- Identidad izquierda: `SEO Total Artículos` `15px`; contexto `Artículos con IA` `14px/400`.
+- Código productivo: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`.
+- Verificación real: `articulos.lasolucionweb.net/dashboard/usuarios` recargado; DOM confirmó familia, tamaños y pesos exactos sin cambios de rutas, permisos ni datos.

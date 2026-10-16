@@ -5201,3 +5201,10 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - Código: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
 - Deployment: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`.
 - Evidencia: DOM y captura en producción confirmaron `Usuarios`, `Composio`, `PostPeer`; filas `31px`, padding `8px 10px`.
+
+### Tipografía del menú de aplicación — 2026-10-16
+
+- Cambio publicado en `main`: enlaces de Artículos San Francisco `14px/400`; título `SEO Total Artículos` `15px`; contexto `Artículos con IA` `14px/400`.
+- Código servido: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`.
+- Evidencia: recarga autenticada y DOM productivo confirmaron familia, tamaños y pesos; el submenú sigue `13px/500–600`.

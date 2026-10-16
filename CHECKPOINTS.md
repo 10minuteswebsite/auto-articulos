@@ -88,6 +88,15 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Evidencia: recarga real en `/dashboard/usuarios`; DOM calculado con `Usuarios` `13px/600`, `Composio` y `PostPeer` `13px/500`, filas `31px`; captura visual con el menú abierto.
 - Estado: PRODUCCIÓN, CERRADO.
 
+## Checkpoint 12 — tipografía del menú de aplicación — 2026-10-16
+
+- Solicitud: menú de Artículos en San Francisco `14px` Regular; título izquierdo `15px`; contexto `Artículos con IA` `14px`.
+- Cambio mínimo: se modificaron solo familia, tamaños y pesos del menú, identidad y contexto; rutas, permisos, datos, colores, márgenes y submenú quedaron intactos.
+- Código servido: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases productivos activos.
+- Evidencia: DOM real confirmó enlaces `14px/400`, título `15px/700`, contexto `14px/400` y pila San Francisco.
+- Estado: PRODUCCIÓN, CERRADO.
+
 ## Checkpoint 6 — paridad visual con Superlinks — 2026-10-16
 
 - Alcance: corregir únicamente la composición y estilos del menú de aplicación y su submenú, usando Superlinks como referencia productiva.

@@ -119,3 +119,10 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 - La corrección canónica es `13px`, activo `600` y no activos `500`; el resto de la geometría y la paleta se conserva.
 - Código: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`; deployment: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2` (`READY`).
 - Verificación: DOM productivo confirmó `Usuarios`, `Composio` y `PostPeer` con `13px`, pesos `600/500`, filas de `31px` y padding `8px 10px`.
+
+## Tipografía del menú de aplicación — 2026-10-16
+
+- La regla canónica para la barra de Artículos es San Francisco `14px/400` en sus enlaces.
+- La identidad del producto queda en `SEO Total Artículos` `15px`; el contexto `Artículos con IA` queda en `14px/400`.
+- Código y producción: `57ac8e28346c6f8823f80338660745cd9a3a24b9`, deployment `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`).
+- La comprobación viva confirma la familia efectiva y conserva el submenú administrativo previamente fijado en `13px/500–600`.

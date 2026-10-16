@@ -11914,6 +11914,14 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - Durante el cierre apareció un diff local concurrente que restauraba el shell antiguo. Se documentó, se re-aplicaron los valores canónicos y el árbol quedó limpio; no se hizo `reset`, ni se usaron ramas/worktrees.
 - Estado: PRODUCCIÓN, CERRADO.
 
+## Cierre — tipografía del menú de aplicación — 2026-10-16
+
+- Se aplicó en todo el menú interno de Artículos la pila San Francisco a `14px` Regular (`400`).
+- `SEO Total Artículos` quedó en `15px`; `Artículos con IA`, en `14px/400`.
+- Código publicado: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment verificado: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases de Artículos activos.
+- Evidencia: DOM y captura de `articulos.lasolucionweb.net/dashboard/usuarios`; no se alteraron rutas, permisos, datos ni el submenú administrativo.
+
 ### Addendum — regresión concurrente detectada y corregida — 2026-10-16
 
 - Un proceso paralelo publicó `babd61c1` directamente en `main` y cambió la `app-subbar` azul a blanco/gris. Ese commit y su deployment `dpl_G5w46PMjrfE5Eyt2g472jUP2cFEF` quedan documentados como regresión, no como verdad.

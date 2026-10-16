@@ -2243,3 +2243,10 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - Commit: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
 - Deployment: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`.
 - Evidencia: recarga productiva y DOM calculado confirmaron `Usuarios`, `Composio`, `PostPeer`, filas de `31px` y padding `8px 10px`.
+
+## Tipografía del menú de aplicación — 2026-10-16
+
+- Solicitud atendida: menú de Artículos en San Francisco `14px` Regular; título izquierdo `15px`; `Artículos con IA` `14px`.
+- Código: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`.
+- Evidencia productiva: menú `14px/400`, título `15px/700`, contexto `14px/400`; funcionalidad administrativa y submenú conservados.
