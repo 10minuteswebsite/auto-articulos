@@ -11838,3 +11838,14 @@ Se leyó y aplicó `IA_JOURNEY.md` del estándar Harness-Mario. Se auditó produ
 - Pendiente real: Vercel no expuso el commit exacto del deployment y falta verificar manualmente las URLs registradas en cada consola de proveedor.
 
 No se tocó código, producción, configuración, cuentas ni proveedores en esta etapa.
+
+## Codex — Punto 1 ejecutado y verificado — 2026-10-16
+
+- **Código:** commit `19f8ff5` en `main`.
+- **Cambio:** sin sesión, `seototal.lasolucionweb.com` redirige `/`, `/login`, `/dashboard` y `/dashboard/*` al HUB `https://hub.lasolucionweb.net/`.
+- **Conservación:** `/api/*`, callbacks técnicos y `/auth/hub` no quedan capturados por esa redirección.
+- **Producción:** deployment `dpl_6bzjEAAUEQGwtwkUaR2mWAyDgcRP`, `READY`, verificado en los endpoints anteriores.
+- **Criterio de seguridad:** usuarios con sesión permanecen temporalmente en dashboard para no crear un bucle antes de corregir `/auth/hub` en el Punto 2.
+- **Pruebas:** typecheck y build correctos; pruebas aisladas 11/11; conjunto web 220 correctas y 1 fallo preexistente de MCP no relacionado.
+- **Incidencia operativa:** el primer comando de Vercel desde una ruta no enlazada creó accidentalmente `la-solucion-web/web`; se canceló antes de completarse y no tiene aliases productivos. Su eliminación queda pendiente de autorización explícita.
+- **Estado:** PUNTO 1 CERRADO. Siguiente autorización: Punto 2, corregir `/auth/hub` con `applyCookie`.

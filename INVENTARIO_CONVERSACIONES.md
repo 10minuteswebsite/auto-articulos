@@ -2162,3 +2162,11 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - **Base:** `main` en `c73e7b9`; deployment observado `dpl_BcZSYWxq6LeXet6owNzFk53Qf63X` (`READY`).
 - **Memoria durable:** `CEREBRO.md`, `CURRENT_STATE.md`, `BASELINE.md` y `CHECKPOINTS.md`, además de Coordinación y Controlador.
 - **Siguiente autorización:** preparar y auditar el cambio mínimo de código; no iniciar conexiones reales ni cambiar consolas de proveedores sin autorización específica.
+
+## [Codex] - RESULTADO: PUNTO 1 HUB SEOTOTAL — 2026-10-16
+
+- Se ejecutó el primer punto autorizado: redirección de entradas humanas sin sesión de `seototal.com` al HUB, conservando `/api/*` y `/auth/hub`.
+- Commit publicado en `main`: `19f8ff5`.
+- Deployment productivo verificado: `dpl_6bzjEAAUEQGwtwkUaR2mWAyDgcRP`.
+- Se actualizó la memoria durable en `CURRENT_STATE.md`, `BASELINE.md`, `CEREBRO.md` y `CHECKPOINTS.md`; también Coordinación y Controlador.
+- Punto 1 cerrado. Siguiente paso pendiente de autorización: corregir `/auth/hub` con `applyCookie`.

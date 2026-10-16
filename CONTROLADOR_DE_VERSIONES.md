@@ -5095,3 +5095,12 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - **Decisión:** modo mixto. `.com` canónico para sesión/HUB/OAuth; `.net` normalizado al `.com` equivalente para navegación humana; `/api/*` disponible para callbacks técnicos.
 - **Pendiente:** Vercel no informó `gitSource`/commit exacto del deployment. Las consolas de proveedores deben verificarse manualmente antes de cambiar callbacks.
 - **Estado:** DOCUMENTACIÓN INICIAL; sin código, migración, configuración, conexión OAuth ni deploy ejecutado por esta tarea.
+
+## Punto 1 — redirección humana de seototal.com al HUB — 2026-10-16
+
+- **Commit:** `19f8ff5` en `main`.
+- **Deployment:** `dpl_6bzjEAAUEQGwtwkUaR2mWAyDgcRP`, `READY`.
+- **Resultado verificado:** sin sesión, `/`, `/login`, `/dashboard` y `/dashboard/*` de `seototal.lasolucionweb.com` devuelven 307 al HUB; `/api/*` sigue respondiendo como API y `/auth/hub` no es capturado.
+- **Alcance:** el cambio es deliberadamente solo para entradas humanas sin sesión; la sesión canónica y el destino de usuarios autenticados se corrigen en el Punto 2.
+- **Verificación:** typecheck/build correctos; 11 pruebas aisladas correctas; 220 pruebas del workspace correctas y un fallo MCP preexistente no relacionado.
+- **Estado:** PRODUCCIÓN, PUNTO 1 CERRADO.

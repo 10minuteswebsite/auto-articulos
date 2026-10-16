@@ -10,6 +10,8 @@ Se trabajará en modo mixto:
 - `.net`: alias de compatibilidad para entrada humana; se normalizará al `.com` equivalente antes de iniciar sesión u OAuth.
 - `seototal.lasolucionweb.com/api/*`: callback técnico conservado aunque las rutas humanas de `seototal` pasen al HUB.
 
+En el Punto 1, la redirección se aplica solo sin sesión. Una sesión existente conserva su dashboard temporalmente para que el retorno de `/auth/hub` no entre en un bucle; el Punto 2 resolverá la sesión compartida y el destino canónico posterior.
+
 No se intentará compartir cookies entre `.com` y `.net`: el navegador no permite una cookie de dominio `.com` puesta desde `.net`.
 
 ## Flujos que no deben romperse

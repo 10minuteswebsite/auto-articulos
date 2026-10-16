@@ -37,3 +37,17 @@ Confirmado: estado HTTP, aliases, deployment, commit actual de `main` y hallazgo
 No confirmado: Vercel no expone en la inspección consultada el commit exacto que produjo el deployment; tampoco se han verificado desde este repositorio las URLs registradas en las consolas OAuth externas.
 
 No se inició ninguna conexión OAuth real ni se modificaron cuentas, proveedores, variables o datos.
+
+## Resultado del Punto 1 — 2026-10-16
+
+- Código publicado: `19f8ff5`.
+- Deployment productivo verificado: `dpl_6bzjEAAUEQGwtwkUaR2mWAyDgcRP`, estado `READY`.
+- Sin sesión, `seototal.lasolucionweb.com/`, `/login` y `/dashboard` redirigen a `https://hub.lasolucionweb.net/`.
+- `seototal.lasolucionweb.com/api/*` continúa respondiendo como API protegida; la prueba OAuth sin sesión devolvió HTTP 401 JSON.
+- `/auth/hub` no fue capturado por la redirección; sin código devolvió el error controlado `hub_code`.
+- `articulos` y `redes`, en `.com` y `.net`, conservaron su redirección normal a `/login`.
+- Usuarios con sesión no se redirigen en esta fase, para evitar que el retorno de `/auth/hub` a `/dashboard` cree un bucle. La sesión HUB se corregirá en el Punto 2.
+
+## Incidente operativo de despliegue
+
+El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y creó el proyecto `la-solucion-web/web`; el proceso fue cancelado antes de completarse y no recibió aliases de producción. El despliegue válido se hizo después en `la-solucion-web/auto-articulos-web`. El proyecto accidental queda pendiente de eliminación con autorización explícita.

@@ -37,3 +37,9 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 4. Publicar desde `main`.
 5. Verificar producción y después probar OAuth con una cuenta de prueba autorizada.
 6. Actualizar todos los documentos con el resultado real.
+
+## Estado de ejecución
+
+- Punto 1 completado en `main` (`19f8ff5`) y verificado en producción (`dpl_6bzjEAAUEQGwtwkUaR2mWAyDgcRP`).
+- La redirección activa solo para visitantes sin sesión en las rutas humanas de `seototal.com`.
+- El Punto 2 pendiente es corregir `/auth/hub` para usar `applyCookie` antes de mover también sesiones existentes al dominio canónico.
