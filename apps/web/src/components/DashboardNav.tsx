@@ -331,13 +331,13 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
   }
 
   const linkStyle = (active: boolean): CSSProperties => ({
-    padding: "8px 12px",
-    fontSize: 14,
-    fontWeight: active ? 500 : 400,
+    padding: "8px 10px",
+    fontSize: 11,
+    fontWeight: 650,
     textDecoration: "none",
-    color: active ? "#030712" : "#6b7280",
-    background: active ? "#f3f4f6" : "transparent",
-    borderRadius: 10,
+    color: active ? "#1d1d1f" : "#526579",
+    background: active ? "#dceafb" : "transparent",
+    borderRadius: 9,
     boxShadow: "none",
     whiteSpace: "nowrap",
     flexShrink: 0,
@@ -379,8 +379,8 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
       <style>{`
         .dashboard-nav.app-subbar {
           min-height: 52px;
-          border-bottom: 1px solid #e7e7eb !important;
-          background: #ffffff;
+          border-bottom: 1px solid #d8e4f2 !important;
+          background: #eef5ff !important;
         }
         .dashboard-nav .app-subbar-inner {
           width: min(100% - 40px, 1160px);
@@ -408,8 +408,8 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
         }
         .dashboard-nav .app-context {
           padding-left: 12px;
-          border-left: 1px solid #d2d2d7;
-          color: #86868b;
+          border-left: 1px solid #b9cde3;
+          color: #60758e;
           font-size: 11px;
           white-space: nowrap;
         }
@@ -424,23 +424,34 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
         }
         .dashboard-nav .nav-link,
         .dashboard-nav .nav-group-button {
+          padding: 8px 10px !important;
+          color: #526579 !important;
+          font-size: 11px !important;
+          font-weight: 650 !important;
           border-radius: 9px !important;
         }
         .dashboard-nav .nav-link:hover,
         .dashboard-nav .nav-group-button:hover {
-          background: #f9fafb !important;
-          color: #030712 !important;
+          background: #dceafb !important;
+          color: #1d1d1f !important;
+        }
+        .dashboard-nav .nav-link[aria-current="page"],
+        .dashboard-nav .nav-group-button[aria-expanded="true"] {
+          background: #dceafb !important;
+          color: #1d1d1f !important;
         }
         .dashboard-nav .nav-admin-button {
           border: 1px solid #d1d5db !important;
           background: #ffffff !important;
-          color: #4b5563 !important;
+          color: #6e6e73 !important;
+          font-size: 12px !important;
+          font-weight: 600 !important;
         }
         .dashboard-nav .nav-admin-button:hover,
         .dashboard-nav .nav-admin-button[aria-expanded="true"] {
           border-color: #d1d5db !important;
-          background: #f3f4f6 !important;
-          color: #030712 !important;
+          background: #f2f2f4 !important;
+          color: #1d1d1f !important;
         }
         .dashboard-nav .nav-dropdown {
           border-radius: 10px !important;
@@ -585,10 +596,10 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
       )}
 
       <div
-        className="nav-desktop-row"
+        className="nav-desktop-row app-nav"
         style={{
           display: "none",
-          gap: 4,
+          gap: 3,
           background: "transparent",
           border: "none",
           borderRadius: 0,
@@ -647,14 +658,14 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
                       top: "calc(100% + 8px)",
                       left: 0,
                       zIndex: 40,
-                      minWidth: 268,
+                      minWidth: 196,
                       background: "rgba(255, 255, 255, 0.98)",
                       backdropFilter: "blur(24px) saturate(180%)",
                       WebkitBackdropFilter: "blur(24px) saturate(180%)",
-                      border: "1px solid rgba(0, 0, 0, 0.08)",
-                      borderRadius: 14,
-                      boxShadow: "0 12px 36px rgba(0, 0, 0, 0.14)",
-                      padding: 5,
+                      border: "1px solid #d8e4f2",
+                      borderRadius: 10,
+                      boxShadow: "0 12px 30px rgba(15, 23, 42, 0.12)",
+                      padding: 4,
                     }}
                   >
                     {entry.items.map((tab) => {
@@ -676,13 +687,13 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
                             alignItems: "center",
                             justifyContent: "space-between",
                             gap: 10,
-                            padding: "10px 12px",
-                            fontSize: 13,
-                            fontWeight: active ? 600 : 500,
+                            padding: "8px 10px",
+                            fontSize: 12,
+                            fontWeight: active ? 650 : 600,
                             textDecoration: "none",
                             color: "#1d1d1f",
-                            background: active ? "rgba(0, 0, 0, 0.05)" : "transparent",
-                            borderRadius: 10,
+                            background: active ? "#f2f2f4" : "transparent",
+                            borderRadius: 9,
                             whiteSpace: "nowrap",
                             borderBottom: tab.id === "oportunidades-redes" ? "1px solid #d2d2d7" : undefined,
                             marginBottom: tab.id === "oportunidades-redes" ? 6 : undefined,
