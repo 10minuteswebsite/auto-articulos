@@ -5104,3 +5104,13 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - **Alcance:** el cambio es deliberadamente solo para entradas humanas sin sesión; la sesión canónica y el destino de usuarios autenticados se corrigen en el Punto 2.
 - **Verificación:** typecheck/build correctos; 11 pruebas aisladas correctas; 220 pruebas del workspace correctas y un fallo MCP preexistente no relacionado.
 - **Estado:** PRODUCCIÓN, PUNTO 1 CERRADO.
+
+## Punto 2 — cookie compartida en `/auth/hub` — 2026-10-16
+
+- **Commit:** `b7ce44c` en `main`.
+- **Cambio:** la ruta `/auth/hub` usa `applyCookie` en lugar de `response.cookies.set`.
+- **Configuración:** `DIA_CERO=on` confirmado en Production; la cookie de sesión usa `Domain=.lasolucionweb.com` y borra la variante host-only.
+- **Deployment:** `dpl_9P62g85S79rBK8sfUN1HCocdoUnw`, `READY`.
+- **Verificación:** 18/18 pruebas dirigidas, typecheck/build OK; HTTP productivo conserva HUB, APIs y error controlado de `/auth/hub`.
+- **Suite amplia:** 221 pass, un fallo preexistente en expectativas MCP y una integración omitida por falta de base de datos de prueba.
+- **Estado:** PRODUCCIÓN, PUNTO 2 CERRADO; queda pendiente probar un código real del HUB.

@@ -2170,3 +2170,12 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - Deployment productivo verificado: `dpl_6bzjEAAUEQGwtwkUaR2mWAyDgcRP`.
 - Se actualizó la memoria durable en `CURRENT_STATE.md`, `BASELINE.md`, `CEREBRO.md` y `CHECKPOINTS.md`; también Coordinación y Controlador.
 - Punto 1 cerrado. Siguiente paso pendiente de autorización: corregir `/auth/hub` con `applyCookie`.
+
+## [Codex] - RESULTADO: PUNTO 2 COOKIE HUB — 2026-10-16
+
+- Se corrigió `/auth/hub` para emitir la sesión mediante `applyCookie`.
+- `DIA_CERO=on` está confirmado en Production; la cookie compartida usa `.lasolucionweb.com`.
+- Commit publicado en `main`: `b7ce44c`.
+- Deployment verificado: `dpl_9P62g85S79rBK8sfUN1HCocdoUnw` (`READY`).
+- Se verificaron por HTTP el HUB, `/api/*` y el error controlado de `/auth/hub`.
+- Punto 2 cerrado. Pendiente: una prueba real del intercambio de código HUB con cuenta autorizada.

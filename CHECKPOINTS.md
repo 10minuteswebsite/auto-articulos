@@ -23,3 +23,12 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Verificado: `/`, `/login` y `/dashboard` de `seototal.com` van al HUB sin sesión; `/api/*` y `/auth/hub` no van al HUB; los demás cinco dominios conservan su comportamiento anterior.
 - Tests: typecheck y build de producción OK; pruebas aisladas de helper/OAuth 11/11 OK. El conjunto web tuvo 220 pruebas correctas y un fallo preexistente de expectativas MCP.
 - Estado: PUNTO 1 CERRADO; pendiente Punto 2 (`applyCookie` en `/auth/hub`).
+
+## Checkpoint 2 — sesión emitida por el HUB
+
+- Commit de código: `b7ce44c`.
+- Deployment: `dpl_9P62g85S79rBK8sfUN1HCocdoUnw` (`READY`).
+- Cambio: `/auth/hub` usa `applyCookie`; `DIA_CERO=on` confirma el dominio compartido `.lasolucionweb.com`.
+- Tests: pruebas dirigidas 18/18, typecheck y build de producción OK. Suite completa: 221 correctas, 1 fallo preexistente de expectativas MCP y 1 integración omitida por falta de `TITLE_GENERATION_TEST_DATABASE_URL`.
+- Producción: entradas al HUB, APIs sin sesión y error controlado de `/auth/hub` verificados por HTTP.
+- Estado: PUNTO 2 CERRADO; pendiente prueba real autorizada del intercambio HUB.

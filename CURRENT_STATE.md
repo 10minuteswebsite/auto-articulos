@@ -51,3 +51,12 @@ No se inició ninguna conexión OAuth real ni se modificaron cuentas, proveedore
 ## Incidente operativo de despliegue
 
 El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y creó el proyecto `la-solucion-web/web`; el proceso fue cancelado antes de completarse y no recibió aliases de producción. El despliegue válido se hizo después en `la-solucion-web/auto-articulos-web`. El proyecto accidental queda pendiente de eliminación con autorización explícita.
+
+## Resultado del Punto 2 — 2026-10-16
+
+- Código publicado: `b7ce44c`.
+- `/auth/hub` ahora usa `applyCookie` para emitir `auto_articulos_session`.
+- Producción tiene `DIA_CERO=on`; por tanto, la cookie se fija con `Domain=.lasolucionweb.com` y se borra también la variante ligada al host.
+- Deployment productivo verificado: `dpl_9P62g85S79rBK8sfUN1HCocdoUnw`, estado `READY`.
+- Verificación HTTP: entradas humanas siguen al HUB, `/api/*` sigue en 401 sin sesión y `/auth/hub` sin código devuelve `hub_code` sin ser capturado.
+- No se probaron cuentas reales del HUB ni se tocaron proveedores externos.

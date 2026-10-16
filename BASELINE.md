@@ -12,6 +12,8 @@ Se trabajará en modo mixto:
 
 En el Punto 1, la redirección se aplica solo sin sesión. Una sesión existente conserva su dashboard temporalmente para que el retorno de `/auth/hub` no entre en un bucle; el Punto 2 resolverá la sesión compartida y el destino canónico posterior.
 
+El Punto 2 ya corrigió la emisión de sesión de `/auth/hub`: con `DIA_CERO=on`, `applyCookie` fija la cookie para `.lasolucionweb.com` y elimina la variante host-only. Todavía falta probar un intercambio real con una cuenta autorizada del HUB.
+
 No se intentará compartir cookies entre `.com` y `.net`: el navegador no permite una cookie de dominio `.com` puesta desde `.net`.
 
 ## Flujos que no deben romperse

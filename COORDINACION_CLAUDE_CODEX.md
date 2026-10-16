@@ -11849,3 +11849,13 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - **Pruebas:** typecheck y build correctos; pruebas aisladas 11/11; conjunto web 220 correctas y 1 fallo preexistente de MCP no relacionado.
 - **Incidencia operativa:** el primer comando de Vercel desde una ruta no enlazada creó accidentalmente `la-solucion-web/web`; se canceló antes de completarse y no tiene aliases productivos. Su eliminación queda pendiente de autorización explícita.
 - **Estado:** PUNTO 1 CERRADO. Siguiente autorización: Punto 2, corregir `/auth/hub` con `applyCookie`.
+
+## Codex — Punto 2 ejecutado y verificado — 2026-10-16
+
+- **Código:** commit `b7ce44c` en `main`; `/auth/hub` reemplaza `response.cookies.set` por `applyCookie`.
+- **Configuración real:** Vercel Production tiene `DIA_CERO=on`, por lo que la sesión se emite para `.lasolucionweb.com` y se elimina la variante host-only.
+- **Producción:** deployment `dpl_9P62g85S79rBK8sfUN1HCocdoUnw`, `READY`.
+- **Verificación:** `seototal.com` sigue redirigiendo entradas humanas al HUB; `/api/*` responde sin redirección; `/auth/hub` sin código devuelve `hub_code`.
+- **Pruebas:** dirigidas 18/18, typecheck/build correctos; suite completa 221 correctas, 1 fallo preexistente de MCP y 1 integración omitida por falta de base de datos de prueba.
+- **Limitación:** no se ejecutó un intercambio real con cuenta/código HUB porque requiere una cuenta autorizada; no se tocaron consolas externas.
+- **Estado:** PUNTO 2 CERRADO. Siguiente autorización: prueba real del retorno HUB y después auditoría de callbacks/proveedores.

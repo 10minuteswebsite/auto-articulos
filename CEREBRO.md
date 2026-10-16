@@ -42,4 +42,11 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 
 - Punto 1 completado en `main` (`19f8ff5`) y verificado en producción (`dpl_6bzjEAAUEQGwtwkUaR2mWAyDgcRP`).
 - La redirección activa solo para visitantes sin sesión en las rutas humanas de `seototal.com`.
-- El Punto 2 pendiente es corregir `/auth/hub` para usar `applyCookie` antes de mover también sesiones existentes al dominio canónico.
+- El Punto 2 corrigió `/auth/hub` para usar `applyCookie`; las sesiones emitidas por el HUB ya quedan preparadas para el dominio canónico `.com`.
+
+## Punto 2 completado
+
+- `/auth/hub` usa `applyCookie` desde `b7ce44c`.
+- Con `DIA_CERO=on`, la sesión emitida por el HUB es válida en los subdominios `.com` y elimina la cookie host-only antigua.
+- Deployment verificado: `dpl_9P62g85S79rBK8sfUN1HCocdoUnw`.
+- Próximo punto: probar el retorno con una cuenta/código real del HUB autorizado; no se deben cambiar consolas de proveedores sin evidencia.
