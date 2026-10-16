@@ -37,3 +37,14 @@ test("ambos mantienen alcance, comprobante y sin pedir credenciales", () => {
     assert.doesNotMatch(texto, /Servidor MCP:/);
   }
 });
+
+import { MCP_AUTOMATION_RULES, MCP_SOCIAL_AUTOMATION_RULES } from "./automation";
+
+test("la automatización se propone y el usuario la acepta una vez; después corre sin pedir aprobación por publicación", () => {
+  for (const texto of [MCP_PROMPT_ARTICULOS, MCP_PROMPT_REDES, MCP_AUTOMATION_RULES, MCP_SOCIAL_AUTOMATION_RULES]) {
+    assert.match(texto, /resúmeme la propuesta/);
+    assert.match(texto, /espera mi sí/);
+    assert.match(texto, /Solo con mi sí, crea/);
+    assert.match(texto, /sin pedirme aprobación en cada publicación; solo te pediré aprobar cada publicación si yo te lo pido/);
+  }
+});
