@@ -45,6 +45,26 @@ export function extractPostPeerPostUrl(result: unknown): string | null {
   return null;
 }
 
+/**
+ * PostPeer puede contestar HTTP 200 con `success:false`, un `error` por plataforma o
+ * un estado fallido. Antes el worker solo miraba `status:"failed"` y marcaba como
+ * «publicada» una publicación que Google nunca recibió. Devuelve el motivo legible
+ * o null si no hay fallo explícito (una advertencia no cuenta como fallo).
+ */
+export function describePostPeerFailure(result: unknown): string | null {
+  const value = result as PostPeerPostResult | null;
+  if (!value || typeof value !== "object") return null;
+  const platformErrors = (Array.isArray(value.platforms) ? value.platforms : [])
+    .filter((item) => item?.success === false || (typeof item?.error === "string" && item.error.trim()))
+    .map((item) => item.error?.trim() || "PostPeer no pudo publicar en Google Business.");
+  if (platformErrors.length > 0) return platformErrors.join(" | ").slice(0, 500);
+  const failedStatus = /^(failed|error|rejected)$/i.test(value.status?.trim() ?? "");
+  if (value.success === false || failedStatus) {
+    return (value.message?.trim() || "PostPeer informó que la publicación no se completó.").slice(0, 500);
+  }
+  return null;
+}
+
 function requireApiKey(apiKey: string): string {
   const value = apiKey.trim();
   if (!value) throw new Error("Falta la clave de API de PostPeer.");
