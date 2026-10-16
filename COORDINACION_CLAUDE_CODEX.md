@@ -11936,3 +11936,12 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - Valores vigentes: fondo `#ffffff`, borde `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, activo `#f2f2f4`; márgenes, espaciado, alturas, tipografía, radios y sombra quedaron alineados.
 - `main`: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`; producción: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ`, `READY`.
 - AX y captura productiva confirman `Admin Artículos` abierto con `Usuarios`, `Composio` y `PostPeer`.
+
+## Cierre — tipografía del submenú de Artículos — 2026-10-16
+
+- Comparación directa en producción: el submenú se servía en `12px` con pesos `650/600`; por eso sus fuentes se veían más pequeñas que el estándar visual.
+- Corrección mínima publicada en `main`: `13px`, activo `600`, no activos `500`. No se modificaron márgenes, padding, colores, líneas, radios, sombra, rutas ni permisos.
+- Commit de código: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
+- Deployment productivo: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`.
+- Evidencia real: recarga de `articulos.lasolucionweb.net/dashboard/usuarios`, menú abierto, AX con `Usuarios`, `Composio`, `PostPeer` y DOM calculado en `13px/600` y `13px/500`.
+- Estado: PRODUCCIÓN, CERRADO.

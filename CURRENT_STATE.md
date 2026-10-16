@@ -133,3 +133,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Deployment productivo: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ`, `READY`.
 - Verificación fresca en `https://articulos.lasolucionweb.net/dashboard`: barra blanca/gris visible y `Admin Artículos` expandido con `Usuarios`, `Composio` y `PostPeer` en AX; no se cambiaron rutas, permisos ni datos.
 - Validación local: typecheck y build de producción OK; `git diff --check` OK. `npm test` queda en `224 pass / 1 fail` por expectativa MCP preexistente y no relacionada. `npm run verify` requiere `DATABASE_URL` y Docker, ausentes en este entorno.
+
+## Corrección vigente del submenú — 2026-10-16
+
+- Se confirmó contra producción que la discrepancia restante era tipográfica: el submenú estaba servido en `12px` con pesos `650/600`.
+- Se corrigió únicamente la tipografía a `13px`, con activo `600` y no activos `500`; no se tocaron márgenes, padding, colores, líneas, radios, sombra, rutas ni permisos.
+- Código productivo: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
+- Deployment: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`.
+- Evidencia real: `articulos.lasolucionweb.net/dashboard/usuarios` recargado; DOM calculado `Usuarios` `13px/600`, `Composio` y `PostPeer` `13px/500`, filas `31px`; captura visual con el submenú abierto.

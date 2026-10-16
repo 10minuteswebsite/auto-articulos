@@ -2234,3 +2234,12 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - El referente activo de Superlinks fue recapturado directamente; su subbarra es blanca/gris.
 - Se fijó el punto cero vigente en `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`, deployment `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ` (`READY`).
 - Comparación confirmada: márgenes, espaciado, letras, líneas, colores, radios, botón administrativo y submenú; AX muestra `Usuarios`, `Composio` y `PostPeer`.
+
+## Corrección final de fuentes del submenú — 2026-10-16
+
+- Solicitud: el submenú de Artículos aún tenía fuentes menores que el patrón de Superlinks.
+- Hallazgo: producción calculaba `12px` y pesos `650/600`; no era una percepción ni un problema de caché.
+- Corrección publicada: `13px`, activo `600`, no activos `500`; sin cambiar layout, espaciado, colores o navegación.
+- Commit: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
+- Deployment: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`.
+- Evidencia: recarga productiva y DOM calculado confirmaron `Usuarios`, `Composio`, `PostPeer`, filas de `31px` y padding `8px 10px`.

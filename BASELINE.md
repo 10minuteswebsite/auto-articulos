@@ -47,7 +47,7 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Superlinks es la referencia servida; no se usa una captura ni un checkout antiguo como fuente visual.
 - Shell global: `min-height: 64px`, contenedor máximo `1280px`, padding horizontal `16px` (<640px), `24px` (640–1023px) y `32px` (≥1024px); enlaces `14px`, peso `400`, línea `20px`; activo `#f3f4f6`; `Admin Hub` sin botón delineado; `Salir` con borde `#d1d5db` y radio 8px.
 - `app-subbar`: `min-height: 52px`, ancho `min(100% - 40px, 1160px)`, fondo `#ffffff`, línea inferior `#e7e7eb`; contexto con línea `#d2d2d7` y texto `#86868b`; enlaces `11px/650`, color `#6e6e73`, activo `#f2f2f4`.
-- `Admin Artículos`: botón delineado con radio 9px; el submenu usa blanco, borde `#e7e7eb`, radio 10px, sombra tenue, enlaces `12px/600–650` y se ancla a la derecha cuando el grupo está al borde del viewport.
+- `Admin Artículos`: botón delineado con radio 9px; el submenu usa blanco, borde `#e7e7eb`, radio 10px, sombra tenue, enlaces `13px/500–600` y se ancla a la derecha cuando el grupo está al borde del viewport.
 - Si una edición local vuelve a azul histórico o agrega el distintivo `L` al shell, se considera discrepancia y debe compararse contra la URL viva antes de continuar.
 
 ### Corrección de regresión registrada — 2026-10-16
@@ -63,3 +63,11 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Valores vigentes en Artículos: fondo `#ffffff`, línea `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, activo `#f2f2f4`, submenú con borde `#e7e7eb` y sombra tenue.
 - Código vigente: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`; deployment vigente: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ` (`READY`).
 - Evidencia: dominio real recargado y submenú expandido; AX confirmó `Usuarios`, `Composio` y `PostPeer`.
+
+### Corrección de tipografía del submenú — 2026-10-16
+
+- Hallazgo productivo: el submenú servido estaba en `12px` con pesos `650/600`, más pequeño y pesado que la referencia visual vigente.
+- Corrección mínima: `13px`; elemento activo `600`, elementos no activos `500`. Se conservaron padding, alturas, colores, bordes, radios, sombra y rutas.
+- Código publicado: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
+- Deployment productivo: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`, aliases de Artículos activos.
+- Evidencia E2E: tras recarga real, `Admin Artículos` mostró `Usuarios`, `Composio` y `PostPeer`; el DOM calculó `13px`, pesos `600/500`, filas de `31px` y padding `8px 10px`.

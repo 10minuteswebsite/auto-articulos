@@ -112,3 +112,10 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 - Se corrigió `DashboardNav` sin tocar rutas, permisos, APIs ni datos: fondo `#ffffff`, borde `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, activo `#f2f2f4` y submenú de superficie blanca.
 - `main`: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`; producción: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ` (`READY`).
 - E2E real: `articulos.lasolucionweb.net/dashboard` cargó la barra y el submenú `Usuarios`, `Composio`, `PostPeer`; typecheck/build OK.
+
+## Corrección de tipografía del submenú — 2026-10-16
+
+- La comparación final contra la URL viva demostró que la diferencia restante no era subjetiva: producción servía `12px` y pesos `650/600` en los elementos del submenú.
+- La corrección canónica es `13px`, activo `600` y no activos `500`; el resto de la geometría y la paleta se conserva.
+- Código: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`; deployment: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2` (`READY`).
+- Verificación: DOM productivo confirmó `Usuarios`, `Composio` y `PostPeer` con `13px`, pesos `600/500`, filas de `31px` y padding `8px 10px`.

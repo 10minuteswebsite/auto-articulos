@@ -78,6 +78,16 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Evidencia: captura lado a lado, recarga productiva y submenú `Admin Artículos` abierto con `Usuarios`, `Composio` y `PostPeer`; typecheck y diff-check OK.
 - Estado: CERRADO.
 
+## Checkpoint 11 — tipografía del submenú confirmada en producción — 2026-10-16
+
+- Punto cero: producción viva de Artículos y referencia viva de Superlinks; `main`, sin ramas ni worktrees.
+- Hallazgo: el submenú de `Admin Artículos` todavía servía `12px` con pesos `650/600`, por debajo de la escala correcta.
+- Cambio mínimo publicado: `13px`, activo `600`, no activos `500`; sin modificar layout, padding, colores, líneas, radios, sombra, rutas o permisos.
+- Código: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
+- Deployment: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`, aliases productivos activos.
+- Evidencia: recarga real en `/dashboard/usuarios`; DOM calculado con `Usuarios` `13px/600`, `Composio` y `PostPeer` `13px/500`, filas `31px`; captura visual con el menú abierto.
+- Estado: PRODUCCIÓN, CERRADO.
+
 ## Checkpoint 6 — paridad visual con Superlinks — 2026-10-16
 
 - Alcance: corregir únicamente la composición y estilos del menú de aplicación y su submenú, usando Superlinks como referencia productiva.

@@ -5193,3 +5193,11 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - **Prueba productiva:** `articulos.lasolucionweb.net/dashboard` recargado; submenú operativo con `Usuarios`, `Composio` y `PostPeer`.
 - **Validación:** typecheck/build/diff-check OK; suite `224 pass / 1 fail` por expectativa MCP preexistente; verificador completo limitado por falta de Docker y `DATABASE_URL` local.
 - **Estado:** PRODUCCIÓN, CERRADO.
+
+### Corrección final de tipografía — 2026-10-16
+
+- Causa: la producción tenía el submenú en `12px` y pesos `650/600`; esa era la incoherencia concreta que mantenía las fuentes más pequeñas.
+- Cambio: `13px`, activo `600`, no activos `500`; sin alterar la geometría restante ni la funcionalidad.
+- Código: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
+- Deployment: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`.
+- Evidencia: DOM y captura en producción confirmaron `Usuarios`, `Composio`, `PostPeer`; filas `31px`, padding `8px 10px`.
