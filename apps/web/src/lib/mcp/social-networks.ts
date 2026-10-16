@@ -67,9 +67,9 @@ export function networkLabel(platform: string): string {
 
 export type SocialProposalRow = { id?: string; platform?: string; status?: string; articleTitle?: string; suggestedText?: string; createdAt?: string | Date; publishedAt?: string | Date | null };
 
-/** La propuesta pendiente más reciente del formato principal de una red (la que se publica en grupo). */
-export function pickPendingProposal(proposals: SocialProposalRow[], network: SocialNetwork): SocialProposalRow | null {
-  const pending = proposals.filter((item) => item.id && item.status === "pending" && item.platform === network.platform);
+/** La propuesta pendiente (o en error, para reintentar) más reciente del formato principal de una red. */
+export function pickPendingProposal(proposals: SocialProposalRow[], network: SocialNetwork, status: "pending" | "error" = "pending"): SocialProposalRow | null {
+  const pending = proposals.filter((item) => item.id && item.status === status && item.platform === network.platform);
   pending.sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
   return pending[0] ?? null;
 }

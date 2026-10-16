@@ -78,6 +78,7 @@ export const SOCIAL_ACTION_TOOLS: ToolDef[] = [
       "Cuándo usarla: el usuario quiere publicar en redes y no hay una propuesta pendiente en esa red (revisa con ver_redes_sociales o listar_propuestas_sociales), o pide 'genera propuestas para Facebook y LinkedIn' / 'para todas'.\n" +
       "Cuándo NO usarla: si ya hay una propuesta pendiente en esa red (publícala en vez de crear otra), ni para redes sin conectar.\n" +
       "Contexto necesario: haber publicado al menos un artículo; las redes deben estar conectadas.\n" +
+      "Argumentos: redes (opcional) = lista de nombres, por ejemplo [\"facebook\",\"linkedin\"], o [\"todas\"]; sin redes se generan para todas las conectadas. No usa confirmación porque no publica. Crea una propuesta por red; el cupo diario no se gasta al generar, solo al publicar.\n" +
       "Siguiente paso típico: listar_propuestas_sociales para ver los textos y luego publicar_propuestas_sociales.",
     inputSchema: { type: "object", properties: { redes: REDES_PROP }, additionalProperties: false },
     requiredScope: "oportunidades:publicar",
@@ -110,12 +111,16 @@ export const SOCIAL_ACTION_TOOLS: ToolDef[] = [
       "Cuándo usarla: el usuario pide publicar en varias redes a la vez ('publica en Facebook, LinkedIn e Instagram', 'publica en todas'). Para UNA sola propuesta puedes usar también publicar_propuesta_social.\n" +
       "Cuándo NO usarla: si no hay propuestas pendientes (genera antes con generar_propuestas_sociales).\n" +
       "Contexto necesario: propuestas pendientes (ver_redes_sociales muestra cuántas hay por red). Máximo 10 por llamada.\n" +
-      "Siguiente paso típico: llamar primero con confirmar=false (vista previa con el texto de cada una), y con confirmar=true y el comprobante en el mismo turno si ya tienes autorización permanente de publicar. Después, listar_propuestas_sociales para confirmar el estado.",
+      "Argumentos: redes (lista de nombres) O ids (lista de IDs de propuestas; máx. 10) · reintentar (true) = con redes, toma la propuesta que quedó en ERROR más reciente de cada red en vez de la pendiente · confirmar (false = vista previa, true = publicar) · confirmacion (el comprobante).\n" +
+      "Flujo con comprobante: 1) llama con confirmar=false: no publica y devuelve el texto de cada propuesta y un comprobante (confirmacion=\"…\"). 2) Con permiso de la persona (o autorización permanente), llama de nuevo con los MISMOS redes/ids, confirmar=true y confirmacion=<el comprobante>. El comprobante vence en 10 minutos, sirve una sola vez y solo para esas mismas propuestas.\n" +
+      "Reintentar un error: si una propuesta falló (por ejemplo una red con la autorización vencida), la persona debe reconectar la red en la web (Configuración → Conexiones); tú no puedes. Después llama con reintentar=true y las redes, o con el id de la propuesta fallida (los ids de propuestas con error también se aceptan).\n" +
+      "Siguiente paso típico: listar_propuestas_sociales (con estado o red) para confirmar el estado y el enlace.",
     inputSchema: {
       type: "object",
       properties: {
         redes: REDES_PROP,
-        ids: { type: "array", items: { type: "string" }, maxItems: 10, description: "IDs de propuestas devueltos por listar_propuestas_sociales (alternativa a redes)." },
+        ids: { type: "array", items: { type: "string" }, maxItems: 10, description: "IDs de propuestas devueltos por listar_propuestas_sociales (alternativa a redes). Sirven también los de propuestas en error, para reintentarlas." },
+        reintentar: { type: "boolean", description: "Con redes: toma la propuesta en error más reciente de cada red en vez de la pendiente." },
         confirmar: { type: "boolean", description: "false para previsualizar; true solo con el comprobante de la vista previa." },
         confirmacion: { type: "string", description: "Comprobante de la vista previa. Obligatorio al confirmar=true." },
       },
@@ -139,9 +144,9 @@ export const SOCIAL_ACTION_TOOLS: ToolDef[] = [
         const { networks, unknown } = resolveNetworks(args.redes);
         if (unknown.length > 0) return toolText(`No reconozco estas redes: ${unknown.join(", ")}.`, true);
         for (const network of networks) {
-          const pending = pickPendingProposal(proposals.items, network);
+          const pending = pickPendingProposal(proposals.items, network, args.reintentar === true ? "error" : "pending");
           if (pending) targets.push(pending);
-          else skipped.push(`${network.label}: no hay propuesta pendiente.`);
+          else skipped.push(`${network.label}: no hay propuesta ${args.reintentar === true ? "con error" : "pendiente"}.`);
         }
       }
       targets = targets.slice(0, 10);
@@ -149,7 +154,7 @@ export const SOCIAL_ACTION_TOOLS: ToolDef[] = [
         return toolText(`No hay nada que publicar. ${skipped.join(" ")} Genera propuestas antes con generar_propuestas_sociales.`, true);
       }
       const ids = targets.map((item) => String(item.id)).sort();
-      const operation = { ids };
+      const operation = { ids, reintentar: args.reintentar === true };
       const lines = targets.map((item) => `- ${networkLabel(String(item.platform))} · “${item.articleTitle ?? "sin título"}”\n  ${snippet(item.suggestedText)}`);
       const confirmation = await confirmOrPreview({
         userId,
@@ -184,7 +189,8 @@ export const SOCIAL_ACTION_TOOLS: ToolDef[] = [
       "Cuándo usarla: el usuario pide cancelar o detener una publicación social concreta.\n" +
       "Cuándo NO usarla: para borrar varias pendientes (usa eliminar_propuestas_sociales) ni para propuestas ya publicadas.\n" +
       "Contexto necesario: ID devuelto por listar_propuestas_sociales.\n" +
-      "Siguiente paso típico: siempre confirmar=false primero y pedir confirmación explícita.",
+      "Argumentos: id (obligatorio) · confirmar (false = vista previa, true = cancelar) · confirmacion (comprobante de la vista previa, obligatorio con confirmar=true; vence en 10 minutos y sirve una sola vez).\n" +
+      "Siguiente paso típico: siempre confirmar=false primero y pedir confirmación explícita a la persona.",
     inputSchema: { type: "object", properties: { id: { type: "string" }, confirmar: { type: "boolean" }, confirmacion: { type: "string" } }, required: ["id"], additionalProperties: false },
     requiredScope: "oportunidades:publicar",
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
@@ -211,7 +217,8 @@ export const SOCIAL_ACTION_TOOLS: ToolDef[] = [
       "Cuándo usarla: el usuario quiere limpiar propuestas que no va a usar ('borra las propuestas de Pinterest', 'borra todas las pendientes').\n" +
       "Cuándo NO usarla: para detener una publicación en curso (usa cancelar_propuesta_social).\n" +
       "Contexto necesario: opcionalmente las redes por nombre; sin redes se borran las pendientes de todas.\n" +
-      "Siguiente paso típico: siempre confirmar=false primero y pedir confirmación explícita.",
+      "Argumentos: redes (opcional, lista de nombres o [\"todas\"]) · confirmar (false = vista previa con cuántas se borrarían, true = borrar) · confirmacion (comprobante, obligatorio con confirmar=true; vence en 10 minutos y sirve una sola vez).\n" +
+      "Siguiente paso típico: siempre confirmar=false primero y pedir confirmación explícita a la persona.",
     inputSchema: { type: "object", properties: { redes: REDES_PROP, confirmar: { type: "boolean" }, confirmacion: { type: "string" } }, additionalProperties: false },
     requiredScope: "oportunidades:publicar",
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },

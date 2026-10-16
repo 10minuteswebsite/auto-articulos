@@ -1,5 +1,14 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — MCP Redes: claridad para asistentes (caso Catalina, el Muse de Lorena) — 2026-10-16
+
+- Capitanía reclamada y liberada al fusionar. Sin migración. Estado: PR abierto, sin fusionar.
+- Caso: Catalina (Muse de Lorena) conectó con el token, descubrió las herramientas sociales pero no sabía su detalle, ni que puede automatizar corridas diarias; Lorena pidió: argumentos exactos, flujo de confirmación, cómo monitorear, relación con «Oportunidades Redes» y cómo reintentar errores. Muse probablemente no lee los prompts MCP (solo `tools/list` e instrucciones), por eso se pone la información donde sí la lee.
+- Respuestas (verificadas en código): (4) «Oportunidades Redes» (`dashboard/oportunidades-redes`) y las propuestas del MCP son LA MISMA tabla `SocialOpportunity` y las mismas rutas `/api/social-opportunities/*`; (3) no hay `estado_de_publicaciones` para redes: se monitorea con `listar_propuestas_sociales`; (5) reintentar = `publicar_propuestas_sociales` con `reintentar=true` (o el id de la propuesta en error en `publicar_propuesta_social`), tras reconectar la red en la web (la ruta `publish` acepta estados pending/error/skipped).
+- Cambios: descripciones completas (argumentos, flujo con comprobante, estados, reintento) en `listar_propuestas_sociales`, `previsualizar_publicacion_social`, `publicar_propuesta_social`, `generar_propuestas_sociales`, `publicar_propuestas_sociales`, `cancelar_propuesta_social` y `eliminar_propuestas_sociales`; `listar_propuestas_sociales` con filtros `red`/`estado`/`id` y muestra el enlace de la publicación (`postId`); `reintentar` en `publicar_propuestas_sociales`; resumen «QUÉ PUEDES HACER» y la automatización diaria en las `instructions` del servidor (`api/mcp/route.ts`); manual y catálogo.
+- Límite: el MCP no puede crear tareas programadas; eso lo hace el asistente. Si Muse/Catalina no tiene programador de tareas, no podrá automatizar y debe decirlo (ahora la instrucción lo pide).
+- Verificación: pruebas MCP (reintento elige la propuesta en error más reciente; las descripciones documentan argumentos, comprobante, monitoreo y reintento; las instrucciones mencionan la automatización); `tsc` sin errores nuevos. No probado en vivo con Catalina.
+
 ## Punto cero documental vigente — 2026-10-16
 
 - Repositorio: `10minuteswebsite/auto-articulos`; trabajo autorizado únicamente en `main`, sin ramas ni worktrees.

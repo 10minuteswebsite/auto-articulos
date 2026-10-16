@@ -40,7 +40,7 @@ export const MCP_SOCIAL_RULES = `REDES Y BLOGS: puedes generar propuestas y publ
 2. Para cada red pedida que no tenga una propuesta pendiente, llama generar_propuestas_sociales con esas redes por nombre (o sin nombres para todas las conectadas). Esto solo crea propuestas, no publica. Si no tengo artículos publicados todavía, dímelo: primero hay que publicar un artículo.
 3. Llama publicar_propuestas_sociales con las redes por nombre: primero confirmar=false para obtener el comprobante y, en el mismo turno, confirmar=true con ese comprobante. Publica una propuesta por red. Si una red ya llegó a su cupo de hoy, dímelo y sigue con las demás.
 4. Llama listar_propuestas_sociales y avísame en pocas líneas: red, estado y enlace real. Si algo sigue en proceso, dilo así; no inventes enlaces. No reescribas los textos que generó la plataforma.
-Para cancelar una propuesta (cancelar_propuesta_social) o borrar pendientes (eliminar_propuestas_sociales) pídeme confirmación. El cupo diario limita las publicaciones, no las propuestas. Nunca me pidas contraseñas ni tokens en el chat.`;
+Si una propuesta quedó en error (por ejemplo una red con la autorización vencida), dime qué red es: yo la reconecto en la web, en Configuración → Conexiones, y luego tú la reintentas con publicar_propuestas_sociales y reintentar=true. Para cancelar una propuesta (cancelar_propuesta_social) o borrar pendientes (eliminar_propuestas_sociales) pídeme confirmación. El cupo diario limita las publicaciones, no las propuestas. Nunca me pidas contraseñas ni tokens en el chat.`;
 
 export const MCP_SOCIAL_AUTOMATION_RULES = `${MCP_SOCIAL_RULES}
 
