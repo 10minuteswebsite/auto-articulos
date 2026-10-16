@@ -2124,3 +2124,33 @@ Ninguna de las 10 entradas describe un árbol de git enredado ni ramas pisadas, 
 agregó nada en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Sin ideas sueltas nuevas para `TO-DO.md` en
 este rango (el pendiente de Search Console/Composio y el de la URL `/news/` ya quedan anotados
 arriba y en `CONTROLADOR_DE_VERSIONES.md`, sin duplicarlos aquí).
+
+## Addendum — 2026-10-16 (tarea programada diaria de propagación)
+
+**Parte A:** sin reserva activa nueva. El rango revisado de Coordinación (`b51c7d8..origin/main`
+sobre `COORDINACION_CLAUDE_CODEX.md`, commits `334d59d` y `81c40c8`, PRs #593 y #594) son 2
+entradas distintas, ambas con capitanía "reclamada y liberada al fusionar" o compartida con una
+capitanía ya liberada, según su propio texto. Verificado en vivo: `git worktree list` en este
+entorno muestra un único worktree (en `a7632fd`, ya con ambos commits) y `git merge-base
+--is-ancestor <commit> origin/main` devuelve que sí son ancestros para los dos commits del rango
+(`334d59d`, `81c40c8`): no queda ninguna reserva abierta que anotar en la tabla de Parte A.
+
+**Parte B — nombres de conversación nuevos encontrados en `COORDINACION_CLAUDE_CODEX.md`** en el
+rango `b51c7d8..origin/main` (detalle técnico completo en Coordinación y, propagado, en
+`CONTROLADOR_DE_VERSIONES.md`; no se transcribe aquí para no duplicar):
+
+- `[Claude] - MCP REDES: GENERAR Y PUBLICAR PROPUESTAS POR NOMBRE O EN GRUPO DESDE UN ASISTENTE DE
+  IA` — 2026-10-14, PR #593 (commit `334d59d`), PRODUCCIÓN. El texto original en Coordinación decía
+  «PR abierto, SIN fusionar (Milton durmiendo; fusiona con su orden)»; verificado con git que ya
+  está fusionado. Pendiente sin verificar (según la propia entrada): una prueba en vivo con la
+  cuenta de Lorena, con el visto bueno de Milton.
+- `[Claude] - MCP: ESTILOS DE ESCRITURA (PROMPT) — EL ASISTENTE LOS LISTA Y ELIGE POR NOMBRE` —
+  2026-10-15, PR #594 (commit `81c40c8`), PRODUCCIÓN. El texto original en Coordinación decía «PR
+  abierto, sin fusionar»; verificado con git que ya está fusionado. Pendiente sin verificar (según
+  la propia entrada): probar en vivo publicando con cada estilo.
+
+Ninguna de las 2 entradas describe un árbol de git enredado ni ramas pisadas, así que no se agregó
+nada en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Sin ideas sueltas nuevas para `TO-DO.md` en este rango
+(las dos pruebas en vivo pendientes ya quedan anotadas arriba y en `CONTROLADOR_DE_VERSIONES.md`,
+sin duplicarlas aquí). Ambos PRs (#593 y #594) ya actualizaron `apps/web/src/content/manual-usuario.ts`
+por sí mismos, así que esta tarea no le agregó nada al manual.
