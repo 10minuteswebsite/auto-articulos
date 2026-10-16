@@ -24,6 +24,8 @@ interface TabGroup {
 
 type NavEntry = TabItem | TabGroup;
 
+const SAN_FRANCISCO_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif';
+
 function isGroup(entry: NavEntry): entry is TabGroup {
   return "group" in entry;
 }
@@ -332,8 +334,8 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
 
   const linkStyle = (active: boolean): CSSProperties => ({
     padding: "8px 10px",
-    fontSize: 11,
-    fontWeight: 650,
+    fontSize: 14,
+    fontWeight: 400,
     textDecoration: "none",
     color: active ? "#1d1d1f" : "#6e6e73",
     background: active ? "#f2f2f4" : "transparent",
@@ -344,7 +346,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
     transition: "background 0.15s ease, color 0.15s ease",
     border: "none",
     cursor: "pointer",
-    fontFamily: "inherit",
+    fontFamily: SAN_FRANCISCO_FONT,
   });
 
   const hiddenBadge = (small: boolean) => (
@@ -401,8 +403,9 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
         }
         .dashboard-nav .app-brand {
           color: #1d1d1f;
-          font-size: 13px;
+          font-size: 15px;
           font-weight: 700;
+          font-family: ${SAN_FRANCISCO_FONT};
           letter-spacing: -0.02em;
           text-decoration: none;
           white-space: nowrap;
@@ -411,7 +414,9 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
           padding-left: 12px;
           border-left: 1px solid #d2d2d7;
           color: #86868b;
-          font-size: 11px;
+          font-size: 14px;
+          font-weight: 400;
+          font-family: ${SAN_FRANCISCO_FONT};
           white-space: nowrap;
         }
         .dashboard-nav .nav-desktop-row {
@@ -427,8 +432,9 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
         .dashboard-nav .nav-group-button {
           padding: 8px 10px !important;
           color: #6e6e73 !important;
-          font-size: 11px !important;
-          font-weight: 650 !important;
+          font-size: 14px !important;
+          font-weight: 400 !important;
+          font-family: ${SAN_FRANCISCO_FONT} !important;
           border-radius: 9px !important;
         }
         .dashboard-nav .nav-link:hover,
@@ -445,8 +451,9 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
           border: 1px solid #d1d5db !important;
           background: #ffffff !important;
           color: #6e6e73 !important;
-          font-size: 12px !important;
-          font-weight: 600 !important;
+          font-size: 14px !important;
+          font-weight: 400 !important;
+          font-family: ${SAN_FRANCISCO_FONT} !important;
         }
         .dashboard-nav .nav-admin-button:hover,
         .dashboard-nav .nav-admin-button[aria-expanded="true"] {
@@ -768,7 +775,7 @@ function MobileLink({
         justifyContent: "space-between",
         padding: indented ? "11px 14px 11px 26px" : "12px 14px",
         fontSize: 14,
-        fontWeight: active ? 600 : 500,
+        fontWeight: 400,
         textDecoration: "none",
         color: "#1d1d1f",
         background: active ? "rgba(0, 0, 0, 0.05)" : "transparent",
@@ -776,6 +783,7 @@ function MobileLink({
         transition: "all 0.15s ease",
         borderBottom: separatorAfter ? "1px solid #d2d2d7" : undefined,
         marginBottom: separatorAfter ? 6 : undefined,
+        fontFamily: SAN_FRANCISCO_FONT,
       }}
     >
       <span>{label}</span>
