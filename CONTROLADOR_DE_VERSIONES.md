@@ -6,7 +6,7 @@ Antes de modificar código, cambiar de rama, crear un commit, ejecutar una migra
 
 ## Fuente de verdad
 
-La fuente funcional vigente es la producción verificada, no una entrada histórica del registro: `main` en `57ac8e28346c6f8823f80338660745cd9a3a24b9`, servido por Vercel como `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`). El árbol de trabajo autorizado es único y no se crean ramas ni worktrees. Los registros anteriores se conservan como historial y deben leerse como tales.
+La fuente funcional vigente es la producción verificada, no una entrada histórica del registro: `main` en `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`, servido por Vercel como `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`). El árbol de trabajo autorizado es único y no se crean ramas ni worktrees. Los registros anteriores se conservan como historial y deben leerse como tales.
 
 ## Versión — 2026-10-12 — cierre del prompt MCP autónomo (PR #554)
 
@@ -5216,3 +5216,10 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - Se alinearon los siete documentos activos con producción: código `57ac8e28`, deployment `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`).
 - Se corrigieron encabezados que todavía presentaban commits/deployments históricos como vigentes.
 - Se conservaron las entradas históricas para trazabilidad; no se borraron incidentes ni verificaciones previas.
+
+### Corrección de navegación de Redes — 2026-10-16
+
+- `DashboardNav` dejó de mostrar `Admin Artículos` en el host de Redes y ahora muestra `Admin Redes`.
+- Código: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
+- Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
+- Verificación: shell de Hub, subbarra de Redes y submenú `Usuarios`, `Composio`, `PostPeer` comprobados en `redes.lasolucionweb.net`; tarjeta de Redes comprobada en el Hub.

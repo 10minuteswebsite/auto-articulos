@@ -6,9 +6,9 @@ Fecha de auditoría: 2026-10-16 (America/New_York)
 
 - Repositorio canónico: `https://github.com/10minuteswebsite/auto-articulos`.
 - Rama única autorizada: `main`.
-- Commit funcional productivo verificado: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Commit funcional productivo verificado: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
 - Producción: Vercel, proyecto `la-solucion-web/auto-articulos-web`.
-- Deployment funcional observado: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`.
+- Deployment funcional observado: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`.
 - Estado: `READY`, objetivo `production`.
 - Alias: `seototal`, `articulos` y `redes`, en `.lasolucionweb.com` y `.lasolucionweb.net`.
 
@@ -129,8 +129,8 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 
 - La referencia vigente es la URL viva `https://superlinks.lasolucionweb.net/app/`; allí la `app-subbar` es blanca, con línea gris clara, contexto gris y estados activos gris claro. Las secciones azules anteriores de este documento quedan supersedidas por esta comprobación visual.
 - `DashboardNav` quedó alineado con esa referencia: fondo `#ffffff`, borde `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, estado activo `#f2f2f4`, submenú con borde `#e7e7eb` y sombra tenue.
-- Código vigente en `main`: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
-- Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`.
+- Código vigente en `main`: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
+- Deployment productivo: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
 - Verificación fresca en `https://articulos.lasolucionweb.net/dashboard`: barra blanca/gris visible y `Admin Artículos` expandido con `Usuarios`, `Composio` y `PostPeer` en AX; no se cambiaron rutas, permisos ni datos.
 - Validación local: typecheck y build de producción OK; `git diff --check` OK. `npm test` queda en `224 pass / 1 fail` por expectativa MCP preexistente y no relacionada. `npm run verify` requiere `DATABASE_URL` y Docker, ausentes en este entorno.
 
@@ -154,3 +154,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Código productivo: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
 - Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`.
 - Verificación real: `articulos.lasolucionweb.net/dashboard/usuarios` recargado; DOM confirmó familia, tamaños y pesos exactos sin cambios de rutas, permisos ni datos.
+
+## Corrección de navegación de Redes — 2026-10-16
+
+- Hallazgo en producción: Redes heredaba el texto `Admin Artículos` aunque el shell, la subbarra y el submenú sí estaban presentes.
+- Corrección mínima: el grupo administrativo usa `Admin Redes` cuando el host es `redes.lasolucionweb.net`/`.com`; Artículos conserva `Admin Artículos`. Rutas, estilo, permisos y destinos (`Usuarios`, `Composio`, `PostPeer`) no cambiaron.
+- Código productivo: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
+- Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
+- Verificación real: Redes `.net` mostró shell global, `SEO Total Redes`, `Difusión social`, `Admin Redes` y su submenú completo; el Hub mantuvo visible `AUTOMATIZA TUS REDES SOCIALES`.

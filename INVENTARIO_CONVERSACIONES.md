@@ -3,7 +3,7 @@
 ## Registro operativo vigente — propagación del punto cero — 2026-10-16
 
 - Repositorio activo: `10minuteswebsite/auto-articulos`; rama única `main`; no se crean ramas ni worktrees.
-- Verdad productiva: `57ac8e28346c6f8823f80338660745cd9a3a24b9`, deployment `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`).
+- Verdad productiva: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`, deployment `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`).
 - Este inventario, Coordinación, CEREBRO, Baseline, Current State, Checkpoints y Controlador quedan alineados con esa referencia.
 - Las entradas que siguen son históricas y conservan reservas, conversaciones, checkpoints y decisiones previas para trazabilidad; no autorizan reutilizar checkouts antiguos.
 
@@ -18,6 +18,14 @@
 
 - El punto cero queda definido por producción observada y por el commit exacto que la sirve, no por una captura, un checkout antiguo o una entrada histórica.
 - La funcionalidad administrativa, la navegación y las métricas tipográficas verificadas se conservan; solo se actualizó la referencia documental vigente.
+
+## Codex — cierre de Redes — 2026-10-16
+
+- Defecto confirmado: Redes heredaba la etiqueta `Admin Artículos`; el Hub ya mostraba la tarjeta `AUTOMATIZA TUS REDES SOCIALES` y no requería cambio de catálogo.
+- Cambio: etiqueta dinámica `Admin Redes` en Redes; mismo submenú y mismo estándar visual que Artículos.
+- Código: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
+- Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
+- Verificación: producción `.net` con shell global, subbarra, menú `Admin Redes` y destinos `Usuarios`, `Composio`, `PostPeer`; Hub con tarjeta de Redes visible.
 
 ## Addendum de regresión — 2026-10-16
 

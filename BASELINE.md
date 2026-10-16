@@ -6,10 +6,10 @@ Fecha: 2026-10-16
 
 - Repositorio: `https://github.com/10minuteswebsite/auto-articulos`.
 - Única rama y checkout autorizado: `main`; sin ramas ni worktrees adicionales.
-- Verdad funcional: código `57ac8e28346c6f8823f80338660745cd9a3a24b9` servido por Vercel.
-- Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases de Artículos activos.
+- Verdad funcional: código `945fe5fcd2af2d1d7383bc4f61dc110bd6875805` servido por Vercel.
+- Deployment productivo: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`, alias de Redes verificado.
 - UI vigente comprobada en producción: menú de aplicación San Francisco `14px/400`; título `SEO Total Artículos` `15px/700`; contexto `Artículos con IA` `14px/400`; submenú administrativo `13px/500–600`.
-- Evidencia: DOM autenticado de `articulos.lasolucionweb.net/dashboard/usuarios` después de recarga real; no se modificaron rutas, permisos, datos ni secretos.
+- Evidencia: DOM autenticado de Artículos y Redes después de recarga real; Redes mostró `Admin Redes` y su submenú completo, y el Hub mostró `AUTOMATIZA TUS REDES SOCIALES`. No se modificaron rutas, permisos, datos ni secretos.
 
 Las secciones posteriores que mencionen otros commits o deployments son registros históricos y no sustituyen este punto cero.
 
@@ -89,3 +89,10 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Código servido: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
 - Deployment productivo: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases de Artículos activos.
 - Evidencia E2E: DOM productivo confirmó menú `14px/400`, título `15px/700`, contexto `14px/400` y familia `-apple-system, system-ui, SF Pro Text, SF Pro Display, Segoe UI, sans-serif`.
+
+### Corrección de navegación de Redes — 2026-10-16
+
+- `DashboardNav` conserva el shell Hub y la subbarra de Superlinks en Redes, pero ahora etiqueta el grupo administrativo según el producto: `Admin Artículos` en Artículos y `Admin Redes` en Redes.
+- Código publicado: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
+- Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
+- Evidencia E2E: `redes.lasolucionweb.net/dashboard` mostró `SEO Total Redes`, `Difusión social`, `Admin Redes` y el submenú `Usuarios`, `Composio`, `PostPeer`; el Hub mostró la tarjeta `AUTOMATIZA TUS REDES SOCIALES`.

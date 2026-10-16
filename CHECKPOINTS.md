@@ -147,3 +147,13 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Alcance documental: `BASELINE.md`, `CURRENT_STATE.md`, `CEREBRO.md`, `CHECKPOINTS.md`, `CONTROLADOR_DE_VERSIONES.md`, `COORDINACION_CLAUDE_CODEX.md` e `INVENTARIO_CONVERSACIONES.md`.
 - Regla: referencias anteriores quedan preservadas como historial etiquetado; ningún commit o deployment histórico reemplaza este punto cero.
 - Estado: DOCUMENTACIÓN SINCRONIZADA.
+
+## Checkpoint 14 — navegación y submenú de Redes — 2026-10-16
+
+- Punto cero de partida: `main` alineada con producción en `57ac8e28346c6f8823f80338660745cd9a3a24b9`; no se crearon ramas ni worktrees.
+- Hallazgo real: el Hub ya mostraba `AUTOMATIZA TUS REDES SOCIALES`; Redes ya recibía el shell y el submenú, pero el grupo administrativo estaba mal rotulado como `Admin Artículos`.
+- Cambio mínimo: `Admin Redes` para el host de Redes; `Admin Artículos` se conserva para Artículos. No se alteraron rutas, permisos ni datos.
+- Código publicado: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
+- Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
+- Evidencia E2E: Redes `.net` mostró `Admin Redes` expandido con `Usuarios`, `Composio` y `PostPeer`; el Hub conservó la tarjeta de Redes visible.
+- Estado: PRODUCCIÓN, CERRADO.

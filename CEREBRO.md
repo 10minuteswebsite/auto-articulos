@@ -28,8 +28,8 @@ Usar un modelo mixto y conservador:
 
 ## Punto cero vigente — producción verificada — 2026-10-16
 
-- La versión funcional que debe tomarse como base es `57ac8e28346c6f8823f80338660745cd9a3a24b9` en `main`.
-- Está servida por Vercel en `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi` (`READY`), con aliases de Artículos activos.
+- La versión funcional que debe tomarse como base es `945fe5fcd2af2d1d7383bc4f61dc110bd6875805` en `main`.
+- Está servida por Vercel en `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`), con Redes verificado en producción.
 - La comprobación viva confirmó menú interno San Francisco `14px/400`, título `15px/700`, contexto `14px/400` y submenú `13px/500–600`.
 - Todo código o documento que contradiga estos valores debe compararse primero contra producción; los commits anteriores de este archivo son historial, no punto de partida.
 
@@ -137,3 +137,9 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 ## Propagación documental completada — 2026-10-16
 
 Los siete archivos activos del Harness comparten ahora el mismo punto cero productivo, la misma evidencia y la misma regla de precedencia: producción verificada primero; historial solo como contexto.
+
+## Corrección de navegación de Redes — 2026-10-16
+
+- La tarjeta de Redes ya estaba visible en el Hub; el defecto real en la aplicación era que el grupo se llamaba `Admin Artículos` también dentro de Redes.
+- `DashboardNav` ahora deriva el nombre del grupo del host, sin duplicar componentes ni alterar las guardas: `Admin Redes` en Redes y `Admin Artículos` en Artículos.
+- Código y deployment verificados: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`, `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`).

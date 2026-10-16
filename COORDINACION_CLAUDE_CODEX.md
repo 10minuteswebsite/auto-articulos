@@ -3,10 +3,18 @@
 ## Punto cero documental vigente — 2026-10-16
 
 - Repositorio: `10minuteswebsite/auto-articulos`; trabajo autorizado únicamente en `main`, sin ramas ni worktrees.
-- Código que producción sirve: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
-- Deployment Vercel verificado: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases de Artículos activos.
+- Código que producción sirve: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
+- Deployment Vercel verificado: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`, alias de Redes verificado.
 - Evidencia productiva: menú San Francisco `14px/400`, título `15px/700`, contexto `14px/400`, submenú `13px/500–600`.
 - Las entradas cronológicas anteriores siguen siendo memoria de decisiones e incidentes; no sustituyen este punto cero.
+
+## Cierre — menú de Redes — 2026-10-16
+
+- Se auditó producción antes de editar: la tarjeta `AUTOMATIZA TUS REDES SOCIALES` sí estaba visible en el Hub y Redes sí recibía el shell/submenú.
+- La incoherencia concreta era el nombre administrativo heredado: `Admin Artículos` aparecía dentro de Redes.
+- Corrección publicada en `main`: `Admin Redes` para Redes, conservando `Admin Artículos` para Artículos y el mismo patrón visual de Superlinks.
+- Código: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`; deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`).
+- E2E: `redes.lasolucionweb.net` muestra `Admin Redes` y `Usuarios`, `Composio`, `PostPeer`; el Hub mantiene la tarjeta de Redes.
 
 ## Claude — MCP: estilos de escritura (Prompt) — 2026-10-15
 
