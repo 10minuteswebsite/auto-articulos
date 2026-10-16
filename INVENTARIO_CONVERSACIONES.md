@@ -2211,6 +2211,15 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - Evidencia en vivo: `Admin Artículos` visible y desplegable con `Usuarios`, `Composio` y `PostPeer`; shell global visible y alineado con Superlinks.
 - Estado: PRODUCCIÓN, CERRADO. No se crearon ramas ni worktrees; no se cambiaron roles, datos ni secretos.
 
+### Corrección final de paridad visual — 2026-10-16
+
+- **Repositorio:** `auto-articulos`, rama única `main`.
+- **Alcance:** estilos de `DashboardNav` únicamente; sin cambios de Auth0, rutas, permisos, APIs, datos o secretos.
+- **Verdad productiva:** Superlinks vivo usa subbarra blanca/gris; Artículos quedó alineado en `364ed6decaa735c0fe9d81901f590417f2c99b82`.
+- **Deployment:** `dpl_7D26RkGkKTYrvsg4A6LfDKVcCPr5`, `READY`.
+- **Evidencia:** menú `Admin Artículos` expandido en producción, con `Usuarios`, `Composio` y `PostPeer`; AX confirmado.
+- **Estado:** cerrado y documentado.
+
 ### Codex — paridad visual con Superlinks — 2026-10-16
 
 - Observación: la funcionalidad administrativa estaba disponible, pero la barra seguía dentro del layout antiguo y no respetaba la composición de Superlinks.

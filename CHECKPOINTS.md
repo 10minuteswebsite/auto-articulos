@@ -43,6 +43,16 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Verificación E2E: desde la tarjeta del HUB se llegó a `https://redes.lasolucionweb.net/dashboard/oportunidades-redes`; sesión activa de Mario Davila y encabezado `SEO TOTAL REDES`; no volvió a `/login`.
 - Estado: CERRADO.
 
+## Checkpoint 8 — verdad funcional final de la paleta — 2026-10-16
+
+- Se revalidó producción contra `https://superlinks.lasolucionweb.net/app/`; la subbarra canónica es blanca/gris, no azul. Las métricas azules de Checkpoint 7 quedan supersedidas.
+- Corrección publicada en `main`: `364ed6decaa735c0fe9d81901f590417f2c99b82`.
+- Deployment productivo: `dpl_7D26RkGkKTYrvsg4A6LfDKVcCPr5`, `READY`.
+- Verificación E2E: `articulos.lasolucionweb.net/dashboard` recargado; `Admin Artículos` desplegado; AX mostró `Usuarios`, `Composio` y `PostPeer`.
+- Validación local: typecheck, build y `git diff --check` OK; `npm test` `224 pass / 1 fail` por expectativa MCP preexistente; `npm run verify` bloqueado solo por Docker/`DATABASE_URL` ausentes.
+- No se crearon ramas/worktrees ni se modificaron rutas, permisos, datos o secretos.
+- **Estado:** PRODUCCIÓN, CERRADO.
+
 ## Checkpoint 8 — reparación de regresión concurrente — 2026-10-16
 
 - Incidente: `babd61c1` cambió la subbarra canónica azul a blanco/gris y produjo `dpl_G5w46PMjrfE5Eyt2g472jUP2cFEF`; se identifica como regresión, no como baseline.

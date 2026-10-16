@@ -56,3 +56,10 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - El estado canónico vigente queda fijado por `82d33d878efabacce5b2af68eb4277c81ae18f0f` y por el deployment productivo `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7` (`READY`).
 
 - Corrección definitiva vigente tras la segunda interferencia: `964444a576b9f1e49bcf568981370f03b6769064`, deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL` (`READY`).
+
+### Corrección de verdad funcional — 2026-10-16
+
+- La comparación viva final contradice la paleta azul documentada arriba: Superlinks servido muestra `app-subbar` blanca/gris. Esa evidencia de producción supersede las métricas azules históricas.
+- Valores vigentes en Artículos: fondo `#ffffff`, línea `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, activo `#f2f2f4`, submenú con borde `#e7e7eb` y sombra tenue.
+- Código: `364ed6decaa735c0fe9d81901f590417f2c99b82`; deployment: `dpl_7D26RkGkKTYrvsg4A6LfDKVcCPr5` (`READY`).
+- Evidencia: dominio real recargado y submenú expandido; AX confirmó `Usuarios`, `Composio` y `PostPeer`.

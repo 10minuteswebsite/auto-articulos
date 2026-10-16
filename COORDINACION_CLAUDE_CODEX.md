@@ -11921,3 +11921,11 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - Deployment final verificado: `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`, `READY`; evidencia visual y AX en producción OK.
 
 - Una segunda escritura concurrente (`0f7288dc`) repitió la regresión; se corrigió definitivamente con `964444a576b9f1e49bcf568981370f03b6769064` y deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL` (`READY`).
+
+### Verificación final de producción — 2026-10-16
+
+- La referencia viva de Superlinks fue revisada nuevamente y confirma subbarra blanca/gris; por tanto, las notas que la describen azul quedan supersedidas.
+- Corrección vigente: `364ed6decaa735c0fe9d81901f590417f2c99b82` en `main`.
+- Deployment: `dpl_7D26RkGkKTYrvsg4A6LfDKVcCPr5`, `READY`.
+- Evidencia: recarga fresca de `articulos.lasolucionweb.net/dashboard`; barra global y subbarra visibles, `Admin Artículos` expandido y AX con `Usuarios`, `Composio`, `PostPeer`.
+- Sin cambios de funcionalidad, rutas, permisos, datos o secretos.

@@ -5175,3 +5175,13 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - **Deployment:** `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
 - **Evidencia:** revisión visual autenticada en `articulos.lasolucionweb.net/dashboard/usuarios`; ambas barras separadas y submenú operativo.
 - **Estado:** PRODUCCIÓN, CERRADO.
+
+## Versión vigente — 2026-10-16 — corrección final de paleta productiva
+
+- **Punto cero:** `main` contenía overrides azules que no coincidían con la referencia viva de Superlinks.
+- **Cambio:** `DashboardNav` adopta la subbarra blanca/gris comprobada en producción, incluyendo estados, contexto y submenú; no se alteran rutas ni autorización.
+- **Commit:** `364ed6decaa735c0fe9d81901f590417f2c99b82`.
+- **Deployment:** `dpl_7D26RkGkKTYrvsg4A6LfDKVcCPr5`, `READY`.
+- **Prueba productiva:** `articulos.lasolucionweb.net/dashboard` recargado; submenú operativo con `Usuarios`, `Composio` y `PostPeer`.
+- **Validación:** typecheck/build/diff-check OK; suite `224 pass / 1 fail` por expectativa MCP preexistente; verificador completo limitado por falta de Docker y `DATABASE_URL` local.
+- **Estado:** PRODUCCIÓN, CERRADO.
