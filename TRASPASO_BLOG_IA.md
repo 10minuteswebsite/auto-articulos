@@ -76,6 +76,7 @@ Cómo probarlo en local: `cd apps/blog && npx tsx src/node/seed.ts && npx tsx sr
 ## Bitácora (más reciente arriba)
 
 **2026-10-16**
+- LOCAL · Modelo/migración `BlogIaBlog`+`BLOG`, `blogIaQueue.ts` y rama en `queue.ts`. Verificación: `prisma validate`; migración en Postgres desechable (2 aplicaciones, cascade, usuarios existentes intactos); worker compila (tsconfig con rutas al worktree, porque `@auto-articulos/*` apunta al repo principal); 39/39 pruebas del blog.
 - LOCAL · QR de WhatsApp real; cliente firmado en `packages/shared`; publisher BLOG IA en el worker; prueba de punta a punta. 39/39 pruebas. Aviso técnico: en este entorno `@auto-articulos/shared` resuelve al repo PRINCIPAL (enlaces de `node_modules`), por eso el publisher recibe `send` inyectado y no importa `shared` en ejecución; al subir, el build real resuelve bien.
 - LOCAL · Fase 1 programada en `apps/blog` (ver sección arriba). Sin push (orden de Milton: todo local hasta probar). 30/30 pruebas.
 - DECISIÓN · Milton elige Opción A: BLOG IA publica solo en el blog, no en 10minutesWebsite.

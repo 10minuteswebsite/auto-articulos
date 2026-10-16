@@ -14,6 +14,7 @@ import { notifyGoogle } from "./googleIndexing";
 import { notifyBing } from "./bingIndexing";
 import { runPatriciaFix } from "./fix-patricia";
 import { processMcpRunTitle } from "./mcpQueue";
+import { processBlogRunTitle } from "./blogIaQueue";
 
 
 export async function markTitleError(titleId: string, message: string) {
@@ -211,6 +212,12 @@ async function processRunTitle(
   // camino que antes de este cambio, sin ninguna diferencia.
   if (run.user.publishMethod === "MCP") {
     return processMcpRunTitle(run, nextTitle);
+  }
+
+  // Tercera línea (2026-10-16, "BLOG IA"): publica SOLO en el blog del cliente.
+  // Ninguna cuenta existente tiene este valor; BROWSER sigue igual que siempre.
+  if (run.user.publishMethod === "BLOG") {
+    return processBlogRunTitle(run, nextTitle);
   }
 
   const credential = await prisma.credential.findUnique({
