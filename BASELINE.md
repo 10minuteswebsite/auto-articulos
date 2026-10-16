@@ -19,6 +19,19 @@ Las secciones posteriores que mencionen otros commits o deployments son registro
 - Corrección: el host `redes` filtra su navegación a `Inicio`, `SEO Total Redes`, `Configuración` y `Admin Redes`; el host `articulos` conserva exclusivamente su menú propio. El Hub compartido mantiene la vista completa de productos.
 - Evidencia productiva: Redes `.net` verificado sin `SEO Total Artículos`, con el submenú propio de Redes y `Admin Redes`; Artículos `.net` verificado con `SEO Total Artículos` y `Admin Artículos`, sin `SEO Total Redes`.
 
+## Contrato MCP — asistentes de IA — 2026-10-16 (commit `4bbf565a`, `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR`)
+
+Comportamiento que NO debe cambiar sin nueva verificación:
+
+- Un solo servidor `/api/mcp` para los tres productos y los seis dominios; sin token responde 401 (sin `WWW-Authenticate`, por Alexa+).
+- ChatGPT usa OAuth (`chatgpt-auto-articulos-v1`, PKCE); la renovación `grant_type=refresh_token` debe devolver 200 con par nuevo; un refresh inválido, `invalid_grant` 400. Claude/Muse/otras usan el token personal `sta_`.
+- Catálogo (33 herramientas): artículos (`listar_oportunidades`, `crear_oportunidades`, `crear_titulos_con_ia`, `publicar_*` con `confirmar=false` → comprobante → `confirmar=true`), cuenta, manual, estilos (`listar_estilos_escritura`, `cambiar_estilo_escritura_por_defecto`, parámetro `estilo`) y Redes (`ver_redes_sociales`, `generar_propuestas_sociales`, `listar_propuestas_sociales` con filtros `red`/`estado`/`id`, `publicar_propuestas_sociales` con `reintentar`, `publicar_propuesta_social`, `cancelar_propuesta_social`, `eliminar_propuestas_sociales`).
+- Prompts MCP: `empezar`, `publicar_contenido`, `programar_publicaciones`, `publicar_en_redes`, `automatizar_redes`, `diagnosticar_cuenta` (la prueba `src/lib/mcp.test.ts` los exige).
+- Las `instructions` del servidor incluyen el resumen «QUÉ PUEDES HACER» y la automatización diaria (Muse y otros clientes leen `tools/list` e `instructions`, no siempre los prompts).
+- El asistente NO conecta ni diagnostica integraciones; el cupo diario de Redes limita publicaciones, no propuestas; todo publicar/cancelar/eliminar exige comprobante.
+- Pantalla `/dashboard/configuracion/mcp`: prompt de Artículos en `articulos`, prompt propio de Redes en `redes`, ambos en el host combinado.
+- «Oportunidades Redes» y las propuestas del MCP son la misma tabla `SocialOpportunity`.
+
 ## Regla de dominios
 
 Se trabajará en modo mixto:

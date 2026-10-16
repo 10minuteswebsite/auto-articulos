@@ -8,6 +8,16 @@ Antes de modificar código, cambiar de rama, crear un commit, ejecutar una migra
 
 La fuente funcional vigente es la producción verificada, no una entrada histórica del registro: `main` en `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`, servido por Vercel como `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE` (`READY`). El árbol de trabajo autorizado es único y no se crean ramas ni worktrees. Los registros anteriores se conservan como historial y deben leerse como tales.
 
+## Versión — 2026-10-16 — MCP: claridad de Redes y corrección de prueba (PR #601)
+
+- Task ID: `MCP-REDES-CLARIDAD-20261016`.
+- Commit: `4bbf565ac2a096d749db8b78b2e2a45db783b317` en `main` (squash; padre `9bcfded8`).
+- Deployment: `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR`, `READY`, git, aliases asignados. Producción servida = este commit (los commits de documentación posteriores no cambian el runtime).
+- Alcance: descripciones/filtros/reintento de las herramientas de Redes, `instructions` del servidor, corrección de `src/lib/mcp.test.ts`. Sin migración.
+- Verificación: HTTP de los seis dominios; renovaciones OAuth 200 en logs; árbol de `main` idéntico al verificado.
+- Versiones MCP previas en producción: `dc4203f0` (#566, `dpl_GYJ9mEpJ4ZnUWGugK6zCK6PkCfNf`), `748c3dec` (#581, `dpl_ExEP7ywHp3FNiMFQgkwQ8NWDxks9`), `334d59d0` (#593, `dpl_8MnYqAW7NceduJdVMh5pzzDZLc2b`), `81c40c87` (#594, `dpl_85mLnuS9qpun6bJt2NAdcG23m1Ey`).
+- Checkpoint: 10 (`CHECKPOINTS.md`).
+
 ## Versión — 2026-10-16 — aislamiento del menú de Redes
 
 - Commit: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08` en `main`.

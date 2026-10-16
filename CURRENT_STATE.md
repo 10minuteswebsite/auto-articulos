@@ -2,6 +2,18 @@
 
 Fecha de auditoría: 2026-10-16 (America/New_York)
 
+## Punto cero vigente — MCP en producción — 2026-10-16 16:40 (America/New_York)
+
+- Task ID: `MCP-REDES-CLARIDAD-20261016`. Repositorio `10minuteswebsite/auto-articulos`, rama única `main`.
+- Commit de código servido: `4bbf565a` (`4bbf565ac2a096d749db8b78b2e2a45db783b317`, squash del PR #601; padre `9bcfded8`).
+- Deployment productivo: `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR`, `READY`, origen git, creado 2026-10-16 20:29Z, aliases asignados.
+- Árbol de `main` = árbol verificado antes de publicar (`e9e8590b`): no se sobrescribió nada ajeno; diff contra `9bcfded8` = 12 archivos, 139 líneas añadidas.
+- Producción comprobada por HTTP en los seis dominios: `/login` 200 (salvo `seototal.com` 307 al HUB, como documenta el baseline), `/` y `/dashboard` 307, `/api/mcp` sin token 401, `/.well-known/oauth-protected-resource` 200; `POST /api/oauth2/token` con refresh falso responde `invalid_grant` 400 (rechazo limpio, no 500).
+- MCP en producción (commits en `main`): `dc4203f0` OAuth refresh (#566), `748c3dec` alcance + automatización de artículos (#581), `334d59d0` Redes (#593), `81c40c87` estilos de escritura (#594), `4bbf565a` claridad de Redes + corrección de prueba (#601).
+- Evidencia del arreglo OAuth (#566) en logs reales de Vercel: el 16/10 hay 7 `POST /api/oauth2/token` 200 sin `authorize` previo (05:57, 08:18, 08:24, 09:19, 11:51, 12:54, 14:18 ET), tras la reautorización de las 05:23; antes del arreglo ninguna renovación tuvo éxito (400 el 13 y 14/10).
+- Pendiente de comprobar en vivo con un asistente real: las herramientas de Redes y de estilos con Catalina/Lorena y Arantza (requieren token personal u OAuth de una cuenta; no se probó publicando).
+- Siguiente punto de partida: `main` más reciente en GitHub; leer este archivo, `BASELINE.md` (sección MCP) y el último checkpoint (10).
+
 ## Identidad del sistema
 
 - Repositorio canónico: `https://github.com/10minuteswebsite/auto-articulos`.

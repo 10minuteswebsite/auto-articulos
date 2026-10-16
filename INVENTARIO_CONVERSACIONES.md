@@ -16,6 +16,7 @@
 - Funcionalidades protegidas: login/permisos, navegación por host (Artículos/Redes), publicación de artículos y de Redes (rutas intactas), OAuth de ChatGPT (#566), estilos de escritura (#594). No se tocan rutas de publicación, esquema ni migraciones.
 - Resultado esperado: asistentes (Muse/ChatGPT/Claude) ven en `tools/list` e `instructions` argumentos, comprobante, monitoreo y reintento de Redes y que pueden automatizar corridas diarias.
 - Reserva: ninguna otra conversación activa en `apps/web/src/lib/mcp/**` (verificado en este inventario y en `git log`); un solo programador a la vez.
+- Resultado (2026-10-16 16:40 ET): publicado y verificado. Commit `4bbf565a`, deployment `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR` (`READY`), checkpoint 10. Reserva liberada. Último mensaje: confirmación de producción y registro documental.
 
 ## Corrección registrada — menú propio de Redes — 2026-10-16
 
