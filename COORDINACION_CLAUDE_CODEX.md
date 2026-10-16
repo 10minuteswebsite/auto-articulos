@@ -11919,3 +11919,5 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - Un proceso paralelo publicó `babd61c1` directamente en `main` y cambió la `app-subbar` azul a blanco/gris. Ese commit y su deployment `dpl_G5w46PMjrfE5Eyt2g472jUP2cFEF` quedan documentados como regresión, no como verdad.
 - Se corrigió hacia delante en `main` con `82d33d878efabacce5b2af68eb4277c81ae18f0f`.
 - Deployment final verificado: `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`, `READY`; evidencia visual y AX en producción OK.
+
+- Una segunda escritura concurrente (`0f7288dc`) repitió la regresión; se corrigió definitivamente con `964444a576b9f1e49bcf568981370f03b6769064` y deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL` (`READY`).

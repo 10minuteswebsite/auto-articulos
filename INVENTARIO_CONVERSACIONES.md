@@ -12,6 +12,8 @@
 - `babd61c1` fue una edición concurrente que reintrodujo blanco/gris en `DashboardNav`.
 - Corrección vigente: `82d33d878efabacce5b2af68eb4277c81ae18f0f`; deployment `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7` (`READY`).
 
+- Segunda interferencia registrada: `0f7288dc`; corrección definitiva `964444a576b9f1e49bcf568981370f03b6769064`, deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL` (`READY`).
+
 Este documento tiene un propósito distinto al de `COORDINACION_CLAUDE_CODEX.md`:
 responder, en cualquier momento, **quién es dueño de cada problema/proyecto,
 quién tiene un archivo o rama tomada ahora mismo, y de quién es cada commit**.

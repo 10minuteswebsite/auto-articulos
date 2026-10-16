@@ -51,6 +51,14 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Evidencia: comparación final con Superlinks, fondo `#eef5ff`, línea `#d8e4f2`, estados activos azules, submenu completo y AX con sus tres opciones.
 - Estado: CERRADO; árbol final limpio y sin ramas/worktrees creados.
 
+## Checkpoint 9 — estado estable después de dos interferencias — 2026-10-16
+
+- Regresiones documentadas: `babd61c1` y `0f7288dc`, ambos commits concurrentes que reintrodujeron blanco/gris.
+- Corrección definitiva: `964444a576b9f1e49bcf568981370f03b6769064`.
+- Deployment productivo: `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL`, `READY`.
+- Evidencia final: comparación con Superlinks y submenu de `Admin Artículos` completo, sin regresión visual ni funcional.
+- Estado: CERRADO; no se harán más cambios de código en esta tarea.
+
 ## Checkpoint 6 — paridad visual con Superlinks — 2026-10-16
 
 - Alcance: corregir únicamente la composición y estilos del menú de aplicación y su submenú, usando Superlinks como referencia productiva.

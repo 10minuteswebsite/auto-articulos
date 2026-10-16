@@ -41,6 +41,8 @@ Usar un modelo mixto y conservador:
 - La respuesta correcta fue corregir hacia delante desde ese estado, no usarlo como verdad ni hacer rollback de la funcionalidad administrativa.
 - Estado vigente: código `82d33d878efabacce5b2af68eb4277c81ae18f0f`, deployment `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7` (`READY`), producción comprobada.
 
+- La segunda interferencia `0f7288dc` volvió a reintroducir el shell antiguo; la corrección definitiva es `964444a576b9f1e49bcf568981370f03b6769064`, deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL` (`READY`).
+
 ## Reparaciones previstas
 
 1. Excluir callbacks y APIs de cualquier redirección humana al HUB.

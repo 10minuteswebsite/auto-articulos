@@ -116,3 +116,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Corrección posterior publicada en `main`: `82d33d878efabacce5b2af68eb4277c81ae18f0f`.
 - Deployment productivo corregido: `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`, `READY`, aliases de Artículos activos.
 - Verificación final: barra azul clara, contexto azul, `Admin Artículos` delineado, submenu completo dentro del viewport y AX con `Usuarios`, `Composio`, `PostPeer`.
+
+## Estado final después de segunda interferencia — 2026-10-16
+
+- Se detectó una segunda escritura concurrente, `0f7288dc`, que repitió la regresión blanco/gris después de `82d33d87`.
+- Corrección definitiva de código: `964444a576b9f1e49bcf568981370f03b6769064`.
+- Deployment productivo verificado: `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL`, `READY`, aliases productivos activos.
+- Verificación final en vivo: barra global y `app-subbar` comparadas con Superlinks; `Admin Artículos` abierto sin recorte; AX confirma `Usuarios`, `Composio` y `PostPeer`.
+- Regla operativa: ningún proceso paralelo puede modificar `DashboardNav` durante una tarea; cualquier commit que reintroduzca blanco/gris se considera regresión y no punto cero.

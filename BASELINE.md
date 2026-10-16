@@ -54,3 +54,5 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 
 - `babd61c1` reintrodujo temporalmente el shell blanco/gris en `main`; no es referencia válida ni debe promoverse.
 - El estado canónico vigente queda fijado por `82d33d878efabacce5b2af68eb4277c81ae18f0f` y por el deployment productivo `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7` (`READY`).
+
+- Corrección definitiva vigente tras la segunda interferencia: `964444a576b9f1e49bcf568981370f03b6769064`, deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL` (`READY`).

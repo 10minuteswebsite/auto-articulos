@@ -56,6 +56,8 @@ No usar restauraciones destructivas ni desplegar una versión anterior solo para
 - Corrección: `82d33d878efabacce5b2af68eb4277c81ae18f0f`.
 - Producción corregida: `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`, `READY`; verificación visual y AX completadas.
 
+- Segunda regresión concurrente: `0f7288dc` repitió el mismo cambio antiguo; corrección definitiva `964444a576b9f1e49bcf568981370f03b6769064`, deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL` (`READY`).
+
 Este archivo es también el historial maestro de versiones. Toda entrada debe
 añadirse al final, sin borrar ni reescribir entradas anteriores. Una versión no
 se considera publicada ni estable solo porque exista un commit: debe tener
