@@ -1,5 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Cuidado de tokens (PostPeer, Composio, imágenes, OpenAI) — 2026-10-16
+
+- Task ID: `CUIDADO-TOKENS-20261016`. Orden de Milton: los tokens se piden solo en el momento preciso. Sin migración, sin cambios de comportamiento, sin workflows. Estado: PR abierto, SIN fusionar.
+- Entrega: `CUIDADO_DE_TOKENS.md` (8 reglas + inventario de llamadas de pago + riesgos) y la prueba guardiana `apps/worker/src/paidApiGuard.test.ts`, que falla si aparece una llamada de pago sin registrar.
+- Hallazgos: PostPeer en Google Business es seguro (reserva atómica, clave de idempotencia, sin reintentos). RIESGOS NO CORREGIDOS: R1 la imagen IA de Instagram se guarda solo si la publicación sale bien, así que un reintento tras fallo la paga otra vez; R2 `social-image.ts` puede probar hasta 3 modelos pagados. Composio y la cadena de fal.ai quedan PENDIENTES de auditar. Threads en PostPeer no se auditó a fondo.
+- Verificación: la prueba guardiana pasa; no se probó nada en vivo ni se gastó ningún token.
+
 ## Claude — Redes: las publicaciones con error salen de Oportunidades y quedan en Historial — 2026-10-16
 
 - Task ID: `REDES-ERRORES-A-HISTORIAL-20261016`. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración. Estado: PR abierto, SIN fusionar.
