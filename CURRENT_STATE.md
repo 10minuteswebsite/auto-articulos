@@ -4,7 +4,7 @@ Fecha de auditoría: 2026-10-16 (America/New_York)
 
 ## Identidad del sistema
 
-- Repositorio: `https://github.com/miltondavila-ux/auto-articulos`.
+- Repositorio canónico: `https://github.com/10minuteswebsite/auto-articulos`.
 - Rama única autorizada: `main`.
 - Commit actual de `main`: `c73e7b9445e05d2fef8774fec4b9cc158978ba69`.
 - Producción: Vercel, proyecto `la-solucion-web/auto-articulos-web`.
