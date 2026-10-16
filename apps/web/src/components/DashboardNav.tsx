@@ -656,7 +656,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
                     style={{
                       position: "absolute",
                       top: "calc(100% + 8px)",
-                      left: 0,
+                      ...(entry.group === "administracion" ? { right: 0 } : { left: 0 }),
                       zIndex: 40,
                       minWidth: 196,
                       background: "rgba(255, 255, 255, 0.98)",
