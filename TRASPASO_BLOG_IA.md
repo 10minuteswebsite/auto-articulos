@@ -43,9 +43,12 @@ BLOG IA es un **destino de salida** del pipeline editorial que ya existe en SEO 
 3. `Title.articleUrl` pasaría a apuntar a `blog.cliente.com/...`; el envío a Google/Bing (`googleIndexing.ts`, `bingIndexing.ts`, `send-daily-sitemaps.ts`) y el sitemap diario asumen el sitio de 10minutesWebsite: revisar antes de conectar.
 4. Las categorías de SEO Total hoy son las del panel de 10minutesWebsite (`Category.externalId`, `Category.panel`); el blueprint pide categorías propias del blog (§6, §8.6): modelo nuevo.
 
-**Pregunta de producto abierta (bloquea el diseño de Fase 3):** cuando una cuenta activa BLOG IA, ¿el artículo se publica SOLO en el blog, o TAMBIÉN en su sitio de 10minutesWebsite como hoy? El blueprint dice «destino de salida» y «reutiliza las reglas actuales» sin precisarlo.
+**DECISIÓN DE MILTON (2026-10-16): Opción A, solo en el blog.** Con BLOG IA activo, el artículo va únicamente a `blog.cliente.com` y deja de ir a 10minutesWebsite (sin contenido duplicado). Consecuencia aceptada: el sitio actual del cliente deja de recibir artículos mientras BLOG IA esté activo. Por tanto BLOG IA reemplaza al publisher de navegador para esa cuenta (no es un envío paralelo), y hay que definir en Fase 3 qué pasa al desactivar/suspender (¿vuelve a 10minutesWebsite?) — pregunta pendiente.
 
 ## Bitácora (más reciente arriba)
+
+**2026-10-16**
+- DECISIÓN · Milton elige Opción A: BLOG IA publica solo en el blog, no en 10minutesWebsite.
 
 **2026-10-15**
 - DOCUMENTACIÓN · Auditoría 0.1 (solo lectura de `queue.ts`, `publisher.ts`, `mcpPublisher.ts`, `mcpQueue.ts`, esquema `Run`/`Title`); hallazgos arriba. Sin cambios de código.
