@@ -11,7 +11,7 @@
 
 - Conversación «PROBLEMAS CON MCP ARTICULOS»; Task ID `MCP-PROMPTS-POR-PRODUCTO-20261016`; responsable Claude, a pedido de Milton.
 - Archivos: `apps/web/src/lib/mcp/prompts-por-producto.ts` (+ prueba), `apps/web/src/app/dashboard/configuracion/mcp/page.tsx`, `apps/web/src/content/manual-usuario.ts`, documentos.
-- Protegido: rutas y herramientas del MCP, OAuth, publicación. Resultado esperado: Redes muestra el prompt de Redes, Artículos el de Artículos. Estado: en publicación (PR).
+- Protegido: rutas y herramientas del MCP, OAuth, publicación. Resultado esperado: Redes muestra el prompt de Redes, Artículos el de Artículos. Estado: publicado. Commit `4836deaf`, deployment `dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx` (`READY`), checkpoint 11; reserva liberada.
 
 ## Claude (Sonnet 5.5) — MCP: claridad de Redes para asistentes + corrección de prueba — 2026-10-16
 

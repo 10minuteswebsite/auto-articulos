@@ -193,3 +193,25 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 | BASELINE.md | sí | `4bbf565a` | `dpl_4rtM1ewR…` | 10 | sí | sí | contrato MCP |
 | CHECKPOINTS.md | sí | `4bbf565a` | `dpl_4rtM1ewR…` | 10 | sí | sí | este registro |
 
+## Checkpoint 11 — prompts por producto y automatización con aceptación única — 2026-10-16 17:00 ET
+
+- Task ID: `MCP-PROMPTS-POR-PRODUCTO-20261016`. Commit de código: `4836deaf` (PR #606); punto de partida `main` `4a736c60`.
+- Deployment: `dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx` (`READY`, git).
+- CURRENT_STATE y BASELINE actualizados.
+- Pruebas: pruebas MCP 28/28; suite completa de `apps/web` 230 con 23 fallos del paquete `shared` local desactualizado (ajenos, mismos de siempre).
+- Evidencia de producción: HTTP de los seis dominios y rechazo limpio de OAuth (ver CURRENT_STATE). La pantalla por host con sesión real NO se verificó.
+- Riesgos: personas deben volver a copiar el prompt; host `seototal` por decidir; automatización no probada en vivo con un asistente real.
+- Siguiente responsable: verificación visual con la cuenta de Lorena y prueba en vivo con Catalina.
+
+### Auditoría de cobertura documental (Task `MCP-PROMPTS-POR-PRODUCTO-20261016`)
+
+| Documento | Task ID | Commit | Deployment | Checkpoint | Alcance | Evidencia | Resultado |
+|---|---|---|---|---|---|---|---|
+| COORDINACION_CLAUDE_CODEX.md | sí | `4836deaf` | `dpl_J9bQtR8X…` | 11 | sí | sí | publicado; pantalla por host sin verificar con sesión |
+| CONTROLADOR_DE_VERSIONES.md | sí | `4836deaf` | `dpl_J9bQtR8X…` | 11 | sí | sí | publicado |
+| INVENTARIO_CONVERSACIONES.md | sí | `4836deaf` | `dpl_J9bQtR8X…` | 11 | sí | sí | publicado |
+| CEREBRO.md | sí | `4836deaf` | `dpl_J9bQtR8X…` | 11 | sí | sí | decisiones registradas |
+| CURRENT_STATE.md | sí | `4836deaf` | `dpl_J9bQtR8X…` | 11 | sí | sí | punto cero vigente |
+| BASELINE.md | sí | `4836deaf` | `dpl_J9bQtR8X…` | 11 | sí | sí | contrato de prompts |
+| CHECKPOINTS.md | sí | `4836deaf` | `dpl_J9bQtR8X…` | 11 | sí | sí | este registro |
+

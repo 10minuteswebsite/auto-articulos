@@ -32,6 +32,11 @@ Comportamiento que NO debe cambiar sin nueva verificación:
 - Pantalla `/dashboard/configuracion/mcp`: prompt de Artículos en `articulos`, prompt propio de Redes en `redes`, ambos en el host combinado.
 - «Oportunidades Redes» y las propuestas del MCP son la misma tabla `SocialOpportunity`.
 
+### Prompts por producto — 2026-10-16 (commit `4836deaf`, `dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx`)
+
+- `/dashboard/configuracion/mcp` muestra un prompt según el host: `redes` → `MCP_PROMPT_REDES`; `articulos` → `MCP_PROMPT_ARTICULOS`; host combinado → Artículos + sección de Redes. Ninguno lleva la línea «Servidor MCP». La prueba `prompts-por-producto.test.ts` exige que Artículos no nombre herramientas de Redes y viceversa.
+- La automatización se PROPONE (resumen del plan) y requiere un sí único del usuario antes de crear tareas; después corre sin aprobar cada publicación salvo que el usuario lo pida. Por defecto: Artículos tres al día a horas distintas (07:00, 12:00, 19:00); Redes una al día por red (10:00) o solo las redes elegidas, cada una con su horario.
+
 ## Regla de dominios
 
 Se trabajará en modo mixto:
