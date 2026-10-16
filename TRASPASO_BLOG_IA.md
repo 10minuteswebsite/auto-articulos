@@ -17,7 +17,7 @@ BLOG IA es un **destino de salida** del pipeline editorial que ya existe en SEO 
 | Fase | Contenido | Estado |
 |---|---|---|
 | 0 | Auditoría y validación (código real, Cloudflare Custom Hostnames, DB, GSC/GA/Bing) | EN CURSO |
-| 1 | Núcleo BLOG IA (multi-tenant, render, ingestión, SEO básico) | Pendiente |
+| 1 | Núcleo BLOG IA (multi-tenant, render, ingestión, SEO básico) | **PROGRAMADO EN LOCAL** (`apps/blog`, 30/30 pruebas; falta D1 real y Cloudflare) |
 | 2 | Wizard y personalización | Pendiente |
 | 3 | Integración operativa con SEO Total | Pendiente |
 | 4 | Calidad, SEO y piloto (3 negocios) | Pendiente |
@@ -45,9 +45,38 @@ BLOG IA es un **destino de salida** del pipeline editorial que ya existe en SEO 
 
 **DECISIÓN DE MILTON (2026-10-16): Opción A, solo en el blog.** Con BLOG IA activo, el artículo va únicamente a `blog.cliente.com` y deja de ir a 10minutesWebsite (sin contenido duplicado). Consecuencia aceptada: el sitio actual del cliente deja de recibir artículos mientras BLOG IA esté activo. Por tanto BLOG IA reemplaza al publisher de navegador para esa cuenta (no es un envío paralelo), y hay que definir en Fase 3 qué pasa al desactivar/suspender (¿vuelve a 10minutesWebsite?) — pregunta pendiente.
 
+## Fase 1 en local — `apps/blog` (SIN SUBIR, orden de Milton 2026-10-16)
+
+Worker de estándar web (`Request`→`Response`), sin dependencias nuevas. Corre igual en Cloudflare y en local: la base se accede por la interfaz `Db` (`src/db.ts`) con adaptador D1 y adaptador `node:sqlite` (pruebas/local); el esquema SQL (`migrations/0001_init.sql`) es el mismo.
+
+| Pieza | Archivo |
+|---|---|
+| Esquema multi-tenant (`tenant_id` en todo, slugs únicos por tenant) | `migrations/0001_init.sql` |
+| API de ingestión firmada (HMAC + ventana 5 min), idempotente, atómica, HTML sanitizado | `src/ingest.ts`, `src/sanitize.ts` |
+| Resolución de tenant SOLO por hostname verificado; consultas siempre filtradas | `src/repo.ts` |
+| Rutas: home, categoría, artículo, búsqueda, paginación, 301 de barra final/host viejo, 503 suspendido | `src/app.ts` |
+| Plantilla única blanca responsive, JSON-LD, canonical, noindex, sitemaps, robots | `src/render/*`, `src/seo.ts` |
+| Entrada Cloudflare / servidor local / datos de ejemplo | `src/worker.ts`, `src/node/server.ts`, `src/node/seed.ts` |
+
+Eventos soportados: `blog.provision`, `blog.domain.change`, `category.upsert`, `article.publish|update|unpublish`, `blog.settings.update`, `blog.subscription.suspend|resume`.
+
+Cómo probarlo en local: `cd apps/blog && npx tsx src/node/seed.ts && npx tsx src/node/server.ts` y abrir `http://blog.demo-salud.localhost:8787`. Pruebas: `cd apps/blog && npx tsx --test src/*.test.ts`. Tipos: `npx tsc -p tsconfig.json --noEmit`.
+
+**Verificado:** 30/30 pruebas (aislamiento entre clientes, idempotencia, firma, XSS, 503/reactivación, cambio de subdominio, sitemaps solo del tenant); tipos sin errores; vista en navegador desktop 1360 px y móvil 375 px sin scroll horizontal.
+
+**NO hecho todavía (pendiente, en orden):**
+1. QR de WhatsApp en desktop (hoy solo botón/enlace; el blueprint exige QR real, nunca decorativo) — requiere codificador QR.
+2. Despliegue real: `wrangler.toml`, D1 real, R2 para imágenes, Custom Hostnames (Fase 0.2–0.4; necesita la cuenta de Cloudflare de Milton).
+3. Conexión con SEO Total: tercer publisher + cola propia en el worker, generación y persistencia del cuerpo del artículo, alojamiento de imágenes (ver hallazgos).
+4. Wizard de 4 pasos y análisis de marca del sitio del cliente (Fase 2).
+5. Pruebas de accesibilidad automáticas, Core Web Vitals, límites/costes y piloto (Fase 4).
+6. Cabeceras de seguridad adicionales (CSP) y límite de tasa en la API.
+7. `apps/blog` aún no está en el `package-lock.json` (no se ejecutó `npm install` para no tocar dependencias); hacerlo al subir.
+
 ## Bitácora (más reciente arriba)
 
 **2026-10-16**
+- LOCAL · Fase 1 programada en `apps/blog` (ver sección arriba). Sin push (orden de Milton: todo local hasta probar). 30/30 pruebas.
 - DECISIÓN · Milton elige Opción A: BLOG IA publica solo en el blog, no en 10minutesWebsite.
 
 **2026-10-15**
