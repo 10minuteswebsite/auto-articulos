@@ -54,3 +54,29 @@ test("publicar, cancelar y eliminar pasan siempre por comprobante de confirmaci�
     assert.match(block, /confirmOrPreview\(/, `${name} exige comprobante`);
   }
 });
+
+test("para reintentar se elige la propuesta en error más reciente de la red", () => {
+  const rows = [
+    { id: "a", platform: "blogger", status: "error", createdAt: "2026-10-14T10:00:00Z" },
+    { id: "b", platform: "blogger", status: "error", createdAt: "2026-10-15T10:00:00Z" },
+    { id: "c", platform: "blogger", status: "pending", createdAt: "2026-10-16T10:00:00Z" },
+  ];
+  const blogger = SOCIAL_NETWORKS.find((n) => n.key === "blogger")!;
+  assert.equal(pickPendingProposal(rows, blogger, "error")?.id, "b");
+  assert.equal(pickPendingProposal(rows, blogger)?.id, "c");
+});
+
+test("las herramientas sociales documentan sus argumentos, el comprobante, el monitoreo y el reintento", () => {
+  const dir = join(__dirname, "tools");
+  const social = readFileSync(join(dir, "social.ts"), "utf8");
+  const actions = readFileSync(join(dir, "social-actions.ts"), "utf8");
+  const single = readFileSync(join(dir, "actions.ts"), "utf8");
+  assert.match(social, /ES la herramienta para monitorear una publicación social/);
+  assert.match(social, /mismas propuestas que ve la persona en la pantalla «Oportunidades Redes»/);
+  assert.match(actions, /Flujo con comprobante/);
+  assert.match(actions, /reintentar=true/);
+  assert.match(single, /REINTENTAR una que quedó en error/);
+  const route = readFileSync(join(__dirname, "..", "..", "app", "api", "mcp", "route.ts"), "utf8");
+  assert.match(route, /AUTOMATIZAR corridas diarias/);
+  assert.match(route, /SEO TOTAL no tiene programador propio/);
+});

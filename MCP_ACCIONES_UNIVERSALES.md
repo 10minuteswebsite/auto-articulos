@@ -270,4 +270,12 @@ No implementar herramientas para:
   limita publicaciones, no propuestas). Nombres y alias en
   `lib/mcp/social-networks.ts`. Flujos con nombre: `publicar_en_redes` y
   `automatizar_redes`. X/Twitter sigue apagada.
+- **Sumado 16/10/2026 (claridad de Redes, caso Catalina/Lorena):** descripciones
+  completas (argumentos, flujo con comprobante, estados, reintento) en las
+  herramientas sociales; `listar_propuestas_sociales` con filtros `red`, `estado`
+  e `id` y es la herramienta de monitoreo (no hay `estado_de_publicaciones` para
+  redes); `publicar_propuestas_sociales` con `reintentar` para propuestas en
+  error; resumen de capacidades y de la automatización diaria en las
+  instrucciones del servidor. Las «Oportunidades Redes» de la web y las
+  propuestas del MCP son la misma tabla (`SocialOpportunity`).
 

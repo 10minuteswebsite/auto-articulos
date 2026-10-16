@@ -7,6 +7,16 @@
 - Este inventario, Coordinación, CEREBRO, Baseline, Current State, Checkpoints y Controlador quedan alineados con esa referencia.
 - Las entradas que siguen son históricas y conservan reservas, conversaciones, checkpoints y decisiones previas para trazabilidad; no autorizan reutilizar checkouts antiguos.
 
+## Claude (Sonnet 5.5) — MCP: claridad de Redes para asistentes + corrección de prueba — 2026-10-16
+
+- Conversación: «PROBLEMAS CON MCP ARTICULOS» (responsable: Claude, a pedido de Milton Dávila). Task ID: `MCP-REDES-CLARIDAD-20261016`.
+- Punto de partida: `main` = `9bcfded8` = producción `dpl_pw7h2Absd4LgCfbMWfC7D9JYnsgt` (`READY`, origen git, creado 2026-10-16 20:20Z).
+- Alcance: descripciones completas de las herramientas sociales del MCP, `listar_propuestas_sociales` con filtros/enlace, `reintentar` en `publicar_propuestas_sociales`, resumen de capacidades y automatización en las `instructions`, y corrección de `src/lib/mcp.test.ts`.
+- Archivos: `apps/web/src/app/api/mcp/route.ts`, `apps/web/src/lib/mcp/{automation,social-networks,social-networks.test}.ts`, `apps/web/src/lib/mcp/tools/{actions,social,social-actions}.ts`, `apps/web/src/lib/mcp.test.ts`, `apps/web/src/content/manual-usuario.ts`, `MCP_ACCIONES_UNIVERSALES.md` y los documentos canónicos.
+- Funcionalidades protegidas: login/permisos, navegación por host (Artículos/Redes), publicación de artículos y de Redes (rutas intactas), OAuth de ChatGPT (#566), estilos de escritura (#594). No se tocan rutas de publicación, esquema ni migraciones.
+- Resultado esperado: asistentes (Muse/ChatGPT/Claude) ven en `tools/list` e `instructions` argumentos, comprobante, monitoreo y reintento de Redes y que pueden automatizar corridas diarias.
+- Reserva: ninguna otra conversación activa en `apps/web/src/lib/mcp/**` (verificado en este inventario y en `git log`); un solo programador a la vez.
+
 ## Corrección registrada — menú propio de Redes — 2026-10-16
 
 - Error reconocido: se había añadido `Admin Redes`, pero Redes todavía recibía y mostraba el grupo de Artículos.
