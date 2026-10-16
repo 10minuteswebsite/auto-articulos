@@ -41,3 +41,11 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - El origen Hub se prueba con un contexto firmado ligado al mismo `userId`; un contexto ausente o inválido conserva el shell legacy y no concede permisos.
 - Las rutas administrativas son transversales al host de producto: el filtro visual de Artículos/Redes no puede ocultarlas para un administrador. Su visibilidad sigue dependiendo del rol o suplantación; esta excepción no concede acceso y las APIs conservan sus guardas.
 - La navegación de producto debe copiar el patrón vivo de Superlinks: encabezado global separado, `app-subbar` independiente, identidad/contexto del producto a la izquierda, enlaces de aplicación a la derecha y botón administrativo delineado. Los submenús usan superficies blancas, borde tenue, radio suave y sombra discreta; no se usan estilos morados ni menús antiguos.
+
+### Métricas visuales canónicas verificadas en producción
+
+- Superlinks es la referencia servida; no se usa una captura ni un checkout antiguo como fuente visual.
+- Shell global: `min-height: 64px`, contenedor máximo `1280px`, padding horizontal `16px` (<640px), `24px` (640–1023px) y `32px` (≥1024px); enlaces `14px`, peso `400`, línea `20px`; activo `#f3f4f6`; `Admin Hub` sin botón delineado; `Salir` con borde `#d1d5db` y radio 8px.
+- `app-subbar`: `min-height: 52px`, ancho `min(100% - 40px, 1160px)`, fondo `#eef5ff`, línea inferior `#d8e4f2`; contexto con línea `#b9cde3` y texto `#60758e`; enlaces `11px/650`, color `#526579`, activo `#dceafb`.
+- `Admin Artículos`: botón delineado con radio 9px; el submenu usa blanco, borde `#d8e4f2`, radio 10px, sombra tenue, enlaces `12px/600–650` y se ancla a la derecha cuando el grupo está al borde del viewport.
+- Si una edición local vuelve a blanco/gris o agrega el distintivo `L` al shell, se considera discrepancia y debe compararse contra la URL viva antes de continuar.

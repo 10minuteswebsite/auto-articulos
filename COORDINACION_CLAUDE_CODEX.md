@@ -11902,3 +11902,14 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - **Producción:** `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
 - **Evidencia:** revisión visual real en `articulos.lasolucionweb.net/dashboard/usuarios`, con el submenú abierto y la pantalla de Administración intacta.
 - **Estado:** CERRADO.
+
+### Cierre final — comparación pixel a pixel — 2026-10-16
+
+- Se compararon en vivo `superlinks.lasolucionweb.net/app/` y `articulos.lasolucionweb.net/dashboard/usuarios` en el mismo navegador y viewport.
+- Se corrigieron diferencias reales de márgenes, espaciado, alturas, tipografías, líneas, colores y radios. El shell global de Artículos ahora coincide con el Superlinks actualmente servido: sin distintivo `L`, `Admin Hub` plano y `Salir` delineado.
+- La subbarra usa el contrato canónico azul claro de Superlinks; `Admin Artículos` conserva su botón delineado y su submenu queda completo dentro del viewport mediante anclaje derecho.
+- Código final: `02b87b4f51a180a87460ce313b246199302fa5ca`.
+- Deployment productivo verificado: `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR`, `READY`, aliases productivos activos.
+- Verificación real: AX confirmó las tres opciones del submenu y la pantalla de Administración siguió cargando; typecheck/build/diff-check OK.
+- Durante el cierre apareció un diff local concurrente que restauraba el shell antiguo. Se documentó, se re-aplicaron los valores canónicos y el árbol quedó limpio; no se hizo `reset`, ni se usaron ramas/worktrees.
+- Estado: PRODUCCIÓN, CERRADO.

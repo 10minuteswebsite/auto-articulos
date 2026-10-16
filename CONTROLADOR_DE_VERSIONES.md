@@ -39,6 +39,17 @@ No usar restauraciones destructivas ni desplegar una versión anterior solo para
 
 ## Registro cronológico de versiones y deployments
 
+### 2026-10-16 — paridad visual final Artículos/Superlinks
+
+- Repositorio: `10minuteswebsite/auto-articulos`; única rama `main`; sin ramas ni worktrees creados.
+- Fuente de verdad visual: producción viva `superlinks.lasolucionweb.net`, comparada contra `articulos.lasolucionweb.net` en el mismo navegador/viewport.
+- Código: `02b87b4f51a180a87460ce313b246199302fa5ca` (`fix(ui): keep admin submenu within viewport`).
+- Deployment Vercel: `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR`, `READY`, aliases de Artículos activos.
+- Cambio: paridad de márgenes, espaciado, alturas, tipografía, líneas, colores, estados y radios en `EcosystemHeader`/`DashboardNav`; submenu administrativo completo dentro del viewport.
+- Evidencia: comparación lado a lado con Superlinks, recarga productiva con caché nueva, AX y click real del submenu; `Usuarios`, `Composio` y `PostPeer` visibles.
+- Verificaciones: typecheck OK, build local OK, build Vercel compilado OK, `git diff --check` OK, árbol limpio.
+- Incidencia controlada: diff local concurrente reintroducía estilos antiguos; se re-aplicó el estándar sin `reset` destructivo. No se modificaron datos, secretos, permisos ni rutas.
+
 Este archivo es también el historial maestro de versiones. Toda entrada debe
 añadirse al final, sin borrar ni reescribir entradas anteriores. Una versión no
 se considera publicada ni estable solo porque exista un commit: debe tener

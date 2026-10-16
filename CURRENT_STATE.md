@@ -95,3 +95,16 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Commit de código: `29d0c7b1689b2082c0939c87c075a2e50685fe37`.
 - Deployment productivo verificado: `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
 - Evidencia visual E2E: producción mostró ambas barras separadas y el submenú `Admin Artículos` abierto con `Usuarios`, `Composio` y `PostPeer`, sin regresión de la pantalla de Administración.
+
+## Paridad visual final contra Superlinks — 2026-10-16
+
+- Referencia comparada en vivo: `https://superlinks.lasolucionweb.net/app/` y `https://articulos.lasolucionweb.net/dashboard/usuarios`, en el mismo navegador y viewport.
+- Ajuste global: `EcosystemHeader` usa las métricas del shell productivo de Superlinks: barra sticky de 64px, contenedor máximo de 1280px, paddings responsive 16/24/32px, enlaces globales 14px/400, estado activo `#f3f4f6`, `Admin Hub` plano y `Salir` delineado.
+- Ajuste de aplicación: `DashboardNav` usa `app-subbar` de 52px, ancho `min(100% - 40px, 1160px)`, fondo `#eef5ff`, línea `#d8e4f2`, contexto `#60758e` y enlaces `11px/650` con estado activo `#dceafb`.
+- Submenú: superficie blanca, borde `#d8e4f2`, radio 10px, sombra discreta, enlaces 12px y anclaje derecho para que `Admin Artículos` no se recorte en el viewport.
+- El distintivo `L` y el contorno de `Admin Hub` se eliminaron porque no aparecen en el shell actualmente servido por Superlinks.
+- Código final publicado: `02b87b4f51a180a87460ce313b246199302fa5ca`.
+- Deployment productivo: `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR`, estado `READY`, aliases de Artículos activos.
+- Evidencia E2E: recarga con caché nueva, comparación visual lado a lado y apertura real de `Admin Artículos`; AX confirmó `Usuarios`, `Composio` y `PostPeer`, sin regresión funcional.
+- Verificación local: typecheck y build de producción OK; `git diff --check` OK; árbol final limpio en `main`.
+- Incidente de control: se detectó una edición local concurrente que intentó devolver la subbarra a blanco/gris; se re-aplicó el estado canónico sin `reset` destructivo y se dejó registrado aquí.

@@ -26,6 +26,15 @@ Usar un modelo mixto y conservador:
 - Las pantallas `ADMIN` no pertenecen a Artículos ni Redes, pero sí deben permanecer visibles para una cuenta administradora dentro de cualquiera de esos hosts. El clasificador de producto sigue devolviendo `ADMIN`; la excepción vive solo en el menú, antes del filtro visual, y no modifica autorización.
 - La composición visual canónica de Artículos es la de Superlinks: `EcosystemHeader` global arriba y `DashboardNav` como `app-subbar` separado. La identidad/contexto del producto no se mezcla con el contenido; `Admin Artículos` conserva su acceso desplegable, pero adopta el botón delineado y el submenú del estándar.
 
+## Punto 6 completado — paridad pixel a pixel del shell
+
+- La verdad visual se comprobó en las URLs públicas vivas de Superlinks y Artículos, usando el mismo navegador y viewport; no se infirió desde un checkout histórico.
+- Se igualaron métricas de margen, espaciado, alturas, tipografía, estados activos, líneas, colores y radios del encabezado global y de `app-subbar`.
+- El shell servido por Superlinks no muestra el distintivo `L` ni un botón delineado para `Admin Hub`; Artículos quedó igualado a ese comportamiento observado.
+- `Admin Artículos` conserva su función y el submenu se ancla por la derecha en el borde de la pantalla para no recortar opciones.
+- Código final: `02b87b4f51a180a87460ce313b246199302fa5ca`; deployment `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR` (`READY`).
+- Se detectó y neutralizó una edición local concurrente que reintroducía el shell antiguo; no se usó `git reset`, no se crearon ramas ni worktrees y el árbol final quedó limpio.
+
 ## Reparaciones previstas
 
 1. Excluir callbacks y APIs de cualquier redirección humana al HUB.

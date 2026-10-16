@@ -72,3 +72,14 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Verificación E2E: recarga completa de `https://articulos.lasolucionweb.net/dashboard`; shell global visible, `Admin Artículos` visible y desplegable con `Usuarios`, `Composio` y `PostPeer`.
 - Validación local: typecheck OK; suite `224 pass / 1 fail` por la expectativa MCP preexistente y no relacionada; `git diff --check` OK.
 - Estado: CERRADO.
+
+## Checkpoint 7 — paridad pixel a pixel del shell Artículos/Superlinks — 2026-10-16
+
+- Punto cero comparativo: Superlinks servido en vivo y Artículos servido en vivo, mismo navegador/viewport; producción anterior `dpl_GavtP6RqyRPDEmijYDdm7CGEufX5` (`caf03ecf8664dfba9334c98b8eee7ea14dd131bb`).
+- Hallazgo: la funcionalidad ya era correcta, pero quedaban diferencias en el shell: contenedor global, tipografía, radios, fondo/línea de `app-subbar`, colores del contexto, botón `Admin Hub` y recorte del submenu en el borde derecho.
+- Corrección: métricas canónicas de Superlinks en `EcosystemHeader` y `DashboardNav`; `LogoutButton` admite clase de shell; submenu administrativo anclado a la derecha.
+- Código final publicado en `main`: `02b87b4f51a180a87460ce313b246199302fa5ca`.
+- Deployment productivo: `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR`, `READY`, aliases `articulos.lasolucionweb.com` y `articulos.lasolucionweb.net` activos.
+- Validación: typecheck OK, build local OK, build Vercel compilado OK, `git diff --check` OK; comparación visual y AX en vivo OK; submenu confirma `Usuarios`, `Composio`, `PostPeer`.
+- Control de concurrencia: apareció un diff local no registrado que reintroducía blanco/gris; se corrigió re-aplicando el estándar sin reset destructivo. Árbol final limpio, `main` único, sin ramas ni worktrees creados.
+- Estado: CERRADO.

@@ -1,5 +1,12 @@
 # Inventario de conversaciones
 
+## Registro operativo — paridad visual Artículos/Superlinks — 2026-10-16
+
+- Solicitud atendida: comparar pixel a pixel los menús de Artículos con Superlinks y corregir márgenes, espaciado, letras, líneas y colores.
+- Resultado durable: `CURRENT_STATE.md`, `BASELINE.md`, `CEREBRO.md`, `CHECKPOINTS.md`, `CONTROLADOR_DE_VERSIONES.md` y `COORDINACION_CLAUDE_CODEX.md` registran el mismo punto cero visual y la misma evidencia productiva.
+- Código final: `02b87b4f51a180a87460ce313b246199302fa5ca`; deployment `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR` (`READY`).
+- Incidencia: una edición local concurrente reintrodujo temporalmente valores antiguos; se re-aplicó el estado productivo canónico sin reset destructivo y se confirmó árbol limpio.
+
 Este documento tiene un propósito distinto al de `COORDINACION_CLAUDE_CODEX.md`:
 responder, en cualquier momento, **quién es dueño de cada problema/proyecto,
 quién tiene un archivo o rama tomada ahora mismo, y de quién es cada commit**.
