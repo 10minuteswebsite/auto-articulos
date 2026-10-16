@@ -1,5 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Redes: las publicaciones con error salen de Oportunidades y quedan en Historial — 2026-10-16
+
+- Task ID: `REDES-ERRORES-A-HISTORIAL-20261016`. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración. Estado: PR abierto, SIN fusionar.
+- Pedido de Milton: el bloque «Publicaciones con error» no debe verse en `oportunidades-redes`; deben quedar en Historial.
+- Causa: ese bloque (últimas 24 h, con Reintentar) vivía en `oportunidades-redes/page.tsx`. El Historial de Redes ya lista las propuestas en error con motivo y su propio Reintentar (`historial/page.tsx`, `/api/social-opportunities/publish`), así que solo se quitó el bloque duplicado y su import. Manual actualizado.
+- Verificación: typecheck sin errores en el archivo. NO verificado en producción (pendiente con la cuenta de Lorena tras fusionar).
+
 ## Claude — MCP: un prompt por producto en la pantalla de Asistentes IA — 2026-10-16
 
 - Task ID: `MCP-PROMPTS-POR-PRODUCTO-20261016`. Punto de partida: `main` = `4a736c60` (documentos del cierre MCP-REDES-CLARIDAD sobre el código `4bbf565a`, producción `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR`). Protocolo Harness-Mario: cambio mínimo sobre `main`, publicado por PR sobre la rama existente, sin ramas nuevas. Sin migración.
