@@ -6,6 +6,15 @@
 - Pedido de Milton: el bloque «Publicaciones con error» no debe verse en `oportunidades-redes`; deben quedar en Historial.
 - Causa: ese bloque (últimas 24 h, con Reintentar) vivía en `oportunidades-redes/page.tsx`. El Historial de Redes ya lista las propuestas en error con motivo y su propio Reintentar (`historial/page.tsx`, `/api/social-opportunities/publish`), así que solo se quitó el bloque duplicado y su import. Manual actualizado.
 - Verificación: typecheck sin errores en el archivo. NO verificado en producción (pendiente con la cuenta de Lorena tras fusionar).
+=======
+## Claude — Google Business: propuesta atascada en 1 % por artículo sin resumen — 2026-10-16
+
+- Task ID: `GMB-SIN-RESUMEN-20261016`. Capitanía reclamada, sin migración ni workflows. Estado: PR abierto, SIN fusionar. Punto de partida: `main` = `a35aa042`.
+- Reproducido en vivo con la cuenta Antonio Aguirre: «Agentes RE/MAX Florida: Tu clave en bienes raíces» quedó en 1 %. Los dos disparos del worker (20:57 y 20:58 UTC) corrieron completos y ninguno tocó Google Business: no fue un disparo perdido, el worker no veía la propuesta.
+- Causa probable (verificada en código, no en base): `generate/route.ts` propone artículos `success` con URL aunque su `summary` sea nulo, y `buildBusinessProfileCandidateWhere` exigía `summary: { not: null }` también para lo aprobado con Publicar. Una propuesta así nunca era candidata, no daba error y `recoverStuckSocialOpportunities` la pasaba a error a los 10 min. NO confirmado que el título de Antonio tenga el resumen nulo (el dato solo está en la base).
+- Cambio: el resumen ya no se exige en lo aprobado (se usa el título si falta); el envío automático antiguo conserva la exigencia. Prueba nueva en `businessProfileCandidate.test.ts` (3/3).
+- Cuidado de Milton: no se publica nada que no se haya publicado. Las propuestas ya pasadas a error o descartadas no se reenvían; solo se toma lo que esté aprobado Y en cola en ese momento.
+>>>>>>> d20e06f9d76104d30da78e40303d5b04a370054f
 
 ## Claude — MCP: un prompt por producto en la pantalla de Asistentes IA — 2026-10-16
 
