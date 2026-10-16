@@ -335,8 +335,8 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
     fontSize: 11,
     fontWeight: 650,
     textDecoration: "none",
-    color: active ? "#1d1d1f" : "#6e6e73",
-    background: active ? "#f2f2f4" : "transparent",
+    color: active ? "#1d1d1f" : "#526579",
+    background: active ? "#dceafb" : "transparent",
     borderRadius: 9,
     boxShadow: "none",
     whiteSpace: "nowrap",
@@ -379,9 +379,8 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
       <style>{`
         .dashboard-nav.app-subbar {
           min-height: 52px;
-          border-bottom: 1px solid #e7e7eb !important;
-          background: #ffffff !important;
-          border-radius: 0 !important;
+          border-bottom: 1px solid #d8e4f2 !important;
+          background: #eef5ff !important;
         }
         .dashboard-nav .app-subbar-inner {
           width: min(100% - 40px, 1160px);
@@ -409,8 +408,8 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
         }
         .dashboard-nav .app-context {
           padding-left: 12px;
-          border-left: 1px solid #d2d2d7;
-          color: #86868b;
+          border-left: 1px solid #b9cde3;
+          color: #60758e;
           font-size: 11px;
           white-space: nowrap;
         }
@@ -426,19 +425,19 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
         .dashboard-nav .nav-link,
         .dashboard-nav .nav-group-button {
           padding: 8px 10px !important;
-          color: #6e6e73 !important;
+          color: #526579 !important;
           font-size: 11px !important;
           font-weight: 650 !important;
           border-radius: 9px !important;
         }
         .dashboard-nav .nav-link:hover,
         .dashboard-nav .nav-group-button:hover {
-          background: #f2f2f4 !important;
+          background: #dceafb !important;
           color: #1d1d1f !important;
         }
         .dashboard-nav .nav-link[aria-current="page"],
         .dashboard-nav .nav-group-button[aria-expanded="true"] {
-          background: #f2f2f4 !important;
+          background: #dceafb !important;
           color: #1d1d1f !important;
         }
         .dashboard-nav .nav-admin-button {
@@ -456,8 +455,8 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
         }
         .dashboard-nav .nav-dropdown {
           border-radius: 10px !important;
-          border-color: #e7e7eb !important;
-          box-shadow: 0 8px 24px rgba(29, 29, 31, 0.06) !important;
+          border-color: #e5e7eb !important;
+          box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12) !important;
         }
         .dashboard-nav .nav-dropdown-link {
           border-radius: 8px !important;
@@ -663,9 +662,9 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
                       background: "rgba(255, 255, 255, 0.98)",
                       backdropFilter: "blur(24px) saturate(180%)",
                       WebkitBackdropFilter: "blur(24px) saturate(180%)",
-                      border: "1px solid #e7e7eb",
+                      border: "1px solid #d8e4f2",
                       borderRadius: 10,
-                      boxShadow: "0 8px 24px rgba(29, 29, 31, 0.06)",
+                      boxShadow: "0 12px 30px rgba(15, 23, 42, 0.12)",
                       padding: 4,
                     }}
                   >
