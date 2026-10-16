@@ -89,6 +89,7 @@ h2.section{font-size:1.4rem;margin:0 0 20px}
 .prose blockquote{border-left:3px solid var(--accent);margin:1.2em 0;padding:.2em 1em;color:var(--muted)}
 .share{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0;font-size:.9rem}
 .wa{border:1px solid var(--line);border-radius:var(--r);padding:16px}.wa strong{display:block;margin-bottom:6px}
+.wa .qr{margin:12px 0;text-align:center}.wa .qr svg{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px}.wa .qr small{display:block;color:var(--muted);margin-top:6px}
 .wa-mobile{display:none}
 .related{margin-top:48px}
 .state{text-align:center;padding:clamp(48px,10vw,120px) 0;max-width:620px;margin:0 auto}
@@ -96,9 +97,9 @@ footer.site{border-top:1px solid var(--line);background:var(--soft);padding:40px
 .fcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:28px}
 .fcols h4{margin:0 0 8px;font-size:.95rem}.fcols a{display:block;color:var(--muted);text-decoration:none;padding:3px 0}.fcols a:hover{color:var(--accent)}
 .empty{color:var(--muted);padding:32px 0}
-@media (max-width:1100px){.layout{grid-template-columns:minmax(0,1fr)}.layout>article,.aside,.toc{grid-column:1;position:static;max-width:none;justify-self:stretch}.toc{order:-1}.aside .wa{display:none}}
+@media (max-width:1100px){.layout{grid-template-columns:minmax(0,1fr)}.layout>article,.aside,.toc{grid-column:1;position:static;max-width:none;justify-self:stretch}.toc{order:-1}}
 @media (max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.featured{grid-template-columns:1fr}}
-@media (max-width:760px){nav.main,.bar>.searchform{display:none}details.menu{display:block}.grid{grid-template-columns:1fr}
+@media (max-width:760px){.aside .wa{display:none}nav.main,.bar>.searchform{display:none}details.menu{display:block}.grid{grid-template-columns:1fr}
 .wa-mobile{display:block;position:fixed;right:16px;bottom:16px;z-index:6}.wa-mobile a{box-shadow:0 4px 14px rgba(0,0,0,.18)}}
 @media (prefers-reduced-motion:no-preference){a,.catcard{transition:color .15s,border-color .15s}}
 `;

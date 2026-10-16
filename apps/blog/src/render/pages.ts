@@ -4,6 +4,7 @@ import type { TenantCtx, ArticleRow, CategoryRow } from "../types";
 import { esc, formatDate, truncate, stripTags } from "../util";
 import { layout, type PageMeta } from "./layout";
 import { t } from "./i18n";
+import { qrSvg } from "../qr";
 
 const abs = (ctx: TenantCtx, path: string) => ctx.baseUrl + path;
 
@@ -161,7 +162,7 @@ ${a.cover_image_url ? `<div class="cover"><img src="${esc(a.cover_image_url)}" a
 <a href="https://twitter.com/intent/tweet?url=${enc(url)}&amp;text=${enc(a.title)}" rel="noopener">X</a>
 <a href="https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}" rel="noopener">LinkedIn</a></div>
 </article>
-<aside class="aside">${waHref ? `<div class="wa"><strong>${esc(s.needHelp)}</strong><span>${esc(s.whatsappHint)}</span><p><a class="btn" href="${esc(waHref)}" rel="noopener">${esc(s.whatsapp)}</a></p></div>` : ""}</aside>
+<aside class="aside">${waHref ? `<div class="wa"><strong>${esc(s.needHelp)}</strong><span>${esc(s.whatsappHint)}</span><div class="qr">${qrSvg(waHref, s.scanWhatsapp)}<small>${esc(s.scanWhatsapp)}</small></div><p><a class="btn" href="${esc(waHref)}" rel="noopener">${esc(s.whatsapp)}</a></p></div>` : ""}</aside>
 </div>
 ${p.related.length ? `<section class="related"><h2 class="section">${esc(s.related)}</h2><div class="grid">${p.related.map((r) => card(ctx, r)).join("")}</div></section>` : ""}`;
 

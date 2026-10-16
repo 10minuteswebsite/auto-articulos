@@ -65,17 +65,18 @@ Cómo probarlo en local: `cd apps/blog && npx tsx src/node/seed.ts && npx tsx sr
 **Verificado:** 30/30 pruebas (aislamiento entre clientes, idempotencia, firma, XSS, 503/reactivación, cambio de subdominio, sitemaps solo del tenant); tipos sin errores; vista en navegador desktop 1360 px y móvil 375 px sin scroll horizontal.
 
 **NO hecho todavía (pendiente, en orden):**
-1. QR de WhatsApp en desktop (hoy solo botón/enlace; el blueprint exige QR real, nunca decorativo) — requiere codificador QR.
+1. ~~QR de WhatsApp~~ HECHO (`apps/blog/src/qr.ts`, usa `qrcode` núcleo JS; se probó que la matriz coincide con la librería de referencia; NO se escaneó con un celular real: probarlo).
 2. Despliegue real: `wrangler.toml`, D1 real, R2 para imágenes, Custom Hostnames (Fase 0.2–0.4; necesita la cuenta de Cloudflare de Milton).
 3. Conexión con SEO Total: tercer publisher + cola propia en el worker, generación y persistencia del cuerpo del artículo, alojamiento de imágenes (ver hallazgos).
 4. Wizard de 4 pasos y análisis de marca del sitio del cliente (Fase 2).
 5. Pruebas de accesibilidad automáticas, Core Web Vitals, límites/costes y piloto (Fase 4).
 6. Cabeceras de seguridad adicionales (CSP) y límite de tasa en la API.
-7. `apps/blog` aún no está en el `package-lock.json` (no se ejecutó `npm install` para no tocar dependencias); hacerlo al subir.
+7. Dependencia nueva: `qrcode` en `apps/blog/package.json`. `apps/blog` aún no está en el `package-lock.json` (no se ejecutó `npm install` para no tocar dependencias); hacerlo al subir.
 
 ## Bitácora (más reciente arriba)
 
 **2026-10-16**
+- LOCAL · QR de WhatsApp real; cliente firmado en `packages/shared`; publisher BLOG IA en el worker; prueba de punta a punta. 39/39 pruebas. Aviso técnico: en este entorno `@auto-articulos/shared` resuelve al repo PRINCIPAL (enlaces de `node_modules`), por eso el publisher recibe `send` inyectado y no importa `shared` en ejecución; al subir, el build real resuelve bien.
 - LOCAL · Fase 1 programada en `apps/blog` (ver sección arriba). Sin push (orden de Milton: todo local hasta probar). 30/30 pruebas.
 - DECISIÓN · Milton elige Opción A: BLOG IA publica solo en el blog, no en 10minutesWebsite.
 

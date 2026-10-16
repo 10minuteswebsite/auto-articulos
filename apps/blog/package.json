@@ -2,7 +2,7 @@
   "name": "@auto-articulos/blog",
   "version": "0.1.0",
   "private": true,
-  "description": "BLOG IA: blog público multi-tenant (Cloudflare Worker). Ver MASTER_BLUEPRINT_BLOG_IA_SEO_TOTAL.md",
+  "description": "BLOG IA: blog p\u00fablico multi-tenant (Cloudflare Worker). Ver MASTER_BLUEPRINT_BLOG_IA_SEO_TOTAL.md",
   "scripts": {
     "dev": "tsx src/node/server.ts",
     "seed": "tsx src/node/seed.ts",
@@ -13,5 +13,8 @@
     "@types/node": "^22.7.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
   }
 }
