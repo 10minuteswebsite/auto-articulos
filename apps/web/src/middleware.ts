@@ -11,6 +11,7 @@ import {
 import { applyCookie } from "./lib/shared-cookies";
 import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
 import { productOfApiPath, productOfHost, productOfPath, type HostProductScope } from "./lib/product-routes";
+import { isSeoTotalHumanEntry } from "./lib/seo-total-hub-redirect";
 
 const PUBLIC_PATHS = [
   "/login",
@@ -52,6 +53,7 @@ function hubProductSlugForHost(hostname: string) {
 }
 const LEGACY_LOGIN_HOST = "auto-articulos-web.vercel.app";
 const CANONICAL_LOGIN_URL = "https://www.seototal.lasolucionweb.com/login";
+const HUB_ENTRY_URL = "https://hub.lasolucionweb.net";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -71,6 +73,14 @@ export async function middleware(request: NextRequest) {
     const destination = new URL(CANONICAL_LOGIN_URL);
     destination.search = request.nextUrl.search;
     return NextResponse.redirect(destination, 308);
+  }
+
+  // SEO Total queda como puerta técnica para callbacks, pero la entrada humana
+  // sin sesión pasa al HUB. Los usuarios ya autenticados no se mueven: así el
+  // retorno de /auth/hub a /dashboard no puede crear un bucle de redirección.
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  if (!token && isSeoTotalHumanEntry(request.nextUrl.hostname, pathname)) {
+    return NextResponse.redirect(new URL(HUB_ENTRY_URL), 307);
   }
 
   if (
@@ -93,7 +103,6 @@ export async function middleware(request: NextRequest) {
     return handleMcpAuth(request);
   }
 
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
   const userId = await verifySessionToken(token);
 
   if (!userId) {
