@@ -28,10 +28,16 @@ Usar un modelo mixto y conservador:
 
 ## Punto cero vigente — producción verificada — 2026-10-16
 
-- La versión funcional que debe tomarse como base es `945fe5fcd2af2d1d7383bc4f61dc110bd6875805` en `main`.
-- Está servida por Vercel en `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`), con Redes verificado en producción.
+- La versión funcional que debe tomarse como base es `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08` en `main`.
+- Está servida por Vercel en `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE` (`READY`), con Redes y Artículos verificados en producción.
 - La comprobación viva confirmó menú interno San Francisco `14px/400`, título `15px/700`, contexto `14px/400` y submenú `13px/500–600`.
 - Todo código o documento que contradiga estos valores debe compararse primero contra producción; los commits anteriores de este archivo son historial, no punto de partida.
+
+## Decisión durable — cada producto conserva su propio menú — 2026-10-16
+
+- El dominio de Redes no debe renderizar el grupo de Artículos. La aplicación está determinada por el host, no por el catálogo completo de productos de la cuenta.
+- El dominio de Artículos no debe renderizar el grupo de Redes. Solo el Hub compartido puede mostrar el selector completo.
+- La corrección `d6b0ac2` filtra `PRODUCT_ENTRIES` por host antes de renderizar `DashboardNav`; no cambia autorización, rutas, datos ni permisos.
 
 ## Punto 6 histórico — paridad pixel a pixel del shell — supersedido por el punto cero vigente
 

@@ -3,9 +3,16 @@
 ## Registro operativo vigente — propagación del punto cero — 2026-10-16
 
 - Repositorio activo: `10minuteswebsite/auto-articulos`; rama única `main`; no se crean ramas ni worktrees.
-- Verdad productiva: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`, deployment `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`).
+- Verdad productiva: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`, deployment `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE` (`READY`).
 - Este inventario, Coordinación, CEREBRO, Baseline, Current State, Checkpoints y Controlador quedan alineados con esa referencia.
 - Las entradas que siguen son históricas y conservan reservas, conversaciones, checkpoints y decisiones previas para trazabilidad; no autorizan reutilizar checkouts antiguos.
+
+## Corrección registrada — menú propio de Redes — 2026-10-16
+
+- Error reconocido: se había añadido `Admin Redes`, pero Redes todavía recibía y mostraba el grupo de Artículos.
+- Causa: el host de Redes reutilizaba `PRODUCT_ENTRIES` sin filtrar por producto.
+- Corrección publicada: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`; deployment `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE` (`READY`).
+- Evidencia: Redes `.net` muestra únicamente su menú y sus destinos; Artículos `.net` conserva el menú de Artículos sin entradas de Redes.
 
 ## Registro histórico — paridad visual Artículos/Superlinks — 2026-10-16
 

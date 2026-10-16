@@ -6,9 +6,9 @@ Fecha de auditoría: 2026-10-16 (America/New_York)
 
 - Repositorio canónico: `https://github.com/10minuteswebsite/auto-articulos`.
 - Rama única autorizada: `main`.
-- Commit funcional productivo verificado: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
+- Commit funcional productivo verificado: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`.
 - Producción: Vercel, proyecto `la-solucion-web/auto-articulos-web`.
-- Deployment funcional observado: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`.
+- Deployment funcional observado: `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE`.
 - Estado: `READY`, objetivo `production`.
 - Alias: `seototal`, `articulos` y `redes`, en `.lasolucionweb.com` y `.lasolucionweb.net`.
 
@@ -37,6 +37,13 @@ Confirmado: estado HTTP, aliases, deployment, commit productivo exacto de `main`
 No confirmado: tampoco se han verificado desde este repositorio las URLs registradas en las consolas OAuth externas.
 
 No se inició ninguna conexión OAuth real ni se modificaron cuentas, proveedores, variables o datos.
+
+## Verdad funcional vigente — aislamiento de navegación por host — 2026-10-16
+
+- Código y deployment vigentes: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08` / `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE` (`READY`).
+- Causa de la regresión: la vista de producto reutilizaba `PRODUCT_ENTRIES` completo en ambos dominios; por eso el menú de Redes incluía Artículos.
+- Corrección: `DashboardNav` selecciona las entradas según el host. Redes solo muestra `SEO Total Redes` y su configuración; Artículos solo muestra `SEO Total Artículos` y su configuración; el grupo administrativo conserva su etiqueta por producto.
+- Verificación E2E: `redes.lasolucionweb.net` muestra `Inicio`, `SEO Total Redes`, `Configuración` y `Admin Redes`; al abrir Redes aparecen sus destinos propios. `articulos.lasolucionweb.net` mantiene `SEO Total Artículos` y `Admin Artículos`, sin entradas de Redes.
 
 ## Resultado del Punto 1 — 2026-10-16
 

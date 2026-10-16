@@ -6,7 +6,14 @@ Antes de modificar código, cambiar de rama, crear un commit, ejecutar una migra
 
 ## Fuente de verdad
 
-La fuente funcional vigente es la producción verificada, no una entrada histórica del registro: `main` en `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`, servido por Vercel como `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`). El árbol de trabajo autorizado es único y no se crean ramas ni worktrees. Los registros anteriores se conservan como historial y deben leerse como tales.
+La fuente funcional vigente es la producción verificada, no una entrada histórica del registro: `main` en `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`, servido por Vercel como `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE` (`READY`). El árbol de trabajo autorizado es único y no se crean ramas ni worktrees. Los registros anteriores se conservan como historial y deben leerse como tales.
+
+## Versión — 2026-10-16 — aislamiento del menú de Redes
+
+- Commit: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08` en `main`.
+- Deployment: `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE`, `READY`.
+- Causa corregida: Redes estaba reutilizando el menú completo de productos y mostraba `SEO Total Artículos`.
+- Verificación: Redes muestra solo su menú y submenú; Artículos conserva solo el suyo; Hub mantiene visible la tarjeta de Redes.
 
 ## Versión — 2026-10-12 — cierre del prompt MCP autónomo (PR #554)
 

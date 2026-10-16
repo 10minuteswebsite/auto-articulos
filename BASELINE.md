@@ -6,12 +6,18 @@ Fecha: 2026-10-16
 
 - Repositorio: `https://github.com/10minuteswebsite/auto-articulos`.
 - Única rama y checkout autorizado: `main`; sin ramas ni worktrees adicionales.
-- Verdad funcional: código `945fe5fcd2af2d1d7383bc4f61dc110bd6875805` servido por Vercel.
-- Deployment productivo: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`, alias de Redes verificado.
+- Verdad funcional: código `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08` servido por Vercel.
+- Deployment productivo: `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE`, `READY`, alias de Redes verificado.
 - UI vigente comprobada en producción: menú de aplicación San Francisco `14px/400`; título `SEO Total Artículos` `15px/700`; contexto `Artículos con IA` `14px/400`; submenú administrativo `13px/500–600`.
 - Evidencia: DOM autenticado de Artículos y Redes después de recarga real; Redes mostró `Admin Redes` y su submenú completo, y el Hub mostró `AUTOMATIZA TUS REDES SOCIALES`. No se modificaron rutas, permisos, datos ni secretos.
 
 Las secciones posteriores que mencionen otros commits o deployments son registros históricos y no sustituyen este punto cero.
+
+## Corrección vigente — menú propio de Redes — 2026-10-16
+
+- Causa: `DashboardNav` usaba el catálogo completo `PRODUCT_ENTRIES` también en el host de Redes, por lo que Redes mostraba el grupo `SEO Total Artículos`.
+- Corrección: el host `redes` filtra su navegación a `Inicio`, `SEO Total Redes`, `Configuración` y `Admin Redes`; el host `articulos` conserva exclusivamente su menú propio. El Hub compartido mantiene la vista completa de productos.
+- Evidencia productiva: Redes `.net` verificado sin `SEO Total Artículos`, con el submenú propio de Redes y `Admin Redes`; Artículos `.net` verificado con `SEO Total Artículos` y `Admin Artículos`, sin `SEO Total Redes`.
 
 ## Regla de dominios
 

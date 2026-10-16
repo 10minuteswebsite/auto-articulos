@@ -88,6 +88,17 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Evidencia: recarga real en `/dashboard/usuarios`; DOM calculado con `Usuarios` `13px/600`, `Composio` y `PostPeer` `13px/500`, filas `31px`; captura visual con el menú abierto.
 - Estado: PRODUCCIÓN, CERRADO.
 
+## Checkpoint 15 — aislamiento del menú propio de Redes — 2026-10-16
+
+- Punto cero de partida: producción verificada del deployment `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`; se trabajó sobre `main`, sin ramas ni worktrees.
+- Regresión confirmada: Redes mostraba `SEO Total Artículos`. La etiqueta `Admin Redes` ya estaba corregida, pero el catálogo completo de `PRODUCT_ENTRIES` seguía renderizándose en ese host.
+- Corrección publicada: `DashboardNav` filtra el menú por host; Redes recibe solo su grupo, Artículos solo el suyo y el Hub compartido mantiene ambos.
+- Código publicado: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`.
+- Deployment productivo: `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE`, `READY`.
+- Validación local: typecheck, build de producción y `git diff --check` OK.
+- Evidencia E2E: Redes `.net` muestra `SEO Total Redes`, `Configuración`, `Admin Redes` y su submenu propio; no muestra Artículos. Artículos `.net` conserva `SEO Total Artículos` y `Admin Artículos`, sin Redes. La tarjeta de Redes sigue visible en el Hub.
+- Estado: PRODUCCIÓN, CERRADO.
+
 ## Checkpoint 12 — tipografía del menú de aplicación — 2026-10-16
 
 - Solicitud: menú de Artículos en San Francisco `14px` Regular; título izquierdo `15px`; contexto `Artículos con IA` `14px`.

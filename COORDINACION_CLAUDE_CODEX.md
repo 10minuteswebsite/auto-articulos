@@ -3,10 +3,18 @@
 ## Punto cero documental vigente — 2026-10-16
 
 - Repositorio: `10minuteswebsite/auto-articulos`; trabajo autorizado únicamente en `main`, sin ramas ni worktrees.
-- Código que producción sirve: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
-- Deployment Vercel verificado: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`, alias de Redes verificado.
+- Código que producción sirve: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`.
+- Deployment Vercel verificado: `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE`, `READY`, alias de Redes verificado.
 - Evidencia productiva: menú San Francisco `14px/400`, título `15px/700`, contexto `14px/400`, submenú `13px/500–600`.
 - Las entradas cronológicas anteriores siguen siendo memoria de decisiones e incidentes; no sustituyen este punto cero.
+
+## Corrección posterior — Redes debe tener su propio menú — 2026-10-16
+
+- Error reconocido: la corrección anterior solo cambió `Admin Artículos` por `Admin Redes`; no aisló el resto de la navegación. Por eso Redes seguía mostrando el grupo `SEO Total Artículos`.
+- Causa técnica: `DashboardNav` reutilizaba `PRODUCT_ENTRIES` completo en el host de Redes.
+- Corrección: filtrar las entradas por host. Redes muestra `Inicio`, `SEO Total Redes`, `Configuración` y `Admin Redes`; Artículos mantiene `Inicio`, `SEO Total Artículos`, `Configuración` y `Admin Artículos`. El Hub compartido conserva el catálogo completo.
+- Código: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`; deployment `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE` (`READY`).
+- Prueba productiva: AX de Redes no contiene `SEO Total Artículos` y su submenu contiene las rutas de Redes; AX de Artículos no contiene `SEO Total Redes`. No se modificaron permisos, rutas de backend, datos ni secretos.
 
 ## Cierre — menú de Redes — 2026-10-16
 
