@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createPostPeerPost, extractPostPeerPostUrl, getPostPeerOAuthUrl, getPostPeerOAuthUrlWithProfileRecovery, listPostPeerIntegrations } from "./postpeer-api";
+import { createPostPeerPost, describePostPeerFailure, extractPostPeerPostUrl, getPostPeerOAuthUrl, getPostPeerOAuthUrlWithProfileRecovery, listPostPeerIntegrations } from "./postpeer-api";
 
 const originalFetch = globalThis.fetch;
 
@@ -80,4 +80,12 @@ test("extractPostPeerPostUrl lee el enlace real del objeto o del JSON guardado",
   assert.equal(extractPostPeerPostUrl({ platforms: [{ platformPostUrl: "javascript:x" }] }), null);
   assert.equal(extractPostPeerPostUrl("no es json"), null);
   assert.equal(extractPostPeerPostUrl({ id: "1" }), null);
+});
+
+test("describePostPeerFailure detects explicit failures and ignores warnings", () => {
+  assert.equal(describePostPeerFailure({ success: true, status: "published" }), null);
+  assert.equal(describePostPeerFailure({ success: true, platforms: [{ success: true, warningMessage: "aviso" }] }), null);
+  assert.equal(describePostPeerFailure({ success: false, message: "Cuenta desconectada" }), "Cuenta desconectada");
+  assert.equal(describePostPeerFailure({ success: true, platforms: [{ platform: "googlebusiness", success: false, error: "Imagen rechazada" }] }), "Imagen rechazada");
+  assert.equal(describePostPeerFailure({ status: "FAILED" }), "PostPeer informó que la publicación no se completó.");
 });
