@@ -6,6 +6,7 @@ import {
   createLocalPost,
   createPostPeerPost,
   extractPostPeerPostUrl,
+  describePostPeerFailure,
 } from "@auto-articulos/shared";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
@@ -253,7 +254,9 @@ export async function processNextBusinessProfilePost(
       });
     }
 
-    const rejected = (result as { state?: string; status?: string }).state === "REJECTED" || (result as { status?: string }).status === "failed";
+    const failureReason = POSTPEER_GBP_READY ? describePostPeerFailure(result) : null;
+    const rejected = Boolean(failureReason) || (result as { state?: string }).state === "REJECTED" || (result as { status?: string }).status === "failed";
+    if (rejected) console.error(`Google Business ${candidate.id}: no publicada — ${failureReason ?? "rechazada por Google"}`);
     await prisma.businessProfilePost.update({
       where: { id: post.id },
       data: {
@@ -270,7 +273,7 @@ export async function processNextBusinessProfilePost(
         status: rejected ? "error" : "published",
         progressPercent: 100,
         progressStage: rejected ? "Google Business Profile rechazó la publicación" : "Publicado en Google Business Profile mediante PostPeer",
-        errorLog: rejected ? JSON.stringify(result) : null,
+        errorLog: rejected ? (failureReason ?? JSON.stringify(result)) : null,
         postId: extractPostPeerPostUrl(result) || (result as { id?: string; url?: string }).url || (result as { postId?: string }).postId || (result as { id?: string }).id || null,
         publishedAt: rejected ? null : new Date(),
         finishedAt: new Date(),
@@ -278,6 +281,7 @@ export async function processNextBusinessProfilePost(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    console.error(`Google Business ${candidate.id}: error al publicar — ${message}`);
     await prisma.businessProfilePost.update({
       where: { id: post.id },
       data: { status: "error", googleResponse: message },

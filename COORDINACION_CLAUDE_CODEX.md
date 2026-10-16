@@ -1,5 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Google Business: PostPeer `success:false`/`error` ya cuenta como fallo — 2026-10-16
+
+- Task ID: `GMB-FALLO-POSTPEER-20261016`. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni cambios de workflows. Estado: PR abierto, SIN fusionar; producción no cambia hasta fusionar. Punto de partida: `main` = `4bbf565a`.
+- Pedido de Milton: ayer Google Business publicaba y hoy no; una publicación quedó en 1 % y otra «pasó» sin publicar, en distintos usuarios.
+- Evidencia (solo lectura, sin base de datos): `businessProfilePublish.ts` solo consideraba fallo `state:"REJECTED"` o `status:"failed"`; una respuesta HTTP 200 de PostPeer con `success:false` o `platforms[].error` se guardaba como «sent»/«published» sin haberse publicado. Además el `catch` y el rechazo no escribían nada en el log del worker. Del lado de Actions: 19 de 40 corridas de `social-worker.yml` salieron canceladas por la cola de concurrencia y la corrida programada de respaldo solo se ejecutó 1 vez; `recoverStuckSocialOpportunities` pasa a error lo que lleva >10 min en cola (visto «Recuperadas 1» hoy).
+- Cambio: `describePostPeerFailure` en `packages/shared/src/postpeer-api.ts` (fallo explícito = `success:false`, `error` por plataforma o estado failed/error/rejected; una advertencia no es fallo); el worker marca `rejected`, guarda el motivo legible en `errorLog` y lo escribe en el log. Prueba nueva en `postpeer-api.test.ts` (7/7); typecheck de los archivos tocados sin errores.
+- NO probado en producción ni confirmada la causa raíz de los casos de hoy: el error exacto de cada intento solo está en la base (`BusinessProfilePost.googleResponse`). Tras fusionar, Milton puede ver el motivo real en Historial al reintentar. Pendiente aparte (requiere capitanía de `social-worker.yml`): disparos cancelados por concurrencia.
+
 ## Claude — MCP Redes: claridad para asistentes (caso Catalina, el Muse de Lorena) — 2026-10-16
 
 - Task ID: `MCP-REDES-CLARIDAD-20261016`. Protocolo Harness-Mario: se publica como commit normal en `main` (cherry-pick del cambio, contenido idéntico, sin ramas nuevas); el PR #601 queda superado. Punto de partida: `main` = `9bcfded8` = producción `dpl_pw7h2Absd4LgCfbMWfC7D9JYnsgt` (verificado por la API de Vercel: `READY`, origen git). Sin migración.
