@@ -2154,3 +2154,11 @@ nada en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`. Sin ideas sueltas nuevas para `TO-DO
 (las dos pruebas en vivo pendientes ya quedan anotadas arriba y en `CONTROLADOR_DE_VERSIONES.md`,
 sin duplicarlas aquí). Ambos PRs (#593 y #594) ya actualizaron `apps/web/src/content/manual-usuario.ts`
 por sí mismos, así que esta tarea no le agregó nada al manual.
+
+## [Codex] - PLAN: HUB, CALLBACKS OAUTH Y DOMINIOS .NET — 2026-10-16
+
+- **Estado:** ACTIVA — punto cero documental completado; todavía sin cambios de código ni producción.
+- **Alcance:** conservar `/api/*`, hacer `.com` canónico para sesión/HUB/OAuth, normalizar `.net` a `.com` para navegación humana y reparar las rutas OAuth inconsistentes.
+- **Base:** `main` en `c73e7b9`; deployment observado `dpl_BcZSYWxq6LeXet6owNzFk53Qf63X` (`READY`).
+- **Memoria durable:** `CEREBRO.md`, `CURRENT_STATE.md`, `BASELINE.md` y `CHECKPOINTS.md`, además de Coordinación y Controlador.
+- **Siguiente autorización:** preparar y auditar el cambio mínimo de código; no iniciar conexiones reales ni cambiar consolas de proveedores sin autorización específica.

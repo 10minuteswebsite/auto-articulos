@@ -11826,3 +11826,15 @@ entradas de Coordinación de este rango (prueba en vivo con la cuenta de Lorena 
 publicando con cada estilo de escritura para #594).
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Codex — Punto cero y plan HUB/OAuth — 2026-10-16
+
+Se leyó y aplicó `IA_JOURNEY.md` del estándar Harness-Mario. Se auditó producción y `main` antes de preparar código. El punto cero queda en `CURRENT_STATE.md`, `BASELINE.md` y `CHECKPOINTS.md`; las decisiones quedan en `CEREBRO.md`.
+
+- Repositorio: `miltondavila-ux/auto-articulos`, rama única `main`, commit `c73e7b9`.
+- Producción: Vercel `la-solucion-web/auto-articulos-web`, deployment observado `dpl_BcZSYWxq6LeXet6owNzFk53Qf63X`, `READY`, seis aliases `.com`/`.net`.
+- Evidencia: los seis `/login` responden HTTP 200; `/` y `/dashboard` responden 307 a `/login` del mismo host; los endpoints OAuth comprobados sin sesión responden 401.
+- Decisión: modo mixto; `.com` canónico para sesión/HUB/OAuth, `.net` como alias normalizado al `.com`, `/api/*` técnico conservado y `seototal` humano derivado al HUB.
+- Pendiente real: Vercel no expuso el commit exacto del deployment y falta verificar manualmente las URLs registradas en cada consola de proveedor.
+
+No se tocó código, producción, configuración, cuentas ni proveedores en esta etapa.

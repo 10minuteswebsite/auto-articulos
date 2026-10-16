@@ -5086,3 +5086,12 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
   producción.
 - Responsable: Claude.
 - Estado: PRODUCCIÓN (fusionado en `main`, confirmado con git).
+
+## Punto cero — plan HUB/OAuth y dominios — 2026-10-16
+
+- **Base:** `main` en `c73e7b9445e05d2fef8774fec4b9cc158978ba69`.
+- **Producción observada:** Vercel deployment `dpl_BcZSYWxq6LeXet6owNzFk53Qf63X`, `READY`, aliases `seototal`, `articulos` y `redes` en `.com` y `.net`.
+- **Verificación:** `/login` HTTP 200 en los seis dominios; `/` y `/dashboard` HTTP 307 a `/login` del mismo host; APIs OAuth comprobadas sin sesión HTTP 401.
+- **Decisión:** modo mixto. `.com` canónico para sesión/HUB/OAuth; `.net` normalizado al `.com` equivalente para navegación humana; `/api/*` disponible para callbacks técnicos.
+- **Pendiente:** Vercel no informó `gitSource`/commit exacto del deployment. Las consolas de proveedores deben verificarse manualmente antes de cambiar callbacks.
+- **Estado:** DOCUMENTACIÓN INICIAL; sin código, migración, configuración, conexión OAuth ni deploy ejecutado por esta tarea.
