@@ -5233,6 +5233,7 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 
 ## Versión — 2026-10-16 — rescate prematuro y guardia anti-canibalización (caso Antonio Aguirre)
 
-- Estado: EN REVISIÓN (PR a `main`); sin migraciones. Se completa con commit y deployment al verificar en producción.
+- Commit: `2de420bb3037cd940b370a24a03faea8516689fe` en `main` (PR #599). Deployments de producción (GitHub) `7128156756` y `7128168390`; sin migraciones.
+- Verificación: `409 ALREADY_PUBLISHED` real en producción (cuenta de pruebas) y worker de pruebas en `success`; falta observar la guardia del worker con un repetido real.
 - Causa corregida: el rescate de títulos atascados daba por muerto un título recién reclamado y lo devolvía a Oportunidades mientras se publicaba; la oportunidad se republicaba y chocaba con el título existente.
 - Defensa añadida: coincidencia exacta normalizada contra lo ya publicado (nunca similitud difusa) al listar Oportunidades, al encolar y en el worker antes de iniciar sesión o generar nada; chequeo remoto de duplicado también en la ruta de prompt propio, antes de la imagen.
