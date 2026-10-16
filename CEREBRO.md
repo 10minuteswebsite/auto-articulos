@@ -24,6 +24,7 @@ Usar un modelo mixto y conservador:
 - El botón global de la plataforma se etiqueta `Admin Hub`, siguiendo la referencia viva de Superlinks.
 - Login nativo y logout eliminan el contexto Hub para evitar que una sesión anterior altere la navegación actual.
 - Las pantallas `ADMIN` no pertenecen a Artículos ni Redes, pero sí deben permanecer visibles para una cuenta administradora dentro de cualquiera de esos hosts. El clasificador de producto sigue devolviendo `ADMIN`; la excepción vive solo en el menú, antes del filtro visual, y no modifica autorización.
+- La composición visual canónica de Artículos es la de Superlinks: `EcosystemHeader` global arriba y `DashboardNav` como `app-subbar` separado. La identidad/contexto del producto no se mezcla con el contenido; `Admin Artículos` conserva su acceso desplegable, pero adopta el botón delineado y el submenú del estándar.
 
 ## Reparaciones previstas
 
@@ -78,3 +79,12 @@ Mantener toda la aplicación en `.net` exigiría una sesión/cookie propia de `.
 - Código: `02861df21487a0704268b30946e8021f866972c9`.
 - Producción: `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`.
 - Evidencia: menú visible y desplegable verificado en vivo en `articulos.lasolucionweb.net`.
+
+## Punto 5 completado — paridad visual con Superlinks
+
+- Se movió el menú de aplicación fuera del `main` para que sea una barra independiente de ancho completo.
+- Se aplicaron las proporciones, alineación, tipografía, estados, botón administrativo y superficie del submenú observados en Superlinks.
+- No se modificaron rutas ni autorización.
+- Código: `29d0c7b1689b2082c0939c87c075a2e50685fe37`.
+- Producción: `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
+- Evidencia: revisión visual E2E con `Admin Artículos` expandido y sus tres destinos presentes.

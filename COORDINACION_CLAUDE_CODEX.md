@@ -11892,3 +11892,13 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - **Verificación E2E:** `articulos.lasolucionweb.net/dashboard` tras recarga completa mostró el shell global (`Aplicaciones`, `Facturación`, `Perfil`, `Admin Hub`, identidad, `Salir`) y `Admin Artículos`; al abrirlo mostró `Usuarios`, `Composio` y `PostPeer`.
 - **Pruebas:** typecheck OK; build de producción del lote OK; suite amplia 224 correctas y 1 expectativa MCP histórica fallida, sin relación con este cambio.
 - **Estado:** CERRADO; no quedan cambios locales funcionales pendientes.
+
+## Codex — paridad visual Artículos/Superlinks — 2026-10-16
+
+- **Solicitud:** aplicar al menú y submenú de Artículos el patrón visual productivo de Superlinks.
+- **Implementación:** `DashboardNav` ahora se monta fuera del contenido como `app-subbar`; muestra `SEO Total Artículos` y `Artículos con IA` a la izquierda, navegación a la derecha y `Admin Artículos` como botón delineado.
+- **Submenú:** conserva `Usuarios`, `Composio` y `PostPeer`, con la superficie blanca, borde tenue, radios y sombra del estándar.
+- **Commit:** `29d0c7b1689b2082c0939c87c075a2e50685fe37`.
+- **Producción:** `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
+- **Evidencia:** revisión visual real en `articulos.lasolucionweb.net/dashboard/usuarios`, con el submenú abierto y la pantalla de Administración intacta.
+- **Estado:** CERRADO.

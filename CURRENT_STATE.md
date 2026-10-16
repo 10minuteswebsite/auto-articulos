@@ -86,3 +86,12 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Deployment productivo: `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`, `main`, aliases de Artículos activos.
 - Evidencia E2E: en `https://articulos.lasolucionweb.net/dashboard`, tras recarga completa, se observaron `Admin Artículos` y su menú expandido con `Usuarios`, `Composio` y `PostPeer`; el shell global mostró `Aplicaciones`, `Facturación`, `Perfil`, `Admin Hub`, identidad y `Salir`.
 - Validación: typecheck OK; build previo del lote OK; suite amplia `224 pass / 1 fail` por expectativa MCP preexistente y no relacionada (`mcp.test.ts` espera tres prompts, el catálogo actual expone seis).
+
+## Cierre visual — shell de Artículos alineado con Superlinks — 2026-10-16
+
+- Cambio: la navegación de aplicación dejó de vivir dentro del contenido y pasó a una barra `app-subbar` de ancho completo, separada del encabezado global.
+- Baseline visual aplicada: identidad del producto a la izquierda (`SEO Total Artículos` / `Artículos con IA`), navegación a la derecha, enlaces neutros con estado activo gris claro, botón administrativo delineado y submenú con bordes/sombra del patrón Superlinks.
+- Se conservaron las rutas, agrupaciones, permisos, menú móvil y guardas administrativas; el cambio es estructural/visual.
+- Commit de código: `29d0c7b1689b2082c0939c87c075a2e50685fe37`.
+- Deployment productivo verificado: `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
+- Evidencia visual E2E: producción mostró ambas barras separadas y el submenú `Admin Artículos` abierto con `Usuarios`, `Composio` y `PostPeer`, sin regresión de la pantalla de Administración.

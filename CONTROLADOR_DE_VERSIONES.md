@@ -5146,3 +5146,13 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - **Evidencia:** recarga real de `articulos.lasolucionweb.net/dashboard`; `Admin Artículos` se ve y abre `Usuarios`, `Composio` y `PostPeer`; shell global conforme a Superlinks.
 - **Validación:** typecheck OK, `git diff --check` OK, suite `224 pass / 1 fail` por expectativa MCP preexistente y no relacionada.
 - **Estado:** PRODUCCIÓN, CERRADO.
+
+## Versión — 2026-10-16 — paridad visual del shell Artículos
+
+- **Referencia:** shell productivo de `superlinks.lasolucionweb.net`.
+- **Cambio:** `DashboardNav` pasó a una `app-subbar` independiente del contenido; identidad/contexto a la izquierda, navegación a la derecha, `Admin Artículos` delineado y submenú con la superficie estándar.
+- **Conservación:** no se cambiaron rutas, permisos, guardas de API ni funcionalidad de los tres destinos administrativos.
+- **Commit:** `29d0c7b1689b2082c0939c87c075a2e50685fe37`.
+- **Deployment:** `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
+- **Evidencia:** revisión visual autenticada en `articulos.lasolucionweb.net/dashboard/usuarios`; ambas barras separadas y submenú operativo.
+- **Estado:** PRODUCCIÓN, CERRADO.

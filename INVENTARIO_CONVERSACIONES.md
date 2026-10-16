@@ -2196,3 +2196,12 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - Deployment: `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`.
 - Evidencia en vivo: `Admin Artículos` visible y desplegable con `Usuarios`, `Composio` y `PostPeer`; shell global visible y alineado con Superlinks.
 - Estado: PRODUCCIÓN, CERRADO. No se crearon ramas ni worktrees; no se cambiaron roles, datos ni secretos.
+
+### Codex — paridad visual con Superlinks — 2026-10-16
+
+- Observación: la funcionalidad administrativa estaba disponible, pero la barra seguía dentro del layout antiguo y no respetaba la composición de Superlinks.
+- Cambio publicado: `DashboardNav` como `app-subbar` separada, identidad/contexto del producto a la izquierda, enlaces a la derecha, botón `Admin Artículos` delineado y submenú estándar.
+- Commit: `29d0c7b1689b2082c0939c87c075a2e50685fe37`.
+- Deployment: `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
+- Verificación: producción mostró el shell alineado y el submenú con `Usuarios`, `Composio` y `PostPeer`.
+- Estado: PRODUCCIÓN, CERRADO.

@@ -43,6 +43,16 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Verificación E2E: desde la tarjeta del HUB se llegó a `https://redes.lasolucionweb.net/dashboard/oportunidades-redes`; sesión activa de Mario Davila y encabezado `SEO TOTAL REDES`; no volvió a `/login`.
 - Estado: CERRADO.
 
+## Checkpoint 6 — paridad visual con Superlinks — 2026-10-16
+
+- Alcance: corregir únicamente la composición y estilos del menú de aplicación y su submenú, usando Superlinks como referencia productiva.
+- Cambio: `DashboardNav` se monta como `app-subbar` independiente para sesiones Hub; incorpora identidad/contexto de Artículos, navegación alineada a la derecha, botón `Admin Artículos` delineado y submenú con la superficie estándar.
+- Conservación: rutas, permisos, guardas de API, agrupaciones, menú móvil y contenido de Administración intactos.
+- Commit publicado: `29d0c7b1689b2082c0939c87c075a2e50685fe37`.
+- Deployment productivo: `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`, aliases activos.
+- Validación: typecheck y build OK; revisión visual E2E en `articulos.lasolucionweb.net/dashboard/usuarios`; `Admin Artículos` abre `Usuarios`, `Composio` y `PostPeer`.
+- Estado: CERRADO.
+
 ## Checkpoint 4 — baseline visual y navegación de Artículos — 2026-10-16
 
 - Punto cero: producción `dpl_8fRv54Y6o9DBgxA1AMCk2ahqvmAx`, SHA `55fa3876b85eba0c6902c3ba82126f3ff9daea8c`, `READY`, `main`, árbol local limpio antes de editar.
