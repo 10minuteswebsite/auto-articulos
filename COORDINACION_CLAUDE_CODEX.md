@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — R1: la imagen IA ya pagada se reutiliza en reintentos — 2026-10-16
+
+- Task ID: `CUIDADO-TOKENS-R1-20261016`. Sin migración, sin workflows. Estado: PR abierto, SIN fusionar. Punto de partida: `main` con #611 (`CUIDADO_DE_TOKENS.md`).
+- Cambio: `generateAiSocialImage` (`apps/worker/src/aiImageGenerator.ts`) guarda `reuse.json` (URL + prompt) junto a la imagen apenas la genera y, antes de pagar, busca ese registro bajo el mismo `pathPrefix` (por título y formato); si existe, es válido, tiene menos de 48 h y la imagen responde, la reutiliza. Las pruebas de diagnóstico (`forcePerson`/`systemPromptOverride`) siempre generan. Cubre Post, Story, Reel-image y Pinterest; NO cubre Carrusel ni Infografía (otro generador), pendiente.
+- Prueba pura nueva `aiImageReuse.test.ts` (1/1); typecheck de los archivos tocados. NO se generó ninguna imagen ni se gastó ningún token. Riesgo conocido: si se cambia el logo o la foto dentro de 48 h, un reintento del mismo título y formato reutiliza la imagen anterior.
+
 ## Claude — Cuidado de tokens (PostPeer, Composio, imágenes, OpenAI) — 2026-10-16
 
 - Task ID: `CUIDADO-TOKENS-20261016`. Orden de Milton: los tokens se piden solo en el momento preciso. Sin migración, sin cambios de comportamiento, sin workflows. Estado: PR abierto, SIN fusionar.

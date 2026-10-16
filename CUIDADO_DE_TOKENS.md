@@ -26,7 +26,7 @@ Orden de Milton (2026-10-16): los tokens y créditos de PostPeer, Composio, imá
 
 ## Riesgos de doble gasto conocidos (NO corregidos todavía)
 
-- **R1 — imagen IA que se paga otra vez en un reintento.** En `socialPublish.ts` la imagen IA de Instagram se genera antes de publicar y `imageUrl`/`aiImagePrompt` solo se guardan cuando la publicación sale bien. Si Meta o Composio fallan después de generarla, la imagen se pierde y el reintento la vuelve a pagar. Arreglo propuesto: guardar `imageUrl` + `aiImagePrompt` en la propuesta al generarla y reutilizarla si `aiImagePrompt` ya existe (regla 4).
+- **R1 — imagen IA que se paga otra vez en un reintento. [CORREGIDO en PR de reutilización para Post, Story, Reel-image y Pinterest; quedan Carrusel e Infografía de Instagram]** En `socialPublish.ts` la imagen IA de Instagram se genera antes de publicar y `imageUrl`/`aiImagePrompt` solo se guardan cuando la publicación sale bien. Si Meta o Composio fallan después de generarla, la imagen se pierde y el reintento la vuelve a pagar. Arreglo propuesto: guardar `imageUrl` + `aiImagePrompt` en la propuesta al generarla y reutilizarla si `aiImagePrompt` ya existe (regla 4).
 - **R2 — cascada de hasta 3 modelos pagados.** `packages/shared/src/social-image.ts` prueba `gpt-image-1` con logo, `gpt-image-1` sin logo y `dall-e-3`; un fallo local (no se pudo bajar el logo) también salta al siguiente. Arreglo propuesto: distinguir rechazo de la API de fallo local y registrar el modelo usado (regla 6).
 
 ## Cómo agregar una llamada de pago nueva
