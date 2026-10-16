@@ -5018,3 +5018,71 @@ TARJETAS — 2026-10-14", por la tarea programada diaria de propagación (2026-1
   cambio, sin borrar el texto anterior (ver detalle en `manual-usuario.ts`).
 - Responsable: Claude.
 - Estado: PRODUCCIÓN (fusionado en `main`, confirmado con git).
+
+## Versión — 2026-10-14 — MCP Redes: generar y publicar propuestas por nombre o en grupo desde un asistente de IA (PR #593)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP Redes: generar y publicar
+propuestas por nombre o en grupo desde un asistente de IA — 2026-10-14", por la tarea programada
+diaria de propagación (2026-10-16).
+
+- **PR #593 (commit `334d59d`)** — Pedido de Milton: analizar Redes e incorporarlo al MCP para
+  generar propuestas por nombre o en grupo y publicarlas desde un asistente. Análisis (solo
+  lectura de rutas): `GET generate` = redes conectadas y cupo diario; `POST generate
+  {networks:[…]}` = genera por red (sin lista = todas las conectadas); `POST publish {id}` =
+  publica con cupo y permisos; `POST cancel {id}`; `DELETE ?scope=pending&platforms=…` = borra
+  pendientes sin tocar historial. X/Twitter apagada. Instagram genera varios formatos (el
+  principal es `instagram-post`).
+- Herramientas nuevas (`lib/mcp/tools/social-actions.ts`): `ver_redes_sociales`,
+  `generar_propuestas_sociales`, `publicar_propuestas_sociales` (grupal, máx. 10, un comprobante),
+  `cancelar_propuesta_social`, `eliminar_propuestas_sociales`. Publicar/cancelar/eliminar exigen
+  comprobante (`confirmOrPreview`, ahora exportado de `actions.ts`). Nombres/alias en
+  `lib/mcp/social-networks.ts`; un nombre desconocido se reporta, no se ignora. Flujos y prompt:
+  `publicar_en_redes` y `automatizar_redes` (`lib/mcp/prompts.ts`, texto único en
+  `lib/mcp/automation.ts`); la pantalla `configuracion/mcp` muestra un prompt propio de Redes en
+  `redes.lasolucionweb.com` (antes copiaba el de Artículos) y añade las reglas de Redes en el host
+  combinado. Manual y `MCP_ACCIONES_UNIVERSALES.md` actualizados por el propio PR. Sin migración.
+- Reglas de Milton respetadas según la propia entrada: el cupo limita publicaciones, no
+  propuestas; una propuesta por red por pedido; el asistente no borra propuestas por su cuenta.
+- Verificación: 16/16 pruebas MCP (nombres/alias, elección de la propuesta pendiente, comprobante
+  obligatorio, herramientas citadas existen); `tsc` sin errores nuevos (los de `startOfSocialDay`
+  y `mcpPublishConfirmation` ya existían por el paquete compartido local desactualizado), según la
+  propia entrada. NO probado en vivo con un asistente real ni publicando, según la propia entrada:
+  hace falta una prueba con la cuenta de Lorena con el visto bueno de Milton (una publicación por
+  red; borrar propuestas sobrantes).
+- Verificado con git (2026-10-16): `334d59d` es ancestro de `origin/main`; el texto original en
+  Coordinación decía «Estado: PR abierto, SIN fusionar (Milton durmiendo; fusiona con su orden)»,
+  pero el PR ya está fusionado en producción.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (fusionado en `main`, confirmado con git).
+
+## Versión — 2026-10-15 — MCP: estilos de escritura (Prompt) — el asistente los lista y elige por nombre (PR #594)
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos de escritura
+(Prompt) — 2026-10-15", por la tarea programada diaria de propagación (2026-10-16).
+
+- **PR #594 (commit `81c40c8`)** — Problema (Milton): en Publicar hay 5 estilos de escritura
+  (STANDARD, comparativos, estadísticos, guías, problema-solución) y el MCP no los contemplaba:
+  publicaba siempre con el de la cuenta y el asistente no podía verlos ni elegirlos. Evidencia: las
+  rutas de la web (`opportunities/execute`, `execute-batch`, `execute-all`, `runs`) aceptan
+  `promptId` y, sin él, usan `User.defaultPromptId`; ninguna herramienta MCP lo enviaba. STANDARD
+  no es un prompt: lo genera directamente 10minutesWebsite (sin `promptId`); los otros 4 son filas
+  de `Prompt` propias de SEO TOTAL.
+- Cambios: `lib/mcp/writing-style.ts` (nombre → `promptId`, sin adivinar coincidencias dudosas),
+  herramienta `listar_estilos_escritura`, parámetro `estilo` en
+  `publicar_oportunidades_seleccionadas`, `publicar_categoria` y `publicar_titulos_en_categoria`
+  (el `promptId` entra en el comprobante de confirmación), estilo por defecto en
+  `ver_preferencias_contenido`, reglas en `lib/mcp/automation.ts` y en el flujo
+  `publicar_contenido`, manual y catálogo actualizados por el propio PR.
+- Pedido de Milton (15/10) resuelto: el MCP toma el estilo por defecto de la cuenta, pero el
+  asistente debe saber que puede CAMBIARLO y elegir otro — parámetro `estilo` (un solo artículo,
+  sin tocar la cuenta) y herramienta nueva `cambiar_estilo_escritura_por_defecto` (`PATCH /api/me`
+  con `defaultPromptId`; `STANDARD` = `null`), con comprobante y solo si la persona lo pide;
+  también permite volver a STANDARD. No se tocaron las rutas de publicación.
+- Verificación: 11/11 pruebas MCP (nombres cortos/acentos, STANDARD aparte, ambigüedad, `estilo` en
+  las 3 herramientas); `tsc` sin errores nuevos, según la propia entrada. NO probado en vivo
+  publicando con cada estilo, según la propia entrada.
+- Verificado con git (2026-10-16): `81c40c8` es ancestro de `origin/main`; el texto original en
+  Coordinación decía «Estado: PR abierto, sin fusionar», pero el PR ya está fusionado en
+  producción.
+- Responsable: Claude.
+- Estado: PRODUCCIÓN (fusionado en `main`, confirmado con git).
