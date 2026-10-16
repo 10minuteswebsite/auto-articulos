@@ -168,3 +168,28 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
 - Evidencia E2E: Redes `.net` mostró `Admin Redes` expandido con `Usuarios`, `Composio` y `PostPeer`; el Hub conservó la tarjeta de Redes visible.
 - Estado: PRODUCCIÓN, CERRADO.
+
+## Checkpoint 10 — MCP: claridad de Redes, estilos, automatización y renovación OAuth — 2026-10-16 16:40 ET
+
+- Task ID: `MCP-REDES-CLARIDAD-20261016`. Producto: `10minuteswebsite/auto-articulos`.
+- Commit de código: `4bbf565a` (PR #601). Commit de `main` al verificar: el mismo. Commits MCP previos en producción: `dc4203f0`, `748c3dec`, `334d59d0`, `81c40c87`.
+- Deployment: `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR` (`READY`, git, aliases asignados). Previos: `dpl_GYJ9mEpJ4ZnUWGugK6zCK6PkCfNf` (#566), `dpl_ExEP7ywHp3FNiMFQgkwQ8NWDxks9` (#581), `dpl_8MnYqAW7NceduJdVMh5pzzDZLc2b` (#593), `dpl_85mLnuS9qpun6bJt2NAdcG23m1Ey` (#594).
+- Punto de partida verificado: `main` `9bcfded8` = producción `dpl_pw7h2Absd4LgCfbMWfC7D9JYnsgt`.
+- CURRENT_STATE y BASELINE (sección «Contrato MCP») actualizados.
+- Pruebas: 227 en `apps/web`, 204 correctas; 23 fallos del paquete `shared` instalado localmente desactualizado (`evaluateProductAccess`), ajenos y distintos del fallo de `mcp.test.ts`, que era mío y quedó corregido; pruebas MCP/OAuth 22/22.
+- Evidencia de producción: HTTP de los seis dominios; logs de Vercel con 7 renovaciones OAuth 200 sin `authorize` el 16/10 (arreglo #566 comprobado); rechazo limpio `invalid_grant` con refresh falso.
+- Riesgos: herramientas de Redes y estilos NO probadas en vivo con un asistente real; las personas deben volver a copiar el prompt de la pantalla del MCP.
+- Siguiente responsable: quien reciba la prueba en vivo con Catalina/Lorena (una publicación por red, borrar propuestas sobrantes, visto bueno de Milton antes de cada publicación real).
+
+### Auditoría de cobertura documental (Task `MCP-REDES-CLARIDAD-20261016`)
+
+| Documento | Task ID | Commit | Deployment | Checkpoint | Alcance | Evidencia | Resultado |
+|---|---|---|---|---|---|---|---|
+| COORDINACION_CLAUDE_CODEX.md | sí | `4bbf565a` | `dpl_4rtM1ewR…` | 10 | sí | sí | publicado y verificado |
+| CONTROLADOR_DE_VERSIONES.md | sí | `4bbf565a` | `dpl_4rtM1ewR…` | 10 | sí | sí | publicado y verificado |
+| INVENTARIO_CONVERSACIONES.md | sí | `4bbf565a` | `dpl_4rtM1ewR…` | 10 | sí | sí | publicado y verificado |
+| CEREBRO.md | sí | `4bbf565a` | `dpl_4rtM1ewR…` | 10 | sí | sí | publicado y verificado |
+| CURRENT_STATE.md | sí | `4bbf565a` | `dpl_4rtM1ewR…` | 10 | sí | sí | punto cero vigente |
+| BASELINE.md | sí | `4bbf565a` | `dpl_4rtM1ewR…` | 10 | sí | sí | contrato MCP |
+| CHECKPOINTS.md | sí | `4bbf565a` | `dpl_4rtM1ewR…` | 10 | sí | sí | este registro |
+

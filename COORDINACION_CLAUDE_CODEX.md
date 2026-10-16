@@ -17,6 +17,7 @@
 - Límite: el MCP no puede crear tareas programadas; eso lo hace el asistente. Si Muse/Catalina no tiene programador de tareas, no podrá automatizar y debe decirlo (ahora la instrucción lo pide).
 - Verificación: pruebas MCP (reintento elige la propuesta en error más reciente; las descripciones documentan argumentos, comprobante, monitoreo y reintento; las instrucciones mencionan la automatización); `tsc` sin errores nuevos. No probado en vivo con Catalina.
 - Corrección propia detectada al auditar: la prueba `src/lib/mcp.test.ts` («MCP prompts… expected workflows») fallaba en `main` desde mis PR #581/#593 (nuevos prompts `programar_publicaciones`, `publicar_en_redes`, `automatizar_redes` no estaban en su lista); los checkpoints de otras conversaciones la llamaron «preexistente» y era mía. Corregida aquí y ampliada para exigir las 7 herramientas nuevas del catálogo. Lección: correr SIEMPRE `npm test` completo antes de publicar, no solo `src/lib/mcp/*`.
+- CIERRE (2026-10-16 16:40 ET): PUBLICADO Y VERIFICADO. Commit `4bbf565a` en `main` (PR #601, squash), deployment `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR` `READY`; árbol de `main` idéntico al verificado; HTTP de los seis dominios correcto; 7 renovaciones OAuth 200 en logs (arreglo #566 comprobado). Checkpoint 10. Pendiente: prueba en vivo con Catalina/Lorena y que las personas vuelvan a copiar el prompt.
 
 ## Punto cero documental vigente — 2026-10-16
 
