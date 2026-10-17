@@ -1,5 +1,16 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — CIERRE: Google Business y cuidado de tokens — 2026-10-17
+
+- Task ID: `GMB-CIERRE-20261016`. Conversación «PROBLEMA PUBLICACION GOOGLE MY BUSINESS». Estado: CERRADA. Este cierre corrige los estados «PR abierto, SIN fusionar» de las entradas de hoy: los cuatro PR están FUSIONADOS en `main`.
+- PR #605 `dca4ff53` (PostPeer `success:false`/`error` cuenta como fallo y se registra el motivo); PR #609 `d20e06f9` (el worker ya no se salta artículos sin resumen: causa probable del 1 % de Antonio Aguirre); PR #611 `1d721742` (`CUIDADO_DE_TOKENS.md` + prueba guardiana); PR #612 `bd57a872` (reutilizar la imagen IA ya pagada, 48 h). Sin migraciones, sin cambios de workflows.
+- Despliegues de producción en Vercel verificados `success` (GitHub deployments `7128972685`, `7129447154`, `7129649611`) y `/login` de Redes en 200. #611 es solo documentación y una prueba: no se verificó despliegue aparte. El worker corre desde `main` en GitHub Actions.
+- Verificado en vivo con permiso de Milton: una propuesta de Google Business con la cuenta de Lorena Álvarez salió «Publicado» y Milton confirmó que aparece en la ficha de Google. Con la cuenta de Antonio Aguirre la propuesta se quedó en 1 % hasta el reintento y luego publicó (Milton la vio en Google); no se confirmó en la base que su artículo tuviera el resumen vacío.
+- Reglas de Milton respetadas: no se publicó ninguna propuesta pasada; no se generó ninguna imagen ni se gastó ningún token en pruebas.
+- Incidente propio, ya reparado: un comando mío corrió en la carpeta principal de Milton y creó la rama `diag/gmb-readonly` con sus cambios sin guardar, que subió a GitHub (repo público) unos minutos. Se restauró su carpeta (`reset --mixed`, mismos 9 archivos) y se borró la rama local y remota. Los archivos pudieron verse mientras existió; si alguno es sensible, rotar o revisar.
+- PENDIENTES (sin tocar, a decisión de Milton): disparos de `social-worker.yml` cancelados y corrida de respaldo programada casi inexistente (17 en 3 días), requiere capitanía de ese workflow; R1 sin cubrir Carrusel/Infografía de Instagram; R2 cascada de hasta 3 modelos pagados en `social-image.ts`; Composio y cadena fal.ai sin auditar; latencia de 30–60 s por arrancar el worker en GitHub Actions.
+- Siguiente punto de partida: `main` desde el commit de este cierre; leer `CUIDADO_DE_TOKENS.md` antes de tocar cualquier llamada de pago.
+
 ## Claude — CIERRE: revisión de callbacks OAuth y paso de .com a .net — 2026-10-17
 
 - Task ID: `CIERRE-CALLBACKS-NET-20261017`. PROYECTO CERRADO. Todo lo de abajo está fusionado en `main` y desplegado; no queda rama ni commit de este trabajo sin fusionar.
