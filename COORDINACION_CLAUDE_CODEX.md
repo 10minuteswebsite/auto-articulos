@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Contenido alineado con el encabezado del Hub — 2026-10-17
+
+- Task ID: `HUB-CONTENIDO-ALINEADO-20261017`. Sin migración ni workflows. Estado: PR abierto, SIN fusionar, NO verificado en vivo (requiere sesión con la navegación del Hub).
+- Causa: encabezado global del Hub = 1280px con márgenes 16/24/32px; la barra de Artículos/Redes = 1160px con 20px; el contenido de `/dashboard` = 1120px con 24px. Tres bordes distintos.
+- Cambio (`dashboard/layout.tsx`): con navegación del Hub, la barra y el contenido usan 1280px y los mismos márgenes laterales que el encabezado. Sin Hub no cambia nada.
+
 ## Claude — CIERRE Y ARCHIVO «PROBLEMAS CON MCP ARTICULOS» — 2026-10-17
 
 - Estado: CERRADO Y ARCHIVADO. Sin PR, ramas ni commits abiertos de esta conversación. Capitanía de migración liberada. Sin migraciones en ninguna de las tareas.

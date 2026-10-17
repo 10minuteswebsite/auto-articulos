@@ -55,7 +55,7 @@ export default async function DashboardLayout({
         />
       )}
     <main
-      className="dashboard-main shell"
+      className={showHubNavigation ? "dashboard-main shell hub-aligned" : "dashboard-main shell"}
       style={{
         maxWidth: 1120,
         margin: "0 auto",
@@ -64,6 +64,22 @@ export default async function DashboardLayout({
         position: "relative",
       }}
     >
+      <style>{`
+        /*
+         * Con la navegación del Hub, el contenido usa el mismo ancho y los mismos
+         * márgenes laterales que el encabezado global (1280px; 16/24/32px).
+         */
+        .hub-aligned { max-width: 1280px !important; padding-left: 16px !important; padding-right: 16px !important; }
+        .dashboard-nav .app-subbar-inner { box-sizing: border-box; width: 100% !important; max-width: 1280px; padding-left: 16px; padding-right: 16px; }
+        @media (min-width: 640px) {
+          .hub-aligned { padding-left: 24px !important; padding-right: 24px !important; }
+          .dashboard-nav .app-subbar-inner { padding-left: 24px; padding-right: 24px; }
+        }
+        @media (min-width: 1024px) {
+          .hub-aligned { padding-left: 32px !important; padding-right: 32px !important; }
+          .dashboard-nav .app-subbar-inner { padding-left: 32px; padding-right: 32px; }
+        }
+      `}</style>
       <style>{`
         @media (max-width: 639px) {
           .topbar { display: flex !important; margin-bottom: 12px !important; align-items: center !important; }
