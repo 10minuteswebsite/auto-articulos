@@ -1,5 +1,10 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Bing: el retorno es SIEMPRE articulos.lasolucionweb.net — 2026-10-17
+
+- Task ID: `BING-RETORNO-NET-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Prueba con Lorena en producción: el aviso rojo salió (Inicio y tarjeta) y la reconexión funcionó, pero el botón mandó a `seototal.lasolucionweb.com` porque `BING_WEBMASTER_REDIRECT_URI` no estaba definida.
+- Cambio: `bingExplicitRedirect()` ya no depende de la variable: por defecto es `https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` (la única registrada para el cliente nuevo); `connect` manda a ese host desde cualquier otro y `callback` usa la misma dirección. Pruebas 238/238.
+
 ## Claude — Bing: guardar credenciales en Admin enciende el aviso de reconexión — 2026-10-17
 
 - Task ID: `BING-AVISO-AUTOMATICO-20261017`. Sin migración ni workflows. Pedido de Milton: que el aviso salga a todos los que tenían Bing sin que él toque variables. `effectiveBingChangedAt` toma la más reciente entre `BING_CLIENT_CHANGED_AT` y el `updatedAt` de las credenciales guardadas en Admin → Bing. Efecto: Milton ya las guardó hoy, así que al desplegar saldrá el aviso a quien no haya reconectado después. Re-guardar credenciales vuelve a avisar a todos. Pruebas en `bing-client-change.test.ts`.

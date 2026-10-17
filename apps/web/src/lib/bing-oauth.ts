@@ -7,7 +7,7 @@ export function bingOAuthConfig(stored?: { clientId: string; clientSecret: strin
   const clientSecret = stored?.clientSecret || process.env.BING_WEBMASTER_CLIENT_SECRET;
   const redirectUri =
     process.env.BING_WEBMASTER_REDIRECT_URI ??
-    "https://seototal.lasolucionweb.com/api/search-integrations/bing/callback";
+    "https://articulos.lasolucionweb.net/api/search-integrations/bing/callback";
   if (!clientId || !clientSecret)
     throw new Error("Bing Webmaster Tools OAuth no está configurado.");
   return { clientId, clientSecret, redirectUri };
@@ -16,16 +16,21 @@ export function bingOAuthConfig(stored?: { clientId: string; clientSecret: strin
 /**
  * Con el cliente nuevo de Bing (cambio de 2026-10-17) la dirección de retorno es
  * UNA sola y debe coincidir letra por letra con la registrada en Bing. Si la
- * variable BING_WEBMASTER_REDIRECT_URI está definida, manda sobre cualquier
- * cálculo por host. Sin ella, todo sigue como hasta hoy.
+ * variable BING_WEBMASTER_REDIRECT_URI está definida y es válida, manda; si no,
+ * se usa SIEMPRE articulos.lasolucionweb.net (el cliente nuevo solo está
+ * registrado ahí). Nunca seototal ni el .com.
  */
-export function bingExplicitRedirect(env: Record<string, string | undefined> = process.env): URL | null {
+export const BING_DEFAULT_REDIRECT = "https://articulos.lasolucionweb.net/api/search-integrations/bing/callback";
+
+export function bingExplicitRedirect(env: Record<string, string | undefined> = process.env): URL {
   const raw = env.BING_WEBMASTER_REDIRECT_URI?.trim();
-  if (!raw) return null;
-  try {
-    const url = new URL(raw);
-    return url.protocol === "https:" ? url : null;
-  } catch {
-    return null;
+  if (raw) {
+    try {
+      const url = new URL(raw);
+      if (url.protocol === "https:") return url;
+    } catch {
+      // valor inválido: se usa el de siempre
+    }
   }
+  return new URL(BING_DEFAULT_REDIRECT);
 }
