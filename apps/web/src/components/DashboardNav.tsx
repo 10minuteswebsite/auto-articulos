@@ -74,7 +74,7 @@ const BASE_ENTRIES: NavEntry[] = [
   },
 ];
 
-const HUB_ENTRY: TabItem = { href: HUB_URL, label: "Volver al HUB" };
+const HUB_ENTRY: TabItem = { href: HUB_URL, label: "Volver al Inicio" };
 
 // VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2). Cuando la
 // cuenta tiene activo el módulo opt-in «vista-productos» (hoy: administradores
