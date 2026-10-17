@@ -1,3 +1,5 @@
+> **✅ DÍA CERO CULMINADO (2026-10-17).** Artículos y Redes ya están separados y funcionando. Todo lo que sigue en este documento es HISTÓRICO: no hay tareas pendientes del Día Cero. El botón Día Cero fue eliminado y la variable `DIA_CERO` ya no existe en el código (los retornos OAuth directos vuelven al host `.net` que inicia la conexión). Ver `COORDINACION_CLAUDE_CODEX.md` (entrada «Limpieza del Día Cero»).
+
 # PROMPT PARA CODEX — TOMA DE CONTROL DEL PROYECTO «SEPARACIÓN DE SEO TOTAL»
 
 Pega esto tal cual en Codex, abierto en `/Users/miltondavila/Creador de articulos`. Claude se queda sin uso esta semana: **desde este momento Codex es el responsable del proyecto.**
