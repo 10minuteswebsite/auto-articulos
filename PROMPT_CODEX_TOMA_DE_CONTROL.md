@@ -1,4 +1,4 @@
-> **✅ DÍA CERO CULMINADO (2026-10-17).** Artículos y Redes ya están separados y funcionando. Todo lo que sigue en este documento es HISTÓRICO: no hay tareas pendientes del Día Cero. El botón Día Cero fue eliminado. La variable `DIA_CERO`/`OAUTH_CANONICAL_ORIGIN` sigue existiendo en el código porque los retornos OAuth de Google la usan (no se puede quitar aún). Ver `COORDINACION_CLAUDE_CODEX.md` (entrada «Limpieza del Día Cero»).
+> **✅ DÍA CERO CULMINADO (2026-10-17).** Artículos y Redes ya están separados y funcionando. Todo lo que sigue en este documento es HISTÓRICO: no hay tareas pendientes del Día Cero. El botón Día Cero fue eliminado y la variable `DIA_CERO` ya no existe en el código (el retorno OAuth quedó fijo en `seototal.lasolucionweb.com`, ajustable con `OAUTH_CANONICAL_ORIGIN`). Ver `COORDINACION_CLAUDE_CODEX.md` (entrada «Limpieza del Día Cero»).
 
 # PROMPT PARA CODEX — TOMA DE CONTROL DEL PROYECTO «SEPARACIÓN DE SEO TOTAL»
 

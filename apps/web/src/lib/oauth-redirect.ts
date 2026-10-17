@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { applyCookie, clearCookie, diaCeroActive } from "./shared-cookies";
+import { applyCookie, clearCookie } from "./shared-cookies";
 
 // Hosts de SEO Total: el principal y los dos productos (decisión de Milton
 // 2026-10-02: subdominios en el .com, sin «seototal.»; Mario crea el DNS).
@@ -36,42 +36,37 @@ export function getOAuthRedirectUri(
 }
 
 /*
- * RETORNO ÚNICO DE OAUTH (proyecto «SEPARACION DE SEO TOTAL»).
+ * RETORNO ÚNICO DE OAUTH.
  *
- * Objetivo de Milton: NO volver a tocar ninguna consola de proveedor. Con el
- * interruptor DIA_CERO=on (o OAUTH_CANONICAL_ORIGIN explícito):
- *  - Todos los `connect` (inicien en seototal., articulos. o redes.) le dicen al
- *    proveedor que vuelva a la dirección de SIEMPRE (el origen canónico), que es
- *    la que ya está registrada.
- *  - El host de origen se recuerda en una cookie corta (compartida por todo el
- *    .com) y, al terminar el callback, se devuelve al usuario a ese host.
- * Apagado (sin variables): todo se comporta exactamente como antes.
+ * Objetivo de Milton: NO volver a tocar ninguna consola de proveedor. Todos los
+ * `connect` (inicien en seototal., articulos. o redes.) le dicen al proveedor que
+ * vuelva a la dirección de SIEMPRE (el origen canónico), que es la que ya está
+ * registrada. Se puede cambiar con OAUTH_CANONICAL_ORIGIN (https); sin ella vale
+ * la constante de abajo. El host de origen se recuerda en una cookie corta y, al
+ * terminar el callback, se devuelve al usuario a ese host si está permitido.
  */
-export const DIA_CERO_CANONICAL_ORIGIN = "https://seototal.lasolucionweb.com";
+export const CANONICAL_OAUTH_ORIGIN = "https://seototal.lasolucionweb.com";
 export const OAUTH_ORIGIN_COOKIE = "oauth_return_origin";
 
 type Env = Record<string, string | undefined>;
 
-/** Origen canónico de los callbacks, o null si el retorno único está apagado. */
-export function canonicalOAuthOrigin(env: Env = process.env): string | null {
+/** Origen canónico de los callbacks: OAUTH_CANONICAL_ORIGIN si es https válido; si no, la constante. */
+export function canonicalOAuthOrigin(env: Env = process.env): string {
   const explicit = env.OAUTH_CANONICAL_ORIGIN?.trim();
   if (explicit) {
     try {
       const url = new URL(explicit);
       if (url.protocol === "https:") return url.origin;
     } catch {
-      // valor inválido: se ignora y se decide por DIA_CERO
+      // valor inválido: se ignora y vale la constante
     }
   }
-  return diaCeroActive(env) ? DIA_CERO_CANONICAL_ORIGIN : null;
+  return CANONICAL_OAUTH_ORIGIN;
 }
 
-/** redirect_uri que se envía al proveedor: canónico si el retorno único está activo; si no, el host de la petición (como siempre). */
-export function oauthCallbackUri(request: { url: string }, path: string, env: Env = process.env): string {
-  const canonical = canonicalOAuthOrigin(env);
-  if (canonical) return `${canonical}${path}`;
-  const url = new URL(request.url);
-  return `${url.protocol}//${url.host}${path}`;
+/** redirect_uri que se envía al proveedor: siempre el origen canónico (la dirección ya registrada). */
+export function oauthCallbackUri(_request: { url: string }, path: string, env: Env = process.env): string {
+  return `${canonicalOAuthOrigin(env)}${path}`;
 }
 
 function allowedHosts(env: Env): Set<string> {
@@ -86,13 +81,12 @@ export function isAllowedOAuthHost(host: string, env: Env = process.env): boolea
   return allowedHosts(env).has(host.trim().toLowerCase());
 }
 
-/** Al iniciar la conexión: recuerda de qué host viene el usuario (solo si el retorno único está activo y el host está permitido). */
+/** Al iniciar la conexión: recuerda de qué host viene el usuario (solo si el host está permitido). */
 export function rememberOAuthOrigin(
   response: Parameters<typeof applyCookie>[0],
   request: { url: string },
   env: Env = process.env,
 ): void {
-  if (!canonicalOAuthOrigin(env)) return;
   const host = new URL(request.url).host.toLowerCase();
   if (!isAllowedOAuthHost(host, env)) return;
   applyCookie(response, OAUTH_ORIGIN_COOKIE, host, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 }, env);
@@ -115,12 +109,11 @@ function readCookie(header: string | null, name: string): string | undefined {
 }
 
 /**
- * Base contra la que se arman las redirecciones del callback. Sin retorno único: la
- * propia petición (idéntico a antes). Con él: el host recordado, SOLO si sigue
- * estando en la lista permitida (nunca un destino arbitrario); si no, la petición.
+ * Base contra la que se arman las redirecciones del callback: el host recordado,
+ * SOLO si sigue estando en la lista permitida (nunca un destino arbitrario); si no,
+ * la propia petición.
  */
 export function oauthReturnBase(request: { url: string; headers: Headers }, env: Env = process.env): string {
-  if (!canonicalOAuthOrigin(env)) return request.url;
   const host = readCookie(request.headers.get("cookie"), OAUTH_ORIGIN_COOKIE);
   if (host && isAllowedOAuthHost(host, env)) return `https://${host.toLowerCase()}`;
   return request.url;
@@ -128,6 +121,5 @@ export function oauthReturnBase(request: { url: string; headers: Headers }, env:
 
 /** Al terminar el callback: borra la cookie de origen (en sus dos variantes). */
 export function clearOAuthOrigin(response: Parameters<typeof clearCookie>[0], env: Env = process.env): void {
-  if (!canonicalOAuthOrigin(env)) return;
   clearCookie(response, OAUTH_ORIGIN_COOKIE, { httpOnly: true, secure: true, sameSite: "lax", path: "/" }, env);
 }

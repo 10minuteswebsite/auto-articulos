@@ -47,7 +47,7 @@ test("normaliza mayúsculas, pero no acepta comodines literales ni host vacío",
   delete process.env.SEO_TOTAL_OAUTH_ALLOWED_HOSTS;
 });
 
-// ── Retorno único (DIA_CERO) ─────────────────────────────────────────────────
+// ── Retorno único ─────────────────────────────────────────────────
 import {
   canonicalOAuthOrigin,
   isAllowedOAuthHost,
@@ -60,31 +60,21 @@ import {
 
 const req = (url: string, cookie?: string) => ({ url, headers: new Headers(cookie ? { cookie } : {}) });
 
-test("retorno único apagado: el redirect_uri sale del host de la petición, como siempre", () => {
-  assert.equal(canonicalOAuthOrigin({}), null);
-  assert.equal(
-    oauthCallbackUri(req("https://redes.lasolucionweb.com/api/x"), "/api/search-integrations/tumblr/callback", {}),
-    "https://redes.lasolucionweb.com/api/search-integrations/tumblr/callback",
-  );
-  const r = req("https://redes.lasolucionweb.com/api/x", `${OAUTH_ORIGIN_COOKIE}=articulos.lasolucionweb.com`);
-  assert.equal(oauthReturnBase(r, {}), r.url); // ignora la cookie
-});
-
-test("DIA_CERO=on: el redirect_uri es SIEMPRE el canónico (la dirección ya registrada)", () => {
-  assert.equal(canonicalOAuthOrigin({ DIA_CERO: "on" }), "https://seototal.lasolucionweb.com");
+test("el redirect_uri es SIEMPRE el canónico (la dirección ya registrada)", () => {
+  assert.equal(canonicalOAuthOrigin({}), "https://seototal.lasolucionweb.com");
   for (const host of ["seototal", "articulos", "redes"]) {
     assert.equal(
-      oauthCallbackUri(req(`https://${host}.lasolucionweb.com/api/x`), "/api/search-integrations/linkedin/callback", { DIA_CERO: "on" }),
+      oauthCallbackUri(req(`https://${host}.lasolucionweb.com/api/x`), "/api/search-integrations/linkedin/callback", {}),
       "https://seototal.lasolucionweb.com/api/search-integrations/linkedin/callback",
     );
   }
-  assert.equal(canonicalOAuthOrigin({ DIA_CERO: "on", OAUTH_CANONICAL_ORIGIN: "https://otro.example.com/ruta" }), "https://otro.example.com");
-  assert.equal(canonicalOAuthOrigin({ OAUTH_CANONICAL_ORIGIN: "http://inseguro.example.com" }), null); // solo https
-  assert.equal(canonicalOAuthOrigin({ OAUTH_CANONICAL_ORIGIN: "no es url" }), null);
+  assert.equal(canonicalOAuthOrigin({ OAUTH_CANONICAL_ORIGIN: "https://otro.example.com/ruta" }), "https://otro.example.com");
+  assert.equal(canonicalOAuthOrigin({ OAUTH_CANONICAL_ORIGIN: "http://inseguro.example.com" }), "https://seototal.lasolucionweb.com"); // solo https
+  assert.equal(canonicalOAuthOrigin({ OAUTH_CANONICAL_ORIGIN: "no es url" }), "https://seototal.lasolucionweb.com");
 });
 
 test("el retorno vuelve al host recordado solo si está permitido", () => {
-  const env = { DIA_CERO: "on" };
+  const env = {};
   const ok = req("https://seototal.lasolucionweb.com/cb", `a=1; ${OAUTH_ORIGIN_COOKIE}=redes.lasolucionweb.com; b=2`);
   assert.equal(oauthReturnBase(ok, env), "https://redes.lasolucionweb.com");
   const mayus = req("https://seototal.lasolucionweb.com/cb", `${OAUTH_ORIGIN_COOKIE}=ARTICULOS.LASOLUCIONWEB.COM`);
@@ -99,21 +89,23 @@ test("el retorno vuelve al host recordado solo si está permitido", () => {
   assert.equal(isAllowedOAuthHost("evil.com", env), false);
 });
 
-test("rememberOAuthOrigin/clearOAuthOrigin escriben la cookie solo con el retorno único activo y host permitido", () => {
-  const mk = () => ({ headers: new Headers(), cookies: { set: () => { throw new Error("no debe usar cookies.set con dominio activo"); } } });
-  const off = mk();
-  rememberOAuthOrigin(off, req("https://redes.lasolucionweb.com/x"), {});
-  assert.equal(off.headers.get("set-cookie"), null);
-  const on = mk();
-  rememberOAuthOrigin(on, req("https://redes.lasolucionweb.com/x"), { DIA_CERO: "on" });
-  const all = on.headers.getSetCookie();
-  assert.match(all[0], new RegExp(`^${OAUTH_ORIGIN_COOKIE}=redes\\.lasolucionweb\\.com; .*Domain=\\.lasolucionweb\\.com`));
+test("rememberOAuthOrigin/clearOAuthOrigin escriben la cookie solo con host permitido", () => {
+  const mk = () => {
+    const sets: string[] = [];
+    return { sets, headers: new Headers(), cookies: { set: (name: string) => { sets.push(name); } } };
+  };
+  const ok = mk();
+  rememberOAuthOrigin(ok, req("https://redes.lasolucionweb.com/x"), {});
+  assert.deepEqual(ok.sets, [OAUTH_ORIGIN_COOKIE]);
   const evil = mk();
-  rememberOAuthOrigin(evil, req("https://evil.example.com/x"), { DIA_CERO: "on" });
-  assert.equal(evil.headers.get("set-cookie"), null);
+  rememberOAuthOrigin(evil, req("https://evil.example.com/x"), {});
+  assert.equal(evil.sets.length, 0);
+  const net = mk();
+  rememberOAuthOrigin(net, req("https://redes.lasolucionweb.net/x"), {});
+  assert.equal(net.sets.length, 0); // los .net no están en la lista de retorno
   const clr = mk();
-  clearOAuthOrigin(clr, { DIA_CERO: "on" });
-  assert.equal(clr.headers.getSetCookie().length, 2); // las dos variantes
+  clearOAuthOrigin(clr, {});
+  assert.equal(clr.sets.length, 1);
 });
 
 test("acepta los dos subdominios de producto y el principal", () => {
