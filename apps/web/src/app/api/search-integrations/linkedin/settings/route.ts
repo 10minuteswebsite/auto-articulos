@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret, encryptSecret } from "@auto-articulos/shared";
 import { getCurrentUser } from "@/lib/current-user";
-import { oauthCallbackUri } from "@/lib/oauth-redirect";
+import { netCallbackUri } from "@/lib/oauth-redirect";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     clientId: clientId ? `${clientId.slice(0, 4)}...${clientId.slice(-4)}` : null,
     rawClientId: clientId ?? "",
     source: idSetting ? "database" : envClientId ? "environment" : "none",
-    callbackUrlInUse: oauthCallbackUri(request, "/api/search-integrations/linkedin/callback"),
+    callbackUrlInUse: netCallbackUri(request, "/api/search-integrations/linkedin/callback"),
   }, { headers: NO_CACHE });
 }
 

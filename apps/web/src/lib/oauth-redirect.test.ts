@@ -121,3 +121,16 @@ test("acepta los dos subdominios de producto y el principal", () => {
     assert.equal(getAllowedOAuthOrigin(new NextRequest(`https://${host}/dashboard`)), `https://${host}`);
   }
 });
+
+import { isNetProductHost, netCallbackUri } from "./oauth-redirect";
+
+test("el retorno .net usa el host de articulos o redes .net y nunca seototal ni .com", () => {
+  const path = "/api/search-integrations/linkedin/callback";
+  assert.equal(netCallbackUri({ url: "https://redes.lasolucionweb.net/x" }, path), `https://redes.lasolucionweb.net${path}`);
+  assert.equal(netCallbackUri({ url: "https://articulos.lasolucionweb.net/x" }, path), `https://articulos.lasolucionweb.net${path}`);
+  for (const url of ["https://seototal.lasolucionweb.com/x", "https://articulos.lasolucionweb.com/x", "https://evil.example/x"]) {
+    assert.equal(netCallbackUri({ url }, path), `https://articulos.lasolucionweb.net${path}`, url);
+  }
+  assert.equal(isNetProductHost("REDES.lasolucionweb.net"), true);
+  assert.equal(isNetProductHost("redes.lasolucionweb.net.evil.com"), false);
+});

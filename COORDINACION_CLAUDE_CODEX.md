@@ -1,5 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — LinkedIn conecta SOLO por articulos/redes .net — 2026-10-17
+
+- Task ID: `LINKEDIN-RETORNO-NET-20261017`. Sin migración. Estado: PR abierto, SIN fusionar.
+- Consola de LinkedIn (hecho por Claude en la sesión de Milton, app AUTO ARTICULOS, pestaña Auth): se AGREGÓ `https://articulos.lasolucionweb.net/api/search-integrations/linkedin/callback`. Quedan registradas 4: seototal.lasolucionweb.com (la usada hasta hoy), seototal.articulos.lasolucionweb.com (antigua), redes.lasolucionweb.net y articulos.lasolucionweb.net. Milton borrará las dos `.com` después de probar.
+- Código: `netCallbackUri`/`isNetProductHost` en `oauth-redirect.ts`; el `connect` de LinkedIn pasa a articulos .net si se inicia desde otro host, usa cookies por familia de dominio y el redirect_uri es el host `.net` de la petición; el `callback` usa la misma regla. Pruebas 240/240.
+- Pendiente: probar la conexión real de LinkedIn tras el despliegue (cuenta de pruebas) y reaplicar el patrón a Tumblr, Pinterest y Blogger.
+
 ## Claude — Menú Admin: todas las conexiones en ambas aplicaciones — 2026-10-17
 
 - Task ID: `ADMIN-MENU-COMPARTIDO-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Orden de Milton: las pantallas de administrador de Bing, LinkedIn, Pinterest, Tumblr, Bluesky y Blogger deben verse en el menú Admin de Artículos y de Redes.
