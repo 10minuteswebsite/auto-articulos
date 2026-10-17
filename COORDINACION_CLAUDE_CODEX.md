@@ -1,10 +1,10 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
-## Claude — Pantalla de administrador para LinkedIn — 2026-10-17
+## Claude — Pantallas de administrador para LinkedIn, Tumblr, Pinterest, Bluesky y Blogger — 2026-10-17
 
-- Task ID: `LINKEDIN-PANTALLA-ADMIN-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Pedido de Milton: hacer con LinkedIn lo mismo que con Bing (pantalla de administrador con instrucciones y campos).
-- Cambio: `/dashboard/linkedin` (solo admin) con instrucciones de la consola de LinkedIn, dirección de retorno que usa el sistema hoy (calculada en el servidor), las dos `.net` por agregar y campos de Client ID/Secret (reutiliza `/api/search-integrations/linkedin/settings`, ya cifrado en `SystemSetting`). Entrada en el menú Admin (`admin-connections.ts`) y ruta ADMIN. Sin cambios en el flujo OAuth de LinkedIn: el código sigue enviando la dirección actual.
-- Pendiente: que Milton registre las dos `.net` en LinkedIn; después, cambiar el código de LinkedIn para usarlas.
+- Task ID: `LINKEDIN-PANTALLA-ADMIN-20261017`. Sin migración. Estado: PR #624 abierto, SIN fusionar. Pedido de Milton: lo mismo que Bing para cada red (Google Business va por PostPeer y no lleva pantalla propia).
+- Cambio: componente común `NetworkAdminPanel` y una pantalla por red (`/dashboard/{linkedin,tumblr,pinterest,bluesky,blogger}`, solo admin) con instrucciones de la consola, dirección de retorno que usa el sistema hoy (calculada en el servidor) + las dos `.net` por agregar, y campos de ID/secreto (reutiliza los `settings` ya cifrados en `SystemSetting`). Bluesky no tiene credenciales de plataforma: pantalla solo informativa. Entradas en el menú Admin y rutas ADMIN. Sin cambios en los flujos OAuth. Pruebas 238/238.
+- Pendiente: que Milton registre las dos `.net` en cada consola y después cambiar el código de cada red para usarlas.
 
 ## Claude — Bing: el retorno es SIEMPRE articulos.lasolucionweb.net — 2026-10-17
 
