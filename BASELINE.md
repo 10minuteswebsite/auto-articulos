@@ -1,5 +1,11 @@
 # BASELINE — Contrato previo HUB/OAuth
 
+## Contrato añadido — Google Business y tokens — 2026-10-17
+
+- Google Business: aprobar con Publicar y tener la cuenta PostPeer activa basta para que el worker tome la propuesta (con o sin resumen); termina en «Publicado» o en error con el motivo real, nunca en un 1 % silencioso más de 10 minutos.
+- Una publicación fallida jamás se reenvía sola; solo una persona la reintenta.
+- Imagen IA: un reintento del mismo título y formato reutiliza la imagen ya pagada (48 h). No hay cambios visuales.
+
 Fecha: 2026-10-16
 
 ## Punto cero vigente — producción verificada — 2026-10-16

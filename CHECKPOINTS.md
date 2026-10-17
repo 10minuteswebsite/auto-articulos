@@ -1,5 +1,13 @@
 # CHECKPOINTS
 
+## Checkpoint — Google Business y cuidado de tokens — 2026-10-17
+
+- Task ID: `GMB-CIERRE-20261016`. Commits: `dca4ff53`, `d20e06f9`, `1d721742`, `bd57a872`. Deployments: GitHub `7128972685`, `7129447154`, `7129649611` en `success`.
+- Alcance: worker de Google Business, cliente PostPeer, generador de imagen IA, documento y prueba de cuidado de tokens. Sin migraciones ni workflows.
+- Evidencia: publicación de prueba con Lorena Álvarez y reintento con Antonio Aguirre confirmados en Google por Milton; pruebas unitarias nuevas (PostPeer 7/7, candidatos 3/3, guardiana 1/1, reutilización 1/1); typecheck de los archivos tocados.
+- Resultado: CERRADO. No se publicó ninguna propuesta pasada ni se generó imagen en pruebas.
+- Siguiente punto de partida: pendientes listados en la Coordinación (`GMB-CIERRE-20261016`).
+
 ## Checkpoint 0 — Estado previo a la reparación HUB/OAuth
 
 - Fecha: 2026-10-16 (America/New_York).

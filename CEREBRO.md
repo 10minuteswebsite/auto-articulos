@@ -1,5 +1,12 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisiones durables — Google Business y tokens — 2026-10-17
+
+- Causa raíz encontrada: el worker exigía `summary` no nulo también en lo aprobado con Publicar, pero Oportunidades Redes propone artículos sin resumen; esas propuestas nunca eran candidatas, no daban error y quedaban en 1 % hasta que la recuperación las pasaba a error a los 10 min. Los disparos del worker sí corrían: no era un disparo perdido.
+- Regla: un fallo explícito de PostPeer (`success:false`, `error` por plataforma, estado failed/error/rejected) nunca se guarda como publicado; una advertencia no es fallo.
+- Regla de Milton, permanente: los tokens y créditos (PostPeer, Composio, imágenes, OpenAI) se piden solo en el momento preciso; ver `CUIDADO_DE_TOKENS.md` y su prueba guardiana `paidApiGuard.test.ts`.
+- Decisión abierta: bajar la latencia de 30–60 s requiere un worker que no arranque en cada publicación (infraestructura, costo).
+
 Fecha: 2026-10-16
 
 ## Objetivo

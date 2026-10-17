@@ -1,5 +1,11 @@
 # CURRENT_STATE — Punto cero real
 
+## Cierre Google Business y cuidado de tokens — 2026-10-17
+
+- Código funcional de esta conversación en `main`: `dca4ff53` (#605), `d20e06f9` (#609), `1d721742` (#611), `bd57a872` (#612). Despliegues de producción verificados `success`; Redes `/login` 200.
+- Comportamiento vigente: una respuesta de PostPeer con `success:false`/`error` marca la publicación como rechazada con el motivo; el worker de Google Business toma también artículos aprobados sin resumen; la imagen IA de Post, Story, Reel-image y Pinterest se reutiliza 48 h en reintentos.
+- Problemas conocidos: corrida programada de respaldo de `social-worker.yml` casi inexistente; Carrusel/Infografía de Instagram sin reutilización; cascada de modelos pagados (R2); Composio y fal.ai sin auditar. Detalle en `CUIDADO_DE_TOKENS.md` y en Coordinación (`GMB-CIERRE-20261016`).
+
 Fecha de auditoría: 2026-10-16 (America/New_York)
 
 ## Punto cero vigente — prompts por producto — 2026-10-16 17:00 (America/New_York)
