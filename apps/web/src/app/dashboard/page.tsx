@@ -135,7 +135,7 @@ export default function InicioPage() {
         ? configurationData.checks.filter(
             (check: ConfigurationAlert & { configured: boolean }) =>
               showReconnectAlert &&
-              ["google-search-console-reconnect", "google-analytics-reconnect", "location"].includes(check.id) && !check.configured,
+              ["google-search-console-reconnect", "google-analytics-reconnect", "bing-reconnect", "location"].includes(check.id) && !check.configured,
           )
         : [];
       setConfigurationAlerts(pendingAlerts);
@@ -226,6 +226,7 @@ export default function InicioPage() {
       {configurationAlerts.map((alert) => {
         const isAnalytics = alert.id === "google-analytics-reconnect";
         const isLocation = alert.id === "location";
+        const isBing = alert.id === "bing-reconnect";
         const tone = isLocation
           ? { border: "#0071e3", background: "#f0f7ff", color: "#00458f", button: "#0071e3" }
           : isAnalytics
@@ -251,10 +252,10 @@ export default function InicioPage() {
           >
             <div style={{ flex: "1 1 260px", minWidth: 0 }}>
               <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                {isLocation ? "Una sola vez · Tu ubicación" : isAnalytics ? "PASO 2 DE 2 · Google Analytics" : "PASO 1 DE 2 · Google Search Console"}
+                {isLocation ? "Una sola vez · Tu ubicación" : isBing ? "CAMBIO DE PROVEEDOR · Bing Webmaster Tools" : isAnalytics ? "PASO 2 DE 2 · Google Analytics" : "PASO 1 DE 2 · Google Search Console"}
               </p>
               <p style={{ margin: 0, fontSize: 15, fontWeight: 800, lineHeight: 1.45, overflowWrap: "anywhere" }}>
-                {isLocation ? "" : "SOLICITUD DE ACTUALIZACIÓN: "}{(alert.description ?? alert.label).trim()}
+                {isLocation || isBing ? "" : "SOLICITUD DE ACTUALIZACIÓN: "}{(alert.description ?? alert.label).trim()}
               </p>
             </div>
             <Link

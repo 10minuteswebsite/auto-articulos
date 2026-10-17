@@ -3,8 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { encryptSecret, formatBingTokenPayload } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
-import { BING_STATE_COOKIE, bingOAuthConfig } from "@/lib/bing-oauth";
-import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { getStoredBingCredentials } from "@/lib/bing-credentials";
+import { BING_STATE_COOKIE, bingExplicitRedirect, bingOAuthConfig } from "@/lib/bing-oauth";
+import { markBingReconnected } from "@/lib/bing-client-change";
+import { clearOAuthOrigin, oauthReturnBase } from "@/lib/oauth-redirect";
 import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
@@ -34,9 +36,10 @@ export async function GET(request: NextRequest) {
   let detalle = "";
   try {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
-    const config = bingOAuthConfig();
+    const config = bingOAuthConfig(await getStoredBingCredentials());
     const { clientId, clientSecret } = config;
-    const redirectUri = getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);
+    const explicit = bingExplicitRedirect();
+    const redirectUri = explicit.toString();
     const tokenResponse = await fetch(
       "https://www.bing.com/webmasters/oauth/token",
       {
@@ -81,8 +84,13 @@ export async function GET(request: NextRequest) {
     });
     const siteDomain = user.selectedSiteDomain ?? "";
     const existing = await prisma.searchIntegration.findFirst({ where: { userId, provider: "bing", siteDomain } });
-    if (existing) await prisma.searchIntegration.update({ where: { id: existing.id }, data: { encryptedRefreshToken: encryptSecret(payload) } });
-    else await prisma.searchIntegration.create({ data: { userId, provider: "bing", siteDomain, encryptedRefreshToken: encryptSecret(payload) } });
+    const saved = existing
+      ? await prisma.searchIntegration.update({ where: { id: existing.id }, data: { encryptedRefreshToken: encryptSecret(payload) } })
+      : await prisma.searchIntegration.create({ data: { userId, provider: "bing", siteDomain, encryptedRefreshToken: encryptSecret(payload) } });
+    // Marca de reconexión: apaga el aviso rojo del cambio de cliente de Bing.
+    await markBingReconnected(saved.id).catch((markError) => {
+      console.error("[bing/callback] No se pudo guardar la marca de reconexión:", markError instanceof Error ? markError.message : String(markError));
+    });
     const response = NextResponse.redirect(
       new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster&bing=connected", oauthReturnBase(request)),
     );

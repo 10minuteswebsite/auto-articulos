@@ -3,9 +3,31 @@ import {
   decryptSecret,
   encryptSecret,
   getBingAccessToken,
+  BING_CLIENT_ID_SETTING,
+  BING_CLIENT_SECRET_SETTING,
+  type BingClientCredentials,
   parseBingTokenPayload,
   formatBingTokenPayload,
 } from "@auto-articulos/shared";
+
+/** Credenciales de Bing guardadas por un administrador (cifradas); si no hay, se usan las variables. */
+async function getStoredBingCredentials(): Promise<BingClientCredentials | null> {
+  const rows = await prisma.systemSetting.findMany({
+    where: { key: { in: [BING_CLIENT_ID_SETTING, BING_CLIENT_SECRET_SETTING] } },
+  });
+  const read = (key: string) => {
+    const row = rows.find((r) => r.key === key);
+    if (!row) return null;
+    try {
+      return decryptSecret(row.encryptedValue);
+    } catch {
+      return null;
+    }
+  };
+  const clientId = read(BING_CLIENT_ID_SETTING);
+  const clientSecret = read(BING_CLIENT_SECRET_SETTING);
+  return clientId && clientSecret ? { clientId, clientSecret } : null;
+}
 
 /**
  * Mismo criterio que apps/web/src/lib/bing-token.ts: único punto por el que el
@@ -28,6 +50,7 @@ export async function getBingTokenForIntegration(integration: {
 
   const { accessToken, expiresInSeconds } = await getBingAccessToken(
     tokenData.refreshToken,
+    await getStoredBingCredentials(),
   );
 
   try {

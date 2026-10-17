@@ -5,7 +5,18 @@ const TOKEN_URL = "https://www.bing.com/webmasters/oauth/token";
 const API_BASE = "https://www.bing.com/webmaster/api.svc/json";
 const API_BASE_WRITE = API_BASE;
 
-function bingConfig() {
+/** Claves de SystemSetting donde Administración guarda (cifradas) las credenciales de Bing. */
+export const BING_CLIENT_ID_SETTING = "bing_webmaster_client_id";
+export const BING_CLIENT_SECRET_SETTING = "bing_webmaster_client_secret";
+
+export interface BingClientCredentials {
+  clientId: string;
+  clientSecret: string;
+}
+
+/** Las guardadas en Administración mandan; las variables de entorno quedan de respaldo. */
+function bingConfig(stored?: BingClientCredentials | null) {
+  if (stored?.clientId && stored?.clientSecret) return stored;
   const clientId = process.env.BING_WEBMASTER_CLIENT_ID;
   const clientSecret = process.env.BING_WEBMASTER_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
@@ -47,13 +58,14 @@ const tokenCache = new Map<string, { accessToken: string; expiresAt: number }>()
 
 export async function getBingAccessToken(
   refreshToken: string,
+  stored?: BingClientCredentials | null,
 ): Promise<BingTokenResult> {
   const cached = tokenCache.get(refreshToken);
   if (cached && Date.now() < cached.expiresAt) {
     return { accessToken: cached.accessToken };
   }
 
-  const { clientId, clientSecret } = bingConfig();
+  const { clientId, clientSecret } = bingConfig(stored);
   const INTENTOS = 4;
   const ESPERAS_MS = [500, 1500, 3000];
   let ultimoDetalle = "sin respuesta de Bing";
