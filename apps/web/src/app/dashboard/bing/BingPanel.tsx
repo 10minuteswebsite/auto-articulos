@@ -15,6 +15,7 @@ export default function BingPanel() {
   const [status, setStatus] = useState<Status | null>(null);
   const [clientId, setClientId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
+  const [redirectUri, setRedirectUri] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -27,10 +28,10 @@ export default function BingPanel() {
   async function save(event: FormEvent) {
     event.preventDefault(); setBusy(true); setMessage(null);
     try {
-      const response = await fetch("/api/admin/bing", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientId, clientSecret }) });
+      const response = await fetch("/api/admin/bing", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientId, clientSecret, redirectUri }) });
       const body = await response.json();
-      setMessage(response.ok ? "Credenciales guardadas de forma cifrada. Las nuevas conexiones de Bing ya las usan." : (body.error ?? "No se pudieron guardar las credenciales."));
-      if (response.ok) { setClientId(""); setClientSecret(""); await load(); }
+      setMessage(response.ok ? "Guardado de forma cifrada. Las nuevas conexiones de Bing ya lo usan." : (body.error ?? "No se pudieron guardar las credenciales."));
+      if (response.ok) { setClientId(""); setClientSecret(""); setRedirectUri(""); await load(); }
     } finally { setBusy(false); }
   }
 
@@ -45,7 +46,8 @@ export default function BingPanel() {
     <form onSubmit={save} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
       <input type="text" autoComplete="off" spellCheck={false} value={clientId} onChange={(event) => setClientId(event.target.value)} placeholder="Client ID de Bing" style={{ ...inputStyle, minWidth: 300 }} />
       <input type="password" autoComplete="off" value={clientSecret} onChange={(event) => setClientSecret(event.target.value)} placeholder="Client Secret de Bing" style={{ ...inputStyle, minWidth: 300 }} />
-      <button type="submit" disabled={busy || !clientId.trim() || !clientSecret.trim()} className="secondary" style={secondaryButtonStyle}>Guardar</button>
+      <input type="text" autoComplete="off" spellCheck={false} value={redirectUri} onChange={(event) => setRedirectUri(event.target.value)} placeholder="Dirección de retorno (https://articulos.lasolucionweb.net/api/search-integrations/bing/callback)" style={{ ...inputStyle, minWidth: 300, flex: "1 1 100%" }} />
+      <button type="submit" disabled={busy || !(clientId.trim() && clientSecret.trim()) && !redirectUri.trim()} className="secondary" style={secondaryButtonStyle}>Guardar</button>
       {status?.source === "admin" && <button type="button" disabled={busy} onClick={() => void remove()} className="secondary" style={secondaryButtonStyle}>Eliminar credenciales</button>}
     </form>
     <p style={{ color: "#6e6e73", fontSize: 13 }}>
@@ -53,7 +55,7 @@ export default function BingPanel() {
       {status?.source === "env" && "Configurada con las variables de entorno (Vercel y worker). Guarda credenciales aquí para reemplazarlas."}
       {status && !status.configured && "No configurada"}
     </p>
-    <p style={{ color: "#6e6e73", fontSize: 13 }}>Dirección de retorno registrada en Bing: {status?.redirectUri ?? "la de siempre (según el sitio desde el que se conecta)"}</p>
+    <p style={{ color: "#6e6e73", fontSize: 13 }}>Dirección de retorno en uso: {status?.redirectUri ?? "la de siempre (según el sitio desde el que se conecta)"}. Debe ser exactamente la registrada en el cliente de Bing.</p>
     {message && <p>{message}</p>}
   </section>;
 }

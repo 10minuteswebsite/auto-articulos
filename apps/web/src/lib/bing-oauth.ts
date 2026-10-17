@@ -19,8 +19,12 @@ export function bingOAuthConfig(stored?: { clientId: string; clientSecret: strin
  * variable BING_WEBMASTER_REDIRECT_URI está definida, manda sobre cualquier
  * cálculo por host. Sin ella, todo sigue como hasta hoy.
  */
-export function bingExplicitRedirect(env: Record<string, string | undefined> = process.env): URL | null {
-  const raw = env.BING_WEBMASTER_REDIRECT_URI?.trim();
+export function bingExplicitRedirect(
+  env: Record<string, string | undefined> = process.env,
+  stored?: string | null,
+): URL | null {
+  // La dirección guardada en Administración manda sobre la variable de entorno.
+  const raw = stored?.trim() || env.BING_WEBMASTER_REDIRECT_URI?.trim();
   if (!raw) return null;
   try {
     const url = new URL(raw);

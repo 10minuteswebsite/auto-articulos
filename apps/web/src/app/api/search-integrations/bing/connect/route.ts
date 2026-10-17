@@ -1,7 +1,7 @@
 import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
-import { getStoredBingCredentials } from "@/lib/bing-credentials";
+import { getStoredBingCredentials, getStoredBingRedirect } from "@/lib/bing-credentials";
 import { BING_SCOPE, BING_STATE_COOKIE, bingExplicitRedirect, bingOAuthConfig } from "@/lib/bing-oauth";
 import { getAllowedOAuthOrigin, getOAuthRedirectUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
 import { applyCookie, cookieEnvForHost } from "@/lib/shared-cookies";
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   // Bing solo acepta el callback canónico cuando la petición llega desde un
   // host que no está en nuestra lista blanca; en ese caso llevamos primero la
   // sesión al host registrado para conservar cookie, state y sesión.
-  const explicit = bingExplicitRedirect();
+  const explicit = bingExplicitRedirect(process.env, await getStoredBingRedirect());
   if (explicit && request.nextUrl.host.toLowerCase() !== explicit.host.toLowerCase()) {
     // Cliente nuevo de Bing: solo se conecta desde el host de su dirección registrada.
     return NextResponse.redirect(new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", explicit.origin));

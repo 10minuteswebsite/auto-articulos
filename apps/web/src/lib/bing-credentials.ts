@@ -37,9 +37,31 @@ export async function saveBingCredentials(clientId: string, clientSecret: string
 }
 
 export async function deleteBingCredentials(): Promise<void> {
-  await prisma.systemSetting.deleteMany({ where: { key: { in: [BING_CLIENT_ID_SETTING, BING_CLIENT_SECRET_SETTING] } } });
+  await prisma.systemSetting.deleteMany({ where: { key: { in: [BING_CLIENT_ID_SETTING, BING_CLIENT_SECRET_SETTING, BING_REDIRECT_SETTING] } } });
 }
 
 export function maskBingValue(value: string): string {
   return `••••••••${value.slice(-4)}`;
+}
+
+/** Dirección de retorno de Bing guardada por un administrador (manda sobre la variable de entorno). */
+export const BING_REDIRECT_SETTING = "bing_webmaster_redirect_uri";
+
+export async function getStoredBingRedirect(): Promise<string | null> {
+  const row = await prisma.systemSetting.findUnique({ where: { key: BING_REDIRECT_SETTING } });
+  if (!row) return null;
+  try {
+    return decryptSecret(row.encryptedValue);
+  } catch {
+    return null;
+  }
+}
+
+export async function saveBingRedirect(redirectUri: string): Promise<void> {
+  const encryptedValue = encryptSecret(redirectUri);
+  await prisma.systemSetting.upsert({
+    where: { key: BING_REDIRECT_SETTING },
+    create: { key: BING_REDIRECT_SETTING, encryptedValue },
+    update: { encryptedValue },
+  });
 }

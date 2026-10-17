@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { bingOAuthConfig } from "./bing-oauth";
+import { bingExplicitRedirect, bingOAuthConfig } from "./bing-oauth";
 
 test("las credenciales guardadas en Administración mandan sobre las variables", () => {
   const antes = { id: process.env.BING_WEBMASTER_CLIENT_ID, secret: process.env.BING_WEBMASTER_CLIENT_SECRET };
@@ -28,4 +28,13 @@ test("sin credenciales guardadas ni variables, falla con el mensaje habitual", (
     if (antes.id !== undefined) process.env.BING_WEBMASTER_CLIENT_ID = antes.id;
     if (antes.secret !== undefined) process.env.BING_WEBMASTER_CLIENT_SECRET = antes.secret;
   }
+});
+
+test("la dirección de retorno guardada en Administración manda sobre la variable", () => {
+  const env = { BING_WEBMASTER_REDIRECT_URI: "https://viejo.example.com/cb" };
+  assert.equal(bingExplicitRedirect(env)?.host, "viejo.example.com");
+  const guardada = "https://articulos.lasolucionweb.net/api/search-integrations/bing/callback";
+  assert.equal(bingExplicitRedirect(env, guardada)?.toString(), guardada);
+  assert.equal(bingExplicitRedirect({}, null), null);
+  assert.equal(bingExplicitRedirect({}, "http://inseguro.example.com/cb"), null);
 });

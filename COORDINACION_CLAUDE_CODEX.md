@@ -1,5 +1,9 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Bing: dirección de retorno guardable en Admin → Bing — 2026-10-17
+
+- Task ID: `BING-REDIRECT-ADMIN-20261017`. Sin migración ni workflows. Causa del fallo de reconexión de Lorena (reproducida: `/api/search-integrations/bing/connect` desde articulos.net redirige a seototal.lasolucionweb.com): sin `BING_WEBMASTER_REDIRECT_URI` en Vercel, tras la reversa de #613 el host articulos.net no es origen permitido y se usa el callback de seototal .com, que el cliente nuevo de Bing no admite. Cambio: campo «Dirección de retorno» en `/dashboard/bing` (SystemSetting cifrado; manda sobre la variable) leído por connect y callback. Tras desplegar, Milton debe guardar ahí `https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` y reintentar. NO probado: la reconexión completa.
+
 ## Claude — Bing: guardar credenciales en Admin enciende el aviso de reconexión — 2026-10-17
 
 - Task ID: `BING-AVISO-AUTOMATICO-20261017`. Sin migración ni workflows. Pedido de Milton: que el aviso salga a todos los que tenían Bing sin que él toque variables. `effectiveBingChangedAt` toma la más reciente entre `BING_CLIENT_CHANGED_AT` y el `updatedAt` de las credenciales guardadas en Admin → Bing. Efecto: Milton ya las guardó hoy, así que al desplegar saldrá el aviso a quien no haya reconectado después. Re-guardar credenciales vuelve a avisar a todos. Pruebas en `bing-client-change.test.ts`.
