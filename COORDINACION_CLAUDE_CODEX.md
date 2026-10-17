@@ -3,7 +3,7 @@
 ## Claude — Menú Admin: todas las conexiones en ambas aplicaciones — 2026-10-17
 
 - Task ID: `ADMIN-MENU-COMPARTIDO-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Orden de Milton: las pantallas de administrador de Bing, LinkedIn, Pinterest, Tumblr, Bluesky y Blogger deben verse en el menú Admin de Artículos y de Redes.
-- Cambio: `adminConnectionItems` ya no filtra por producto. Prueba nueva `admin-connections.test.ts`; suite 239/239.
+- Cambio: `adminConnectionItems` ya no filtra por producto. Prueba nueva `admin-connections.test.ts`; suite 239/239. El desplegable Admin lleva el subtítulo «Conexiones principales» antes de la primera conexión (`TabItem.subtitle` en `DashboardNav`, escritorio y móvil).
 
 ## Claude — Pantallas de administrador para LinkedIn, Tumblr, Pinterest, Bluesky y Blogger — 2026-10-17
 
