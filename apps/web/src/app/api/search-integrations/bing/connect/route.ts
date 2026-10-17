@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
+import { getStoredBingCredentials } from "@/lib/bing-credentials";
 import { BING_SCOPE, BING_STATE_COOKIE, bingExplicitRedirect, bingOAuthConfig } from "@/lib/bing-oauth";
 import { getAllowedOAuthOrigin, getOAuthRedirectUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
 import { applyCookie, cookieEnvForHost } from "@/lib/shared-cookies";
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
   }
   if (!explicit && !getAllowedOAuthOrigin(request)) {
     try {
-      const canonical = new URL(bingOAuthConfig().redirectUri);
+      const canonical = new URL(bingOAuthConfig(await getStoredBingCredentials()).redirectUri);
       return NextResponse.redirect(new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", canonical.origin));
     } catch {
       // Sin configuración válida, el bloque principal devolverá el error habitual.
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
   }
   await getCurrentUserId();
   try {
-    const config = bingOAuthConfig();
+    const config = bingOAuthConfig(await getStoredBingCredentials());
     const { clientId } = config;
     const redirectUri = explicit ? explicit.toString() : getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);
     const state = randomBytes(24).toString("base64url");

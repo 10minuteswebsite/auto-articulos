@@ -1,3 +1,4 @@
+import { getStoredBingCredentials } from "@/lib/bing-credentials";
 import { prisma } from "@auto-articulos/db";
 import {
   decryptSecret,
@@ -33,6 +34,7 @@ export async function getBingTokenForIntegration(integration: {
   // Si no hay accessToken válido en DB o ya expiró, refrescamos con Bing
   const { accessToken, expiresInSeconds } = await getBingAccessToken(
     tokenData.refreshToken,
+    await getStoredBingCredentials(),
   );
 
   // Guardamos el nuevo accessToken actualizado junto al refreshToken original
