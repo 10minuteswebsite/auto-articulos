@@ -3020,7 +3020,7 @@ function UserCard({
             <div>
               <strong style={{ fontSize: 14 }}>Módulo de Redes (DIFUSIÓN SOCIAL)</strong>
               <p style={{ margin: "4px 0 0", fontSize: 12, color: "#6e6e73", maxWidth: 440 }}>
-                Es el ÚNICO interruptor de Redes para esta cuenta en seototal: <strong>Activado</strong> la deja entrar;
+                Es el ÚNICO interruptor de Redes para esta cuenta: <strong>Activado</strong> la deja entrar;
                 <strong> Desactivado</strong> la mantiene fuera. Las redes de abajo no la abren: solo deciden en cuáles puede
                 publicar. Se guarda con <strong>Guardar cambios</strong>.
               </p>

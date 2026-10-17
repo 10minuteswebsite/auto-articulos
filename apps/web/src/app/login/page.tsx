@@ -168,7 +168,7 @@ function LoginContent() {
           </p>
           <div style={{ marginTop: 24 }}>
             <QrCodeDisplay
-              url="https://seototal.lasolucionweb.com/login"
+              url="https://articulos.lasolucionweb.net/login"
               size={160}
               label="Escanea para registrarte en movil"
             />

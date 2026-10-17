@@ -49,12 +49,12 @@ const NO_CACHE_HEADERS = {
 
 function hubProductSlugForHost(hostname: string) {
   const host = hostname.toLowerCase();
-  return host === "redes.lasolucionweb.net" || host === "redes.lasolucionweb.com"
+  return host === "redes.lasolucionweb.net"
     ? "auto-redes"
     : "seo-total";
 }
 const LEGACY_LOGIN_HOST = "auto-articulos-web.vercel.app";
-const CANONICAL_LOGIN_URL = "https://www.seototal.lasolucionweb.com/login";
+const CANONICAL_LOGIN_URL = "https://articulos.lasolucionweb.net/login";
 const HUB_ENTRY_URL = "https://hub.lasolucionweb.net";
 
 export async function middleware(request: NextRequest) {
