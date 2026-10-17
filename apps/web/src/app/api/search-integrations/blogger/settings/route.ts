@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret, encryptSecret } from "@auto-articulos/shared";
 import { getCurrentUser } from "@/lib/current-user";
+import { oauthCallbackUri } from "@/lib/oauth-redirect";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate" };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
   const [idSetting, secretSetting] = await Promise.all([
     prisma.systemSetting.findUnique({ where: { key: "blogger_client_id" } }),
@@ -19,7 +20,7 @@ export async function GET() {
   const configured = sharedGoogleConfigured || Boolean((idSetting && secretSetting) || (envClientId && envClientSecret));
   if (user.role !== "admin") return NextResponse.json({ configured, isAdmin: false }, { headers: NO_CACHE });
   const clientId = idSetting ? decryptSecret(idSetting.encryptedValue) : envClientId || (sharedGoogleConfigured ? process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID! : null);
-  return NextResponse.json({ configured, isAdmin: true, clientId: clientId ? `${clientId.slice(0, 4)}...${clientId.slice(-4)}` : null, rawClientId: clientId ?? "", source: idSetting ? "database" : envClientId ? "environment" : sharedGoogleConfigured ? "shared-google-environment" : "none" }, { headers: NO_CACHE });
+  return NextResponse.json({ configured, isAdmin: true, clientId: clientId ? `${clientId.slice(0, 4)}...${clientId.slice(-4)}` : null, rawClientId: clientId ?? "", source: idSetting ? "database" : envClientId ? "environment" : sharedGoogleConfigured ? "shared-google-environment" : "none", callbackUrlInUse: oauthCallbackUri(request, "/api/search-integrations/blogger/callback"), }, { headers: NO_CACHE });
 }
 
 export async function POST(request: NextRequest) {

@@ -18,14 +18,21 @@ export const ADMIN_CONNECTIONS = [
   { id: "facebook", label: "Facebook", product: "REDES", via: "composio" },
   { id: "threads", label: "Threads", product: "REDES", via: "postpeer" },
   { id: "linkedin", label: "LinkedIn", product: "REDES", via: "propia" },
-  { id: "pinterest", label: "Pinterest", product: "REDES", via: "composio" },
+  { id: "pinterest", label: "Pinterest", product: "REDES", via: "propia" },
   { id: "tumblr", label: "Tumblr", product: "REDES", via: "propia" },
   { id: "bluesky", label: "Bluesky", product: "REDES", via: "propia" },
   { id: "blogger", label: "Blogger", product: "REDES", via: "propia" },
 ] as const;
 
 /** Pantallas de administrador propias (credenciales de la plataforma) por conexión. */
-const ADMIN_PAGES: Record<string, string> = { "bing-webmaster": "/dashboard/bing" };
+const ADMIN_PAGES: Record<string, string> = {
+  "bing-webmaster": "/dashboard/bing",
+  linkedin: "/dashboard/linkedin",
+  tumblr: "/dashboard/tumblr",
+  pinterest: "/dashboard/pinterest",
+  bluesky: "/dashboard/bluesky",
+  blogger: "/dashboard/blogger",
+};
 
 export function adminConnectionItems(host: HostProductScope): { href: string; label: string }[] {
   return ADMIN_CONNECTIONS.filter((c) => c.via === "propia" && (host === "COMPARTIDO" || c.product === host)).map((c) => ({
