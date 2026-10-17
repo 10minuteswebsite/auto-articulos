@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Se eliminan las conexiones directas de Google Cloud y Meta — 2026-10-17
+
+- Task ID: `QUITAR-GOOGLE-META-DIRECTO-20261017`. Sin migración. Estado: PR abierto. Orden de Milton: Google Cloud y Meta ya no se usan.
+- Borrado: rutas `connect`, `callback` y `settings` de `search-integrations/{google,instagram,threads,facebook-pages}`, `google-analytics` y `business-profile`; libs `google-oauth`, `google-analytics-oauth`, `instagram-app-config`, `threads-app-config`. La ficha de Google Business ahora solo ofrece la conexión por PostPeer.
+- Conservado a propósito (conexiones ya hechas): `route.ts`, `test` y la renovación de tokens/publicación del worker. Typecheck limpio, pruebas 240/240.
+
 ## Claude — Limpieza del Día Cero (punto a punto con Milton) — 2026-10-17
 
 - Task ID: `DIA-CERO-LIMPIEZA-20261017`. Orden de Milton: el Día Cero está CULMINADO (Artículos y Redes ya separados); se cierran sus señalamientos uno por uno. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni workflows. Estado: PR abierto, SIN fusionar; se libera al fusionar. ALCANCE FINAL del PR #623: botón Día Cero y manual borrados, documentos archivados, notas de culminado y variable `DIA_CERO` eliminada del código (decisión de Milton).

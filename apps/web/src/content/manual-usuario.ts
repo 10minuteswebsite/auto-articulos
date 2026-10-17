@@ -63,6 +63,8 @@ El menú superior tiene, en este orden: **Inicio**, **Cómo funciona esta aplica
 
 **Actualización 2026-10-17 (retornos de conexión):** todas las conexiones vuelven ahora solo a **articulos.lasolucionweb.net** o **redes.lasolucionweb.net**, según la aplicación donde empezaste. Ya no se usan direcciones antiguas (seototal ni .com) para ese regreso.
 
+**Actualización 2026-10-17 (conexiones directas retiradas):** se eliminaron del sistema las vías directas de conexión con Google Cloud (Search Console, Analytics y Business) y con Meta (Instagram, Facebook y Threads). Esas conexiones se hacen por sus pantallas de Conexiones (Composio y PostPeer); las personas que ya estaban conectadas no necesitan hacer nada.
+
 **Publicaciones** no es una pantalla: es un grupo que se despliega. Dentro están cinco accesos relacionados con publicar y revisar tus resultados:
 
 - **${MENU_NAMES.propios}** (/dashboard/publicar): escribe tus títulos y publícalos directamente en tu página web. Es la opción recomendada si estás comenzando y todavía no tienes registros de indexación en Google, o si quieres publicar contenido propio.

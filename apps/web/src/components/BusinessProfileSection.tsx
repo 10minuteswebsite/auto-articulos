@@ -165,7 +165,7 @@ export default function BusinessProfileSection() {
                 <button type="button" onClick={() => void load(true)} disabled={loadingLocations} style={{ ...secondaryButtonStyle, opacity: loadingLocations ? 0.55 : 1 }}>
                   {loadingLocations ? "Buscando fichas…" : retrySeconds ? "Espera para buscar fichas" : "Buscar fichas disponibles"}
                 </button>
-                <a href="/api/business-profile/connect" style={{ ...secondaryButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{CONNECTION_LABELS.connect}</a>
+                <a href="/api/postpeer/connect" style={{ ...secondaryButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{CONNECTION_LABELS.connect}</a>
               </div>
             </div>
           )}
@@ -185,7 +185,7 @@ export default function BusinessProfileSection() {
           <ConnectionActions
             network="business-profile"
             endpoint="/api/business-profile/test"
-            connect={<a href={postPeerConnected ? "/api/postpeer/connect" : "/api/business-profile/connect"} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{CONNECTION_LABELS.connect}</a>}
+            connect={<a href="/api/postpeer/connect" style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{CONNECTION_LABELS.connect}</a>}
             disconnect={<button type="button" onClick={() => disconnect(postPeerConnected)} style={{ ...secondaryButtonStyle, color: "#c62828" }}>{CONNECTION_LABELS.disconnect}</button>}
           />
         </>
