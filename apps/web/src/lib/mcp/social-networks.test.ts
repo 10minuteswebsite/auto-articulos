@@ -57,13 +57,13 @@ test("publicar, cancelar y eliminar pasan siempre por comprobante de confirmaciÃ
 
 test("para reintentar se elige la propuesta en error mÃ¡s reciente de la red", () => {
   const rows = [
-    { id: "a", platform: "blogger", status: "error", createdAt: "2026-10-14T10:00:00Z" },
-    { id: "b", platform: "blogger", status: "error", createdAt: "2026-10-15T10:00:00Z" },
-    { id: "c", platform: "blogger", status: "pending", createdAt: "2026-10-16T10:00:00Z" },
+    { id: "a", platform: "tumblr", status: "error", createdAt: "2026-10-14T10:00:00Z" },
+    { id: "b", platform: "tumblr", status: "error", createdAt: "2026-10-15T10:00:00Z" },
+    { id: "c", platform: "tumblr", status: "pending", createdAt: "2026-10-16T10:00:00Z" },
   ];
-  const blogger = SOCIAL_NETWORKS.find((n) => n.key === "blogger")!;
-  assert.equal(pickPendingProposal(rows, blogger, "error")?.id, "b");
-  assert.equal(pickPendingProposal(rows, blogger)?.id, "c");
+  const tumblr = SOCIAL_NETWORKS.find((n) => n.key === "tumblr")!;
+  assert.equal(pickPendingProposal(rows, tumblr, "error")?.id, "b");
+  assert.equal(pickPendingProposal(rows, tumblr)?.id, "c");
 });
 
 test("las herramientas sociales documentan sus argumentos, el comprobante, el monitoreo y el reintento", () => {

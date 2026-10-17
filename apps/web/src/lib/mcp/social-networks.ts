@@ -29,7 +29,6 @@ export const SOCIAL_NETWORKS: SocialNetwork[] = [
   { key: "pinterest", label: "Pinterest", generateId: "pinterest", platform: "pinterest", platforms: ["pinterest"], connectedKey: "pinterest", aliases: ["pinterest"] },
   { key: "tumblr", label: "Tumblr", generateId: "tumblr", platform: "tumblr", platforms: ["tumblr"], connectedKey: "tumblr", aliases: ["tumblr"] },
   { key: "bluesky", label: "Bluesky", generateId: "bluesky", platform: "bluesky", platforms: ["bluesky"], connectedKey: "bluesky", aliases: ["bluesky", "blue sky"] },
-  { key: "blogger", label: "Blogger", generateId: "blogger", platform: "blogger", platforms: ["blogger"], connectedKey: "blogger", aliases: ["blogger", "blog"] },
   { key: "google-business", label: "Google Business Profile", generateId: "google-business", platform: "google-business", platforms: ["google-business"], connectedKey: "googleBusiness", aliases: ["google business", "google business profile", "google-business", "google my business", "perfil de negocio", "google"] },
 ];
 

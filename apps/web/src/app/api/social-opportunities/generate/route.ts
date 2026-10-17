@@ -541,7 +541,7 @@ export async function POST(request: Request) {
     });
     const requestedNetworks = Array.isArray(body.networks)
       ? body.networks.filter((network) => network === "threads" || network === "x" || network === "linkedin" || network === "instagram" || network === "facebook-page" || network === "pinterest" || network === "tumblr" || network === "bluesky" || network === "blogger" || network === "google-business")
-      : ["threads", "x", "linkedin", "instagram", "facebook-page", "pinterest", "tumblr", "bluesky", "blogger", "google-business"];
+      : ["threads", "x", "linkedin", "instagram", "facebook-page", "pinterest", "tumblr", "bluesky", "google-business"];
 
     const integrations: string[] = [];
     if (requestedNetworks.includes("threads") && connected.threads) {

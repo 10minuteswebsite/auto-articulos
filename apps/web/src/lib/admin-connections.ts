@@ -21,7 +21,6 @@ export const ADMIN_CONNECTIONS = [
   { id: "pinterest", label: "Pinterest", product: "REDES", via: "propia" },
   { id: "tumblr", label: "Tumblr", product: "REDES", via: "propia" },
   { id: "bluesky", label: "Bluesky", product: "REDES", via: "propia" },
-  { id: "blogger", label: "Blogger", product: "REDES", via: "propia" },
 ] as const;
 
 /** Pantallas de administrador propias (credenciales de la plataforma) por conexión. */
@@ -31,7 +30,6 @@ const ADMIN_PAGES: Record<string, string> = {
   tumblr: "/dashboard/tumblr",
   pinterest: "/dashboard/pinterest",
   bluesky: "/dashboard/bluesky",
-  blogger: "/dashboard/blogger",
 };
 
 /** Todas las conexiones con pantalla propia salen en el menú Admin de AMBOS productos (orden de Milton, 2026-10-17). */

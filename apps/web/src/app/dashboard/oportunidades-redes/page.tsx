@@ -72,7 +72,6 @@ const NETWORK_ROWS = [
   { key: "pinterest", platform: "pinterest", label: "Pinterest", conexionId: "pinterest", group: "otras" },
   { key: "tumblr", platform: "tumblr", label: "Tumblr", conexionId: "tumblr", group: "otras" },
   { key: "bluesky", platform: "bluesky", label: "Bluesky", conexionId: "bluesky", group: "otras" },
-  { key: "blogger", platform: "blogger", label: "Blogger", conexionId: "blogger", group: "otras" },
   { key: "googleBusiness", platform: "google-business", label: "Google Business Profile", conexionId: "business-profile", group: "otras" },
   { key: "x", platform: "x", label: "X (Twitter)", conexionId: null, group: "otras" },
 ] as const;
@@ -136,7 +135,7 @@ function limitFormatOf(rowKey: string, rowPlatform: string): string {
 
 const GROUP_CARDS: ReadonlyArray<{ id: NetworkGroup; title: string; hint: string }> = [
   { id: "meta", title: "META", hint: "Instagram, Threads y Facebook" },
-  { id: "otras", title: "Otras redes y blogs", hint: "LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business" },
+  { id: "otras", title: "Otras redes y blogs", hint: "LinkedIn, Pinterest, Tumblr, Bluesky y Google Business" },
 ];
 
 export default function OportunidadesRedesPage() {

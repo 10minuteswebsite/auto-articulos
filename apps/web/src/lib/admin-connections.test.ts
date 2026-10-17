@@ -7,7 +7,7 @@ test("el menú Admin muestra las mismas conexiones en Artículos, Redes y compar
   const todas = labels("COMPARTIDO");
   assert.deepEqual(labels("ARTICULOS"), todas);
   assert.deepEqual(labels("REDES"), todas);
-  for (const nombre of ["Bing Webmaster Tools", "LinkedIn", "Pinterest", "Tumblr", "Bluesky", "Blogger"]) {
+  for (const nombre of ["Bing Webmaster Tools", "LinkedIn", "Pinterest", "Tumblr", "Bluesky"]) {
     assert.ok(todas.includes(nombre), nombre);
   }
 });
