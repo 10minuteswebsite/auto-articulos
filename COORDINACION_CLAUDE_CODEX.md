@@ -1,5 +1,10 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Blogger se oculta a los usuarios — 2026-10-17
+
+- Task ID: `QUITAR-BLOGGER-20261017`. Sin migración. Estado: PR #632 abierto. Investigación: PostPeer (10 plataformas, sin Blogger; verificado en su selector y en su documentación) y Composio (catálogo de 1.529 apps: búsqueda «blogger» = 0; «blog» = solo Inblog) NO ofrecen Blogger. Decisión de Milton: quitarlo para que los usuarios no lo vean.
+- Quitado de la interfaz y de las opciones: tarjeta en Conexiones, fila en Oportunidades Redes, pantalla `/dashboard/blogger` y entrada del menú Admin, fila de permisos en Usuarios, red de MCP, valor por defecto de «generar en todas», textos y manual. CONSERVADO: datos y permisos de la base, código del worker y la API (no se borra nada de datos). Pruebas 240/240.
+
 ## Claude — Se eliminan las conexiones directas de Google Cloud y Meta — 2026-10-17
 
 - Task ID: `QUITAR-GOOGLE-META-DIRECTO-20261017`. Sin migración. Estado: PR abierto. Orden de Milton: Google Cloud y Meta ya no se usan.

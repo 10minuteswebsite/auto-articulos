@@ -244,7 +244,6 @@ const SOCIAL_GROUPS: {
     title: "Blogs",
     networks: [
       { id: "tumblr", label: "Tumblr", formats: [["tumblr", "Artículo"]] },
-      { id: "blogger", label: "Blogger", formats: [["blogger", "Artículo"]] },
     ],
   },
 ];

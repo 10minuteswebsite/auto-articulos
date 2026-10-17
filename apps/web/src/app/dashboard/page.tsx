@@ -22,7 +22,7 @@ const QUICK_LINKS = [
   {
     href: "/dashboard/oportunidades-redes",
     label: MENU_NAMES.redes,
-    description: "Instagram, Threads, Facebook, LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business. Crea con ayuda de la IA tus publicaciones y difúndelas en redes sociales y blogs públicos.",
+    description: "Instagram, Threads, Facebook, LinkedIn, Pinterest, Tumblr, Bluesky y Google Business. Crea con ayuda de la IA tus publicaciones y difúndelas en redes sociales y blogs públicos.",
   },
 ];
 
@@ -178,7 +178,7 @@ export default function InicioPage() {
     hostProduct === "REDES" && link.href === "/dashboard/oportunidades-redes"
       ? [
           { href: "/dashboard/oportunidades-redes?grupo=meta", label: "META", description: "Instagram, Threads y Facebook" },
-          { href: "/dashboard/oportunidades-redes?grupo=otras", label: "Otras redes y blogs", description: "LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business" },
+          { href: "/dashboard/oportunidades-redes?grupo=otras", label: "Otras redes y blogs", description: "LinkedIn, Pinterest, Tumblr, Bluesky y Google Business" },
         ]
       : [link],
   );
