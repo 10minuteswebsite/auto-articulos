@@ -6,12 +6,11 @@
 - Pedido de Milton: a los administradores no debe aparecer Configuración → Conexiones (es para usuarios ordinarios); esas conexiones pasan al menú Admin, debajo de Composio y PostPeer, una por una.
 - Cambio: `lib/admin-connections.ts` (lista por producto), `DashboardNav.tsx` (el grupo Admin añade una entrada por conexión según el host: Artículos = Search Console, Analytics, Bing; Redes = Business, Instagram, Facebook, Threads, LinkedIn, Pinterest, Tumblr, Bluesky, Blogger; host compartido = todas), `configuracion/page.tsx` (oculta la tarjeta Conexiones a administradores, incluido «Acceder como»). Manual actualizado. La ruta `/dashboard/configuracion/conexiones?conexion=<id>` sigue siendo la misma pantalla.
 
-## Claude — Callbacks OAuth solo en articulos/redes .net — 2026-10-17
 
-- Task ID: `CALLBACKS-SOLO-NET-20261017`. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni workflows. Estado: PR abierto, SIN fusionar. Orden de Milton: los únicos hosts de callback son `articulos.lasolucionweb.net` y `redes.lasolucionweb.net`; nada de seototal ni `.com`.
-- Hallazgos (auditoría): la lista permitida de `oauth-redirect.ts` solo tenía hosts `.com` (incluido seototal), por lo que en un host `.net` Google, Analytics, Business y Bing caían al `redirect_uri` fijo de `seototal.lasolucionweb.com`; con `DIA_CERO=on` TODAS las redes mandaban el callback a seototal; Blogger no admitía `articulos`.
-- Cambio: lista fija de dos hosts `.net` (la variable `SEO_TOTAL_OAUTH_ALLOWED_HOSTS` ya no amplía); `DIA_CERO` ya no fija origen canónico (solo `OAUTH_CANONICAL_ORIGIN` si es https y host permitido); valores por defecto de Google/Business/Analytics/Bing y lista de Blogger a `.net`. Pruebas reescritas (`oauth-redirect.test.ts`), suite web 232/232, `tsc` sin errores en lo tocado. `CHECKLIST_CALLBACKS_MILTON.md` reescrito con las URLs exactas por consola.
-- NO verificado: variables de entorno reales de Vercel (no hay acceso) y consolas de proveedores. Fuera de alcance, aún con nombres antiguos (no son callbacks): `CANONICAL_LOGIN_URL` en `middleware.ts`, `seo-total-hub-redirect.ts`, `access-router-adapter.ts`, `DiaCeroPanel.tsx`, `login/page.tsx`. Composio, PostPeer, Instagram y Facebook ya usaban el host de la petición.
+## Claude — REVERSA del PR #613 (callbacks solo .net) — 2026-10-17
+
+- Task ID: `CALLBACKS-SOLO-NET-REVERSA-20261017`. Sin migración. Prueba en vivo con la sesión del navegador: `articulos.lasolucionweb.net/api/search-integrations/google/connect` terminó en Google con `Error 400: redirect_uri_mismatch`. Causa: producción tiene `DIA_CERO=on`, así que hasta #613 TODOS los callbacks salían como `seototal.lasolucionweb.com` (la única dirección registrada en las consolas); #613 los cambió a `.net`, no registradas aún.
+- Acción: se revierte #613 (código, pruebas y checklist anterior) para restaurar lo que funcionaba. Cualquier nuevo intento solo después de que Milton registre las URLs `.net` en cada consola y se pruebe proveedor por proveedor.
 
 ## Claude — R1: la imagen IA ya pagada se reutiliza en reintentos — 2026-10-16
 
