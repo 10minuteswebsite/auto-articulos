@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Callbacks OAuth solo en articulos/redes .net (reaplicación de #613) — 2026-10-17
+
+- Task ID: `CALLBACKS-SOLO-NET-V2-20261017`. Sin migración. Estado: PR abierto. Reaplica #613 (revertido en #614 por `redirect_uri_mismatch` de Google) ahora que Bing, LinkedIn y Tumblr ya están registrados y probados en `.net` y que Google Cloud, Meta directo, X y Blogger no se usan.
+- Cambio: lista fija de dos hosts `.net` en `oauth-redirect.ts` (`SEO_TOTAL_OAUTH_ALLOWED_HOSTS` ya no amplía); `DIA_CERO` ya no fija origen canónico (solo `OAUTH_CANONICAL_ORIGIN` si es https y host permitido); valores por defecto de Google/Business/Analytics/Bing y lista de Blogger a `.net`; pruebas reescritas 240/240; checklist actualizado.
+- Riesgo conocido: conexiones directas sin uso (Google Cloud, Meta, X, Blogger, Pinterest directo) darían `redirect_uri_mismatch` si se reactivaran sin registrar antes las `.net`.
+
 ## Claude — Tumblr: consola en redes .net y pantalla Admin corregida — 2026-10-17
 
 - Task ID: `TUMBLR-PANTALLA-FIX-20261017`. Sin migración. Consola de Tumblr (app 10minuteswebsite, #661539, hecho por Claude en la sesión de Milton): «URL de retrollamada» y «URL de redirección de OAuth2» ahora son SOLO `https://redes.lasolucionweb.net/api/search-integrations/tumblr/callback` (antes seototal.lasolucionweb.com). El código ya recibe en redes .net (el `callback` reenvía cualquier otro host allí).
