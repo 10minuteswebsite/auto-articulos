@@ -24,9 +24,12 @@ export const ADMIN_CONNECTIONS = [
   { id: "blogger", label: "Blogger", product: "REDES", via: "propia" },
 ] as const;
 
+/** Pantallas de administrador propias (credenciales de la plataforma) por conexión. */
+const ADMIN_PAGES: Record<string, string> = { "bing-webmaster": "/dashboard/bing" };
+
 export function adminConnectionItems(host: HostProductScope): { href: string; label: string }[] {
   return ADMIN_CONNECTIONS.filter((c) => c.via === "propia" && (host === "COMPARTIDO" || c.product === host)).map((c) => ({
-    href: `/dashboard/configuracion/conexiones?conexion=${c.id}`,
+    href: ADMIN_PAGES[c.id] ?? `/dashboard/configuracion/conexiones?conexion=${c.id}`,
     label: c.label,
   }));
 }

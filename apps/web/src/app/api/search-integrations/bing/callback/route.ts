@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { encryptSecret, formatBingTokenPayload } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
+import { getStoredBingCredentials } from "@/lib/bing-credentials";
 import { BING_STATE_COOKIE, bingExplicitRedirect, bingOAuthConfig } from "@/lib/bing-oauth";
 import { markBingReconnected } from "@/lib/bing-client-change";
 import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
   let detalle = "";
   try {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
-    const config = bingOAuthConfig();
+    const config = bingOAuthConfig(await getStoredBingCredentials());
     const { clientId, clientSecret } = config;
     const explicit = bingExplicitRedirect();
     const redirectUri = explicit ? explicit.toString() : getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);

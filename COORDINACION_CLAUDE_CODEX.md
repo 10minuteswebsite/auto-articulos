@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Pantalla de administrador para las credenciales de Bing — 2026-10-17
+
+- Task ID: `ADMIN-BING-CREDENCIALES-20261017`. Sin migración (usa `SystemSetting`, como PostPeer). Toca web Y worker (`bingToken.ts`): despliegue del worker lento. Pedido de Milton: un administrador debe poder cambiar/renovar las credenciales generales; el menú no debe mandar a la tarjeta de usuario.
+- Cambio: `/dashboard/bing` + `/api/admin/bing` (mismo estilo que PostPeer), `lib/bing-credentials.ts`, `bingOAuthConfig(stored)`, `getBingAccessToken(refreshToken, stored)` en shared; connect/callback y los wrappers de token (web y worker) leen primero lo guardado y, si no hay, las variables. Menú Admin Artículos → Bing apunta a esa pantalla. Pruebas: `bing-oauth.test.ts`.
+- NO probado en vivo: guardar credenciales reales ni conectar Bing con ellas. Las credenciales actuales siguen en Vercel/GitHub y funcionan como respaldo. LinkedIn, Tumblr, Bluesky y Blogger siguen sin pantalla propia (pendiente).
+
 ## Claude — Admin: sin entradas de conexiones que van por Composio/PostPeer — 2026-10-17
 
 - Task ID: `ADMIN-CONEXIONES-SOLO-PROPIAS-20261017`. Sin migración ni workflows. Corrige el PR #615: Search Console, Analytics, Instagram, Facebook y Pinterest (Composio) y Business y Threads (PostPeer) ya no llevan entrada en el menú Admin; se manejan en sus paneles. Quedan Bing (Artículos) y LinkedIn, Tumblr, Bluesky, Blogger (Redes). PENDIENTE (pedido de Milton): una pantalla de administrador para cada conexión principal, distinta de la tarjeta de usuario; decisión abierta sobre mostrar el token enmascarado.
