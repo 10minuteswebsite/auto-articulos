@@ -21,3 +21,14 @@ test("quien reconectó después de la fecha ya no ve el aviso", () => {
   assert.equal(bingNeedsReconnect(changed, new Date("2026-10-18T12:00:00Z")), false);
   assert.equal(bingNeedsReconnect(changed, new Date("2026-10-19T09:00:00Z")), false);
 });
+
+import { bingExplicitRedirect } from "./bing-oauth";
+
+test("la dirección de retorno explícita de Bing solo vale si es https y válida", () => {
+  assert.equal(bingExplicitRedirect({}), null);
+  assert.equal(bingExplicitRedirect({ BING_WEBMASTER_REDIRECT_URI: "no es url" }), null);
+  assert.equal(bingExplicitRedirect({ BING_WEBMASTER_REDIRECT_URI: "http://articulos.lasolucionweb.net/x" }), null);
+  const ok = bingExplicitRedirect({ BING_WEBMASTER_REDIRECT_URI: "https://articulos.lasolucionweb.net/api/search-integrations/bing/callback" });
+  assert.equal(ok?.host, "articulos.lasolucionweb.net");
+  assert.equal(ok?.toString(), "https://articulos.lasolucionweb.net/api/search-integrations/bing/callback");
+});

@@ -1,15 +1,20 @@
 import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
-import { BING_SCOPE, BING_STATE_COOKIE, bingOAuthConfig } from "@/lib/bing-oauth";
+import { BING_SCOPE, BING_STATE_COOKIE, bingExplicitRedirect, bingOAuthConfig } from "@/lib/bing-oauth";
 import { getAllowedOAuthOrigin, getOAuthRedirectUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
-import { applyCookie } from "@/lib/shared-cookies";
+import { applyCookie, cookieEnvForHost } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
   // Bing solo acepta el callback canónico cuando la petición llega desde un
   // host que no está en nuestra lista blanca; en ese caso llevamos primero la
   // sesión al host registrado para conservar cookie, state y sesión.
-  if (!getAllowedOAuthOrigin(request)) {
+  const explicit = bingExplicitRedirect();
+  if (explicit && request.nextUrl.host.toLowerCase() !== explicit.host.toLowerCase()) {
+    // Cliente nuevo de Bing: solo se conecta desde el host de su dirección registrada.
+    return NextResponse.redirect(new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", explicit.origin));
+  }
+  if (!explicit && !getAllowedOAuthOrigin(request)) {
     try {
       const canonical = new URL(bingOAuthConfig().redirectUri);
       return NextResponse.redirect(new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", canonical.origin));
@@ -21,7 +26,7 @@ export async function GET(request: NextRequest) {
   try {
     const config = bingOAuthConfig();
     const { clientId } = config;
-    const redirectUri = getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);
+    const redirectUri = explicit ? explicit.toString() : getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);
     const state = randomBytes(24).toString("base64url");
     const url = new URL("https://www.bing.com/webmasters/oauth/authorize");
     url.search = new URLSearchParams({
@@ -38,7 +43,7 @@ export async function GET(request: NextRequest) {
       sameSite: "lax",
       path: "/",
       maxAge: 600,
-    });
+    }, cookieEnvForHost(request.nextUrl.hostname));
     rememberOAuthOrigin(response, request);
     return response;
   } catch (error) {
