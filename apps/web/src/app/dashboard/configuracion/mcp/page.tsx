@@ -109,7 +109,7 @@ export default function ConfiguracionMcpPage() {
       setWorking(false);
     }
   }
-  return <main style={{ maxWidth: 900, margin: "0 auto", padding: "36px 24px 72px", color: "#1d1d1f", fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" }}>
+  return <main style={{ maxWidth: "none", margin: 0, padding: "36px 0 72px", color: "#1d1d1f", fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" }}>
     <p style={{ color: "#6e6e73", fontSize: 12, letterSpacing: ".08em", fontWeight: 700 }}>SEO TOTAL</p>
     <h1 style={{ fontSize: 30, margin: "8px 0 10px", letterSpacing: "-.03em" }}>Conecta tu asistente IA</h1>
     <p style={{ color: "#6e6e73", lineHeight: 1.55, maxWidth: 680 }}>Completa estos cuatro pasos en orden para conectar Claude, ChatGPT, Meta MUSE u otra IA.</p>

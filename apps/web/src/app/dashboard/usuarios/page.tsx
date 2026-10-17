@@ -938,7 +938,7 @@ export default function UsuariosPage() {
   }
 
   return (
-    <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+    <div style={{ maxWidth: "none", margin: 0 }}>
       <header style={{ padding: "8px 0 20px" }}>
         <p className="eyebrow" style={{ margin: "0 0 4px" }}>
           Centro de Control

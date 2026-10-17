@@ -478,7 +478,7 @@ export default function OportunidadesRedesPage() {
   // Pantalla inicial: solo las tarjetas (mismo estándar que las de Inicio). El resto aparece al entrar.
   if (!openGroup) {
     return (
-      <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
+      <div className="oportunidades-redes-page" style={{ maxWidth: "none", margin: 0 }}>
         <div style={{ marginTop: 20, marginBottom: 20 }}>
           <h1 style={{ fontSize: 30, fontWeight: 600, color: "#1d1d1f", margin: "0 0 6px", letterSpacing: "-0.03em", lineHeight: 1.15 }}>{MENU_NAMES.redes}</h1>
           <p style={{ margin: "0 0 16px", fontSize: 15, color: "#6e6e73" }}>Elige dónde publicar.</p>
@@ -518,7 +518,7 @@ export default function OportunidadesRedesPage() {
     opportunities.filter((o) => o.status === "published" && o.publishedAt && new Date(o.publishedAt).getTime() >= dayStart && o.platform.trim().toLowerCase() === limitFormatOf(rowKey, rowPlatform)).length;
 
   return (
-    <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto", paddingBottom: 40 }}>
+    <div className="oportunidades-redes-page" style={{ maxWidth: "none", margin: 0, paddingBottom: 40 }}>
       {/* Cabecera */}
       <div style={{ padding: "8px 0 24px" }}>
         <button

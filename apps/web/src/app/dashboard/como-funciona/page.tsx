@@ -36,7 +36,7 @@ export default async function ComoFuncionaPage() {
         ];
 
   return (
-    <main style={{ width: "100%", maxWidth: 1120, margin: "0 auto" }}>
+    <main style={{ width: "100%", maxWidth: "none", margin: 0 }}>
       <header style={{ borderBottom: "1px solid #d2d2d7", padding: "0 0 24px" }}>
         <p className="eyebrow" style={{ margin: "0 0 6px" }}>CÓMO FUNCIONA</p>
         <h1 style={{ margin: 0, fontSize: "clamp(26px, 4vw, 38px)", lineHeight: 1.1, fontWeight: 600, letterSpacing: "-0.03em" }}>{titulo}</h1>
