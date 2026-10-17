@@ -1,5 +1,10 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — REVERSA del PR #613 (callbacks solo .net) — 2026-10-17
+
+- Task ID: `CALLBACKS-SOLO-NET-REVERSA-20261017`. Sin migración. Prueba en vivo con la sesión del navegador: `articulos.lasolucionweb.net/api/search-integrations/google/connect` terminó en Google con `Error 400: redirect_uri_mismatch`. Causa: producción tiene `DIA_CERO=on`, así que hasta #613 TODOS los callbacks salían como `seototal.lasolucionweb.com` (la única dirección registrada en las consolas); #613 los cambió a `.net`, no registradas aún.
+- Acción: se revierte #613 (código, pruebas y checklist anterior) para restaurar lo que funcionaba. Cualquier nuevo intento solo después de que Milton registre las URLs `.net` en cada consola y se pruebe proveedor por proveedor.
+
 ## Claude — R1: la imagen IA ya pagada se reutiliza en reintentos — 2026-10-16
 
 - Task ID: `CUIDADO-TOKENS-R1-20261016`. Sin migración, sin workflows. Estado: PR abierto, SIN fusionar. Punto de partida: `main` con #611 (`CUIDADO_DE_TOKENS.md`).
