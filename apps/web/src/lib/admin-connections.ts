@@ -25,7 +25,7 @@ export const ADMIN_CONNECTIONS = [
 ] as const;
 
 /** Pantallas de administrador propias (credenciales de la plataforma) por conexión. */
-const ADMIN_PAGES: Record<string, string> = { "bing-webmaster": "/dashboard/bing" };
+const ADMIN_PAGES: Record<string, string> = { "bing-webmaster": "/dashboard/bing", linkedin: "/dashboard/linkedin" };
 
 export function adminConnectionItems(host: HostProductScope): { href: string; label: string }[] {
   return ADMIN_CONNECTIONS.filter((c) => c.via === "propia" && (host === "COMPARTIDO" || c.product === host)).map((c) => ({

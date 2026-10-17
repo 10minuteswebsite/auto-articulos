@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Pantalla de administrador para LinkedIn — 2026-10-17
+
+- Task ID: `LINKEDIN-PANTALLA-ADMIN-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Pedido de Milton: hacer con LinkedIn lo mismo que con Bing (pantalla de administrador con instrucciones y campos).
+- Cambio: `/dashboard/linkedin` (solo admin) con instrucciones de la consola de LinkedIn, dirección de retorno que usa el sistema hoy (calculada en el servidor), las dos `.net` por agregar y campos de Client ID/Secret (reutiliza `/api/search-integrations/linkedin/settings`, ya cifrado en `SystemSetting`). Entrada en el menú Admin (`admin-connections.ts`) y ruta ADMIN. Sin cambios en el flujo OAuth de LinkedIn: el código sigue enviando la dirección actual.
+- Pendiente: que Milton registre las dos `.net` en LinkedIn; después, cambiar el código de LinkedIn para usarlas.
+
 ## Claude — Bing: el retorno es SIEMPRE articulos.lasolucionweb.net — 2026-10-17
 
 - Task ID: `BING-RETORNO-NET-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Prueba con Lorena en producción: el aviso rojo salió (Inicio y tarjeta) y la reconexión funcionó, pero el botón mandó a `seototal.lasolucionweb.com` porque `BING_WEBMASTER_REDIRECT_URI` no estaba definida.
