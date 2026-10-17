@@ -28,8 +28,10 @@ Regla de Milton: los ÚNICOS hosts de callback son `https://articulos.lasolucion
 - `callbacks.lasolucionweb.com` sigue reservado para rutas de máquina (MCP, OAuth2, `.well-known`); no es callback de usuario.
 - Bing exige el mismo `redirect_uri` al autorizar y al canjear: el código ya usa el host de la petición en ambos pasos.
 
-## Estado real a 2026-10-17
+## ✅ PROYECTO CERRADO (2026-10-17). Estado real
 
 - Hecho y probado con Lorena: **Bing** (cliente nuevo, retorno articulos .net), **LinkedIn** (registradas articulos y redes .net; sin `.com`), **Tumblr** (una sola: redes .net).
 - Sin registro propio: **Composio** y **PostPeer** (administrados por ellos; el código manda el host de la petición). **Bluesky** no usa OAuth de la plataforma.
 - Sin uso hoy (no se registraron): Google Cloud directo (Search Console/Analytics/Business van por Composio y PostPeer), Meta directo (Instagram/Facebook van por Composio, Threads por PostPeer), X y Blogger. Si algún día se reactivan, registrar primero las dos `.net` de esta tabla.
+
+- Retirados del sistema: conexiones directas de Google Cloud y Meta (#630) y Blogger para usuarios (#632). Ver la entrada «CIERRE: revisión de callbacks OAuth» en `COORDINACION_CLAUDE_CODEX.md`.

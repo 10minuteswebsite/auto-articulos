@@ -12,9 +12,9 @@ import { getAccessRouterEnabled } from "./access-router-setting";
  * Cualquier error = null: un fallo técnico nunca redirige ni bloquea a nadie.
  */
 export const ROUTER_HOSTS = {
-  canonicalHost: "seototal.lasolucionweb.com",
-  articulosHost: "articulos.lasolucionweb.com",
-  redesHost: "redes.lasolucionweb.com",
+  canonicalHost: "articulos.lasolucionweb.net",
+  articulosHost: "articulos.lasolucionweb.net",
+  redesHost: "redes.lasolucionweb.net",
 } as const;
 
 /** Plataforma de facturación (HUB). Configurable por variable de entorno; por defecto la que indicó Mario. */

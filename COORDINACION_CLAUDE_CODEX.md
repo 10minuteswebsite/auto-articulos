@@ -1,5 +1,17 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — CIERRE: revisión de callbacks OAuth y paso de .com a .net — 2026-10-17
+
+- Task ID: `CIERRE-CALLBACKS-NET-20261017`. PROYECTO CERRADO. Todo lo de abajo está fusionado en `main` y desplegado; no queda rama ni commit de este trabajo sin fusionar.
+- **Resultado:** ninguna conexión envía su retorno a `.com` ni a `seototal`. Hosts de callback permitidos, fijos: `articulos.lasolucionweb.net` y `redes.lasolucionweb.net`.
+- **Por conexión:** Composio y PostPeer (sin lista de URLs en sus paneles; usan el host de la petición) · Bing (cliente nuevo «SEO TOTAL ARTICULOS NET», retorno articulos .net, aviso rojo de reconexión con interruptor `BING_CLIENT_CHANGED_AT`, credenciales en `/dashboard/bing`) · LinkedIn (consola solo con las dos .net) · Tumblr (consola solo con redes .net; una única dirección) · Pinterest (por Composio) · Bluesky (sin OAuth de plataforma). Probado en vivo con Lorena: Bing, LinkedIn y Tumblr.
+- **Eliminado:** conexiones directas de Google Cloud y Meta (#630); Blogger oculto a los usuarios (#632: Composio y PostPeer no lo ofrecen; datos y worker intactos); Día Cero (#623, de otra sesión).
+- **Pantallas de administrador nuevas** (en el menú Admin de ambas aplicaciones, bajo «Conexiones principales»): Bing, LinkedIn, Pinterest, Tumblr, Bluesky.
+- **PRs de esta tarea (todos fusionados):** #613 → revertido por #614 (Google daba `redirect_uri_mismatch`) → reaplicado en #628 · #616, #622, #624, #625, #626, #627, #630, #632 y la limpieza de enlaces de esta entrada.
+- **Limpieza final:** `middleware.ts` (login del alias antiguo), código QR del login y `ROUTER_HOSTS` del enrutador pasan a `.net`. Se CONSERVAN a propósito el reconocimiento de hosts `.com` (productos y cookies) y la redirección de `seototal.lasolucionweb.com` al HUB: no son callbacks y protegen a quien aún llegue por esas direcciones.
+- **Lecciones:** (1) no cambiar el `redirect_uri` en código antes de registrar la dirección en la consola del proveedor (#613); (2) Bing admite UNA dirección por cliente y no es editable; (3) Tumblr OAuth1 usa la dirección fija de su app; (4) probar siempre con Lorena en producción hasta el paso previo al consentimiento.
+- **Pendientes opcionales de Milton:** borrar el cliente viejo «AUTO ARTICULOS» en la consola de Bing; falla aparte anotada en #623 («Acceder como» Lorena).
+
 ## Claude — Blogger se oculta a los usuarios — 2026-10-17
 
 - Task ID: `QUITAR-BLOGGER-20261017`. Sin migración. Estado: PR #632 abierto. Investigación: PostPeer (10 plataformas, sin Blogger; verificado en su selector y en su documentación) y Composio (catálogo de 1.529 apps: búsqueda «blogger» = 0; «blog» = solo Inblog) NO ofrecen Blogger. Decisión de Milton: quitarlo para que los usuarios no lo vean.
