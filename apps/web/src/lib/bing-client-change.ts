@@ -1,5 +1,5 @@
 import { prisma } from "@auto-articulos/db";
-import { decryptSecret, encryptSecret } from "@auto-articulos/shared";
+import { BING_CLIENT_ID_SETTING, decryptSecret, encryptSecret } from "@auto-articulos/shared";
 
 /*
  * CAMBIO DEL CLIENTE OAUTH DE BING (2026-10-17). Bing solo admite una dirección
@@ -22,6 +22,23 @@ export function bingClientChangedAt(env: Record<string, string | undefined> = pr
   if (!raw) return null;
   const date = new Date(raw);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** Pura: la más reciente de las dos fechas de cambio (la variable y el guardado en Administración). */
+export function latestBingChange(a: Date | null, b: Date | null): Date | null {
+  if (!a) return b;
+  if (!b) return a;
+  return a.getTime() >= b.getTime() ? a : b;
+}
+
+/**
+ * Fecha del cambio de cliente: la variable BING_CLIENT_CHANGED_AT o, si es más
+ * reciente, el momento en que un administrador guardó credenciales nuevas en
+ * Admin → Bing. Así renovar las credenciales enciende el aviso solo.
+ */
+export async function effectiveBingChangedAt(): Promise<Date | null> {
+  const row = await prisma.systemSetting.findUnique({ where: { key: BING_CLIENT_ID_SETTING }, select: { updatedAt: true } });
+  return latestBingChange(bingClientChangedAt(), row?.updatedAt ?? null);
 }
 
 /** Pura: ¿debe esta conexión volver a conectarse? */
@@ -49,8 +66,9 @@ async function readReconnectedAt(integrationId: string): Promise<Date | null> {
 
 /** ¿Esta integración de Bing (ya existente) debe reconectarse por el cambio de cliente? */
 export async function integrationNeedsBingReconnect(integrationId: string | null | undefined): Promise<boolean> {
-  const changedAt = bingClientChangedAt();
-  if (!integrationId || !changedAt) return false;
+  if (!integrationId) return false;
+  const changedAt = await effectiveBingChangedAt();
+  if (!changedAt) return false;
   return bingNeedsReconnect(changedAt, await readReconnectedAt(integrationId));
 }
 

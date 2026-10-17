@@ -1,5 +1,9 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Bing: guardar credenciales en Admin enciende el aviso de reconexión — 2026-10-17
+
+- Task ID: `BING-AVISO-AUTOMATICO-20261017`. Sin migración ni workflows. Pedido de Milton: que el aviso salga a todos los que tenían Bing sin que él toque variables. `effectiveBingChangedAt` toma la más reciente entre `BING_CLIENT_CHANGED_AT` y el `updatedAt` de las credenciales guardadas en Admin → Bing. Efecto: Milton ya las guardó hoy, así que al desplegar saldrá el aviso a quien no haya reconectado después. Re-guardar credenciales vuelve a avisar a todos. Pruebas en `bing-client-change.test.ts`.
+
 ## Claude — Pantalla de administrador para las credenciales de Bing — 2026-10-17
 
 - Task ID: `ADMIN-BING-CREDENCIALES-20261017`. Sin migración (usa `SystemSetting`, como PostPeer). Toca web Y worker (`bingToken.ts`): despliegue del worker lento. Pedido de Milton: un administrador debe poder cambiar/renovar las credenciales generales; el menú no debe mandar a la tarjeta de usuario.

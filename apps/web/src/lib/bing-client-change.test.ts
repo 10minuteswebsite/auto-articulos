@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { bingClientChangedAt, bingNeedsReconnect } from "./bing-client-change";
+import { bingClientChangedAt, bingNeedsReconnect, latestBingChange } from "./bing-client-change";
 
 test("sin fecha de cambio no se avisa a nadie", () => {
   assert.equal(bingClientChangedAt({}), null);
@@ -31,4 +31,21 @@ test("la dirección de retorno explícita de Bing solo vale si es https y válid
   const ok = bingExplicitRedirect({ BING_WEBMASTER_REDIRECT_URI: "https://articulos.lasolucionweb.net/api/search-integrations/bing/callback" });
   assert.equal(ok?.host, "articulos.lasolucionweb.net");
   assert.equal(ok?.toString(), "https://articulos.lasolucionweb.net/api/search-integrations/bing/callback");
+});
+
+test("la fecha de cambio es la más reciente entre la variable y el guardado en Administración", () => {
+  const vieja = new Date("2026-10-01T00:00:00Z");
+  const nueva = new Date("2026-10-17T18:00:00Z");
+  assert.equal(latestBingChange(null, null), null);
+  assert.equal(latestBingChange(vieja, null), vieja);
+  assert.equal(latestBingChange(null, nueva), nueva);
+  assert.equal(latestBingChange(vieja, nueva), nueva);
+  assert.equal(latestBingChange(nueva, vieja), nueva);
+});
+
+test("guardar credenciales nuevas hace que quien conectó antes deba reconectar", () => {
+  const guardadas = new Date("2026-10-17T18:00:00Z");
+  assert.equal(bingNeedsReconnect(guardadas, null), true);
+  assert.equal(bingNeedsReconnect(guardadas, new Date("2026-10-10T00:00:00Z")), true);
+  assert.equal(bingNeedsReconnect(guardadas, new Date("2026-10-17T19:00:00Z")), false);
 });
