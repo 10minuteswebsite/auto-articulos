@@ -2,12 +2,42 @@
 
 ## Claude — Limpieza del Día Cero (punto a punto con Milton) — 2026-10-17
 
-- Task ID: `DIA-CERO-LIMPIEZA-20261017`. Orden de Milton: el Día Cero está CULMINADO (Artículos y Redes ya separados); se cierran sus señalamientos uno por uno. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni workflows. Estado: PR abierto, SIN fusionar; se libera al fusionar. ALCANCE FINAL del PR #623: botón Día Cero y manual borrados, documentos archivados, notas de culminado Y variable `DIA_CERO` eliminada del código (decisión de Milton: Google va por PostPeer/Composio, X está eliminado, Business por PostPeer).
+- Task ID: `DIA-CERO-LIMPIEZA-20261017`. Orden de Milton: el Día Cero está CULMINADO (Artículos y Redes ya separados); se cierran sus señalamientos uno por uno. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni workflows. Estado: PR abierto, SIN fusionar; se libera al fusionar. ALCANCE FINAL del PR #623: botón Día Cero y manual borrados, documentos archivados, notas de culminado y variable `DIA_CERO` eliminada del código (decisión de Milton).
 - Punto 1 (hecho, local): borrados `api/admin/dia-cero/route.ts` y `usuarios/DiaCeroPanel.tsx` (nada más los usaba) y la sección «Día Cero» de `manual-usuario.ts`. Sin leer la base: no se comprobó si existe `dia_cero_backup` en `SystemSetting` (dato huérfano inofensivo si existe).
-- Punto 2 (cerrado): Milton quitó `DIA_CERO` de Vercel y redesplegó; sesión estable en pruebas con su cuenta admin. Hallazgo: tras el revert #614, `main` dependía de `DIA_CERO` u `OAUTH_CANONICAL_ORIGIN` para mandar los retornos OAuth directos a `seototal.lasolucionweb.com` (la registrada). En vivo, con la variable quitada, Google/Analytics/Business seguían enviando `redirect_uri=https://seototal.lasolucionweb.com/...` (alguna variable sigue activa en Vercel; sin acceso para ver cuál). Milton confirmó que ninguna conexión viva depende de ese retorno (Google/Threads/Business por PostPeer o Composio, X eliminado); LinkedIn, Pinterest, Instagram y Blogger directas ya no completan hoy (caen en la portada del proveedor). Cambio: `canonicalOAuthOrigin` devuelve siempre `OAUTH_CANONICAL_ORIGIN` (https) o la constante `CANONICAL_OAUTH_ORIGIN` = seototal; `diaCeroActive` y el dominio por defecto de cookies eliminados (solo vale `SHARED_COOKIE_DOMAIN` explícito). Comportamiento en producción: idéntico al observado. Pruebas de cookies y OAuth 16/16.
+- Punto 2 (cerrado): Milton quitó `DIA_CERO` de Vercel y redesplegó; sesión estable (Redes, Artículos, Administración) en pruebas en vivo con su cuenta admin. Hallazgo: tras el revert #614, `main` dependía de `DIA_CERO` u `OAUTH_CANONICAL_ORIGIN` para el retorno OAuth directo a `seototal.lasolucionweb.com`; en vivo, con la variable quitada, Google/Analytics/Business seguían enviando ese `redirect_uri` (sin acceso a Vercel para ver qué variable lo mantenía). Milton aclaró que Google, Threads y Business van por PostPeer/Composio y X está eliminado. Mientras se fusionaba este PR, `main` reaplicó el cambio a `.net` (#628) y ese cambio SUSTITUYE al de este PR en `oauth-redirect.ts`; aquí solo queda la eliminación de `diaCeroActive` y del dominio por defecto de cookies (`shared-cookies.ts`), y `DIA_CERO` ya no existe en `apps/`.
 - FALLA APARTE, sin causa conocida: «Acceder como» Lorena desde `articulos.lasolucionweb.net` responde 200 en `POST /api/admin/impersonate` pero `/api/me` sigue devolviendo al admin (`actingAdmin: null`). No se sabe si ya fallaba antes de quitar la variable (no se había probado tras la reparación de Administración). Pendiente de investigar; pruebas 5 (conexiones) y 6 (cerrar sesión) no se hicieron.
 - Puntos 4 a 6 (hechos, local): 6 documentos del plan movidos a `archivo/dia-cero/`; nota «Día Cero culminado» al inicio de los 4 traspasos; línea del Revertir marcada «SUPERADO». Punto 7 (datos en la base) DESCARTADO por Milton. Punto 8: pruebas ajustadas junto con el código (ya no existe `DIA_CERO` en `apps/`).
 - Punto 3 (manual) ya quedó hecho junto con el 1. Quedan los puntos 4 a 8 (documentos, tareas en traspasos, avisos en este archivo, datos, pruebas).
+
+## Claude — Callbacks OAuth solo en articulos/redes .net (reaplicación de #613) — 2026-10-17
+
+- Task ID: `CALLBACKS-SOLO-NET-V2-20261017`. Sin migración. Estado: PR abierto. Reaplica #613 (revertido en #614 por `redirect_uri_mismatch` de Google) ahora que Bing, LinkedIn y Tumblr ya están registrados y probados en `.net` y que Google Cloud, Meta directo, X y Blogger no se usan.
+- Cambio: lista fija de dos hosts `.net` en `oauth-redirect.ts` (`SEO_TOTAL_OAUTH_ALLOWED_HOSTS` ya no amplía); `DIA_CERO` ya no fija origen canónico (solo `OAUTH_CANONICAL_ORIGIN` si es https y host permitido); valores por defecto de Google/Business/Analytics/Bing y lista de Blogger a `.net`; pruebas reescritas 240/240; checklist actualizado.
+- Riesgo conocido: conexiones directas sin uso (Google Cloud, Meta, X, Blogger, Pinterest directo) darían `redirect_uri_mismatch` si se reactivaran sin registrar antes las `.net`.
+
+## Claude — Tumblr: consola en redes .net y pantalla Admin corregida — 2026-10-17
+
+- Task ID: `TUMBLR-PANTALLA-FIX-20261017`. Sin migración. Consola de Tumblr (app 10minuteswebsite, #661539, hecho por Claude en la sesión de Milton): «URL de retrollamada» y «URL de redirección de OAuth2» ahora son SOLO `https://redes.lasolucionweb.net/api/search-integrations/tumblr/callback` (antes seototal.lasolucionweb.com). El código ya recibe en redes .net (el `callback` reenvía cualquier otro host allí).
+- Pantalla `/dashboard/tumblr`: mostraba «la que usa el sistema hoy: seototal» y pedía agregar dos direcciones; es falso (Tumblr admite UNA y el código la fija a redes .net). Ahora muestra una sola dirección fija. Pruebas 240/240.
+- Pendiente: completar la conexión real de Tumblr con Lorena (quedó en la pantalla de permisos de Tumblr) y quitar `.com` del resto del código (reaplicar #613 por pasos).
+
+## Claude — LinkedIn conecta SOLO por articulos/redes .net — 2026-10-17
+
+- Task ID: `LINKEDIN-RETORNO-NET-20261017`. Sin migración. Estado: PR abierto, SIN fusionar.
+- Consola de LinkedIn (hecho por Claude en la sesión de Milton, app AUTO ARTICULOS, pestaña Auth): se AGREGÓ `https://articulos.lasolucionweb.net/api/search-integrations/linkedin/callback`. Quedan registradas 4: seototal.lasolucionweb.com (la usada hasta hoy), seototal.articulos.lasolucionweb.com (antigua), redes.lasolucionweb.net y articulos.lasolucionweb.net. Milton borrará las dos `.com` después de probar.
+- Código: `netCallbackUri`/`isNetProductHost` en `oauth-redirect.ts`; el `connect` de LinkedIn pasa a articulos .net si se inicia desde otro host, usa cookies por familia de dominio y el redirect_uri es el host `.net` de la petición; el `callback` usa la misma regla. Pruebas 240/240.
+- Pendiente: probar la conexión real de LinkedIn tras el despliegue (cuenta de pruebas) y reaplicar el patrón a Tumblr, Pinterest y Blogger.
+
+## Claude — Menú Admin: todas las conexiones en ambas aplicaciones — 2026-10-17
+
+- Task ID: `ADMIN-MENU-COMPARTIDO-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Orden de Milton: las pantallas de administrador de Bing, LinkedIn, Pinterest, Tumblr, Bluesky y Blogger deben verse en el menú Admin de Artículos y de Redes.
+- Cambio: `adminConnectionItems` ya no filtra por producto. Prueba nueva `admin-connections.test.ts`; suite 239/239. El desplegable Admin lleva el subtítulo «Conexiones principales» antes de la primera conexión (`TabItem.subtitle` en `DashboardNav`, escritorio y móvil).
+
+## Claude — Pantallas de administrador para LinkedIn, Tumblr, Pinterest, Bluesky y Blogger — 2026-10-17
+
+- Task ID: `LINKEDIN-PANTALLA-ADMIN-20261017`. Sin migración. Estado: PR #624 abierto, SIN fusionar. Pedido de Milton: lo mismo que Bing para cada red (Google Business va por PostPeer y no lleva pantalla propia).
+- Cambio: componente común `NetworkAdminPanel` y una pantalla por red (`/dashboard/{linkedin,tumblr,pinterest,bluesky,blogger}`, solo admin) con instrucciones de la consola, dirección de retorno que usa el sistema hoy (calculada en el servidor) + las dos `.net` por agregar, y campos de ID/secreto (reutiliza los `settings` ya cifrados en `SystemSetting`). Bluesky no tiene credenciales de plataforma: pantalla solo informativa. Entradas en el menú Admin y rutas ADMIN. Sin cambios en los flujos OAuth. Pruebas 238/238.
+- Pendiente: que Milton registre las dos `.net` en cada consola y después cambiar el código de cada red para usarlas.
 
 ## Claude — Bing: el retorno es SIEMPRE articulos.lasolucionweb.net — 2026-10-17
 

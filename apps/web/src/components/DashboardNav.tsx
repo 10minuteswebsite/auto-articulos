@@ -2,7 +2,7 @@
 
 import { MENU_LABELS_NUMBERED, MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
 import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
@@ -14,6 +14,8 @@ interface TabItem {
   id?: string;
   href: string;
   label: string;
+  /** Subtítulo (no clicable) que se pinta justo antes de este elemento dentro del desplegable. */
+  subtitle?: string;
 }
 
 interface TabGroup {
@@ -304,7 +306,10 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
   const adminGroup: TabGroup = {
     ...ADMIN_GROUP,
     label: hostProduct === "REDES" ? "Admin Redes" : "Admin Artículos",
-    items: [...ADMIN_GROUP.items, ...adminConnectionItems(hostProduct)],
+    items: [
+      ...ADMIN_GROUP.items,
+      ...adminConnectionItems(hostProduct).map((item, index) => (index === 0 ? { ...item, subtitle: "Conexiones principales" } : item)),
+    ],
   };
   const rawEntries: NavEntry[] = [
     ...baseEntries,
@@ -587,16 +592,18 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
                     {entry.label}
                   </p>
                   {entry.items.map((tab) => (
-                    <MobileLink
-                      key={tab.href}
-                      tab={tab}
-                      label={displayLabel(tab)}
-                      active={pathname === hrefPath(tab.href)}
-                      hidden={hiddenGlobally(tab)}
-                      onNavigate={() => setOpen(false)}
-                      indented
-                      separatorAfter={tab.id === "oportunidades-redes"}
-                    />
+                    <Fragment key={tab.href}>
+                      {tab.subtitle && <p style={{ margin: "10px 14px 2px", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#86868b" }}>{tab.subtitle}</p>}
+                      <MobileLink
+                        tab={tab}
+                        label={displayLabel(tab)}
+                        active={pathname === hrefPath(tab.href)}
+                        hidden={hiddenGlobally(tab)}
+                        onNavigate={() => setOpen(false)}
+                        indented
+                        separatorAfter={tab.id === "oportunidades-redes"}
+                      />
+                    </Fragment>
                   ))}
                 </div>
               );
@@ -694,8 +701,9 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
                     {entry.items.map((tab) => {
                       const active = pathname === hrefPath(tab.href);
                       return (
+                        <Fragment key={tab.href}>
+                        {tab.subtitle && <div role="presentation" style={{ padding: "10px 10px 4px", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#86868b" }}>{tab.subtitle}</div>}
                         <Link
-                          key={tab.href}
                           href={tab.href}
                           role="menuitem"
                           className="nav-dropdown-link"
@@ -725,6 +733,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
                           <span>{displayLabel(tab)}</span>
                           {hiddenGlobally(tab) && hiddenBadge(true)}
                         </Link>
+                        </Fragment>
                       );
                     })}
                   </div>

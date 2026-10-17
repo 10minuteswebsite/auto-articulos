@@ -5,15 +5,20 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredLinkedInAppCredentials } from "@/lib/linkedin-app-config";
 
 import { LINKEDIN_STATE_COOKIE } from "./constants";
-import { applyCookie } from "@/lib/shared-cookies";
-import { oauthCallbackUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
+import { applyCookie, cookieEnvForHost } from "@/lib/shared-cookies";
+import { NET_DEFAULT_ORIGIN, isNetProductHost, netCallbackUri } from "@/lib/oauth-redirect";
 
 export async function GET(request: Request) {
+  const reqHost = new URL(request.url).host;
+  if (!isNetProductHost(reqHost)) {
+    // LinkedIn solo vuelve a articulos/redes .net: se inicia desde allí para conservar sesión y state.
+    return NextResponse.redirect(new URL("/api/search-integrations/linkedin/connect", NET_DEFAULT_ORIGIN));
+  }
   await getCurrentUserId();
 
   try {
     const appCreds = await getStoredLinkedInAppCredentials();
-    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/linkedin/callback");
+    const redirectUri = netCallbackUri(request, "/api/search-integrations/linkedin/callback");
     const state = randomBytes(24).toString("base64url");
     const authUrl = getLinkedInAuthUrl(state, redirectUri, appCreds);
 
@@ -24,9 +29,7 @@ export async function GET(request: Request) {
       sameSite: "lax",
       path: "/",
       maxAge: 600,
-    });
-
-    rememberOAuthOrigin(response, request);
+    }, cookieEnvForHost(reqHost));
 
     return response;
   } catch {
