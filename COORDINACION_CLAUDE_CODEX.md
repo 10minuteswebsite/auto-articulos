@@ -1,5 +1,9 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Admin: sin entradas de conexiones que van por Composio/PostPeer — 2026-10-17
+
+- Task ID: `ADMIN-CONEXIONES-SOLO-PROPIAS-20261017`. Sin migración ni workflows. Corrige el PR #615: Search Console, Analytics, Instagram, Facebook y Pinterest (Composio) y Business y Threads (PostPeer) ya no llevan entrada en el menú Admin; se manejan en sus paneles. Quedan Bing (Artículos) y LinkedIn, Tumblr, Bluesky, Blogger (Redes). PENDIENTE (pedido de Milton): una pantalla de administrador para cada conexión principal, distinta de la tarjeta de usuario; decisión abierta sobre mostrar el token enmascarado.
+
 ## Claude — Conexiones principales pasan al menú Admin — 2026-10-17
 
 - Task ID: `ADMIN-CONEXIONES-UBICACION-20261017`. Sin migración ni workflows. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`). Estado: PR abierto, SIN fusionar.
