@@ -59,6 +59,8 @@ El menú superior tiene, en este orden: **Inicio**, **Cómo funciona esta aplica
 
 **Actualización 2026-10-17 (Admin · redes):** en el menú Admin Redes, **LinkedIn**, **Tumblr**, **Pinterest**, **Bluesky** y **Blogger** abren cada una su propia pantalla de administración (/dashboard/linkedin, /dashboard/tumblr, /dashboard/pinterest, /dashboard/bluesky y /dashboard/blogger). Cada pantalla trae las instrucciones paso a paso para la consola del proveedor, las direcciones de retorno que deben estar registradas (la que usa el sistema hoy y las dos nuevas de articulos y redes .net) y los campos para pegar las credenciales; se guardan cifradas y nunca se muestran completas. Bluesky no usa credenciales de la plataforma (cada persona conecta con su usuario y una contraseña de aplicación), por eso su pantalla solo explica cómo funciona. Pinterest hoy se conecta por Composio y Google Business Profile y Threads por PostPeer: se administran en esos paneles. Las personas que conectan sus redes no ven estas pantallas.
 
+**Actualización 2026-10-17 (menú Admin):** las pantallas de administración de Bing, LinkedIn, Pinterest, Tumblr, Bluesky y Blogger aparecen ahora en el menú Admin de **ambas** aplicaciones (Admin Artículos y Admin Redes), junto con Usuarios, Composio y PostPeer.
+
 **Publicaciones** no es una pantalla: es un grupo que se despliega. Dentro están cinco accesos relacionados con publicar y revisar tus resultados:
 
 - **${MENU_NAMES.propios}** (/dashboard/publicar): escribe tus títulos y publícalos directamente en tu página web. Es la opción recomendada si estás comenzando y todavía no tienes registros de indexación en Google, o si quieres publicar contenido propio.

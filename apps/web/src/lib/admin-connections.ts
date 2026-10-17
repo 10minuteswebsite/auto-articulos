@@ -34,8 +34,9 @@ const ADMIN_PAGES: Record<string, string> = {
   blogger: "/dashboard/blogger",
 };
 
-export function adminConnectionItems(host: HostProductScope): { href: string; label: string }[] {
-  return ADMIN_CONNECTIONS.filter((c) => c.via === "propia" && (host === "COMPARTIDO" || c.product === host)).map((c) => ({
+/** Todas las conexiones con pantalla propia salen en el menú Admin de AMBOS productos (orden de Milton, 2026-10-17). */
+export function adminConnectionItems(_host?: HostProductScope): { href: string; label: string }[] {
+  return ADMIN_CONNECTIONS.filter((c) => c.via === "propia").map((c) => ({
     href: ADMIN_PAGES[c.id] ?? `/dashboard/configuracion/conexiones?conexion=${c.id}`,
     label: c.label,
   }));
