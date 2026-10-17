@@ -8,6 +8,7 @@ import {
   buttonStyle,
 } from "./dashboard-ui";
 import { CONNECTION_SELECT_STYLE, ConnectionCard, ConnectionGuide, ConnectionTestButton } from "./connection-ui";
+import { BING_RECONNECT_MESSAGE_TEXT as BING_RECONNECT_MESSAGE } from "@/lib/bing-client-change-text";
 import { CONNECTION_GUIDES } from "@/lib/connection-guides";
 
 type Site = { Url: string; IsVerified: boolean };
@@ -24,6 +25,7 @@ export default function BingWebmasterSection() {
   const [connecting, setConnecting] = useState(false);
   const [data, setData] = useState<{
     connected: boolean;
+    reconectarPorCambio?: boolean;
     siteUrl?: string | null;
     sitemapUrl?: string | null;
     sitemapCheck?: { ok: boolean; reason?: string };
@@ -66,6 +68,9 @@ export default function BingWebmasterSection() {
     /invalid.*token|invalid_client|invalid_grant|client authentication|volver a autorizar|expired|unauthorized|401/i.test(
       data.error,
     );
+
+  // Cambio de proveedor de Bing: la conexión anterior ya no sirve y hay que reconectar.
+  const cambioProveedor = !reconectando && !!data?.connected && !!data?.reconectarPorCambio;
 
   useEffect(() => {
     const bingParam = searchParams.get("bing");
@@ -206,7 +211,7 @@ export default function BingWebmasterSection() {
   return (
     <ConnectionCard
       title="Bing Webmaster Tools"
-      state={!data?.connected ? "disconnected" : tokenExpired ? "expired" : "connected"}
+      state={!data?.connected ? "disconnected" : tokenExpired || cambioProveedor ? "expired" : "connected"}
       lead="Conexión administrada desde esta tarjeta. Conecta tu cuenta de Bing y elige aquí el sitio que usará SEO TOTAL."
       note="El sistema enviará tu sitemap a Bing todas las noches y procesará cada artículo publicado para acelerar su aparición en búsquedas."
     >
@@ -240,7 +245,7 @@ export default function BingWebmasterSection() {
             {connecting ? "Conectando…" : "Nueva conexión"}
           </a>
         </div>
-      ) : tokenExpired ? (
+      ) : tokenExpired || cambioProveedor ? (
         <div
           style={{
             background: "#fff2f1",
@@ -250,10 +255,12 @@ export default function BingWebmasterSection() {
           }}
         >
           <p style={{ margin: 0, fontWeight: 600, color: "#ff3b30", fontSize: 14 }}>
-            Tu conexión con Bing venció
+            {cambioProveedor ? "Cambiamos de proveedor: vuelve a conectar Bing" : "Tu conexión con Bing venció"}
           </p>
           <p style={{ margin: "6px 0 12px", color: "#6e6e73", fontSize: 13, lineHeight: 1.5 }}>
-            La autorización venció. Pulsa «Nueva conexión» para renovar el acceso; tu sitio y tu sitemap siguen guardados.
+            {cambioProveedor
+              ? BING_RECONNECT_MESSAGE
+              : "La autorización venció. Pulsa «Nueva conexión» para renovar el acceso; tu sitio y tu sitemap siguen guardados."}
           </p>
           <a
             href="/api/search-integrations/bing/connect"

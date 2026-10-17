@@ -1,5 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Bing: cliente OAuth nuevo (solo Artículos) y aviso rojo de reconexión — 2026-10-17
+
+- Task ID: `BING-CLIENTE-NUEVO-20261017`. Capitanía reclamada, sin migración ni workflows. Estado: PR abierto, SIN fusionar. Decisión de Milton: Bing solo en `articulos.lasolucionweb.net`; quien lo tenga conectado debe ver un aviso rojo que le diga dónde reconectar.
+- Consola de Bing (hecho, por Claude con la sesión de Milton): creado el cliente OAuth «SEO TOTAL ARTICULOS NET» con retorno `https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` (Bing admite UNA dirección por cliente y no es editable; queda 1 cupo libre). El cliente anterior «AUTO ARTICULOS» sigue intacto. El secreto NO se copió.
+- Código: `lib/bing-client-change.ts` (interruptor `BING_CLIENT_CHANGED_AT`; ausente = nadie ve nada), marca de reconexión en `SystemSetting` escrita por el callback de Bing (no se usa `updatedAt`, que el envío diario del sitemap también cambia), check `bing-reconnect` en `configuration-status` + alerta roja en Inicio y caja roja en la tarjeta de Bing. Pruebas nuevas 3/3, suite web 235/235, `tsc` limpio.
+- CORTE (lo hace Milton, en este orden): (1) fusionar el PR; (2) en Vercel poner `BING_WEBMASTER_CLIENT_ID`/`SECRET` del cliente nuevo, `BING_WEBMASTER_REDIRECT_URI=https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` y `BING_CLIENT_CHANGED_AT` con la fecha/hora del corte (ISO); (3) cambiar los mismos ID/secreto en los secretos de GitHub usados por `worker.yml` y `daily-sitemaps.yml`; (4) redesplegar. Hasta el paso 2 todo sigue como hoy. Riesgo: entre (2) y la reconexión de cada persona, el envío diario de sitemap a Bing falla para esa cuenta.
+- Pendiente: probar en vivo el flujo con una cuenta real tras el corte; con el código actual, el connect de Bing solo funciona en un host permitido (hoy los `.com`/seototal); en `.net` hace falta la reaplicación del cambio de hosts (#613 revertido) o ampliar la lista, pendiente de decidir.
+
 ## Claude — REVERSA del PR #613 (callbacks solo .net) — 2026-10-17
 
 - Task ID: `CALLBACKS-SOLO-NET-REVERSA-20261017`. Sin migración. Prueba en vivo con la sesión del navegador: `articulos.lasolucionweb.net/api/search-integrations/google/connect` terminó en Google con `Error 400: redirect_uri_mismatch`. Causa: producción tiene `DIA_CERO=on`, así que hasta #613 TODOS los callbacks salían como `seototal.lasolucionweb.com` (la única dirección registrada en las consolas); #613 los cambió a `.net`, no registradas aún.
