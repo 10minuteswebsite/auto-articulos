@@ -8,6 +8,13 @@
 - CORTE (lo hace Milton, en este orden): (1) fusionar el PR; (2) en Vercel poner `BING_WEBMASTER_CLIENT_ID`/`SECRET` del cliente nuevo, `BING_WEBMASTER_REDIRECT_URI=https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` y `BING_CLIENT_CHANGED_AT` con la fecha/hora del corte (ISO); (3) cambiar los mismos ID/secreto en los secretos de GitHub usados por `worker.yml` y `daily-sitemaps.yml`; (4) redesplegar. Hasta el paso 2 todo sigue como hoy. Riesgo: entre (2) y la reconexión de cada persona, el envío diario de sitemap a Bing falla para esa cuenta.
 - Bing en `.net`: con `BING_WEBMASTER_REDIRECT_URI` definida, `connect` y `callback` de Bing usan EXACTAMENTE esa dirección (sin cálculo por host, sin bucle de redirección) y las cookies se emiten para la familia de dominios del host (`cookieEnvForHost`), evitando el rechazo por `Domain=.com` desde un `.net`. Sin la variable, todo sigue como hoy. Pendiente: prueba en vivo con cuenta real tras el corte.
 
+## Claude — Conexiones principales pasan al menú Admin — 2026-10-17
+
+- Task ID: `ADMIN-CONEXIONES-UBICACION-20261017`. Sin migración ni workflows. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`). Estado: PR abierto, SIN fusionar.
+- Pedido de Milton: a los administradores no debe aparecer Configuración → Conexiones (es para usuarios ordinarios); esas conexiones pasan al menú Admin, debajo de Composio y PostPeer, una por una.
+- Cambio: `lib/admin-connections.ts` (lista por producto), `DashboardNav.tsx` (el grupo Admin añade una entrada por conexión según el host: Artículos = Search Console, Analytics, Bing; Redes = Business, Instagram, Facebook, Threads, LinkedIn, Pinterest, Tumblr, Bluesky, Blogger; host compartido = todas), `configuracion/page.tsx` (oculta la tarjeta Conexiones a administradores, incluido «Acceder como»). Manual actualizado. La ruta `/dashboard/configuracion/conexiones?conexion=<id>` sigue siendo la misma pantalla.
+
+
 ## Claude — REVERSA del PR #613 (callbacks solo .net) — 2026-10-17
 
 - Task ID: `CALLBACKS-SOLO-NET-REVERSA-20261017`. Sin migración. Prueba en vivo con la sesión del navegador: `articulos.lasolucionweb.net/api/search-integrations/google/connect` terminó en Google con `Error 400: redirect_uri_mismatch`. Causa: producción tiene `DIA_CERO=on`, así que hasta #613 TODOS los callbacks salían como `seototal.lasolucionweb.com` (la única dirección registrada en las consolas); #613 los cambió a `.net`, no registradas aún.

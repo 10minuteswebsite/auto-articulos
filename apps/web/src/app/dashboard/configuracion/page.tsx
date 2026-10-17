@@ -2,6 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import { productOfHost } from "@/lib/product-routes";
+import { getSessionContext } from "@/lib/current-user";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +63,10 @@ const SECCIONES = [
 
 export default async function ConfiguracionPage() {
   const product = productOfHost((await headers()).get("host"));
-  const seccionesVisibles = SECCIONES.filter(
+  // Los administradores manejan las conexiones principales desde el menú Admin.
+  const { user, actingAdmin } = await getSessionContext();
+  const esAdmin = user.role === "admin" || Boolean(actingAdmin);
+  const seccionesVisibles = SECCIONES.filter((seccion) => !(esAdmin && seccion.href === "/dashboard/configuracion/conexiones")).filter(
     (seccion) => product === "COMPARTIDO" || seccion.producto === "COMPARTIDO" || seccion.producto === product,
   );
   const esRedes = product === "REDES";

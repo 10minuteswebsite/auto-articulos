@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
 import LogoutButton from "@/components/LogoutButton";
 import type { ProductsInfo } from "@/lib/product-page-gate";
+import { adminConnectionItems } from "@/lib/admin-connections";
 
 interface TabItem {
   id?: string;
@@ -303,6 +304,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
   const adminGroup: TabGroup = {
     ...ADMIN_GROUP,
     label: hostProduct === "REDES" ? "Admin Redes" : "Admin Artículos",
+    items: [...ADMIN_GROUP.items, ...adminConnectionItems(hostProduct)],
   };
   const rawEntries: NavEntry[] = [
     ...baseEntries,
