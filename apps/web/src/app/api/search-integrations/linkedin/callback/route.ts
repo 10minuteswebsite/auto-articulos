@@ -7,7 +7,7 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredLinkedInAppCredentials } from "@/lib/linkedin-app-config";
 import { LINKEDIN_STATE_COOKIE } from "../connect/constants";
 import { clearCookie } from "@/lib/shared-cookies";
-import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { clearOAuthOrigin, netCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const appCreds = await getStoredLinkedInAppCredentials();
-    const redirectUri = oauthCallbackUri(request, "/api/search-integrations/linkedin/callback");
+    const redirectUri = netCallbackUri(request, "/api/search-integrations/linkedin/callback");
     const tokens = await exchangeCodeForLinkedInTokens(code, redirectUri, appCreds);
 
     const expiresAt = new Date(Date.now() + tokens.expiresIn * 1000);

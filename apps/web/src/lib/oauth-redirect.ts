@@ -131,3 +131,21 @@ export function clearOAuthOrigin(response: Parameters<typeof clearCookie>[0], en
   if (!canonicalOAuthOrigin(env)) return;
   clearCookie(response, OAUTH_ORIGIN_COOKIE, { httpOnly: true, secure: true, sameSite: "lax", path: "/" }, env);
 }
+
+/*
+ * REDES CONECTADAS POR LOS DOS SITIOS .NET (2026-10-17). Para las conexiones ya
+ * registradas en el proveedor con las direcciones de articulos y redes .net, el
+ * retorno es SIEMPRE el host .net desde el que se inicia (nunca seototal ni .com).
+ */
+export const NET_PRODUCT_HOSTS = ["articulos.lasolucionweb.net", "redes.lasolucionweb.net"] as const;
+export const NET_DEFAULT_ORIGIN = "https://articulos.lasolucionweb.net";
+
+export function isNetProductHost(host: string): boolean {
+  return (NET_PRODUCT_HOSTS as readonly string[]).includes(host.trim().toLowerCase());
+}
+
+/** redirect_uri .net: el host de la petición si es articulos/redes .net; si no, articulos .net. */
+export function netCallbackUri(request: { url: string }, path: string): string {
+  const host = new URL(request.url).host.toLowerCase();
+  return `${isNetProductHost(host) ? `https://${host}` : NET_DEFAULT_ORIGIN}${path}`;
+}
