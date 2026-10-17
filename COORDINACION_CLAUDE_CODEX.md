@@ -1,5 +1,10 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Bing: el retorno es SIEMPRE articulos.lasolucionweb.net — 2026-10-17
+
+- Task ID: `BING-RETORNO-NET-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Prueba con Lorena en producción: el aviso rojo salió (Inicio y tarjeta) y la reconexión funcionó, pero el botón mandó a `seototal.lasolucionweb.com` porque `BING_WEBMASTER_REDIRECT_URI` no estaba definida.
+- Cambio: `bingExplicitRedirect()` ya no depende de la variable: por defecto es `https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` (la única registrada para el cliente nuevo); `connect` manda a ese host desde cualquier otro y `callback` usa la misma dirección. Pruebas 238/238.
+
 ## Claude — CIERRE «Ubicación de Conexiones en el Admin» y Bing — 2026-10-17
 
 - Task ID: `ADMIN-CONEXIONES-UBICACION-20261017`. Sin migración. Capitanía liberada. PR #615, #617, #618 y #619 fusionados y desplegados. PR #620 CERRADO SIN FUSIONAR (ver abajo).

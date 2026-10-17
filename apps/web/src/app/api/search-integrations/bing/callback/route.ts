@@ -6,7 +6,7 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredBingCredentials } from "@/lib/bing-credentials";
 import { BING_STATE_COOKIE, bingExplicitRedirect, bingOAuthConfig } from "@/lib/bing-oauth";
 import { markBingReconnected } from "@/lib/bing-client-change";
-import { clearOAuthOrigin, getOAuthRedirectUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { clearOAuthOrigin, oauthReturnBase } from "@/lib/oauth-redirect";
 import { clearCookie } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const config = bingOAuthConfig(await getStoredBingCredentials());
     const { clientId, clientSecret } = config;
     const explicit = bingExplicitRedirect();
-    const redirectUri = explicit ? explicit.toString() : getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);
+    const redirectUri = explicit.toString();
     const tokenResponse = await fetch(
       "https://www.bing.com/webmasters/oauth/token",
       {

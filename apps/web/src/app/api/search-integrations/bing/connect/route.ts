@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredBingCredentials } from "@/lib/bing-credentials";
 import { BING_SCOPE, BING_STATE_COOKIE, bingExplicitRedirect, bingOAuthConfig } from "@/lib/bing-oauth";
-import { getAllowedOAuthOrigin, getOAuthRedirectUri, rememberOAuthOrigin } from "@/lib/oauth-redirect";
+import { rememberOAuthOrigin } from "@/lib/oauth-redirect";
 import { applyCookie, cookieEnvForHost } from "@/lib/shared-cookies";
 
 export async function GET(request: NextRequest) {
@@ -11,23 +11,15 @@ export async function GET(request: NextRequest) {
   // host que no está en nuestra lista blanca; en ese caso llevamos primero la
   // sesión al host registrado para conservar cookie, state y sesión.
   const explicit = bingExplicitRedirect();
-  if (explicit && request.nextUrl.host.toLowerCase() !== explicit.host.toLowerCase()) {
+  if (request.nextUrl.host.toLowerCase() !== explicit.host.toLowerCase()) {
     // Cliente nuevo de Bing: solo se conecta desde el host de su dirección registrada.
     return NextResponse.redirect(new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", explicit.origin));
-  }
-  if (!explicit && !getAllowedOAuthOrigin(request)) {
-    try {
-      const canonical = new URL(bingOAuthConfig(await getStoredBingCredentials()).redirectUri);
-      return NextResponse.redirect(new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster", canonical.origin));
-    } catch {
-      // Sin configuración válida, el bloque principal devolverá el error habitual.
-    }
   }
   await getCurrentUserId();
   try {
     const config = bingOAuthConfig(await getStoredBingCredentials());
     const { clientId } = config;
-    const redirectUri = explicit ? explicit.toString() : getOAuthRedirectUri(request, "/api/search-integrations/bing/callback", config.redirectUri);
+    const redirectUri = explicit.toString();
     const state = randomBytes(24).toString("base64url");
     const url = new URL("https://www.bing.com/webmasters/oauth/authorize");
     url.search = new URLSearchParams({
