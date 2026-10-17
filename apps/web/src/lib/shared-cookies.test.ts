@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { applyCookie, clearCookieHeaders, cookieEnvForHost, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
+import { applyCookie, clearCookieHeaders, cookieEnvForHost, diaCeroActive, serializeCookie, setCookieHeaders, sharedCookieDomain } from "./shared-cookies";
 
 test("el dominio compartido solo vale si es válido; si no, todo queda como hoy", () => {
   assert.equal(sharedCookieDomain({}), undefined);
@@ -27,7 +27,7 @@ test("con dominio: fija con Domain y borra la variante ligada al host", () => {
 
 test("applyCookie escribe la cookie compartida en una respuesta real", () => {
   const response = { headers: new Headers(), cookies: { set: () => { throw new Error("no debe usar cookies.set con dominio activo"); } } };
-  applyCookie(response, "s", "abc", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 }, { SHARED_COOKIE_DOMAIN: ".lasolucionweb.com" });
+  applyCookie(response, "s", "abc", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 }, { DIA_CERO: "on" });
   const headers = response.headers.getSetCookie();
   assert.equal(headers.length, 2);
   assert.match(headers[0], /^s=abc; .*Domain=\.lasolucionweb\.com/);
@@ -47,14 +47,17 @@ test("el valor se codifica (no puede inyectar atributos)", () => {
   assert.equal(serializeCookie("s", "a; Domain=evil.com", {}), "s=a%3B%20Domain%3Devil.com; Path=/");
 });
 
-test("solo el dominio explícito activa la cookie compartida; sin él, ligada al host", () => {
-  assert.equal(sharedCookieDomain({}), undefined);
-  assert.equal(sharedCookieDomain({ SHARED_COOKIE_DOMAIN: ".otro.com" }), ".otro.com");
-  assert.equal(sharedCookieDomain({ SHARED_COOKIE_DOMAIN: "invalido" }), undefined);
+test("DIA_CERO=on activa el dominio por defecto; el explícito manda; apagado = como hoy", () => {
+  assert.equal(diaCeroActive({}), false);
+  assert.equal(diaCeroActive({ DIA_CERO: "off" }), false);
+  assert.equal(diaCeroActive({ DIA_CERO: " ON " }), true);
+  assert.equal(sharedCookieDomain({ DIA_CERO: "on" }), ".lasolucionweb.com");
+  assert.equal(sharedCookieDomain({ DIA_CERO: "on", SHARED_COOKIE_DOMAIN: ".otro.com" }), ".otro.com");
+  assert.equal(sharedCookieDomain({ DIA_CERO: "off" }), undefined);
 });
 
 test("el callback del HUB usa el dominio de la familia que lo está sirviendo", () => {
-  assert.equal(cookieEnvForHost("redes.lasolucionweb.net", {}).SHARED_COOKIE_DOMAIN, ".lasolucionweb.net");
-  assert.equal(cookieEnvForHost("redes.lasolucionweb.com", {}).SHARED_COOKIE_DOMAIN, ".lasolucionweb.com");
-  assert.equal(cookieEnvForHost("redes.lasolucionweb.net:443", {}).SHARED_COOKIE_DOMAIN, ".lasolucionweb.net");
+  assert.equal(cookieEnvForHost("redes.lasolucionweb.net", { DIA_CERO: "on" }).SHARED_COOKIE_DOMAIN, ".lasolucionweb.net");
+  assert.equal(cookieEnvForHost("redes.lasolucionweb.com", { DIA_CERO: "on" }).SHARED_COOKIE_DOMAIN, ".lasolucionweb.com");
+  assert.equal(cookieEnvForHost("redes.lasolucionweb.net:443", { DIA_CERO: "on" }).SHARED_COOKIE_DOMAIN, ".lasolucionweb.net");
 });

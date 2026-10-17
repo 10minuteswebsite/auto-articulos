@@ -57,16 +57,17 @@ test("el redirect_uri sale del host .net de la petición; fuera de la lista usa 
   assert.equal(getOAuthRedirectUri(new NextRequest("https://preview.example/x"), path, `https://${ARTICULOS}${path}`), `https://${ARTICULOS}${path}`);
 });
 
-test("sin origen canónico: el callback no manda a seototal y el retorno es el host de la petición", () => {
+test("sin origen canónico: DIA_CERO ya no manda a seototal y el retorno es el host de la petición", () => {
   assert.equal(canonicalOAuthOrigin({}), null);
+  assert.equal(canonicalOAuthOrigin({ DIA_CERO: "on" }), null);
   for (const host of [ARTICULOS, REDES]) {
     assert.equal(
-      oauthCallbackUri(req(`https://${host}/api/x`), "/api/search-integrations/linkedin/callback", {}),
+      oauthCallbackUri(req(`https://${host}/api/x`), "/api/search-integrations/linkedin/callback", { DIA_CERO: "on" }),
       `https://${host}/api/search-integrations/linkedin/callback`,
     );
   }
   const r = req(`https://${REDES}/api/x`, `oauth_return_origin=${ARTICULOS}`);
-  assert.equal(oauthReturnBase(r, {}), r.url);
+  assert.equal(oauthReturnBase(r, { DIA_CERO: "on" }), r.url);
 });
 
 test("OAUTH_CANONICAL_ORIGIN solo vale si es https y de un host permitido", () => {
@@ -92,8 +93,8 @@ test("rememberOAuthOrigin/clearOAuthOrigin solo escriben cookie con origen canó
     return { sets, headers: new Headers(), cookies: { set: (name: string) => { sets.push(name); } } };
   };
   const off = mk();
-  rememberOAuthOrigin(off, req(`https://${REDES}/x`), {});
-  clearOAuthOrigin(off, {});
+  rememberOAuthOrigin(off, req(`https://${REDES}/x`), { DIA_CERO: "on" });
+  clearOAuthOrigin(off, { DIA_CERO: "on" });
   assert.equal(off.headers.get("set-cookie"), null);
   assert.equal(off.sets.length, 0);
   const on = mk();
