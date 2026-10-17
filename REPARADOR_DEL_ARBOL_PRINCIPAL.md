@@ -331,3 +331,24 @@ workflow — esto es solo la señal, aditiva, para que quede visible junto al re
 esto no se resuelva (declarando las columnas del HUB en `schema.prisma` de `main`, consistente
 con lo que la base real ya tiene), nadie debería correr `migrate.yml` con `accept_data_loss` o
 `force_sync` activados.** Queda para que Milton decida cómo y cuándo reconciliar el schema.
+
+### Dos escrituras concurrentes sobre `main` revirtieron temporalmente la subbarra de Artículos — 2026-10-16 (ya resuelto por la propia conversación, sin acción del Reparador)
+
+Agregado por la tarea programada diaria de propagación (corrida 2026-10-17) a partir de
+`COORDINACION_CLAUDE_CODEX.md` ("Addendum — regresión concurrente detectada y corregida",
+dentro de "Cierre — tipografía del menú de aplicación" — 2026-10-16).
+
+Mientras se cerraba la paridad visual de `DashboardNav` (Artículos vs. Superlinks), un proceso
+paralelo publicó el commit `babd61c1` directamente en `main`, revirtiendo la subbarra de azul a
+blanco/gris; ese commit y su deployment (`dpl_G5w46PMjrfE5Eyt2g472jUP2cFEF`) quedaron
+documentados como regresión, no como verdad. Se corrigió hacia delante (sin revertir ni usar
+`reset`) con `82d33d878efabacce5b2af68eb4277c81ae18f0f`, deployment
+`dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`. Una segunda escritura concurrente (`0f7288dc`) repitió el
+mismo cambio antiguo; se corrigió de nuevo hacia delante con
+`964444a576b9f1e49bcf568981370f03b6769064`, deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL`.
+
+Mismo patrón que otros hallazgos de este documento: más de una conversación escribiendo sobre
+`main` casi al mismo tiempo y sobre el mismo archivo. Ya fue resuelto por la propia conversación
+(corrección hacia delante, sin `reset` ni fuerza) y verificado en producción; el Reparador no
+tuvo que intervenir. Se deja señalado solo para que quede visible junto al resto de incidentes
+de árbol compartido.
