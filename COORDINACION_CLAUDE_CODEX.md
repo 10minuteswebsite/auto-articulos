@@ -1,5 +1,11 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Tumblr: consola en redes .net y pantalla Admin corregida — 2026-10-17
+
+- Task ID: `TUMBLR-PANTALLA-FIX-20261017`. Sin migración. Consola de Tumblr (app 10minuteswebsite, #661539, hecho por Claude en la sesión de Milton): «URL de retrollamada» y «URL de redirección de OAuth2» ahora son SOLO `https://redes.lasolucionweb.net/api/search-integrations/tumblr/callback` (antes seototal.lasolucionweb.com). El código ya recibe en redes .net (el `callback` reenvía cualquier otro host allí).
+- Pantalla `/dashboard/tumblr`: mostraba «la que usa el sistema hoy: seototal» y pedía agregar dos direcciones; es falso (Tumblr admite UNA y el código la fija a redes .net). Ahora muestra una sola dirección fija. Pruebas 240/240.
+- Pendiente: completar la conexión real de Tumblr con Lorena (quedó en la pantalla de permisos de Tumblr) y quitar `.com` del resto del código (reaplicar #613 por pasos).
+
 ## Claude — LinkedIn conecta SOLO por articulos/redes .net — 2026-10-17
 
 - Task ID: `LINKEDIN-RETORNO-NET-20261017`. Sin migración. Estado: PR abierto, SIN fusionar.
