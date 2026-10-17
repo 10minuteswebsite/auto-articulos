@@ -5252,4 +5252,41 @@ Propagado desde `COORDINACION_CLAUDE_CODEX.md`, entrada "Claude — MCP: estilos
 - Commit: `2de420bb3037cd940b370a24a03faea8516689fe` en `main` (PR #599). Deployments de producción (GitHub) `7128156756` y `7128168390`; sin migraciones.
 - Verificación: `409 ALREADY_PUBLISHED` real en producción (cuenta de pruebas) y worker de pruebas en `success`; corrida real `38959171399` en `success` sin «Recuperados» y confirmada por Milton. La guardia del worker ante un repetido real no se provocó en vivo (cubierta por pruebas).
 - Causa corregida: el rescate de títulos atascados daba por muerto un título recién reclamado y lo devolvía a Oportunidades mientras se publicaba; la oportunidad se republicaba y chocaba con el título existente.
+
+## Versión — 2026-10-16 (propagación) — verificación de fusión de PR #605, #609, #611 y #612
+
+Entrada agregada por la tarea programada diaria de propagación de Claude, a partir de
+`COORDINACION_CLAUDE_CODEX.md` ("Claude — Google Business: PostPeer `success:false`/`error` ya
+cuenta como fallo" — `GMB-FALLO-POSTPEER-20261016`; "Claude — Google Business: propuesta
+atascada en 1 % por artículo sin resumen" — `GMB-SIN-RESUMEN-20261016`; "Claude — Cuidado de
+tokens (PostPeer, Composio, imágenes, OpenAI)" — `CUIDADO-TOKENS-20261016`; "Claude — R1: la
+imagen IA ya pagada se reutiliza en reintentos" — `CUIDADO-TOKENS-R1-20261016`).
+
+Las cuatro entradas originales en Coordinación describen su propio commit como "PR abierto, SIN
+fusionar" (las dos de Google Business) o no incluyen ninguna línea de cierre (las dos de
+Cuidado de Tokens). Verificado hoy con `git merge-base --is-ancestor <commit> origin/main`
+desde este entorno: los cuatro commits YA son ancestros de `origin/main`, es decir, ya están
+fusionados, aunque el texto original de sus entradas en Coordinación diga lo contrario. No se
+reescribió ninguna palabra de esas entradas; esta verificación se agrega solo aquí.
+
+- PR #605 (`GMB-FALLO-POSTPEER-20261016`): commit `dca4ff5` en `main`. Cambia
+  `describePostPeerFailure` para que una respuesta de PostPeer con `success:false` o `error`
+  por plataforma cuente como fallo real (antes se guardaba como publicada). Deployment de
+  Vercel NO verificado en esta corrida (sin acceso a la consola de Vercel desde este entorno);
+  solo se confirmó la fusión en `main` vía git.
+- PR #609 (`GMB-SIN-RESUMEN-20261016`): commit `d20e06f` en `main`. Ya no exige `summary` no
+  nulo para que una propuesta aprobada de Google Business sea candidata a publicar. Deployment
+  de Vercel NO verificado en esta corrida.
+- PR #611 (`CUIDADO-TOKENS-20261016`): commit `1d72174` en `main`. Agrega `CUIDADO_DE_TOKENS.md`
+  y la prueba guardiana `paidApiGuard.test.ts`; es documentación y una prueba, no cambia
+  comportamiento en producción. Deployment de Vercel NO verificado en esta corrida.
+- PR #612 (`CUIDADO-TOKENS-R1-20261016`): commit `bd57a87` en `main`. `generateAiSocialImage`
+  reutiliza la imagen IA ya pagada (vía `reuse.json`) si existe, tiene menos de 48 h y responde,
+  en vez de generar y pagar de nuevo. Deployment de Vercel NO verificado en esta corrida.
+
+Responsable de esta entrada: Claude (tarea programada diaria de propagación). Responsable del
+trabajo original: Claude (según las propias entradas de Coordinación).
+Siguiente acción: quien retome estos cuatro proyectos debe confirmar el deployment de Vercel de
+cada uno y, si corresponde, agregar aquí mismo el identificador y el estado `READY`.
+Estado: FUSIONADOS EN `main` (verificado por git); DEPLOYMENT DE VERCEL SIN VERIFICAR POR ESTA TAREA.
 - Defensa añadida: coincidencia exacta normalizada contra lo ya publicado (nunca similitud difusa) al listar Oportunidades, al encolar y en el worker antes de iniciar sesión o generar nada; chequeo remoto de duplicado también en la ruta de prompt propio, antes de la imagen.
