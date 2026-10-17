@@ -223,3 +223,25 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 | BASELINE.md | sí | `4836deaf` | `dpl_J9bQtR8X…` | 11 | sí | sí | contrato de prompts |
 | CHECKPOINTS.md | sí | `4836deaf` | `dpl_J9bQtR8X…` | 11 | sí | sí | este registro |
 
+## Checkpoint 12 — cierre y archivo de la conversación MCP — 2026-10-17 (America/New_York)
+
+- Task ID: `MCP-CIERRE-20261017`. Producto: `10minuteswebsite/auto-articulos`, rama única `main`.
+- Commit de `main` al cerrar: `e5414d1a` (incluye mi último código `4836deaf`). Deployment: `dpl_At7F1QJYaUzy9mdkGUyX2KRM4VZu` (`READY`).
+- CURRENT_STATE y BASELINE: sin cambio de comportamiento en este cierre (N/A; el contrato MCP vigente es el del Checkpoint 11).
+- Pruebas: sin cambios de código; las del Checkpoint 11 siguen vigentes (28/28 MCP).
+- Evidencia: HTTP `articulos` y `redes` `.com` (`/login` 200, `/api/mcp` 401) el 2026-10-17; 8 PR fusionados y ninguno abierto; ramas propias eliminadas.
+- Riesgos/pendientes: ver Coordinación (entrada «CIERRE Y ARCHIVO»), 5 puntos con dueño Milton.
+- Siguiente responsable: quien reciba la prueba en vivo con Catalina/Lorena o los pendientes de Milton.
+
+### Auditoría de cobertura documental (Task `MCP-CIERRE-20261017`)
+
+| Documento | Task ID | Commit | Deployment | Checkpoint | Alcance | Evidencia | Resultado |
+|---|---|---|---|---|---|---|---|
+| COORDINACION_CLAUDE_CODEX.md | sí | `4836deaf`/`e5414d1a` | `dpl_At7F1QJ…` | 12 | sí | sí | cerrado y archivado |
+| CONTROLADOR_DE_VERSIONES.md | sí | `4836deaf`/`e5414d1a` | `dpl_At7F1QJ…` | 12 | sí | sí | cierre registrado |
+| INVENTARIO_CONVERSACIONES.md | sí | `4836deaf`/`e5414d1a` | `dpl_At7F1QJ…` | 12 | sí | sí | reservas liberadas |
+| CEREBRO.md | sí | `4836deaf` | `dpl_J9bQtR8…` | 12 | sí | sí | lecciones y pendientes |
+| CURRENT_STATE.md | sí | `4836deaf`/`e5414d1a` | `dpl_At7F1QJ…` | 12 | sí | sí | punto cero MCP vigente |
+| BASELINE.md | sí | N/A (sin cambio de comportamiento) | N/A | 12 | N/A | N/A | contrato MCP del Checkpoint 11 vigente |
+| CHECKPOINTS.md | sí | `e5414d1a` | `dpl_At7F1QJ…` | 12 | sí | sí | este registro |
+

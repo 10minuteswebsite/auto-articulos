@@ -1,5 +1,9 @@
 # CURRENT_STATE — Punto cero real
 
+## Nota de cierre MCP — 2026-10-17
+
+- La conversación «PROBLEMAS CON MCP ARTICULOS» quedó CERRADA Y ARCHIVADA (Task `MCP-CIERRE-20261017`). El estado del MCP en producción está descrito en la sección «Punto cero vigente — prompts por producto» y en el Checkpoint 11/12; el último código MCP es `4836deaf`. Producción al cierre: `e5414d1a`, `dpl_At7F1QJYaUzy9mdkGUyX2KRM4VZu` (`READY`).
+
 ## Cierre Google Business y cuidado de tokens — 2026-10-17
 
 - Código funcional de esta conversación en `main`: `dca4ff53` (#605), `d20e06f9` (#609), `1d721742` (#611), `bd57a872` (#612). Despliegues de producción verificados `success`; Redes `/login` 200.

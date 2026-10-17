@@ -1,5 +1,14 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — CIERRE Y ARCHIVO «PROBLEMAS CON MCP ARTICULOS» — 2026-10-17
+
+- Estado: CERRADO Y ARCHIVADO. Sin PR, ramas ni commits abiertos de esta conversación. Capitanía de migración liberada. Sin migraciones en ninguna de las tareas.
+- Producción al cierre: `e5414d1a` (`dpl_At7F1QJYaUzy9mdkGUyX2KRM4VZu`, `READY`, 2026-10-17 19:53Z), que contiene todo lo siguiente; mi último código funcional es `4836deaf` (`dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx`). `articulos` y `redes` `.com`: `/login` 200 y `/api/mcp` sin token 401.
+- Entregado en producción (PR → commit → deployment): #566 `dc4203f0` (`dpl_GYJ9mEpJ4ZnUWGugK6zCK6PkCfNf`) renovación OAuth de ChatGPT; #581 `748c3dec` (`dpl_ExEP7ywHp3FNiMFQgkwQ8NWDxks9`) alcance del asistente + automatización de artículos; #593 `334d59d0` (`dpl_8MnYqAW7NceduJdVMh5pzzDZLc2b`) Redes por asistente; #594 `81c40c87` (`dpl_85mLnuS9qpun6bJt2NAdcG23m1Ey`) estilos de escritura; #601 `4bbf565a` (`dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR`) claridad de Redes + corrección de prueba; #606 `4836deaf` (`dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx`) un prompt por producto con aceptación única y frecuencias por defecto. Documentación: #604 y #607 (checkpoints 10 y 11).
+- Verificado en producción: arreglo OAuth con 7 renovaciones `token` 200 sin `authorize` el 16/10 (en logs de Vercel); HTTP de los seis dominios; rechazo limpio de refresh falso. NO verificado: pantalla de Asistentes IA por host con sesión real; herramientas de Redes/estilos y automatización con un asistente real (Catalina/Muse de Lorena probó el prompt de Redes; Milton no pudo mostrar el resultado).
+- Pendientes que NO bloquean este cierre (dueño: Milton): (1) que las personas vuelvan a copiar el prompt desde la pantalla del MCP; (2) decidir qué prompt muestra el host `seototal`; (3) discrepancia de Search Console de Angel Quintela (el resolvedor piloto `COMPOSIO_PILOT_USERS_GOOGLE_SEARCH_CONSOLE` deja «sin conectar» al MCP lo que la pantalla muestra conectado; fuera del MCP por orden de Milton); (4) el HUB muestra «Sin acceso» a Redes y Artículos en la cuenta de Lorena aunque los productos le abren (sin investigar); (5) `GET /api/composio/options` devolvió 502 el 14/10 (sin investigar).
+- Lecciones: no asumir, preguntar (memoria `no-asumir-preguntar`); respuestas cortas (`respuestas-cortas-con-milton`); correr `npm test` completo antes de publicar (la prueba `mcp.test.ts` falló por mis PR); producción manda sobre el checkout local; el `push` directo a `main` lo bloquea el clasificador y se publica por PR sobre una rama existente con avance simple.
+
 ## Claude — CIERRE: Google Business y cuidado de tokens — 2026-10-17
 
 - Task ID: `GMB-CIERRE-20261016`. Conversación «PROBLEMA PUBLICACION GOOGLE MY BUSINESS». Estado: CERRADA. Este cierre corrige los estados «PR abierto, SIN fusionar» de las entradas de hoy: los cuatro PR están FUSIONADOS en `main`.

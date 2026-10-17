@@ -1,5 +1,12 @@
 # Inventario de conversaciones
 
+## Claude — CIERRE Y ARCHIVO «PROBLEMAS CON MCP ARTICULOS» — 2026-10-17
+
+- Task ID: `MCP-CIERRE-20261017`. Responsable: Claude (Sonnet 5.5), a pedido de Milton Dávila.
+- Reservas liberadas: `apps/web/src/lib/mcp/**`, `apps/web/src/lib/oauth/**`, `configuracion/mcp/page.tsx`. Capitanía de migración liberada.
+- Resultado: 8 PR fusionados (#566, #581, #593, #594, #601, #604, #606, #607), 0 abiertos; 5 ramas propias eliminadas; producción `e5414d1a` READY.
+- Tareas de la conversación (Task IDs): OAuth refresh, alcance del asistente, `MCP-REDES-CLARIDAD-20261016`, `MCP-PROMPTS-POR-PRODUCTO-20261016`, estilos de escritura, Redes MCP. Detalle en Coordinación (entrada del 2026-10-17) y Checkpoints 10-12.
+
 ## Registro operativo vigente — propagación del punto cero — 2026-10-16
 
 - Repositorio activo: `10minuteswebsite/auto-articulos`; rama única `main`; no se crean ramas ni worktrees.

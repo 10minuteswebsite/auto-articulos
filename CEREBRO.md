@@ -180,3 +180,9 @@ Los siete archivos activos del Harness comparten ahora el mismo punto cero produ
 - Frecuencia por defecto: Artículos 3 al día a horas distintas; Redes 1 al día por red, o solo algunas redes con su horario.
 - La línea «Servidor MCP» se quitó de los prompts (cambia por dominio y el asistente ya está conectado).
 
+## Cierre y lecciones — conversación MCP — 2026-10-17 (Task `MCP-CIERRE-20261017`)
+
+- Estado de las decisiones: ver las secciones del 2026-10-16 de este documento (OAuth refresh, alcance del asistente, automatización, estilos, prompts por producto, confirmación única del plan).
+- Deuda técnica registrada sin resolver: el resolvedor piloto de Search Console deja «sin conectar» al MCP a cuentas conectadas solo por Composio fuera de la lista piloto; el HUB muestra «Sin acceso» donde el producto sí abre; el MCP no oculta herramientas de Redes a cuentas solo-Artículos (las rutas lo impiden con error); host `seototal` sin prompt definido por Milton.
+- Procesos: no asumir (preguntar); respuestas cortas; `npm test` completo antes de publicar; publicar por PR sobre rama existente con avance simple cuando el `push` directo está bloqueado; un solo programador a la vez.
+
