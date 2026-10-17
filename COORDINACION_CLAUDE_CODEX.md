@@ -12047,3 +12047,56 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - Hallazgo no tocado: el desplegable «Ver historial» de Administración lee `data.runs` pero `/api/admin/inspect-runs` devuelve un arreglo; por eso salía vacío.
 - Capitán liberado.
 - **Cierre final (2026-10-16 20:17Z):** corrida real del worker `38959171399` (commit `247002b0`, que incluye #599) disparada por una publicación de Milton: terminó en `success`, procesó trabajo real (unidad de título de 163 s con `trabajo=true`) y sus registros tienen 0 líneas «Recuperados» (antes del fix la corrida `38938094773` imprimió «Recuperados 1 título(s)» sobre un título vivo). Milton confirmó en pantalla que la publicación funcionó. Limitación honesta: el caso exacto del repetido ante el worker no se provocó en vivo; queda cubierto por pruebas unitarias y por el `409 ALREADY_PUBLISHED` web ya verificado.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-17
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-16 (commit
+`c73e7b9`, "docs(coordinacion): cierre de la propagación diaria 2026-10-16"). Se revisó el rango
+`c73e7b9..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 221 líneas agregadas, 0 eliminadas
+(confirmado con `git diff --stat`), correspondientes a 30 commits que tocan este documento, de un
+total de 56 commits nuevos en el rango. El contenido corresponde a 14 proyectos/entradas
+distintas; varias ya estaban propagadas por sus propias conversaciones (Codex actualiza
+directamente `CONTROLADOR_DE_VERSIONES.md` e `INVENTARIO_CONVERSACIONES.md` al cerrar cada
+cambio de UI/HUB) y 6 todavía no estaban registradas en ningún otro documento.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 1 entrada nueva, verificando con `git merge-base --is-ancestor
+  <commit> origin/main` que 4 PRs (#605, #609, #611, #612) cuyo texto en Coordinación decía "PR
+  abierto, SIN fusionar" o no tenía ninguna línea de cierre YA están fusionados en `main`. Se dejó
+  explícito que el deployment de Vercel de esos 4 no se verificó en esta corrida (sin acceso a la
+  consola de Vercel desde este entorno). El resto de los commits del rango (los de Codex sobre
+  HUB/OAuth y paridad visual) ya estaban registrados en este documento con sus propios
+  commits/deployments citados; no se duplicó nada.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (los 6 proyectos nuevos ya son ancestros de
+  `origin/main`, verificado con `git merge-base --is-ancestor`; este entorno solo expone su
+  propio worktree en `git worktree list`, limitación ya señalada en corridas anteriores). Parte
+  B: 6 entradas nuevas, una por cada proyecto de Claude que no tenía registro en este inventario
+  (`CUIDADO-TOKENS-R1-20261016`, `CUIDADO-TOKENS-20261016`, `REDES-ERRORES-A-HISTORIAL-20261016`,
+  `GMB-SIN-RESUMEN-20261016`, `GMB-FALLO-POSTPEER-20261016`, y el rescate prematuro/guardia
+  anti-canibalización de PR #599). Los proyectos de Codex (MCP prompts por producto, MCP Redes
+  claridad, paridad visual Artículos/Superlinks, regresión concurrente, tipografías, menú propio
+  de Redes) ya estaban en Parte B; no se duplicaron.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: 1 hallazgo nuevo, sobre las dos escrituras concurrentes
+  (`babd61c1` y `0f7288dc`) que revirtieron temporalmente la subbarra de Artículos durante el
+  cierre de paridad visual — ya resuelto por la propia conversación, sin acción del Reparador; se
+  deja señalado por ser del mismo tipo que otros hallazgos ya registrados ahí.
+- `apps/web/src/content/manual-usuario.ts`: 1 actualización nueva, describiendo el menú **Admin
+  Hub** / **Admin Artículos** / **Admin Redes** con sus tres opciones (**Usuarios**, **Composio**,
+  **PostPeer**), que no estaba documentado para el usuario final. El cambio de "Publicaciones con
+  error" a Historial en Redes (PR #608) ya estaba propagado por el propio PR, según su misma
+  entrada en Coordinación; no se duplicó.
+- `TO-DO.md`: sin cambios. Se revisaron posibles ideas sueltas (riesgo R2 de imágenes pagadas,
+  auditoría de Composio/fal.ai, auditoría de Threads en PostPeer, disparos de `social-worker.yml`
+  cancelados por concurrencia, decisión pendiente sobre el host `seototal` en el prompt MCP) y se
+  decidió no copiarlas: son pendientes técnicos ya anotados dentro de sus propias entradas de
+  Coordinación (y ahora también en los documentos donde correspondía), no ideas sueltas de Milton
+  para este buzón, que por su propia regla "SOLO GUARDA" lo que Milton pide guardar
+  explícitamente.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva
+para Milton: ninguna — la única acción pendiente de autorización explícita detectada en el rango
+(eliminar el proyecto Vercel `la-solucion-web/web` creado por accidente) ya estaba señalada por
+Codex en su propia entrada ("Incidencia operativa", Punto 1 HUB/OAuth), así que no se repite aquí.
+
+Responsable: Claude (tarea programada diaria de propagación).
