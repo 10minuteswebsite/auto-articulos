@@ -4,6 +4,14 @@
 
 - Task ID: `ADMIN-CONEXIONES-SOLO-PROPIAS-20261017`. Sin migración ni workflows. Corrige el PR #615: Search Console, Analytics, Instagram, Facebook y Pinterest (Composio) y Business y Threads (PostPeer) ya no llevan entrada en el menú Admin; se manejan en sus paneles. Quedan Bing (Artículos) y LinkedIn, Tumblr, Bluesky, Blogger (Redes). PENDIENTE (pedido de Milton): una pantalla de administrador para cada conexión principal, distinta de la tarjeta de usuario; decisión abierta sobre mostrar el token enmascarado.
 
+## Claude — Bing: cliente OAuth nuevo (solo Artículos) y aviso rojo de reconexión — 2026-10-17
+
+- Task ID: `BING-CLIENTE-NUEVO-20261017`. Capitanía reclamada, sin migración ni workflows. Estado: PR abierto, SIN fusionar. Decisión de Milton: Bing solo en `articulos.lasolucionweb.net`; quien lo tenga conectado debe ver un aviso rojo que le diga dónde reconectar.
+- Consola de Bing (hecho, por Claude con la sesión de Milton): creado el cliente OAuth «SEO TOTAL ARTICULOS NET» con retorno `https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` (Bing admite UNA dirección por cliente y no es editable; queda 1 cupo libre). El cliente anterior «AUTO ARTICULOS» sigue intacto. El secreto NO se copió.
+- Código: `lib/bing-client-change.ts` (interruptor `BING_CLIENT_CHANGED_AT`; ausente = nadie ve nada), marca de reconexión en `SystemSetting` escrita por el callback de Bing (no se usa `updatedAt`, que el envío diario del sitemap también cambia), check `bing-reconnect` en `configuration-status` + alerta roja en Inicio y caja roja en la tarjeta de Bing. Pruebas nuevas 3/3, suite web 235/235, `tsc` limpio.
+- CORTE (lo hace Milton, en este orden): (1) fusionar el PR; (2) en Vercel poner `BING_WEBMASTER_CLIENT_ID`/`SECRET` del cliente nuevo, `BING_WEBMASTER_REDIRECT_URI=https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` y `BING_CLIENT_CHANGED_AT` con la fecha/hora del corte (ISO); (3) cambiar los mismos ID/secreto en los secretos de GitHub usados por `worker.yml` y `daily-sitemaps.yml`; (4) redesplegar. Hasta el paso 2 todo sigue como hoy. Riesgo: entre (2) y la reconexión de cada persona, el envío diario de sitemap a Bing falla para esa cuenta.
+- Bing en `.net`: con `BING_WEBMASTER_REDIRECT_URI` definida, `connect` y `callback` de Bing usan EXACTAMENTE esa dirección (sin cálculo por host, sin bucle de redirección) y las cookies se emiten para la familia de dominios del host (`cookieEnvForHost`), evitando el rechazo por `Domain=.com` desde un `.net`. Sin la variable, todo sigue como hoy. Pendiente: prueba en vivo con cuenta real tras el corte.
+
 ## Claude — Conexiones principales pasan al menú Admin — 2026-10-17
 
 - Task ID: `ADMIN-CONEXIONES-UBICACION-20261017`. Sin migración ni workflows. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`). Estado: PR abierto, SIN fusionar.

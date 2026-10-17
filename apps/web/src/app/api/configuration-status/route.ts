@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { BING_RECONNECT_MESSAGE, integrationNeedsBingReconnect } from "@/lib/bing-client-change";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { platformHelpUrl } from "@auto-articulos/shared";
@@ -87,7 +88,7 @@ export async function GET() {
     // 6. Bing Webmaster Tools
     prisma.searchIntegration.findFirst({
       where: { userId, provider: "bing", ...(account.selectedSiteDomain ? { siteDomain: account.selectedSiteDomain } : {}) },
-      select: { siteUrl: true, sitemapUrl: true },
+      select: { id: true, siteUrl: true, sitemapUrl: true },
     }),
     // 6. Google Business Profile
     prisma.businessProfileIntegration.findUnique({
@@ -430,6 +431,20 @@ export async function GET() {
       description: "Debes reconectar Google Analytics mediante Conexiones.",
       actionUrl: "/dashboard/configuracion/conexiones?conexion=google-analytics&reconectar=1",
       actionLabel: "Reconectar Analytics",
+    });
+  }
+
+  // Cambio del cliente OAuth de Bing: solo a quien tiene Bing conectado y aún no reconectó.
+  if (bingIntegration && (await integrationNeedsBingReconnect(bingIntegration.id))) {
+    checks.push({
+      id: "bing-reconnect",
+      label: "Reconectar Bing Webmaster Tools",
+      configured: false,
+      required: false,
+      section: "seo",
+      description: BING_RECONNECT_MESSAGE,
+      actionUrl: "/dashboard/configuracion/conexiones?conexion=bing-webmaster&reconectar=1",
+      actionLabel: "Reconectar Bing",
     });
   }
 
