@@ -201,6 +201,21 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
 - Verificación real: Redes `.net` mostró shell global, `SEO Total Redes`, `Difusión social`, `Admin Redes` y su submenú completo; el Hub mantuvo visible `AUTOMATIZA TUS REDES SOCIALES`.
 
+## Etiqueta de salida al Hub — 2026-10-17
+
+- Punto cero: producción Vercel `dpl_BxyHihabAupym2Tw3DiXdXzoiV6r`, `READY`,
+  con `main` limpia antes de editar.
+- Cambio mínimo: la entrada compartida de `DashboardNav` conserva el destino
+  `https://hub.lasolucionweb.net` y cambia únicamente su texto de `Volver al HUB`
+  a `Volver al Inicio`. Artículos y Redes reciben la misma etiqueta; no cambian
+  rutas, permisos, autenticación ni el encabezado global.
+- Código publicado: `3e181b79`.
+- Deployment verificado: `dpl_9NLNZAzUA5TuTTKz7896g1SZiEEY`, `READY`, con aliases
+  productivos de Artículos y Redes activos.
+- Validación: build de producción OK; suite `240/240`; el typecheck aislado local
+  conserva un error preexistente en `src/lib/bing-client-change.test.ts` por una
+  variable no usada, fuera de este cambio.
+
 ## Rescate de títulos y anti-canibalización — 2026-10-16
 
 - Causa probada de la republicación de «Aspectos clave para comprar propiedades en Orlando desde Medellín» (cuenta Antonio Aguirre): rescate prematuro de un título recién reclamado. El primer artículo es válido y sigue publicado; la segunda corrida terminó en error de título duplicado.

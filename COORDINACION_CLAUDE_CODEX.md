@@ -12116,6 +12116,21 @@ No se tocó código, producción, configuración, cuentas ni proveedores en esta
 - **Pruebas:** typecheck OK; build de producción del lote OK; suite amplia 224 correctas y 1 expectativa MCP histórica fallida, sin relación con este cambio.
 - **Estado:** CERRADO; no quedan cambios locales funcionales pendientes.
 
+## Codex — etiqueta Volver al Inicio — 2026-10-17
+
+- Solicitud: recuperar en los menús de aplicación el enlace de salida al Hub,
+  con el texto `Volver al Inicio`.
+- Auditoría: `DashboardNav` ya compartía una única entrada para Artículos y
+  Redes, pero la etiqueta seguía siendo `Volver al HUB`; el destino ya era el
+  Hub oficial y no se modificó.
+- Cambio mínimo publicado en `main`: `3e181b79`, una sola línea en
+  `apps/web/src/components/DashboardNav.tsx`.
+- Producción: Vercel `dpl_9NLNZAzUA5TuTTKz7896g1SZiEEY`, `READY`, aliases
+  `articulos.lasolucionweb.net` y `redes.lasolucionweb.net` activos.
+- Evidencia: build de producción OK y suite `240/240`; no se tocaron permisos,
+  autenticación, rutas ni datos.
+- Estado: PRODUCCIÓN, CERRADO.
+
 ## Codex — paridad visual Artículos/Superlinks — 2026-10-16
 
 - **Solicitud:** aplicar al menú y submenú de Artículos el patrón visual productivo de Superlinks.

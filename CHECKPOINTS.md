@@ -96,6 +96,21 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Evidencia: recarga real en `/dashboard/usuarios`; DOM calculado con `Usuarios` `13px/600`, `Composio` y `PostPeer` `13px/500`, filas `31px`; captura visual con el menú abierto.
 - Estado: PRODUCCIÓN, CERRADO.
 
+## Checkpoint 16 — Volver al Inicio — 2026-10-17
+
+- Punto cero: producción Vercel `dpl_BxyHihabAupym2Tw3DiXdXzoiV6r`, `READY`,
+  `main`, sin ramas ni worktrees adicionales.
+- Cambio: `DashboardNav` renombra la entrada compartida `Volver al HUB` a
+  `Volver al Inicio`, manteniendo el destino oficial del Hub.
+- Alcance: Artículos y Redes; sin cambios de rutas, permisos, autenticación,
+  datos ni navegación global.
+- Código publicado: `3e181b79`.
+- Deployment: `dpl_9NLNZAzUA5TuTTKz7896g1SZiEEY`, `READY`, aliases productivos
+  activos.
+- Validación: build OK y suite `240/240`; el único aviso local restante es un
+  typecheck preexistente por variable no usada en `bing-client-change.test.ts`.
+- Estado: PRODUCCIÓN, CERRADO.
+
 ## Checkpoint 15 — aislamiento del menú propio de Redes — 2026-10-16
 
 - Punto cero de partida: producción verificada del deployment `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`; se trabajó sobre `main`, sin ramas ni worktrees.
