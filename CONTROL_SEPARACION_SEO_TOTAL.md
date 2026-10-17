@@ -1,3 +1,5 @@
+> **✅ DÍA CERO CULMINADO (2026-10-17).** Artículos y Redes ya están separados y funcionando. Todo lo que sigue en este documento es HISTÓRICO: no hay tareas pendientes del Día Cero. El botón Día Cero fue eliminado y la variable `DIA_CERO` se quitó de Vercel. Ver `COORDINACION_CLAUDE_CODEX.md` (entrada «Limpieza del Día Cero»).
+
 > # ⛔ LEE ESTO PRIMERO, CODEX — REGLA PERMANENTE: **NO TE DETENGAS NUNCA**
 > **Orden de Milton.** Tu turno **NO termina** mientras quede un punto sin hacer en **C-038** (lista de pendientes). Solo puedes terminarlo si: **(1)** la cola está vacía y hiciste la auditoría final; **(2)** necesitas una acción de Milton (una sola pregunta, en palabras simples); **(3)** estás bloqueado en **TODOS** los puntos. Si solo uno falla: **una línea, y pasa al siguiente.**
 > **Ciclo cada ~5 min, HAYA CAMBIADO O NO el documento:** `git fetch` → leer órdenes nuevas (solo para recibirlas) → **trabajar el primer punto sin hacer** → registrar en `/private/tmp/codex-ciclos.log` y en el control (al terminar cada punto o cada 30 min) → **volver a empezar.** Comando largo: `timeout 900 <cmd> > /private/tmp/x.log 2>&1` y **avanza otro punto mientras corre.**

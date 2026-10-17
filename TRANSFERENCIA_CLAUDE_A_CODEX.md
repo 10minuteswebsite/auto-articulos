@@ -1,3 +1,5 @@
+> **✅ DÍA CERO CULMINADO (2026-10-17).** Artículos y Redes ya están separados y funcionando. Todo lo que sigue en este documento es HISTÓRICO: no hay tareas pendientes del Día Cero. El botón Día Cero fue eliminado y la variable `DIA_CERO` se quitó de Vercel. Ver `COORDINACION_CLAUDE_CODEX.md` (entrada «Limpieza del Día Cero»).
+
 # TRANSFERENCIA COMPLETA DE LIDERAZGO — CLAUDE → CODEX
 Proyecto: «SEPARACIÓN DE SEO TOTAL EN ARTÍCULOS Y REDES» · Fecha: 2026-10-02 · **Sin secretos** (ninguna clave, token ni contraseña real está en este documento; los usuarios y contraseñas de prueba de la base desechable los creas tú).
 

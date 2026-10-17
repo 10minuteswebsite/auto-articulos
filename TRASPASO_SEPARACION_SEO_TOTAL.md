@@ -1,3 +1,5 @@
+> **✅ DÍA CERO CULMINADO (2026-10-17).** Artículos y Redes ya están separados y funcionando. Todo lo que sigue en este documento es HISTÓRICO: no hay tareas pendientes del Día Cero. El botón Día Cero fue eliminado y la variable `DIA_CERO` se quitó de Vercel. Ver `COORDINACION_CLAUDE_CODEX.md` (entrada «Limpieza del Día Cero»).
+
 # TRASPASO — SEPARACIÓN DE SEO TOTAL EN ARTÍCULOS Y REDES (versión 3)
 
 > **Para Codex (o cualquier agente que retome esto).** Este archivo es el punto de entrada y **sustituye a la versión 1**. Si Claude se queda sin tokens, **tú tomas el control** (ver sección 12). Léelo completo, luego `CONTROL_SEPARACION_SEO_TOTAL.md` (sección 0 y las últimas entradas `C-0xx`), `CONTRATO_HUB_PARA_EL_HUB.md`, `MANUAL_DIA_CERO.md` y `BUZON_HUB_SEO_TOTAL.md`.
