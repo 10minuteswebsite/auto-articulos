@@ -1,5 +1,12 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Conexiones principales pasan al menú Admin — 2026-10-17
+
+- Task ID: `ADMIN-CONEXIONES-UBICACION-20261017`. Sin migración ni workflows. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`). Estado: PR abierto, SIN fusionar.
+- Pedido de Milton: a los administradores no debe aparecer Configuración → Conexiones (es para usuarios ordinarios); esas conexiones pasan al menú Admin, debajo de Composio y PostPeer, una por una.
+- Cambio: `lib/admin-connections.ts` (lista por producto), `DashboardNav.tsx` (el grupo Admin añade una entrada por conexión según el host: Artículos = Search Console, Analytics, Bing; Redes = Business, Instagram, Facebook, Threads, LinkedIn, Pinterest, Tumblr, Bluesky, Blogger; host compartido = todas), `configuracion/page.tsx` (oculta la tarjeta Conexiones a administradores, incluido «Acceder como»). Manual actualizado. La ruta `/dashboard/configuracion/conexiones?conexion=<id>` sigue siendo la misma pantalla.
+
+
 ## Claude — REVERSA del PR #613 (callbacks solo .net) — 2026-10-17
 
 - Task ID: `CALLBACKS-SOLO-NET-REVERSA-20261017`. Sin migración. Prueba en vivo con la sesión del navegador: `articulos.lasolucionweb.net/api/search-integrations/google/connect` terminó en Google con `Error 400: redirect_uri_mismatch`. Causa: producción tiene `DIA_CERO=on`, así que hasta #613 TODOS los callbacks salían como `seototal.lasolucionweb.com` (la única dirección registrada en las consolas); #613 los cambió a `.net`, no registradas aún.
