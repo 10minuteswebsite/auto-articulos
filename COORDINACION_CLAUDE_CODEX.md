@@ -1,12 +1,5 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
-## Claude — Callbacks OAuth solo en articulos/redes .net — 2026-10-17
-
-- Task ID: `CALLBACKS-SOLO-NET-20261017`. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni workflows. Estado: PR abierto, SIN fusionar. Orden de Milton: los únicos hosts de callback son `articulos.lasolucionweb.net` y `redes.lasolucionweb.net`; nada de seototal ni `.com`.
-- Hallazgos (auditoría): la lista permitida de `oauth-redirect.ts` solo tenía hosts `.com` (incluido seototal), por lo que en un host `.net` Google, Analytics, Business y Bing caían al `redirect_uri` fijo de `seototal.lasolucionweb.com`; con `DIA_CERO=on` TODAS las redes mandaban el callback a seototal; Blogger no admitía `articulos`.
-- Cambio: lista fija de dos hosts `.net` (la variable `SEO_TOTAL_OAUTH_ALLOWED_HOSTS` ya no amplía); `DIA_CERO` ya no fija origen canónico (solo `OAUTH_CANONICAL_ORIGIN` si es https y host permitido); valores por defecto de Google/Business/Analytics/Bing y lista de Blogger a `.net`. Pruebas reescritas (`oauth-redirect.test.ts`), suite web 232/232, `tsc` sin errores en lo tocado. `CHECKLIST_CALLBACKS_MILTON.md` reescrito con las URLs exactas por consola.
-- NO verificado: variables de entorno reales de Vercel (no hay acceso) y consolas de proveedores. Fuera de alcance, aún con nombres antiguos (no son callbacks): `CANONICAL_LOGIN_URL` en `middleware.ts`, `seo-total-hub-redirect.ts`, `access-router-adapter.ts`, `DiaCeroPanel.tsx`, `login/page.tsx`. Composio, PostPeer, Instagram y Facebook ya usaban el host de la petición.
-
 ## Claude — R1: la imagen IA ya pagada se reutiliza en reintentos — 2026-10-16
 
 - Task ID: `CUIDADO-TOKENS-R1-20261016`. Sin migración, sin workflows. Estado: PR abierto, SIN fusionar. Punto de partida: `main` con #611 (`CUIDADO_DE_TOKENS.md`).

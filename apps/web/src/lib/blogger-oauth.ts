@@ -9,7 +9,9 @@ export const BLOGGER_CALLBACK_PATH = "/api/search-integrations/blogger/callback"
 // cuando está disponible. Durante la transición conservamos como fallback las
 // credenciales antiguas guardadas en systemSetting.
 const BLOGGER_ALLOWED_HOSTS = new Set([
-  "articulos.lasolucionweb.net",
+  "seototal.lasolucionweb.com",
+  "seototal.lasolucionweb.net",
+  "redes.lasolucionweb.com",
   "redes.lasolucionweb.net",
 ]);
 

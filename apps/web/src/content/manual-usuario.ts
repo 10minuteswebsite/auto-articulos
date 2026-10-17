@@ -51,8 +51,6 @@ El menú superior tiene, en este orden: **Inicio**, **Cómo funciona esta aplica
 
 **Actualización 2026-10-16:** para los administradores, el menú de administración ahora se ve en dos niveles: **Admin Hub** (arriba, compartido entre todas las aplicaciones) y, dentro de cada aplicación, **Admin Artículos** en articulos.lasolucionweb.com o **Admin Redes** en redes.lasolucionweb.com. Al abrir Admin Artículos o Admin Redes ves las mismas tres opciones de siempre: **Usuarios** (/dashboard/usuarios), **Composio** (/dashboard/composio) y **PostPeer** (/dashboard/postpeer).
 
-**Actualización 2026-10-17:** al conectar Google, Bing, Blogger, Instagram, Threads, LinkedIn, Pinterest, Tumblr, X o cualquier red desde **Conexiones**, el proveedor te devuelve siempre a la misma aplicación donde empezaste: articulos.lasolucionweb.net o redes.lasolucionweb.net. Ya no se usan direcciones antiguas (seototal ni .com) para ese regreso.
-
 **Publicaciones** no es una pantalla: es un grupo que se despliega. Dentro están cinco accesos relacionados con publicar y revisar tus resultados:
 
 - **${MENU_NAMES.propios}** (/dashboard/publicar): escribe tus títulos y publícalos directamente en tu página web. Es la opción recomendada si estás comenzando y todavía no tienes registros de indexación en Google, o si quieres publicar contenido propio.
