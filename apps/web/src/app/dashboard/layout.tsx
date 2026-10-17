@@ -50,7 +50,6 @@ export default async function DashboardLayout({
       {showHubNavigation && <EcosystemHeader email={user.email} isAdmin={user.role === "admin" || Boolean(actingAdmin)} actingAdmin={Boolean(actingAdmin)} />}
       {showHubNavigation && !blocked && (
         <DashboardNav
-          showHubNavigation
           initialIsAdmin={user.role === "admin" || Boolean(actingAdmin)}
         />
       )}

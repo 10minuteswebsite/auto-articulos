@@ -131,7 +131,7 @@ const ADMIN_GROUP: TabGroup = {
   ],
 };
 
-export default function DashboardNav({ showHubNavigation = false, initialIsAdmin = false }: { showHubNavigation?: boolean; initialIsAdmin?: boolean }) {
+export default function DashboardNav({ initialIsAdmin = false }: { initialIsAdmin?: boolean }) {
   const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
   const [disabledModules, setDisabledModules] = useState<string[]>([]);
@@ -314,7 +314,7 @@ export default function DashboardNav({ showHubNavigation = false, initialIsAdmin
   const rawEntries: NavEntry[] = [
     ...baseEntries,
     ...(isAdmin ? [adminGroup] : []),
-    ...(!showHubNavigation ? [HUB_ENTRY] : []),
+    ...[HUB_ENTRY],
   ];
 
   // Un grupo cuyos módulos están todos ocultos desaparece entero, en vez de
