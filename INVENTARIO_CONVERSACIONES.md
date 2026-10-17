@@ -2294,3 +2294,40 @@ por sí mismos, así que esta tarea no le agregó nada al manual.
 - Código: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
 - Deployment: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`.
 - Evidencia productiva: menú `14px/400`, título `15px/700`, contexto `14px/400`; funcionalidad administrativa y submenú conservados.
+
+## Propagación — 6 conversaciones cerradas sin registrar en este inventario — 2026-10-16/17
+
+Agregado por la tarea programada diaria de propagación, a partir de `COORDINACION_CLAUDE_CODEX.md`.
+Ninguna tiene reserva activa ahora mismo (los 6 commits ya son ancestros de `origin/main`,
+verificado con `git merge-base --is-ancestor`; este entorno solo muestra su propio worktree en
+`git worktree list`, así que no se puede ver si otra sesión sigue con un checkout local abierto
+sobre el mismo tema, pero no hay nada pendiente de fusionar). Van a Parte B por ser ya historial.
+
+- `[Claude] - CUIDADO DE TOKENS: POSTPEER, COMPOSIO, IMÁGENES Y OPENAI` — 2026-10-16, PR #611
+  (commit `1d72174`), FUSIONADO EN `main` (verificado con git; la entrada original en
+  Coordinación no tenía línea de cierre). Entrega `CUIDADO_DE_TOKENS.md` y la prueba guardiana
+  `paidApiGuard.test.ts`. Pendiente sin resolver (según la propia entrada): riesgo R2
+  (`social-image.ts` puede probar hasta 3 modelos pagados), auditoría de Composio y de la
+  cadena de fal.ai, y auditoría a fondo de Threads en PostPeer.
+- `[Claude] - R1: LA IMAGEN IA YA PAGADA SE REUTILIZA EN REINTENTOS` — 2026-10-16, PR #612
+  (commit `bd57a87`), FUSIONADO EN `main` (verificado con git; la entrada original decía «PR
+  abierto, SIN fusionar»). Cubre Post, Story, Reel-image y Pinterest; NO cubre Carrusel ni
+  Infografía (pendiente, según la propia entrada).
+- `[Claude] - REDES: LAS PUBLICACIONES CON ERROR SALEN DE OPORTUNIDADES Y QUEDAN EN HISTORIAL` —
+  2026-10-16, PR #608 (commit `bad6e7b`), PRODUCCIÓN. Capitanía reclamada y liberada (cierre
+  explícito en la propia entrada); Milton confirmó en producción que ya no se ve el bloque de
+  error en Oportunidades Redes. El manual de usuario ya fue actualizado por el propio PR.
+- `[Claude] - GOOGLE BUSINESS: PROPUESTA ATASCADA EN 1 % POR ARTÍCULO SIN RESUMEN` — 2026-10-16,
+  PR #609 (commit `d20e06f`), FUSIONADO EN `main` (verificado con git; la entrada original no
+  tenía línea de cierre). Causa: un `summary` nulo impedía que la propuesta fuera candidata
+  aunque estuviera aprobada con Publicar; ahora se usa el título si falta el resumen.
+- `[Claude] - GOOGLE BUSINESS: POSTPEER success:false/error YA CUENTA COMO FALLO` — 2026-10-16,
+  PR #605 (commit `dca4ff5`), FUSIONADO EN `main` (verificado con git; la entrada original decía
+  «PR abierto, SIN fusionar»). Pendiente sin resolver (según la propia entrada): disparos de
+  `social-worker.yml` cancelados por la cola de concurrencia (requiere capitanía de ese workflow).
+- `[Claude] - RESCATE PREMATURO DE TÍTULOS Y GUARDIA ANTI-CANIBALIZACIÓN AL PUBLICAR (CASO
+  ANTONIO AGUIRRE)` — 2026-10-16, PR #599 (commit `2de420b`), PRODUCCIÓN, CERRADO Y VERIFICADO.
+  Capitanía reclamada y liberada. La corrida real del worker (`38959171399`) confirmó 0 líneas
+  «Recuperados» y Milton confirmó en pantalla que la publicación funcionó. Pendiente sin
+  resolver (según la propia entrada): el hallazgo de que «Ver historial» en Administración lee
+  `data.runs` pero `/api/admin/inspect-runs` devuelve un arreglo (pantalla vacía).
