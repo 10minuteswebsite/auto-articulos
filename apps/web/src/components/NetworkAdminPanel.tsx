@@ -21,6 +21,8 @@ export type NetworkAdminConfig = {
   secretLabel?: string;
   /** Ruta de retorno OAuth (para mostrar las direcciones .net por registrar). */
   callbackPath?: string;
+  /** Redes que admiten UNA sola dirección de retorno (Tumblr): se muestra esa y nada más. */
+  fixedCallback?: string;
   /** Aviso fijo (por ejemplo, quién maneja la conexión). */
   notice?: ReactNode;
 };
@@ -67,7 +69,13 @@ export default function NetworkAdminPanel({ config }: { config: NetworkAdminConf
       {config.steps.map((step, index) => <li key={index}>{step}</li>)}
     </ol>
 
-    {config.callbackPath && <>
+    {config.fixedCallback && <>
+      <h3 style={{ fontSize: 16, margin: "18px 0 6px" }}>Dirección de retorno</h3>
+      <p style={{ margin: "0 0 4px", fontSize: 14 }}>Debe ser la <strong>única</strong> registrada en el proveedor (el sistema la recibe aquí y devuelve a cada persona a su sitio):</p>
+      <code style={{ fontSize: 13, wordBreak: "break-all" }}>{config.fixedCallback}</code>
+    </>}
+
+    {config.callbackPath && !config.fixedCallback && <>
       <h3 style={{ fontSize: 16, margin: "18px 0 6px" }}>Direcciones de retorno</h3>
       <p style={{ margin: "0 0 4px", fontSize: 14 }}><strong>La que usa el sistema hoy</strong> (debe estar registrada en el proveedor):</p>
       <code style={{ fontSize: 13, wordBreak: "break-all" }}>{status?.callbackUrlInUse ?? "…"}</code>
