@@ -1,5 +1,10 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Blogger se oculta a los usuarios — 2026-10-17
+
+- Task ID: `QUITAR-BLOGGER-20261017`. Sin migración. Estado: PR #632 abierto. Investigación: PostPeer (10 plataformas, sin Blogger; verificado en su selector y en su documentación) y Composio (catálogo de 1.529 apps: búsqueda «blogger» = 0; «blog» = solo Inblog) NO ofrecen Blogger. Decisión de Milton: quitarlo para que los usuarios no lo vean.
+- Quitado de la interfaz y de las opciones: tarjeta en Conexiones, fila en Oportunidades Redes, pantalla `/dashboard/blogger` y entrada del menú Admin, fila de permisos en Usuarios, red de MCP, valor por defecto de «generar en todas», textos y manual. CONSERVADO: datos y permisos de la base, código del worker y la API (no se borra nada de datos). Pruebas 240/240.
+
 ## Claude — Limpieza del Día Cero (punto a punto con Milton) — 2026-10-17
 
 - Task ID: `DIA-CERO-LIMPIEZA-20261017`. Orden de Milton: el Día Cero está CULMINADO (Artículos y Redes ya separados); se cierran sus señalamientos uno por uno. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni workflows. Estado: CERRADO Y ARCHIVADO. PR #623 fusionado en `main` (`0ad89fbb`), Vercel success en web y auto-articulos-web; capitanía liberada. VERIFICADO EN VIVO tras el despliegue (cuenta admin de Milton): Artículos y Redes `.net` con sesión (`/api/me` 200), Composio y PostPeer `/status` 200, `/api/configuration-status` 200, Administración lista usuarios, `/api/admin/dia-cero` 404 (ya no existe). NO verificado: «Acceder como» (falla aparte, abajo), conexión real de un proveedor y cierre de sesión. ALCANCE FINAL del PR #623: botón Día Cero y manual borrados, documentos archivados, notas de culminado y variable `DIA_CERO` eliminada del código (decisión de Milton).
