@@ -220,3 +220,15 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 
 - Causa probada de la republicación de «Aspectos clave para comprar propiedades en Orlando desde Medellín» (cuenta Antonio Aguirre): rescate prematuro de un título recién reclamado. El primer artículo es válido y sigue publicado; la segunda corrida terminó en error de título duplicado.
 - Código en producción: PR #599, commit `2de420bb3037cd940b370a24a03faea8516689fe`. Verificado el bloqueo web (`409 ALREADY_PUBLISHED`) y el arranque del worker; corrida real del worker `38959171399` en `success`, sin falsos rescates, confirmada por Milton. Solo queda sin provocar en vivo el repetido ante el worker (cubierto por pruebas).
+
+## Visibilidad de Volver al Inicio desde sesiones Hub — 2026-10-17
+
+- Hallazgo: el enlace ya estaba publicado, pero `DashboardNav` lo añadía solo
+  cuando `showHubNavigation` era falso; por eso no aparecía al entrar desde el Hub.
+- Corrección: `Volver al Inicio` se renderiza también en sesiones con encabezado
+  global del Hub. Se eliminó el prop ya innecesario sin cambiar destino, permisos
+  ni autenticación.
+- Código publicado: `c69c9628`.
+- Deployment verificado: `dpl_HEoU6gp5XJN6PoHpRHaYik4rRWtt`, `READY`, con aliases
+  productivos de Artículos y Redes activos.
+- Validación: build OK y suite `240/240`.

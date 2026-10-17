@@ -260,3 +260,14 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 | BASELINE.md | sí | N/A (sin cambio de comportamiento) | N/A | 12 | N/A | N/A | contrato MCP del Checkpoint 11 vigente |
 | CHECKPOINTS.md | sí | `e5414d1a` | `dpl_At7F1QJ…` | 12 | sí | sí | este registro |
 
+## Checkpoint 17 — visibilidad desde sesiones Hub — 2026-10-17
+
+- Hallazgo: `Volver al Inicio` estaba condicionado a sesiones sin shell global;
+  por eso no se veía al entrar desde el Hub.
+- Cambio mínimo: la entrada se muestra en ambos contextos y mantiene el destino
+  `https://hub.lasolucionweb.net`.
+- Código: `c69c9628`.
+- Deployment: `dpl_HEoU6gp5XJN6PoHpRHaYik4rRWtt`, `READY`, aliases productivos activos.
+- Validación: build y suite `240/240`.
+- Estado: PRODUCCIÓN, CERRADO.
+
