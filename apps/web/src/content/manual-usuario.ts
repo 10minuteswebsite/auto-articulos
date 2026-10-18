@@ -51,6 +51,10 @@ El menú superior tiene, en este orden: **Inicio**, **Cómo funciona esta aplica
 
 **Actualización 2026-10-16:** para los administradores, el menú de administración ahora se ve en dos niveles: **Admin Hub** (arriba, compartido entre todas las aplicaciones) y, dentro de cada aplicación, **Admin Artículos** en articulos.lasolucionweb.com o **Admin Redes** en redes.lasolucionweb.com. Al abrir Admin Artículos o Admin Redes ves las mismas tres opciones de siempre: **Usuarios** (/dashboard/usuarios), **Composio** (/dashboard/composio) y **PostPeer** (/dashboard/postpeer).
 
+**Actualización 2026-10-17:** el enlace para salir de Artículos o de Redes y volver al Hub
+(compartido entre las dos aplicaciones) se llama **Volver al Inicio**. Lleva al mismo Hub de
+siempre; solo cambió el texto del enlace.
+
 **Actualización 2026-10-17 (Bing Webmaster Tools):** cambiamos el proveedor de conexión de Bing. Si tenías Bing conectado, verás un aviso rojo en **Inicio** y en la tarjeta de Bing indicándote que vuelvas a conectarlo: entra a **Configuración → Conexiones → Bing Webmaster Tools** y pulsa **Nueva conexión**. Tu sitio y tu sitemap siguen guardados. Quien no tenía Bing conectado no ve ningún aviso, y el aviso desaparece apenas vuelves a conectar.
 
 **Actualización 2026-10-17:** para los administradores, las conexiones principales ya no están en **Configuración → Conexiones** (esa tarjeta solo la ven los usuarios ordinarios). Se manejan desde el menú **Admin**. Las que pasan por **Composio** (Google Search Console, Google Analytics, Instagram, Facebook y Pinterest) y por **PostPeer** (Google Business Profile y Threads) se configuran dentro de los paneles **Composio** y **PostPeer**, sin entrada aparte. Debajo de ellos quedan las conexiones propias: en **Admin Artículos**, Bing Webmaster Tools; en **Admin Redes**, LinkedIn, Tumblr, Bluesky y Blogger.
@@ -281,6 +285,11 @@ permite moverte entre ellas sin volver primero al índice. Las redes sociales
 y Google Business Profile se conectan en **Conexiones** (pestaña Difusión). **Todas las redes y blogs muestran las mismas instrucciones de conexión** (la caja «Te acompañamos para conectar tu cuenta», con los mismos pasos, el enlace para crear la cuenta si no la tienes y el aviso «Si falla»); Bluesky solo cambia en que pide una contraseña de aplicación. **Instagram, Facebook y Pinterest se conectan por Composio para todas las cuentas** (desde 2026-10-12): pulsa el botón de Composio de esa red y autoriza; ya no hace falta pedirle a Administración el módulo «Conexión por Composio» y la conexión directa con Meta queda solo para administradores o cuentas que ya la tenían;
 si una red no aparece allí, puede estar deshabilitada para tu cuenta por el
 administrador.
+
+**Actualización 2026-10-17:** la conexión directa con Google Cloud y con Meta se eliminó por
+completo de la plataforma (ya no existe ni para administradores). Google Business Profile se
+conecta únicamente por PostPeer; Instagram, Facebook y Pinterest únicamente por Composio, como
+ya decía el párrafo anterior.
 
 ### Configuración inicial
 
