@@ -5295,3 +5295,106 @@ Siguiente acción: quien retome estos cuatro proyectos debe confirmar el deploym
 cada uno y, si corresponde, agregar aquí mismo el identificador y el estado `READY`.
 Estado: FUSIONADOS EN `main` (verificado por git); DEPLOYMENT DE VERCEL SIN VERIFICAR POR ESTA TAREA.
 - Defensa añadida: coincidencia exacta normalizada contra lo ya publicado (nunca similitud difusa) al listar Oportunidades, al encolar y en el worker antes de iniciar sesión o generar nada; chequeo remoto de duplicado también en la ruta de prompt propio, antes de la imagen.
+
+## Versión — 2026-10-17 (propagación) — deployment de Vercel verificado para PR #605, #609 y #612
+
+Entrada agregada por la tarea programada diaria de propagación de Claude (corrida 2026-10-18), a
+partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — CIERRE: Google Business y cuidado de tokens —
+2026-10-17", `GMB-CIERRE-20261016`). Completa el pendiente dejado abierto en la entrada anterior
+de este mismo documento ("Versión — 2026-10-16 (propagación)...", "Siguiente acción: ... confirmar
+el deployment de Vercel").
+
+- Despliegues de producción en Vercel ya verificados `success` (deployments de GitHub
+  `7128972685`, `7129447154`, `7129649611`), que corresponden a los commits `dca4ff5` (PR #605),
+  `d20e06f` (PR #609) y `bd57a87` (PR #612). `/login` de Redes respondió 200 tras el despliegue.
+  PR #611 (`1d72174`) es solo documentación y una prueba (`CUIDADO_DE_TOKENS.md` +
+  `paidApiGuard.test.ts`): no tiene deployment propio que verificar.
+- Verificado en vivo con permiso de Milton (según la propia entrada de origen): una propuesta de
+  Google Business con la cuenta de Lorena Álvarez salió «Publicado» y se confirmó en la ficha de
+  Google; con la cuenta de Antonio Aguirre la propuesta se quedó en 1 % hasta el reintento y luego
+  publicó.
+- Estado: FUSIONADOS EN `main` Y DESPLEGADOS EN VERCEL (`success`), ambos verificados.
+
+## Versión — 2026-10-17 — CIERRE: callbacks OAuth, .com → .net (conexiones principales)
+
+Entrada agregada por la tarea programada diaria de propagación de Claude (corrida 2026-10-18), a
+partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — CIERRE: revisión de callbacks OAuth y paso de
+.com a .net — 2026-10-17", `CIERRE-CALLBACKS-NET-20261017`). Proyecto cerrado: todo lo siguiente
+está fusionado en `main` y desplegado; no queda rama ni commit sin fusionar de este trabajo.
+
+- Resultado: ninguna conexión envía su retorno a `.com` ni a `seototal`; hosts de callback
+  permitidos y fijos: `articulos.lasolucionweb.net` y `redes.lasolucionweb.net`.
+- Commits en `main` (verificado con `git log origin/main`, todos ya ancestros de la punta
+  actual): `1239473` (PR #613, callbacks solo .net) → revertido por `6fd43d6` (PR #614,
+  `redirect_uri_mismatch` de Google) → reaplicado en `38967c6` (PR #628); `945a062` (PR #616,
+  cliente OAuth nuevo de Bing); `8f0726a` (PR #617); `44b88ea` (PR #618, pantalla admin de
+  credenciales de Bing); `d3fbac1` (PR #619, aviso de reconexión); `e3f769e` (PR #615,
+  conexiones principales al menú Admin); `342530c` (PR #622, retorno fijo de Bing);
+  `0ad0258` (PR #624, pantallas admin LinkedIn/Tumblr/Pinterest/Bluesky/Blogger); `8db088b`
+  (PR #625, menú Admin compartido entre ambas apps); `488f462` (PR #626, LinkedIn solo
+  articulos/redes .net); `20f693c` (PR #627, pantalla de Tumblr corregida); `0ad89fb` (PR #623,
+  limpieza del Día Cero); `acf8a92` (PR #630, elimina conexiones directas de Google Cloud y
+  Meta); `8692d8d` (PR #632, Blogger oculto a los usuarios); `e5414d1` (limpieza final de
+  enlaces .net en login/enrutador).
+- Eliminado de la plataforma: conexiones directas de Google Cloud y Meta (código borrado, no solo
+  oculto); Blogger (oculto a usuarios; datos y worker intactos); botón y variable `DIA_CERO`.
+- PR #620 (campo manual de «Dirección de retorno» en Admin → Bing): CERRADO SIN FUSIONAR por
+  decisión de Milton; su rama fue borrada. No representa trabajo pendiente.
+- Deployment de Vercel: la entrada de origen no cita un identificador `dpl_` propio para este
+  cierre narrativo (a diferencia de otros cierres de este documento); los despliegues
+  individuales de cada PR fusionado no fueron verificados aparte por esta tarea. Pendiente para
+  quien retome: confirmar en la consola de Vercel el `dpl_` del despliegue más reciente de esta
+  cadena de PRs.
+- Hallazgo sin resolver, documentado en la propia entrada de origen (no se repite aquí en
+  detalle): la reconexión de Bing sigue fallando para cuentas que ya estaban conectadas
+  (`GET /api/search-integrations/bing/connect` redirige a `seototal.lasolucionweb.com` en vez de
+  a `.net`); causa no confirmada, sin acceso a logs de Vercel desde este entorno.
+- Estado: FUSIONADO EN `main`; DEPLOYMENT DE VERCEL ESPECÍFICO SIN VERIFICAR POR ESTA TAREA.
+
+## Versión — 2026-10-17 — PR #637: alineación del contenido con el encabezado del Hub
+
+Entrada agregada por la tarea programada diaria de propagación de Claude (corrida 2026-10-18), a
+partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — Contenido alineado con el encabezado del Hub
+— 2026-10-17", `HUB-CONTENIDO-ALINEADO-20261017`). La entrada original decía "PR abierto, SIN
+fusionar, NO verificado en vivo"; verificado hoy con `git log origin/main`: el commit `f5d4c2f`
+("fix(ui): alinear contenido y barra de Artículos/Redes con el encabezado del Hub (#637)") ya es
+parte de `origin/main`, es decir, el PR #637 YA está fusionado. No se reescribió ninguna palabra
+de la entrada original; esta corrección de estado se agrega solo aquí.
+
+- Cambio: con navegación del Hub, la barra de Artículos/Redes y el contenido de `/dashboard`
+  pasan a usar el mismo ancho (1280px) y los mismos márgenes laterales que el encabezado global
+  del Hub (antes eran tres anchos distintos: 1280/1160/1120px). Sin Hub no cambia nada.
+- Deployment de Vercel: no verificado por esta tarea (sin acceso a la consola de Vercel desde
+  este entorno).
+- Estado: FUSIONADO EN `main` (verificado por git); DEPLOYMENT DE VERCEL SIN VERIFICAR.
+
+## Versión — 2026-10-15/17 — CIERRE: enlace de Google Business en el Historial de Redes (sin enlace)
+
+Entrada agregada por la tarea programada diaria de propagación de Claude (corrida 2026-10-18), a
+partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — Historial de Redes: enlace a la publicación de
+Google Business — 2026-10-15 (CERRADO)", `ENLACE-GBP-HISTORIAL-20261015`).
+
+- Resultado: CERRADO SIN ENLACE, por decisión de Milton. PostPeer no entrega URL para
+  publicaciones `googlebusiness` (`platformPostUrl` = `null` tanto en `POST /v1/posts` como en
+  `GET /v1/posts/{postId}`); el botón «Ver en la red social» del Historial de Redes no puede
+  mostrarse para esa red mientras eso no cambie del lado de PostPeer.
+- PRs fusionados en `main`, todos en producción: #589 (búsqueda de Google por nombre del
+  negocio, descartado por Milton), #592 (campo manual por cuenta, descartado por Milton), #595
+  (corrección de raíz: el worker usa `extractPostPeerPostUrl` sobre `platforms[].platformPostUrl`
+  y recupera publicaciones anteriores desde `BusinessProfilePost.googleResponse`; queda vigente,
+  sin efecto visible hasta que PostPeer entregue la URL).
+- Estado: CERRADO (decisión de producto, no un defecto a corregir); FUSIONADO EN `main`.
+
+## Versión — 2026-10-17 — Codex: etiqueta del enlace de salida al Hub ("Volver al Inicio")
+
+Entrada agregada por la tarea programada diaria de propagación de Claude (corrida 2026-10-18), a
+partir de `COORDINACION_CLAUDE_CODEX.md` ("Codex — etiqueta Volver al Inicio — 2026-10-17").
+
+- Cambio: una sola línea en `apps/web/src/components/DashboardNav.tsx`; la etiqueta del enlace de
+  salida al Hub (compartido entre Artículos y Redes) pasa de «Volver al HUB» a «Volver al
+  Inicio». El destino (el Hub oficial) no cambió.
+- Commit: `3e181b79`. Deployment de Vercel: `dpl_9NLNZAzUA5TuTTKz7896g1SZiEEY`, `READY`; alias
+  `articulos.lasolucionweb.net` y `redes.lasolucionweb.net` activos.
+- Evidencia: build de producción OK y suite `240/240`; no se tocaron permisos, autenticación,
+  rutas ni datos.
+- Estado: PRODUCCIÓN, CERRADO, VERIFICADO.
