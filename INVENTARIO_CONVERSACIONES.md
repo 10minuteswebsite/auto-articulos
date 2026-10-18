@@ -2338,3 +2338,44 @@ sobre el mismo tema, pero no hay nada pendiente de fusionar). Van a Parte B por 
   «Recuperados» y Milton confirmó en pantalla que la publicación funcionó. Pendiente sin
   resolver (según la propia entrada): el hallazgo de que «Ver historial» en Administración lee
   `data.runs` pero `/api/admin/inspect-runs` devuelve un arreglo (pantalla vacía).
+
+## Propagación — 4 conversaciones cerradas sin registrar en este inventario — 2026-10-15/17
+
+Agregado por la tarea programada diaria de propagación (corrida 2026-10-18), a partir de
+`COORDINACION_CLAUDE_CODEX.md`. Ninguna tiene reserva activa ahora mismo (verificado con
+`git log origin/main`: todos los commits citados ya son ancestros de la punta actual). Van a
+Parte B por ser ya historial.
+
+- `[Claude] - CIERRE: GOOGLE BUSINESS Y CUIDADO DE TOKENS` — Task ID `GMB-CIERRE-20261016`,
+  2026-10-17, conversación «PROBLEMA PUBLICACION GOOGLE MY BUSINESS». CERRADA. Cierra los PR
+  #605, #609, #611 y #612 (ya registrados arriba) confirmando que los cuatro están FUSIONADOS y
+  que sus despliegues de Vercel YA están verificados `success` (detalle en
+  `CONTROLADOR_DE_VERSIONES.md`, entrada "Versión — 2026-10-17 (propagación)..."). Incidente
+  propio ya reparado (sin acción del Reparador, ver nota en `REPARADOR_DEL_ARBOL_PRINCIPAL.md`):
+  un comando de esta conversación corrió en la carpeta principal de Milton y creó la rama
+  `diag/gmb-readonly`, que subió brevemente a GitHub (repo público) antes de restaurarse y
+  borrarse. Pendientes sin resolver (según la propia entrada, no repetidos aquí en detalle):
+  disparos de `social-worker.yml` cancelados, R1 sin cubrir Carrusel/Infografía de Instagram, R2
+  cascada de modelos pagados, Composio/fal.ai sin auditar.
+- `[Claude] - CIERRE: CALLBACKS OAUTH, .COM → .NET (CONEXIONES PRINCIPALES)` — Task ID
+  `CIERRE-CALLBACKS-NET-20261017`, 2026-10-17. PROYECTO CERRADO; agrupa como mínimo los Task ID
+  `CALLBACKS-SOLO-NET-V2-20261017`, `CALLBACKS-SOLO-NET-REVERSA-20261017`,
+  `BING-CLIENTE-NUEVO-20261017`, `BING-AVISO-AUTOMATICO-20261017`,
+  `ADMIN-BING-CREDENCIALES-20261017`, `BING-RETORNO-NET-20261017`,
+  `ADMIN-CONEXIONES-UBICACION-20261017`, `ADMIN-CONEXIONES-SOLO-PROPIAS-20261017`,
+  `LINKEDIN-RETORNO-NET-20261017`, `LINKEDIN-PANTALLA-ADMIN-20261017`,
+  `TUMBLR-PANTALLA-FIX-20261017`, `ADMIN-MENU-COMPARTIDO-20261017`,
+  `QUITAR-BLOGGER-20261017`, `QUITAR-GOOGLE-META-DIRECTO-20261017` y
+  `DIA-CERO-LIMPIEZA-20261017`. Todas fusionadas en `main` (detalle de commits en
+  `CONTROLADOR_DE_VERSIONES.md`, entrada "Versión — 2026-10-17 — CIERRE: callbacks OAuth..."),
+  salvo PR #620 (cerrado sin fusionar por decisión de Milton). Sin reserva activa: ninguna rama
+  propia de este proyecto sigue abierta.
+- `[Claude] - CONTENIDO ALINEADO CON EL ENCABEZADO DEL HUB` — Task ID
+  `HUB-CONTENIDO-ALINEADO-20261017`, 2026-10-17, PR #637. La entrada original en Coordinación
+  decía «PR abierto, SIN fusionar»; verificado hoy con `git log origin/main`: el PR #637 YA está
+  fusionado (commit `f5d4c2f`). Sin reserva activa.
+- `[Claude] - HISTORIAL DE REDES: ENLACE A LA PUBLICACIÓN DE GOOGLE BUSINESS` — Task ID
+  `ENLACE-GBP-HISTORIAL-20261015`, CERRADO SIN ENLACE por decisión de Milton (PostPeer no
+  entrega URL para publicaciones de Google Business). PR #589, #592 y #595 fusionados en
+  `main`, producción; ramas propias ya borradas (local y remota, según la propia entrada). Sin
+  reserva activa.
