@@ -352,3 +352,24 @@ Mismo patrón que otros hallazgos de este documento: más de una conversación e
 (corrección hacia delante, sin `reset` ni fuerza) y verificado en producción; el Reparador no
 tuvo que intervenir. Se deja señalado solo para que quede visible junto al resto de incidentes
 de árbol compartido.
+
+### Comando corrió en la carpeta principal de Milton y empujó una rama de diagnóstico al repo público — 2026-10-17 (ya reparado por la propia conversación, sin acción del Reparador)
+
+Agregado por la tarea programada diaria de propagación (corrida 2026-10-18) a partir de
+`COORDINACION_CLAUDE_CODEX.md` ("Claude — CIERRE: Google Business y cuidado de tokens —
+2026-10-17", `GMB-CIERRE-20261016`).
+
+Un comando de esa conversación corrió, por error, en la carpeta principal de trabajo de Milton
+(no en un worktree aislado) y creó la rama `diag/gmb-readonly` con los cambios sin guardar que
+hubiera en ese momento en esa carpeta; esa rama se subió a GitHub (repositorio público) y quedó
+visible ahí durante unos minutos. La propia conversación lo detectó y lo revirtió: restauró la
+carpeta de Milton con `git reset --mixed` (mismos 9 archivos que tenía antes) y borró la rama
+tanto local como remota.
+
+Mismo patrón que otros hallazgos de este documento (trabajo fuera de un worktree aislado,
+tocando la carpeta principal de Milton), con un agravante adicional: al ser un repositorio
+público, lo que hubiera en esos 9 archivos pudo verse públicamente mientras la rama existió. La
+propia entrada de origen ya deja la duda señalada para Milton ("si alguno es sensible, rotar o
+revisar"); esta tarea de propagación no la repite como una nueva duda, solo la deja visible aquí
+también, junto al resto de incidentes de árbol compartido, por si Milton quiere revisar qué
+contenían esos 9 archivos.
