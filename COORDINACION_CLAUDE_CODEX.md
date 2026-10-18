@@ -12259,3 +12259,69 @@ para Milton: ninguna — la única acción pendiente de autorización explícita
 Codex en su propia entrada ("Incidencia operativa", Punto 1 HUB/OAuth), así que no se repite aquí.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-18
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-17 (commit
+`1d5dde9`, "docs(coordinacion): cierre de la propagacion diaria 2026-10-17"). Se revisó el rango
+`1d5dde9..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 160 líneas agregadas, 1 modificada
+(una anotación «SUPERADO» añadida al final de una línea ya existente, sin quitar ni una palabra
+de lo anterior), correspondientes a 25 commits que tocan este documento, de un total de 28
+commits nuevos en el rango. El contenido corresponde a 22 entradas/proyectos distintos.
+
+Antes de propagar nada se verificó una anomalía al hacer `git fetch origin main`: Git reportó
+"forced update" entre la punta de `main` que tenía este entorno al arrancar y la punta actual.
+Investigado a fondo (`git merge-base`, `.git/shallow`): **no es una reescritura de historia ni
+una pérdida de commits** — este entorno usa un clon superficial (`--depth 50`) y, al avanzar la
+punta remota más de 50 commits desde el arranque del contenedor, el límite del clon superficial
+se recalculó en un punto distinto, lo que Git reporta como "forced update" aunque no hubo ningún
+`push --force` real. Se deja esta nota para que quede claro por qué se investigó y para que
+ninguna otra conversación repita la misma alarma falsa. Tampoco se encontró contenido perdido:
+los 37 renglones que la corrida anterior (2026-10-17) agregó a `INVENTARIO_CONVERSACIONES.md`
+siguen intactos en `origin/main`.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 6 entradas nuevas. (1) Deployment de Vercel ya verificado
+  `success` para los PR #605, #609 y #612, que la corrida del 2026-10-16 había dejado marcados
+  "SIN verificar" — cierra ese pendiente. (2) Cierre completo del proyecto de callbacks OAuth
+  `.com` → `.net` (`CIERRE-CALLBACKS-NET-20261017`), con la lista de commits de los ~15 PR que lo
+  componen. (3) Corrección de estado del PR #637 (alineación con el encabezado del Hub): decía
+  "SIN fusionar" y ya está fusionado, verificado con `git log`. (4) Cierre del proyecto
+  `ENLACE-GBP-HISTORIAL-20261015` (Google Business sin enlace en Historial, por decisión de
+  Milton: PostPeer no entrega esa URL). (5) Deployment de Codex para la etiqueta "Volver al
+  Inicio" (commit `3e181b79`, `dpl_9NLNZAzUA5TuTTKz7896g1SZiEEY`).
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (ninguno de los proyectos de este rango
+  tiene una reserva activa ahora mismo; todos están fusionados o cerrados, salvo el PR #620,
+  cerrado explícitamente sin fusionar por decisión de Milton — no es una reserva, es un
+  descarte). Parte B: 4 entradas nuevas (`GMB-CIERRE-20261016`, el cierre agrupado de
+  `CIERRE-CALLBACKS-NET-20261017` con sus ~15 Task ID componentes, `HUB-CONTENIDO-ALINEADO-20261017`
+  y `ENLACE-GBP-HISTORIAL-20261015`).
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: 1 hallazgo nuevo, ya resuelto por la propia conversación:
+  un comando de la conversación `GMB-CIERRE-20261016` corrió en la carpeta principal de Milton
+  (no en un worktree aislado) y empujó brevemente a GitHub (repo público) una rama de
+  diagnóstico con cambios sin guardar de esa carpeta; ya se restauró la carpeta y se borró la
+  rama (local y remota). Se deja señalado por ser del mismo tipo que otros hallazgos ya
+  registrados ahí.
+- `apps/web/src/content/manual-usuario.ts`: 2 actualizaciones nuevas. (1) La conexión directa con
+  Google Cloud y con Meta se eliminó por completo (ya no existe ni para administradores); Google
+  Business Profile y Meta ya solo se conectan por PostPeer/Composio. (2) El enlace para volver al
+  Hub desde Artículos o Redes ahora se llama "Volver al Inicio" (antes "Volver al HUB"). El resto
+  de los cambios visibles del rango (pantallas de administrador de Bing/LinkedIn/Tumblr/
+  Pinterest/Bluesky, Blogger retirado, aviso rojo de reconexión de Bing, menú Admin compartido)
+  ya estaban documentados en este mismo manual por los propios PR que los introdujeron; no se
+  duplicó nada. El caso de Google Business sin enlace en Historial tampoco necesitó un párrafo
+  nuevo: la regla general ya documentada ("el enlace solo aparece cuando la publicación tiene un
+  enlace público") ya cubre correctamente ese caso.
+- `TO-DO.md`: sin cambios. No se encontró ninguna idea suelta de Milton para más adelante en este
+  rango; el único punto roto sin resolver (reconexión de Bing que sigue fallando para cuentas que
+  ya estaban conectadas) ya queda documentado dentro de su propia entrada de Coordinación y ahora
+  también en `CONTROLADOR_DE_VERSIONES.md`, no es una idea de Milton para este buzón.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva
+para Milton: ninguna — el hallazgo del incidente de la rama `diag/gmb-readonly` (repo público) ya
+pedía revisión de Milton dentro de su propia entrada original; no se repite aquí como una duda
+nueva, solo se deja señalado también en `REPARADOR_DEL_ARBOL_PRINCIPAL.md` para que no quede
+enterrado.
+
+Responsable: Claude (tarea programada diaria de propagación).
