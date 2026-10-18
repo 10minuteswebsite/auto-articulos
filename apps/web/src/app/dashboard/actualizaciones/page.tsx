@@ -48,7 +48,7 @@ export default async function ActualizacionesPage({
   const total = totalNuevas + totalArreglos;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", maxWidth: 1120, margin: "0 auto" }}>
+    <div style={{ display: "flex", flexDirection: "column", maxWidth: "none", margin: 0 }}>
       <header style={{ borderBottom: "1px solid #d2d2d7", padding: "0 0 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div>

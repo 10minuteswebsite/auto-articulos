@@ -1,5 +1,9 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Claude — Alineación del Hub, segunda parte — 2026-10-17
+
+- Task ID: `HUB-CONTENIDO-ALINEADO-2-20261017`. Sin migración. Corrige la entrada de abajo, que decía «SIN fusionar»: el PR #637 SÍ está fusionado y desplegado. Hallazgo de Milton: `oportunidades-redes` seguía desalineada porque la propia página envolvía su contenido en `maxWidth: 1120` centrado. Se quitó ese tope (y el de Cómo funciona, Actualizaciones, Usuarios y Configuración → MCP, que repetían el patrón). `mi-acceso` queda como tarjeta angosta a propósito. NO verificado en vivo.
+
 ## Claude — Contenido alineado con el encabezado del Hub — 2026-10-17
 
 - Task ID: `HUB-CONTENIDO-ALINEADO-20261017`. Sin migración ni workflows. Estado: PR abierto, SIN fusionar, NO verificado en vivo (requiere sesión con la navegación del Hub).
