@@ -1,5 +1,10 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Resultado — THREADS-POSTPEER-BOTON-20261019
+
+- `474ed73c` está publicado en `main`; los dos deployments productivos terminaron `success`.
+- No se modificaron permisos, datos, migraciones ni conexiones.
+
 ## Decisión — Threads usa PostPeer sin compuerta Meta heredada — 2026-10-19
 
 - Task ID: `THREADS-POSTPEER-BOTON-20261019`.

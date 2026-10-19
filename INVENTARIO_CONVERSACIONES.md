@@ -1,5 +1,10 @@
 # Inventario de conversaciones
 
+## Cierre — THREADS-POSTPEER-BOTON-20261019
+
+- Commit `474ed73c` publicado en `main`; deployments `web` y `auto-articulos-web` en `success`.
+- Sin ramas, worktrees, migraciones ni reservas activas. E2E autenticado de Juan pendiente por falta de sesión.
+
 ## Codex — THREADS POSTPEER BOTÓN DE CONEXIÓN — 2026-10-19
 
 - Task ID: `THREADS-POSTPEER-BOTON-20261019`. Responsable/publicador: Codex. Sin rama ni worktree nuevos; trabajo sobre `main`.

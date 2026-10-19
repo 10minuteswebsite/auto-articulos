@@ -1,5 +1,11 @@
 # CHECKPOINTS
 
+## Cierre — Threads/PostPeer — 2026-10-19
+
+- Task ID: `THREADS-POSTPEER-BOTON-20261019`; código `474ed73c` en `main`.
+- Deployments `5XcP7ZMdrRhTWHeGuN3SNeRXrJSn` y `6W6fHM4eaLN59CXxBfcFww6C1KAh`, ambos `success`.
+- HTTP productivo verificado; E2E autenticado de Juan no verificado por falta de sesión.
+
 ## Checkpoint — Threads/PostPeer: botón de conexión — 2026-10-19
 
 - Task ID: `THREADS-POSTPEER-BOTON-20261019`.

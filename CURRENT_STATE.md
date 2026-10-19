@@ -19,6 +19,13 @@ Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELIN
 
 # CURRENT_STATE — Punto cero real
 
+## Cierre — Threads/PostPeer: botón de conexión — 2026-10-19
+
+- Task ID: `THREADS-POSTPEER-BOTON-20261019`. Commit funcional `474ed73ca6796672c4d274e8b310f2d23e8b301c` en `main`.
+- Deployments productivos: Vercel `web` `5XcP7ZMdrRhTWHeGuN3SNeRXrJSn` y `auto-articulos-web` `6W6fHM4eaLN59CXxBfcFww6C1KAh`; ambos `success`.
+- HTTP productivo verificado; la pantalla autenticada redirige a `/login` sin sesión (`307`). No se declara E2E autenticado de Juan por falta de sesión.
+- Siguiente punto cero: `main` en la punta remota posterior a `474ed73c`; validación visual de Juan queda pendiente de sesión autenticada.
+
 ## En curso — Threads/PostPeer: botón de conexión — 2026-10-19
 
 - Task ID: `THREADS-POSTPEER-BOTON-20261019`.

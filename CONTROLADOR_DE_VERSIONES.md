@@ -1,5 +1,11 @@
 # CONTROLADOR DE VERSIONES
 
+## Cierre — THREADS-POSTPEER-BOTON-20261019
+
+- Commit funcional: `474ed73ca6796672c4d274e8b310f2d23e8b301c` en `main`.
+- Deployments: `5XcP7ZMdrRhTWHeGuN3SNeRXrJSn` (`web`) y `6W6fHM4eaLN59CXxBfcFww6C1KAh` (`auto-articulos-web`), ambos `success`.
+- Sin migraciones ni cambios de datos/permisos; E2E autenticado de Juan pendiente por falta de sesión.
+
 ## En curso — THREADS-POSTPEER-BOTON-20261019
 
 - Punto cero: `origin/main` = `cfe380006423950da5447a12d0d6896421941d5f`; deployments productivos `7187003637` y `7187010076`, ambos `success`.

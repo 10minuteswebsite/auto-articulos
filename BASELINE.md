@@ -1,5 +1,10 @@
 # BASELINE — Contrato previo HUB/OAuth
 
+## Verificación posterior — Threads/PostPeer — 2026-10-19
+
+- `474ed73c` publicado en `main`; ambos deployments productivos `success`.
+- La verificación visual autenticada de Juan queda pendiente de sesión; el dominio protegido responde `/login` sin sesión.
+
 ## Contrato añadido — conexión Threads por PostPeer — 2026-10-19
 
 - En Configuración → Conexiones → Threads, una cuenta autorizada debe ver `Conectar con Threads` cuando no está conectada.

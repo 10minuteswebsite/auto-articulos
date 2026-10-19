@@ -32,6 +32,12 @@ Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELIN
 
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Cierre — Threads/PostPeer: botón de conexión — 2026-10-19
+
+- Task ID `THREADS-POSTPEER-BOTON-20261019`; commit funcional `474ed73ca6796672c4d274e8b310f2d23e8b301c` publicado en `main`.
+- Vercel: `web` `5XcP7ZMdrRhTWHeGuN3SNeRXrJSn` y `auto-articulos-web` `6W6fHM4eaLN59CXxBfcFww6C1KAh`, ambos `success`.
+- HTTP productivo verificado. No se declara la comprobación visual con Juan porque no había sesión autenticada.
+
 ## Codex — Threads/PostPeer: botón de conexión oculto — 2026-10-19
 
 - Task ID: `THREADS-POSTPEER-BOTON-20261019`. Punto cero: `origin/main`/`cfe380006423950da5447a12d0d6896421941d5f`; deployments `7187003637` y `7187010076`, ambos `success`.
