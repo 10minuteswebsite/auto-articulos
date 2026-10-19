@@ -58,3 +58,14 @@ test("el callback del HUB usa el dominio de la familia que lo está sirviendo", 
   assert.equal(cookieEnvForHost("redes.lasolucionweb.com", {}).SHARED_COOKIE_DOMAIN, ".lasolucionweb.com");
   assert.equal(cookieEnvForHost("redes.lasolucionweb.net:443", {}).SHARED_COOKIE_DOMAIN, ".lasolucionweb.net");
 });
+
+test("el host de logout prevalece sobre una familia global mal configurada", () => {
+  assert.equal(
+    cookieEnvForHost("hub.lasolucionweb.net", { SHARED_COOKIE_DOMAIN: ".lasolucionweb.com" }).SHARED_COOKIE_DOMAIN,
+    ".lasolucionweb.net",
+  );
+  assert.equal(
+    cookieEnvForHost("seototal.lasolucionweb.com", { SHARED_COOKIE_DOMAIN: ".lasolucionweb.net" }).SHARED_COOKIE_DOMAIN,
+    ".lasolucionweb.com",
+  );
+});
