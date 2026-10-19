@@ -145,3 +145,13 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Auto Artículos limpia sus cookies y vuelve al HUB con el marcador `autoArticulosCleared=1`; el HUB evita repetir el puente y completa el logout Auth0.
 - No se comparten cookies entre `.com` y `.net`; el contrato usa `.com` como host canónico del puente.
 - Prueba pública realizada: la cadena terminó en `hub.lasolucionweb.net/login` sin `401` JSON ni Auth0 Oops.
+
+
+## Verificación E2E final — logout cruzado con sesión real — 2026-10-19
+
+- Se abrió una sesión real desde el HUB y se lanzó Auto Artículos en `articulos.lasolucionweb.net/dashboard`; el dashboard mostró la cuenta autenticada.
+- Se ejecutó logout desde `hub.lasolucionweb.net/auth/logout`.
+- Resultado verificado: `articulos.lasolucionweb.net/dashboard` redirigió a `/login`; la cookie de la familia `.lasolucionweb.net` dejó de ser utilizable.
+- El HUB también quedó sin sesión: `hub.lasolucionweb.net/dashboard` redirigió al login de Auth0.
+- El puente de Auto Artículos ya estaba publicado en `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`; la corrección de ambas familias vive en el HUB, commit `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100%.
+- Punto 4: COMPLETADO. No se comparten cookies entre `.com` y `.net`; el HUB visita ambos orígenes para borrarlas.
