@@ -12395,3 +12395,12 @@ Responsable: Claude (tarea programada diaria de propagación).
 ## Cierre — limpieza de estado OAuth en errores — 2026-10-19
 
 Se ejecutó el Punto 1 del plan `PLAN_PENDIENTES_SESION_OAUTH.md` directamente sobre `main`. El helper `clearOAuthFlowCookies` limpia state, verifier y origen recordado en éxito, error y cancelación, seleccionando la familia de dominio del host callback. Se corrigieron Twitter/X, LinkedIn, Pinterest, Blogger y Bing. Tumblr conserva su pending server-side; Threads, Instagram, Search Console, Analytics y Business Profile no tienen callback local con cookie state. Código publicado: `849ba35bd4bb7f77d3f79063d12495a37075f44d`; producción: `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ` (`READY`). La prueba real con proveedor requiere una sesión autorizada y sigue pendiente.
+
+
+## Cierre del Punto 4 — logout cruzado HUB → Auto Artículos — 2026-10-19
+
+- Código publicado en `main`: `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`.
+- Corrección: `/api/auth/logout` queda público para que el puente pueda limpiar las cookies de Auto Artículos aunque ya no exista una sesión local; la ruta GET borra las cookies y redirige de forma segura al HUB.
+- Vercel: deployment `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`, estado `READY`, producción; aliases personalizados incluidos `seototal.lasolucionweb.com`, `seototal.lasolucionweb.net`, `articulos.*` y `redes.*`.
+- Verificación pública: el flujo `hub.lasolucionweb.net/auth/logout` → puente `seototal.lasolucionweb.com/api/auth/logout` → HUB terminó en `https://hub.lasolucionweb.net/login`, sin JSON `No autenticado` ni pantalla Auth0 Oops.
+- La verificación se hizo sin una sesión activa de Auto Artículos; queda separada la comprobación con una cookie real del producto para observar físicamente su expiración en el navegador.
