@@ -1,5 +1,14 @@
 # CHECKPOINTS
 
+## Checkpoint — Threads/PostPeer: botón de conexión — 2026-10-19
+
+- Task ID: `THREADS-POSTPEER-BOTON-20261019`.
+- Punto cero: producción servida desde `cfe380006423950da5447a12d0d6896421941d5f`; deployments `7187003637` y `7187010076`, ambos `success`.
+- Causa: la UI bloqueaba Threads por un endpoint de credenciales Meta eliminado.
+- Cambio: `OAuthNetworkSection.tsx` permite el botón PostPeer para `config.id === "threads"`.
+- Typecheck local no ejecutable: falta `tsc` en el worktree. La verificación productiva queda obligatoria después del despliegue.
+- Siguiente punto cero: commit y deployments productivos de este cambio, con Threads comprobado en producción.
+
 ## Checkpoint — Google Business y cuidado de tokens — 2026-10-17
 
 - Task ID: `GMB-CIERRE-20261016`. Commits: `dca4ff53`, `d20e06f9`, `1d721742`, `bd57a872`. Deployments: GitHub `7128972685`, `7129447154`, `7129649611` en `success`.

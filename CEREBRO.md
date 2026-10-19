@@ -1,5 +1,11 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión — Threads usa PostPeer sin compuerta Meta heredada — 2026-10-19
+
+- Task ID: `THREADS-POSTPEER-BOTON-20261019`.
+- Causa raíz: al retirar la conexión directa de Meta, se conservó una compuerta genérica que esperaba `/api/search-integrations/threads/settings`; esa ruta ya no forma parte del diseño vigente.
+- Regla durable: Threads inicia por `/api/postpeer/threads/connect`; la disponibilidad del botón no se decide por credenciales Meta directas.
+
 ## Decisiones durables — Google Business y tokens — 2026-10-17
 
 - Causa raíz encontrada: el worker exigía `summary` no nulo también en lo aprobado con Publicar, pero Oportunidades Redes propone artículos sin resumen; esas propuestas nunca eran candidatas, no daban error y quedaban en 1 % hasta que la recuperación las pasaba a error a los 10 min. Los disparos del worker sí corrían: no era un disparo perdido.

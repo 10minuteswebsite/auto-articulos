@@ -19,6 +19,14 @@ Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELIN
 
 # CURRENT_STATE — Punto cero real
 
+## En curso — Threads/PostPeer: botón de conexión — 2026-10-19
+
+- Task ID: `THREADS-POSTPEER-BOTON-20261019`.
+- Punto cero productivo confirmado: `origin/main` en `cfe380006423950da5447a12d0d6896421941d5f`; deployments `Production – web` y `Production – auto-articulos-web` de ese commit en `success` el 2026-10-19.
+- Causa confirmada: `OAuthNetworkSection` consulta `/api/search-integrations/threads/settings`, ruta eliminada al migrar Threads a PostPeer; el 404 se interpreta como `configured=false` y oculta `Conectar con Threads`.
+- Cambio: Threads omite esa comprobación antigua y conserva `/api/postpeer/threads/connect`.
+- Sin migración, sin cambio de datos ni permisos; se protegen PostPeer, las demás redes y las conexiones existentes.
+
 ## Nota de cierre MCP — 2026-10-17
 
 - La conversación «PROBLEMAS CON MCP ARTICULOS» quedó CERRADA Y ARCHIVADA (Task `MCP-CIERRE-20261017`). El estado del MCP en producción está descrito en la sección «Punto cero vigente — prompts por producto» y en el Checkpoint 11/12; el último código MCP es `4836deaf`. Producción al cierre: `e5414d1a`, `dpl_At7F1QJYaUzy9mdkGUyX2KRM4VZu` (`READY`).

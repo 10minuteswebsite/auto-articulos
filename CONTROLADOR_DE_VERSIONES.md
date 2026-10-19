@@ -1,5 +1,11 @@
 # CONTROLADOR DE VERSIONES
 
+## En curso — THREADS-POSTPEER-BOTON-20261019
+
+- Punto cero: `origin/main` = `cfe380006423950da5447a12d0d6896421941d5f`; deployments productivos `7187003637` y `7187010076`, ambos `success`.
+- Cambio único: `apps/web/src/components/OAuthNetworkSection.tsx`; no migración, workflows, datos ni permisos.
+- Publicación: solo `main`, sin ramas ni worktrees; commit y deployments se añadirán después de verificar producción.
+
 ## Regla obligatoria
 
 Antes de modificar código, cambiar de rama, crear un commit, ejecutar una migración o desplegar, se debe leer este documento y `COORDINACION_CLAUDE_CODEX.md` completos.

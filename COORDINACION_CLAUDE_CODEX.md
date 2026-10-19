@@ -19,6 +19,13 @@ Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELIN
 
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
+## Codex — Threads/PostPeer: botón de conexión oculto — 2026-10-19
+
+- Task ID: `THREADS-POSTPEER-BOTON-20261019`. Punto cero: `origin/main`/`cfe380006423950da5447a12d0d6896421941d5f`; deployments `7187003637` y `7187010076`, ambos `success`.
+- Causa confirmada: `OAuthNetworkSection` llamaba `/api/search-integrations/threads/settings`; esa ruta ya no existe desde la migración a PostPeer. El 404 se convertía en `configured=false` y ocultaba el botón.
+- Corrección: para Threads, la UI deja visible `/api/postpeer/threads/connect`. No se tocan permisos, base de datos ni conexiones.
+- Estado: pendiente de commit en `main`, despliegue y verificación E2E productiva.
+
 ## Claude — CIERRE Y ARCHIVO «CONTENIDO NO ALINEADO EN EL HUB» — 2026-10-17
 
 - Task ID: `HUB-CONTENIDO-ALINEADO-20261017`. Estado: CERRADO Y ARCHIVADO. Sin migraciones ni workflows. Capitanía reclamada y liberada dos veces. Sin ramas ni PR abiertos de esta conversación.

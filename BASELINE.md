@@ -1,5 +1,11 @@
 # BASELINE — Contrato previo HUB/OAuth
 
+## Contrato añadido — conexión Threads por PostPeer — 2026-10-19
+
+- En Configuración → Conexiones → Threads, una cuenta autorizada debe ver `Conectar con Threads` cuando no está conectada.
+- Threads usa `/api/postpeer/threads/connect`; no depende de credenciales Meta propias ni de `/api/search-integrations/threads/settings`.
+- Un 404 de la antigua ruta de settings no puede convertirse en «Esta conexión todavía no está disponible».
+
 ## Contrato añadido — Google Business y tokens — 2026-10-17
 
 - Google Business: aprobar con Publicar y tener la cuenta PostPeer activa basta para que el worker tome la propuesta (con o sin resumen); termina en «Publicado» o en error con el motivo real, nunca en un 1 % silencioso más de 10 minutos.

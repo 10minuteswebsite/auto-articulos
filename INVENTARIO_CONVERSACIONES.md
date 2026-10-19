@@ -1,5 +1,11 @@
 # Inventario de conversaciones
 
+## Codex — THREADS POSTPEER BOTÓN DE CONEXIÓN — 2026-10-19
+
+- Task ID: `THREADS-POSTPEER-BOTON-20261019`. Responsable/publicador: Codex. Sin rama ni worktree nuevos; trabajo sobre `main`.
+- Alcance: corregir la compuerta heredada de settings que ocultaba el botón Threads por PostPeer. No hay reservas paralelas ni migración.
+- El cierre queda en `CURRENT_STATE.md`, Coordinación, `CONTROLADOR_DE_VERSIONES.md` y `CHECKPOINTS.md`.
+
 ## Claude — CIERRE Y ARCHIVO «PROBLEMAS CON MCP ARTICULOS» — 2026-10-17
 
 - Task ID: `MCP-CIERRE-20261017`. Responsable: Claude (Sonnet 5.5), a pedido de Milton Dávila.
