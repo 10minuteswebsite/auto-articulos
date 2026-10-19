@@ -63,3 +63,17 @@ Registrar en los documentos Harness los resultados de los puntos 2–4 y cualqui
 ## Fuera de este plan
 
 MCP, tokens, nuevas funcionalidades y limpieza administrativa de PRs antiguos.
+
+
+## Cierre del Punto 4 — logout cruzado HUB → Auto Artículos — 2026-10-19
+
+- Código publicado en `main`: `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`.
+- Corrección: `/api/auth/logout` queda público para que el puente pueda limpiar las cookies de Auto Artículos aunque ya no exista una sesión local; la ruta GET borra las cookies y redirige de forma segura al HUB.
+- Vercel: deployment `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`, estado `READY`, producción; aliases personalizados incluidos `seototal.lasolucionweb.com`, `seototal.lasolucionweb.net`, `articulos.*` y `redes.*`.
+- Verificación pública: el flujo `hub.lasolucionweb.net/auth/logout` → puente `seototal.lasolucionweb.com/api/auth/logout` → HUB terminó en `https://hub.lasolucionweb.net/login`, sin JSON `No autenticado` ni pantalla Auth0 Oops.
+- La verificación se hizo sin una sesión activa de Auto Artículos; queda separada la comprobación con una cookie real del producto para observar físicamente su expiración en el navegador.
+
+## Pendiente residual después del Punto 4
+
+- Ejecutar una prueba E2E con una sesión real de Auto Artículos y confirmar en DevTools que las cookies de la familia `.lasolucionweb.com` desaparecen al cerrar sesión desde el HUB.
+- Revisar manualmente las URLs de callback y logout registradas en cada consola externa; el repositorio no puede confirmar esa configuración.
