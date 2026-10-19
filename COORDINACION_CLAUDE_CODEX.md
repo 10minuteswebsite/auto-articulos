@@ -1,14 +1,13 @@
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
-## Claude — Alineación del Hub, segunda parte — 2026-10-17
+## Claude — CIERRE Y ARCHIVO «CONTENIDO NO ALINEADO EN EL HUB» — 2026-10-17
 
-- Task ID: `HUB-CONTENIDO-ALINEADO-2-20261017`. Sin migración. Corrige la entrada de abajo, que decía «SIN fusionar»: el PR #637 SÍ está fusionado y desplegado. Hallazgo de Milton: `oportunidades-redes` seguía desalineada porque la propia página envolvía su contenido en `maxWidth: 1120` centrado. Se quitó ese tope (y el de Cómo funciona, Actualizaciones, Usuarios y Configuración → MCP, que repetían el patrón). `mi-acceso` queda como tarjeta angosta a propósito. NO verificado en vivo.
-
-## Claude — Contenido alineado con el encabezado del Hub — 2026-10-17
-
-- Task ID: `HUB-CONTENIDO-ALINEADO-20261017`. Sin migración ni workflows. Estado: PR abierto, SIN fusionar, NO verificado en vivo (requiere sesión con la navegación del Hub).
-- Causa: encabezado global del Hub = 1280px con márgenes 16/24/32px; la barra de Artículos/Redes = 1160px con 20px; el contenido de `/dashboard` = 1120px con 24px. Tres bordes distintos.
-- Cambio (`dashboard/layout.tsx`): con navegación del Hub, la barra y el contenido usan 1280px y los mismos márgenes laterales que el encabezado. Sin Hub no cambia nada.
+- Task ID: `HUB-CONTENIDO-ALINEADO-20261017`. Estado: CERRADO Y ARCHIVADO. Sin migraciones ni workflows. Capitanía reclamada y liberada dos veces. Sin ramas ni PR abiertos de esta conversación.
+- Causa: el encabezado global del Hub mide 1280px con márgenes laterales de 16/24/32px; la barra de Artículos/Redes medía 1160px con 20px, el contenido de `/dashboard` 1120px con 24px, y varias páginas añadían su propio tope centrado de 1120px (el caso de `oportunidades-redes` que Milton señaló).
+- PR #637 (`f5d4c2fe`): con la navegación del Hub, barra y contenido usan 1280px y los mismos márgenes que el encabezado (`dashboard/layout.tsx`). Sin Hub no cambia nada.
+- PR #638 (`3b63f673`): se quitó el tope propio de ancho en Oportunidades Redes, Cómo funciona, Actualizaciones, Usuarios y Configuración → MCP. `mi-acceso` queda como tarjeta angosta a propósito.
+- Verificado: despliegues de Vercel `success` en ambos PR; `/login` de Artículos y Redes `.net` en 200. NO verificado: la alineación en pantalla con sesión del Hub (Milton debe recargar con fuerza `/dashboard` y `/dashboard/oportunidades-redes`). `tsc` muestra errores previos sobre `@auto-articulos/shared`, ajenos a este cambio.
+- Lección: al alinear con un encabezado compartido, buscar también los topes de ancho que cada página pone por su cuenta (`maxWidth` en línea), no solo el contenedor del layout.
 
 ## Claude — CIERRE Y ARCHIVO «PROBLEMAS CON MCP ARTICULOS» — 2026-10-17
 
