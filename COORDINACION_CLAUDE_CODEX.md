@@ -27,8 +27,10 @@ Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELIN
   el prompt no existe.
 - Punto cero confirmado antes de editar: Artículos `/login` 200; ruta de
   Contenido protegida 307 a `/login`; `/api/me` y `/api/mcp` 401 sin sesión.
-- Estado: código local sobre `main`; pendiente auditoría, commit, publicación,
-  aplicación controlada de la migración y verificación funcional en producción.
+- Estado: CERRADO. Commit `e0b6cf8a` publicado en `main`; deployment Vercel
+  `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ`, `success`; workflow `39340883977` aplicó el
+  backfill seguro. Verificación posterior: `/login` 200 y `/api/me` 401 sin
+  sesión. No hubo sesión autenticada disponible para una comprobación visual.
 
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 

@@ -1,5 +1,13 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## Punto cero — estilo problema-solución publicado (2026-10-19)
+
+- Task ID: `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`.
+- Código: `e0b6cf8a` en `main`; deployment Vercel `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ`, `success`.
+- Datos: workflow `39340883977` ejecutó únicamente `safe_problem_solution_default_prompt`; el paso terminó correctamente.
+- Verificación HTTP posterior: Artículos `/login` 200 y `/api/me` sin sesión 401. No hubo sesión autenticada disponible para prueba visual.
+- Siguiente punto cero: `main` en `e0b6cf8a` y base productiva con el prompt problema-solución asignado a todas las cuentas.
+
 Este bloque prevalece sobre las notas históricas posteriores del archivo.
 
 - Harness aplicado: producción verificada como verdad funcional; GitHub como memoria durable; rama única `main`; sin ramas ni worktrees.
