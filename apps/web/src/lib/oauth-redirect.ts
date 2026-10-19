@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { applyCookie, clearCookie } from "./shared-cookies";
+import { applyCookie, clearCookie, cookieEnvForHost } from "./shared-cookies";
 
 // ÚNICOS hosts donde se admite un callback OAuth (orden de Milton 2026-10-17):
 // articulos.lasolucionweb.net y redes.lasolucionweb.net. Nada de seototal ni
