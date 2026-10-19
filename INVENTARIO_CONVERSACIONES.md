@@ -1,5 +1,10 @@
 # Inventario de conversaciones
 
+## Codex — estilo problema-solución por defecto — 2026-10-19
+
+- Task `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`; commit `e0b6cf8a` publicado en `main`; deployment `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ` (`success`).
+- El backfill se aplicó con el workflow `39340883977`; no quedan reservas activas.
+
 ## Cierre — THREADS-POSTPEER-BOTON-20261019
 
 - Commit `474ed73c` publicado en `main`; deployments `web` y `auto-articulos-web` en `success`.

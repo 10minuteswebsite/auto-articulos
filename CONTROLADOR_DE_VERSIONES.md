@@ -1,5 +1,10 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — 2026-10-19 — estilo problema-solución por defecto
+
+- Task `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`; commit funcional `e0b6cf8a` en `main`.
+- Deployment Vercel `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ`, `success`; workflow productivo `39340883977` completado con el input seguro.
+
 ## Cierre — THREADS-POSTPEER-BOTON-20261019
 
 - Commit funcional: `474ed73ca6796672c4d274e8b310f2d23e8b301c` en `main`.

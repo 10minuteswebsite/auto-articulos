@@ -1,5 +1,10 @@
 # CHECKPOINTS
 
+## Checkpoint — estilo problema-solución por defecto — 2026-10-19
+
+- Task `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`; código `e0b6cf8a`; deployment Vercel `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ`, `success`.
+- Workflow `39340883977` aplicó únicamente `safe_problem_solution_default_prompt`; `/login` 200 y `/api/me` 401 sin sesión después del cambio.
+
 ## Cierre — Threads/PostPeer — 2026-10-19
 
 - Task ID: `THREADS-POSTPEER-BOTON-20261019`; código `474ed73c` en `main`.

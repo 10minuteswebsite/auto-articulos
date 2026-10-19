@@ -1,5 +1,9 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión editorial durable — 2026-10-19
+
+- Por decisión de Milton, el predeterminado global pasó de STANDARD a `GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION`, mediante backfill de `User.defaultPromptId`; el selector individual permanece intacto.
+
 ## Resultado — THREADS-POSTPEER-BOTON-20261019
 
 - `474ed73c` está publicado en `main`; los dos deployments productivos terminaron `success`.

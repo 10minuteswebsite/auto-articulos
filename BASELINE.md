@@ -1,5 +1,9 @@
 # BASELINE — Contrato previo HUB/OAuth
 
+## Contrato editorial vigente — 2026-10-19
+
+- Todas las cuentas usan `GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION` como estilo predeterminado. STANDARD sigue disponible como elección explícita; no cambiaron navegación, permisos ni rutas.
+
 ## Verificación posterior — Threads/PostPeer — 2026-10-19
 
 - `474ed73c` publicado en `main`; ambos deployments productivos `success`.
