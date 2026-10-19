@@ -21,6 +21,7 @@ const PUBLIC_PATHS = [
   "/privacidad",
   "/terminos",
   "/api/auth/login",
+  "/api/auth/logout",
   "/api/auth/trial-signup",
   "/auth/hub",
   "/api/oauth2/authorize",
