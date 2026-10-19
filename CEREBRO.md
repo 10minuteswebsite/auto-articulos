@@ -190,3 +190,12 @@ Los siete archivos activos del Harness comparten ahora el mismo punto cero produ
 ## Verdad vigente — Punto 1 de sesión/OAuth — 2026-10-19
 
 La limpieza de cookies OAuth en errores ya no es una reparación pendiente. `clearOAuthFlowCookies` centraliza el borrado por familia de host y se usa en Twitter/X, LinkedIn, Pinterest, Blogger y Bing. Tumblr usa pending server-side; Threads, Instagram, Search Console, Analytics y Business Profile no tienen aquí un callback con cookie state. La prueba con una cuenta autorizada sigue separada de la corrección de código.
+
+
+## Cierre del Punto 4 — logout cruzado HUB → Auto Artículos — 2026-10-19
+
+- Código publicado en `main`: `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`.
+- Corrección: `/api/auth/logout` queda público para que el puente pueda limpiar las cookies de Auto Artículos aunque ya no exista una sesión local; la ruta GET borra las cookies y redirige de forma segura al HUB.
+- Vercel: deployment `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`, estado `READY`, producción; aliases personalizados incluidos `seototal.lasolucionweb.com`, `seototal.lasolucionweb.net`, `articulos.*` y `redes.*`.
+- Verificación pública: el flujo `hub.lasolucionweb.net/auth/logout` → puente `seototal.lasolucionweb.com/api/auth/logout` → HUB terminó en `https://hub.lasolucionweb.net/login`, sin JSON `No autenticado` ni pantalla Auth0 Oops.
+- La verificación se hizo sin una sesión activa de Auto Artículos; queda separada la comprobación con una cookie real del producto para observar físicamente su expiración en el navegador.
