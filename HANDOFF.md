@@ -2,6 +2,15 @@
 
 Última actualización: 2026-09-08, por Claude.
 
+## Cambio pendiente de publicación — estilo problema-solución por defecto (19/10/2026, Codex)
+
+- Se agregó la migración `20261019190000_set_problem_solution_default_prompt`, que
+  busca el prompt existente `GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION` y asigna su
+  `id` a todas las cuentas, sustituyendo STANDARD y cualquier estilo anterior.
+- La migración falla si el prompt no existe; no crea ni duplica prompts.
+- La migración aún no se ejecutó; este lote queda pendiente de publicación y
+  verificación productiva.
+
 ## Reparación de build web — 2026-10-06
 
 En la rama aislada `codex/reparar-typecheck-web-20261006` se corrigieron dos

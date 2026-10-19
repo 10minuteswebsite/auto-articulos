@@ -17,6 +17,19 @@ Este bloque prevalece sobre las notas históricas posteriores del archivo.
 
 Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELINE.md` antes de programar.
 
+## Codex — estilo problema-solución por defecto — 2026-10-19
+
+- Task ID: `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`.
+- Pedido: establecer `GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION` como estilo
+  predeterminado para todos los usuarios desde Configuración → Contenido.
+- Cambio: migración `20261019190000_set_problem_solution_default_prompt`, que
+  resuelve el prompt por nombre, actualiza todas las filas de `User` y falla si
+  el prompt no existe.
+- Punto cero confirmado antes de editar: Artículos `/login` 200; ruta de
+  Contenido protegida 307 a `/login`; `/api/me` y `/api/mcp` 401 sin sesión.
+- Estado: código local sobre `main`; pendiente auditoría, commit, publicación,
+  aplicación controlada de la migración y verificación funcional en producción.
+
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
 ## Codex — Threads/PostPeer: botón de conexión oculto — 2026-10-19
