@@ -129,7 +129,7 @@ test("la limpieza de errores OAuth borra todas las cookies temporales en la fami
   const headers = response.headers.getSetCookie();
   assert.equal(headers.length, 4);
   assert.ok(headers.every((header) => /Max-Age=0/.test(header)));
-  assert.ok(headers.some((header) => /Domain=\\.lasolucionweb\\.net/.test(header)));
+  assert.ok(headers.some((header) => /Domain=\.lasolucionweb\.net/.test(header)));
   assert.ok(headers.some((header) => /twitter_oauth_state=/.test(header)));
   assert.ok(headers.some((header) => /twitter_code_verifier=/.test(header)));
 });
