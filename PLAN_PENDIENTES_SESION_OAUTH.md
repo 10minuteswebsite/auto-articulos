@@ -1,3 +1,22 @@
+# HANDOFF VIGENTE — 2026-10-19
+
+Este bloque prevalece sobre las notas históricas posteriores del archivo.
+
+- Harness aplicado: producción verificada como verdad funcional; GitHub como memoria durable; rama única `main`; sin ramas ni worktrees.
+- Punto 4 de sesión/logout: COMPLETADO y verificado con sesión real.
+- Auto Artículos: código `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`, Vercel `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`, `READY`.
+- HUB: puente final `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100% en producción.
+- El logout del HUB recorre las familias `.com` y `.net`; después de la prueba, Auto Artículos llevó a `/login`, el HUB llevó a Auth0 login y no quedaron cookies de sesión. Solo permanecieron `_fbp` y `_gcl_au`; no se leyeron valores.
+- No modificar de nuevo el puente de logout salvo que aparezca nueva evidencia productiva.
+
+## Siguiente trabajo autorizado
+
+1. Reconexiones OAuth reales, empezando por Bing.
+2. Auditoría manual de URLs en las consolas externas.
+3. Registrar resultados y limitaciones en los documentos Harness.
+
+Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELINE.md` antes de programar.
+
 # Plan actual — Pendientes de sesión y OAuth
 
 Fecha de actualización: 2026-10-19
