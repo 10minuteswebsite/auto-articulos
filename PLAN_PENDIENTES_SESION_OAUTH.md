@@ -88,3 +88,10 @@ El punto 4 ya no está pendiente. La prueba E2E con sesión real confirmó que e
 1. Verificar reconexiones OAuth reales, empezando por Bing y luego los proveedores prioritarios.
 2. Comparar manualmente las URLs registradas en las consolas externas con las URLs del código publicado.
 3. Documentar los resultados de esas verificaciones y sus limitaciones.
+
+
+## Evidencia adicional — cookies inspeccionadas sin leer valores — 2026-10-19
+
+- Tras el logout cruzado se inspeccionaron solo nombre, dominio y ruta mediante el navegador.
+- En `articulos.lasolucionweb.net`, `seototal.lasolucionweb.net` y `seototal.lasolucionweb.com` no quedó ninguna cookie de sesión de Auto Artículos; solo permanecieron `_fbp` y `_gcl_au` de analítica/marketing.
+- No se leyeron ni registraron valores de cookies.
