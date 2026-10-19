@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { NextRequest } from "next/server";
 import {
   canonicalOAuthOrigin,
+  clearOAuthFlowCookies,
   clearOAuthOrigin,
   getAllowedOAuthOrigin,
   getOAuthRedirectUri,
@@ -115,4 +116,20 @@ test("el retorno .net usa el host de articulos o redes .net y nunca seototal ni 
   }
   assert.equal(isNetProductHost("REDES.lasolucionweb.net"), true);
   assert.equal(isNetProductHost("redes.lasolucionweb.net.evil.com"), false);
+});
+
+test("la limpieza de errores OAuth borra todas las cookies temporales en la familia del callback", () => {
+  const response = { headers: new Headers(), cookies: { set: () => undefined } };
+  clearOAuthFlowCookies(
+    response,
+    { url: `https://${REDES}/api/search-integrations/twitter/callback` },
+    ["twitter_oauth_state", "twitter_code_verifier"],
+    {},
+  );
+  const headers = response.headers.getSetCookie();
+  assert.equal(headers.length, 4);
+  assert.ok(headers.every((header) => /Max-Age=0/.test(header)));
+  assert.ok(headers.some((header) => /Domain=\\.lasolucionweb\\.net/.test(header)));
+  assert.ok(headers.some((header) => /twitter_oauth_state=/.test(header)));
+  assert.ok(headers.some((header) => /twitter_code_verifier=/.test(header)));
 });
