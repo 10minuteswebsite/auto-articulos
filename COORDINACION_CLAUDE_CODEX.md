@@ -5330,6 +5330,22 @@ el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+## Codex — Márgenes de texto en tarjetas de Redes — 2026-10-19 (CERRADO)
+
+- Pedido: igualar el padding izquierdo de las tarjetas META y «Otras redes y blogs» en
+  `/dashboard/oportunidades-redes`, especialmente en la vista móvil.
+- Causa: las tarjetas se renderizan como botones y el estilo nativo del botón podía alterar el
+  espacio interior respecto a la tarjeta equivalente.
+- Cambio: `.inicio-action-card` fija `box-sizing`, `padding: 22px`, margen, `appearance`,
+  alineación interna y `text-indent` en `apps/web/src/app/globals.css`.
+- Commits publicados en `main`: `088f8516` y corrección final `f2f5163a`.
+- Verificación: Milton confirmó en producción que el padding ya se ve correctamente igualado.
+  No hubo migraciones ni cambios de datos. El typecheck local no se ejecutó porque faltaban
+  `tsc`/`tsx` en el worktree.
+- Estado: PRODUCCIÓN, CERRADO Y ARCHIVADO.
+
+Responsable: Codex.
+
 ## Cierre Codex — Redes restringidas por allowlist — 2026-10-07
 
 - Solicitud final: Redes solo para administradores, Lorena Alvarez y Zulmad;

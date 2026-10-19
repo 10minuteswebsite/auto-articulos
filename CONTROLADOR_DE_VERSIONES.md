@@ -5416,3 +5416,19 @@ partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — Alineación del Hub, segun
   este entorno).
 - Estado: FUSIONADO EN `main` (verificado por git); DEPLOYMENT DE VERCEL SIN VERIFICAR; NO
   VERIFICADO EN VIVO (según la propia entrada de origen).
+
+## Versión — 2026-10-19 — márgenes de texto en tarjetas de Redes
+
+- Fecha y hora: 2026-10-19 (America/New_York)
+- Versión/commit: `f2f5163a` (`fix(ui): eliminar estilo nativo de tarjetas de redes`)
+- Rama: `main`
+- Cambios incluidos: padding interior uniforme para las tarjetas META y «Otras redes y blogs».
+- Archivos modificados: `apps/web/src/app/globals.css`.
+- Archivos eliminados: ninguno.
+- Migraciones creadas/aplicadas: ninguna.
+- Diff revisado: `git diff --check` limpio.
+- Deployment/Vercel: activado por push a `main`.
+- Dominio verificado: `redes.lasolucionweb.net/dashboard/oportunidades-redes`.
+- Producción verificada: Milton confirmó visualmente que ambas tarjetas ya tienen el mismo
+  margen izquierdo.
+- Estado: PRODUCCIÓN, CERRADO Y ARCHIVADO.
