@@ -6,19 +6,24 @@ import { encryptSecret, exchangeCodeForLinkedInTokens } from "@auto-articulos/sh
 import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredLinkedInAppCredentials } from "@/lib/linkedin-app-config";
 import { LINKEDIN_STATE_COOKIE } from "../connect/constants";
-import { clearCookie } from "@/lib/shared-cookies";
-import { clearOAuthOrigin, netCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { clearOAuthFlowCookies, netCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
+  const errorResponse = () => {
+    const response = NextResponse.redirect(
+      new URL(connectionReturnPath("linkedin", "error"), oauthReturnBase(request)),
+    );
+    clearOAuthFlowCookies(response, request, [LINKEDIN_STATE_COOKIE]);
+    return response;
+  };
+
   const userId = await getCurrentUserId();
   const cookieStore = await cookies();
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
 
   if (!state || state !== cookieStore.get(LINKEDIN_STATE_COOKIE)?.value || !code) {
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("linkedin", "error"), oauthReturnBase(request))
-    );
+    return errorResponse();
   }
 
   try {
@@ -48,13 +53,10 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(
       new URL(connectionReturnPath("linkedin", "connected"), oauthReturnBase(request))
     );
-    clearCookie(response, LINKEDIN_STATE_COOKIE, { path: "/" });
-    clearOAuthOrigin(response);
+    clearOAuthFlowCookies(response, request, [LINKEDIN_STATE_COOKIE]);
     return response;
   } catch (error) {
     console.error("Error en LinkedIn OAuth callback:", error);
-    return NextResponse.redirect(
-      new URL(connectionReturnPath("linkedin", "error"), oauthReturnBase(request))
-    );
+    return errorResponse();
   }
 }
