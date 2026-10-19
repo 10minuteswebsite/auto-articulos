@@ -12391,3 +12391,7 @@ Responsable: Claude (tarea programada diaria de propagación).
 - El botón de logout ahora es explícitamente type="button", envía la petición con credentials: same-origin y redirige incluso si la petición falla.
 - Verificación real: con una sesión iniciada en seototal.lasolucionweb.net/dashboard, pulsar Salir llevó a Auth0 y después a hub.lasolucionweb.net/login; al volver a seototal.lasolucionweb.net/dashboard, producción respondió con /login. La navegación visible no mostró Volver al Inicio.
 - Alcance: esta evidencia cubre el botón Salir del dashboard, que ejecuta primero el logout de Auto Artículos y después el logout de Auth0. Un logout iniciado exclusivamente desde otra aplicación del HUB debe seguir usando este mismo contrato si se quiere invalidar también la cookie de Auto Artículos.
+
+## Cierre — limpieza de estado OAuth en errores — 2026-10-19
+
+Se ejecutó el Punto 1 del plan `PLAN_PENDIENTES_SESION_OAUTH.md` directamente sobre `main`. El helper `clearOAuthFlowCookies` limpia state, verifier y origen recordado en éxito, error y cancelación, seleccionando la familia de dominio del host callback. Se corrigieron Twitter/X, LinkedIn, Pinterest, Blogger y Bing. Tumblr conserva su pending server-side; Threads, Instagram, Search Console, Analytics y Business Profile no tienen callback local con cookie state. Código publicado: `849ba35bd4bb7f77d3f79063d12495a37075f44d`; producción: `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ` (`READY`). La prueba real con proveedor requiere una sesión autorizada y sigue pendiente.

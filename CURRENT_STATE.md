@@ -242,3 +242,12 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - El botón de logout ahora es explícitamente type="button", envía la petición con credentials: same-origin y redirige incluso si la petición falla.
 - Verificación real: con una sesión iniciada en seototal.lasolucionweb.net/dashboard, pulsar Salir llevó a Auth0 y después a hub.lasolucionweb.net/login; al volver a seototal.lasolucionweb.net/dashboard, producción respondió con /login. La navegación visible no mostró Volver al Inicio.
 - Alcance: esta evidencia cubre el botón Salir del dashboard, que ejecuta primero el logout de Auto Artículos y después el logout de Auth0. Un logout iniciado exclusivamente desde otra aplicación del HUB debe seguir usando este mismo contrato si se quiere invalidar también la cookie de Auto Artículos.
+
+## Punto 1 del plan de sesión/OAuth completado — 2026-10-19
+
+- Código vigente en `main`: `849ba35bd4bb7f77d3f79063d12495a37075f44d`; deployment productivo: `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ`, estado `READY`.
+- Se centralizó `clearOAuthFlowCookies()` para borrar el estado temporal tanto en éxito como en error y usando la familia del host callback (`.lasolucionweb.com` o `.lasolucionweb.net`).
+- Se aplicó a los callbacks OAuth de Twitter/X, LinkedIn, Pinterest, Blogger y Bing. Tumblr usa un pending server-side, no una cookie de state; no requería este cambio. Threads, Instagram, Search Console, Analytics y Business Profile no tienen en este repositorio un callback OAuth con esa cookie; no se modificaron.
+- Se añadió prueba de regresión para borrar state y verifier en ambas variantes de cookie.
+- Vercel confirmó compilación, typecheck y deployment exitosos. Los callbacks sin sesión responden `401`, por lo que no se ejecutó una autorización real ni se modificaron cuentas.
+- Pendiente de prueba con sesión autorizada: cancelar/error real desde cada proveedor y confirmar visualmente la ausencia de la cookie en el navegador.

@@ -280,3 +280,12 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - El botón de logout ahora es explícitamente type="button", envía la petición con credentials: same-origin y redirige incluso si la petición falla.
 - Verificación real: con una sesión iniciada en seototal.lasolucionweb.net/dashboard, pulsar Salir llevó a Auth0 y después a hub.lasolucionweb.net/login; al volver a seototal.lasolucionweb.net/dashboard, producción respondió con /login. La navegación visible no mostró Volver al Inicio.
 - Alcance: esta evidencia cubre el botón Salir del dashboard, que ejecuta primero el logout de Auto Artículos y después el logout de Auth0. Un logout iniciado exclusivamente desde otra aplicación del HUB debe seguir usando este mismo contrato si se quiere invalidar también la cookie de Auto Artículos.
+
+## Checkpoint — Punto 1 de sesión/OAuth cerrado — 2026-10-19
+
+- Objetivo: limpiar cookies temporales de OAuth también en errores y cancelaciones.
+- Resultado: helper común `clearOAuthFlowCookies` y callbacks de Twitter/X, LinkedIn, Pinterest, Blogger y Bing corregidos.
+- Tumblr queda fuera del cambio porque usa un pending cifrado server-side, no cookie de state. Threads, Instagram, Google Search Console, Google Analytics y Business Profile no exponen aquí callbacks con esa cookie.
+- Código: `849ba35bd4bb7f77d3f79063d12495a37075f44d`.
+- Producción: `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ`, `READY`; Vercel reportó build y typecheck correctos.
+- Verificación pública sin sesión: endpoints protegidos responden `401`. La autorización real queda pendiente porque requiere una cuenta/sesión autorizada.

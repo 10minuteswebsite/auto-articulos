@@ -186,3 +186,7 @@ Los siete archivos activos del Harness comparten ahora el mismo punto cero produ
 - Deuda técnica registrada sin resolver: el resolvedor piloto de Search Console deja «sin conectar» al MCP a cuentas conectadas solo por Composio fuera de la lista piloto; el HUB muestra «Sin acceso» donde el producto sí abre; el MCP no oculta herramientas de Redes a cuentas solo-Artículos (las rutas lo impiden con error); host `seototal` sin prompt definido por Milton.
 - Procesos: no asumir (preguntar); respuestas cortas; `npm test` completo antes de publicar; publicar por PR sobre rama existente con avance simple cuando el `push` directo está bloqueado; un solo programador a la vez.
 
+
+## Verdad vigente — Punto 1 de sesión/OAuth — 2026-10-19
+
+La limpieza de cookies OAuth en errores ya no es una reparación pendiente. `clearOAuthFlowCookies` centraliza el borrado por familia de host y se usa en Twitter/X, LinkedIn, Pinterest, Blogger y Bing. Tumblr usa pending server-side; Threads, Instagram, Search Console, Analytics y Business Profile no tienen aquí un callback con cookie state. La prueba con una cuenta autorizada sigue separada de la corrección de código.

@@ -1,108 +1,65 @@
 # Plan actual — Pendientes de sesión y OAuth
 
-Fecha: 2026-10-19
+Fecha de actualización: 2026-10-19
 Repositorio: 10minuteswebsite/auto-articulos
 Rama: main
-Base funcional: producción verificada en el deployment READY vigente.
-
-Este plan reemplaza el plan anterior para esta incidencia. Solo contiene trabajo pendiente; no reabre correcciones ya verificadas.
+Base funcional: producción verificada.
 
 ## Decisión operativa vigente
 
-Mantener una arquitectura mixta:
+Mantener arquitectura mixta:
 
 - `.com`: dominio canónico del HUB y de la sesión.
 - `.net`: aplicación independiente por producto, con su propia sesión.
 - No compartir cookies entre `.com` y `.net`.
 - No añadir `.net` globalmente a la allowlist OAuth.
 
-## Pendientes
+## Estado
 
-### 1. Corregir limpieza de estado OAuth en errores
+### 1. Limpieza de estado OAuth en errores — COMPLETADO
 
-Auditar los callbacks que dejan la cookie temporal de estado cuando el proveedor devuelve error o el usuario cancela.
+- Corregidos Twitter/X, LinkedIn, Pinterest, Blogger y Bing.
+- Tumblr usa pending server-side y no necesitaba cookie state.
+- Threads, Instagram, Search Console, Analytics y Business Profile no tienen en este repo un callback con esa cookie.
+- Código: `849ba35bd4bb7f77d3f79063d12495a37075f44d`.
+- Producción: `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ`, `READY`.
+- Vercel confirmó compilación y typecheck.
+- La autorización real con una cuenta sigue sin ejecutarse.
 
-Alcance inicial:
-
-- Tumblr
-- LinkedIn
-- Pinterest
-- Blogger
-- Bing
-- Threads
-- Instagram/Facebook
-- Google Search Console
-- Google Analytics
-- Google Business Profile
-
-Resultado esperado:
-
-- La cookie temporal se elimina tanto en éxito como en error/cancelación.
-- Se agregan pruebas de regresión.
-- Se verifica el flujo publicado en producción.
+## Pendientes restantes
 
 ### 2. Verificar reconexiones OAuth reales
 
-Probar en producción, empezando por Bing, una cuenta real o de prueba controlada:
+Empezar por Bing y después los proveedores prioritarios:
 
-1. Iniciar conexión.
+1. Iniciar conexión con una sesión autorizada.
 2. Completar autorización.
 3. Confirmar retorno al producto correcto.
-4. Confirmar sesión y conexión guardadas.
+4. Confirmar conexión guardada.
 5. Probar cancelación/error.
-6. Confirmar que no queda estado OAuth temporal.
-
-Después repetir con los proveedores prioritarios.
+6. Confirmar que no queda state temporal.
 
 ### 3. Verificar las consolas externas
 
-Comparar las URLs registradas en cada proveedor contra las URLs que usa el código publicado.
+Comparar las URLs registradas en Google, Bing, Threads, LinkedIn, Pinterest, X, Blogger e Instagram/Facebook con las URLs que usa el código publicado. No cambiar nada sin evidencia de discrepancia.
 
-Proveedores:
+### 4. Confirmar logout iniciado exclusivamente desde el HUB
 
-- Google Search Console
-- Google Analytics
-- Google Business Profile
-- Bing
-- Threads
-- LinkedIn
-- Pinterest
-- X
-- Blogger
-- Instagram/Facebook
-
-No se cambiarán URLs en las consolas sin evidencia de una discrepancia.
-
-### 4. Confirmar el logout iniciado exclusivamente desde el HUB
-
-El logout del dashboard de producto ya fue probado. Falta comprobar si el botón de logout del HUB también invalida la sesión de `auto-articulos`.
-
-Si no lo hace, habrá que integrar el HUB con:
+Comprobar si el botón de logout del HUB también invalida la sesión de `auto-articulos`. Si no, revisar el repositorio del HUB e integrar su llamada a:
 
 `POST https://seototal.lasolucionweb.com/api/auth/logout`
 
-Este punto requiere revisar el repositorio/aplicación del HUB; no se modificará a ciegas desde `auto-articulos`.
+### 5. Mantener documentación sincronizada
 
-### 5. Reconciliar la documentación
+Registrar en los documentos Harness los resultados de los puntos 2–4 y cualquier limitación real de verificación.
 
-Actualizar:
+## Orden restante
 
-- `CEREBRO.md`: retirar afirmaciones antiguas sobre normalizar automáticamente `.net` a `.com`.
-- `CURRENT_STATE.md`
-- `CHECKPOINTS.md`
-- `COORDINACION_CLAUDE_CODEX.md`
-
-Registrar resultados reales de los puntos 1–4, incluyendo pruebas fallidas o no ejecutables.
-
-## Orden de ejecución
-
-1. Limpieza OAuth en errores.
-2. Publicación y verificación de producción.
-3. Reconexión real de Bing y proveedores prioritarios.
-4. Verificación de consolas externas.
-5. Auditoría del logout independiente del HUB.
-6. Cierre documental.
+1. Reconexión real de Bing y proveedores prioritarios.
+2. Verificación de consolas externas.
+3. Auditoría del logout independiente del HUB.
+4. Cierre documental.
 
 ## Fuera de este plan
 
-No forman parte de esta incidencia los pendientes de MCP, tokens, nuevas funcionalidades ni la limpieza administrativa de PRs antiguos.
+MCP, tokens, nuevas funcionalidades y limpieza administrativa de PRs antiguos.
