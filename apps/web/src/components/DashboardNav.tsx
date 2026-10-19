@@ -1,7 +1,7 @@
 "use client";
 
 import { MENU_LABELS_NUMBERED, MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
-import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
+import { isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
