@@ -6,10 +6,14 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredBingCredentials } from "@/lib/bing-credentials";
 import { BING_STATE_COOKIE, bingExplicitRedirect, bingOAuthConfig } from "@/lib/bing-oauth";
 import { markBingReconnected } from "@/lib/bing-client-change";
-import { clearOAuthOrigin, oauthReturnBase } from "@/lib/oauth-redirect";
-import { clearCookie } from "@/lib/shared-cookies";
+import { clearOAuthFlowCookies, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
+  const clearState = (response: NextResponse) => {
+    clearOAuthFlowCookies(response, request, [BING_STATE_COOKIE]);
+    return response;
+  };
+
   const userId = await getCurrentUserId();
   const cookieStore = await cookies();
   const state = request.nextUrl.searchParams.get("state");
@@ -25,7 +29,7 @@ export async function GET(request: NextRequest) {
     back.searchParams.set("bing", "error");
     back.searchParams.set("motivo", "estado");
     back.searchParams.set("detalle", motivoEstado.slice(0, 200));
-    return NextResponse.redirect(back);
+    return clearState(NextResponse.redirect(back));
   }
   // El error real de Bing solo iba a `console.error`, y los logs de Vercel
   // rotan en minutos: en la práctica nunca se llegaba a leer y había que
@@ -94,8 +98,7 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(
       new URL("/dashboard/configuracion/conexiones?conexion=bing-webmaster&bing=connected", oauthReturnBase(request)),
     );
-    clearCookie(response, BING_STATE_COOKIE, { path: "/" });
-    clearOAuthOrigin(response);
+    clearState(response);
     return response;
   } catch (error) {
     if (!detalle) {
@@ -108,6 +111,6 @@ export async function GET(request: NextRequest) {
     destino.searchParams.set("bing", "error");
     destino.searchParams.set("motivo", "token");
     destino.searchParams.set("detalle", detalle.slice(0, 200));
-    return NextResponse.redirect(destino);
+    return clearState(NextResponse.redirect(destino));
   }
 }
