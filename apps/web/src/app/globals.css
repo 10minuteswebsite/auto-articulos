@@ -424,6 +424,10 @@ select {
 .inicio-action-card {
   box-sizing: border-box;
   padding: 22px !important;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  align-items: stretch;
   text-indent: 0;
 }
 
