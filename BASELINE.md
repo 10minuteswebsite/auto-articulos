@@ -126,3 +126,13 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Código publicado: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`.
 - Deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9`, `READY`.
 - Evidencia E2E: `redes.lasolucionweb.net/dashboard` mostró `SEO Total Redes`, `Difusión social`, `Admin Redes` y el submenú `Usuarios`, `Composio`, `PostPeer`; el Hub mostró la tarjeta `AUTOMATIZA TUS REDES SOCIALES`.
+
+## Corrección de logout y navegación Hub — 2026-10-19
+
+- Punto cero: producción en main, commit funcional final a2f3406e9dfe154188e180d204f82ea08e8558ee, deployment Vercel dpl_H6HNToZ9agcLBf5WxPnMe4KkVRCS (READY), con los seis dominios de producto asignados.
+- Hallazgo: /api/auth/logout borraba las cookies usando process.env sin seleccionar la familia del host receptor. En el flujo .net, el logout podía no borrar la cookie compartida .lasolucionweb.net.
+- Corrección: el endpoint usa cookieEnvForHost(request.nextUrl.hostname) al borrar sesión, suplantación y contexto Hub. Se añadió prueba de regresión para una variable global mal configurada.
+- Corrección visual: se eliminó del DashboardNav la entrada Volver al Inicio; no se alteraron los enlaces internos de las páginas.
+- El botón de logout ahora es explícitamente type="button", envía la petición con credentials: same-origin y redirige incluso si la petición falla.
+- Verificación real: con una sesión iniciada en seototal.lasolucionweb.net/dashboard, pulsar Salir llevó a Auth0 y después a hub.lasolucionweb.net/login; al volver a seototal.lasolucionweb.net/dashboard, producción respondió con /login. La navegación visible no mostró Volver al Inicio.
+- Alcance: esta evidencia cubre el botón Salir del dashboard, que ejecuta primero el logout de Auto Artículos y después el logout de Auth0. Un logout iniciado exclusivamente desde otra aplicación del HUB debe seguir usando este mismo contrato si se quiere invalidar también la cookie de Auto Artículos.
