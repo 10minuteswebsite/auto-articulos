@@ -418,6 +418,15 @@ select {
   border-radius: 6px !important;
 }
 
+/* Las tarjetas de Inicio y Redes comparten esta clase, pero una se renderiza
+   como enlace y la otra como botón. Fijamos el relleno en la clase común para
+   que los estilos propios de los botones no desplacen el texto de META. */
+.inicio-action-card {
+  box-sizing: border-box;
+  padding: 22px !important;
+  text-indent: 0;
+}
+
 /* Algunas pantallas antiguas todavía entregan el radio como estilo inline.
    Esta capa final garantiza que cualquier superficie rectangular conserve el
    mismo estándar visual en todas las rutas. Los radios 999/50% se reservan
