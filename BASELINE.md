@@ -136,3 +136,12 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - El botón de logout ahora es explícitamente type="button", envía la petición con credentials: same-origin y redirige incluso si la petición falla.
 - Verificación real: con una sesión iniciada en seototal.lasolucionweb.net/dashboard, pulsar Salir llevó a Auth0 y después a hub.lasolucionweb.net/login; al volver a seototal.lasolucionweb.net/dashboard, producción respondió con /login. La navegación visible no mostró Volver al Inicio.
 - Alcance: esta evidencia cubre el botón Salir del dashboard, que ejecuta primero el logout de Auto Artículos y después el logout de Auth0. Un logout iniciado exclusivamente desde otra aplicación del HUB debe seguir usando este mismo contrato si se quiere invalidar también la cookie de Auto Artículos.
+
+
+## Contrato vigente — logout cruzado desde el HUB — 2026-10-19
+
+- El HUB es el iniciador canónico del logout global.
+- El logout del HUB llama primero a `seototal.lasolucionweb.com/api/auth/logout`; esa ruta es técnica, pública y solo acepta un retorno interno al HUB.
+- Auto Artículos limpia sus cookies y vuelve al HUB con el marcador `autoArticulosCleared=1`; el HUB evita repetir el puente y completa el logout Auth0.
+- No se comparten cookies entre `.com` y `.net`; el contrato usa `.com` como host canónico del puente.
+- Prueba pública realizada: la cadena terminó en `hub.lasolucionweb.net/login` sin `401` JSON ni Auth0 Oops.
