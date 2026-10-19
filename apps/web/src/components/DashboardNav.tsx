@@ -74,8 +74,6 @@ const BASE_ENTRIES: NavEntry[] = [
   },
 ];
 
-const HUB_ENTRY: TabItem = { href: HUB_URL, label: "Volver al Inicio" };
-
 // VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2). Cuando la
 // cuenta tiene activo el módulo opt-in «vista-productos» (hoy: administradores
 // como vista previa), el grupo único «Publicaciones» se reemplaza por UN GRUPO
@@ -314,7 +312,6 @@ export default function DashboardNav({ initialIsAdmin = false }: { initialIsAdmi
   const rawEntries: NavEntry[] = [
     ...baseEntries,
     ...(isAdmin ? [adminGroup] : []),
-    ...[HUB_ENTRY],
   ];
 
   // Un grupo cuyos módulos están todos ocultos desaparece entero, en vez de
