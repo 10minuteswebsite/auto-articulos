@@ -77,3 +77,14 @@ MCP, tokens, nuevas funcionalidades y limpieza administrativa de PRs antiguos.
 
 - Ejecutar una prueba E2E con una sesión real de Auto Artículos y confirmar en DevTools que las cookies de la familia `.lasolucionweb.com` desaparecen al cerrar sesión desde el HUB.
 - Revisar manualmente las URLs de callback y logout registradas en cada consola externa; el repositorio no puede confirmar esa configuración.
+
+
+## Estado actualizado — Punto 4 completado con sesión real — 2026-10-19
+
+El punto 4 ya no está pendiente. La prueba E2E con sesión real confirmó que el logout iniciado desde el HUB invalida Auto Artículos en `.net` y termina la sesión Auth0 del HUB. El puente del HUB recorre `.com` y `.net` porque cada familia de cookies solo puede ser eliminada por su propio host.
+
+### Pendientes reales restantes
+
+1. Verificar reconexiones OAuth reales, empezando por Bing y luego los proveedores prioritarios.
+2. Comparar manualmente las URLs registradas en las consolas externas con las URLs del código publicado.
+3. Documentar los resultados de esas verificaciones y sus limitaciones.
