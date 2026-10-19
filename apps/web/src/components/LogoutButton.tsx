@@ -12,12 +12,19 @@ export default function LogoutButton({
   className?: string;
 } = {}) {
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = redirectTo;
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+    } finally {
+      window.location.href = redirectTo;
+    }
   }
 
   return (
-    <button className={className} onClick={handleLogout} style={secondaryButtonStyle}>
+    <button type="button" className={className} onClick={handleLogout} style={secondaryButtonStyle}>
       {label}
     </button>
   );
