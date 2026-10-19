@@ -308,3 +308,10 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - El HUB también quedó sin sesión: `hub.lasolucionweb.net/dashboard` redirigió al login de Auth0.
 - El puente de Auto Artículos ya estaba publicado en `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`; la corrección de ambas familias vive en el HUB, commit `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100%.
 - Punto 4: COMPLETADO. No se comparten cookies entre `.com` y `.net`; el HUB visita ambos orígenes para borrarlas.
+
+
+## Evidencia adicional — cookies inspeccionadas sin leer valores — 2026-10-19
+
+- Tras el logout cruzado se inspeccionaron solo nombre, dominio y ruta mediante el navegador.
+- En `articulos.lasolucionweb.net`, `seototal.lasolucionweb.net` y `seototal.lasolucionweb.com` no quedó ninguna cookie de sesión de Auto Artículos; solo permanecieron `_fbp` y `_gcl_au` de analítica/marketing.
+- No se leyeron ni registraron valores de cookies.
