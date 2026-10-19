@@ -111,6 +111,24 @@ export function clearOAuthOrigin(response: Parameters<typeof clearCookie>[0], en
   clearCookie(response, OAUTH_ORIGIN_COOKIE, { httpOnly: true, secure: true, sameSite: "lax", path: "/" }, env);
 }
 
+/**
+ * Limpia todo el estado temporal de un flujo OAuth, tanto en éxito como en
+ * error. El dominio se decide por el host que recibió el callback para no
+ * intentar borrar una cookie .com desde .net (o al revés).
+ */
+export function clearOAuthFlowCookies(
+  response: Parameters<typeof clearCookie>[0],
+  request: { url: string },
+  cookieNames: readonly string[],
+  env: Env = process.env,
+): void {
+  const cookieEnv = cookieEnvForHost(new URL(request.url).hostname, env);
+  for (const cookieName of cookieNames) {
+    clearCookie(response, cookieName, { path: "/" }, cookieEnv);
+  }
+  clearOAuthOrigin(response, cookieEnv);
+}
+
 /*
  * REDES CONECTADAS POR LOS DOS SITIOS .NET (2026-10-17). Para las conexiones ya
  * registradas en el proveedor con las direcciones de articulos y redes .net, el
