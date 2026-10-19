@@ -251,3 +251,12 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Se añadió prueba de regresión para borrar state y verifier en ambas variantes de cookie.
 - Vercel confirmó compilación, typecheck y deployment exitosos. Los callbacks sin sesión responden `401`, por lo que no se ejecutó una autorización real ni se modificaron cuentas.
 - Pendiente de prueba con sesión autorizada: cancelar/error real desde cada proveedor y confirmar visualmente la ausencia de la cookie en el navegador.
+
+
+## Cierre del Punto 4 — logout cruzado HUB → Auto Artículos — 2026-10-19
+
+- Código publicado en `main`: `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`.
+- Corrección: `/api/auth/logout` queda público para que el puente pueda limpiar las cookies de Auto Artículos aunque ya no exista una sesión local; la ruta GET borra las cookies y redirige de forma segura al HUB.
+- Vercel: deployment `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`, estado `READY`, producción; aliases personalizados incluidos `seototal.lasolucionweb.com`, `seototal.lasolucionweb.net`, `articulos.*` y `redes.*`.
+- Verificación pública: el flujo `hub.lasolucionweb.net/auth/logout` → puente `seototal.lasolucionweb.com/api/auth/logout` → HUB terminó en `https://hub.lasolucionweb.net/login`, sin JSON `No autenticado` ni pantalla Auth0 Oops.
+- La verificación se hizo sin una sesión activa de Auto Artículos; queda separada la comprobación con una cookie real del producto para observar físicamente su expiración en el navegador.
