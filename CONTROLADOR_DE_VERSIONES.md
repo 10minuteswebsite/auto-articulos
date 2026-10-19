@@ -5398,3 +5398,21 @@ partir de `COORDINACION_CLAUDE_CODEX.md` ("Codex — etiqueta Volver al Inicio �
 - Evidencia: build de producción OK y suite `240/240`; no se tocaron permisos, autenticación,
   rutas ni datos.
 - Estado: PRODUCCIÓN, CERRADO, VERIFICADO.
+
+## Versión — 2026-10-17 — PR #638: alineación del contenido con el encabezado del Hub, segunda parte
+
+Entrada agregada por la tarea programada diaria de propagación de Claude (corrida 2026-10-19), a
+partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — Alineación del Hub, segunda parte — 2026-10-17",
+`HUB-CONTENIDO-ALINEADO-2-20261017`).
+
+- Cambio: continúa el PR #637 (ver la entrada "Versión — 2026-10-17 — PR #637..." arriba).
+  Hallazgo de Milton: `oportunidades-redes` seguía desalineada porque la propia página envolvía su
+  contenido en `maxWidth: 1120` centrado. Se quitó ese tope de ancho propio, y el mismo patrón en
+  las páginas Cómo funciona, Actualizaciones, Usuarios y Configuración → MCP. La página
+  `mi-acceso` queda como tarjeta angosta a propósito (no se tocó).
+- Commit: `3b63f67` ("fix(ui): quitar topes de ancho propios de las páginas para alinear con el
+  Hub (#638)"), ya fusionado en `origin/main` (verificado con `git log`).
+- Deployment de Vercel: no verificado por esta tarea (sin acceso a la consola de Vercel desde
+  este entorno).
+- Estado: FUSIONADO EN `main` (verificado por git); DEPLOYMENT DE VERCEL SIN VERIFICAR; NO
+  VERIFICADO EN VIVO (según la propia entrada de origen).

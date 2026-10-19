@@ -2379,3 +2379,8 @@ Parte B por ser ya historial.
   entrega URL para publicaciones de Google Business). PR #589, #592 y #595 fusionados en
   `main`, producción; ramas propias ya borradas (local y remota, según la propia entrada). Sin
   reserva activa.
+- `[Claude] - ALINEACIÓN DEL HUB, SEGUNDA PARTE` — Task ID `HUB-CONTENIDO-ALINEADO-2-20261017`,
+  2026-10-17, PR #638. Continúa `HUB-CONTENIDO-ALINEADO-20261017` (ver entrada anterior): quita
+  el tope de ancho propio (`maxWidth: 1120`) de `oportunidades-redes`, Cómo funciona,
+  Actualizaciones, Usuarios y Configuración → MCP, para alinearlas con el encabezado del Hub.
+  Fusionado en `main` (commit `3b63f67`, verificado con `git log`). Sin reserva activa.
