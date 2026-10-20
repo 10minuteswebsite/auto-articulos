@@ -22,6 +22,9 @@ import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consu
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
+// Bloqueo global temporal: los carruseles permanecen en historial, pero no se generan nuevas propuestas.
+const INSTAGRAM_CAROUSELS_ENABLED = false;
+
 type ArticleCandidate = {
   id: string;
   finalTitle: string | null;
@@ -579,7 +582,7 @@ export async function POST(request: Request) {
       if ((await getSocialHostContext()).redesHost || user?.allowInstagramPublishing) {
         const hasComposioInstagram = Boolean((connected as { hideInstagramStories?: boolean }).hideInstagramStories);
         if (!hasComposioInstagram) integrations.push("instagram-story");
-        integrations.push("instagram-carousel");
+        if (INSTAGRAM_CAROUSELS_ENABLED) integrations.push("instagram-carousel");
         integrations.push("instagram-post");
       }
     }
