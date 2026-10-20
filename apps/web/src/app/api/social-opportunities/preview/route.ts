@@ -5,6 +5,8 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import sharp from "sharp";
 
+export const runtime = "nodejs";
+
 function escapeXml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[char] ?? char);
 }
@@ -35,20 +37,15 @@ export async function POST(request: NextRequest) {
 
   if (platform === "instagram-carousel") {
     const headline = String(summary).trim().slice(0, 140) || "Una idea importante para tu audiencia";
-    const slides = await Promise.all(Array.from({ length: 5 }, async (_, index) => {
+    const lines = headline.replace(/\s+/g, " ").match(/.{1,26}(?:\s|$)/g)?.map((line) => line.trim()).filter(Boolean) ?? [headline];
+    const slides: string[] = [];
+    for (let index = 0; index < 5; index += 1) {
       const label = String(index + 1).padStart(2, "0") + "/05";
-      const lines = headline.match(/.{1,24}/g) ?? [headline];
       const foreground = index % 2 ? "#102A43" : "#F7F0E5";
       const background = index % 2 ? "#F7F0E5" : "#102A43";
-      const svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1080\" height=\"1350\">" +
-        "<rect width=\"1080\" height=\"1350\" fill=\"" + background + "\"/>" +
-        "<circle cx=\"950\" cy=\"100\" r=\"210\" fill=\"#D9825B\" opacity=\".9\"/>" +
-        "<text x=\"72\" y=\"100\" font-family=\"Arial\" font-size=\"30\" font-weight=\"700\" fill=\"" + foreground + "\">" + label + "</text>" +
-        "<text x=\"92\" y=\"510\" font-family=\"Arial\" font-size=\"64\" font-weight=\"700\" fill=\"" + foreground + "\">" + escapeXml(lines[0]) + "</text>" +
-        "<text x=\"92\" y=\"590\" font-family=\"Arial\" font-size=\"64\" font-weight=\"700\" fill=\"" + foreground + "\">" + escapeXml(lines[1] ?? "") + "</text>" +
-        "<rect x=\"92\" y=\"760\" width=\"896\" height=\"260\" rx=\"30\" fill=\"#D9825B\" opacity=\".18\"/></svg>";
-      return (await sharp(Buffer.from(svg)).png().toBuffer()).toString("base64");
-    }));
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350"><rect width="1080" height="1350" fill="${background}"/><circle cx="950" cy="100" r="210" fill="#D9825B" opacity=".9"/><text x="72" y="100" font-family="Arial" font-size="30" font-weight="700" fill="${foreground}">${label}</text><text x="92" y="510" font-family="Arial" font-size="64" font-weight="700" fill="${foreground}">${escapeXml(lines[0] ?? headline)}</text><text x="92" y="590" font-family="Arial" font-size="64" font-weight="700" fill="${foreground}">${escapeXml(lines[1] ?? "")}</text><rect x="92" y="760" width="896" height="260" rx="30" fill="#D9825B" opacity=".18"/></svg>`;
+      slides.push((await sharp(Buffer.from(svg, "utf8"), { density: 144 }).png().toBuffer()).toString("base64"));
+    }
     return NextResponse.json({ imageBase64s: slides });
   }
 
