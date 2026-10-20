@@ -5461,6 +5461,24 @@ partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — Alineación del Hub, segun
 - Alcance: esta evidencia cubre el botón Salir del dashboard, que ejecuta primero el logout de Auto Artículos y después el logout de Auth0. Un logout iniciado exclusivamente desde otra aplicación del HUB debe seguir usando este mismo contrato si se quiere invalidar también la cookie de Auto Artículos.
 
 
+## Cierre — limpieza de estado OAuth en errores — 2026-10-19
+
+Entrada agregada por la tarea programada diaria de propagación de Claude (corrida 2026-10-20), a
+partir de `COORDINACION_CLAUDE_CODEX.md` ("Cierre — limpieza de estado OAuth en errores —
+2026-10-19").
+
+- Se ejecutó el Punto 1 del plan `PLAN_PENDIENTES_SESION_OAUTH.md` directamente sobre `main`. El
+  helper `clearOAuthFlowCookies` limpia state, verifier y origen recordado en éxito, error y
+  cancelación, seleccionando la familia de dominio del host callback. Se corrigieron Twitter/X,
+  LinkedIn, Pinterest, Blogger y Bing. Tumblr conserva su pending server-side; Threads, Instagram,
+  Search Console, Analytics y Business Profile no tienen callback local con cookie state.
+- Commit: `849ba35bd4bb7f77d3f79063d12495a37075f44d`. Deployment de Vercel:
+  `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ`, `READY`.
+- La prueba real con proveedor requiere una sesión autorizada y sigue pendiente (según la propia
+  entrada de origen).
+- Estado: PRODUCCIÓN (código publicado); VERIFICACIÓN CON PROVEEDOR REAL PENDIENTE.
+
+
 ## Cierre del Punto 4 — logout cruzado HUB → Auto Artículos — 2026-10-19
 
 - Código publicado en `main`: `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`.
@@ -5478,6 +5496,18 @@ partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — Alineación del Hub, segun
 - El HUB también quedó sin sesión: `hub.lasolucionweb.net/dashboard` redirigió al login de Auth0.
 - El puente de Auto Artículos ya estaba publicado en `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`; la corrección de ambas familias vive en el HUB, commit `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100%.
 - Punto 4: COMPLETADO. No se comparten cookies entre `.com` y `.net`; el HUB visita ambos orígenes para borrarlas.
+
+### Evidencia adicional — cookies inspeccionadas sin leer valores — 2026-10-19
+
+Entrada agregada por la tarea programada diaria de propagación de Claude (corrida 2026-10-20), a
+partir de `COORDINACION_CLAUDE_CODEX.md` ("Evidencia adicional — cookies inspeccionadas sin leer
+valores — 2026-10-19").
+
+- Tras el logout cruzado se inspeccionaron solo nombre, dominio y ruta mediante el navegador.
+- En `articulos.lasolucionweb.net`, `seototal.lasolucionweb.net` y `seototal.lasolucionweb.com`
+  no quedó ninguna cookie de sesión de Auto Artículos; solo permanecieron `_fbp` y `_gcl_au` de
+  analítica/marketing.
+- No se leyeron ni registraron valores de cookies.
 
 ## Antonio Aguirre — idioma por categoría y selección MCP — 2026-10-20
 
