@@ -12475,3 +12475,49 @@ Se ejecutó el Punto 1 del plan `PLAN_PENDIENTES_SESION_OAUTH.md` directamente s
 - Tras el logout cruzado se inspeccionaron solo nombre, dominio y ruta mediante el navegador.
 - En `articulos.lasolucionweb.net`, `seototal.lasolucionweb.net` y `seototal.lasolucionweb.com` no quedó ninguna cookie de sesión de Auto Artículos; solo permanecieron `_fbp` y `_gcl_au` de analítica/marketing.
 - No se leyeron ni registraron valores de cookies.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-20
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-19 (dentro del
+rango revisado entonces, hasta el commit `3b63f67`, PR #638). Entre esa entrada y el final del
+documento (sin que mediara ninguna otra firma de esta tarea) aparecían 5 entradas nuevas, todas
+fechadas 2026-10-19, de otra conversación: "Corrección de logout y navegación Hub",
+"Cierre — limpieza de estado OAuth en errores", "Cierre del Punto 4 — logout cruzado HUB → Auto
+Artículos", "Verificación E2E final — logout cruzado con sesión real" y "Evidencia adicional —
+cookies inspeccionadas sin leer valores". `git fetch origin main` no mostró ninguna anomalía esta
+vez (sin "forced update"; el entorno usa un clon superficial, por lo que `git log` corta en un
+commit sin padre — no es un indicio de árbol dañado).
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: de las 5 entradas, 3 ("Corrección de logout y navegación Hub",
+  "Cierre del Punto 4" y "Verificación E2E final") ya estaban copiadas ahí verbatim (y también en
+  `INVENTARIO_CONVERSACIONES.md`), aparentemente por un proceso anterior a esta tarea; no se
+  duplicaron. Se agregaron las 2 que faltaban: "Cierre — limpieza de estado OAuth en errores"
+  (commit `849ba35bd4bb7f77d3f79063d12495a37075f44d`, deployment Vercel
+  `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ`, `READY`), insertada en su lugar cronológico entre las
+  entradas de "Corrección de logout" y "Cierre del Punto 4"; y "Evidencia adicional — cookies
+  inspeccionadas sin leer valores", agregada como continuación de "Verificación E2E final" (ya
+  presente ahí). Ambas llevan una nota indicando que esta tarea las agregó, igual que las entradas
+  hermanas de corridas anteriores.
+- `INVENTARIO_CONVERSACIONES.md`: sin cambios de esta tarea. Las 3 entradas que ya aparecían ahí
+  (ver arriba) no corresponden al formato de Parte A ni Parte B según el mapa de esta tarea
+  (no son ni una reserva de archivo/rama activa ni el nombre de una conversación nueva), así que
+  no se agregaron las 2 restantes tampoco.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. Las 5 entradas son correcciones internas
+  de sesión/cookies sin pantalla, mensaje ni flujo nuevo para el usuario final. La única mención
+  visible — "se eliminó del DashboardNav la entrada Volver al Inicio" — se verificó contra el
+  código: el enlace "Volver al Inicio" hacia el Hub que ya describe el manual (actualización
+  2026-10-17) sigue existiendo en `apps/web/src/components/dashboard-ui.tsx`; lo que se quitó de
+  `DashboardNav.tsx` era una entrada duplicada, no el enlace documentado. No cambia lo que el
+  manual ya explica.
+- `TO-DO.md`: sin cambios. No se encontró ninguna idea suelta de Milton para más adelante en este
+  rango.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. No se encontró ningún hallazgo de árbol de git
+  enredado en este rango (el clon superficial de este entorno no es un hallazgo de árbol real,
+  solo una limitación del entorno de ejecución).
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva para
+Milton: ninguna.
+
+Responsable: Claude (tarea programada diaria de propagación).
