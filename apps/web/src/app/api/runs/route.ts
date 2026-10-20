@@ -137,21 +137,6 @@ export async function POST(request: NextRequest) {
   }
 
 
-  const effectiveLanguage =
-    typeof contentLanguage === "string" && contentLanguage.trim()
-      ? contentLanguage.trim()
-      : user.contentLanguage?.trim() || "";
-
-  if (!effectiveLanguage) {
-    return NextResponse.json(
-      {
-        error:
-          "Debes configurar tu idioma de redacción en Configuración antes de publicar.",
-      },
-      { status: 400 },
-    );
-  }
-
   /*
    * Cupos. Antes, pasarse de cualquier límite rechazaba el lote entero y la
    * persona se quedaba sin publicar nada. Pedido de Milton (19/8/2026): que se
@@ -186,6 +171,15 @@ export async function POST(request: NextRequest) {
   });
   if (!category) {
     return NextResponse.json({ error: "Categoría inválida" }, { status: 400 });
+  }
+
+  const effectiveLanguage =
+    typeof contentLanguage === "string" && contentLanguage.trim()
+      ? contentLanguage.trim()
+      : category.contentLanguage?.trim() || user.contentLanguage?.trim() || "";
+
+  if (!effectiveLanguage) {
+    return NextResponse.json({ error: "Debes configurar el idioma de redacción de esta categoría antes de publicar." }, { status: 400 });
   }
 
   const existingRunning = await prisma.run.findFirst({
@@ -259,7 +253,7 @@ export async function POST(request: NextRequest) {
       contentLanguage:
         typeof contentLanguage === "string" && contentLanguage.trim()
           ? contentLanguage.trim()
-          : null,
+          : category.contentLanguage?.trim() || null,
       promptId:
         typeof promptId === "string" && promptId.trim()
           ? promptId.trim()

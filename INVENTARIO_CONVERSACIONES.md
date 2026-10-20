@@ -2429,3 +2429,9 @@ Parte B por ser ya historial.
 - El HUB también quedó sin sesión: `hub.lasolucionweb.net/dashboard` redirigió al login de Auth0.
 - El puente de Auto Artículos ya estaba publicado en `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`; la corrección de ambas familias vive en el HUB, commit `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100%.
 - Punto 4: COMPLETADO. No se comparten cookies entre `.com` y `.net`; el HUB visita ambos orígenes para borrarlas.
+
+## Antonio Aguirre — idioma por categoría y selección MCP — 2026-10-20
+
+- Se conserva temporalmente una cuenta con dos sitios mientras termina el nuevo MCP de conexión con 10MWS.
+- Se añadió idioma editorial por categoría y regla MCP de preguntar el sitio antes de publicar.
+- Estado: preparado en `main`, pendiente de publicación y verificación productiva.

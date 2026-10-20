@@ -319,3 +319,10 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Tras el logout cruzado se inspeccionaron solo nombre, dominio y ruta mediante el navegador.
 - En `articulos.lasolucionweb.net`, `seototal.lasolucionweb.net` y `seototal.lasolucionweb.com` no quedó ninguna cookie de sesión de Auto Artículos; solo permanecieron `_fbp` y `_gcl_au` de analítica/marketing.
 - No se leyeron ni registraron valores de cookies.
+
+## Punto cero del lote Antonio — 2026-10-20
+
+- Base: `main` `c2e1e11d`.
+- Código preparado: idioma editorial por categoría y selección explícita de sitio en MCP.
+- Validación: web 245/245, worker 20/20 y builds web/worker correctos.
+- Pendiente: commit, deployment, migración y prueba productiva; typecheck completo mantiene un error previo no relacionado.

@@ -348,6 +348,7 @@ async function processRunTitle(
 
     const effectiveLanguage =
       (run.contentLanguage && run.contentLanguage.trim()) ||
+      (run.category.contentLanguage && run.category.contentLanguage.trim()) ||
       (run.user.contentLanguage && run.user.contentLanguage.trim());
 
     if (!effectiveLanguage) {

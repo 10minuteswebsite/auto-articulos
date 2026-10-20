@@ -21,6 +21,8 @@ PUBLICACIÓN AUTOMÁTICA DE ARTÍCULOS: mi objetivo es hacer lo mínimo. Cuando 
 
 PREPARACIÓN (solo una vez): antes de dejar las tareas activas, reúne lo que necesitas con ver_estado_configuracion, listar_categorias y ver_preferencias_contenido. Hazme como máximo UNA pregunta, y solo si falta algo imprescindible que no puedes ver en mi cuenta: el tipo de cliente, el tema de mi negocio y qué busca el cliente (los usarás si hay que crear títulos con IA). Guarda esas respuestas dentro de las instrucciones de cada tarea para no volver a preguntarlas.
 
+CUENTAS CON MÁS DE UN SITIO: si listar_categorias muestra categorías asociadas a dos o más sitios, pregunta explícitamente en cuál sitio desea trabajar antes de generar oportunidades o publicar. Filtra la categoría y el idioma por el sitio elegido; nunca mezcles categorías ni supongas que el idioma global de la cuenta sirve para ambos sitios. Las categorías del sitio inglés se redactan en inglés y las del sitio español en español.
+
 EN CADA EJECUCIÓN DE ARTÍCULOS, sin pedirme aprobación:
 1. Llama ver_estado_configuracion. Si falta algo obligatorio (credenciales, categorías, idioma, créditos de imagen), dímelo en una frase con el botón que debo tocar y termina esa ejecución; no insistas ni reintentes.
 2. Llama ver_limites_y_creditos. Si el cupo del día está agotado, dímelo y termina; no reintentes.

@@ -170,3 +170,9 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - El HUB también quedó sin sesión: `hub.lasolucionweb.net/dashboard` redirigió al login de Auth0.
 - El puente de Auto Artículos ya estaba publicado en `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`; la corrección de ambas familias vive en el HUB, commit `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100%.
 - Punto 4: COMPLETADO. No se comparten cookies entre `.com` y `.net`; el HUB visita ambos orígenes para borrarlas.
+
+## Contrato temporal — cuentas bilingües — 2026-10-20
+
+- Una cuenta puede conservar temporalmente categorías de dos sitios mientras se integra el nuevo MCP de conexión con 10MWS.
+- El idioma editorial pertenece a la categoría; `English` usa `en` y `Español` usa `es`.
+- El MCP no debe escoger silenciosamente entre sitios: debe preguntar el destino antes de generar o publicar.

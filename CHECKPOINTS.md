@@ -335,3 +335,11 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Tras el logout cruzado se inspeccionaron solo nombre, dominio y ruta mediante el navegador.
 - En `articulos.lasolucionweb.net`, `seototal.lasolucionweb.net` y `seototal.lasolucionweb.com` no quedó ninguna cookie de sesión de Auto Artículos; solo permanecieron `_fbp` y `_gcl_au` de analítica/marketing.
 - No se leyeron ni registraron valores de cookies.
+
+## Checkpoint — Antonio bilingüe — 2026-10-20
+
+- Base `main`: `c2e1e11d`.
+- Cambios: `Category.contentLanguage`, asignación por panel, prioridad en publicación/worker y regla de selección en MCP.
+- Validación local: 245 pruebas web, 20 worker y ambos builds correctos.
+- Migración pendiente: `20261019000000_category_editorial_language`.
+- No declarar cerrado hasta confirmar Vercel `READY`, smoke HTTP, migración y comportamiento productivo.

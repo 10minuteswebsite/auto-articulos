@@ -132,13 +132,17 @@ export const ACCOUNT_TOOLS: ToolDef[] = [
       const userId = await getCurrentUserId();
       const categorias = await prisma.category.findMany({
         where: { userId, source: { not: "archived" } },
-        select: { name: true },
+        select: { name: true, panel: true, siteDomain: true, contentLanguage: true },
         orderBy: { name: "asc" },
       });
       if (categorias.length === 0) {
         return toolText("No hay categorías sincronizadas todavía. Sincronízalas desde Configuración → Cuenta.");
       }
-      return toolText(`Categorías (${categorias.length}):\n${categorias.map((c) => `- ${c.name}`).join("\n")}`);
+      const sitios = new Set(categorias.map((c) => c.siteDomain || c.panel).filter(Boolean));
+      const aviso = sitios.size > 1
+        ? "\nHay más de un sitio configurado. Antes de publicar, pregunta en cuál sitio desea hacerlo y no elijas uno por tu cuenta."
+        : "";
+      return toolText(`Categorías (${categorias.length}):\n${categorias.map((c) => `- ${c.name} — ${c.siteDomain || c.panel || "sitio no identificado"} — ${c.contentLanguage || c.panel || "idioma de la cuenta"}`).join("\n")}${aviso}`);
     },
   },
 

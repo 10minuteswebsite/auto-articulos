@@ -14,6 +14,14 @@ import {
 import { tryReserveUser, releaseUser } from "./reservation";
 import { chooseUnambiguousCategoryPanel } from "./categoryPanelFallback";
 
+function languageFromPanel(panel: string): string | null {
+  const value = panel.trim().toLocaleLowerCase();
+  if (!value) return null;
+  if (/\b(english|inglés|ingles)\b/.test(value)) return "en";
+  if (/\b(español|espanol|spanish)\b/.test(value)) return "es";
+  return null;
+}
+
 /**
  * Prueba primero el servidor configurado y, si falla, el resto de
  * PLATFORM_SERVERS — mismo criterio que fetchCategoriesDetectingServer, pero
@@ -262,8 +270,9 @@ export async function processNextCategorySync(filterUserId?: string): Promise<bo
             isSequence: cat.isSequence,
             source: "sync",
             siteDomain: selectedSiteDomain,
+            contentLanguage: languageFromPanel(cat.panel),
           },
-          update: { name: cat.name, isSequence: cat.isSequence, source: "sync", siteDomain: selectedSiteDomain },
+          update: { name: cat.name, isSequence: cat.isSequence, source: "sync", siteDomain: selectedSiteDomain, contentLanguage: languageFromPanel(cat.panel) },
         }),
       );
     }

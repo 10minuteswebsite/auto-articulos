@@ -5478,3 +5478,11 @@ partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — Alineación del Hub, segun
 - El HUB también quedó sin sesión: `hub.lasolucionweb.net/dashboard` redirigió al login de Auth0.
 - El puente de Auto Artículos ya estaba publicado en `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`; la corrección de ambas familias vive en el HUB, commit `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100%.
 - Punto 4: COMPLETADO. No se comparten cookies entre `.com` y `.net`; el HUB visita ambos orígenes para borrarlas.
+
+## Antonio Aguirre — idioma por categoría y selección MCP — 2026-10-20
+
+- Punto cero: `main`/`origin/main` `c2e1e11d`.
+- Cambio: idioma editorial por categoría; `English`→`en`, `Español`→`es`; publicación/worker priorizan ese idioma; MCP informa y pregunta cuando hay más de un sitio.
+- Migración: `20261019000000_category_editorial_language`, pendiente de aplicar por producción.
+- Verificación: web 245/245, worker 20/20, builds web/worker correctos; typecheck aislado conserva fallo previo `latestBingChange` no usado.
+- Estado: pendiente de commit, deployment, migración y verificación productiva.

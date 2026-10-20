@@ -47,6 +47,13 @@ Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELIN
 - Corrección: para Threads, la UI deja visible `/api/postpeer/threads/connect`. No se tocan permisos, base de datos ni conexiones.
 - Estado: pendiente de commit en `main`, despliegue y verificación E2E productiva.
 
+## Nota vigente — Antonio Aguirre: dos sitios e idioma por categoría — 2026-10-19
+
+- Decisión temporal de Milton: mantener los dos sitios de Antonio dentro de la misma cuenta mientras termina la integración del nuevo MCP de conexión con 10MWS.
+- No se crea una segunda cuenta por ahora ni se convierte esta decisión temporal en la arquitectura definitiva.
+- Arreglo local aplicado sin commit, push, migración ejecutada ni despliegue: las categorías sincronizadas guardan su idioma editorial según el panel (`English`/`Español`), la creación de ejecuciones prioriza el idioma de la categoría y el MCP avisa/pregunta cuando detecta más de un sitio.
+- Al culminar la integración nueva de MCP, se revisará la arquitectura definitiva y cualquier migración pendiente.
+
 ## Claude — CIERRE Y ARCHIVO «CONTENIDO NO ALINEADO EN EL HUB» — 2026-10-17
 
 - Task ID: `HUB-CONTENIDO-ALINEADO-20261017`. Estado: CERRADO Y ARCHIVADO. Sin migraciones ni workflows. Capitanía reclamada y liberada dos veces. Sin ramas ni PR abiertos de esta conversación.
