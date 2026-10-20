@@ -4,8 +4,9 @@
 
 - Commit: `f0e40a4d` en `main`, enviado a GitHub.
 - Verificación: worker `20/20`, pruebas de carrusel `4/4`, builds de worker/web correctos.
-- Migración preparada: `20261020130000_add_social_opportunity_assets`; no aplicada desde este entorno.
-- Cierre bloqueado hasta confirmar deployment y comportamiento en producción.
+- Migración `20261020130000_add_social_opportunity_assets` aplicada mediante workflow `39435521352`, `success`.
+- Deployment Vercel `9ikVLnzfaDe8nZAMR2JdTarnx5x8`, `Ready`; HTTP productivo verificado sin sesión.
+- Pendiente: comprobación funcional autenticada de generación/publicación.
 
 ## Versión — 2026-10-19 — estilo problema-solución por defecto
 

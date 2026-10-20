@@ -2,10 +2,12 @@
 
 ## META — historias y carruseles — 2026-10-20
 
-- Commit en `main`: `f0e40a4d` (`feat(meta): add Instagram stories and five-slide carousels`), publicado en GitHub.
+- Commit en `main`: `943a0231` (`fix(web): remove unused admin image flag`), deployment Vercel `9ikVLnzfaDe8nZAMR2JdTarnx5x8`, `Ready`.
 - Alcance: Instagram Carrusel de cinco láminas, numeración, formato `1080×1350`, identidad visual derivada del logo sin insertar el logo, validación anti-corte y persistencia de assets.
 - Verificación local: worker `20/20`, pruebas específicas `4/4`, build de worker y web correctos.
-- Producción: pendiente de verificación HTTP desde este entorno por fallo DNS; no se declara cierre productivo.
+- Migración productiva `20261020130000_add_social_opportunity_assets` aplicada por workflow `39435521352`, `success`.
+- Verificación HTTP posterior: `/login` `200`, `/api/me` `401` sin sesión y generación sin sesión `401`.
+- Pendiente: prueba autenticada de creación/publicación real; no hay sesión de usuario disponible en este entorno.
 
 ## Punto cero — estilo problema-solución publicado (2026-10-19)
 
