@@ -239,7 +239,6 @@ export async function PATCH(request: NextRequest) {
     allowBlueskyPublishing,
     allowBloggerPublishing,
     allowGoogleBusinessPublishing,
-    aiImageGenerationEnabled,
     profilePhotoUrl,
     businessLogoUrl,
     isTrialSignup,
