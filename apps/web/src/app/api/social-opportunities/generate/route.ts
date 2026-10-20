@@ -579,6 +579,7 @@ export async function POST(request: Request) {
       if ((await getSocialHostContext()).redesHost || user?.allowInstagramPublishing) {
         const hasComposioInstagram = Boolean((connected as { hideInstagramStories?: boolean }).hideInstagramStories);
         if (!hasComposioInstagram) integrations.push("instagram-story");
+        integrations.push("instagram-carousel");
         integrations.push("instagram-post");
       }
     }

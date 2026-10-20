@@ -2067,7 +2067,7 @@ function UserCard({
   const [permBlogger, setPermBlogger] = useState(Boolean(user.allowBloggerPublishing));
   const [permGoogleBusiness, setPermGoogleBusiness] = useState(Boolean(user.allowGoogleBusinessPublishing));
   const [permAiImageGeneration, setPermAiImageGeneration] = useState(
-    Boolean(user.aiImageGenerationEnabled),
+    true,
   );
   // Sistema de prueba gratuita (13/8/2026): estado de prueba y desbloqueo manual.
   const [permIsTrialSignup, setPermIsTrialSignup] = useState(
@@ -2106,7 +2106,7 @@ function UserCard({
     setPermBluesky(Boolean(user.allowBlueskyPublishing));
     setPermBlogger(Boolean(user.allowBloggerPublishing));
     setPermGoogleBusiness(Boolean(user.allowGoogleBusinessPublishing));
-    setPermAiImageGeneration(Boolean(user.aiImageGenerationEnabled));
+    setPermAiImageGeneration(true);
     setPermIsTrialSignup(Boolean(user.isTrialSignup));
     setPermTrialUnlocked(Boolean(user.trialUnlocked));
     setPermImageCredits(user.hasImageCredits !== false);
@@ -2123,7 +2123,6 @@ function UserCard({
     permBluesky !== Boolean(user.allowBlueskyPublishing) ||
     permBlogger !== Boolean(user.allowBloggerPublishing) ||
     permGoogleBusiness !== Boolean(user.allowGoogleBusinessPublishing) ||
-    permAiImageGeneration !== Boolean(user.aiImageGenerationEnabled) ||
     permIsTrialSignup !== Boolean(user.isTrialSignup) ||
     permTrialUnlocked !== Boolean(user.trialUnlocked) ||
     permImageCredits !== (user.hasImageCredits !== false);
@@ -2179,7 +2178,7 @@ function UserCard({
     setPermBluesky(Boolean(user.allowBlueskyPublishing));
     setPermBlogger(Boolean(user.allowBloggerPublishing));
     setPermGoogleBusiness(Boolean(user.allowGoogleBusinessPublishing));
-    setPermAiImageGeneration(Boolean(user.aiImageGenerationEnabled));
+    setPermAiImageGeneration(true);
     setPermIsTrialSignup(Boolean(user.isTrialSignup));
     setPermTrialUnlocked(Boolean(user.trialUnlocked));
     setPermImageCredits(user.hasImageCredits !== false);
@@ -3111,9 +3110,8 @@ function UserCard({
               <label style={permissionLabelStyle}>
                 <input
                   type="checkbox"
-                  checked={permAiImageGeneration}
-                  onChange={(e) => setPermAiImageGeneration(e.target.checked)}
-                  disabled={savingPermissions}
+                  checked
+                  disabled
                   style={{ accentColor: "#1d1d1f", width: 16, height: 16 }}
                 />
                 Generador de imágenes con IA (Instagram Story/Reel)

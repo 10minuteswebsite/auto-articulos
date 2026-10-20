@@ -37,6 +37,7 @@ import sharp from "sharp";
 import { generateAiSocialImage } from "./aiImageGenerator";
 import { formatBloggerSummary } from "./bloggerContent";
 import { checkSocialProductAccess } from "./product-access";
+import { analyzeLogoStyle } from "./carouselDesign";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_IMAGE_URL = "https://api.openai.com/v1/images/generations";
@@ -1175,6 +1176,7 @@ async function generateInstagramImage(
   index?: number,
   customImagePrompt?: string | null,
   customInfographicPrompt?: string | null,
+  logoUrls: string[] = [],
 ): Promise<string | null> {
   if (!OPENAI_API_KEY) return null;
 
@@ -1184,12 +1186,26 @@ async function generateInstagramImage(
   let styleInstruction: string;
   let pathPrefix: string;
 
+  let brandInstruction = "";
+  const logoUrl = logoUrls.find(Boolean);
+  if (logoUrl) {
+    try {
+      const logoResponse = await fetch(logoUrl, { signal: AbortSignal.timeout(8000) });
+      if (logoResponse.ok) {
+        const brand = await analyzeLogoStyle(Buffer.from(await logoResponse.arrayBuffer()));
+        brandInstruction = ` Usa una dirección visual relacionada con la identidad del logo: color principal ${brand.primaryColors[0]}, colores secundarios ${brand.secondaryColors.join(", ")}, tono ${brand.tone}. No dibujes ni pegues el logo; solo respeta su estilo, colores y personalidad tipográfica.`;
+      }
+    } catch (error) {
+      console.warn("[Instagram Carousel] No se pudo analizar el logo; se continúa sin bloquear la generación:", error);
+    }
+  }
+
   switch (format) {
     case "carousel": {
       const withText = index !== undefined ? index % 2 === 0 : false;
       styleInstruction = withText
-        ? `Imagen con texto superpuesto grande y llamativo. Fondo visual moderno, colores vibrantes, con una frase clave o tip escrita directamente en la imagen en tipografía grande y audaz. Diseño tipo slide informativo para redes sociales.`
-        : `Imagen sin texto, solo visual. Fotografía o ilustración de alta calidad, colores vibrantes, composición profesional. Sin ningún texto superpuesto. Diseñado para redes sociales.`;
+        ? `Lámina ${String((index ?? 0) + 1).padStart(2, "0")}/05 de un carrusel de Instagram 4:5. Imagen con texto superpuesto grande y llamativo, dentro de márgenes amplios. Fondo visual moderno, colores vibrantes, una sola frase clave en tipografía grande y audaz. No cortes ni deformes palabras; si el texto no cabe, redúcelo o elimínalo. Diseño editorial muy legible para redes sociales.`
+        : `Lámina ${String((index ?? 0) + 1).padStart(2, "0")}/05 de un carrusel de Instagram 4:5. Imagen sin texto superpuesto, solo un visual de alta calidad con composición profesional y espacio limpio. No agregues letras, números ni marcas de agua. Diseñado para redes sociales.`;
       pathPrefix = `instagram/carousel/${titleId}`;
       break;
     }
@@ -1208,7 +1224,7 @@ async function generateInstagramImage(
 
   for (const model of models) {
     try {
-      const prompt = `${basePrompt}\n\n${styleInstruction}`;
+      const prompt = `${basePrompt}\n\n${styleInstruction}${brandInstruction}`;
       const variation = index !== undefined ? ` -- Variación ${index + 1}` : "";
 
       const response = await fetch(OPENAI_IMAGE_URL, {
@@ -1224,7 +1240,14 @@ async function generateInstagramImage(
         continue;
       }
 
-      const buffer = Buffer.from(b64, "base64");
+      const rawBuffer = Buffer.from(b64, "base64");
+      // Instagram exige que todas las láminas del carrusel compartan la misma
+      // proporción. Normalizamos antes de subirlas para no enviar cuadrados
+      // mezclados con piezas verticales. El contenido se centra y se recorta
+      // solo en los bordes de la imagen, nunca en el área de texto segura.
+      const buffer = format === "carousel"
+        ? await sharp(rawBuffer).resize(1080, 1350, { fit: "contain", background: "#ffffff" }).png().toBuffer()
+        : rawBuffer;
       const filename = index !== undefined ? `${index}.png` : "0.png";
       const blob = await put(`${pathPrefix}/${filename}`, buffer, {
         access: "public",
@@ -1380,13 +1403,26 @@ async function processInstagramJob(job: {
           i,
           user?.imagePrompt,
           user?.infographicPrompt,
+          [user?.businessLogoUrl, user?.businessLogoUrl2].filter((url): url is string => Boolean(url)),
         );
         if (url) imageUrls.push(url);
       }
       console.log(`[Instagram Carousel] generated ${imageUrls.length} images:`, imageUrls.map(u => u.substring(0, 80)));
-      if (imageUrls.length < 2) {
-        throw new Error(`No se pudieron generar suficientes imágenes para el carrusel (solo ${imageUrls.length}).`);
+      // Un carrusel aprobado siempre debe conservar sus cinco láminas. Publicar
+      // con menos piezas rompe la narrativa, la numeración y el contrato visual.
+      if (imageUrls.length !== 5) {
+        throw new Error(`El carrusel debe tener exactamente 5 imágenes válidas (se obtuvieron ${imageUrls.length}).`);
       }
+      await prisma.socialOpportunityAsset.deleteMany({ where: { opportunityId: job.id, assetType: "image" } });
+      await prisma.socialOpportunityAsset.createMany({
+        data: imageUrls.map((url, position) => ({
+          opportunityId: job.id,
+          position,
+          assetType: "image",
+          url,
+          source: "instagram-carousel",
+        })),
+      });
       publishedImageUrl = imageUrls[0];
       result = await publishInstagramCarousel(
         accessToken,
