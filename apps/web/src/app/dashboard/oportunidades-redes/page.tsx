@@ -170,7 +170,7 @@ export default function OportunidadesRedesPage() {
       setOpenGroup(grupo);
     }
   }, []);
-  const [previewModal, setPreviewModal] = useState<{ loading: boolean; imageUrl: string | null; imageBase64: string | null; platform: string; title: string } | null>(null);
+  const [previewModal, setPreviewModal] = useState<{ loading: boolean; imageUrl: string | null; imageBase64: string | null; imageBase64s: string[]; platform: string; title: string; slide: number } | null>(null);
 
   useEffect(() => {
     loadOpportunities(true);
@@ -446,7 +446,7 @@ export default function OportunidadesRedesPage() {
   }
 
   async function handlePreview(opp: SocialOpportunity) {
-    setPreviewModal({ loading: true, imageUrl: null, imageBase64: null, platform: opp.platform, title: opp.articleTitle });
+    setPreviewModal({ loading: true, imageUrl: null, imageBase64: null, imageBase64s: [], platform: opp.platform, title: opp.articleTitle, slide: 0 });
     try {
       const res = await fetch("/api/social-opportunities/preview", {
         method: "POST",
@@ -458,11 +458,13 @@ export default function OportunidadesRedesPage() {
         loading: false,
         imageUrl: data.imageUrl || null,
         imageBase64: data.imageBase64 || null,
+        imageBase64s: Array.isArray(data.imageBase64s) ? data.imageBase64s : [],
         platform: opp.platform,
         title: opp.articleTitle,
+        slide: 0,
       });
     } catch {
-      setPreviewModal({ loading: false, imageUrl: null, imageBase64: null, platform: opp.platform, title: opp.articleTitle });
+      setPreviewModal({ loading: false, imageUrl: null, imageBase64: null, imageBase64s: [], platform: opp.platform, title: opp.articleTitle, slide: 0 });
     }
   }
 
@@ -867,6 +869,19 @@ export default function OportunidadesRedesPage() {
               {previewModal.loading ? (
                 <div className="muted" style={{ textAlign: "center", padding: 30, fontSize: 13 }}>
                   Generando preview...
+                </div>
+              ) : previewModal.imageBase64s.length > 0 ? (
+                <div style={{ width: "100%", textAlign: "center" }}>
+                  <img
+                    src={"data:image/png;base64," + previewModal.imageBase64s[previewModal.slide]}
+                    alt={"Lámina " + (previewModal.slide + 1) + " de 5"}
+                    style={{ width: "100%", maxHeight: 380, objectFit: "contain" }}
+                  />
+                  <div style={{ display: "flex", justifyContent: "center", gap: 8, padding: "10px 0 2px" }}>
+                    <button type="button" disabled={previewModal.slide === 0} onClick={() => setPreviewModal({ ...previewModal, slide: previewModal.slide - 1 })}>‹ Anterior</button>
+                    <span style={{ alignSelf: "center", fontSize: 13 }}>{String(previewModal.slide + 1).padStart(2, "0")} / 05</span>
+                    <button type="button" disabled={previewModal.slide === previewModal.imageBase64s.length - 1} onClick={() => setPreviewModal({ ...previewModal, slide: previewModal.slide + 1 })}>Siguiente ›</button>
+                  </div>
                 </div>
               ) : previewModal.imageUrl || previewModal.imageBase64 ? (
                 <img
