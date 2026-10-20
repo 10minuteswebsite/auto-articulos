@@ -176,3 +176,9 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Una cuenta puede conservar temporalmente categorías de dos sitios mientras se integra el nuevo MCP de conexión con 10MWS.
 - El idioma editorial pertenece a la categoría; `English` usa `en` y `Español` usa `es`.
 - El MCP no debe escoger silenciosamente entre sitios: debe preguntar el destino antes de generar o publicar.
+
+## Estado verificado del contrato bilingüe — 2026-10-20
+
+- Código productivo: `0c3b7197`; Vercel `success`.
+- Esquema productivo: `Category.contentLanguage` aplicado por workflow seguro #81 (`39347494879`).
+- No se permite aceptar pérdida de datos para resolver migraciones no relacionadas.

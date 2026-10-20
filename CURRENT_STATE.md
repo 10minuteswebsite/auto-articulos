@@ -326,3 +326,10 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Código preparado: idioma editorial por categoría y selección explícita de sitio en MCP.
 - Validación: web 245/245, worker 20/20 y builds web/worker correctos.
 - Pendiente: commit, deployment, migración y prueba productiva; typecheck completo mantiene un error previo no relacionado.
+
+## Cierre del lote Antonio — 2026-10-20
+
+- Código `0c3b7197` publicado en `main`; Vercel asociado en `success`.
+- Smoke público OK en Artículos y Redes; `seototal` conserva 307 al HUB.
+- Migración segura #81 (`39347494879`) `Success`, columna aplicada sin pérdida de datos.
+- Queda como pendiente no bloqueante el error previo de typecheck `latestBingChange` no usado.

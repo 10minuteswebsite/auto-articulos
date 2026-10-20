@@ -343,3 +343,10 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Validación local: 245 pruebas web, 20 worker y ambos builds correctos.
 - Migración pendiente: `20261019000000_category_editorial_language`.
 - No declarar cerrado hasta confirmar Vercel `READY`, smoke HTTP, migración y comportamiento productivo.
+
+## Cierre del Checkpoint Antonio bilingüe — 2026-10-20
+
+- Vercel: deployments del cambio `success`.
+- Smoke: Artículos y Redes OK; endpoints protegidos 307/401 según contrato.
+- Migración: workflow #81 (`39347494879`) `Success`, sin `--accept-data-loss`.
+- Código/documentación en `main`; no se creó rama nueva ni worktree.

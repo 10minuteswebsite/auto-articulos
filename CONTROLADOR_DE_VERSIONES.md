@@ -5486,3 +5486,10 @@ partir de `COORDINACION_CLAUDE_CODEX.md` ("Claude — Alineación del Hub, segun
 - Migración: `20261019000000_category_editorial_language`, pendiente de aplicar por producción.
 - Verificación: web 245/245, worker 20/20, builds web/worker correctos; typecheck aislado conserva fallo previo `latestBingChange` no usado.
 - Estado: pendiente de commit, deployment, migración y verificación productiva.
+
+### Cierre verificado — 2026-10-20
+
+- Commit funcional: `0c3b7197`; workflow controlado: `cabe10f3`.
+- Vercel: deployments del commit funcional `success`; smoke `articulos`/`redes` OK.
+- Migración segura: workflow #81 (`39347494879`) `Success`; no se aceptó pérdida de datos.
+- Limitaciones: smoke en `seototal` devuelve 307 al HUB por diseño; typecheck aislado conserva el error previo `latestBingChange` no usado.

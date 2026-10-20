@@ -2435,3 +2435,8 @@ Parte B por ser ya historial.
 - Se conserva temporalmente una cuenta con dos sitios mientras termina el nuevo MCP de conexión con 10MWS.
 - Se añadió idioma editorial por categoría y regla MCP de preguntar el sitio antes de publicar.
 - Estado: preparado en `main`, pendiente de publicación y verificación productiva.
+
+### Cierre verificado — 2026-10-20
+
+- Publicado en `main`; Vercel `success`; smoke público OK; migración segura #81 `Success`.
+- No se modificaron datos ajenos ni se aceptó `--accept-data-loss`.

@@ -230,3 +230,8 @@ La limpieza de cookies OAuth en errores ya no es una reparación pendiente. `cle
 - Mantener los dos sitios en la misma cuenta hasta culminar la integración del nuevo MCP de conexión con 10MWS.
 - El idioma editorial pertenece a la categoría: `English` redacta en inglés y `Español` en español.
 - El MCP debe preguntar el sitio de destino antes de generar o publicar si detecta más de uno.
+
+### Resultado verificado — 2026-10-20
+
+- El cambio bilingüe está publicado en `main` y la columna editorial fue aplicada en producción mediante el workflow seguro #81.
+- La primera ejecución amplia fue rechazada por Prisma al detectar posible pérdida de 115 valores de `allowDevToPublishing`; se corrigió el procedimiento y no se forzó esa pérdida.
