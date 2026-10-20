@@ -1622,6 +1622,21 @@ export async function processNextSocialPublish(filterUserId?: string, filterArti
 
   if (!job) return false;
 
+  // Bloqueo global temporal: nunca inicia generación ni publicación de carruseles.
+  // Se conserva la oportunidad para historial y futura reactivación.
+  if (job.platform === "instagram-carousel") {
+    await prisma.socialOpportunity.update({
+      where: { id: job.id },
+      data: {
+        status: "error",
+        errorLog: "Los carruseles de Instagram están temporalmente deshabilitados mientras se validan en local.",
+        progressStage: "Carrusel temporalmente deshabilitado",
+        finishedAt: new Date(),
+      },
+    });
+    return true;
+  }
+
   // Google Business Profile tiene su propio registro y lane
   // (BusinessProfilePost). Nunca debe caer en el worker social genérico,
   // incluso si una oportunidad antigua quedó en estado queued.
