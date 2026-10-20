@@ -1,5 +1,12 @@
 # BASELINE — Contrato previo HUB/OAuth
 
+## Contrato añadido — META historias y carruseles — 2026-10-20
+
+- Carrusel Instagram: exactamente cinco láminas, `1080×1350`, numeradas `01/05` a `05/05`.
+- Las composiciones pueden ser de texto, imágenes o mixtas; el logo informa color/tono/estilo y no se inserta obligatoriamente.
+- El flujo rechaza publicaciones con menos de cinco imágenes y registra cada asset generado.
+- Historias permanecen en el flujo META existente; Reels quedan fuera de este alcance.
+
 ## Contrato editorial vigente — 2026-10-19
 
 - Todas las cuentas usan `GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION` como estilo predeterminado. STANDARD sigue disponible como elección explícita; no cambiaron navegación, permisos ni rutas.

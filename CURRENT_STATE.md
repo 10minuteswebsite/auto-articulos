@@ -1,5 +1,12 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## META — historias y carruseles — 2026-10-20
+
+- Commit en `main`: `f0e40a4d` (`feat(meta): add Instagram stories and five-slide carousels`), publicado en GitHub.
+- Alcance: Instagram Carrusel de cinco láminas, numeración, formato `1080×1350`, identidad visual derivada del logo sin insertar el logo, validación anti-corte y persistencia de assets.
+- Verificación local: worker `20/20`, pruebas específicas `4/4`, build de worker y web correctos.
+- Producción: pendiente de verificación HTTP desde este entorno por fallo DNS; no se declara cierre productivo.
+
 ## Punto cero — estilo problema-solución publicado (2026-10-19)
 
 - Task ID: `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`.

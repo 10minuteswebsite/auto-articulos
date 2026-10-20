@@ -1,5 +1,12 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — 2026-10-20 — META historias y carruseles
+
+- Commit: `f0e40a4d` en `main`, enviado a GitHub.
+- Verificación: worker `20/20`, pruebas de carrusel `4/4`, builds de worker/web correctos.
+- Migración preparada: `20261020130000_add_social_opportunity_assets`; no aplicada desde este entorno.
+- Cierre bloqueado hasta confirmar deployment y comportamiento en producción.
+
 ## Versión — 2026-10-19 — estilo problema-solución por defecto
 
 - Task `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`; commit funcional `e0b6cf8a` en `main`.

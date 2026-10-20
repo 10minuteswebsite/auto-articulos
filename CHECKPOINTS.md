@@ -1,5 +1,12 @@
 # CHECKPOINTS
 
+## Checkpoint — META historias y carruseles — 2026-10-20 — pendiente de producción
+
+- Commit de código: `f0e40a4d` en `main`; GitHub actualizado.
+- Verificación local: Prisma generate, worker `20/20`, carrusel `4/4`, builds de worker y web correctos.
+- Migración preparada: `20261020130000_add_social_opportunity_assets`.
+- Pendiente obligatorio: aplicar migración, obtener deployment productivo, comprobar HTTP y ejecutar una prueba real autenticada de generación/publicación.
+
 ## Checkpoint — estilo problema-solución por defecto — 2026-10-19
 
 - Task `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`; código `e0b6cf8a`; deployment Vercel `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ`, `success`.

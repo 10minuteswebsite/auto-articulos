@@ -1,5 +1,12 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## Codex — META historias y carruseles — 2026-10-20
+
+- Commit `f0e40a4d` integrado y publicado en `main`.
+- Se preservaron cambios locales existentes de `main` mediante stash recuperable antes de sincronizar e integrar.
+- Local verificado: worker `20/20`, carrusel `4/4`, builds correctos.
+- Pendiente de la siguiente sesión: aplicar migración `20261020130000_add_social_opportunity_assets`, verificar deployment y probar producción con sesión real.
+
 Este bloque prevalece sobre las notas históricas posteriores del archivo.
 
 - Harness aplicado: producción verificada como verdad funcional; GitHub como memoria durable; rama única `main`; sin ramas ni worktrees.
