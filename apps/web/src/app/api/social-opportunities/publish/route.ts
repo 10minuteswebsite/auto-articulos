@@ -95,6 +95,13 @@ export async function POST(request: NextRequest) {
     // worker social genérico: GBP siempre debe entrar por BusinessProfilePost.
     const platform = opp.platform.trim().toLowerCase();
 
+    if (platform === "instagram-carousel") {
+      return NextResponse.json(
+        { error: "Los carruseles de Instagram están temporalmente deshabilitados mientras se validan en local." },
+        { status: 423 },
+      );
+    }
+
     if (!opp.articleUrl) {
       return NextResponse.json(
         { error: "El artículo no tiene URL publicada. Publica el artículo primero." },
