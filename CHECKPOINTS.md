@@ -400,3 +400,12 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - `git diff --check`: correcto. Typecheck y suite web quedan no concluyentes por errores preexistentes y restricción IPC del entorno.
 - Estado de producción: deployment de Vercel pendiente de confirmación; no se forzó OAuth ni se publicó contenido.
 - Estado documental: ARCHIVADO como pendiente de verificación productiva.
+
+
+## Checkpoint — AUTO ARTICULOS 500 en /auth/hub — 2026-10-21
+
+- Punto cero: `main` en `1c8d2803`; producción con 500 por columna `User.disableIndexing` ausente.
+- Corrección: ALTER TABLE aditivo en Supabase (Milton). Sin cambio de código.
+- Cierre: `/auth/hub` 303 (16:03) sin P2022; `/login` 200 en Artículos y Redes. Siguiente punto cero: producción con la columna aplicada.
+
+- Cierre final: commit `5e03ce76` en `main` (opción `safe_user_indexing_preference` en `migrate.yml`). Smoke de producción posterior sano. CERRADO.
