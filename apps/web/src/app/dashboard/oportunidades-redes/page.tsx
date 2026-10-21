@@ -170,7 +170,6 @@ export default function OportunidadesRedesPage() {
       setOpenGroup(grupo);
     }
   }, []);
-  const [previewModal, setPreviewModal] = useState<{ loading: boolean; imageUrl: string | null; imageBase64: string | null; imageBase64s: string[]; platform: string; title: string; slide: number } | null>(null);
 
   useEffect(() => {
     loadOpportunities(true);
@@ -444,30 +443,6 @@ export default function OportunidadesRedesPage() {
       setDeletingAll(false);
     }
   }
-
-  async function handlePreview(opp: SocialOpportunity) {
-    setPreviewModal({ loading: true, imageUrl: null, imageBase64: null, imageBase64s: [], platform: opp.platform, title: opp.articleTitle, slide: 0 });
-    try {
-      const res = await fetch("/api/social-opportunities/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ summary: opp.articleTitle, platform: opp.platform }),
-      });
-      const data = await res.json();
-      setPreviewModal({
-        loading: false,
-        imageUrl: data.imageUrl || null,
-        imageBase64: data.imageBase64 || null,
-        imageBase64s: Array.isArray(data.imageBase64s) ? data.imageBase64s : [],
-        platform: opp.platform,
-        title: opp.articleTitle,
-        slide: 0,
-      });
-    } catch {
-      setPreviewModal({ loading: false, imageUrl: null, imageBase64: null, imageBase64s: [], platform: opp.platform, title: opp.articleTitle, slide: 0 });
-    }
-  }
-
   const pendingList = opportunities.filter((o) => o.status === "pending" && o.platform !== "instagram-carousel" && !(storiesUnavailable.instagram && o.platform === "instagram-story") && !(storiesUnavailable.facebook && o.platform === "facebook-story"));
 
   if (loading || connectionsLoading) return null;
@@ -697,7 +672,6 @@ export default function OportunidadesRedesPage() {
             <div>
               {groupPending.map((opp) => {
                 const editing = editingId === opp.id;
-                const canPreview = opp.platform.startsWith("instagram") || opp.platform === "threads" || opp.platform === "linkedin";
                 return (
                   <div key={opp.id} className="rp-item" style={{ borderTop: "1px solid #e5e5ea", padding: "18px 0", display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div style={{ flex: "1 1 340px", minWidth: 0 }}>
@@ -729,7 +703,6 @@ export default function OportunidadesRedesPage() {
                       ) : (
                         <button type="button" onClick={() => setEditingId(opp.id)} style={compactSecondary}>Editar</button>
                       )}
-                      {canPreview && <button type="button" onClick={() => handlePreview(opp)} style={compactSecondary}>Vista previa</button>}
                       <button type="button" onClick={() => handleSkipOne(opp)} style={compactDanger}>Descartar</button>
                     </div>
                   </div>
@@ -831,83 +804,7 @@ export default function OportunidadesRedesPage() {
         </div>
       )}
 
-      {/* Modal de Preview */}
-      {previewModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
-            backdropFilter: "blur(5px)",
-            WebkitBackdropFilter: "blur(5px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-            padding: 16,
-          }}
-          onClick={() => setPreviewModal(null)}
-        >
-          <div
-            style={{
-              background: "rgba(255, 255, 255, 0.96)",
-              borderRadius: 22,
-              padding: 24,
-              maxWidth: 480,
-              width: "100%",
-              boxShadow: "0 24px 80px rgba(0, 0, 0, 0.15)",
-              border: "1px solid rgba(0, 0, 0, 0.08)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="eyebrow" style={{ margin: "0 0 4px" }}>Vista Previa</p>
-            <h3 style={{ color: "#1d1d1f", margin: "0 0 12px 0", fontSize: 18, fontWeight: 600 }}>
-              {previewModal.title}
-            </h3>
 
-            <div style={{ background: "#f5f5f7", borderRadius: 12, overflow: "hidden", minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {previewModal.loading ? (
-                <div className="muted" style={{ textAlign: "center", padding: 30, fontSize: 13 }}>
-                  Generando preview...
-                </div>
-              ) : previewModal.imageBase64s.length > 0 ? (
-                <div style={{ width: "100%", textAlign: "center" }}>
-                  <img
-                    src={"data:image/png;base64," + previewModal.imageBase64s[previewModal.slide]}
-                    alt={"Lámina " + (previewModal.slide + 1) + " de 5"}
-                    style={{ width: "100%", maxHeight: 380, objectFit: "contain" }}
-                  />
-                  <div style={{ display: "flex", justifyContent: "center", gap: 8, padding: "10px 0 2px" }}>
-                    <button type="button" disabled={previewModal.slide === 0} onClick={() => setPreviewModal({ ...previewModal, slide: previewModal.slide - 1 })}>‹ Anterior</button>
-                    <span style={{ alignSelf: "center", fontSize: 13 }}>{String(previewModal.slide + 1).padStart(2, "0")} / 05</span>
-                    <button type="button" disabled={previewModal.slide === previewModal.imageBase64s.length - 1} onClick={() => setPreviewModal({ ...previewModal, slide: previewModal.slide + 1 })}>Siguiente ›</button>
-                  </div>
-                </div>
-              ) : previewModal.imageUrl || previewModal.imageBase64 ? (
-                <img
-                  src={previewModal.imageBase64 ? `data:image/png;base64,${previewModal.imageBase64}` : previewModal.imageUrl!}
-                  alt="Preview"
-                  style={{ width: "100%", maxHeight: 380, objectFit: "contain" }}
-                />
-              ) : (
-                <div style={{ color: "#ff3b30", textAlign: "center", padding: 30, fontSize: 13 }}>
-                  No se pudo generar el preview
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
-              <button
-                onClick={() => setPreviewModal(null)}
-                className="secondary"
-                style={{ ...secondaryButtonStyle, ...uniformButtonSize }}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
