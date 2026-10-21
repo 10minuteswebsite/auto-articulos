@@ -12528,3 +12528,51 @@ No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta ta
 Milton: ninguna.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-21
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-20 (arriba).
+`git fetch origin main` no mostró anomalías. Desde esa firma hasta el final del documento
+apareció una sola entrada nueva, sin firma propia: "Codex — META historias y carruseles —
+2026-10-20" (commit `f0e40a4d`, insertada cerca del inicio del archivo, en el bloque "HANDOFF
+VIGENTE", no al final — se la ubicó revisando el diff del commit `82fd81e` sobre este documento).
+
+Propagado por documento:
+
+- `INVENTARIO_CONVERSACIONES.md`: se agregó al historial (Parte B) la entrada
+  `CODEX - META HISTORIAS Y CARRUSELES`, verificando con `git branch -a` y `git log` que el
+  trabajo se hizo directo sobre `main` (sin rama propia) — no hay reserva activa que anotar en
+  Parte A.
+- `CONTROLADOR_DE_VERSIONES.md`: sin cambios de esta tarea. Ya existe ahí la entrada "Versión —
+  2026-10-20 — META historias y carruseles" (commit `f0e40a4d`, migración
+  `20261020130000_add_social_opportunity_assets` aplicada, deployment Vercel `9ikVLnzfaDe8nZAMR2JdTarnx5x8`
+  `Ready`), agregada por un proceso ajeno a esta tarea de propagación (commit `15dbad9`, que no
+  tocó `COORDINACION_CLAUDE_CODEX.md`). Cubre todo lo que estaba pendiente en la entrada de
+  origen, así que no se duplicó.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. La entrada de origen es un checkpoint
+  técnico interno (estado de verificación local y pendientes de despliegue), no describe una
+  pantalla, mensaje o flujo nuevo concreto. Además, verificado contra el código actual
+  (`apps/web/src/app/api/social-opportunities/generate/route.ts`,
+  `apps/worker/src/socialPublish.ts` y `.../publish/route.ts`), los carruseles de Instagram de
+  esa misma conversación quedaron deshabilitados globalmente horas después, el mismo
+  2026-10-20 (commits `43d1ad5`, `8022e9b`, `1cc0639`): no se generan nuevas propuestas de
+  carrusel y la publicación se rechaza con error 423. Documentar ahora un carrusel nuevo en el
+  manual contradiría el estado real de producción; Instagram Stories de esa misma conversación
+  sigue activo, pero ya estaba descrito en el manual (línea ~418, "Para Instagram puedes
+  proponer Story, Post...") de una actualización anterior, por lo que no hace falta agregarlo de
+  nuevo.
+- `TO-DO.md`: sin cambios. "Pendiente de la siguiente sesión: aplicar migración, verificar
+  deployment y probar producción" en la entrada de origen no es una idea suelta para más
+  adelante, sino una tarea operativa inmediata, y ya quedó resuelta ese mismo día según
+  `CONTROLADOR_DE_VERSIONES.md` (ver arriba).
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. La mención de "stash recuperable antes de
+  sincronizar e integrar" es una práctica segura normal, no un hallazgo de árbol de git
+  enredado.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva
+para Milton: ninguna — se deja anotado únicamente como contexto (no requiere decisión) que los
+carruseles de Instagram de la conversación "META historias y carruseles" quedaron desactivados
+en producción esa misma tarde del 2026-10-20, sin que los commits que lo hicieron dejaran su
+propia entrada firmada en este documento.
+
+Responsable: Claude (tarea programada diaria de propagación).
