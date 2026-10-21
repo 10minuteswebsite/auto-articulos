@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DashboardNav from "@/components/DashboardNav";
+import EcosystemHeader from "@/components/EcosystemHeader";
 import FloatingAssistant from "@/components/FloatingAssistant";
 import LogoutButton from "@/components/LogoutButton";
 import ModuleGuard from "@/components/ModuleGuard";
@@ -25,6 +26,7 @@ export default async function DashboardLayout({
 }) {
   const { user, actingAdmin } = await getSessionContext();
   const requestHeaders = await headers();
+  const showHubNavigation = requestHeaders.get("x-auth-source") === "hub";
   const hostProduct = productOfHost(requestHeaders.get("host"));
   const productTitle = hostProduct === "ARTICULOS"
     ? "SEO TOTAL ARTÍCULOS"
@@ -44,8 +46,15 @@ export default async function DashboardLayout({
   }
 
   return (
+    <>
+      {showHubNavigation && <EcosystemHeader email={user.email} isAdmin={user.role === "admin" || Boolean(actingAdmin)} actingAdmin={Boolean(actingAdmin)} />}
+      {showHubNavigation && !blocked && (
+        <DashboardNav
+          initialIsAdmin={user.role === "admin" || Boolean(actingAdmin)}
+        />
+      )}
     <main
-      className="dashboard-main shell"
+      className={showHubNavigation ? "dashboard-main shell hub-aligned" : "dashboard-main shell"}
       style={{
         maxWidth: 1120,
         margin: "0 auto",
@@ -54,6 +63,22 @@ export default async function DashboardLayout({
         position: "relative",
       }}
     >
+      <style>{`
+        /*
+         * Con la navegación del Hub, el contenido usa el mismo ancho y los mismos
+         * márgenes laterales que el encabezado global (1280px; 16/24/32px).
+         */
+        .hub-aligned { max-width: 1280px !important; padding-left: 16px !important; padding-right: 16px !important; }
+        .dashboard-nav .app-subbar-inner { box-sizing: border-box; width: 100% !important; max-width: 1280px; padding-left: 16px; padding-right: 16px; }
+        @media (min-width: 640px) {
+          .hub-aligned { padding-left: 24px !important; padding-right: 24px !important; }
+          .dashboard-nav .app-subbar-inner { padding-left: 24px; padding-right: 24px; }
+        }
+        @media (min-width: 1024px) {
+          .hub-aligned { padding-left: 32px !important; padding-right: 32px !important; }
+          .dashboard-nav .app-subbar-inner { padding-left: 32px; padding-right: 32px; }
+        }
+      `}</style>
       <style>{`
         @media (max-width: 639px) {
           .topbar { display: flex !important; margin-bottom: 12px !important; align-items: center !important; }
@@ -136,7 +161,7 @@ export default async function DashboardLayout({
           }
         }
       `}</style>
-      <div
+      {!showHubNavigation && <div
         className="topbar"
         style={{
           display: "flex",
@@ -221,12 +246,16 @@ export default async function DashboardLayout({
           {actingAdmin && <StopImpersonationButton />}
           <LogoutButton />
         </div>
-      </div>
+      </div>}
       {blocked ? (
         <TrialBlockedScreen />
       ) : (
         <>
-          <DashboardNav />
+          {!showHubNavigation && (
+            <DashboardNav
+              initialIsAdmin={user.role === "admin" || Boolean(actingAdmin)}
+            />
+          )}
           <ProductAccessGuard>
             <ModuleGuard>{children}</ModuleGuard>
           </ProductAccessGuard>
@@ -234,5 +263,6 @@ export default async function DashboardLayout({
         </>
       )}
     </main>
+    </>
   );
 }

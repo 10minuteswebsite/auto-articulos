@@ -68,7 +68,7 @@ test("el inicio y cualquier ruta desconocida son compartidos: nunca se esconde u
 });
 
 test("Administración queda fuera de ambos productos", () => {
-  for (const p of ["/dashboard/usuarios", "/dashboard/composio", "/dashboard/postpeer"]) {
+  for (const p of ["/dashboard/usuarios", "/dashboard/composio", "/dashboard/postpeer", "/dashboard/bing", "/dashboard/linkedin"]) {
     assert.equal(productOfPath(p), "ADMIN");
   }
 });
@@ -108,9 +108,9 @@ test("la vista por productos solo se activa si /api/me ya llegó y el módulo no
 
 test("cada carpeta de dashboard tiene una decisión explícita de producto", () => {
   const expected = new Map<string, string>([
-    ["actualizaciones", "COMPARTIDO"], ["articulos", "ARTICULOS"], ["blog-ia", "ARTICULOS"], ["como-funciona", "COMPARTIDO"],
+    ["actualizaciones", "COMPARTIDO"], ["articulos", "ARTICULOS"], ["bing", "ADMIN"], ["blog-ia", "ARTICULOS"], ["como-funciona", "COMPARTIDO"],
     ["composio", "ADMIN"], ["configuracion", "COMPARTIDO"], ["estadisticas", "ARTICULOS"],
-    ["historial", "COMPARTIDO"], ["mi-acceso", "COMPARTIDO"], ["oportunidades", "ARTICULOS"],
+    ["historial", "COMPARTIDO"], ["linkedin", "ADMIN"], ["tumblr", "ADMIN"], ["pinterest", "ADMIN"], ["bluesky", "ADMIN"], ["mi-acceso", "COMPARTIDO"], ["oportunidades", "ARTICULOS"],
     ["oportunidades-redes", "REDES"], ["postpeer", "ADMIN"], ["publicaciones-en-curso", "COMPARTIDO"],
     ["publicar", "ARTICULOS"], ["redes", "REDES"], ["usuarios", "ADMIN"],
     ["vista-previa-bloqueo", "COMPARTIDO"],

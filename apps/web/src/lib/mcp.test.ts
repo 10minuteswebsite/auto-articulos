@@ -9,6 +9,9 @@ test("MCP catalog has unique tools and every personal-token tool is visible", ()
   assert.equal(new Set(names).size, names.length, "no debe haber tools duplicadas");
   assert.ok(names.includes("ver_historial_publicaciones"));
   assert.ok(names.includes("ver_preferencias_contenido"));
+  for (const name of ["ver_redes_sociales", "generar_propuestas_sociales", "publicar_propuestas_sociales", "cancelar_propuesta_social", "eliminar_propuestas_sociales", "listar_estilos_escritura", "cambiar_estilo_escritura_por_defecto"]) {
+    assert.ok(names.includes(name), `falta la tool ${name}`);
+  }
   assert.ok(listToolsPayload(["oportunidades:leer", "oportunidades:publicar"]).length >= 16);
 });
 
@@ -23,6 +26,15 @@ test("MCP prompts are named, unique and expose the expected workflows", () => {
     "automatizar_redes",
     "diagnosticar_cuenta",
   ]);
+});
+
+test("MCP hides Redes tools and prompts when the HUB entitlement is off", () => {
+  const tools = listToolsPayload(["oportunidades:leer", "oportunidades:publicar"], false);
+  const prompts = listPromptsPayload(false);
+  assert.equal(tools.some((tool) => tool.name === "ver_redes_sociales"), false);
+  assert.equal(tools.some((tool) => tool.name === "publicar_propuestas_sociales"), false);
+  assert.equal(prompts.some((prompt) => prompt.name === "publicar_en_redes"), false);
+  assert.equal(prompts.some((prompt) => prompt.name === "automatizar_redes"), false);
 });
 
 test("protocol envelope uses MCP JSON-RPC version and preserves ids", () => {

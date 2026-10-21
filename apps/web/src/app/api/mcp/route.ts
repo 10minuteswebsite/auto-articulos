@@ -9,9 +9,11 @@ import {
   rpcResult,
   type JsonRpcRequest,
 } from "@/lib/mcp/protocol";
-import { findTool, listToolsPayload } from "@/lib/mcp/tools";
+import { findTool, listToolsPayload, SOCIAL_TOOL_NAMES } from "@/lib/mcp/tools";
 import { findPrompt, listPromptsPayload } from "@/lib/mcp/prompts";
 import { MCP_SCOPE_RULES } from "@/lib/mcp/scope";
+import { getCurrentUserId } from "@/lib/current-user";
+import { canUseSocialModule } from "@/lib/social-access";
 
 /**
  * Servidor MCP de SEO TOTAL — transporte "streamable HTTP".
@@ -46,9 +48,11 @@ export async function POST(request: NextRequest) {
   // las notificaciones (sin `id`) no llevan respuesta.
   const mensajes = Array.isArray(body) ? body : [body];
   const scopes = request.headers.get("x-mcp-scopes")?.split(" ").filter(Boolean) ?? [];
+  const userId = await getCurrentUserId();
+  const socialEnabled = await canUseSocialModule(userId);
   const respuestas = [];
   for (const mensaje of mensajes) {
-    const respuesta = await manejar(mensaje, scopes);
+    const respuesta = await manejar(mensaje, scopes, socialEnabled);
     if (respuesta) respuestas.push(respuesta);
   }
 
@@ -59,7 +63,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(Array.isArray(body) ? respuestas : respuestas[0]);
 }
 
-async function manejar(mensaje: JsonRpcRequest, scopes: string[]) {
+async function manejar(mensaje: JsonRpcRequest, scopes: string[], socialEnabled: boolean) {
   const id = mensaje?.id ?? null;
   const esNotificacion = mensaje?.id === undefined;
 
@@ -79,8 +83,12 @@ async function manejar(mensaje: JsonRpcRequest, scopes: string[]) {
           "Al conectarte (primer mensaje de la conversación) o cuando la persona no sepa qué hacer, usa el prompt 'empezar': saluda brevemente y ofrece el mismo menú numerado que vería en su Inicio:\n" +
           "1) Contenido propio — escribir y publicar tus propios títulos.\n" +
           "2) Contenido generado por IA — que la IA proponga y publique artículos por ti.\n" +
-          "3) Publicar en redes sociales y blogs públicos.\n" +
+          (socialEnabled ? "3) Publicar en redes sociales y blogs públicos.\n" : "") +
           "Deja que la persona elija un número o lo diga con sus palabras; en cada paso siguiente, sigue ofreciendo opciones numeradas concretas en vez de preguntas abiertas.\n\n" +
+          "QUÉ PUEDES HACER (resumen para que no tengas que adivinar): (1) Artículos: crear títulos, publicar y revisar el estado, con el estilo de escritura de la cuenta o el que la persona pida; " +
+          (socialEnabled ? "(2) Redes y blogs: ver redes conectadas, generar propuestas por nombre o en grupo, publicarlas con comprobante, cancelarlas, reintentar las que fallaron y monitorearlas con listar_propuestas_sociales (son las mismas \"Oportunidades Redes\" de la web); " : "") +
+          "(3) AUTOMATIZAR corridas diarias: SEO TOTAL no tiene programador propio; tú sí puedes crear tareas recurrentes en tu asistente (por ejemplo un artículo a las 7:00, otro a las 12:00 y otro a las 19:00, o una publicación por red a su hora) y en cada ejecución usar estas herramientas, reponiendo oportunidades cuando se acaben. Si tu asistente no puede crear tareas programadas, díselo a la persona con claridad. Para el detalle usa los prompts \'programar_publicaciones\' y \'automatizar_redes\' si tu cliente los soporta, o ver_manual_seo_total.\n\n" +
+          `Estado de Redes: ${socialEnabled ? "habilitado por el HUB" : "no habilitado por el HUB"}. ${socialEnabled ? "Puedes ofrecer las opciones de Redes cuando corresponda." : "No ofrezcas ni intentes acciones de Redes; indica que primero debe activarse desde el HUB."}\n\n` +
           "Si la persona pide publicar de forma recurrente o automática (por ejemplo «un artículo a las 7, otro a las 12 y otro a las 19»), usa el prompt 'programar_publicaciones': trae cómo dejar las tareas funcionando solas y cómo reponer oportunidades cuando se acaban.\n\n" +
           "Si la persona quiere publicar en redes sociales o blogs (por nombre de red o en todas a la vez), usa el prompt 'publicar_en_redes'; si lo quiere recurrente (por ejemplo «en Facebook a las 9 y en LinkedIn a las 12»), usa 'automatizar_redes'.\n\n" +
           "Si en cualquier momento no sabes cómo guiar a la persona, no tienes claro qué botón o pantalla corresponde, o necesitas explicar cómo funciona algo, llama a ver_manual_seo_total (sin argumentos para el índice, o con 'tema' para una sección) — es el manual real y siempre actualizado de la plataforma, no lo inventes de memoria.\n\n" +
@@ -97,17 +105,17 @@ async function manejar(mensaje: JsonRpcRequest, scopes: string[]) {
       return rpcResult(id, {});
 
     case "tools/list":
-      return rpcResult(id, { tools: listToolsPayload(scopes) });
+      return rpcResult(id, { tools: listToolsPayload(scopes, socialEnabled) });
 
     case "prompts/list":
-      return rpcResult(id, { prompts: listPromptsPayload() });
+      return rpcResult(id, { prompts: listPromptsPayload(socialEnabled) });
 
     case "prompts/get": {
       const nombrePrompt = mensaje.params?.name;
       if (typeof nombrePrompt !== "string") {
         return rpcError(id, RPC_INVALID_PARAMS, "Falta el nombre del prompt.");
       }
-      const prompt = findPrompt(nombrePrompt);
+      const prompt = findPrompt(nombrePrompt, socialEnabled);
       if (!prompt) {
         return rpcError(id, RPC_METHOD_NOT_FOUND, `No existe el prompt "${nombrePrompt}".`);
       }
@@ -128,7 +136,10 @@ async function manejar(mensaje: JsonRpcRequest, scopes: string[]) {
       if (typeof nombre !== "string") {
         return rpcError(id, RPC_INVALID_PARAMS, "Falta el nombre de la herramienta.");
       }
-      const tool = findTool(nombre, scopes);
+      if (!socialEnabled && SOCIAL_TOOL_NAMES.has(nombre)) {
+        return rpcResult(id, { content: [{ type: "text", text: "La publicación en Redes no está habilitada para esta cuenta por el HUB. Activa SEO TOTAL Redes desde el HUB y vuelve a intentarlo." }], isError: true });
+      }
+      const tool = findTool(nombre, scopes, socialEnabled);
       if (!tool) {
         return rpcError(id, RPC_METHOD_NOT_FOUND, `No existe la herramienta "${nombre}".`);
       }

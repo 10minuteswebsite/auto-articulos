@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "node:crypto";
 import { prisma } from "@auto-articulos/db";
-import { createSessionToken, SESSION_COOKIE } from "@/lib/session";
+import { createHubSessionContextToken, createSessionToken, HUB_SESSION_CONTEXT_COOKIE, SESSION_COOKIE } from "@/lib/session";
+import { applyCookie, cookieEnvForHost } from "@/lib/shared-cookies";
 
 export const runtime = "nodejs";
 
@@ -87,15 +88,35 @@ export async function GET(request: NextRequest) {
   }
 
   const token = await createSessionToken(user.id);
+  const hubContextToken = await createHubSessionContextToken(user.id);
   const destination = appSlug === "auto-redes" ? "/dashboard/oportunidades-redes" : "/dashboard";
   const response = NextResponse.redirect(new URL(destination, request.url), 303);
   response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
-  response.cookies.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
+  applyCookie(
+    response,
+    SESSION_COOKIE,
+    token,
+    {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    },
+    cookieEnvForHost(request.nextUrl.hostname),
+  );
+  applyCookie(
+    response,
+    HUB_SESSION_CONTEXT_COOKIE,
+    hubContextToken,
+    {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    },
+    cookieEnvForHost(request.nextUrl.hostname),
+  );
   return response;
 }

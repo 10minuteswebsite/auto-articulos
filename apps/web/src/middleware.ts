@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   IMPERSONATION_COOKIE,
+  HUB_SESSION_CONTEXT_COOKIE,
   SESSION_COOKIE,
   SESSION_TTL_MS,
   createSessionToken,
   verifyMcpAccessToken,
   verifyImpersonationToken,
+  verifyHubSessionContextToken,
   verifySessionToken,
 } from "./lib/session";
 import { applyCookie } from "./lib/shared-cookies";
 import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
 import { productOfApiPath, productOfHost, productOfPath, type HostProductScope } from "./lib/product-routes";
+import { isSeoTotalHumanEntry } from "./lib/seo-total-hub-redirect";
 
 const PUBLIC_PATHS = [
   "/login",
@@ -18,6 +21,7 @@ const PUBLIC_PATHS = [
   "/privacidad",
   "/terminos",
   "/api/auth/login",
+  "/api/auth/logout",
   "/api/auth/trial-signup",
   "/auth/hub",
   "/api/oauth2/authorize",
@@ -46,12 +50,13 @@ const NO_CACHE_HEADERS = {
 
 function hubProductSlugForHost(hostname: string) {
   const host = hostname.toLowerCase();
-  return host === "redes.lasolucionweb.net" || host === "redes.lasolucionweb.com"
+  return host === "redes.lasolucionweb.net"
     ? "auto-redes"
     : "seo-total";
 }
 const LEGACY_LOGIN_HOST = "auto-articulos-web.vercel.app";
-const CANONICAL_LOGIN_URL = "https://www.seototal.lasolucionweb.com/login";
+const CANONICAL_LOGIN_URL = "https://articulos.lasolucionweb.net/login";
+const HUB_ENTRY_URL = "https://hub.lasolucionweb.net";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -71,6 +76,14 @@ export async function middleware(request: NextRequest) {
     const destination = new URL(CANONICAL_LOGIN_URL);
     destination.search = request.nextUrl.search;
     return NextResponse.redirect(destination, 308);
+  }
+
+  // SEO Total queda como puerta técnica para callbacks, pero la entrada humana
+  // sin sesión pasa al HUB. Los usuarios ya autenticados no se mueven: así el
+  // retorno de /auth/hub a /dashboard no puede crear un bucle de redirección.
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  if (!token && isSeoTotalHumanEntry(request.nextUrl.hostname, pathname)) {
+    return NextResponse.redirect(new URL(HUB_ENTRY_URL), 307);
   }
 
   if (
@@ -93,7 +106,6 @@ export async function middleware(request: NextRequest) {
     return handleMcpAuth(request);
   }
 
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
   const userId = await verifySessionToken(token);
 
   if (!userId) {
@@ -121,6 +133,10 @@ export async function middleware(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", userId);
+  const hubContextUserId = await verifyHubSessionContextToken(
+    request.cookies.get(HUB_SESSION_CONTEXT_COOKIE)?.value,
+  );
+  requestHeaders.set("x-auth-source", hubContextUserId === userId ? "hub" : "legacy");
   requestHeaders.set("x-hub-product-slug", hubProductSlugForHost(request.nextUrl.hostname));
 
   const impersonationToken = request.cookies.get(IMPERSONATION_COOKIE)?.value;

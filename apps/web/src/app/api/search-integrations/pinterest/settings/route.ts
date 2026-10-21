@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret, encryptSecret } from "@auto-articulos/shared";
 import { getCurrentUser } from "@/lib/current-user";
+import { oauthCallbackUri } from "@/lib/oauth-redirect";
 
 export const dynamic = "force-dynamic";
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate" };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
   const [idSetting, secretSetting] = await Promise.all([
     prisma.systemSetting.findUnique({ where: { key: "pinterest_client_id" } }),
@@ -26,7 +27,7 @@ export async function GET() {
     isAdmin: true,
     clientId: clientId ? `${clientId.slice(0, 4)}...${clientId.slice(-4)}` : null,
     rawClientId: clientId ?? "",
-    source: idSetting ? "database" : envClientId ? "environment" : "none",
+    source: idSetting ? "database" : envClientId ? "environment" : "none", callbackUrlInUse: oauthCallbackUri(request, "/api/search-integrations/pinterest/callback"),
   }, { headers: NO_CACHE });
 }
 

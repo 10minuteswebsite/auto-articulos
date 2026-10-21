@@ -7,19 +7,28 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { getStoredPinterestAppCredentials } from "@/lib/pinterest-app-config";
 import { canPublishToNetwork } from "@/lib/social-access";
 import { PINTEREST_STATE_COOKIE } from "../connect/constants";
-import { clearCookie } from "@/lib/shared-cookies";
-import { clearOAuthOrigin, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
+import { clearOAuthFlowCookies, oauthCallbackUri, oauthReturnBase } from "@/lib/oauth-redirect";
 
 export async function GET(request: NextRequest) {
+  const errorResponse = () => {
+    const response = NextResponse.redirect(
+      new URL(connectionReturnPath("pinterest", "error"), oauthReturnBase(request)),
+    );
+    clearOAuthFlowCookies(response, request, [PINTEREST_STATE_COOKIE]);
+    return response;
+  };
+
   const userId = await getCurrentUserId();
   if (!(await canPublishToNetwork(userId, "pinterest"))) {
-    return NextResponse.redirect(new URL(connectionReturnPath("pinterest", "forbidden"), oauthReturnBase(request)));
+    const response = NextResponse.redirect(new URL(connectionReturnPath("pinterest", "forbidden"), oauthReturnBase(request)));
+    clearOAuthFlowCookies(response, request, [PINTEREST_STATE_COOKIE]);
+    return response;
   }
   const cookieStore = await cookies();
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
   if (!state || state !== cookieStore.get(PINTEREST_STATE_COOKIE)?.value || !code) {
-    return NextResponse.redirect(new URL(connectionReturnPath("pinterest", "error"), oauthReturnBase(request)));
+    return errorResponse();
   }
   try {
     const credentials = await getStoredPinterestAppCredentials();
@@ -31,11 +40,10 @@ export async function GET(request: NextRequest) {
       update: { accessTokenEncrypted: encryptSecret(token.access_token), refreshTokenEncrypted: token.refresh_token ? encryptSecret(token.refresh_token) : undefined, expiresAt: token.expires_in ? new Date(Date.now() + token.expires_in * 1000) : undefined },
     });
     const response = NextResponse.redirect(new URL(connectionReturnPath("pinterest", "connected"), oauthReturnBase(request)));
-    clearCookie(response, PINTEREST_STATE_COOKIE, { path: "/" });
-    clearOAuthOrigin(response);
+    clearOAuthFlowCookies(response, request, [PINTEREST_STATE_COOKIE]);
     return response;
   } catch (error) {
     console.error("Error en Pinterest OAuth callback:", error);
-    return NextResponse.redirect(new URL(connectionReturnPath("pinterest", "error"), oauthReturnBase(request)));
+    return errorResponse();
   }
 }

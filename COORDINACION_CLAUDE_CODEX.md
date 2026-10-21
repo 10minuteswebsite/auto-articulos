@@ -1,11 +1,308 @@
+# HANDOFF VIGENTE — 2026-10-19
+
+## Claude — BLOG IA: Fases 2 y 3 (wizard, portadas, desactivar/reactivar, sitemap) — 2026-10-21
+
+- Task `BLOG-IA-FASE-2-3-20261021`. Milton es el dueño de la decisión; Claude es propietario del proyecto, Codex responde preguntas (canal fuera del repo). Estado: PR abierto, SIN fusionar; Milton autorizó subir a GitHub, la fusión se confirma aparte.
+- Qué entra: módulo opt-in `blog-ia` (solo admins y cuentas «Habilitado»; nadie más lo ve), pantalla `/dashboard/blog-ia` y rutas `/api/blog-ia/*`; `apps/blog` (Worker del blog público, aún NO desplegado: no hay Worker, D1, R2 ni Custom Hostnames reales); portadas con OpenAI calidad baja; cola BLOG (`publishMethod = BLOG`); sitemap diario del blog por la conexión de Search Console ya existente.
+- Decisiones de Milton: con BLOG IA activo el artículo va SOLO al blog; al desactivar, las publicaciones se detienen y NO se cambia `publishMethod`; sin prompt por defecto (si el lote no tiene prompt, se pide elegir uno); imágenes: OpenAI calidad baja (≈0,005 USD/imagen).
+- **MIGRACIÓN (aplicar ANTES de fusionar, protocolo 2026-09-08):** `20261016120000_add_blog_ia` (valor `BLOG` en `PublishMethod`, tabla `BlogIaBlog`) y `20261021120000_blog_ia_wizard` (`hostname` opcional + 6 columnas). Ambas aditivas e idempotentes (probadas dos veces sobre una BD local). Sin pérdida de datos; ninguna cuenta cambia (todas siguen en BROWSER).
+- Protegido: flujo BROWSER y MCP sin cambios de lógica; la rama BLOG de `queue.ts` solo actúa con `publishMethod === 'BLOG'`.
+- Verificación local: web typecheck + pruebas, blog 52/52, worker, `git diff --check`; probado en navegador con la cuenta tester sobre una copia de la BD. NO probado en producción ni con Cloudflare/OpenAI-en-cola real: configuración/código verificados; E2E pendiente. Variables nuevas del worker: `BLOG_IA_API_URL`, `BLOG_IA_SECRET`, `BLOG_IA_CNAME_TARGET`, `BLOG_IA_IMAGE_PROVIDER`/`BLOG_IA_IMAGE_QUALITY` (opcionales).
+- Traspaso detallado: `TRASPASO_BLOG_IA.md` y `DISENO_WIZARD_BLOG_IA_FASE_2.md`. Siguiente paso: aplicar migración, fusionar con orden de Milton, crear Worker/D1/R2 en Cloudflare.
+
+## Codex — CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21
+
+- Publicado únicamente en `main`: `7531dc5c`.
+- `User.disableIndexing` es la preferencia por cuenta; el selector explícito del lote prevalece y la API aplica fallback server-side.
+- Evidencia: login público 200 y commit visible en GitHub. Sin sesión autenticada/dependencias locales, no se declara cierre productivo.
+- Corrección posterior: los primeros deployments fallaron porque Prisma no exponía el campo nuevo en el cliente generado. `d8cebcb0` usa consultas SQL parametrizadas para la preferencia, quedó `Ready` en `la-solucion-web/auto-articulos-web` y la pantalla se verificó autenticada en producción con Lorena, sin cambiar su valor.
+- Estado: CERRADO y documentado. El siguiente punto cero es `d8cebcb0` + deployment `Ready`.
+
+## Claude — mensaje de login genérico — 2026-10-21
+
+- Capitán de migración: Claude reclamó para este cambio; sin migraciones. Task `LOGIN-MENSAJE-GENERICO-20261021`.
+- Alcance: solo texto de error en `apps/worker`. Protegido: lógica de login, PLATFORM_SERVERS, reintentos.
+- Decisión de Milton: el mensaje no debe nombrar servidores.
+- Siguiente paso: observar el próximo fallo de login real y confirmar el texto en la interfaz.
+
+
+## Codex — META historias y carruseles — 2026-10-20
+
+- Commit `f0e40a4d` integrado y publicado en `main`.
+- Se preservaron cambios locales existentes de `main` mediante stash recuperable antes de sincronizar e integrar.
+- Local verificado: worker `20/20`, carrusel `4/4`, builds correctos.
+- Pendiente de la siguiente sesión: aplicar migración `20261020130000_add_social_opportunity_assets`, verificar deployment y probar producción con sesión real.
+
+Este bloque prevalece sobre las notas históricas posteriores del archivo.
+
+- Harness aplicado: producción verificada como verdad funcional; GitHub como memoria durable; rama única `main`; sin ramas ni worktrees.
+- Punto 4 de sesión/logout: COMPLETADO y verificado con sesión real.
+- Auto Artículos: código `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`, Vercel `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`, `READY`.
+- HUB: puente final `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100% en producción.
+- El logout del HUB recorre las familias `.com` y `.net`; después de la prueba, Auto Artículos llevó a `/login`, el HUB llevó a Auth0 login y no quedaron cookies de sesión. Solo permanecieron `_fbp` y `_gcl_au`; no se leyeron valores.
+- No modificar de nuevo el puente de logout salvo que aparezca nueva evidencia productiva.
+
+## Siguiente trabajo autorizado
+
+1. Reconexiones OAuth reales, empezando por Bing.
+2. Auditoría manual de URLs en las consolas externas.
+3. Registrar resultados y limitaciones en los documentos Harness.
+
+Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELINE.md` antes de programar.
+
+## Codex — estilo problema-solución por defecto — 2026-10-19
+
+- Task ID: `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`.
+- Pedido: establecer `GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION` como estilo
+  predeterminado para todos los usuarios desde Configuración → Contenido.
+- Cambio: migración `20261019190000_set_problem_solution_default_prompt`, que
+  resuelve el prompt por nombre, actualiza todas las filas de `User` y falla si
+  el prompt no existe.
+- Punto cero confirmado antes de editar: Artículos `/login` 200; ruta de
+  Contenido protegida 307 a `/login`; `/api/me` y `/api/mcp` 401 sin sesión.
+- Estado: CERRADO. Commit `e0b6cf8a` publicado en `main`; deployment Vercel
+  `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ`, `success`; workflow `39340883977` aplicó el
+  backfill seguro. Verificación posterior: `/login` 200 y `/api/me` 401 sin
+  sesión. No hubo sesión autenticada disponible para una comprobación visual.
+
 # INCIDENTE CRÍTICO Y PROTOCOLO OBLIGATORIO — 2026-09-08
 
-## Claude — Proyecto BLOG IA: blueprint guardado y arranque de Fase 0 — 2026-10-15
+## Cierre — Threads/PostPeer: botón de conexión — 2026-10-19
 
-- Capitanía reclamada por Claude (`migration-coordinator.sh claim "Claude"`), solo documentación, sin migración. Se libera al fusionar. Estado: PR abierto, sin fusionar.
-- Documento maestro del proyecto: `MASTER_BLUEPRINT_BLOG_IA_SEO_TOTAL.md` (raíz del repo, copia fiel del `.md` de Milton, v1.0 del 15/10/2026). **Es la fuente de verdad: releerlo antes de cada lote.** Seguimiento del proyecto y bitácora: `TRASPASO_BLOG_IA.md`.
-- Regla central del blueprint: BLOG IA es un NUEVO DESTINO DE SALIDA del pipeline editorial existente; no duplica generación, aprobación, programación ni publicación. Infraestructura pública independiente en Cloudflare; SEO Total sigue en Vercel. Fase 0 (auditoría y validación) es obligatoria antes de programar.
-- AVISO: el repo es PÚBLICO (decisión del 12/10, ver «SEGURIDAD DEL REPOSITORIO»). El blueprint no contiene secretos, pero es visible; si Milton lo quiere privado, se mueve fuera del repo.
+- Task ID `THREADS-POSTPEER-BOTON-20261019`; commit funcional `474ed73ca6796672c4d274e8b310f2d23e8b301c` publicado en `main`.
+- Vercel: `web` `5XcP7ZMdrRhTWHeGuN3SNeRXrJSn` y `auto-articulos-web` `6W6fHM4eaLN59CXxBfcFww6C1KAh`, ambos `success`.
+- HTTP productivo verificado. No se declara la comprobación visual con Juan porque no había sesión autenticada.
+
+## Codex — Threads/PostPeer: botón de conexión oculto — 2026-10-19
+
+- Task ID: `THREADS-POSTPEER-BOTON-20261019`. Punto cero: `origin/main`/`cfe380006423950da5447a12d0d6896421941d5f`; deployments `7187003637` y `7187010076`, ambos `success`.
+- Causa confirmada: `OAuthNetworkSection` llamaba `/api/search-integrations/threads/settings`; esa ruta ya no existe desde la migración a PostPeer. El 404 se convertía en `configured=false` y ocultaba el botón.
+- Corrección: para Threads, la UI deja visible `/api/postpeer/threads/connect`. No se tocan permisos, base de datos ni conexiones.
+- Estado: pendiente de commit en `main`, despliegue y verificación E2E productiva.
+
+## Nota vigente — Antonio Aguirre: dos sitios e idioma por categoría — 2026-10-19
+
+- Decisión temporal de Milton: mantener los dos sitios de Antonio dentro de la misma cuenta mientras termina la integración del nuevo MCP de conexión con 10MWS.
+- No se crea una segunda cuenta por ahora ni se convierte esta decisión temporal en la arquitectura definitiva.
+- Arreglo local aplicado sin commit, push, migración ejecutada ni despliegue: las categorías sincronizadas guardan su idioma editorial según el panel (`English`/`Español`), la creación de ejecuciones prioriza el idioma de la categoría y el MCP avisa/pregunta cuando detecta más de un sitio.
+- Al culminar la integración nueva de MCP, se revisará la arquitectura definitiva y cualquier migración pendiente.
+
+## Claude — CIERRE Y ARCHIVO «CONTENIDO NO ALINEADO EN EL HUB» — 2026-10-17
+
+- Task ID: `HUB-CONTENIDO-ALINEADO-20261017`. Estado: CERRADO Y ARCHIVADO. Sin migraciones ni workflows. Capitanía reclamada y liberada dos veces. Sin ramas ni PR abiertos de esta conversación.
+- Causa: el encabezado global del Hub mide 1280px con márgenes laterales de 16/24/32px; la barra de Artículos/Redes medía 1160px con 20px, el contenido de `/dashboard` 1120px con 24px, y varias páginas añadían su propio tope centrado de 1120px (el caso de `oportunidades-redes` que Milton señaló).
+- PR #637 (`f5d4c2fe`): con la navegación del Hub, barra y contenido usan 1280px y los mismos márgenes que el encabezado (`dashboard/layout.tsx`). Sin Hub no cambia nada.
+- PR #638 (`3b63f673`): se quitó el tope propio de ancho en Oportunidades Redes, Cómo funciona, Actualizaciones, Usuarios y Configuración → MCP. `mi-acceso` queda como tarjeta angosta a propósito.
+- Verificado: despliegues de Vercel `success` en ambos PR; `/login` de Artículos y Redes `.net` en 200. NO verificado: la alineación en pantalla con sesión del Hub (Milton debe recargar con fuerza `/dashboard` y `/dashboard/oportunidades-redes`). `tsc` muestra errores previos sobre `@auto-articulos/shared`, ajenos a este cambio.
+- Lección: al alinear con un encabezado compartido, buscar también los topes de ancho que cada página pone por su cuenta (`maxWidth` en línea), no solo el contenedor del layout.
+
+## Claude — CIERRE Y ARCHIVO «PROBLEMAS CON MCP ARTICULOS» — 2026-10-17
+
+- Estado: CERRADO Y ARCHIVADO. Sin PR, ramas ni commits abiertos de esta conversación. Capitanía de migración liberada. Sin migraciones en ninguna de las tareas.
+- Producción al cierre: `e5414d1a` (`dpl_At7F1QJYaUzy9mdkGUyX2KRM4VZu`, `READY`, 2026-10-17 19:53Z), que contiene todo lo siguiente; mi último código funcional es `4836deaf` (`dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx`). `articulos` y `redes` `.com`: `/login` 200 y `/api/mcp` sin token 401.
+- Entregado en producción (PR → commit → deployment): #566 `dc4203f0` (`dpl_GYJ9mEpJ4ZnUWGugK6zCK6PkCfNf`) renovación OAuth de ChatGPT; #581 `748c3dec` (`dpl_ExEP7ywHp3FNiMFQgkwQ8NWDxks9`) alcance del asistente + automatización de artículos; #593 `334d59d0` (`dpl_8MnYqAW7NceduJdVMh5pzzDZLc2b`) Redes por asistente; #594 `81c40c87` (`dpl_85mLnuS9qpun6bJt2NAdcG23m1Ey`) estilos de escritura; #601 `4bbf565a` (`dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR`) claridad de Redes + corrección de prueba; #606 `4836deaf` (`dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx`) un prompt por producto con aceptación única y frecuencias por defecto. Documentación: #604 y #607 (checkpoints 10 y 11).
+- Verificado en producción: arreglo OAuth con 7 renovaciones `token` 200 sin `authorize` el 16/10 (en logs de Vercel); HTTP de los seis dominios; rechazo limpio de refresh falso. NO verificado: pantalla de Asistentes IA por host con sesión real; herramientas de Redes/estilos y automatización con un asistente real (Catalina/Muse de Lorena probó el prompt de Redes; Milton no pudo mostrar el resultado).
+- Pendientes que NO bloquean este cierre (dueño: Milton): (1) que las personas vuelvan a copiar el prompt desde la pantalla del MCP; (2) decidir qué prompt muestra el host `seototal`; (3) discrepancia de Search Console de Angel Quintela (el resolvedor piloto `COMPOSIO_PILOT_USERS_GOOGLE_SEARCH_CONSOLE` deja «sin conectar» al MCP lo que la pantalla muestra conectado; fuera del MCP por orden de Milton); (4) el HUB muestra «Sin acceso» a Redes y Artículos en la cuenta de Lorena aunque los productos le abren (sin investigar); (5) `GET /api/composio/options` devolvió 502 el 14/10 (sin investigar).
+- Lecciones: no asumir, preguntar (memoria `no-asumir-preguntar`); respuestas cortas (`respuestas-cortas-con-milton`); correr `npm test` completo antes de publicar (la prueba `mcp.test.ts` falló por mis PR); producción manda sobre el checkout local; el `push` directo a `main` lo bloquea el clasificador y se publica por PR sobre una rama existente con avance simple.
+
+## Claude — CIERRE: Google Business y cuidado de tokens — 2026-10-17
+
+- Task ID: `GMB-CIERRE-20261016`. Conversación «PROBLEMA PUBLICACION GOOGLE MY BUSINESS». Estado: CERRADA. Este cierre corrige los estados «PR abierto, SIN fusionar» de las entradas de hoy: los cuatro PR están FUSIONADOS en `main`.
+- PR #605 `dca4ff53` (PostPeer `success:false`/`error` cuenta como fallo y se registra el motivo); PR #609 `d20e06f9` (el worker ya no se salta artículos sin resumen: causa probable del 1 % de Antonio Aguirre); PR #611 `1d721742` (`CUIDADO_DE_TOKENS.md` + prueba guardiana); PR #612 `bd57a872` (reutilizar la imagen IA ya pagada, 48 h). Sin migraciones, sin cambios de workflows.
+- Despliegues de producción en Vercel verificados `success` (GitHub deployments `7128972685`, `7129447154`, `7129649611`) y `/login` de Redes en 200. #611 es solo documentación y una prueba: no se verificó despliegue aparte. El worker corre desde `main` en GitHub Actions.
+- Verificado en vivo con permiso de Milton: una propuesta de Google Business con la cuenta de Lorena Álvarez salió «Publicado» y Milton confirmó que aparece en la ficha de Google. Con la cuenta de Antonio Aguirre la propuesta se quedó en 1 % hasta el reintento y luego publicó (Milton la vio en Google); no se confirmó en la base que su artículo tuviera el resumen vacío.
+- Reglas de Milton respetadas: no se publicó ninguna propuesta pasada; no se generó ninguna imagen ni se gastó ningún token en pruebas.
+- Incidente propio, ya reparado: un comando mío corrió en la carpeta principal de Milton y creó la rama `diag/gmb-readonly` con sus cambios sin guardar, que subió a GitHub (repo público) unos minutos. Se restauró su carpeta (`reset --mixed`, mismos 9 archivos) y se borró la rama local y remota. Los archivos pudieron verse mientras existió; si alguno es sensible, rotar o revisar.
+- PENDIENTES (sin tocar, a decisión de Milton): disparos de `social-worker.yml` cancelados y corrida de respaldo programada casi inexistente (17 en 3 días), requiere capitanía de ese workflow; R1 sin cubrir Carrusel/Infografía de Instagram; R2 cascada de hasta 3 modelos pagados en `social-image.ts`; Composio y cadena fal.ai sin auditar; latencia de 30–60 s por arrancar el worker en GitHub Actions.
+- Siguiente punto de partida: `main` desde el commit de este cierre; leer `CUIDADO_DE_TOKENS.md` antes de tocar cualquier llamada de pago.
+
+## Claude — CIERRE: revisión de callbacks OAuth y paso de .com a .net — 2026-10-17
+
+- Task ID: `CIERRE-CALLBACKS-NET-20261017`. PROYECTO CERRADO. Todo lo de abajo está fusionado en `main` y desplegado; no queda rama ni commit de este trabajo sin fusionar.
+- **Resultado:** ninguna conexión envía su retorno a `.com` ni a `seototal`. Hosts de callback permitidos, fijos: `articulos.lasolucionweb.net` y `redes.lasolucionweb.net`.
+- **Por conexión:** Composio y PostPeer (sin lista de URLs en sus paneles; usan el host de la petición) · Bing (cliente nuevo «SEO TOTAL ARTICULOS NET», retorno articulos .net, aviso rojo de reconexión con interruptor `BING_CLIENT_CHANGED_AT`, credenciales en `/dashboard/bing`) · LinkedIn (consola solo con las dos .net) · Tumblr (consola solo con redes .net; una única dirección) · Pinterest (por Composio) · Bluesky (sin OAuth de plataforma). Probado en vivo con Lorena: Bing, LinkedIn y Tumblr.
+- **Eliminado:** conexiones directas de Google Cloud y Meta (#630); Blogger oculto a los usuarios (#632: Composio y PostPeer no lo ofrecen; datos y worker intactos); Día Cero (#623, de otra sesión).
+- **Pantallas de administrador nuevas** (en el menú Admin de ambas aplicaciones, bajo «Conexiones principales»): Bing, LinkedIn, Pinterest, Tumblr, Bluesky.
+- **PRs de esta tarea (todos fusionados):** #613 → revertido por #614 (Google daba `redirect_uri_mismatch`) → reaplicado en #628 · #616, #622, #624, #625, #626, #627, #630, #632 y la limpieza de enlaces de esta entrada.
+- **Limpieza final:** `middleware.ts` (login del alias antiguo), código QR del login y `ROUTER_HOSTS` del enrutador pasan a `.net`. Se CONSERVAN a propósito el reconocimiento de hosts `.com` (productos y cookies) y la redirección de `seototal.lasolucionweb.com` al HUB: no son callbacks y protegen a quien aún llegue por esas direcciones.
+- **Lecciones:** (1) no cambiar el `redirect_uri` en código antes de registrar la dirección en la consola del proveedor (#613); (2) Bing admite UNA dirección por cliente y no es editable; (3) Tumblr OAuth1 usa la dirección fija de su app; (4) probar siempre con Lorena en producción hasta el paso previo al consentimiento.
+- **Pendientes opcionales de Milton:** borrar el cliente viejo «AUTO ARTICULOS» en la consola de Bing; falla aparte anotada en #623 («Acceder como» Lorena).
+
+## Claude — Blogger se oculta a los usuarios — 2026-10-17
+
+- Task ID: `QUITAR-BLOGGER-20261017`. Sin migración. Estado: PR #632 abierto. Investigación: PostPeer (10 plataformas, sin Blogger; verificado en su selector y en su documentación) y Composio (catálogo de 1.529 apps: búsqueda «blogger» = 0; «blog» = solo Inblog) NO ofrecen Blogger. Decisión de Milton: quitarlo para que los usuarios no lo vean.
+- Quitado de la interfaz y de las opciones: tarjeta en Conexiones, fila en Oportunidades Redes, pantalla `/dashboard/blogger` y entrada del menú Admin, fila de permisos en Usuarios, red de MCP, valor por defecto de «generar en todas», textos y manual. CONSERVADO: datos y permisos de la base, código del worker y la API (no se borra nada de datos). Pruebas 240/240.
+
+## Claude — Se eliminan las conexiones directas de Google Cloud y Meta — 2026-10-17
+
+- Task ID: `QUITAR-GOOGLE-META-DIRECTO-20261017`. Sin migración. Estado: PR abierto. Orden de Milton: Google Cloud y Meta ya no se usan.
+- Borrado: rutas `connect`, `callback` y `settings` de `search-integrations/{google,instagram,threads,facebook-pages}`, `google-analytics` y `business-profile`; libs `google-oauth`, `google-analytics-oauth`, `instagram-app-config`, `threads-app-config`. La ficha de Google Business ahora solo ofrece la conexión por PostPeer.
+- Conservado a propósito (conexiones ya hechas): `route.ts`, `test` y la renovación de tokens/publicación del worker. Typecheck limpio, pruebas 240/240.
+
+## Claude — Limpieza del Día Cero (punto a punto con Milton) — 2026-10-17
+
+- Task ID: `DIA-CERO-LIMPIEZA-20261017`. Orden de Milton: el Día Cero está CULMINADO (Artículos y Redes ya separados); se cierran sus señalamientos uno por uno. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni workflows. Estado: CERRADO Y ARCHIVADO. PR #623 fusionado en `main` (`0ad89fbb`), Vercel success en web y auto-articulos-web; capitanía liberada. VERIFICADO EN VIVO tras el despliegue (cuenta admin de Milton): Artículos y Redes `.net` con sesión (`/api/me` 200), Composio y PostPeer `/status` 200, `/api/configuration-status` 200, Administración lista usuarios, `/api/admin/dia-cero` 404 (ya no existe). NO verificado: «Acceder como» (falla aparte, abajo), conexión real de un proveedor y cierre de sesión. ALCANCE FINAL del PR #623: botón Día Cero y manual borrados, documentos archivados, notas de culminado y variable `DIA_CERO` eliminada del código (decisión de Milton).
+- Punto 1 (hecho, local): borrados `api/admin/dia-cero/route.ts` y `usuarios/DiaCeroPanel.tsx` (nada más los usaba) y la sección «Día Cero» de `manual-usuario.ts`. Sin leer la base: no se comprobó si existe `dia_cero_backup` en `SystemSetting` (dato huérfano inofensivo si existe).
+- Punto 2 (cerrado): Milton quitó `DIA_CERO` de Vercel y redesplegó; sesión estable (Redes, Artículos, Administración) en pruebas en vivo con su cuenta admin. Hallazgo: tras el revert #614, `main` dependía de `DIA_CERO` u `OAUTH_CANONICAL_ORIGIN` para el retorno OAuth directo a `seototal.lasolucionweb.com`; en vivo, con la variable quitada, Google/Analytics/Business seguían enviando ese `redirect_uri` (sin acceso a Vercel para ver qué variable lo mantenía). Milton aclaró que Google, Threads y Business van por PostPeer/Composio y X está eliminado. Mientras se fusionaba este PR, `main` reaplicó el cambio a `.net` (#628) y ese cambio SUSTITUYE al de este PR en `oauth-redirect.ts`; aquí solo queda la eliminación de `diaCeroActive` y del dominio por defecto de cookies (`shared-cookies.ts`), y `DIA_CERO` ya no existe en `apps/`.
+- «Acceder como» RESUELTO SIN CAMBIOS DE CÓDIGO PROPIOS (2026-10-17, tras el despliegue de #623): antes respondía 200 pero `/api/me` seguía devolviendo al admin; después del despliegue, con la cuenta admin de Milton en `articulos.lasolucionweb.net`, `POST /api/admin/impersonate` a Lorena dejó `/api/me` = Lorena con `actingAdmin` = Milton, y `DELETE` devolvió la sesión a Milton. Causa probable (no demostrada): con `DIA_CERO` efectivo, la cookie de suplantación salía con `Domain=.lasolucionweb.com` desde un host `.net` y el navegador la rechazaba; ya no existe esa ruta. Queda sin probar en `redes.lasolucionweb.net`.
+- Puntos 4 a 6 (hechos, local): 6 documentos del plan movidos a `archivo/dia-cero/`; nota «Día Cero culminado» al inicio de los 4 traspasos; línea del Revertir marcada «SUPERADO». Punto 7 (datos en la base) DESCARTADO por Milton. Punto 8: pruebas ajustadas junto con el código (ya no existe `DIA_CERO` en `apps/`).
+- Punto 3 (manual) ya quedó hecho junto con el 1. Quedan los puntos 4 a 8 (documentos, tareas en traspasos, avisos en este archivo, datos, pruebas).
+
+## Claude — Callbacks OAuth solo en articulos/redes .net (reaplicación de #613) — 2026-10-17
+
+- Task ID: `CALLBACKS-SOLO-NET-V2-20261017`. Sin migración. Estado: PR abierto. Reaplica #613 (revertido en #614 por `redirect_uri_mismatch` de Google) ahora que Bing, LinkedIn y Tumblr ya están registrados y probados en `.net` y que Google Cloud, Meta directo, X y Blogger no se usan.
+- Cambio: lista fija de dos hosts `.net` en `oauth-redirect.ts` (`SEO_TOTAL_OAUTH_ALLOWED_HOSTS` ya no amplía); `DIA_CERO` ya no fija origen canónico (solo `OAUTH_CANONICAL_ORIGIN` si es https y host permitido); valores por defecto de Google/Business/Analytics/Bing y lista de Blogger a `.net`; pruebas reescritas 240/240; checklist actualizado.
+- Riesgo conocido: conexiones directas sin uso (Google Cloud, Meta, X, Blogger, Pinterest directo) darían `redirect_uri_mismatch` si se reactivaran sin registrar antes las `.net`.
+
+## Claude — Tumblr: consola en redes .net y pantalla Admin corregida — 2026-10-17
+
+- Task ID: `TUMBLR-PANTALLA-FIX-20261017`. Sin migración. Consola de Tumblr (app 10minuteswebsite, #661539, hecho por Claude en la sesión de Milton): «URL de retrollamada» y «URL de redirección de OAuth2» ahora son SOLO `https://redes.lasolucionweb.net/api/search-integrations/tumblr/callback` (antes seototal.lasolucionweb.com). El código ya recibe en redes .net (el `callback` reenvía cualquier otro host allí).
+- Pantalla `/dashboard/tumblr`: mostraba «la que usa el sistema hoy: seototal» y pedía agregar dos direcciones; es falso (Tumblr admite UNA y el código la fija a redes .net). Ahora muestra una sola dirección fija. Pruebas 240/240.
+- Pendiente: completar la conexión real de Tumblr con Lorena (quedó en la pantalla de permisos de Tumblr) y quitar `.com` del resto del código (reaplicar #613 por pasos).
+
+## Claude — LinkedIn conecta SOLO por articulos/redes .net — 2026-10-17
+
+- Task ID: `LINKEDIN-RETORNO-NET-20261017`. Sin migración. Estado: PR abierto, SIN fusionar.
+- Consola de LinkedIn (hecho por Claude en la sesión de Milton, app AUTO ARTICULOS, pestaña Auth): se AGREGÓ `https://articulos.lasolucionweb.net/api/search-integrations/linkedin/callback`. Quedan registradas 4: seototal.lasolucionweb.com (la usada hasta hoy), seototal.articulos.lasolucionweb.com (antigua), redes.lasolucionweb.net y articulos.lasolucionweb.net. Milton borrará las dos `.com` después de probar.
+- Código: `netCallbackUri`/`isNetProductHost` en `oauth-redirect.ts`; el `connect` de LinkedIn pasa a articulos .net si se inicia desde otro host, usa cookies por familia de dominio y el redirect_uri es el host `.net` de la petición; el `callback` usa la misma regla. Pruebas 240/240.
+- Pendiente: probar la conexión real de LinkedIn tras el despliegue (cuenta de pruebas) y reaplicar el patrón a Tumblr, Pinterest y Blogger.
+
+## Claude — Menú Admin: todas las conexiones en ambas aplicaciones — 2026-10-17
+
+- Task ID: `ADMIN-MENU-COMPARTIDO-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Orden de Milton: las pantallas de administrador de Bing, LinkedIn, Pinterest, Tumblr, Bluesky y Blogger deben verse en el menú Admin de Artículos y de Redes.
+- Cambio: `adminConnectionItems` ya no filtra por producto. Prueba nueva `admin-connections.test.ts`; suite 239/239. El desplegable Admin lleva el subtítulo «Conexiones principales» antes de la primera conexión (`TabItem.subtitle` en `DashboardNav`, escritorio y móvil).
+
+## Claude — Pantallas de administrador para LinkedIn, Tumblr, Pinterest, Bluesky y Blogger — 2026-10-17
+
+- Task ID: `LINKEDIN-PANTALLA-ADMIN-20261017`. Sin migración. Estado: PR #624 abierto, SIN fusionar. Pedido de Milton: lo mismo que Bing para cada red (Google Business va por PostPeer y no lleva pantalla propia).
+- Cambio: componente común `NetworkAdminPanel` y una pantalla por red (`/dashboard/{linkedin,tumblr,pinterest,bluesky,blogger}`, solo admin) con instrucciones de la consola, dirección de retorno que usa el sistema hoy (calculada en el servidor) + las dos `.net` por agregar, y campos de ID/secreto (reutiliza los `settings` ya cifrados en `SystemSetting`). Bluesky no tiene credenciales de plataforma: pantalla solo informativa. Entradas en el menú Admin y rutas ADMIN. Sin cambios en los flujos OAuth. Pruebas 238/238.
+- Pendiente: que Milton registre las dos `.net` en cada consola y después cambiar el código de cada red para usarlas.
+
+## Claude — Bing: el retorno es SIEMPRE articulos.lasolucionweb.net — 2026-10-17
+
+- Task ID: `BING-RETORNO-NET-20261017`. Sin migración. Estado: PR abierto, SIN fusionar. Prueba con Lorena en producción: el aviso rojo salió (Inicio y tarjeta) y la reconexión funcionó, pero el botón mandó a `seototal.lasolucionweb.com` porque `BING_WEBMASTER_REDIRECT_URI` no estaba definida.
+- Cambio: `bingExplicitRedirect()` ya no depende de la variable: por defecto es `https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` (la única registrada para el cliente nuevo); `connect` manda a ese host desde cualquier otro y `callback` usa la misma dirección. Pruebas 238/238.
+
+## Claude — CIERRE «Ubicación de Conexiones en el Admin» y Bing — 2026-10-17
+
+- Task ID: `ADMIN-CONEXIONES-UBICACION-20261017`. Sin migración. Capitanía liberada. PR #615, #617, #618 y #619 fusionados y desplegados. PR #620 CERRADO SIN FUSIONAR (ver abajo).
+- Hecho y verificado en producción: (1) el menú Admin ya no mezcla conexiones de usuario: Search Console, Analytics, Instagram, Facebook, Pinterest (Composio) y Business, Threads (PostPeer) se manejan en sus paneles; quedan Bing (Artículos) y LinkedIn, Tumblr, Bluesky, Blogger (Redes). (2) Pantalla de administrador `/dashboard/bing` (mismo estilo que PostPeer): Client ID y Secret cifrados en `SystemSetting`; web y worker los leen primero, las variables son respaldo. Milton guardó credenciales nuevas hoy ~18:20 UTC y se vio «Configurada desde Administración». (3) El aviso rojo de reconexión sale solo a quien tenía Bing conectado y no reconectó después del guardado (`effectiveBingChangedAt`, #619); verificado con la cuenta de Lorena.
+- PENDIENTE Y ROTO: la reconexión de Bing FALLA. Lorena (lorenalvarez30) terminó el proceso y quedó «No se pudo completar la conexión con Bing». Evidencia: `GET /api/search-integrations/bing/connect` desde articulos.lasolucionweb.net redirige a seototal.lasolucionweb.com. Hipótesis (NO confirmada, sin logs de Vercel): sin `BING_WEBMASTER_REDIRECT_URI` y tras la reversa del #613 (#614), articulos.net no es origen OAuth permitido y se usa el callback de seototal .com, que el cliente nuevo de Bing no admite. El motivo real solo está en los logs de Vercel (`[bing/callback] Bing rechazó…`) o en el detalle que ve un administrador.
+- PARCHE DESCARTADO: PR #620 (campo «Dirección de retorno» en Admin → Bing) cerrado sin fusionar y su rama borrada, por orden de Milton: compensaba la falta de la variable pero no corregía el fondo. Solución de fondo pendiente: que articulos y redes `.net` sean orígenes OAuth permitidos y resolver el motivo de la reversa del #613 (`redirect_uri_mismatch` de Google), o poner la variable en Vercel.
+- Otros pendientes: LinkedIn, Tumblr, Bluesky y Blogger no tienen pantalla de administrador propia; la novedad de «Actualizaciones» no se generó (el generador necesita `DATABASE_URL`); la conexión de Bing con credenciales nuevas no se ha logrado probar de punta a punta. Nota de método: la regla `autoMode.allow` en `.claude/settings.local.json` (frase en lenguaje natural) sí permitió fusionar con `gh pr merge`.
+
+## Claude — Bing: guardar credenciales en Admin enciende el aviso de reconexión — 2026-10-17
+
+- Task ID: `BING-AVISO-AUTOMATICO-20261017`. Sin migración ni workflows. Pedido de Milton: que el aviso salga a todos los que tenían Bing sin que él toque variables. `effectiveBingChangedAt` toma la más reciente entre `BING_CLIENT_CHANGED_AT` y el `updatedAt` de las credenciales guardadas en Admin → Bing. Efecto: Milton ya las guardó hoy, así que al desplegar saldrá el aviso a quien no haya reconectado después. Re-guardar credenciales vuelve a avisar a todos. Pruebas en `bing-client-change.test.ts`.
+
+## Claude — Pantalla de administrador para las credenciales de Bing — 2026-10-17
+
+- Task ID: `ADMIN-BING-CREDENCIALES-20261017`. Sin migración (usa `SystemSetting`, como PostPeer). Toca web Y worker (`bingToken.ts`): despliegue del worker lento. Pedido de Milton: un administrador debe poder cambiar/renovar las credenciales generales; el menú no debe mandar a la tarjeta de usuario.
+- Cambio: `/dashboard/bing` + `/api/admin/bing` (mismo estilo que PostPeer), `lib/bing-credentials.ts`, `bingOAuthConfig(stored)`, `getBingAccessToken(refreshToken, stored)` en shared; connect/callback y los wrappers de token (web y worker) leen primero lo guardado y, si no hay, las variables. Menú Admin Artículos → Bing apunta a esa pantalla. Pruebas: `bing-oauth.test.ts`.
+- NO probado en vivo: guardar credenciales reales ni conectar Bing con ellas. Las credenciales actuales siguen en Vercel/GitHub y funcionan como respaldo. LinkedIn, Tumblr, Bluesky y Blogger siguen sin pantalla propia (pendiente).
+
+## Claude — Admin: sin entradas de conexiones que van por Composio/PostPeer — 2026-10-17
+
+- Task ID: `ADMIN-CONEXIONES-SOLO-PROPIAS-20261017`. Sin migración ni workflows. Corrige el PR #615: Search Console, Analytics, Instagram, Facebook y Pinterest (Composio) y Business y Threads (PostPeer) ya no llevan entrada en el menú Admin; se manejan en sus paneles. Quedan Bing (Artículos) y LinkedIn, Tumblr, Bluesky, Blogger (Redes). PENDIENTE (pedido de Milton): una pantalla de administrador para cada conexión principal, distinta de la tarjeta de usuario; decisión abierta sobre mostrar el token enmascarado.
+
+## Claude — Bing: cliente OAuth nuevo (solo Artículos) y aviso rojo de reconexión — 2026-10-17
+
+- Task ID: `BING-CLIENTE-NUEVO-20261017`. Capitanía reclamada, sin migración ni workflows. Estado: PR abierto, SIN fusionar. Decisión de Milton: Bing solo en `articulos.lasolucionweb.net`; quien lo tenga conectado debe ver un aviso rojo que le diga dónde reconectar.
+- Consola de Bing (hecho, por Claude con la sesión de Milton): creado el cliente OAuth «SEO TOTAL ARTICULOS NET» con retorno `https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` (Bing admite UNA dirección por cliente y no es editable; queda 1 cupo libre). El cliente anterior «AUTO ARTICULOS» sigue intacto. El secreto NO se copió.
+- Código: `lib/bing-client-change.ts` (interruptor `BING_CLIENT_CHANGED_AT`; ausente = nadie ve nada), marca de reconexión en `SystemSetting` escrita por el callback de Bing (no se usa `updatedAt`, que el envío diario del sitemap también cambia), check `bing-reconnect` en `configuration-status` + alerta roja en Inicio y caja roja en la tarjeta de Bing. Pruebas nuevas 3/3, suite web 235/235, `tsc` limpio.
+- CORTE (lo hace Milton, en este orden): (1) fusionar el PR; (2) en Vercel poner `BING_WEBMASTER_CLIENT_ID`/`SECRET` del cliente nuevo, `BING_WEBMASTER_REDIRECT_URI=https://articulos.lasolucionweb.net/api/search-integrations/bing/callback` y `BING_CLIENT_CHANGED_AT` con la fecha/hora del corte (ISO); (3) cambiar los mismos ID/secreto en los secretos de GitHub usados por `worker.yml` y `daily-sitemaps.yml`; (4) redesplegar. Hasta el paso 2 todo sigue como hoy. Riesgo: entre (2) y la reconexión de cada persona, el envío diario de sitemap a Bing falla para esa cuenta.
+- Bing en `.net`: con `BING_WEBMASTER_REDIRECT_URI` definida, `connect` y `callback` de Bing usan EXACTAMENTE esa dirección (sin cálculo por host, sin bucle de redirección) y las cookies se emiten para la familia de dominios del host (`cookieEnvForHost`), evitando el rechazo por `Domain=.com` desde un `.net`. Sin la variable, todo sigue como hoy. Pendiente: prueba en vivo con cuenta real tras el corte.
+
+## Claude — Conexiones principales pasan al menú Admin — 2026-10-17
+
+- Task ID: `ADMIN-CONEXIONES-UBICACION-20261017`. Sin migración ni workflows. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`). Estado: PR abierto, SIN fusionar.
+- Pedido de Milton: a los administradores no debe aparecer Configuración → Conexiones (es para usuarios ordinarios); esas conexiones pasan al menú Admin, debajo de Composio y PostPeer, una por una.
+- Cambio: `lib/admin-connections.ts` (lista por producto), `DashboardNav.tsx` (el grupo Admin añade una entrada por conexión según el host: Artículos = Search Console, Analytics, Bing; Redes = Business, Instagram, Facebook, Threads, LinkedIn, Pinterest, Tumblr, Bluesky, Blogger; host compartido = todas), `configuracion/page.tsx` (oculta la tarjeta Conexiones a administradores, incluido «Acceder como»). Manual actualizado. La ruta `/dashboard/configuracion/conexiones?conexion=<id>` sigue siendo la misma pantalla.
+
+
+## Claude — REVERSA del PR #613 (callbacks solo .net) — 2026-10-17
+
+- Task ID: `CALLBACKS-SOLO-NET-REVERSA-20261017`. Sin migración. Prueba en vivo con la sesión del navegador: `articulos.lasolucionweb.net/api/search-integrations/google/connect` terminó en Google con `Error 400: redirect_uri_mismatch`. Causa: producción tiene `DIA_CERO=on`, así que hasta #613 TODOS los callbacks salían como `seototal.lasolucionweb.com` (la única dirección registrada en las consolas); #613 los cambió a `.net`, no registradas aún.
+- Acción: se revierte #613 (código, pruebas y checklist anterior) para restaurar lo que funcionaba. Cualquier nuevo intento solo después de que Milton registre las URLs `.net` en cada consola y se pruebe proveedor por proveedor.
+
+## Claude — R1: la imagen IA ya pagada se reutiliza en reintentos — 2026-10-16
+
+- Task ID: `CUIDADO-TOKENS-R1-20261016`. Sin migración, sin workflows. Estado: PR abierto, SIN fusionar. Punto de partida: `main` con #611 (`CUIDADO_DE_TOKENS.md`).
+- Cambio: `generateAiSocialImage` (`apps/worker/src/aiImageGenerator.ts`) guarda `reuse.json` (URL + prompt) junto a la imagen apenas la genera y, antes de pagar, busca ese registro bajo el mismo `pathPrefix` (por título y formato); si existe, es válido, tiene menos de 48 h y la imagen responde, la reutiliza. Las pruebas de diagnóstico (`forcePerson`/`systemPromptOverride`) siempre generan. Cubre Post, Story, Reel-image y Pinterest; NO cubre Carrusel ni Infografía (otro generador), pendiente.
+- Prueba pura nueva `aiImageReuse.test.ts` (1/1); typecheck de los archivos tocados. NO se generó ninguna imagen ni se gastó ningún token. Riesgo conocido: si se cambia el logo o la foto dentro de 48 h, un reintento del mismo título y formato reutiliza la imagen anterior.
+
+## Claude — Cuidado de tokens (PostPeer, Composio, imágenes, OpenAI) — 2026-10-16
+
+- Task ID: `CUIDADO-TOKENS-20261016`. Orden de Milton: los tokens se piden solo en el momento preciso. Sin migración, sin cambios de comportamiento, sin workflows. Estado: PR abierto, SIN fusionar.
+- Entrega: `CUIDADO_DE_TOKENS.md` (8 reglas + inventario de llamadas de pago + riesgos) y la prueba guardiana `apps/worker/src/paidApiGuard.test.ts`, que falla si aparece una llamada de pago sin registrar.
+- Hallazgos: PostPeer en Google Business es seguro (reserva atómica, clave de idempotencia, sin reintentos). RIESGOS NO CORREGIDOS: R1 la imagen IA de Instagram se guarda solo si la publicación sale bien, así que un reintento tras fallo la paga otra vez; R2 `social-image.ts` puede probar hasta 3 modelos pagados. Composio y la cadena de fal.ai quedan PENDIENTES de auditar. Threads en PostPeer no se auditó a fondo.
+- Verificación: la prueba guardiana pasa; no se probó nada en vivo ni se gastó ningún token.
+
+## Claude — Redes: las publicaciones con error salen de Oportunidades y quedan en Historial — 2026-10-16
+
+- Task ID: `REDES-ERRORES-A-HISTORIAL-20261016`. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración. Estado: PR abierto, SIN fusionar.
+- Pedido de Milton: el bloque «Publicaciones con error» no debe verse en `oportunidades-redes`; deben quedar en Historial.
+- Causa: ese bloque (últimas 24 h, con Reintentar) vivía en `oportunidades-redes/page.tsx`. El Historial de Redes ya lista las propuestas en error con motivo y su propio Reintentar (`historial/page.tsx`, `/api/social-opportunities/publish`), así que solo se quitó el bloque duplicado y su import. Manual actualizado.
+- Verificación: typecheck sin errores en el archivo. CIERRE (2026-10-16): PUBLICADO Y VERIFICADO por Milton. PR #608 (`bad6e7bc`), Vercel `success`; Milton confirmó que ya no se ve en Oportunidades Redes (tras recarga forzada). Capitanía liberada. Se limpiaron marcas de conflicto que quedaron en este documento al fusionar.
+
+## Claude — Google Business: propuesta atascada en 1 % por artículo sin resumen — 2026-10-16
+
+- Task ID: `GMB-SIN-RESUMEN-20261016`. Capitanía reclamada, sin migración ni workflows. Estado: PR abierto, SIN fusionar. Punto de partida: `main` = `a35aa042`.
+- Reproducido en vivo con la cuenta Antonio Aguirre: «Agentes RE/MAX Florida: Tu clave en bienes raíces» quedó en 1 %. Los dos disparos del worker (20:57 y 20:58 UTC) corrieron completos y ninguno tocó Google Business: no fue un disparo perdido, el worker no veía la propuesta.
+- Causa probable (verificada en código, no en base): `generate/route.ts` propone artículos `success` con URL aunque su `summary` sea nulo, y `buildBusinessProfileCandidateWhere` exigía `summary: { not: null }` también para lo aprobado con Publicar. Una propuesta así nunca era candidata, no daba error y `recoverStuckSocialOpportunities` la pasaba a error a los 10 min. NO confirmado que el título de Antonio tenga el resumen nulo (el dato solo está en la base).
+- Cambio: el resumen ya no se exige en lo aprobado (se usa el título si falta); el envío automático antiguo conserva la exigencia. Prueba nueva en `businessProfileCandidate.test.ts` (3/3).
+- Cuidado de Milton: no se publica nada que no se haya publicado. Las propuestas ya pasadas a error o descartadas no se reenvían; solo se toma lo que esté aprobado Y en cola en ese momento.
+
+## Claude — MCP: un prompt por producto en la pantalla de Asistentes IA — 2026-10-16
+
+- Task ID: `MCP-PROMPTS-POR-PRODUCTO-20261016`. Punto de partida: `main` = `4a736c60` (documentos del cierre MCP-REDES-CLARIDAD sobre el código `4bbf565a`, producción `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR`). Protocolo Harness-Mario: cambio mínimo sobre `main`, publicado por PR sobre la rama existente, sin ramas nuevas. Sin migración.
+- Orden de Milton: el MCP es uno solo para Artículos y Redes, pero las órdenes deben ser separadas: quien entra por Redes ve el prompt de Redes y quien entra por Artículos ve el de Artículos. (Antes de esto se me pidió un prompt unificado y luego se corrigió a este; la mezcla de prompts por dominio ya existía desde #593.)
+- Cambio: `lib/mcp/prompts-por-producto.ts` (`MCP_PROMPT_ARTICULOS`, `MCP_PROMPT_REDES`) y `configuracion/mcp/page.tsx` elige por host (`redes` → Redes, `articulos` → Artículos, host combinado → Artículos + sección de Redes como antes). Los prompts ya no llevan la línea «Servidor MCP» (cambia por dominio y el asistente ya está conectado) y ahora incluyen la automatización, el estilo de escritura (solo Artículos) y el reintento de errores (solo Redes).
+- Confirmación (decisión de Milton, aclarada): el asistente PROPONE el plan de automatización (cuántos, a qué horas, qué hará en cada ejecución), el usuario lo acepta con un sí y solo entonces se crean las tareas recurrentes; después cada ejecución corre sola, SIN pedir aprobación por publicación, salvo que el usuario lo pida. Frecuencia por defecto (Milton): Redes, una publicación al día por red, o solo algunas redes elegidas por la persona, cada una con su horario; Artículos, tres al día a horas distintas (07:00, 12:00, 19:00). Aplicado en los dos prompts y en `automation.ts` (flujos `programar_publicaciones`/`automatizar_redes`); prueba que lo exige.
+- Verificación local: prueba nueva `prompts-por-producto.test.ts` (nombra solo herramientas existentes, Artículos no trae Redes y viceversa, alcance/comprobante/sin credenciales); suite completa 230 pruebas, 207 correctas y 23 fallos del paquete `shared` local desactualizado (ajenos). CIERRE (2026-10-16 17:00 ET): PUBLICADO. Commit `4836deaf` (PR #606), deployment `dpl_J9bQtR8XPmRHDA6LFPiXCQq7wvBx` `READY`; HTTP de los seis dominios correcto; pantalla por host con sesión real NO verificada (pendiente con la cuenta de Lorena); host `seototal` por decidir. Checkpoint 11.
+
+## Claude — Google Business: PostPeer `success:false`/`error` ya cuenta como fallo — 2026-10-16
+
+- Task ID: `GMB-FALLO-POSTPEER-20261016`. Capitanía reclamada (`migration-coordinator.sh claim "Claude"`), sin migración ni cambios de workflows. Estado: PR abierto, SIN fusionar; producción no cambia hasta fusionar. Punto de partida: `main` = `4bbf565a`.
+- Pedido de Milton: ayer Google Business publicaba y hoy no; una publicación quedó en 1 % y otra «pasó» sin publicar, en distintos usuarios.
+- Evidencia (solo lectura, sin base de datos): `businessProfilePublish.ts` solo consideraba fallo `state:"REJECTED"` o `status:"failed"`; una respuesta HTTP 200 de PostPeer con `success:false` o `platforms[].error` se guardaba como «sent»/«published» sin haberse publicado. Además el `catch` y el rechazo no escribían nada en el log del worker. Del lado de Actions: 19 de 40 corridas de `social-worker.yml` salieron canceladas por la cola de concurrencia y la corrida programada de respaldo solo se ejecutó 1 vez; `recoverStuckSocialOpportunities` pasa a error lo que lleva >10 min en cola (visto «Recuperadas 1» hoy).
+- Cambio: `describePostPeerFailure` en `packages/shared/src/postpeer-api.ts` (fallo explícito = `success:false`, `error` por plataforma o estado failed/error/rejected; una advertencia no es fallo); el worker marca `rejected`, guarda el motivo legible en `errorLog` y lo escribe en el log. Prueba nueva en `postpeer-api.test.ts` (7/7); typecheck de los archivos tocados sin errores.
+- NO probado en producción ni confirmada la causa raíz de los casos de hoy: el error exacto de cada intento solo está en la base (`BusinessProfilePost.googleResponse`). Tras fusionar, Milton puede ver el motivo real en Historial al reintentar. Pendiente aparte (requiere capitanía de `social-worker.yml`): disparos cancelados por concurrencia.
+
+## Claude — MCP Redes: claridad para asistentes (caso Catalina, el Muse de Lorena) — 2026-10-16
+
+- Task ID: `MCP-REDES-CLARIDAD-20261016`. Protocolo Harness-Mario: se publica como commit normal en `main` (cherry-pick del cambio, contenido idéntico, sin ramas nuevas); el PR #601 queda superado. Punto de partida: `main` = `9bcfded8` = producción `dpl_pw7h2Absd4LgCfbMWfC7D9JYnsgt` (verificado por la API de Vercel: `READY`, origen git). Sin migración.
+- Caso: Catalina (Muse de Lorena) conectó con el token, descubrió las herramientas sociales pero no sabía su detalle, ni que puede automatizar corridas diarias; Lorena pidió: argumentos exactos, flujo de confirmación, cómo monitorear, relación con «Oportunidades Redes» y cómo reintentar errores. Muse probablemente no lee los prompts MCP (solo `tools/list` e instrucciones), por eso se pone la información donde sí la lee.
+- Respuestas (verificadas en código): (4) «Oportunidades Redes» (`dashboard/oportunidades-redes`) y las propuestas del MCP son LA MISMA tabla `SocialOpportunity` y las mismas rutas `/api/social-opportunities/*`; (3) no hay `estado_de_publicaciones` para redes: se monitorea con `listar_propuestas_sociales`; (5) reintentar = `publicar_propuestas_sociales` con `reintentar=true` (o el id de la propuesta en error en `publicar_propuesta_social`), tras reconectar la red en la web (la ruta `publish` acepta estados pending/error/skipped).
+- Cambios: descripciones completas (argumentos, flujo con comprobante, estados, reintento) en `listar_propuestas_sociales`, `previsualizar_publicacion_social`, `publicar_propuesta_social`, `generar_propuestas_sociales`, `publicar_propuestas_sociales`, `cancelar_propuesta_social` y `eliminar_propuestas_sociales`; `listar_propuestas_sociales` con filtros `red`/`estado`/`id` y muestra el enlace de la publicación (`postId`); `reintentar` en `publicar_propuestas_sociales`; resumen «QUÉ PUEDES HACER» y la automatización diaria en las `instructions` del servidor (`api/mcp/route.ts`); manual y catálogo.
+- Límite: el MCP no puede crear tareas programadas; eso lo hace el asistente. Si Muse/Catalina no tiene programador de tareas, no podrá automatizar y debe decirlo (ahora la instrucción lo pide).
+- Verificación: pruebas MCP (reintento elige la propuesta en error más reciente; las descripciones documentan argumentos, comprobante, monitoreo y reintento; las instrucciones mencionan la automatización); `tsc` sin errores nuevos. No probado en vivo con Catalina.
+- Corrección propia detectada al auditar: la prueba `src/lib/mcp.test.ts` («MCP prompts… expected workflows») fallaba en `main` desde mis PR #581/#593 (nuevos prompts `programar_publicaciones`, `publicar_en_redes`, `automatizar_redes` no estaban en su lista); los checkpoints de otras conversaciones la llamaron «preexistente» y era mía. Corregida aquí y ampliada para exigir las 7 herramientas nuevas del catálogo. Lección: correr SIEMPRE `npm test` completo antes de publicar, no solo `src/lib/mcp/*`.
+- CIERRE (2026-10-16 16:40 ET): PUBLICADO Y VERIFICADO. Commit `4bbf565a` en `main` (PR #601, squash), deployment `dpl_4rtM1ewRc2bXtQRmcuASB3yhahFR` `READY`; árbol de `main` idéntico al verificado; HTTP de los seis dominios correcto; 7 renovaciones OAuth 200 en logs (arreglo #566 comprobado). Checkpoint 10. Pendiente: prueba en vivo con Catalina/Lorena y que las personas vuelvan a copiar el prompt.
+
+## Punto cero documental vigente — 2026-10-16
+
+- Repositorio: `10minuteswebsite/auto-articulos`; trabajo autorizado únicamente en `main`, sin ramas ni worktrees.
+- Código que producción sirve: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`.
+- Deployment Vercel verificado: `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE`, `READY`, alias de Redes verificado.
+- Evidencia productiva: menú San Francisco `14px/400`, título `15px/700`, contexto `14px/400`, submenú `13px/500–600`.
+- Las entradas cronológicas anteriores siguen siendo memoria de decisiones e incidentes; no sustituyen este punto cero.
+
+## Corrección posterior — Redes debe tener su propio menú — 2026-10-16
+
+- Error reconocido: la corrección anterior solo cambió `Admin Artículos` por `Admin Redes`; no aisló el resto de la navegación. Por eso Redes seguía mostrando el grupo `SEO Total Artículos`.
+- Causa técnica: `DashboardNav` reutilizaba `PRODUCT_ENTRIES` completo en el host de Redes.
+- Corrección: filtrar las entradas por host. Redes muestra `Inicio`, `SEO Total Redes`, `Configuración` y `Admin Redes`; Artículos mantiene `Inicio`, `SEO Total Artículos`, `Configuración` y `Admin Artículos`. El Hub compartido conserva el catálogo completo.
+- Código: `d6b0ac20000c70ee66b79cdf54ae9783b1f3da08`; deployment `dpl_2H4BhWtbetcEkAFHUgLpBzixZZFE` (`READY`).
+- Prueba productiva: AX de Redes no contiene `SEO Total Artículos` y su submenu contiene las rutas de Redes; AX de Artículos no contiene `SEO Total Redes`. No se modificaron permisos, rutas de backend, datos ni secretos.
+
+## Cierre — menú de Redes — 2026-10-16
+
+- Se auditó producción antes de editar: la tarjeta `AUTOMATIZA TUS REDES SOCIALES` sí estaba visible en el Hub y Redes sí recibía el shell/submenú.
+- La incoherencia concreta era el nombre administrativo heredado: `Admin Artículos` aparecía dentro de Redes.
+- Corrección publicada en `main`: `Admin Redes` para Redes, conservando `Admin Artículos` para Artículos y el mismo patrón visual de Superlinks.
+- Código: `945fe5fcd2af2d1d7383bc4f61dc110bd6875805`; deployment: `dpl_FdSLPtRq3jC53rfZcekMT3W1H6f9` (`READY`).
+- E2E: `redes.lasolucionweb.net` muestra `Admin Redes` y `Usuarios`, `Composio`, `PostPeer`; el Hub mantiene la tarjeta de Redes.
 
 ## Claude — MCP: estilos de escritura (Prompt) — 2026-10-15
 
@@ -85,7 +382,7 @@
 - **Declaración (Protocolo de No Destrucción):** Subiré a producción de acuerdo al Protocolo de No Destrucción, el PR #570 (puertas cerradas de Redes), por PR normal y squash, sin push directo a `main`.
 - **Tres auditorías del PR #570 (2026-10-14):** (1) Funcional: `modules.test`, `social-access.test` y `product-routes.test` 49/49 con el `shared` del propio árbol; ninguna referencia huérfana a `redes-profile`, `activate-instagram`, `configure-instagram` ni `instagram-errors`. (2) Regresión: `git diff origin/main...HEAD` = 13 archivos, todos de este proyecto (ninguno ajeno; `10minutesWebsite.ts` que aparece al comparar con `main` viene del #572, no de este PR); `tsc` sin errores en archivos tocados (los 49 errores de tipos restantes son de archivos no tocados y ya existían por el `shared`/Prisma instalados); ningún otro PR abierto toca estos archivos; sin cambios en `vercel.json`, esquema ni migraciones. (3) Integración: build de Vercel del commit exacto `a3a9978f` en verde (Root Directory real `apps/web`, comando `npm run build`, sin tocar la configuración); el único cambio en `middleware.ts` es QUITAR dos rutas públicas de debug. Verificación posterior en producción: pendiente de ejecutar tras el despliegue.
 - Antes de fusionar: Lorena Alvarez y Zulmad dejan de entrar si su selector no está en «Habilitado». Comprobarlo en Administración (ficha de cada una) y ponerlo antes del despliegue.
-- Sin comprobar: los datos reales de producción (no se leyó la base). Si tras esto una cuenta sin interruptor sigue viendo Redes, mirar si el Día Cero (`/api/admin/dia-cero`) está aplicado: escribe «Habilitado» a todas las cuentas no administradoras y a las nuevas; se deshace con su botón Revertir, no con código.
+- Sin comprobar: los datos reales de producción (no se leyó la base). Si tras esto una cuenta sin interruptor sigue viendo Redes, mirar si el Día Cero (`/api/admin/dia-cero`) está aplicado: escribe «Habilitado» a todas las cuentas no administradoras y a las nuevas; se deshace con su botón Revertir, no con código. **SUPERADO (2026-10-17): el botón Día Cero fue eliminado; ya no existe Revertir ni hay que mirar si está aplicado.**
 - Verificación: pruebas `modules.test.ts` + `social-access.test.ts` 32/32 (con `shared` del propio árbol); tsc sin errores nuevos en los archivos tocados (los demás errores de tipos ya existían por el `shared` instalado en `node_modules`). Desvío conocido: la regla legacy del worker (`hasLegacySocialModuleAccess`, solo con enforcement activo) sigue aceptando «Heredar + red aprobada»; es más permisiva que la web, no más estricta.
 
 ## Claude — Fix «MCP/ChatGPT: Internal error y nueva autorización» (OAuth refresh) — 2026-10-14
@@ -166,6 +463,15 @@ Todo cambio de Redes —subido o solo en local— se anota en la «BITÁCORA RED
 - **Regla:** quien aplique estas medidas anota cada una en la bitácora, y no toca `worker.yml` ni `social-worker.yml` sin reclamar la capitanía (detienen la producción si fallan).
 
 ## BITÁCORA REDES (más reciente arriba)
+
+## Claude — Historial de Redes: enlace a la publicación de Google Business — 2026-10-15 (CERRADO)
+
+- Task ID: `ENLACE-GBP-HISTORIAL-20261015`. Sin migración. Pedido de Milton: en el Historial de Redes, Google Business no tenía enlace para ver la publicación, como sí lo tienen las otras redes y blogs.
+- Resultado: **CERRADO SIN ENLACE, por decisión de Milton.** PostPeer no entrega URL para publicaciones `googlebusiness`: ni en `POST /v1/posts` ni en `GET /v1/posts/{postId}` (`platformPostUrl` = `null`; solo `platformPostId` = `accounts/…/locations/…/localPosts/…`). Verificado en producción con un diagnóstico de solo lectura (workflow temporal en rama propia, ya borrada). El enlace exacto requeriría el `searchUrl` de la API de Google con el token que guarda PostPeer; la documentación pública de PostPeer no lista canal de soporte ni endpoint que lo dé. Milton puede escribirles; si PostPeer lo entrega, bastará con que llegue en `platformPostUrl`.
+- Intentos (todos en `main`, PRODUCCIÓN): #589 (búsqueda de Google por nombre del negocio; Milton: no servía), #592 (campo manual por cuenta; Milton: el usuario no debe pegar nada), #595 (corrección de raíz: el worker leía `url`/`id` que PostPeer no devuelve; ahora usa `extractPostPeerPostUrl` sobre `platforms[].platformPostUrl`, recupera publicaciones anteriores desde `BusinessProfilePost.googleResponse`, quita el campo manual de #592 y rotula el botón «Ver artículo en la red social»). #595 queda vigente: no hace daño y mostrará el enlace si PostPeer algún día lo entrega.
+- Estado final observable: en Google Business publicado, el Historial no muestra el botón de enlace; las demás redes no cambian.
+- Lección: antes de arreglar «el enlace no sale», leer la respuesta real guardada (`googleResponse`) y no suponer el campo; el primer arreglo (#595) asumía `platformPostUrl` sin evidencia. Honesto: los PR #589, #592 y #595 se subieron sin reclamar la capitanía (`migration-coordinator.sh`); esta entrada documental sí la reclama.
+- Limpieza: PR #589, #592, #595 fusionados; ramas `fix/historial-enlace-google-business`, `fix/historial-enlace-ficha-google`, `fix/google-business-enlace-automatico` y `diag/gbp-respuesta-postpeer` borradas (local y remota). Ningún PR ni rama abierta de esta conversación.
 
 **2026-10-12**
 - PRODUCCIÓN (en este PR) · Aviso de acceso terminado con enlace para pagar (pregunta de Milton): `ProductAccessGuard.tsx` ahora muestra el botón «Ir al HUB para activar o renovar» (`HUB_URL`) en vez de «contacta al administrador», y el worker (`socialPublish.ts`) detiene la publicación con un mensaje que manda al HUB. Solo se ve cuando el interruptor `product_enforcement` esté en `enforce`; hoy está en `off`. Verificación: typecheck, pruebas, build.
@@ -5110,6 +5416,22 @@ Verificaciones hechas con `git fetch origin` + `git merge-base
 el texto existente.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Codex — Márgenes de texto en tarjetas de Redes — 2026-10-19 (CERRADO)
+
+- Pedido: igualar el padding izquierdo de las tarjetas META y «Otras redes y blogs» en
+  `/dashboard/oportunidades-redes`, especialmente en la vista móvil.
+- Causa: las tarjetas se renderizan como botones y el estilo nativo del botón podía alterar el
+  espacio interior respecto a la tarjeta equivalente.
+- Cambio: `.inicio-action-card` fija `box-sizing`, `padding: 22px`, margen, `appearance`,
+  alineación interna y `text-indent` en `apps/web/src/app/globals.css`.
+- Commits publicados en `main`: `088f8516` y corrección final `f2f5163a`.
+- Verificación: Milton confirmó en producción que el padding ya se ve correctamente igualado.
+  No hubo migraciones ni cambios de datos. El typecheck local no se ejecutó porque faltaban
+  `tsc`/`tsx` en el worktree.
+- Estado: PRODUCCIÓN, CERRADO Y ARCHIVADO.
+
+Responsable: Codex.
 
 ## Cierre Codex — Redes restringidas por allowlist — 2026-10-07
 
@@ -11787,3 +12109,513 @@ de confirmar tras el despliegue del PR #572; comprobar en Administración que Lo
 Zulmad siguen entrando tras el PR #569/#570).
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-16
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-15 (commit
+`b51c7d8`, "docs(coordinacion): cierre de la propagacion diaria 2026-10-15"). Se revisó el rango
+`b51c7d8..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 19 líneas agregadas, 0 eliminadas
+(confirmado con `git diff --stat`), correspondientes a 2 commits que tocan este documento
+(`334d59d`, `81c40c8`; PRs #593 y #594) de un total de 6 commits nuevos en el rango — los otros 4
+(`e44b9e1`, `aa8e332`, `d7f99e6`, `a7632fd`) no agregan nada a Coordinación: 2 entradas nuevas y
+distintas.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 2 entradas nuevas, una por cada entrada nueva de Coordinación
+  (PR #593, PR #594). Ambas citan sus commits y, como el texto original de la entrada en
+  Coordinación todavía decía "PR abierto, SIN fusionar" (#593, con la nota "Milton durmiendo;
+  fusiona con su orden") o "PR abierto, sin fusionar" (#594) — texto escrito antes de que Milton
+  fusionara —, se agregó la verificación real hecha hoy con `git merge-base --is-ancestor <commit>
+  origin/main`: los dos commits del rango ya son ancestros de `origin/main`, es decir, ya están en
+  PRODUCCIÓN aunque el texto de las entradas originales diga lo contrario. No se reescribió
+  ninguna palabra de las entradas originales en Coordinación; la verificación se agregó solo en
+  `CONTROLADOR_DE_VERSIONES.md`.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios — verificado con `git log -- ruta` que
+  ambos PRs del rango (#593 y #594) ya tocaron el manual directamente en su propio commit, así que
+  no hacía falta propagar nada.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (ninguna reserva activa nueva; las 2
+  capitanías del rango fueron reclamadas y liberadas al fusionar o comparten una capitanía ya
+  liberada, verificado contra `git worktree list` — un solo worktree en este entorno — y `git
+  merge-base --is-ancestor` para los 2 commits). Parte B: 2 entradas nuevas, una por cada entrada
+  nueva de Coordinación (mismos PRs listados arriba), porque cada una describe un proyecto
+  distinto y nombrado (MCP de Redes por asistente de IA; MCP de estilos de escritura), no una
+  continuación de una lista ya indexada.
+- `TO-DO.md`: sin cambios — no se encontró ninguna idea suelta nueva para más adelante en este
+  rango; las dos pruebas en vivo pendientes mencionadas en las propias entradas (publicar con la
+  cuenta de Lorena para #593; probar cada estilo de escritura para #594) ya están anotadas como
+  verificación pendiente en la propia entrada de Coordinación y en `CONTROLADOR_DE_VERSIONES.md`,
+  no son ideas sueltas para agregar a `TO-DO.md`.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios — ninguna de las 2 entradas del rango describe
+  un árbol de git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. No quedó
+ninguna duda nueva sin resolver para Milton más allá de las que ya estaban anotadas en las propias
+entradas de Coordinación de este rango (prueba en vivo con la cuenta de Lorena para #593; probar
+publicando con cada estilo de escritura para #594).
+
+Responsable: Claude (tarea programada diaria de propagación).
+
+## Codex — Punto cero y plan HUB/OAuth — 2026-10-16
+
+Se leyó y aplicó `IA_JOURNEY.md` del estándar Harness-Mario. Se auditó producción y `main` antes de preparar código. El punto cero queda en `CURRENT_STATE.md`, `BASELINE.md` y `CHECKPOINTS.md`; las decisiones quedan en `CEREBRO.md`.
+
+- Repositorio: `miltondavila-ux/auto-articulos`, rama única `main`, commit `c73e7b9`.
+- Producción: Vercel `la-solucion-web/auto-articulos-web`, deployment observado `dpl_BcZSYWxq6LeXet6owNzFk53Qf63X`, `READY`, seis aliases `.com`/`.net`.
+- Evidencia: los seis `/login` responden HTTP 200; `/` y `/dashboard` responden 307 a `/login` del mismo host; los endpoints OAuth comprobados sin sesión responden 401.
+- Decisión: modo mixto; `.com` canónico para sesión/HUB/OAuth, `.net` como alias normalizado al `.com`, `/api/*` técnico conservado y `seototal` humano derivado al HUB.
+- Pendiente real: Vercel no expuso el commit exacto del deployment y falta verificar manualmente las URLs registradas en cada consola de proveedor.
+
+No se tocó código, producción, configuración, cuentas ni proveedores en esta etapa.
+
+## Codex — Punto 1 ejecutado y verificado — 2026-10-16
+
+- **Código:** commit `19f8ff5` en `main`.
+- **Cambio:** sin sesión, `seototal.lasolucionweb.com` redirige `/`, `/login`, `/dashboard` y `/dashboard/*` al HUB `https://hub.lasolucionweb.net/`.
+- **Conservación:** `/api/*`, callbacks técnicos y `/auth/hub` no quedan capturados por esa redirección.
+- **Producción:** deployment `dpl_6bzjEAAUEQGwtwkUaR2mWAyDgcRP`, `READY`, verificado en los endpoints anteriores.
+- **Criterio de seguridad:** usuarios con sesión permanecen temporalmente en dashboard para no crear un bucle antes de corregir `/auth/hub` en el Punto 2.
+- **Pruebas:** typecheck y build correctos; pruebas aisladas 11/11; conjunto web 220 correctas y 1 fallo preexistente de MCP no relacionado.
+- **Incidencia operativa:** el primer comando de Vercel desde una ruta no enlazada creó accidentalmente `la-solucion-web/web`; se canceló antes de completarse y no tiene aliases productivos. Su eliminación queda pendiente de autorización explícita.
+- **Estado:** PUNTO 1 CERRADO. Siguiente autorización: Punto 2, corregir `/auth/hub` con `applyCookie`.
+
+## Codex — Punto 2 ejecutado y verificado — 2026-10-16
+
+- **Código:** commit `b7ce44c` en `main`; `/auth/hub` reemplaza `response.cookies.set` por `applyCookie`.
+- **Configuración real:** Vercel Production tiene `DIA_CERO=on`, por lo que la sesión se emite para `.lasolucionweb.com` y se elimina la variante host-only.
+- **Producción:** deployment `dpl_9P62g85S79rBK8sfUN1HCocdoUnw`, `READY`.
+- **Verificación:** `seototal.com` sigue redirigiendo entradas humanas al HUB; `/api/*` responde sin redirección; `/auth/hub` sin código devuelve `hub_code`.
+- **Pruebas:** dirigidas 18/18, typecheck/build correctos; suite completa 221 correctas, 1 fallo preexistente de MCP y 1 integración omitida por falta de base de datos de prueba.
+- **Limitación:** no se ejecutó un intercambio real con cuenta/código HUB porque requiere una cuenta autorizada; no se tocaron consolas externas.
+- **Estado:** PUNTO 2 CERRADO. Siguiente autorización: prueba real del retorno HUB y después auditoría de callbacks/proveedores.
+
+## Codex — Corrección lanzamiento HUB → Redes `.net` — 2026-10-16
+
+- **Punto cero:** producción Vercel `auto-articulos-web` servía `fae041b976ad54721992fa198dfe43d0dabb8681`; el checkout fue sincronizado a `main`, con un único worktree y árbol limpio antes de editar.
+- **Incidente observado:** desde la tarjeta `AUTOMATIZA TUS REDES SOCIALES`, el HUB generaba `app=auto-redes` correctamente, pero `redes.lasolucionweb.net` terminaba en `/login`.
+- **Causa:** `DIA_CERO=on` hacía que `/auth/hub` emitiera `Domain=.lasolucionweb.com` desde un host `.net`; el navegador rechazaba la cookie.
+- **Corrección:** `cookieEnvForHost()` selecciona `.lasolucionweb.net` o `.lasolucionweb.com` según `request.nextUrl.hostname`; se añadió cobertura dirigida para ambas familias.
+- **Código publicado:** `7112c1ac0a3c840640027cd93b094243ceebd980`.
+- **Producción verificada:** `dpl_kzmJfxq2E2fS41QWAVKx76Jkgv8V` (`READY`). Después de sincronizar la documentación, `dpl_7p9V232KeKeNMKLsePvCyVoChZ6B` (`READY`) sirve `ca8850bbee925fcbe91f25a5d4f4f6ca6dcb0e2b`.
+- **E2E:** HUB → Redes terminó en `/dashboard/oportunidades-redes`, sesión activa y encabezado `SEO TOTAL REDES`; no volvió a `/login`.
+- **Validación:** build y typecheck correctos; 222 pruebas correctas, un fallo preexistente de expectativas MCP y una integración omitida por falta de `TITLE_GENERATION_TEST_DATABASE_URL`.
+- **Estado:** CERRADO. Sin cambios en secretos, datos, DNS ni consolas de proveedores.
+
+## Codex — restauración del shell Hub y menú Admin Artículos — 2026-10-16
+
+- **Punto cero real:** `main` y producción Vercel `auto-articulos-web` estaban alineados en `55fa3876b85eba0c6902c3ba82126f3ff9daea8c`, deployment `dpl_8fRv54Y6o9DBgxA1AMCk2ahqvmAx`, `READY`; sin ramas ni worktrees adicionales.
+- **Evidencia:** `articulos.lasolucionweb.net` no mostraba el shell global del Hub; `superlinks.lasolucionweb.net` sí separaba shell global y menú de aplicación.
+- **Causa:** el componente de shell y la señal verificable de sesión Hub habían sido retirados en la línea productiva; el menú local conservaba un enlace Hub duplicado.
+- **Acción:** se prepara el shell global con `Admin Hub`, el grupo local `Admin Artículos`, contexto firmado ligado al usuario y limpieza del contexto en login nativo/logout.
+- **Guardas:** no se otorgan permisos por CSS ni por presencia del menú; las APIs continúan usando `requireAdmin`/rol local.
+- **Validación local:** build/typecheck OK; 12 pruebas focalizadas OK; la única falla de suite completa es la expectativa MCP histórica ya desfasada respecto del catálogo actual.
+- **Estado:** esperando publicación y comprobación productiva autenticada.
+
+## Codex — cierre del menú Admin Artículos en producción — 2026-10-16
+
+- **Punto cero:** producción `dpl_BdeLPGhpYcUJj3d1MEwV4TgQ39C8`, `READY`, SHA `97454ab2577a4e7c28568cee27249a14a2b6c16b`; se trabajó directamente en `main`, sin crear ramas ni worktrees.
+- **Causa raíz nueva y confirmada:** no era una regresión del shell ni del contexto Hub. `DashboardNav` clasificaba `/dashboard/usuarios`, `/dashboard/composio` y `/dashboard/postpeer` como `ADMIN`, y el filtro del host de Artículos los ocultaba antes de construir el grupo.
+- **Cambio mínimo:** para una sesión con `role === "admin"` o suplantación activa, las rutas `ADMIN` se conservan visibles en el menú. `isVisibleInProduct()` sigue clasificándolas fuera de los productos y las APIs siguen protegidas.
+- **Commit publicado:** `02861df21487a0704268b30946e8021f866972c9`.
+- **Deployment productivo:** `dpl_3J97U2QwYPx2r5MhaU6snsfd8hLG`, `READY`.
+- **Verificación E2E:** `articulos.lasolucionweb.net/dashboard` tras recarga completa mostró el shell global (`Aplicaciones`, `Facturación`, `Perfil`, `Admin Hub`, identidad, `Salir`) y `Admin Artículos`; al abrirlo mostró `Usuarios`, `Composio` y `PostPeer`.
+- **Pruebas:** typecheck OK; build de producción del lote OK; suite amplia 224 correctas y 1 expectativa MCP histórica fallida, sin relación con este cambio.
+- **Estado:** CERRADO; no quedan cambios locales funcionales pendientes.
+
+## Codex — etiqueta Volver al Inicio — 2026-10-17
+
+- Solicitud: recuperar en los menús de aplicación el enlace de salida al Hub,
+  con el texto `Volver al Inicio`.
+- Auditoría: `DashboardNav` ya compartía una única entrada para Artículos y
+  Redes, pero la etiqueta seguía siendo `Volver al HUB`; el destino ya era el
+  Hub oficial y no se modificó.
+- Cambio mínimo publicado en `main`: `3e181b79`, una sola línea en
+  `apps/web/src/components/DashboardNav.tsx`.
+- Producción: Vercel `dpl_9NLNZAzUA5TuTTKz7896g1SZiEEY`, `READY`, aliases
+  `articulos.lasolucionweb.net` y `redes.lasolucionweb.net` activos.
+- Evidencia: build de producción OK y suite `240/240`; no se tocaron permisos,
+  autenticación, rutas ni datos.
+- Estado: PRODUCCIÓN, CERRADO.
+
+## Codex — paridad visual Artículos/Superlinks — 2026-10-16
+
+- **Solicitud:** aplicar al menú y submenú de Artículos el patrón visual productivo de Superlinks.
+- **Implementación:** `DashboardNav` ahora se monta fuera del contenido como `app-subbar`; muestra `SEO Total Artículos` y `Artículos con IA` a la izquierda, navegación a la derecha y `Admin Artículos` como botón delineado.
+- **Submenú:** conserva `Usuarios`, `Composio` y `PostPeer`, con la superficie blanca, borde tenue, radios y sombra del estándar.
+- **Commit:** `29d0c7b1689b2082c0939c87c075a2e50685fe37`.
+- **Producción:** `dpl_32q6Rg5dppMPZXfwrep8qnWXdcWi`, `READY`.
+- **Evidencia:** revisión visual real en `articulos.lasolucionweb.net/dashboard/usuarios`, con el submenú abierto y la pantalla de Administración intacta.
+- **Estado:** CERRADO.
+
+### Cierre final — comparación pixel a pixel — 2026-10-16
+
+- Se compararon en vivo `superlinks.lasolucionweb.net/app/` y `articulos.lasolucionweb.net/dashboard/usuarios` en el mismo navegador y viewport.
+- Se corrigieron diferencias reales de márgenes, espaciado, alturas, tipografías, líneas, colores y radios. El shell global de Artículos ahora coincide con el Superlinks actualmente servido: sin distintivo `L`, `Admin Hub` plano y `Salir` delineado.
+- La subbarra usa el contrato canónico azul claro de Superlinks; `Admin Artículos` conserva su botón delineado y su submenu queda completo dentro del viewport mediante anclaje derecho.
+- Código final: `02b87b4f51a180a87460ce313b246199302fa5ca`.
+- Deployment productivo verificado: `dpl_ETboyDP3AmkbNW8JH3BfuZN5WqnR`, `READY`, aliases productivos activos.
+- Verificación real: AX confirmó las tres opciones del submenu y la pantalla de Administración siguió cargando; typecheck/build/diff-check OK.
+- Durante el cierre apareció un diff local concurrente que restauraba el shell antiguo. Se documentó, se re-aplicaron los valores canónicos y el árbol quedó limpio; no se hizo `reset`, ni se usaron ramas/worktrees.
+- Estado: PRODUCCIÓN, CERRADO.
+
+## Cierre — tipografía del menú de aplicación — 2026-10-16
+
+- Se aplicó en todo el menú interno de Artículos la pila San Francisco a `14px` Regular (`400`).
+- `SEO Total Artículos` quedó en `15px`; `Artículos con IA`, en `14px/400`.
+- Código publicado: `57ac8e28346c6f8823f80338660745cd9a3a24b9`.
+- Deployment verificado: `dpl_LnWjSCLfamnVPssaRcyCFk87jVdi`, `READY`, aliases de Artículos activos.
+- Evidencia: DOM y captura de `articulos.lasolucionweb.net/dashboard/usuarios`; no se alteraron rutas, permisos, datos ni el submenú administrativo.
+
+### Addendum — regresión concurrente detectada y corregida — 2026-10-16
+
+- Un proceso paralelo publicó `babd61c1` directamente en `main` y cambió la `app-subbar` azul a blanco/gris. Ese commit y su deployment `dpl_G5w46PMjrfE5Eyt2g472jUP2cFEF` quedan documentados como regresión, no como verdad.
+- Se corrigió hacia delante en `main` con `82d33d878efabacce5b2af68eb4277c81ae18f0f`.
+- Deployment final verificado: `dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`, `READY`; evidencia visual y AX en producción OK.
+
+- Una segunda escritura concurrente (`0f7288dc`) repitió la regresión; se corrigió definitivamente con `964444a576b9f1e49bcf568981370f03b6769064` y deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL` (`READY`).
+
+### Verificación final de producción — 2026-10-16
+
+- La referencia viva de Superlinks fue revisada nuevamente y confirma subbarra blanca/gris; por tanto, las notas que la describen azul quedan supersedidas.
+- Corrección vigente: `364ed6decaa735c0fe9d81901f590417f2c99b82` en `main`.
+- Deployment: `dpl_7D26RkGkKTYrvsg4A6LfDKVcCPr5`, `READY`.
+- Evidencia: recarga fresca de `articulos.lasolucionweb.net/dashboard`; barra global y subbarra visibles, `Admin Artículos` expandido y AX con `Usuarios`, `Composio`, `PostPeer`.
+- Sin cambios de funcionalidad, rutas, permisos, datos o secretos.
+
+### Corrección final de paridad live — 2026-10-16
+
+- La comparación visual directa con Superlinks confirmó que la subbarra servida es blanca/gris, no azul.
+- Valores vigentes: fondo `#ffffff`, borde `#e7e7eb`, contexto `#86868b`, enlaces `#6e6e73`, activo `#f2f2f4`; márgenes, espaciado, alturas, tipografía, radios y sombra quedaron alineados.
+- `main`: `2050d88c6c70ab4f8c7a37aa73a5b40e0dd825a8`; producción: `dpl_D4CeNFCjs4P4UusUhgQym9dsv4CJ`, `READY`.
+- AX y captura productiva confirman `Admin Artículos` abierto con `Usuarios`, `Composio` y `PostPeer`.
+
+## Cierre — tipografía del submenú de Artículos — 2026-10-16
+
+- Comparación directa en producción: el submenú se servía en `12px` con pesos `650/600`; por eso sus fuentes se veían más pequeñas que el estándar visual.
+- Corrección mínima publicada en `main`: `13px`, activo `600`, no activos `500`. No se modificaron márgenes, padding, colores, líneas, radios, sombra, rutas ni permisos.
+- Commit de código: `3f5c953fbbf5b5269ee325f60a45c84f0c371c46`.
+- Deployment productivo: `dpl_FsQ7hFKRRL195c3qEHBRv7EwPbF2`, `READY`.
+- Evidencia real: recarga de `articulos.lasolucionweb.net/dashboard/usuarios`, menú abierto, AX con `Usuarios`, `Composio`, `PostPeer` y DOM calculado en `13px/600` y `13px/500`.
+- Estado: PRODUCCIÓN, CERRADO.
+
+## Reclamo de capitán — rescate prematuro y guardia anti-canibalización — 2026-10-16
+
+- **Capitán de migración:** Claude — revisará y aplicará el lote completo. Motivo: fix rescate prematuro de títulos y guardia anti-canibalización al publicar (caso Antonio Aguirre 16/10). Nadie más ejecuta Prisma hasta su liberación.
+- Sin migraciones de base de datos en este lote.
+- Causa probada (producción, historial admin de Antonio Aguirre + logs de GitHub Actions): a las `17:14:45Z`, el shard de mantenimiento de la corrida `38938094773` imprimió «Recuperados 1 título(s) atascado(s)» sobre un título recién reclamado (sin eventos y con `processedAt` vacío); lo cerró como error, creó la oportunidad (`opportunityCreatedAt = 17:14:45.186Z`) y detuvo el lote, mientras el worker original publicó el artículo a las `17:17:07Z`. A las `19:20:58Z` la oportunidad restaurada se publicó otra vez y el sitio rechazó el título duplicado.
+- Cambios: `stuckTitle.ts` (sin evidencia de inactividad no hay rescate), `processedAt` al reclamar (queue y mcpQueue), cierre condicionado a `status = processing` en `finalizeStuckTitle`, retiro de la oportunidad restaurada al publicar, guardia de tema ya publicado en el worker antes de iniciar sesión/redactar (`publishedGuard.ts`), la misma guardia al encolar en `/api/runs` y al listar Oportunidades, y `resolveDuplicateTitleEarly()` también en la ruta de prompt propio.
+- Estado: PRODUCCIÓN, CERRADO Y VERIFICADO (cierre 2026-10-16, ver «Cierre final» abajo).
+- Fusionado: PR #599, commit `2de420bb3037cd940b370a24a03faea8516689fe` en `main`. Deployments de producción (GitHub) `7128156756` (web) y `7128168390` (auto-articulos-web); estado del commit `success`.
+- Verificado en producción: como Lorena Álvarez (cuenta de pruebas), `POST /api/runs` con un tema ya publicado escrito en MAYÚSCULAS respondió `409 ALREADY_PUBLISHED` con el enlace real del artículo existente y sin crear ninguna corrida (`run: false`); `GET /api/opportunities` respondió 200 con el filtro nuevo. Se salió de la suplantación con «Volver a mi cuenta».
+- Worker: `worker-test.yml` (corrida `38958482732`, commit `2de420bb`) terminó en `success` y arrancó con el código nuevo (Lorena sin nada pendiente). NO verificado todavía: la guardia del worker ante un título real ya publicado y el no-rescate de un título recién reclamado; no hay forma de provocarlos sin crear filas a mano. Observar en la próxima corrida real: ausencia de «Recuperados 1 título(s)» sobre títulos de menos de 10 minutos y eventos «ya está publicado en tu sitio» si aparece un repetido.
+- Pruebas: 6 de `stuckTitle` + 5 de `published-title`, typecheck limpio de worker y web.
+- Hallazgo no tocado: el desplegable «Ver historial» de Administración lee `data.runs` pero `/api/admin/inspect-runs` devuelve un arreglo; por eso salía vacío.
+- Capitán liberado.
+- **Cierre final (2026-10-16 20:17Z):** corrida real del worker `38959171399` (commit `247002b0`, que incluye #599) disparada por una publicación de Milton: terminó en `success`, procesó trabajo real (unidad de título de 163 s con `trabajo=true`) y sus registros tienen 0 líneas «Recuperados» (antes del fix la corrida `38938094773` imprimió «Recuperados 1 título(s)» sobre un título vivo). Milton confirmó en pantalla que la publicación funcionó. Limitación honesta: el caso exacto del repetido ante el worker no se provocó en vivo; queda cubierto por pruebas unitarias y por el `409 ALREADY_PUBLISHED` web ya verificado.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-17
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-16 (commit
+`c73e7b9`, "docs(coordinacion): cierre de la propagación diaria 2026-10-16"). Se revisó el rango
+`c73e7b9..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 221 líneas agregadas, 0 eliminadas
+(confirmado con `git diff --stat`), correspondientes a 30 commits que tocan este documento, de un
+total de 56 commits nuevos en el rango. El contenido corresponde a 14 proyectos/entradas
+distintas; varias ya estaban propagadas por sus propias conversaciones (Codex actualiza
+directamente `CONTROLADOR_DE_VERSIONES.md` e `INVENTARIO_CONVERSACIONES.md` al cerrar cada
+cambio de UI/HUB) y 6 todavía no estaban registradas en ningún otro documento.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 1 entrada nueva, verificando con `git merge-base --is-ancestor
+  <commit> origin/main` que 4 PRs (#605, #609, #611, #612) cuyo texto en Coordinación decía "PR
+  abierto, SIN fusionar" o no tenía ninguna línea de cierre YA están fusionados en `main`. Se dejó
+  explícito que el deployment de Vercel de esos 4 no se verificó en esta corrida (sin acceso a la
+  consola de Vercel desde este entorno). El resto de los commits del rango (los de Codex sobre
+  HUB/OAuth y paridad visual) ya estaban registrados en este documento con sus propios
+  commits/deployments citados; no se duplicó nada.
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (los 6 proyectos nuevos ya son ancestros de
+  `origin/main`, verificado con `git merge-base --is-ancestor`; este entorno solo expone su
+  propio worktree en `git worktree list`, limitación ya señalada en corridas anteriores). Parte
+  B: 6 entradas nuevas, una por cada proyecto de Claude que no tenía registro en este inventario
+  (`CUIDADO-TOKENS-R1-20261016`, `CUIDADO-TOKENS-20261016`, `REDES-ERRORES-A-HISTORIAL-20261016`,
+  `GMB-SIN-RESUMEN-20261016`, `GMB-FALLO-POSTPEER-20261016`, y el rescate prematuro/guardia
+  anti-canibalización de PR #599). Los proyectos de Codex (MCP prompts por producto, MCP Redes
+  claridad, paridad visual Artículos/Superlinks, regresión concurrente, tipografías, menú propio
+  de Redes) ya estaban en Parte B; no se duplicaron.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: 1 hallazgo nuevo, sobre las dos escrituras concurrentes
+  (`babd61c1` y `0f7288dc`) que revirtieron temporalmente la subbarra de Artículos durante el
+  cierre de paridad visual — ya resuelto por la propia conversación, sin acción del Reparador; se
+  deja señalado por ser del mismo tipo que otros hallazgos ya registrados ahí.
+- `apps/web/src/content/manual-usuario.ts`: 1 actualización nueva, describiendo el menú **Admin
+  Hub** / **Admin Artículos** / **Admin Redes** con sus tres opciones (**Usuarios**, **Composio**,
+  **PostPeer**), que no estaba documentado para el usuario final. El cambio de "Publicaciones con
+  error" a Historial en Redes (PR #608) ya estaba propagado por el propio PR, según su misma
+  entrada en Coordinación; no se duplicó.
+- `TO-DO.md`: sin cambios. Se revisaron posibles ideas sueltas (riesgo R2 de imágenes pagadas,
+  auditoría de Composio/fal.ai, auditoría de Threads en PostPeer, disparos de `social-worker.yml`
+  cancelados por concurrencia, decisión pendiente sobre el host `seototal` en el prompt MCP) y se
+  decidió no copiarlas: son pendientes técnicos ya anotados dentro de sus propias entradas de
+  Coordinación (y ahora también en los documentos donde correspondía), no ideas sueltas de Milton
+  para este buzón, que por su propia regla "SOLO GUARDA" lo que Milton pide guardar
+  explícitamente.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva
+para Milton: ninguna — la única acción pendiente de autorización explícita detectada en el rango
+(eliminar el proyecto Vercel `la-solucion-web/web` creado por accidente) ya estaba señalada por
+Codex en su propia entrada ("Incidencia operativa", Punto 1 HUB/OAuth), así que no se repite aquí.
+
+Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-18
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-17 (commit
+`1d5dde9`, "docs(coordinacion): cierre de la propagacion diaria 2026-10-17"). Se revisó el rango
+`1d5dde9..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 160 líneas agregadas, 1 modificada
+(una anotación «SUPERADO» añadida al final de una línea ya existente, sin quitar ni una palabra
+de lo anterior), correspondientes a 25 commits que tocan este documento, de un total de 28
+commits nuevos en el rango. El contenido corresponde a 22 entradas/proyectos distintos.
+
+Antes de propagar nada se verificó una anomalía al hacer `git fetch origin main`: Git reportó
+"forced update" entre la punta de `main` que tenía este entorno al arrancar y la punta actual.
+Investigado a fondo (`git merge-base`, `.git/shallow`): **no es una reescritura de historia ni
+una pérdida de commits** — este entorno usa un clon superficial (`--depth 50`) y, al avanzar la
+punta remota más de 50 commits desde el arranque del contenedor, el límite del clon superficial
+se recalculó en un punto distinto, lo que Git reporta como "forced update" aunque no hubo ningún
+`push --force` real. Se deja esta nota para que quede claro por qué se investigó y para que
+ninguna otra conversación repita la misma alarma falsa. Tampoco se encontró contenido perdido:
+los 37 renglones que la corrida anterior (2026-10-17) agregó a `INVENTARIO_CONVERSACIONES.md`
+siguen intactos en `origin/main`.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 6 entradas nuevas. (1) Deployment de Vercel ya verificado
+  `success` para los PR #605, #609 y #612, que la corrida del 2026-10-16 había dejado marcados
+  "SIN verificar" — cierra ese pendiente. (2) Cierre completo del proyecto de callbacks OAuth
+  `.com` → `.net` (`CIERRE-CALLBACKS-NET-20261017`), con la lista de commits de los ~15 PR que lo
+  componen. (3) Corrección de estado del PR #637 (alineación con el encabezado del Hub): decía
+  "SIN fusionar" y ya está fusionado, verificado con `git log`. (4) Cierre del proyecto
+  `ENLACE-GBP-HISTORIAL-20261015` (Google Business sin enlace en Historial, por decisión de
+  Milton: PostPeer no entrega esa URL). (5) Deployment de Codex para la etiqueta "Volver al
+  Inicio" (commit `3e181b79`, `dpl_9NLNZAzUA5TuTTKz7896g1SZiEEY`).
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (ninguno de los proyectos de este rango
+  tiene una reserva activa ahora mismo; todos están fusionados o cerrados, salvo el PR #620,
+  cerrado explícitamente sin fusionar por decisión de Milton — no es una reserva, es un
+  descarte). Parte B: 4 entradas nuevas (`GMB-CIERRE-20261016`, el cierre agrupado de
+  `CIERRE-CALLBACKS-NET-20261017` con sus ~15 Task ID componentes, `HUB-CONTENIDO-ALINEADO-20261017`
+  y `ENLACE-GBP-HISTORIAL-20261015`).
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: 1 hallazgo nuevo, ya resuelto por la propia conversación:
+  un comando de la conversación `GMB-CIERRE-20261016` corrió en la carpeta principal de Milton
+  (no en un worktree aislado) y empujó brevemente a GitHub (repo público) una rama de
+  diagnóstico con cambios sin guardar de esa carpeta; ya se restauró la carpeta y se borró la
+  rama (local y remota). Se deja señalado por ser del mismo tipo que otros hallazgos ya
+  registrados ahí.
+- `apps/web/src/content/manual-usuario.ts`: 2 actualizaciones nuevas. (1) La conexión directa con
+  Google Cloud y con Meta se eliminó por completo (ya no existe ni para administradores); Google
+  Business Profile y Meta ya solo se conectan por PostPeer/Composio. (2) El enlace para volver al
+  Hub desde Artículos o Redes ahora se llama "Volver al Inicio" (antes "Volver al HUB"). El resto
+  de los cambios visibles del rango (pantallas de administrador de Bing/LinkedIn/Tumblr/
+  Pinterest/Bluesky, Blogger retirado, aviso rojo de reconexión de Bing, menú Admin compartido)
+  ya estaban documentados en este mismo manual por los propios PR que los introdujeron; no se
+  duplicó nada. El caso de Google Business sin enlace en Historial tampoco necesitó un párrafo
+  nuevo: la regla general ya documentada ("el enlace solo aparece cuando la publicación tiene un
+  enlace público") ya cubre correctamente ese caso.
+- `TO-DO.md`: sin cambios. No se encontró ninguna idea suelta de Milton para más adelante en este
+  rango; el único punto roto sin resolver (reconexión de Bing que sigue fallando para cuentas que
+  ya estaban conectadas) ya queda documentado dentro de su propia entrada de Coordinación y ahora
+  también en `CONTROLADOR_DE_VERSIONES.md`, no es una idea de Milton para este buzón.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva
+para Milton: ninguna — el hallazgo del incidente de la rama `diag/gmb-readonly` (repo público) ya
+pedía revisión de Milton dentro de su propia entrada original; no se repite aquí como una duda
+nueva, solo se deja señalado también en `REPARADOR_DEL_ARBOL_PRINCIPAL.md` para que no quede
+enterrado.
+
+Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-19
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-18 (commit
+`23cca3e`, "docs(coordinacion): cierre de la propagacion diaria 2026-10-18"). Se revisó el rango
+`23cca3e..origin/main` sobre `COORDINACION_CLAUDE_CODEX.md`: 1 solo commit nuevo en todo el
+repositorio desde entonces (`3b63f67`, PR #638, "quitar topes de ancho propios de las páginas
+para alinear con el Hub"), que agrega 4 líneas a este documento con una sola entrada nueva
+("Claude — Alineación del Hub, segunda parte — 2026-10-17",
+`HUB-CONTENIDO-ALINEADO-2-20261017`). `git fetch origin main` no mostró ninguna anomalía esta
+vez (sin "forced update").
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: 1 entrada nueva ("Versión — 2026-10-17 — PR #638: alineación del
+  contenido con el encabezado del Hub, segunda parte"), siguiendo la plantilla de la entrada
+  hermana del PR #637 ya registrada ahí. Commit `3b63f67` verificado como fusionado en
+  `origin/main` con `git log`; deployment de Vercel sin verificar (sin acceso a la consola desde
+  este entorno).
+- `INVENTARIO_CONVERSACIONES.md`: Parte A sin cambios (el Task ID
+  `HUB-CONTENIDO-ALINEADO-2-20261017` ya está fusionado en `main`, no hay rama propia abierta: no
+  corresponde una reserva activa). Parte B: 1 entrada nueva (`HUB-CONTENIDO-ALINEADO-2-20261017`,
+  continuación de `HUB-CONTENIDO-ALINEADO-20261017` ya registrada ahí).
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. El PR #638 es un ajuste puramente visual
+  de alineación (quitar topes de ancho propios en varias páginas para igualarlas con el
+  encabezado del Hub); no cambia pantallas, flujos, mensajes, permisos ni módulos para el usuario
+  final. Se sigue el mismo criterio que la corrida anterior aplicó al PR #637 hermano (tampoco se
+  documentó en el manual).
+- `TO-DO.md`: sin cambios. No se encontró ninguna idea suelta de Milton para más adelante en este
+  rango.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. No se encontró ningún hallazgo de árbol de git
+  enredado en este rango.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva
+para Milton: ninguna.
+
+Responsable: Claude (tarea programada diaria de propagación).
+
+## Corrección de logout y navegación Hub — 2026-10-19
+
+- Punto cero: producción en main, commit funcional final a2f3406e9dfe154188e180d204f82ea08e8558ee, deployment Vercel dpl_H6HNToZ9agcLBf5WxPnMe4KkVRCS (READY), con los seis dominios de producto asignados.
+- Hallazgo: /api/auth/logout borraba las cookies usando process.env sin seleccionar la familia del host receptor. En el flujo .net, el logout podía no borrar la cookie compartida .lasolucionweb.net.
+- Corrección: el endpoint usa cookieEnvForHost(request.nextUrl.hostname) al borrar sesión, suplantación y contexto Hub. Se añadió prueba de regresión para una variable global mal configurada.
+- Corrección visual: se eliminó del DashboardNav la entrada Volver al Inicio; no se alteraron los enlaces internos de las páginas.
+- El botón de logout ahora es explícitamente type="button", envía la petición con credentials: same-origin y redirige incluso si la petición falla.
+- Verificación real: con una sesión iniciada en seototal.lasolucionweb.net/dashboard, pulsar Salir llevó a Auth0 y después a hub.lasolucionweb.net/login; al volver a seototal.lasolucionweb.net/dashboard, producción respondió con /login. La navegación visible no mostró Volver al Inicio.
+- Alcance: esta evidencia cubre el botón Salir del dashboard, que ejecuta primero el logout de Auto Artículos y después el logout de Auth0. Un logout iniciado exclusivamente desde otra aplicación del HUB debe seguir usando este mismo contrato si se quiere invalidar también la cookie de Auto Artículos.
+
+## Cierre — limpieza de estado OAuth en errores — 2026-10-19
+
+Se ejecutó el Punto 1 del plan `PLAN_PENDIENTES_SESION_OAUTH.md` directamente sobre `main`. El helper `clearOAuthFlowCookies` limpia state, verifier y origen recordado en éxito, error y cancelación, seleccionando la familia de dominio del host callback. Se corrigieron Twitter/X, LinkedIn, Pinterest, Blogger y Bing. Tumblr conserva su pending server-side; Threads, Instagram, Search Console, Analytics y Business Profile no tienen callback local con cookie state. Código publicado: `849ba35bd4bb7f77d3f79063d12495a37075f44d`; producción: `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ` (`READY`). La prueba real con proveedor requiere una sesión autorizada y sigue pendiente.
+
+
+## Cierre del Punto 4 — logout cruzado HUB → Auto Artículos — 2026-10-19
+
+- Código publicado en `main`: `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`.
+- Corrección: `/api/auth/logout` queda público para que el puente pueda limpiar las cookies de Auto Artículos aunque ya no exista una sesión local; la ruta GET borra las cookies y redirige de forma segura al HUB.
+- Vercel: deployment `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`, estado `READY`, producción; aliases personalizados incluidos `seototal.lasolucionweb.com`, `seototal.lasolucionweb.net`, `articulos.*` y `redes.*`.
+- Verificación pública: el flujo `hub.lasolucionweb.net/auth/logout` → puente `seototal.lasolucionweb.com/api/auth/logout` → HUB terminó en `https://hub.lasolucionweb.net/login`, sin JSON `No autenticado` ni pantalla Auth0 Oops.
+- La verificación se hizo sin una sesión activa de Auto Artículos; queda separada la comprobación con una cookie real del producto para observar físicamente su expiración en el navegador.
+
+
+## Verificación E2E final — logout cruzado con sesión real — 2026-10-19
+
+- Se abrió una sesión real desde el HUB y se lanzó Auto Artículos en `articulos.lasolucionweb.net/dashboard`; el dashboard mostró la cuenta autenticada.
+- Se ejecutó logout desde `hub.lasolucionweb.net/auth/logout`.
+- Resultado verificado: `articulos.lasolucionweb.net/dashboard` redirigió a `/login`; la cookie de la familia `.lasolucionweb.net` dejó de ser utilizable.
+- El HUB también quedó sin sesión: `hub.lasolucionweb.net/dashboard` redirigió al login de Auth0.
+- El puente de Auto Artículos ya estaba publicado en `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`; la corrección de ambas familias vive en el HUB, commit `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100%.
+- Punto 4: COMPLETADO. No se comparten cookies entre `.com` y `.net`; el HUB visita ambos orígenes para borrarlas.
+
+
+## Evidencia adicional — cookies inspeccionadas sin leer valores — 2026-10-19
+
+- Tras el logout cruzado se inspeccionaron solo nombre, dominio y ruta mediante el navegador.
+- En `articulos.lasolucionweb.net`, `seototal.lasolucionweb.net` y `seototal.lasolucionweb.com` no quedó ninguna cookie de sesión de Auto Artículos; solo permanecieron `_fbp` y `_gcl_au` de analítica/marketing.
+- No se leyeron ni registraron valores de cookies.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-20
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-19 (dentro del
+rango revisado entonces, hasta el commit `3b63f67`, PR #638). Entre esa entrada y el final del
+documento (sin que mediara ninguna otra firma de esta tarea) aparecían 5 entradas nuevas, todas
+fechadas 2026-10-19, de otra conversación: "Corrección de logout y navegación Hub",
+"Cierre — limpieza de estado OAuth en errores", "Cierre del Punto 4 — logout cruzado HUB → Auto
+Artículos", "Verificación E2E final — logout cruzado con sesión real" y "Evidencia adicional —
+cookies inspeccionadas sin leer valores". `git fetch origin main` no mostró ninguna anomalía esta
+vez (sin "forced update"; el entorno usa un clon superficial, por lo que `git log` corta en un
+commit sin padre — no es un indicio de árbol dañado).
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: de las 5 entradas, 3 ("Corrección de logout y navegación Hub",
+  "Cierre del Punto 4" y "Verificación E2E final") ya estaban copiadas ahí verbatim (y también en
+  `INVENTARIO_CONVERSACIONES.md`), aparentemente por un proceso anterior a esta tarea; no se
+  duplicaron. Se agregaron las 2 que faltaban: "Cierre — limpieza de estado OAuth en errores"
+  (commit `849ba35bd4bb7f77d3f79063d12495a37075f44d`, deployment Vercel
+  `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ`, `READY`), insertada en su lugar cronológico entre las
+  entradas de "Corrección de logout" y "Cierre del Punto 4"; y "Evidencia adicional — cookies
+  inspeccionadas sin leer valores", agregada como continuación de "Verificación E2E final" (ya
+  presente ahí). Ambas llevan una nota indicando que esta tarea las agregó, igual que las entradas
+  hermanas de corridas anteriores.
+- `INVENTARIO_CONVERSACIONES.md`: sin cambios de esta tarea. Las 3 entradas que ya aparecían ahí
+  (ver arriba) no corresponden al formato de Parte A ni Parte B según el mapa de esta tarea
+  (no son ni una reserva de archivo/rama activa ni el nombre de una conversación nueva), así que
+  no se agregaron las 2 restantes tampoco.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. Las 5 entradas son correcciones internas
+  de sesión/cookies sin pantalla, mensaje ni flujo nuevo para el usuario final. La única mención
+  visible — "se eliminó del DashboardNav la entrada Volver al Inicio" — se verificó contra el
+  código: el enlace "Volver al Inicio" hacia el Hub que ya describe el manual (actualización
+  2026-10-17) sigue existiendo en `apps/web/src/components/dashboard-ui.tsx`; lo que se quitó de
+  `DashboardNav.tsx` era una entrada duplicada, no el enlace documentado. No cambia lo que el
+  manual ya explica.
+- `TO-DO.md`: sin cambios. No se encontró ninguna idea suelta de Milton para más adelante en este
+  rango.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. No se encontró ningún hallazgo de árbol de git
+  enredado en este rango (el clon superficial de este entorno no es un hallazgo de árbol real,
+  solo una limitación del entorno de ejecución).
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva para
+Milton: ninguna.
+
+Responsable: Claude (tarea programada diaria de propagación).
+
+## Claude (tarea programada diaria de propagación) — 2026-10-21
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-20 (arriba).
+`git fetch origin main` no mostró anomalías. Desde esa firma hasta el final del documento
+apareció una sola entrada nueva, sin firma propia: "Codex — META historias y carruseles —
+2026-10-20" (commit `f0e40a4d`, insertada cerca del inicio del archivo, en el bloque "HANDOFF
+VIGENTE", no al final — se la ubicó revisando el diff del commit `82fd81e` sobre este documento).
+
+Propagado por documento:
+
+- `INVENTARIO_CONVERSACIONES.md`: se agregó al historial (Parte B) la entrada
+  `CODEX - META HISTORIAS Y CARRUSELES`, verificando con `git branch -a` y `git log` que el
+  trabajo se hizo directo sobre `main` (sin rama propia) — no hay reserva activa que anotar en
+  Parte A.
+- `CONTROLADOR_DE_VERSIONES.md`: sin cambios de esta tarea. Ya existe ahí la entrada "Versión —
+  2026-10-20 — META historias y carruseles" (commit `f0e40a4d`, migración
+  `20261020130000_add_social_opportunity_assets` aplicada, deployment Vercel `9ikVLnzfaDe8nZAMR2JdTarnx5x8`
+  `Ready`), agregada por un proceso ajeno a esta tarea de propagación (commit `15dbad9`, que no
+  tocó `COORDINACION_CLAUDE_CODEX.md`). Cubre todo lo que estaba pendiente en la entrada de
+  origen, así que no se duplicó.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. La entrada de origen es un checkpoint
+  técnico interno (estado de verificación local y pendientes de despliegue), no describe una
+  pantalla, mensaje o flujo nuevo concreto. Además, verificado contra el código actual
+  (`apps/web/src/app/api/social-opportunities/generate/route.ts`,
+  `apps/worker/src/socialPublish.ts` y `.../publish/route.ts`), los carruseles de Instagram de
+  esa misma conversación quedaron deshabilitados globalmente horas después, el mismo
+  2026-10-20 (commits `43d1ad5`, `8022e9b`, `1cc0639`): no se generan nuevas propuestas de
+  carrusel y la publicación se rechaza con error 423. Documentar ahora un carrusel nuevo en el
+  manual contradiría el estado real de producción; Instagram Stories de esa misma conversación
+  sigue activo, pero ya estaba descrito en el manual (línea ~418, "Para Instagram puedes
+  proponer Story, Post...") de una actualización anterior, por lo que no hace falta agregarlo de
+  nuevo.
+- `TO-DO.md`: sin cambios. "Pendiente de la siguiente sesión: aplicar migración, verificar
+  deployment y probar producción" en la entrada de origen no es una idea suelta para más
+  adelante, sino una tarea operativa inmediata, y ya quedó resuelta ese mismo día según
+  `CONTROLADOR_DE_VERSIONES.md` (ver arriba).
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. La mención de "stash recuperable antes de
+  sincronizar e integrar" es una práctica segura normal, no un hallazgo de árbol de git
+  enredado.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva
+para Milton: ninguna — se deja anotado únicamente como contexto (no requiere decisión) que los
+carruseles de Instagram de la conversación "META historias y carruseles" quedaron desactivados
+en producción esa misma tarde del 2026-10-20, sin que los commits que lo hicieron dejaran su
+propia entrada firmada en este documento.
+
+Responsable: Claude (tarea programada diaria de propagación).
+# Task `REVISION-CONTENIDO-BLOGS-20261021` — regla factual para prompts de escritura
+
+- Alcance: prompts del sistema que generan artículos, títulos y FAQs; se excluye expresamente el prompt de 10MWS.
+- Regla durable: no inventar hechos, cifras, fechas, leyes, nombres ni afirmaciones actuales; omitir lo no verificable; exigir fuentes directas, trazables y preferentemente gubernamentales o institucionales serias cuando la afirmación sea externa o sensible.
+- Cambio aplicado: `apps/worker/src/automation/generateCustomArticle.ts`, `apps/worker/src/faqPrompt.ts`, `apps/web/src/lib/title-generation-core.ts`.
+- Commit publicado en `main`: `04910056`.
+- Vercel confirmó Production `Ready`, deployment `6wAi9CqW6tjQTeW9qxpiHPkuUiYd`, sirviendo `04910056`; smoke HTTP público OK.
+- Estado de cierre: VERIFICADO en producción. El commit documental posterior no modifica runtime.
+
+# Codex — MCP: estado explícito de activación HUB→Redes — 2026-10-21
+
+- Task ID: `MCP-HUB-REDES-20261021`. Se confirmó que el HUB/web ya protege las operaciones sociales, pero el MCP anunciaba siempre sus herramientas y prompts sociales según scopes, sin comunicar el entitlement efectivo del HUB.
+- Cambio preparado: `POST /api/mcp` consulta `canUseSocialModule` para el usuario autenticado. Cuando Redes está apagado, `tools/list` y `prompts/list` no exponen la superficie social; `initialize` informa el estado; `tools/call` devuelve una instrucción clara para activar SEO TOTAL Redes desde el HUB. Cuando está encendido, se conserva el catálogo y flujo existentes.
+- Seguridad: la validación de las rutas sociales sigue vigente como segunda barrera; no se sustituyó por catálogo dinámico. No hubo migración, publicación social ni cambio de datos.
+- Evidencia previa: producción pública responde descubrimiento OAuth MCP 200 en ambos productos y capacidades sin token 401. Local: 247/247 pruebas; typecheck detenido por fallo preexistente de variable no usada en `bing-client-change.test.ts`.
+- Commit publicado en `main`: `fd19b682`. Smoke HTTP posterior OK en ambos productos y en los documentos públicos MCP. No se pudo asociar un deployment Vercel al SHA desde la inspección disponible y no hay sesión/token de usuario para probar autenticadamente los dos estados del HUB; queda como verificación pendiente, no como éxito supuesto.
+

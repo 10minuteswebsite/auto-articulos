@@ -1,18 +1,21 @@
 "use client";
 
 import { MENU_LABELS_NUMBERED, MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
-import { HUB_URL, isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
-import { useEffect, useRef, useState } from "react";
+import { isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
 import LogoutButton from "@/components/LogoutButton";
 import type { ProductsInfo } from "@/lib/product-page-gate";
+import { adminConnectionItems } from "@/lib/admin-connections";
 
 interface TabItem {
   id?: string;
   href: string;
   label: string;
+  /** Subtítulo (no clicable) que se pinta justo antes de este elemento dentro del desplegable. */
+  subtitle?: string;
 }
 
 interface TabGroup {
@@ -23,6 +26,8 @@ interface TabGroup {
 }
 
 type NavEntry = TabItem | TabGroup;
+
+const SAN_FRANCISCO_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif';
 
 function isGroup(entry: NavEntry): entry is TabGroup {
   return "group" in entry;
@@ -69,8 +74,6 @@ const BASE_ENTRIES: NavEntry[] = [
     ],
   },
 ];
-
-const HUB_ENTRY: TabItem = { href: HUB_URL, label: "Volver al HUB" };
 
 // VISTA POR PRODUCTOS (proyecto «SEPARACION DE SEO TOTAL», Lote 2). Cuando la
 // cuenta tiene activo el módulo opt-in «vista-productos» (hoy: administradores
@@ -120,7 +123,7 @@ const PRODUCT_ENTRIES: NavEntry[] = [
 // plataforma como Composio sin tocar la página de usuarios.
 const ADMIN_GROUP: TabGroup = {
   group: "administracion",
-  label: "Administración",
+  label: "Admin Artículos",
   items: [
     { href: "/dashboard/usuarios", label: "Usuarios" },
     { href: "/dashboard/composio", label: "Composio" },
@@ -128,9 +131,9 @@ const ADMIN_GROUP: TabGroup = {
   ],
 };
 
-export default function DashboardNav() {
+export default function DashboardNav({ initialIsAdmin = false }: { initialIsAdmin?: boolean }) {
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
   const [disabledModules, setDisabledModules] = useState<string[]>([]);
   const [globalDisabledModules, setGlobalDisabledModules] = useState<string[]>([]);
   const [products, setProducts] = useState<ProductsInfo | null>(null);
@@ -178,14 +181,17 @@ export default function DashboardNav() {
         if (!cancelled) {
           // Los administradores necesitan conservar el menú para supervisar y
           // configurar el sistema aunque su propia cuenta esté incompleta.
-          setIsAdmin(meData?.role === "admin" || Boolean(meData?.isActingAdmin));
+          setIsAdmin(initialIsAdmin || meData?.role === "admin" || Boolean(meData?.isActingAdmin));
           const localDemo = process.env.NEXT_PUBLIC_LOCAL_DEMO === "true";
           const isRedesHost = productOfHost(window.location.hostname) === "REDES";
           setHideForSetup(!isRedesHost && !localDemo && !(step1 && step2 && step3 && step4));
         }
       })
       .catch(() => {
-        if (!cancelled) setHideForSetup(false);
+        if (!cancelled) {
+          setIsAdmin(initialIsAdmin);
+          setHideForSetup(false);
+        }
       });
     return () => {
       cancelled = true;
@@ -199,7 +205,7 @@ export default function DashboardNav() {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        setIsAdmin(data?.role === "admin" || Boolean(data?.isActingAdmin));
+        setIsAdmin(initialIsAdmin || data?.role === "admin" || Boolean(data?.isActingAdmin));
         setProductView(isProductViewEnabled(data?.disabledModules));
         setProducts(data?.products ?? null);
         if (Array.isArray(data?.disabledModules)) {
@@ -210,7 +216,7 @@ export default function DashboardNav() {
         }
       })
       .catch(() => {
-        setIsAdmin(false);
+        setIsAdmin(initialIsAdmin);
         setDisabledModules([]);
         setGlobalDisabledModules([]);
         setProducts(null);
@@ -230,7 +236,7 @@ export default function DashboardNav() {
     } catch {
       setLastProduct(null);
     }
-  }, [pathname]);
+  }, [pathname, initialIsAdmin]);
 
   useEffect(() => {
     setOpen(false);
@@ -260,6 +266,10 @@ export default function DashboardNav() {
   }, [openGroup]);
 
   function isVisible(tab: TabItem): boolean {
+    // La administración es transversal al producto alojado. En un host de
+    // Artículos/Redes no debe desaparecer por el filtro de pantallas de
+    // producto; solo se controla por la identidad administrativa.
+    if (isAdmin && productOfPath(hrefPath(tab.href)) === "ADMIN") return true;
     if (hostProduct !== "COMPARTIDO" && !isVisibleInProduct(productOfPath(hrefPath(tab.href)), hostProduct)) return false;
     if (isAdmin) return true;
     if (tab.id && disabledModules.includes(tab.id)) return false;
@@ -283,8 +293,28 @@ export default function DashboardNav() {
     return tab.label;
   }
 
-  const baseEntries = productView ? PRODUCT_ENTRIES : BASE_ENTRIES;
-  const rawEntries: NavEntry[] = isAdmin ? [...baseEntries, ADMIN_GROUP, HUB_ENTRY] : [...baseEntries, HUB_ENTRY];
+  // En los hosts de producto la aplicación ya está determinada por el dominio:
+  // Redes no puede mostrar el grupo de Artículos, aunque la vista por productos
+  // esté activa para la cuenta. La vista completa por productos solo aplica al
+  // host compartido, donde la persona sí puede cambiar entre ambos productos.
+  const hostProductEntries = hostProduct === "REDES"
+    ? PRODUCT_ENTRIES.filter((entry) => !isGroup(entry) || entry.group === "redes" || entry.group === "configuracion")
+    : hostProduct === "ARTICULOS"
+      ? PRODUCT_ENTRIES.filter((entry) => !isGroup(entry) || entry.group === "articulos" || entry.group === "configuracion")
+      : null;
+  const baseEntries = hostProductEntries ?? (productView ? PRODUCT_ENTRIES : BASE_ENTRIES);
+  const adminGroup: TabGroup = {
+    ...ADMIN_GROUP,
+    label: hostProduct === "REDES" ? "Admin Redes" : "Admin Artículos",
+    items: [
+      ...ADMIN_GROUP.items,
+      ...adminConnectionItems(hostProduct).map((item, index) => (index === 0 ? { ...item, subtitle: "Conexiones principales" } : item)),
+    ],
+  };
+  const rawEntries: NavEntry[] = [
+    ...baseEntries,
+    ...(isAdmin ? [adminGroup] : []),
+  ];
 
   // Un grupo cuyos módulos están todos ocultos desaparece entero, en vez de
   // quedar como un desplegable vacío.
@@ -322,20 +352,20 @@ export default function DashboardNav() {
   }
 
   const linkStyle = (active: boolean): CSSProperties => ({
-    padding: "8px 14px",
-    fontSize: 13,
-    fontWeight: active ? 600 : 500,
+    padding: "8px 10px",
+    fontSize: 14,
+    fontWeight: 400,
     textDecoration: "none",
     color: active ? "#1d1d1f" : "#6e6e73",
-    background: active ? "#f5f5f7" : "transparent",
-    borderRadius: 10,
+    background: active ? "#f2f2f4" : "transparent",
+    borderRadius: 9,
     boxShadow: "none",
     whiteSpace: "nowrap",
     flexShrink: 0,
-    transition: "all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
+    transition: "background 0.15s ease, color 0.15s ease",
     border: "none",
     cursor: "pointer",
-    fontFamily: "inherit",
+    fontFamily: SAN_FRANCISCO_FONT,
   });
 
   const hiddenBadge = (small: boolean) => (
@@ -358,9 +388,109 @@ export default function DashboardNav() {
   // siempre conservan el menú inicial para poder administrar la plataforma.
   if (hideForSetup && !isAdmin) return null;
 
+  const appName = hostProduct === "REDES" ? "SEO Total Redes" : "SEO Total Artículos";
+  const appContext = hostProduct === "REDES" ? "Difusión social" : "Artículos con IA";
+
   return (
-    <nav className="dashboard-nav" style={{ position: "relative", marginTop: 18, marginBottom: 28 }}>
+    <nav
+      className="dashboard-nav app-subbar"
+      aria-label="Navegación de la aplicación"
+      style={{ position: "relative", margin: 0 }}
+    >
       <style>{`
+        .dashboard-nav.app-subbar {
+          min-height: 52px;
+          border-bottom: 1px solid #e7e7eb !important;
+          background: #ffffff !important;
+          border-radius: 0 !important;
+        }
+        .dashboard-nav .app-subbar-inner {
+          width: min(100% - 40px, 1160px);
+          min-height: 52px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          box-sizing: border-box;
+        }
+        .dashboard-nav .app-identity {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+          flex-shrink: 0;
+        }
+        .dashboard-nav .app-brand {
+          color: #1d1d1f;
+          font-size: 15px;
+          font-weight: 700;
+          font-family: ${SAN_FRANCISCO_FONT};
+          letter-spacing: -0.02em;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+        .dashboard-nav .app-context {
+          padding-left: 12px;
+          border-left: 1px solid #d2d2d7;
+          color: #86868b;
+          font-size: 14px;
+          font-weight: 400;
+          font-family: ${SAN_FRANCISCO_FONT};
+          white-space: nowrap;
+        }
+        .dashboard-nav .nav-desktop-row {
+          flex: 1 1 auto;
+          justify-content: flex-end;
+          min-width: 0;
+          margin: 0;
+          padding: 0;
+          border: 0;
+          background: transparent;
+        }
+        .dashboard-nav .nav-link,
+        .dashboard-nav .nav-group-button {
+          padding: 8px 10px !important;
+          color: #6e6e73 !important;
+          font-size: 14px !important;
+          font-weight: 400 !important;
+          font-family: ${SAN_FRANCISCO_FONT} !important;
+          border-radius: 9px !important;
+        }
+        .dashboard-nav .nav-link:hover,
+        .dashboard-nav .nav-group-button:hover {
+          background: #f2f2f4 !important;
+          color: #1d1d1f !important;
+        }
+        .dashboard-nav .nav-link[aria-current="page"],
+        .dashboard-nav .nav-group-button[aria-expanded="true"] {
+          background: #f2f2f4 !important;
+          color: #1d1d1f !important;
+        }
+        .dashboard-nav .nav-admin-button {
+          border: 1px solid #d1d5db !important;
+          background: #ffffff !important;
+          color: #6e6e73 !important;
+          font-size: 14px !important;
+          font-weight: 400 !important;
+          font-family: ${SAN_FRANCISCO_FONT} !important;
+        }
+        .dashboard-nav .nav-admin-button:hover,
+        .dashboard-nav .nav-admin-button[aria-expanded="true"] {
+          border-color: #d1d5db !important;
+          background: #f2f2f4 !important;
+          color: #1d1d1f !important;
+        }
+        .dashboard-nav .nav-dropdown {
+          border-radius: 10px !important;
+          border-color: #e7e7eb !important;
+          box-shadow: 0 8px 24px rgba(29, 29, 31, 0.06) !important;
+        }
+        .dashboard-nav .nav-dropdown-link {
+          border-radius: 8px !important;
+        }
+        .dashboard-nav .nav-mobile-toggle {
+          border-radius: 9px !important;
+        }
         @media (min-width: 1180px) {
           .nav-mobile-toggle { display: none !important; }
           .nav-mobile-menu { display: none !important; }
@@ -371,12 +501,24 @@ export default function DashboardNav() {
           .nav-mobile-menu { border-radius: 12px !important; }
         }
         @media (max-width: 1179px) {
+          .dashboard-nav .app-subbar-inner { flex-wrap: wrap; padding: 10px 0; }
+          .dashboard-nav .app-identity { flex: 1 1 auto; }
           .nav-mobile-toggle { width: 48px !important; margin-left: auto; }
           .nav-mobile-menu { left: auto !important; right: 0 !important; width: min(320px, calc(100vw - 32px)); }
         }
+        @media (max-width: 420px) {
+          .dashboard-nav .app-subbar-inner { width: min(100% - 28px, 620px); }
+          .dashboard-nav .app-context { display: none; }
+        }
       `}</style>
 
-      <button
+      <div className="app-subbar-inner">
+        <div className="app-identity">
+          <Link className="app-brand" href="/dashboard">{appName}</Link>
+          <span className="app-context">{appContext}</span>
+        </div>
+
+        <button
         type="button"
         className="nav-mobile-toggle"
         onClick={() => setOpen((v) => !v)}
@@ -399,14 +541,14 @@ export default function DashboardNav() {
           transition: "all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
           fontFamily: "inherit",
         }}
-      >
+        >
         <span
           style={{ fontSize: 22, lineHeight: 1, opacity: 0.75, flexShrink: 0 }}
           aria-hidden="true"
         >
           {open ? "×" : "☰"}
         </span>
-      </button>
+        </button>
 
       {open && (
         <div
@@ -449,16 +591,18 @@ export default function DashboardNav() {
                     {entry.label}
                   </p>
                   {entry.items.map((tab) => (
-                    <MobileLink
-                      key={tab.href}
-                      tab={tab}
-                      label={displayLabel(tab)}
-                      active={pathname === hrefPath(tab.href)}
-                      hidden={hiddenGlobally(tab)}
-                      onNavigate={() => setOpen(false)}
-                      indented
-                      separatorAfter={tab.id === "oportunidades-redes"}
-                    />
+                    <Fragment key={tab.href}>
+                      {tab.subtitle && <p style={{ margin: "10px 14px 2px", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#86868b" }}>{tab.subtitle}</p>}
+                      <MobileLink
+                        tab={tab}
+                        label={displayLabel(tab)}
+                        active={pathname === hrefPath(tab.href)}
+                        hidden={hiddenGlobally(tab)}
+                        onNavigate={() => setOpen(false)}
+                        indented
+                        separatorAfter={tab.id === "oportunidades-redes"}
+                      />
+                    </Fragment>
                   ))}
                 </div>
               );
@@ -481,10 +625,10 @@ export default function DashboardNav() {
       )}
 
       <div
-        className="nav-desktop-row"
+        className="nav-desktop-row app-nav"
         style={{
           display: "none",
-          gap: 4,
+          gap: 3,
           background: "transparent",
           border: "none",
           borderRadius: 0,
@@ -509,6 +653,7 @@ export default function DashboardNav() {
               >
                 <button
                   type="button"
+                  className={`nav-group-button ${entry.group === "administracion" ? "nav-admin-button" : ""}`}
                   onClick={() => setOpenGroup((prev) => (prev === entry.group ? null : entry.group))}
                   aria-expanded={expanded}
                   aria-haspopup="menu"
@@ -536,28 +681,31 @@ export default function DashboardNav() {
                 {expanded && (
                   <div
                     role="menu"
+                    className="nav-dropdown"
                     style={{
                       position: "absolute",
                       top: "calc(100% + 8px)",
-                      left: 0,
+                      ...(entry.group === "administracion" ? { right: 0 } : { left: 0 }),
                       zIndex: 40,
-                      minWidth: 268,
+                      minWidth: 196,
                       background: "rgba(255, 255, 255, 0.98)",
                       backdropFilter: "blur(24px) saturate(180%)",
                       WebkitBackdropFilter: "blur(24px) saturate(180%)",
-                      border: "1px solid rgba(0, 0, 0, 0.08)",
-                      borderRadius: 14,
-                      boxShadow: "0 12px 36px rgba(0, 0, 0, 0.14)",
-                      padding: 5,
+                      border: "1px solid #e7e7eb",
+                      borderRadius: 10,
+                      boxShadow: "0 8px 24px rgba(29, 29, 31, 0.06)",
+                      padding: 4,
                     }}
                   >
                     {entry.items.map((tab) => {
                       const active = pathname === hrefPath(tab.href);
                       return (
+                        <Fragment key={tab.href}>
+                        {tab.subtitle && <div role="presentation" style={{ padding: "10px 10px 4px", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#86868b" }}>{tab.subtitle}</div>}
                         <Link
-                          key={tab.href}
                           href={tab.href}
                           role="menuitem"
+                          className="nav-dropdown-link"
                           onClick={() => setOpenGroup(null)}
                           title={
                             hiddenGlobally(tab)
@@ -569,13 +717,13 @@ export default function DashboardNav() {
                             alignItems: "center",
                             justifyContent: "space-between",
                             gap: 10,
-                            padding: "10px 12px",
+                            padding: "8px 10px",
                             fontSize: 13,
                             fontWeight: active ? 600 : 500,
                             textDecoration: "none",
                             color: "#1d1d1f",
-                            background: active ? "rgba(0, 0, 0, 0.05)" : "transparent",
-                            borderRadius: 10,
+                            background: active ? "#f2f2f4" : "transparent",
+                            borderRadius: 9,
                             whiteSpace: "nowrap",
                             borderBottom: tab.id === "oportunidades-redes" ? "1px solid #d2d2d7" : undefined,
                             marginBottom: tab.id === "oportunidades-redes" ? 6 : undefined,
@@ -584,6 +732,7 @@ export default function DashboardNav() {
                           <span>{displayLabel(tab)}</span>
                           {hiddenGlobally(tab) && hiddenBadge(true)}
                         </Link>
+                        </Fragment>
                       );
                     })}
                   </div>
@@ -597,6 +746,7 @@ export default function DashboardNav() {
             <Link
               key={entry.href}
               href={entry.href}
+              className="nav-link"
               title={
                 hiddenGlobally(entry)
                   ? "Módulo en mantenimiento / oculto globalmente para usuarios"
@@ -614,6 +764,7 @@ export default function DashboardNav() {
             </Link>
           );
         })}
+      </div>
       </div>
     </nav>
   );
@@ -647,7 +798,7 @@ function MobileLink({
         justifyContent: "space-between",
         padding: indented ? "11px 14px 11px 26px" : "12px 14px",
         fontSize: 14,
-        fontWeight: active ? 600 : 500,
+        fontWeight: 400,
         textDecoration: "none",
         color: "#1d1d1f",
         background: active ? "rgba(0, 0, 0, 0.05)" : "transparent",
@@ -655,6 +806,7 @@ function MobileLink({
         transition: "all 0.15s ease",
         borderBottom: separatorAfter ? "1px solid #d2d2d7" : undefined,
         marginBottom: separatorAfter ? 6 : undefined,
+        fontFamily: SAN_FRANCISCO_FONT,
       }}
     >
       <span>{label}</span>

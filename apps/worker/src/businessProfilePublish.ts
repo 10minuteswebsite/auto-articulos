@@ -6,6 +6,7 @@ import {
   createLocalPost,
   createPostPeerPost,
   extractPostPeerPostUrl,
+  describePostPeerFailure,
 } from "@auto-articulos/shared";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
@@ -117,7 +118,9 @@ export function buildBusinessProfileCandidateWhere(
     status: "success",
     articleUrl: { not: null },
     ...(filterArticleUrl ? { articleUrl: { in: articleUrlVariants(filterArticleUrl) } } : {}),
-    summary: { not: null },
+    // El resumen NO se exige en lo aprobado con Publicar: Oportunidades Redes propone artículos que
+    // pueden no tener resumen guardado, y exigirlo aquí dejaba la propuesta en 1 % para siempre sin
+    // ningún error (el worker nunca la veía). Sin resumen se usa el título (ver processNext...).
     OR: [
       // Aprobada con el botón Publicar: envío «pending» Y su propuesta sigue en cola (una propuesta
       // descartada o cancelada nunca debe enviarse aunque su envío haya quedado «pending»).
@@ -127,6 +130,8 @@ export function buildBusinessProfileCandidateWhere(
       },
       {
         businessProfilePost: null,
+        // El envío automático antiguo sí necesita un resumen real: nadie lo aprobó uno a uno.
+        summary: { not: null },
         run: { user: { businessProfileIntegration: { locationName: { not: null } } } },
       },
     ],
@@ -208,7 +213,7 @@ export async function processNextBusinessProfilePost(
       await enforceSocialDailyLimit(candidate.run.userId, "google-business");
     }
     const finalTitle = candidate.finalTitle ?? candidate.text;
-    const summary = candidate.summary ?? "";
+    const summary = candidate.summary?.trim() || finalTitle;
     const gbpSummary = await buildBusinessProfileSummary(finalTitle, summary);
     // GBP debe usar estrictamente la imagen real del artículo: primero la
     // imagen guardada en la oportunidad y, si falta, la og:image del artículo.
@@ -253,7 +258,9 @@ export async function processNextBusinessProfilePost(
       });
     }
 
-    const rejected = (result as { state?: string; status?: string }).state === "REJECTED" || (result as { status?: string }).status === "failed";
+    const failureReason = POSTPEER_GBP_READY ? describePostPeerFailure(result) : null;
+    const rejected = Boolean(failureReason) || (result as { state?: string }).state === "REJECTED" || (result as { status?: string }).status === "failed";
+    if (rejected) console.error(`Google Business ${candidate.id}: no publicada — ${failureReason ?? "rechazada por Google"}`);
     await prisma.businessProfilePost.update({
       where: { id: post.id },
       data: {
@@ -270,7 +277,7 @@ export async function processNextBusinessProfilePost(
         status: rejected ? "error" : "published",
         progressPercent: 100,
         progressStage: rejected ? "Google Business Profile rechazó la publicación" : "Publicado en Google Business Profile mediante PostPeer",
-        errorLog: rejected ? JSON.stringify(result) : null,
+        errorLog: rejected ? (failureReason ?? JSON.stringify(result)) : null,
         postId: extractPostPeerPostUrl(result) || (result as { id?: string; url?: string }).url || (result as { postId?: string }).postId || (result as { id?: string }).id || null,
         publishedAt: rejected ? null : new Date(),
         finishedAt: new Date(),
@@ -278,6 +285,7 @@ export async function processNextBusinessProfilePost(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    console.error(`Google Business ${candidate.id}: error al publicar — ${message}`);
     await prisma.businessProfilePost.update({
       where: { id: post.id },
       data: { status: "error", googleResponse: message },

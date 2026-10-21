@@ -72,6 +72,11 @@ export const PRODUCT_ROUTES: ReadonlyArray<readonly [string, ProductScope]> = [
   ["/dashboard/usuarios", "ADMIN"],
   ["/dashboard/composio", "ADMIN"],
   ["/dashboard/postpeer", "ADMIN"],
+  ["/dashboard/bing", "ADMIN"],
+  ["/dashboard/linkedin", "ADMIN"],
+  ["/dashboard/tumblr", "ADMIN"],
+  ["/dashboard/pinterest", "ADMIN"],
+  ["/dashboard/bluesky", "ADMIN"],
 ];
 
 /**

@@ -1,12 +1,12 @@
 import type { NextRequest } from "next/server";
-import { applyCookie, clearCookie, diaCeroActive } from "./shared-cookies";
+import { applyCookie, clearCookie, cookieEnvForHost } from "./shared-cookies";
 
-// Hosts de SEO Total: el principal y los dos productos (decisión de Milton
-// 2026-10-02: subdominios en el .com, sin «seototal.»; Mario crea el DNS).
+// ÚNICOS hosts donde se admite un callback OAuth (orden de Milton 2026-10-17):
+// articulos.lasolucionweb.net y redes.lasolucionweb.net. Nada de seototal ni
+// del .com. La lista es fija: ninguna variable de entorno puede ampliarla.
 const DEFAULT_ALLOWED_HOSTS = [
-  "seototal.lasolucionweb.com",
-  "articulos.lasolucionweb.com",
-  "redes.lasolucionweb.com",
+  "articulos.lasolucionweb.net",
+  "redes.lasolucionweb.net",
 ];
 
 /**
@@ -15,13 +15,8 @@ const DEFAULT_ALLOWED_HOSTS = [
  * inició OAuth, sin aceptar un Host header arbitrario ni comodines.
  */
 export function getAllowedOAuthOrigin(request: NextRequest): string | null {
-  const configured = (process.env.SEO_TOTAL_OAUTH_ALLOWED_HOSTS ?? "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-  const allowed = new Set([...DEFAULT_ALLOWED_HOSTS, ...configured]);
   const host = request.nextUrl.host.toLowerCase();
-  return allowed.has(host) ? request.nextUrl.origin : null;
+  return DEFAULT_ALLOWED_HOSTS.includes(host) ? request.nextUrl.origin : null;
 }
 
 export function getOAuthRedirectUri(
@@ -36,34 +31,26 @@ export function getOAuthRedirectUri(
 }
 
 /*
- * RETORNO ÚNICO DE OAUTH (proyecto «SEPARACION DE SEO TOTAL»).
- *
- * Objetivo de Milton: NO volver a tocar ninguna consola de proveedor. Con el
- * interruptor DIA_CERO=on (o OAUTH_CANONICAL_ORIGIN explícito):
- *  - Todos los `connect` (inicien en seototal., articulos. o redes.) le dicen al
- *    proveedor que vuelva a la dirección de SIEMPRE (el origen canónico), que es
- *    la que ya está registrada.
- *  - El host de origen se recuerda en una cookie corta (compartida por todo el
- *    .com) y, al terminar el callback, se devuelve al usuario a ese host.
- * Apagado (sin variables): todo se comporta exactamente como antes.
+ * RETORNO ÚNICO DE OAUTH. Ya no existe un origen canónico por defecto (antes era
+ * seototal.lasolucionweb.com): cada conexión vuelve al host que la inició
+ * (articulos o redes .net). Solo si se define OAUTH_CANONICAL_ORIGIN y su host
+ * está en la lista permitida se usa ese origen; cualquier otro valor se ignora.
  */
-export const DIA_CERO_CANONICAL_ORIGIN = "https://seototal.lasolucionweb.com";
 export const OAUTH_ORIGIN_COOKIE = "oauth_return_origin";
 
 type Env = Record<string, string | undefined>;
 
-/** Origen canónico de los callbacks, o null si el retorno único está apagado. */
+/** Origen canónico de los callbacks, o null (lo normal): se usa el host de la petición. */
 export function canonicalOAuthOrigin(env: Env = process.env): string | null {
   const explicit = env.OAUTH_CANONICAL_ORIGIN?.trim();
-  if (explicit) {
-    try {
-      const url = new URL(explicit);
-      if (url.protocol === "https:") return url.origin;
-    } catch {
-      // valor inválido: se ignora y se decide por DIA_CERO
-    }
+  if (!explicit) return null;
+  try {
+    const url = new URL(explicit);
+    if (url.protocol === "https:" && DEFAULT_ALLOWED_HOSTS.includes(url.host.toLowerCase())) return url.origin;
+  } catch {
+    // valor inválido: se ignora
   }
-  return diaCeroActive(env) ? DIA_CERO_CANONICAL_ORIGIN : null;
+  return null;
 }
 
 /** redirect_uri que se envía al proveedor: canónico si el retorno único está activo; si no, el host de la petición (como siempre). */
@@ -74,16 +61,8 @@ export function oauthCallbackUri(request: { url: string }, path: string, env: En
   return `${url.protocol}//${url.host}${path}`;
 }
 
-function allowedHosts(env: Env): Set<string> {
-  const configured = (env.SEO_TOTAL_OAUTH_ALLOWED_HOSTS ?? "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-  return new Set([...DEFAULT_ALLOWED_HOSTS, ...configured]);
-}
-
-export function isAllowedOAuthHost(host: string, env: Env = process.env): boolean {
-  return allowedHosts(env).has(host.trim().toLowerCase());
+export function isAllowedOAuthHost(host: string, _env: Env = process.env): boolean {
+  return DEFAULT_ALLOWED_HOSTS.includes(host.trim().toLowerCase());
 }
 
 /** Al iniciar la conexión: recuerda de qué host viene el usuario (solo si el retorno único está activo y el host está permitido). */
@@ -130,4 +109,40 @@ export function oauthReturnBase(request: { url: string; headers: Headers }, env:
 export function clearOAuthOrigin(response: Parameters<typeof clearCookie>[0], env: Env = process.env): void {
   if (!canonicalOAuthOrigin(env)) return;
   clearCookie(response, OAUTH_ORIGIN_COOKIE, { httpOnly: true, secure: true, sameSite: "lax", path: "/" }, env);
+}
+
+/**
+ * Limpia todo el estado temporal de un flujo OAuth, tanto en éxito como en
+ * error. El dominio se decide por el host que recibió el callback para no
+ * intentar borrar una cookie .com desde .net (o al revés).
+ */
+export function clearOAuthFlowCookies(
+  response: Parameters<typeof clearCookie>[0],
+  request: { url: string },
+  cookieNames: readonly string[],
+  env: Env = process.env,
+): void {
+  const cookieEnv = cookieEnvForHost(new URL(request.url).hostname, env);
+  for (const cookieName of cookieNames) {
+    clearCookie(response, cookieName, { path: "/" }, cookieEnv);
+  }
+  clearOAuthOrigin(response, cookieEnv);
+}
+
+/*
+ * REDES CONECTADAS POR LOS DOS SITIOS .NET (2026-10-17). Para las conexiones ya
+ * registradas en el proveedor con las direcciones de articulos y redes .net, el
+ * retorno es SIEMPRE el host .net desde el que se inicia (nunca seototal ni .com).
+ */
+export const NET_PRODUCT_HOSTS = ["articulos.lasolucionweb.net", "redes.lasolucionweb.net"] as const;
+export const NET_DEFAULT_ORIGIN = "https://articulos.lasolucionweb.net";
+
+export function isNetProductHost(host: string): boolean {
+  return (NET_PRODUCT_HOSTS as readonly string[]).includes(host.trim().toLowerCase());
+}
+
+/** redirect_uri .net: el host de la petición si es articulos/redes .net; si no, articulos .net. */
+export function netCallbackUri(request: { url: string }, path: string): string {
+  const host = new URL(request.url).host.toLowerCase();
+  return `${isNetProductHost(host) ? `https://${host}` : NET_DEFAULT_ORIGIN}${path}`;
 }

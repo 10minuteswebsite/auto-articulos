@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { friendlyPublishError } from "@auto-articulos/shared/src/friendly-error";
 import { startOfSocialDay } from "@auto-articulos/shared/src/social-day";
 import { MENU_NAMES } from "@/lib/menu-names";
 import MobileInstructions from "@/components/MobileInstructions";
@@ -73,7 +72,6 @@ const NETWORK_ROWS = [
   { key: "pinterest", platform: "pinterest", label: "Pinterest", conexionId: "pinterest", group: "otras" },
   { key: "tumblr", platform: "tumblr", label: "Tumblr", conexionId: "tumblr", group: "otras" },
   { key: "bluesky", platform: "bluesky", label: "Bluesky", conexionId: "bluesky", group: "otras" },
-  { key: "blogger", platform: "blogger", label: "Blogger", conexionId: "blogger", group: "otras" },
   { key: "googleBusiness", platform: "google-business", label: "Google Business Profile", conexionId: "business-profile", group: "otras" },
   { key: "x", platform: "x", label: "X (Twitter)", conexionId: null, group: "otras" },
 ] as const;
@@ -137,7 +135,7 @@ function limitFormatOf(rowKey: string, rowPlatform: string): string {
 
 const GROUP_CARDS: ReadonlyArray<{ id: NetworkGroup; title: string; hint: string }> = [
   { id: "meta", title: "META", hint: "Instagram, Threads y Facebook" },
-  { id: "otras", title: "Otras redes y blogs", hint: "LinkedIn, Pinterest, Tumblr, Bluesky, Blogger y Google Business" },
+  { id: "otras", title: "Otras redes y blogs", hint: "LinkedIn, Pinterest, Tumblr, Bluesky y Google Business" },
 ];
 
 export default function OportunidadesRedesPage() {
@@ -172,7 +170,6 @@ export default function OportunidadesRedesPage() {
       setOpenGroup(grupo);
     }
   }, []);
-  const [previewModal, setPreviewModal] = useState<{ loading: boolean; imageUrl: string | null; imageBase64: string | null; platform: string; title: string } | null>(null);
 
   useEffect(() => {
     loadOpportunities(true);
@@ -446,37 +443,11 @@ export default function OportunidadesRedesPage() {
       setDeletingAll(false);
     }
   }
-
-  async function handlePreview(opp: SocialOpportunity) {
-    setPreviewModal({ loading: true, imageUrl: null, imageBase64: null, platform: opp.platform, title: opp.articleTitle });
-    try {
-      const res = await fetch("/api/social-opportunities/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ summary: opp.articleTitle, platform: opp.platform }),
-      });
-      const data = await res.json();
-      setPreviewModal({
-        loading: false,
-        imageUrl: data.imageUrl || null,
-        imageBase64: data.imageBase64 || null,
-        platform: opp.platform,
-        title: opp.articleTitle,
-      });
-    } catch {
-      setPreviewModal({ loading: false, imageUrl: null, imageBase64: null, platform: opp.platform, title: opp.articleTitle });
-    }
-  }
-
-  const pendingList = opportunities.filter((o) => o.status === "pending" && !(storiesUnavailable.instagram && o.platform === "instagram-story") && !(storiesUnavailable.facebook && o.platform === "facebook-story"));
+  const pendingList = opportunities.filter((o) => o.status === "pending" && o.platform !== "instagram-carousel" && !(storiesUnavailable.instagram && o.platform === "instagram-story") && !(storiesUnavailable.facebook && o.platform === "facebook-story"));
 
   if (loading || connectionsLoading) return null;
 
   const groupPending = openGroup ? pendingList.filter((o) => groupOfPlatform(o.platform) === openGroup) : pendingList;
-  // Publicaciones que fallaron en las últimas 24 h: se muestran con el motivo y un reintento,
-  // en vez de desaparecer de la pantalla.
-  const failedCutoff = Date.now() - 24 * 60 * 60 * 1000;
-  const failedList = opportunities.filter((o) => o.status === "error" && (!openGroup || groupOfPlatform(o.platform) === openGroup) && new Date(o.finishedAt ?? o.createdAt).getTime() > failedCutoff);
   const openCard = GROUP_CARDS.find((card) => card.id === openGroup);
   const groupRows = NETWORK_ROWS.filter((row) => row.group === openGroup && activeNetworks[row.key]);
   const groupConnectedCount = groupRows.filter((row) => connectedNetworks[row.key]).length;
@@ -484,7 +455,7 @@ export default function OportunidadesRedesPage() {
   // Pantalla inicial: solo las tarjetas (mismo estándar que las de Inicio). El resto aparece al entrar.
   if (!openGroup) {
     return (
-      <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto" }}>
+      <div className="oportunidades-redes-page" style={{ maxWidth: "none", margin: 0 }}>
         <div style={{ marginTop: 20, marginBottom: 20 }}>
           <h1 style={{ fontSize: 30, fontWeight: 600, color: "#1d1d1f", margin: "0 0 6px", letterSpacing: "-0.03em", lineHeight: 1.15 }}>{MENU_NAMES.redes}</h1>
           <p style={{ margin: "0 0 16px", fontSize: 15, color: "#6e6e73" }}>Elige dónde publicar.</p>
@@ -524,7 +495,7 @@ export default function OportunidadesRedesPage() {
     opportunities.filter((o) => o.status === "published" && o.publishedAt && new Date(o.publishedAt).getTime() >= dayStart && o.platform.trim().toLowerCase() === limitFormatOf(rowKey, rowPlatform)).length;
 
   return (
-    <div className="oportunidades-redes-page" style={{ maxWidth: 1120, margin: "0 auto", paddingBottom: 40 }}>
+    <div className="oportunidades-redes-page" style={{ maxWidth: "none", margin: 0, paddingBottom: 40 }}>
       {/* Cabecera */}
       <div style={{ padding: "8px 0 24px" }}>
         <button
@@ -688,23 +659,6 @@ export default function OportunidadesRedesPage() {
             )}
           </div>
 
-          {failedList.length > 0 && (
-            <div style={{ borderTop: "1px solid #e5e5ea", padding: "14px 0 4px" }}>
-              <h3 style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: "#ff3b30" }}>Publicaciones con error ({failedList.length})</h3>
-              {failedList.map((opp) => (
-                <div key={opp.id} style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", padding: "10px 0" }}>
-                  <div style={{ flex: "1 1 340px", minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "#1d1d1f" }}>{platformLabel(opp.platform)} · {opp.articleTitle}</div>
-                    <div style={{ fontSize: 13, color: "#ff3b30", marginTop: 2 }}>{friendlyPublishError(opp.errorLog, platformLabel(opp.platform))}</div>
-                  </div>
-                  <button type="button" onClick={() => handlePublishOne(opp)} disabled={publishingId === opp.id} style={disabledStyle(compactPrimary, publishingId === opp.id)}>
-                    {publishingId === opp.id ? "Reintentando..." : "Reintentar"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
           {groupPending.length === 0 ? (
             <div style={{ borderTop: "1px solid #e5e5ea", padding: "28px 0", color: "#6e6e73", fontSize: 14 }}>
               Aún no hay propuestas. Pulsa <strong style={{ color: "#1d1d1f" }}>Crear propuestas</strong> y el sistema las prepara a partir de tus artículos.
@@ -718,7 +672,6 @@ export default function OportunidadesRedesPage() {
             <div>
               {groupPending.map((opp) => {
                 const editing = editingId === opp.id;
-                const canPreview = opp.platform.startsWith("instagram") || opp.platform === "threads" || opp.platform === "linkedin";
                 return (
                   <div key={opp.id} className="rp-item" style={{ borderTop: "1px solid #e5e5ea", padding: "18px 0", display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div style={{ flex: "1 1 340px", minWidth: 0 }}>
@@ -750,7 +703,6 @@ export default function OportunidadesRedesPage() {
                       ) : (
                         <button type="button" onClick={() => setEditingId(opp.id)} style={compactSecondary}>Editar</button>
                       )}
-                      {canPreview && <button type="button" onClick={() => handlePreview(opp)} style={compactSecondary}>Vista previa</button>}
                       <button type="button" onClick={() => handleSkipOne(opp)} style={compactDanger}>Descartar</button>
                     </div>
                   </div>
@@ -852,70 +804,7 @@ export default function OportunidadesRedesPage() {
         </div>
       )}
 
-      {/* Modal de Preview */}
-      {previewModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
-            backdropFilter: "blur(5px)",
-            WebkitBackdropFilter: "blur(5px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-            padding: 16,
-          }}
-          onClick={() => setPreviewModal(null)}
-        >
-          <div
-            style={{
-              background: "rgba(255, 255, 255, 0.96)",
-              borderRadius: 22,
-              padding: 24,
-              maxWidth: 480,
-              width: "100%",
-              boxShadow: "0 24px 80px rgba(0, 0, 0, 0.15)",
-              border: "1px solid rgba(0, 0, 0, 0.08)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="eyebrow" style={{ margin: "0 0 4px" }}>Vista Previa</p>
-            <h3 style={{ color: "#1d1d1f", margin: "0 0 12px 0", fontSize: 18, fontWeight: 600 }}>
-              {previewModal.title}
-            </h3>
 
-            <div style={{ background: "#f5f5f7", borderRadius: 12, overflow: "hidden", minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {previewModal.loading ? (
-                <div className="muted" style={{ textAlign: "center", padding: 30, fontSize: 13 }}>
-                  Generando preview...
-                </div>
-              ) : previewModal.imageUrl || previewModal.imageBase64 ? (
-                <img
-                  src={previewModal.imageBase64 ? `data:image/png;base64,${previewModal.imageBase64}` : previewModal.imageUrl!}
-                  alt="Preview"
-                  style={{ width: "100%", maxHeight: 380, objectFit: "contain" }}
-                />
-              ) : (
-                <div style={{ color: "#ff3b30", textAlign: "center", padding: 30, fontSize: 13 }}>
-                  No se pudo generar el preview
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
-              <button
-                onClick={() => setPreviewModal(null)}
-                className="secondary"
-                style={{ ...secondaryButtonStyle, ...uniformButtonSize }}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

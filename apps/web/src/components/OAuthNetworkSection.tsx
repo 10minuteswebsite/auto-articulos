@@ -197,7 +197,8 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
   if (!allowed) return null;
 
   const dest = config.destination;
-  const configured = Boolean(settings?.configured);
+  // Threads usa PostPeer; no depende de la antigua ruta de settings Meta.
+  const configured = config.id === "threads" ? true : Boolean(settings?.configured);
   const connected = Boolean(connection?.connected);
   const expired = connected && Boolean(connection?.isExpired);
   const savedDestId: string | null = dest ? connection?.[dest.savedIdKey] || null : null;

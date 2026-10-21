@@ -99,6 +99,7 @@ export async function processMcpRunTitle(
 
   const effectiveLanguage =
     (run.contentLanguage && run.contentLanguage.trim()) ||
+    (run.category.contentLanguage && run.category.contentLanguage.trim()) ||
     (run.user.contentLanguage && run.user.contentLanguage.trim());
   if (!effectiveLanguage) {
     await markTitleError(
@@ -115,7 +116,12 @@ export async function processMcpRunTitle(
 
   const claimed = await prisma.title.updateMany({
     where: { id: nextTitle.id, status: "pending" },
-    data: { status: "processing", attempts: { increment: 1 } },
+    data: {
+      status: "processing",
+      attempts: { increment: 1 },
+      // Señal de vida desde el reclamo (ver stuckTitle.ts).
+      processedAt: new Date(),
+    },
   });
   if (claimed.count !== 1) return false;
 

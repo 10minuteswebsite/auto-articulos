@@ -1,16 +1,12 @@
 /*
- * COOKIES COMPARTIDAS ENTRE SUBDOMINIOS (proyecto «SEPARACION DE SEO TOTAL»).
+ * COOKIES COMPARTIDAS ENTRE SUBDOMINIOS.
  *
- * El Día Cero SEO Total responde en tres direcciones del mismo `.com`:
- * seototal.lasolucionweb.com, articulos.lasolucionweb.com y redes.lasolucionweb.com.
- * Para que quien inicia sesión en una siga identificado en las otras (y para que
- * el retorno de una conexión OAuth, que llega siempre a la dirección de siempre,
- * reconozca al usuario), la cookie de sesión debe valer para todo el `.com`.
- *
- * INTERRUPTOR ÚNICO DEL DÍA CERO: la variable de entorno DIA_CERO=on (activa el
- * dominio «.lasolucionweb.com»). También vale SHARED_COOKIE_DOMAIN explícito.
- * Sin ninguna (o con un valor inválido) TODO funciona exactamente como antes: cookie
- * ligada al host. Es lógica pura y válida para el runtime Edge (middleware).
+ * Para que quien inicia sesión en una dirección siga identificado en otras de la
+ * misma familia (`.lasolucionweb.net`), la cookie puede llevar un dominio
+ * compartido. Se activa solo con la variable SHARED_COOKIE_DOMAIN explícita (o con
+ * el dominio que fija `cookieEnvForHost` en el callback del HUB). Sin ninguna (o
+ * con un valor inválido) TODO funciona exactamente como siempre: cookie ligada al
+ * host. Es lógica pura y válida para el runtime Edge (middleware).
  *
  * Problema que resuelve el doble Set-Cookie: una cookie con Domain y otra
  * ligada al host con el MISMO nombre conviven en el navegador, y el servidor
@@ -28,23 +24,30 @@ export interface SharedCookieOptions {
 
 type Env = Record<string, string | undefined>;
 
-/** Dominio por defecto del Día Cero (los tres subdominios de SEO Total viven bajo él). */
-export const DIA_CERO_COOKIE_DOMAIN = ".lasolucionweb.com";
-
-/** ¿Está activo el interruptor único del Día Cero (variable DIA_CERO=on)? */
-export function diaCeroActive(env: Env = process.env): boolean {
-  const raw = env.DIA_CERO?.trim().toLowerCase();
-  return raw === "on" || raw === "1" || raw === "true";
+/**
+ * Selecciona el dominio compartido de la familia de hosts que está emitiendo
+ * la cookie. El HUB puede abrir Redes en `.net` o en `.com`; un servidor `.net`
+ * no puede fijar una cookie para `.com` porque el navegador la rechaza.
+ */
+export function cookieEnvForHost(hostname: string, env: Env = process.env): Env {
+  const host = hostname.trim().toLowerCase().split(":", 1)[0];
+  if (host.endsWith(".lasolucionweb.net")) {
+    return { ...env, SHARED_COOKIE_DOMAIN: ".lasolucionweb.net" };
+  }
+  if (host.endsWith(".lasolucionweb.com")) {
+    return { ...env, SHARED_COOKIE_DOMAIN: ".lasolucionweb.com" };
+  }
+  return env;
 }
 
 /**
  * Dominio compartido válido (empieza por punto y tiene al menos dos etiquetas) o undefined.
- * Prioridad: SHARED_COOKIE_DOMAIN explícito; si no, DIA_CERO=on usa el dominio por defecto.
+ * Solo vale SHARED_COOKIE_DOMAIN explícito; sin él, cookie ligada al host.
  */
 export function sharedCookieDomain(env: Env = process.env): string | undefined {
   const raw = env.SHARED_COOKIE_DOMAIN?.trim().toLowerCase();
   if (raw && /^\.[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(raw)) return raw;
-  return diaCeroActive(env) ? DIA_CERO_COOKIE_DOMAIN : undefined;
+  return undefined;
 }
 
 export function serializeCookie(

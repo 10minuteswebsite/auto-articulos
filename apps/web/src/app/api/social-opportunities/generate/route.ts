@@ -22,6 +22,9 @@ import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consu
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
+// Bloqueo global temporal: los carruseles permanecen en historial, pero no se generan nuevas propuestas.
+const INSTAGRAM_CAROUSELS_ENABLED = false;
+
 type ArticleCandidate = {
   id: string;
   finalTitle: string | null;
@@ -541,7 +544,7 @@ export async function POST(request: Request) {
     });
     const requestedNetworks = Array.isArray(body.networks)
       ? body.networks.filter((network) => network === "threads" || network === "x" || network === "linkedin" || network === "instagram" || network === "facebook-page" || network === "pinterest" || network === "tumblr" || network === "bluesky" || network === "blogger" || network === "google-business")
-      : ["threads", "x", "linkedin", "instagram", "facebook-page", "pinterest", "tumblr", "bluesky", "blogger", "google-business"];
+      : ["threads", "x", "linkedin", "instagram", "facebook-page", "pinterest", "tumblr", "bluesky", "google-business"];
 
     const integrations: string[] = [];
     if (requestedNetworks.includes("threads") && connected.threads) {
@@ -579,6 +582,7 @@ export async function POST(request: Request) {
       if ((await getSocialHostContext()).redesHost || user?.allowInstagramPublishing) {
         const hasComposioInstagram = Boolean((connected as { hideInstagramStories?: boolean }).hideInstagramStories);
         if (!hasComposioInstagram) integrations.push("instagram-story");
+        if (INSTAGRAM_CAROUSELS_ENABLED) integrations.push("instagram-carousel");
         integrations.push("instagram-post");
       }
     }
@@ -587,8 +591,8 @@ export async function POST(request: Request) {
     // por día, no cuántas propuestas se crean (decisión de Milton, 2026-10-11).
     // Se comprueba al pulsar «Publicar» (publish/route.ts) y, como respaldo, en
     // el worker. Cada pulsación crea una propuesta por red.
-    const integrationsWithinLimit: string[] = [...integrations];
-    const remainingByPlatform = new Map<string, number>(integrations.map((platform) => [platform, 1]));
+    const integrationsWithinLimit: string[] = integrations.filter((platform) => platform !== "instagram-carousel");
+    const remainingByPlatform = new Map<string, number>(integrationsWithinLimit.map((platform) => [platform, 1]));
 
     if (integrationsWithinLimit.length === 0) {
       console.warn("[social-opportunities/generate] red solicitada sin conexión efectiva", {

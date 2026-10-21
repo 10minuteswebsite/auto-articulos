@@ -2,15 +2,30 @@
 
 import { secondaryButtonStyle } from "@/components/dashboard-ui";
 
-export default function LogoutButton() {
+export default function LogoutButton({
+  label = "Cerrar sesión",
+  redirectTo = "/login",
+  className,
+}: {
+  label?: string;
+  redirectTo?: string;
+  className?: string;
+} = {}) {
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/login";
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+    } finally {
+      window.location.href = redirectTo;
+    }
   }
 
   return (
-    <button onClick={handleLogout} style={secondaryButtonStyle}>
-      Cerrar sesión
+    <button type="button" className={className} onClick={handleLogout} style={secondaryButtonStyle}>
+      {label}
     </button>
   );
 }

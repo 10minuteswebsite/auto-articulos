@@ -331,3 +331,45 @@ workflow — esto es solo la señal, aditiva, para que quede visible junto al re
 esto no se resuelva (declarando las columnas del HUB en `schema.prisma` de `main`, consistente
 con lo que la base real ya tiene), nadie debería correr `migrate.yml` con `accept_data_loss` o
 `force_sync` activados.** Queda para que Milton decida cómo y cuándo reconciliar el schema.
+
+### Dos escrituras concurrentes sobre `main` revirtieron temporalmente la subbarra de Artículos — 2026-10-16 (ya resuelto por la propia conversación, sin acción del Reparador)
+
+Agregado por la tarea programada diaria de propagación (corrida 2026-10-17) a partir de
+`COORDINACION_CLAUDE_CODEX.md` ("Addendum — regresión concurrente detectada y corregida",
+dentro de "Cierre — tipografía del menú de aplicación" — 2026-10-16).
+
+Mientras se cerraba la paridad visual de `DashboardNav` (Artículos vs. Superlinks), un proceso
+paralelo publicó el commit `babd61c1` directamente en `main`, revirtiendo la subbarra de azul a
+blanco/gris; ese commit y su deployment (`dpl_G5w46PMjrfE5Eyt2g472jUP2cFEF`) quedaron
+documentados como regresión, no como verdad. Se corrigió hacia delante (sin revertir ni usar
+`reset`) con `82d33d878efabacce5b2af68eb4277c81ae18f0f`, deployment
+`dpl_6FBpAqVmxU39LjiTZGquBcwT9Fq7`. Una segunda escritura concurrente (`0f7288dc`) repitió el
+mismo cambio antiguo; se corrigió de nuevo hacia delante con
+`964444a576b9f1e49bcf568981370f03b6769064`, deployment `dpl_Ehik784nNKkRoTsaoMUH9FBG7gsL`.
+
+Mismo patrón que otros hallazgos de este documento: más de una conversación escribiendo sobre
+`main` casi al mismo tiempo y sobre el mismo archivo. Ya fue resuelto por la propia conversación
+(corrección hacia delante, sin `reset` ni fuerza) y verificado en producción; el Reparador no
+tuvo que intervenir. Se deja señalado solo para que quede visible junto al resto de incidentes
+de árbol compartido.
+
+### Comando corrió en la carpeta principal de Milton y empujó una rama de diagnóstico al repo público — 2026-10-17 (ya reparado por la propia conversación, sin acción del Reparador)
+
+Agregado por la tarea programada diaria de propagación (corrida 2026-10-18) a partir de
+`COORDINACION_CLAUDE_CODEX.md` ("Claude — CIERRE: Google Business y cuidado de tokens —
+2026-10-17", `GMB-CIERRE-20261016`).
+
+Un comando de esa conversación corrió, por error, en la carpeta principal de trabajo de Milton
+(no en un worktree aislado) y creó la rama `diag/gmb-readonly` con los cambios sin guardar que
+hubiera en ese momento en esa carpeta; esa rama se subió a GitHub (repositorio público) y quedó
+visible ahí durante unos minutos. La propia conversación lo detectó y lo revirtió: restauró la
+carpeta de Milton con `git reset --mixed` (mismos 9 archivos que tenía antes) y borró la rama
+tanto local como remota.
+
+Mismo patrón que otros hallazgos de este documento (trabajo fuera de un worktree aislado,
+tocando la carpeta principal de Milton), con un agravante adicional: al ser un repositorio
+público, lo que hubiera en esos 9 archivos pudo verse públicamente mientras la rama existió. La
+propia entrada de origen ya deja la duda señalada para Milton ("si alguno es sensible, rotar o
+revisar"); esta tarea de propagación no la repite como una nueva duda, solo la deja visible aquí
+también, junto al resto de incidentes de árbol compartido, por si Milton quiere revisar qué
+contenían esos 9 archivos.

@@ -4,6 +4,7 @@ import { listBingSites } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
 import { getBingTokenForIntegration } from "@/lib/bing-token";
 import { autoConfigureBing, checkSitemapReachable, defaultSitemapUrl, type SitemapCheck } from "@/lib/bing-sitemap";
+import { integrationNeedsBingReconnect } from "@/lib/bing-client-change";
 import { validateAndRegisterTrialDomain } from "@/lib/domain-validation";
 
 async function integrationFor(userId: string) {
@@ -15,6 +16,7 @@ export async function GET() {
   const userId = await getCurrentUserId();
   const integration = await integrationFor(userId);
   if (!integration) return NextResponse.json({ connected: false, sites: [] });
+  const reconectarPorCambio = await integrationNeedsBingReconnect(integration.id);
   try {
     const accessToken = await getBingTokenForIntegration(integration);
     const sites = await listBingSites(accessToken);
@@ -39,6 +41,7 @@ export async function GET() {
 
     return NextResponse.json({
       connected: true,
+      reconectarPorCambio,
       siteUrl,
       sitemapUrl,
       sitemapCheck,
@@ -50,6 +53,7 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json({
       connected: true,
+      reconectarPorCambio,
       siteUrl: integration.siteUrl,
       sitemapUrl: integration.sitemapUrl,
       sites: [],

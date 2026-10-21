@@ -23,18 +23,24 @@ import type { ToolDef } from "./shared";
  */
 export const TOOLS: ToolDef[] = [...OPPORTUNITY_TOOLS, ...ACCOUNT_TOOLS, ...CONTENT_GENERATION_TOOLS, ...GUIDANCE_TOOLS, ...HISTORY_TOOLS, ...PREFERENCE_TOOLS, ...SOCIAL_TOOLS, ...SOCIAL_ACTION_TOOLS, ...WRITING_STYLE_TOOLS, ...ACTION_TOOLS, ...INDEXING_TOOLS];
 
+/** Tools whose availability follows the HUB's Redes product entitlement. */
+export const SOCIAL_TOOL_NAMES = new Set([
+  ...SOCIAL_TOOLS.map((tool) => tool.name),
+  ...SOCIAL_ACTION_TOOLS.map((tool) => tool.name),
+]);
+
 const duplicateNames = TOOLS.map((tool) => tool.name).filter((name, index, all) => all.indexOf(name) !== index);
 if (duplicateNames.length > 0) {
   throw new Error(`Catálogo MCP inválido: tools duplicadas (${Array.from(new Set(duplicateNames)).join(", ")}).`);
 }
 
-export function findTool(name: string, scopes: string[]) {
-  return TOOLS.find((tool) => tool.name === name && scopes.includes(tool.requiredScope));
+export function findTool(name: string, scopes: string[], socialEnabled = true) {
+  return TOOLS.find((tool) => tool.name === name && scopes.includes(tool.requiredScope) && (socialEnabled || !SOCIAL_TOOL_NAMES.has(tool.name)));
 }
 
 /** Forma que espera `tools/list` (sin el handler, que es interno). */
-export function listToolsPayload(scopes: string[]) {
-  return TOOLS.filter((tool) => scopes.includes(tool.requiredScope)).map(({ name, title, description, inputSchema, annotations }) => ({
+export function listToolsPayload(scopes: string[], socialEnabled = true) {
+  return TOOLS.filter((tool) => scopes.includes(tool.requiredScope) && (socialEnabled || !SOCIAL_TOOL_NAMES.has(tool.name))).map(({ name, title, description, inputSchema, annotations }) => ({
     name,
     title,
     description,

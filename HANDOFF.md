@@ -2,6 +2,17 @@
 
 Última actualización: 2026-09-08, por Claude.
 
+## Cambio publicado — estilo problema-solución por defecto (19/10/2026, Codex)
+
+- Se agregó la migración `20261019190000_set_problem_solution_default_prompt`, que
+  busca el prompt existente `GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION` y asigna su
+  `id` a todas las cuentas, sustituyendo STANDARD y cualquier estilo anterior.
+- La migración falla si el prompt no existe; no crea ni duplica prompts.
+- Commit `e0b6cf8a` en `main`; deployment Vercel `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ`
+  terminó en `success`. El workflow `39340883977` aplicó correctamente la
+  migración mediante `safe_problem_solution_default_prompt`. No se ejecutó
+  `db push`. Verificación posterior: `/login` 200 y `/api/me` 401 sin sesión.
+
 ## Reparación de build web — 2026-10-06
 
 En la rama aislada `codex/reparar-typecheck-web-20261006` se corrigieron dos

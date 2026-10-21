@@ -41,6 +41,9 @@ model User {
   // permitir añadir plataformas sin otra migración; todas empiezan en 1.
   socialDailyLimits                 Json          @default("{}")
   maxTitlesPerBatch                 Int           @default(20)
+  // Preferencia por defecto para nuevos lotes: true evita solicitar
+  // indexación automática; cada ejecución aún puede ajustarla.
+  disableIndexing                    Boolean       @default(false)
   // Encontrado el 2/8/2026: usuarios en Europa (ej. Lidia Capdevila) tienen
   // su cuenta real en 10minutesWebsite.site en vez de .net. El login/las
   // acciones generales funcionan igual en ambos, pero la generación de
@@ -142,15 +145,9 @@ model User {
   allowBloggerPublishing            Boolean       @default(false)
   // Control de acceso a publicación en Google Business Profile mediante PostPeer.
   allowGoogleBusinessPublishing     Boolean       @default(false)
-  // Control de acceso al generador de imágenes con IA para redes sociales
-  // (20/8/2026, "Creador de Imágenes para Redes Sociales"). Solo el admin
-  // puede activarlo por usuario — es un upsell, no un reemplazo forzado.
-  // Default: false = se sigue usando la imagen OG del artículo tal cual,
-  // exactamente como hoy. En true, Instagram Story y Reel-image generan la
-  // imagen con IA (partiendo de la OG + logo/foto del usuario) en vez de
-  // usar la OG sin tocar. No afecta Carrusel/Infografía (ya generan imagen
-  // propia, no usan la OG).
-  aiImageGenerationEnabled          Boolean       @default(false)
+  // El generador de imágenes IA está habilitado para todas las cuentas,
+  // incluidas las nuevas. No se apaga desde la ficha individual.
+  aiImageGenerationEnabled          Boolean       @default(true)
   // Foto de perfil del usuario y logo de su negocio/marca.
   // Se usan como elementos visuales en las publicaciones de redes sociales
   // (carruseles, reels, infografías). Subidas como URLs de Vercel Blob.
@@ -797,6 +794,7 @@ model Category {
   // Dominio confirmado para esta categoría. Vacío conserva compatibilidad
   // con categorías históricas aún no vinculadas.
   siteDomain String   @default("")
+  contentLanguage String?
   updatedAt  DateTime @updatedAt
   createdAt  DateTime @default(now())
 
@@ -1097,6 +1095,21 @@ model SocialOpportunity {
 
   user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   title Title? @relation(fields: [titleId], references: [id], onDelete: SetNull)
+  assets SocialOpportunityAsset[]
+}
+
+model SocialOpportunityAsset {
+  id             String           @id @default(cuid())
+  opportunityId  String
+  position       Int
+  assetType      String           // "image" | "audio"
+  url            String
+  source         String?
+  createdAt      DateTime         @default(now())
+  opportunity    SocialOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, position, assetType])
+  @@index([opportunityId])
 }
 
 // Registro global y durable de mejoras y arreglos visibles para los usuarios.

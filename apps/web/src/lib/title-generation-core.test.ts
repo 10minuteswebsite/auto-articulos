@@ -109,6 +109,25 @@ test("buildMessages funciona aunque el prompt no use ninguna variable", () => {
   assert.match(user, /<titulos_a_evitar>\n\(ninguno\)\n<\/titulos_a_evitar>/);
 });
 
+test("buildMessages impone verificación factual sobre el prompt administrable", () => {
+  const { system } = buildMessages("Escribe títulos sobre {{tema}}.", {
+    categoryName: "Salud",
+    languageLabel: "Español",
+    inputs: {
+      clienteTipo: "familias",
+      tema: "seguros de salud",
+      deseoCliente: "informarse",
+      ubicacionClientes: "Florida",
+      ubicacionNegocio: "Miami",
+    },
+    titlesToAvoid: [],
+    count: 3,
+  });
+
+  assert.match(system, /VERIFICACIÓN FACTUAL/);
+  assert.match(system, /fuente oficial o institucional seria/);
+});
+
 test("buildMessages NO reinterpreta variables dentro de los valores (inyección)", () => {
   const evil: TitleGenerationInputs = {
     ...inputs,

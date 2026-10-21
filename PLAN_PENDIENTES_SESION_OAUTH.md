@@ -1,0 +1,116 @@
+# HANDOFF VIGENTE — 2026-10-19
+
+Este bloque prevalece sobre las notas históricas posteriores del archivo.
+
+- Harness aplicado: producción verificada como verdad funcional; GitHub como memoria durable; rama única `main`; sin ramas ni worktrees.
+- Punto 4 de sesión/logout: COMPLETADO y verificado con sesión real.
+- Auto Artículos: código `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`, Vercel `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`, `READY`.
+- HUB: puente final `7e4628cba95564736d3d18f3f7e7574533e72077`, Cloudflare `73a6fbcd`, 100% en producción.
+- El logout del HUB recorre las familias `.com` y `.net`; después de la prueba, Auto Artículos llevó a `/login`, el HUB llevó a Auth0 login y no quedaron cookies de sesión. Solo permanecieron `_fbp` y `_gcl_au`; no se leyeron valores.
+- No modificar de nuevo el puente de logout salvo que aparezca nueva evidencia productiva.
+
+## Siguiente trabajo autorizado
+
+1. Reconexiones OAuth reales, empezando por Bing.
+2. Auditoría manual de URLs en las consolas externas.
+3. Registrar resultados y limitaciones en los documentos Harness.
+
+Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELINE.md` antes de programar.
+
+# Plan actual — Pendientes de sesión y OAuth
+
+Fecha de actualización: 2026-10-19
+Repositorio: 10minuteswebsite/auto-articulos
+Rama: main
+Base funcional: producción verificada.
+
+## Decisión operativa vigente
+
+Mantener arquitectura mixta:
+
+- `.com`: dominio canónico del HUB y de la sesión.
+- `.net`: aplicación independiente por producto, con su propia sesión.
+- No compartir cookies entre `.com` y `.net`.
+- No añadir `.net` globalmente a la allowlist OAuth.
+
+## Estado
+
+### 1. Limpieza de estado OAuth en errores — COMPLETADO
+
+- Corregidos Twitter/X, LinkedIn, Pinterest, Blogger y Bing.
+- Tumblr usa pending server-side y no necesitaba cookie state.
+- Threads, Instagram, Search Console, Analytics y Business Profile no tienen en este repo un callback con esa cookie.
+- Código: `849ba35bd4bb7f77d3f79063d12495a37075f44d`.
+- Producción: `dpl_AWAZPEAmvnZgoVUN5yxJUox6bDhQ`, `READY`.
+- Vercel confirmó compilación y typecheck.
+- La autorización real con una cuenta sigue sin ejecutarse.
+
+## Pendientes restantes
+
+### 2. Verificar reconexiones OAuth reales
+
+Empezar por Bing y después los proveedores prioritarios:
+
+1. Iniciar conexión con una sesión autorizada.
+2. Completar autorización.
+3. Confirmar retorno al producto correcto.
+4. Confirmar conexión guardada.
+5. Probar cancelación/error.
+6. Confirmar que no queda state temporal.
+
+### 3. Verificar las consolas externas
+
+Comparar las URLs registradas en Google, Bing, Threads, LinkedIn, Pinterest, X, Blogger e Instagram/Facebook con las URLs que usa el código publicado. No cambiar nada sin evidencia de discrepancia.
+
+### 4. Confirmar logout iniciado exclusivamente desde el HUB
+
+Comprobar si el botón de logout del HUB también invalida la sesión de `auto-articulos`. Si no, revisar el repositorio del HUB e integrar su llamada a:
+
+`POST https://seototal.lasolucionweb.com/api/auth/logout`
+
+### 5. Mantener documentación sincronizada
+
+Registrar en los documentos Harness los resultados de los puntos 2–4 y cualquier limitación real de verificación.
+
+## Orden restante
+
+1. Reconexión real de Bing y proveedores prioritarios.
+2. Verificación de consolas externas.
+3. Auditoría del logout independiente del HUB.
+4. Cierre documental.
+
+## Fuera de este plan
+
+MCP, tokens, nuevas funcionalidades y limpieza administrativa de PRs antiguos.
+
+
+## Cierre del Punto 4 — logout cruzado HUB → Auto Artículos — 2026-10-19
+
+- Código publicado en `main`: `c28f8ccef86aee1e41c828b6eee1d0141b3eaed9`.
+- Corrección: `/api/auth/logout` queda público para que el puente pueda limpiar las cookies de Auto Artículos aunque ya no exista una sesión local; la ruta GET borra las cookies y redirige de forma segura al HUB.
+- Vercel: deployment `dpl_8q4iRMCe2iyPYh6VeJ3quKw3G5cd`, estado `READY`, producción; aliases personalizados incluidos `seototal.lasolucionweb.com`, `seototal.lasolucionweb.net`, `articulos.*` y `redes.*`.
+- Verificación pública: el flujo `hub.lasolucionweb.net/auth/logout` → puente `seototal.lasolucionweb.com/api/auth/logout` → HUB terminó en `https://hub.lasolucionweb.net/login`, sin JSON `No autenticado` ni pantalla Auth0 Oops.
+- La verificación se hizo sin una sesión activa de Auto Artículos; queda separada la comprobación con una cookie real del producto para observar físicamente su expiración en el navegador.
+
+## Pendiente residual después del Punto 4
+
+- Ejecutar una prueba E2E con una sesión real de Auto Artículos y confirmar en DevTools que las cookies de la familia `.lasolucionweb.com` desaparecen al cerrar sesión desde el HUB.
+- Revisar manualmente las URLs de callback y logout registradas en cada consola externa; el repositorio no puede confirmar esa configuración.
+
+
+## Estado actualizado — Punto 4 completado con sesión real — 2026-10-19
+
+El punto 4 ya no está pendiente. La prueba E2E con sesión real confirmó que el logout iniciado desde el HUB invalida Auto Artículos en `.net` y termina la sesión Auth0 del HUB. El puente del HUB recorre `.com` y `.net` porque cada familia de cookies solo puede ser eliminada por su propio host.
+
+### Pendientes reales restantes
+
+1. Verificar reconexiones OAuth reales, empezando por Bing y luego los proveedores prioritarios.
+2. Comparar manualmente las URLs registradas en las consolas externas con las URLs del código publicado.
+3. Documentar los resultados de esas verificaciones y sus limitaciones.
+
+
+## Evidencia adicional — cookies inspeccionadas sin leer valores — 2026-10-19
+
+- Tras el logout cruzado se inspeccionaron solo nombre, dominio y ruta mediante el navegador.
+- En `articulos.lasolucionweb.net`, `seototal.lasolucionweb.net` y `seototal.lasolucionweb.com` no quedó ninguna cookie de sesión de Auto Artículos; solo permanecieron `_fbp` y `_gcl_au` de analítica/marketing.
+- No se leyeron ni registraron valores de cookies.

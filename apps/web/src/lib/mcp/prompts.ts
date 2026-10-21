@@ -29,6 +29,7 @@ export type PromptDef = {
   arguments?: PromptArgument[];
   /** Texto único que se devuelve como mensaje de guía en `prompts/get`. */
   build: (args: Record<string, string>) => string;
+  social?: boolean;
 };
 
 export const PROMPTS: PromptDef[] = [
@@ -87,6 +88,7 @@ ${MCP_SCOPE_RULES}`,
 
   {
     name: "publicar_en_redes",
+    social: true,
     title: "Publicar en redes sociales y blogs",
     description:
       "Úsalo cuando el usuario quiera publicar en redes sociales o blogs ('publica en Facebook', 'sube esto a LinkedIn e Instagram', 'publica en todas mis redes', 'genera propuestas para Pinterest'). Trae el orden exacto: ver redes, generar propuestas por nombre o en grupo, publicar con comprobante y confirmar el estado.",
@@ -99,6 +101,7 @@ ${MCP_SCOPE_RULES}`,
 
   {
     name: "automatizar_redes",
+    social: true,
     title: "Programar publicaciones automáticas en redes",
     description:
       "Úsalo cuando el usuario pida publicar en redes de forma recurrente o automática ('publica en Facebook a las 9 y en LinkedIn a las 12', 'todos los días en todas mis redes') o quiera cambiar, pausar o detener esa programación.",
@@ -128,12 +131,12 @@ ${MCP_SCOPE_RULES}`,
   },
 ];
 
-export function findPrompt(name: string) {
-  return PROMPTS.find((p) => p.name === name);
+export function findPrompt(name: string, socialEnabled = true) {
+  return PROMPTS.find((p) => p.name === name && (socialEnabled || !p.social));
 }
 
-export function listPromptsPayload() {
-  return PROMPTS.map(({ name, title, description, arguments: args }) => ({
+export function listPromptsPayload(socialEnabled = true) {
+  return PROMPTS.filter((p) => socialEnabled || !p.social).map(({ name, title, description, arguments: args }) => ({
     name,
     title,
     description,

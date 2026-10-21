@@ -12,6 +12,9 @@ test("Google Business solo toma lo aprobado (pending) o, con conexión propia an
     socialOpportunities: { some: { platform: "google-business", status: "queued" } },
   });
   assert.equal(legacy.businessProfilePost, null);
+  // Regresión (2026-10-16): exigir resumen en lo aprobado dejaba la propuesta en 1 % sin error.
+  assert.equal("summary" in where, false);
+  assert.deepEqual(legacy.summary, { not: null });
   // Sin la conexión propia con locationName, la rama «sin publicación» no puede coincidir.
   assert.deepEqual(legacy.run, { user: { businessProfileIntegration: { locationName: { not: null } } } });
 });

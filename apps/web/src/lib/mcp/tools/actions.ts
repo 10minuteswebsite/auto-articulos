@@ -97,8 +97,14 @@ export const ACTION_TOOLS: ToolDef[] = [
   {
     name: "publicar_propuesta_social",
     title: "Publicar propuesta en red social o blog",
-    description: "Publica una propuesta social existente. Siempre muestra el destino y texto antes, y exige comprobante de confirmación.",
-    inputSchema: { type: "object", properties: { id: { type: "string" }, confirmar: { type: "boolean" }, confirmacion: { type: "string" } }, required: ["id"], additionalProperties: false },
+    description:
+      "Propósito: publicar UNA propuesta social concreta (por su ID) en su red o blog. También sirve para REINTENTAR una que quedó en error o descartada, una vez que la persona reconectó la red en la web.\n" +
+      "Cuándo usarla: una sola propuesta. Para varias redes a la vez usa publicar_propuestas_sociales.\n" +
+      "Cuándo NO usarla: si la propuesta ya está publicada, en cola o procesándose (la herramienta lo dirá).\n" +
+      "Argumentos: id (obligatorio, de listar_propuestas_sociales) · confirmar (false = vista previa, true = publicar) · confirmacion (comprobante).\n" +
+      "Flujo con comprobante: 1) confirmar=false → no publica; muestra red y texto y devuelve un comprobante. 2) confirmar=true y confirmacion=<comprobante> con permiso de la persona (o autorización permanente). Vence en 10 minutos y sirve una sola vez.\n" +
+      "Siguiente paso típico: listar_propuestas_sociales con el id para ver el estado y el enlace.",
+    inputSchema: { type: "object", properties: { id: { type: "string", description: "ID de la propuesta (listar_propuestas_sociales)." }, confirmar: { type: "boolean", description: "false para previsualizar; true para publicar." }, confirmacion: { type: "string", description: "Comprobante de la vista previa; obligatorio con confirmar=true." } }, required: ["id"], additionalProperties: false },
     requiredScope: "oportunidades:publicar",
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
     handler: async (args) => {

@@ -244,7 +244,6 @@ const SOCIAL_GROUPS: {
     title: "Blogs",
     networks: [
       { id: "tumblr", label: "Tumblr", formats: [["tumblr", "Artículo"]] },
-      { id: "blogger", label: "Blogger", formats: [["blogger", "Artículo"]] },
     ],
   },
 ];
@@ -939,7 +938,7 @@ export default function UsuariosPage() {
   }
 
   return (
-    <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+    <div style={{ maxWidth: "none", margin: 0 }}>
       <header style={{ padding: "8px 0 20px" }}>
         <p className="eyebrow" style={{ margin: "0 0 4px" }}>
           Centro de Control
@@ -2068,7 +2067,7 @@ function UserCard({
   const [permBlogger, setPermBlogger] = useState(Boolean(user.allowBloggerPublishing));
   const [permGoogleBusiness, setPermGoogleBusiness] = useState(Boolean(user.allowGoogleBusinessPublishing));
   const [permAiImageGeneration, setPermAiImageGeneration] = useState(
-    Boolean(user.aiImageGenerationEnabled),
+    true,
   );
   // Sistema de prueba gratuita (13/8/2026): estado de prueba y desbloqueo manual.
   const [permIsTrialSignup, setPermIsTrialSignup] = useState(
@@ -2107,7 +2106,7 @@ function UserCard({
     setPermBluesky(Boolean(user.allowBlueskyPublishing));
     setPermBlogger(Boolean(user.allowBloggerPublishing));
     setPermGoogleBusiness(Boolean(user.allowGoogleBusinessPublishing));
-    setPermAiImageGeneration(Boolean(user.aiImageGenerationEnabled));
+    setPermAiImageGeneration(true);
     setPermIsTrialSignup(Boolean(user.isTrialSignup));
     setPermTrialUnlocked(Boolean(user.trialUnlocked));
     setPermImageCredits(user.hasImageCredits !== false);
@@ -2124,7 +2123,6 @@ function UserCard({
     permBluesky !== Boolean(user.allowBlueskyPublishing) ||
     permBlogger !== Boolean(user.allowBloggerPublishing) ||
     permGoogleBusiness !== Boolean(user.allowGoogleBusinessPublishing) ||
-    permAiImageGeneration !== Boolean(user.aiImageGenerationEnabled) ||
     permIsTrialSignup !== Boolean(user.isTrialSignup) ||
     permTrialUnlocked !== Boolean(user.trialUnlocked) ||
     permImageCredits !== (user.hasImageCredits !== false);
@@ -2180,7 +2178,7 @@ function UserCard({
     setPermBluesky(Boolean(user.allowBlueskyPublishing));
     setPermBlogger(Boolean(user.allowBloggerPublishing));
     setPermGoogleBusiness(Boolean(user.allowGoogleBusinessPublishing));
-    setPermAiImageGeneration(Boolean(user.aiImageGenerationEnabled));
+    setPermAiImageGeneration(true);
     setPermIsTrialSignup(Boolean(user.isTrialSignup));
     setPermTrialUnlocked(Boolean(user.trialUnlocked));
     setPermImageCredits(user.hasImageCredits !== false);
@@ -3021,7 +3019,7 @@ function UserCard({
             <div>
               <strong style={{ fontSize: 14 }}>Módulo de Redes (DIFUSIÓN SOCIAL)</strong>
               <p style={{ margin: "4px 0 0", fontSize: 12, color: "#6e6e73", maxWidth: 440 }}>
-                Es el ÚNICO interruptor de Redes para esta cuenta en seototal: <strong>Activado</strong> la deja entrar;
+                Es el ÚNICO interruptor de Redes para esta cuenta: <strong>Activado</strong> la deja entrar;
                 <strong> Desactivado</strong> la mantiene fuera. Las redes de abajo no la abren: solo deciden en cuáles puede
                 publicar. Se guarda con <strong>Guardar cambios</strong>.
               </p>
@@ -3112,9 +3110,8 @@ function UserCard({
               <label style={permissionLabelStyle}>
                 <input
                   type="checkbox"
-                  checked={permAiImageGeneration}
-                  onChange={(e) => setPermAiImageGeneration(e.target.checked)}
-                  disabled={savingPermissions}
+                  checked
+                  disabled
                   style={{ accentColor: "#1d1d1f", width: 16, height: 16 }}
                 />
                 Generador de imágenes con IA (Instagram Story/Reel)

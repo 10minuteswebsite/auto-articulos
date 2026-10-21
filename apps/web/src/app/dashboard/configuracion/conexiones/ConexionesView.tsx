@@ -13,7 +13,6 @@ import LinkedInSection from "@/components/LinkedInSection";
 import PinterestSection from "@/components/PinterestSection";
 import TumblrSection from "@/components/TumblrSection";
 import BlueskySection from "@/components/BlueskySection";
-import BloggerSection from "@/components/BloggerSection";
 import FacebookSection from "@/components/FacebookSection";
 import InstagramSection from "@/components/InstagramSection";
 import { ConnectionReturnSuccess, LEGACY_RETURN_NETWORKS, useConnectionReturn } from "@/components/ConnectionReturn";
@@ -225,7 +224,6 @@ export default function ConexionesView() {
       { id: "pinterest", title: "Pinterest", text: "Publica contenido visual en tus tableros de Pinterest.", view: "difusion" as Vista },
       { id: "tumblr", title: "Tumblr", text: "Publica artículos y contenido en tu blog de Tumblr.", view: "difusion" as Vista },
       { id: "bluesky", title: "Bluesky", text: "Comparte tus publicaciones en Bluesky.", view: "difusion" as Vista },
-      { id: "blogger", title: "Blogger", text: "Publica artículos en tu blog de Blogger.", view: "difusion" as Vista },
       { id: "business-profile", title: "Google Business Profile", text: "Publica novedades en la ficha de tu negocio en Google.", view: "difusion" as Vista },
     ];
     const esHostProducto = hostProduct === "ARTICULOS" || hostProduct === "REDES";
@@ -381,7 +379,6 @@ export default function ConexionesView() {
           {solo("pinterest") && puede("pinterest") && <PinterestSection />}
           {solo("bluesky") && puede("bluesky") && <BlueskySection allowed={puede("bluesky")} />}
           {solo("tumblr") && puede("tumblr") && <TumblrSection allowed={puede("tumblr")} />}
-          {solo("blogger") && puede("blogger") && <BloggerSection allowed={puede("blogger")} />}
         </div>
       )}
 

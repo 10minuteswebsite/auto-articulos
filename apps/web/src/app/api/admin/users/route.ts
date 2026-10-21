@@ -239,7 +239,6 @@ export async function PATCH(request: NextRequest) {
     allowBlueskyPublishing,
     allowBloggerPublishing,
     allowGoogleBusinessPublishing,
-    aiImageGenerationEnabled,
     profilePhotoUrl,
     businessLogoUrl,
     isTrialSignup,
@@ -430,7 +429,9 @@ export async function PATCH(request: NextRequest) {
   }
 
   if ("aiImageGenerationEnabled" in body) {
-    data.aiImageGenerationEnabled = Boolean(aiImageGenerationEnabled);
+    // Política global: el generador IA permanece siempre activo para todas
+    // las cuentas. Se conserva el campo para compatibilidad histórica.
+    data.aiImageGenerationEnabled = true;
   }
 
   if ("moduleOverrides" in body) {

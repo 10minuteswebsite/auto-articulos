@@ -77,6 +77,7 @@ export default function PublicarPage() {
       if (typeof data.defaultPromptId === "string" && data.defaultPromptId) {
         setSelectedPromptId(data.defaultPromptId);
       }
+      if (typeof data.disableIndexing === "boolean") setDisableIndexing(data.disableIndexing);
       if (typeof data.hasImageCredits === "boolean") {
         setHasImageCredits(data.hasImageCredits);
       }

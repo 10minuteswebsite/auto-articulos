@@ -45,6 +45,7 @@ export async function generateFaqs(
       `Write every question and answer entirely in ${targetLanguage}. ` +
       "Do not mix languages or copy the language of the source content. " +
       "Use the article's facts only; never invent data, names, laws, or claims.",
+    "FACTUAL ACCURACY CHECK: audit every factual sentence against the supplied article before returning each answer. Omit unsupported claims; do not guess or complete missing details. For externally verifiable claims, use only a direct, traceable source from a government agency, official regulator, university, professional association, primary research, or another authoritative institution, and never fabricate a source or URL.",
     `Article title: "${title}".`,
     "Generate 4 to 6 FAQs using high-intent search patterns adapted to the " +
       "specific topic, plus 1 to 3 specific questions grounded directly in " +
