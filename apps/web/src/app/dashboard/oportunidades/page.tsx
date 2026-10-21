@@ -140,6 +140,7 @@ export default function OportunidadesPage() {
       }
       setDailyArticleLimit(typeof me.dailyArticleLimit === "number" ? me.dailyArticleLimit : null);
       setMonthlyArticleLimit(typeof me.monthlyArticleLimit === "number" ? me.monthlyArticleLimit : null);
+      if (typeof me.disableIndexing === "boolean") setDisableIndexing(me.disableIndexing);
       setDisclosureAcceptedAt(me.opportunitiesDisclosureAcceptedAt ?? null);
       if (typeof me.contentLanguage === "string") {
         setContentLanguage(me.contentLanguage);

@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   if (denied) return denied;
   const account = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    select: { selectedSiteDomain: true, platformDomain: true },
+    select: { selectedSiteDomain: true, platformDomain: true, disableIndexing: true },
   });
   const {
     titlesText,
@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
       userId,
       categoryId: category.id,
       status: "running",
-      disableIndexing: Boolean(disableIndexing),
+      disableIndexing: typeof disableIndexing === "boolean" ? disableIndexing : account.disableIndexing,
       // Idioma de ESTE lote. Se guarda solo si viene un valor real; vacío o
       // ausente deja NULL, que el worker interpreta como "usar el idioma
       // configurado del usuario" (comportamiento de siempre).

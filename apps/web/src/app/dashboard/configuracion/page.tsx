@@ -46,6 +46,12 @@ const SECCIONES = [
       "Configura Search Console, Analytics y tus redes desde un solo lugar.",
   },
   {
+    href: "/dashboard/configuracion/indexacion",
+    titulo: "Indexación",
+    producto: "ARTICULOS" as const,
+    descripcion: "Decide si los nuevos artículos solicitan indexación automática mientras los revisas.",
+  },
+  {
     href: "/dashboard/configuracion/movil",
     titulo: "App Móvil",
     producto: "COMPARTIDO" as const,
