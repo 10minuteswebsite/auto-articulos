@@ -717,30 +717,10 @@ async function login(
       timeout: LOGIN_VERIFY_TIMEOUT_MS,
     });
   } catch {
-    // Mensaje más claro que el timeout crudo de Playwright: esto casi
-    // siempre pasa por usuario/contraseña incorrectos guardados en
-    // Configuración, no por un problema del código. Si el sitio muestra
-    // algún texto de error visible, se incluye también.
-    const alertText = await page
-      .evaluate(() => {
-        const candidates = Array.from(
-          document.querySelectorAll(
-            '[class*="alert" i], [class*="error" i], [role="alert"]',
-          ),
-        ).filter((el) => (el as HTMLElement).offsetParent !== null);
-        return candidates
-          .map((el) => (el.textContent ?? "").trim())
-          .filter((t) => t.length > 0)
-          .slice(0, 3)
-          .join(" | ");
-      })
-      .catch(() => "");
-    // Se nombra el servidor concreto: desde que hay varios (ver
-    // PLATFORM_SERVERS), un login que falla puede deberse a que la cuenta
-    // vive en otro dominio y no a credenciales mal escritas, y sin este dato
-    // los dos casos se veían idénticos en el mensaje.
+    // Mensaje claro en vez del timeout crudo de Playwright; no nombra el
+    // servidor para no exponer la infraestructura al usuario.
     throw new Error(
-      `No se pudo iniciar sesión con las credenciales guardadas en ${baseUrl} dentro de ${LOGIN_VERIFY_TIMEOUT_MS / 1000} segundos. Cambia o restablece la contraseña de tu cuenta en la plataforma y vuelve a guardarla en SEO TOTAL.${alertText ? ` Mensaje visible en el sitio: "${alertText}"` : ""}`,
+      "No se pudo iniciar sesión con las credenciales guardadas. Cambia o restablece la contraseña de tu cuenta en la plataforma y vuelve a guardarla en SEO TOTAL.",
     );
   }
   await onStep("Sesión iniciada correctamente.");

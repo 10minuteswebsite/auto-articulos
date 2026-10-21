@@ -55,13 +55,8 @@ async function withServerDetection<T>(
   );
   if (successful) return successful;
 
-  const firstError = attempts[0] && "error" in attempts[0] ? attempts[0].error : null;
-
-  const intentados = candidates.map((d) => PLATFORM_SERVERS[d].label).join(", ");
-  const detalle =
-    firstError instanceof Error ? firstError.message : String(firstError ?? "");
   throw new Error(
-    `No se pudo iniciar sesión con las credenciales guardadas en ninguno de los servidores disponibles (${intentados}). Lo más probable es que el usuario o la contraseña guardados en Configuración ya no sean válidos: verifícalos entrando a mano a tu plataforma y vuelve a guardarlos.${detalle ? ` Detalle técnico del primer intento: ${detalle}` : ""}`,
+    "No se pudo iniciar sesión con las credenciales guardadas. Lo más probable es que el usuario o la contraseña guardados en Configuración ya no sean válidos: verifícalos entrando a mano a tu plataforma y vuelve a guardarlos.",
   );
 }
 
@@ -119,13 +114,8 @@ async function fetchCategoriesDetectingServer(
   // probado TODOS. Encontrado con la cuenta de Stefany Meza (15/8/2026):
   // el mensaje mandaba a revisar el servidor asignado, cuando el problema
   // real era que las credenciales no servían en ninguno.
-  const intentados = candidates
-    .map((d) => PLATFORM_SERVERS[d].label)
-    .join(", ");
-  const detalle =
-    firstError instanceof Error ? firstError.message : String(firstError ?? "");
   throw new Error(
-    `No se pudo iniciar sesión con las credenciales guardadas en ninguno de los servidores disponibles (${intentados}). Lo más probable es que el usuario o la contraseña guardados en Configuración ya no sean válidos: verifícalos entrando a mano a tu plataforma y vuelve a guardarlos.${detalle ? ` Detalle técnico del primer intento: ${detalle}` : ""}`,
+    "No se pudo iniciar sesión con las credenciales guardadas. Lo más probable es que el usuario o la contraseña guardados en Configuración ya no sean válidos: verifícalos entrando a mano a tu plataforma y vuelve a guardarlos.",
   );
 }
 
