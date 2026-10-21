@@ -5,6 +5,11 @@
 - Task `ARTICULOS-500-AUTH-HUB-20261021`. Causa: columna `User.disableIndexing` ausente en producción (migración `20261021120000` del commit `7531dc5c` nunca aplicada). Arreglo: ALTER TABLE aditivo ejecutado por Milton en Supabase.
 - Verificado: `/auth/hub` 303 a las 16:03 sin P2022. Esto reabre y corrige el cierre de «CONTROL NO INDEXAR ARTÍCULOS».
 
+## Claude — BLOG IA: Worker desplegado en Cloudflare — 2026-10-21
+
+- Task `BLOG-IA-WORKER-CLOUDFLARE-20261021`. Worker `blog-ia` + D1 `blog-ia` + R2 `blog-ia-media` NUEVOS en la cuenta de Cloudflare de Milton; ningún Worker, D1, R2, DNS o ruta existente se tocó. Verificado con eventos firmados reales (401 sin firma/firma falsa, `applied`, replay `duplicate`); datos de prueba borrados; acceso de `wrangler` revocado. Detalle y fotos previa/posterior en `CURRENT_STATE.md`.
+- BLOG IA sigue OCULTO a los clientes; SEO Total NO está conectado al Worker todavía (faltan variables `BLOG_IA_*`, dominio de prueba y Custom Hostnames).
+
 ## Claude — BLOG IA: Fases 2 y 3 (wizard, portadas, desactivar/reactivar, sitemap) — 2026-10-21
 
 - **Capitán de migración:** Claude — LIBERADO el 2026-10-21 tras aplicar y verificar el lote (reclamado para este lote (migraciones `20261016120000_add_blog_ia` y `20261021120000_blog_ia_wizard`); el reclamo del 15/10 (solo documentación) se liberó y quedó absorbido. Nadie más ejecuta Prisma hasta su liberación.

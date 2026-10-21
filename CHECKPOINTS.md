@@ -1,5 +1,10 @@
 # CHECKPOINTS
 
+## Checkpoint — BLOG IA Worker en Cloudflare — 2026-10-21 — desplegado, sin conectar
+
+- Task: `BLOG-IA-WORKER-CLOUDFLARE-20261021`; punto cero: `origin/main` = `58786850` + este cierre.
+- Worker `blog-ia` + D1 `blog-ia` + R2 `blog-ia-media` creados; pruebas negativas y positivas con eventos firmados reales OK; replay sin duplicación; datos de prueba borrados; acceso de `wrangler` revocado. Pendiente: conexión con SEO Total, dominio de prueba/Custom Hostnames, R2 real de imágenes (ver CURRENT_STATE).
+
 ## Checkpoint — BLOG IA Fases 2-3 — 2026-10-21 — fusionado, oculto; verificado con sesión real
 
 - Task: `BLOG-IA-FASE-2-3-20261021`; punto cero: `origin/main` = `74f61ee0`.
