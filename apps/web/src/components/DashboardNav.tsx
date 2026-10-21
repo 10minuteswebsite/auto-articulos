@@ -54,6 +54,7 @@ const BASE_ENTRIES: NavEntry[] = [
         href: "/dashboard/oportunidades-redes",
         label: MENU_LABELS_NUMBERED.redes,
       },
+      { id: "blog-ia", href: "/dashboard/blog-ia", label: "BLOG IA" },
       {
         id: "publicaciones-en-curso",
         href: "/dashboard/publicaciones-en-curso",
@@ -95,6 +96,7 @@ const PRODUCT_ENTRIES: NavEntry[] = [
       { href: "/dashboard/articulos", label: "Inicio de Artículos" },
       { id: "publicar", href: "/dashboard/publicar", label: MENU_NAMES.propios },
       { id: "oportunidades", href: "/dashboard/oportunidades", label: MENU_NAMES.ia },
+      { id: "blog-ia", href: "/dashboard/blog-ia", label: "BLOG IA" },
       { id: "publicaciones-en-curso", href: "/dashboard/publicaciones-en-curso?producto=articulos", label: "Progreso de las publicaciones" },
       { id: "historial", href: "/dashboard/historial?producto=articulos", label: "Historial" },
       { id: "estadisticas", href: "/dashboard/estadisticas", label: "Estadísticas" },

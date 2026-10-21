@@ -44,7 +44,7 @@ test("los administradores lo ven siempre (lista vacía)", () => {
 // «SEPARACION DE SEO TOTAL», Lote 2). Este test fija que no se cuele ningún otro
 // por descuido: un módulo opt-in nuevo debe añadirse aquí a propósito.
 test("Redes y la vista por productos son módulos opt-in", () => {
-  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), ["oportunidades-redes", "vista-productos"]);
+  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), ["oportunidades-redes", "vista-productos", "blog-ia"]);
 });
 
 test("la vista por productos NO la ve un usuario normal, ni con el ocultar global vacío", () => {
@@ -124,4 +124,15 @@ test("seototal: ningún nombre abre Redes por sí solo (antes Lorena y Zulmad es
 test("seototal: 'Deshabilitado' oculta Redes", () => {
   const user = { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) };
   assert.equal(getEffectiveDisabledModules(user, []).includes("oportunidades-redes"), true);
+});
+
+test("BLOG IA es una función oculta: opt-in, secreta y nunca visible para un cliente normal", () => {
+  const mod = SYSTEM_MODULES.find((m) => m.id === "blog-ia");
+  assert.ok(mod && mod.optIn === true && mod.secret === true);
+  // Un cliente normal (sin «Habilitado») la tiene deshabilitada, también con otras cuentas o con módulos globales vacíos.
+  for (const disabledModules of [null, "{}", "[]", JSON.stringify({ "blog-ia": "inherit" }), JSON.stringify({ "blog-ia": "disabled" })]) {
+    assert.ok(getEffectiveDisabledModules({ role: "user", disabledModules }, []).includes("blog-ia"), String(disabledModules));
+  }
+  assert.equal(getEffectiveDisabledModules({ role: "user", disabledModules: enabled("blog-ia") }, []).includes("blog-ia"), false);
+  assert.deepEqual(getEffectiveDisabledModules({ role: "admin", disabledModules: null }, []), []);
 });

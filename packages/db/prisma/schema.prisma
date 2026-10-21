@@ -198,6 +198,7 @@ model User {
 
   credentials                Credential[]
   mcpConnections             McpConnection[]
+  blogIaBlog                 BlogIaBlog?
   composioConnections        ComposioConnection[]
   postPeerConnection         PostPeerConnection?
   postPeerSocialConnections  PostPeerSocialConnection[]
@@ -519,6 +520,34 @@ model Credential {
 enum PublishMethod {
   BROWSER
   MCP
+  // BLOG IA (2026-10-16): el artículo se publica SOLO en el blog del cliente
+  // (Cloudflare), no en 10minutesWebsite. Decisión de Milton. Ver
+  // MASTER_BLUEPRINT_BLOG_IA_SEO_TOTAL.md y apps/worker/src/blogIaQueue.ts.
+  BLOG
+}
+
+// Blog público de una cuenta (BLOG IA, máximo uno por cuenta). El contenido y
+// la configuración viven en Cloudflare; aquí solo queda lo necesario para
+// publicar y mostrar el estado. `tenantId` es el id del cliente en BLOG IA.
+model BlogIaBlog {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  tenantId  String   @unique
+  // Vacío mientras la persona no ha elegido el dominio (paso 3 del wizard).
+  hostname  String?  @unique
+  // draft_setup | pending_dns | pending_tls | active | suspended | domain_error
+  status    String   @default("draft_setup")
+  // Marca, idioma, WhatsApp y sitio principal que captura el wizard (Fase 2).
+  config        Json?
+  provisionedAt DateTime? // el Worker BLOG IA confirmó blog.provision
+  dnsVerified   Boolean  @default(false)
+  tlsReady      Boolean  @default(false)
+  activatedAt   DateTime? // la persona pulsó «Activar» (paso 4)
+  lastError     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // Conexión OAuth de una cuenta contra un servidor MCP de publicación de

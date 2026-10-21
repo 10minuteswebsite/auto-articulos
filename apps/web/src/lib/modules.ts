@@ -14,6 +14,11 @@ export interface SystemModule {
    * todos por descuido. Se quita esta marca cuando se decide abrirlo a todos.
    */
   optIn?: boolean;
+  /**
+   * Función OCULTA: ningún aviso a quien no tiene acceso debe nombrarla (ni la
+   * pantalla de bloqueo ni las APIs). Para funciones aún no abiertas a los clientes.
+   */
+  secret?: boolean;
 }
 
 // El orden es el mismo que el del menú (ver DashboardNav), para que el panel
@@ -82,6 +87,17 @@ export const SYSTEM_MODULES: SystemModule[] = [
     description:
       "Organiza el menú y el inicio en dos productos: SEO Total Artículos y SEO Total Redes. Vista previa para administradores hasta que se abra a todos.",
     optIn: true,
+  },
+  {
+    // BLOG IA (Fase 2, local): wizard para publicar en un blog propio. Opt-in:
+    // lo ven los administradores y solo quien tenga «Habilitado» en
+    // Administración → Usuarios. Nadie más nota cambios (BROWSER/MCP intactos).
+    id: "blog-ia",
+    label: "BLOG IA",
+    href: "/dashboard/blog-ia",
+    description: "Configura tu blog en tu propio dominio y publica en él los artículos de SEO Total.",
+    optIn: true,
+    secret: true,
   },
   {
     id: "conexion-composio",

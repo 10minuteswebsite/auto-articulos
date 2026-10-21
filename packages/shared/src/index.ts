@@ -21,6 +21,7 @@ export * from "./social-image";
 export * from "./platform-servers";
 export * from "./article-limits";
 export * from "./mcp-client";
+export * from "./blog-ia-client";
 export * from "./composio";
 export * from "./composio-resolver";
 export * from "./composio-search-console";

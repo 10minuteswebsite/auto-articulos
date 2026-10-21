@@ -11,6 +11,7 @@ import {
 } from "@auto-articulos/shared";
 import { getBingTokenForIntegration } from "./bingToken";
 import { loadConnectionState } from "./composio-connection-state";
+import { resolveSitemapForAccount } from "./blogIaSitemap";
 
 const CONCURRENCY = 5;
 
@@ -39,6 +40,23 @@ async function submitForUser(integration: {
   const providerLabel =
     integration.provider === "bing" ? "Bing Webmaster Tools" : "Google Search Console";
 
+  // BLOG IA activo: se envía el sitemap del blog (reutilizando esta misma conexión).
+  // Cuentas BROWSER/MCP: `keep`, comportamiento idéntico al de siempre.
+  const owner = await prisma.user.findUnique({ where: { id: integration.userId }, select: { publishMethod: true } });
+  const blog = owner?.publishMethod === "BLOG"
+    ? await prisma.blogIaBlog.findUnique({ where: { userId: integration.userId }, select: { status: true, hostname: true } })
+    : null;
+  const blogSitemap = resolveSitemapForAccount({ publishMethod: owner?.publishMethod, blog, siteUrl: integration.siteUrl });
+  if (blogSitemap.kind === "error") {
+    await prisma.searchIntegration.update({
+      where: { id: integration.id },
+      data: { lastSitemapSyncAt: new Date(), lastSitemapSyncStatus: "error", lastSitemapSyncError: blogSitemap.message },
+    });
+    console.error(`Sitemap omitido para el usuario ${integration.userId}: ${blogSitemap.message}`);
+    return { userId: integration.userId, ok: false, error: blogSitemap.message };
+  }
+  const sitemapUrl = blogSitemap.kind === "use" ? blogSitemap.sitemapUrl : integration.sitemapUrl;
+
   try {
     if (integration.provider === "google" && await shouldUseComposio(integration)) {
       const state = await loadConnectionState(integration.userId, "google_search_console", integration.siteDomain);
@@ -50,16 +68,16 @@ async function submitForUser(integration: {
       await composioSubmitSitemap(
         { apiKey, userId: integration.userId, connectedAccountId: state.composio.connectedAccountId },
         state.composio.siteUrl,
-        integration.sitemapUrl,
+        sitemapUrl,
       );
     } else {
       const accessToken = integration.provider === "bing"
         ? await getBingTokenForIntegration(integration)
         : await getGoogleAccessToken(decryptSecret(integration.encryptedRefreshToken));
       if (integration.provider === "bing") {
-        await submitBingSitemap(accessToken, integration.siteUrl, integration.sitemapUrl);
+        await submitBingSitemap(accessToken, integration.siteUrl, sitemapUrl);
       } else {
-        await submitGoogleSitemap(accessToken, integration.siteUrl, integration.sitemapUrl);
+        await submitGoogleSitemap(accessToken, integration.siteUrl, sitemapUrl);
       }
     }
 
