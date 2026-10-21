@@ -468,7 +468,7 @@ export default function OportunidadesRedesPage() {
     }
   }
 
-  const pendingList = opportunities.filter((o) => o.status === "pending" && !(storiesUnavailable.instagram && o.platform === "instagram-story") && !(storiesUnavailable.facebook && o.platform === "facebook-story"));
+  const pendingList = opportunities.filter((o) => o.status === "pending" && o.platform !== "instagram-carousel" && !(storiesUnavailable.instagram && o.platform === "instagram-story") && !(storiesUnavailable.facebook && o.platform === "facebook-story"));
 
   if (loading || connectionsLoading) return null;
 
