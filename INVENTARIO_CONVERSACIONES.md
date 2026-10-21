@@ -2469,4 +2469,5 @@ sección "Codex — META historias y carruseles — 2026-10-20" de `COORDINACION
 - Solicitud de Inés: evitar falsedades en artículos generados por IA.
 - Implementación: regla de autocontrol factual y fuentes serias en generación de artículos, títulos y FAQs; no se destruyó el contenido existente de los prompts ni se tocó 10MWS.
 - Estado: en verificación; falta publicar y comprobar producción.
+- Actualización: publicado en `main` como `04910056`; smoke HTTP OK, pero la comprobación del deployment productivo está bloqueada por falta de acceso al proyecto Vercel.
 

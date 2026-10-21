@@ -12589,5 +12589,7 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Alcance: prompts del sistema que generan artículos, títulos y FAQs; se excluye expresamente el prompt de 10MWS.
 - Regla durable: no inventar hechos, cifras, fechas, leyes, nombres ni afirmaciones actuales; omitir lo no verificable; exigir fuentes directas, trazables y preferentemente gubernamentales o institucionales serias cuando la afirmación sea externa o sensible.
 - Cambio aplicado: `apps/worker/src/automation/generateCustomArticle.ts`, `apps/worker/src/faqPrompt.ts`, `apps/web/src/lib/title-generation-core.ts`.
-- Verificación pendiente: tests, publicación desde `main` y comprobación HTTP del deployment productivo.
+- Commit publicado en `main`: `04910056`.
+- Smoke HTTP público: OK; Vercel Production/READY de este SHA no confirmado porque la cuenta disponible no ve `auto-articulos-web`.
+- Estado de cierre: código publicado, producción pendiente; no declarar éxito productivo.
 

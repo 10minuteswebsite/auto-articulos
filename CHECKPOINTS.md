@@ -1,12 +1,13 @@
 # CHECKPOINTS
 
-## Checkpoint — revisión factual de blogs — 2026-10-21 — en curso
+## Checkpoint — revisión factual de blogs — 2026-10-21 — código publicado, producción pendiente
 
 - Task: `REVISION-CONTENIDO-BLOGS-20261021`.
-- Punto cero: `origin/main` en `14fc2333`; producción aún debe verificarse contra el deployment vigente antes de declarar el cierre.
-- Código local: regla factual en generador de artículos, FAQs y títulos; test unitario de contrato añadido.
+- Punto cero de código: `origin/main` en `04910056`.
+- Código: regla factual en generador de artículos, FAQs y títulos; test unitario de contrato añadido.
 - Exclusión respetada: no se modificó el prompt de 10MWS.
-- Cierre condicionado a: suite relevante, commit en `main`, deployment `success` y comprobación HTTP/funcional en producción.
+- Smoke HTTP público: OK en Artículos y Redes (`/login` 200; protegidas 307/401).
+- Cierre condicionado a: acceso al proyecto Vercel `auto-articulos-web`, deployment `Production/READY` de `04910056` y verificación posterior. No se declara VERIFICADO.
 
 ## Checkpoint — mensaje de login genérico — 2026-10-21
 

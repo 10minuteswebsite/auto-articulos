@@ -1,5 +1,23 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — 2026-10-21 — regla factual de contenido
+
+Fecha y hora: 2026-10-21 (America/New_York)
+Versión/commit: `04910056a6f6bd5c081b33970baf76c5b27deec0`
+Rama: `main` en GitHub; este checkout permanece detached y no creó rama/worktree.
+Worktree: el existente autorizado; no se creó otro.
+Conversación/proyecto: `REVISION-CONTENIDO-BLOGS-20261021`
+Cambios incluidos: autocontrol de veracidad y fuentes en artículos, títulos y FAQs.
+Archivos eliminados: ninguno. Migraciones: ninguna.
+Auditoría: diff revisado; `git diff --check` solo reporta líneas en blanco finales preexistentes en documentación; hook de tests no ejecutó por falta de `node_modules`.
+Deployment/Vercel: pendiente; la cuenta autenticada no tiene acceso al proyecto productivo `auto-articulos-web`.
+Dominio: smoke HTTP público OK, sin prueba de correspondencia SHA/deployment.
+Producción verificada: no; el estándar exige identificar `Production/READY` del commit.
+Problemas conocidos: falta acceso Vercel y dependencias locales.
+Responsable: Codex.
+Siguiente acción: autenticar la cuenta Vercel del equipo `la-solucion-web`, desplegar/verificar `04910056` y actualizar este registro.
+Estado: PREPARADA — NO DECLARAR DESPLEGADA.
+
 ## Versión — 2026-10-21 — mensaje de login genérico
 
 - Commit `45569e14` en `main`; worker por GitHub Actions (toma `main` en cada corrida). Sin migraciones.

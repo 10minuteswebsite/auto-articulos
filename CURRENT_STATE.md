@@ -1,10 +1,13 @@
 # HANDOFF VIGENTE — 2026-10-19
 
-## En curso — revisión factual de blogs — 2026-10-21
+## Cierre condicionado — revisión factual de blogs — 2026-10-21
 
-- Punto cero local: checkout detached en `origin/main`/`14fc2333`; no se creó rama ni worktree.
-- Cambio local: norma factual añadida a generación de artículos, títulos y FAQs; 10MWS no modificado.
-- Aún no es cierre productivo: faltan pruebas, publicación a `main`, deployment y verificación en producción.
+- Task ID: `REVISION-CONTENIDO-BLOGS-20261021`.
+- Commit publicado en `main`: `04910056a6f6bd5c081b33970baf76c5b27deec0`.
+- Cambio: norma factual añadida a generación de artículos, títulos y FAQs; 10MWS no modificado.
+- Punto cero productivo confirmado por smoke HTTP: Artículos y Redes responden `/login` 200, rutas protegidas 307/401; esto confirma salud pública, no el SHA servido.
+- Deployment Vercel del commit: NO CONFIRMADO. La cuenta Vercel disponible no tiene acceso a `auto-articulos-web`; no se declara producción actualizada.
+- Estado: CÓDIGO PUBLICADO / PRODUCCIÓN PENDIENTE. Siguiente punto cero: deployment `Production/READY` identificado por Vercel con este SHA.
 
 ## Cierre — mensaje de login genérico — 2026-10-21
 

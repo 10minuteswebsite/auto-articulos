@@ -6,6 +6,7 @@
 - Todo dato externo, cambiante o sensible debe estar respaldado por material suministrado o por una fuente directa y trazable de un organismo gubernamental, regulador, universidad, asociación profesional, investigación primaria u otra institución autorizada.
 - Si no existe respaldo, el modelo debe omitir la afirmación o declarar que no pudo verificarse; nunca debe fabricar citas o URLs.
 - Este contrato no aplica al prompt de 10MWS y no reemplaza los prompts editoriales existentes.
+- Estado de implementación: commit `04910056` publicado en `main`; la activación productiva queda pendiente de confirmar con Vercel.
 
 ## Contrato añadido — META historias y carruseles — 2026-10-20
 
