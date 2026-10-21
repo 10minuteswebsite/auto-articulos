@@ -1,5 +1,13 @@
 # CONTROLADOR DE VERSIONES
 
+## En curso — MCP HUB→Redes — 2026-10-21
+
+- Task ID: `MCP-HUB-REDES-20261021`.
+- Punto cero: `origin/main` = `c47b4878`; checkout único autorizado, sin ramas ni worktrees adicionales.
+- Alcance: `apps/web/src/app/api/mcp/route.ts`, catálogo/prompts MCP y prueba de regresión; sin migración ni cambios de datos.
+- Verificación previa: 247/247 pruebas; typecheck tiene un fallo preexistente en `bing-client-change.test.ts` por `latestBingChange` no usado.
+- Publicación y deployment: pendientes; no declarar éxito hasta comprobar producción autenticada.
+
 ## Versión — 2026-10-21 — regla factual de contenido
 
 Fecha y hora: 2026-10-21 (America/New_York)

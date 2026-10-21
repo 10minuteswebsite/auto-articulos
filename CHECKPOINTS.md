@@ -1,5 +1,13 @@
 # CHECKPOINTS
 
+## Checkpoint — HUB→MCP reconoce activación de Redes — 2026-10-21 — en curso
+
+- Task: `MCP-HUB-REDES-20261021`; punto cero `origin/main` = `c47b4878`.
+- Código preparado sin migración ni cambios de datos: el catálogo MCP y sus prompts obedecen el permiso efectivo del HUB; `tools/call` conserva una barrera final clara.
+- Validación local: 247/247 pruebas; typecheck detenido por el error preexistente `latestBingChange` sin uso.
+- Producción pública: descubrimiento MCP OK en Artículos y Redes; endpoint protegido devuelve 401 sin token.
+- Pendiente: commit/deployment, prueba autenticada de initialize/tools/list y verificación de activado/desactivado.
+
 ## Checkpoint — control de no indexar artículos — 2026-10-21 — cerrado
 
 - Punto cero: login público = 200; luego se comprobó la pantalla autenticada de Indexación con `lorenalvarez30@gmail.com`.

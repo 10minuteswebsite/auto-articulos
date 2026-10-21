@@ -12601,3 +12601,11 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Vercel confirmó Production `Ready`, deployment `6wAi9CqW6tjQTeW9qxpiHPkuUiYd`, sirviendo `04910056`; smoke HTTP público OK.
 - Estado de cierre: VERIFICADO en producción. El commit documental posterior no modifica runtime.
 
+# Codex — MCP: estado explícito de activación HUB→Redes — 2026-10-21
+
+- Task ID: `MCP-HUB-REDES-20261021`. Se confirmó que el HUB/web ya protege las operaciones sociales, pero el MCP anunciaba siempre sus herramientas y prompts sociales según scopes, sin comunicar el entitlement efectivo del HUB.
+- Cambio preparado: `POST /api/mcp` consulta `canUseSocialModule` para el usuario autenticado. Cuando Redes está apagado, `tools/list` y `prompts/list` no exponen la superficie social; `initialize` informa el estado; `tools/call` devuelve una instrucción clara para activar SEO TOTAL Redes desde el HUB. Cuando está encendido, se conserva el catálogo y flujo existentes.
+- Seguridad: la validación de las rutas sociales sigue vigente como segunda barrera; no se sustituyó por catálogo dinámico. No hubo migración, publicación social ni cambio de datos.
+- Evidencia previa: producción pública responde descubrimiento OAuth MCP 200 en ambos productos y capacidades sin token 401. Local: 247/247 pruebas; typecheck detenido por fallo preexistente de variable no usada en `bing-client-change.test.ts`.
+- Estado: pendiente de commit, deployment y pruebas autenticadas en producción.
+

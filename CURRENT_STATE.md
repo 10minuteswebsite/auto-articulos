@@ -1,5 +1,13 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## En curso — estado HUB→MCP para Redes — 2026-10-21
+
+- Task ID: `MCP-HUB-REDES-20261021`.
+- Punto cero: `origin/main` en `c47b4878`; producción pública confirma ambos descubrimientos OAuth MCP 200, `/api/mcp/capabilities` 401 sin autenticación y scopes `oportunidades:leer`/`oportunidades:publicar`.
+- Cambio preparado: el MCP consulta el permiso efectivo de Redes del HUB; filtra herramientas/prompts sociales, comunica el estado en `initialize` y devuelve un mensaje accionable si se intenta operar con Redes apagado.
+- Pruebas locales: 247/247; `git diff --check` limpio. Typecheck bloqueado por error preexistente no relacionado: `latestBingChange` declarado sin uso en `bing-client-change.test.ts`.
+- Estado: pendiente de commit, deployment y verificación autenticada en producción.
+
 ## CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21 — desplegado y verificado
 
 - Producción pública: `articulos.lasolucionweb.net/login` respondió 200. Después del despliegue se verificó autenticadamente `/dashboard/configuracion/indexacion` con la cuenta `lorenalvarez30@gmail.com`.

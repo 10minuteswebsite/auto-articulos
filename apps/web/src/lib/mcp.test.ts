@@ -28,6 +28,15 @@ test("MCP prompts are named, unique and expose the expected workflows", () => {
   ]);
 });
 
+test("MCP hides Redes tools and prompts when the HUB entitlement is off", () => {
+  const tools = listToolsPayload(["oportunidades:leer", "oportunidades:publicar"], false);
+  const prompts = listPromptsPayload(false);
+  assert.equal(tools.some((tool) => tool.name === "ver_redes_sociales"), false);
+  assert.equal(tools.some((tool) => tool.name === "publicar_propuestas_sociales"), false);
+  assert.equal(prompts.some((prompt) => prompt.name === "publicar_en_redes"), false);
+  assert.equal(prompts.some((prompt) => prompt.name === "automatizar_redes"), false);
+});
+
 test("protocol envelope uses MCP JSON-RPC version and preserves ids", () => {
   assert.equal(MCP_PROTOCOL_VERSION, "2025-11-25");
   assert.deepEqual(rpcResult("abc", { ok: true }), { jsonrpc: "2.0", id: "abc", result: { ok: true } });
