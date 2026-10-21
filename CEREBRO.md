@@ -1,5 +1,11 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión durable — Worker de BLOG IA en workers.dev hasta tener dominio de prueba — 2026-10-21
+
+- La API de ingestión vive en `blog-ia.10minuteswebsite.workers.dev` (sin tocar el DNS de `lasolucionweb.net`); los blogs públicos de clientes necesitarán Custom Hostnames (Cloudflare for SaaS) sobre una zona con origen de respaldo. `workers.dev` rechaza `Host` forzado (403): el render público solo se prueba con un dominio real.
+- El despliegue del Worker NO conecta SEO Total: las variables `BLOG_IA_*` se añaden aparte (la clave se rota al conectar). Los IDs de recursos de Cloudflare no son secretos y van en `wrangler.toml`; el secreto `INGEST_SECRET` solo vive en Cloudflare.
+- Regla aplicada del protocolo de runtime: foto previa/posterior, comprobar que el nombre del Worker no existe antes de desplegar, pruebas sin firma/firma falsa/firma válida/replay, limpieza de datos de prueba y revocación del acceso temporal.
+
 ## Decisión durable — BLOG IA es una función oculta con migración «segura» propia — 2026-10-21
 
 - BLOG IA (destino de salida: el artículo va solo al blog del cliente) se fusionó oculto: nada visible para los clientes hasta orden de Milton. Mecanismos: `optIn` + `secret` en `modules.ts`, `ModuleGuard` y APIs sin nombrar la función, y `scripts/product-update-hidden.ts` para que el gancho post-commit no la anuncie en «Actualizaciones». Para abrirla: quitar `optIn`/`secret` y vaciar `HIDDEN_FEATURES`.

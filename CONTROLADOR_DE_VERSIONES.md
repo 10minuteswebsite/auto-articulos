@@ -1,5 +1,11 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — BLOG IA Worker (Cloudflare) — 2026-10-21
+
+- Task ID: `BLOG-IA-WORKER-CLOUDFLARE-20261021`. Sin cambios en la web ni en el worker de Vercel/GitHub; solo infraestructura nueva en Cloudflare y `apps/blog/wrangler.toml` en el repositorio.
+- Despliegue: `wrangler deploy` (4.151.3) → versión `4b2645f6-0862-4ac4-8f23-d2aff8924f97` de `blog-ia`; migraciones D1 `0001`/`0002` aplicadas.
+- Verificación: ver CURRENT_STATE (401/200/404, alta firmada, replay `duplicate`, limpieza). Pendiente: conexión con SEO Total y E2E con dominio real.
+
 ## Versión — BLOG IA Fases 2-3 — 2026-10-21 — oculto a clientes
 
 - Task ID: `BLOG-IA-FASE-2-3-20261021`. Commit publicado: `74f61ee09d964ac28b080205abc4335d0514a402` (merge del PR #598).
