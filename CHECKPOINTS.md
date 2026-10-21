@@ -1,10 +1,10 @@
 # CHECKPOINTS
 
-## Checkpoint — BLOG IA Fases 2-3 — 2026-10-21 — fusionado, oculto; autenticado pendiente
+## Checkpoint — BLOG IA Fases 2-3 — 2026-10-21 — fusionado, oculto; verificado con sesión real
 
 - Task: `BLOG-IA-FASE-2-3-20261021`; punto cero: `origin/main` = `74f61ee0`.
 - Migraciones aditivas aplicadas ANTES por `safe_blog_ia` (run `39668041448`) y verificadas; Vercel `success`; smoke público OK; módulo invisible para clientes.
-- Pendiente obligatorio: verificación autenticada en producción (ver CURRENT_STATE).
+- Verificación AUTENTICADA en producción (2026-10-21, panel lateral): admin `miltondavila@gmail.com` ve la pantalla BLOG IA, el asistente guarda marca y valida dominios, `/dashboard` y `/api/blog-ia` 200; cliente `lorenalvarez30@gmail.com`: `/dashboard` 200, menú SIN BLOG IA, `/dashboard/blog-ia` = «Página no disponible», `/api/blog-ia` 403 «No disponible para tu cuenta.», sin la palabra «BLOG IA» en pantalla. Fix posterior PR #641 (`dd9f6728`, aviso del análisis vacío) desplegado, Vercel `success`.
 
 ## Checkpoint — HUB→MCP reconoce activación de Redes — 2026-10-21 — condicionado
 
