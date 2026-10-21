@@ -1,5 +1,12 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21 — despliegue pendiente de confirmar
+
+- Producción pública: `articulos.lasolucionweb.net/login` respondió 200; no hubo sesión autenticada disponible.
+- `main`/GitHub: commit `7531dc5c` (`feat: persist article indexing preference`).
+- `User.disableIndexing` se guarda con migración, aparece en Configuración → Indexación y alimenta Publicar/Oportunidades; una decisión explícita del selector prevalece.
+- No se pudo ejecutar typecheck/tests: faltan `node_modules`/`tsc`. Deployment y prueba autenticada quedan pendientes.
+
 ## Cierre condicionado — revisión factual de blogs — 2026-10-21
 
 - Task ID: `REVISION-CONTENIDO-BLOGS-20261021`.

@@ -1,5 +1,11 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión durable — autoindexación configurable por usuario — 2026-10-21
+
+- La preferencia pertenece a cada usuario de Artículos, no a una variable global.
+- `User.disableIndexing` es el valor predeterminado; cada `Run` conserva su decisión puntual.
+- Las APIs aplican fallback server-side para no depender del navegador.
+
 ## Decisión editorial durable — veracidad de contenido — 2026-10-21
 
 Toda escritura asistida debe separar evidencia de inferencia. Los prompts de artículos, títulos y FAQs deben rechazar invenciones, omitir datos no verificables y pedir fuentes directas de organismos gubernamentales o instituciones reconocidas para afirmaciones externas, cambiantes o sensibles. Esta regla se añade como capa de seguridad y no reemplaza las instrucciones editoriales existentes. El prompt de 10MWS queda fuera del alcance.

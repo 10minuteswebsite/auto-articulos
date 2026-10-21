@@ -17,6 +17,10 @@ Problemas conocidos: falta acceso Vercel y dependencias locales.
 Responsable: Codex.
 Siguiente acción: autenticar la cuenta Vercel del equipo `la-solucion-web`, desplegar/verificar `04910056` y actualizar este registro.
 Estado: PREPARADA — NO DECLARAR DESPLEGADA.
+## Registro — 2026-10-21 — CONTROL NO INDEXAR ARTÍCULOS
+
+- Commit `7531dc5c` publicado en `main`; no se creó rama ni worktree.
+- Deployment productivo: pendiente de verificación explícita.
 
 ## Versión — 2026-10-21 — mensaje de login genérico
 

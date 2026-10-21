@@ -41,6 +41,9 @@ model User {
   // permitir añadir plataformas sin otra migración; todas empiezan en 1.
   socialDailyLimits                 Json          @default("{}")
   maxTitlesPerBatch                 Int           @default(20)
+  // Preferencia por defecto para nuevos lotes: true evita solicitar
+  // indexación automática; cada ejecución aún puede ajustarla.
+  disableIndexing                    Boolean       @default(false)
   // Encontrado el 2/8/2026: usuarios en Europa (ej. Lidia Capdevila) tienen
   // su cuenta real en 10minutesWebsite.site en vez de .net. El login/las
   // acciones generales funcionan igual en ambos, pero la generación de

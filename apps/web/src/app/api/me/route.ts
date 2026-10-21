@@ -51,6 +51,7 @@ export async function GET() {
         ? { id: actingAdmin.id, email: actingAdmin.email, name: displayName(actingAdmin) }
         : null,
       maxTitlesPerBatch: user.maxTitlesPerBatch,
+      disableIndexing: user.disableIndexing,
       dailyArticleLimit: user.dailyArticleLimit,
       monthlyArticleLimit: user.monthlyArticleLimit,
       // Servidor donde vive su cuenta de la plataforma. La interfaz lo usa
@@ -135,7 +136,15 @@ export async function PATCH(request: NextRequest) {
     timeZone?: string;
     excludedTopics?: string | null;
     hasImageCredits?: boolean;
+    disableIndexing?: boolean;
   } = {};
+
+  if ("disableIndexing" in body) {
+    if (typeof body.disableIndexing !== "boolean") {
+      return NextResponse.json({ error: "disableIndexing debe ser booleano" }, { status: 400 });
+    }
+    data.disableIndexing = body.disableIndexing;
+  }
 
   if ("contentLanguage" in body) {
     const { contentLanguage } = body;

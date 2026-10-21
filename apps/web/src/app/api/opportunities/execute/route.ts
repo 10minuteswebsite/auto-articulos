@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
         hasImageCredits: true,
         defaultPromptId: true,
         platformDomain: true,
+        disableIndexing: true,
       },
     }),
   ]);
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
           userId,
           categoryId: group.categoryId,
           status: "running",
-          disableIndexing: Boolean(disableIndexing),
+          disableIndexing: typeof disableIndexing === "boolean" ? disableIndexing : user.disableIndexing,
           // Ver POST /api/runs: vacío deja NULL y el worker usa el idioma
           // configurado del usuario.
           contentLanguage:
