@@ -21,6 +21,7 @@ Estado: VERIFICADA.
 
 - Commit `7531dc5c` publicado en `main`; no se creó rama ni worktree.
 - Deployment productivo: pendiente de verificación explícita.
+- Corrección final `d8cebcb0`: deployment Vercel `auto-articulos-web` en estado `Ready`; producción autenticada mostró Configuración → Indexación correctamente.
 
 ## Versión — 2026-10-21 — mensaje de login genérico
 

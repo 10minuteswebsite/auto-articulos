@@ -5,6 +5,7 @@
 - Configuración debe persistir si los nuevos artículos solicitan indexación automática.
 - Publicar y Oportunidades deben iniciar el selector con esa preferencia; una decisión explícita prevalece.
 - Default histórico: indexación activada (`false`).
+- Verificado en producción tras `d8cebcb0`: la pantalla carga el valor persistido por usuario y mantiene el default activado para la cuenta comprobada.
 
 ## Contrato editorial — veracidad y fuentes — 2026-10-21
 

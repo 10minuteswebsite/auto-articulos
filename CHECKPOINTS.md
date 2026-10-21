@@ -1,10 +1,10 @@
 # CHECKPOINTS
 
-## Checkpoint — control de no indexar artículos — 2026-10-21 — abierto
+## Checkpoint — control de no indexar artículos — 2026-10-21 — cerrado
 
-- Punto cero: login público de Artículos = 200; sin sesión autenticada.
-- Commit `7531dc5c` en `main`; alcance: preferencia por usuario, migración, Configuración, Publicar y Oportunidades.
-- Falta cerrar: deployment `success`, guardar/recargar en producción y pruebas con dependencias disponibles.
+- Punto cero: login público = 200; luego se comprobó la pantalla autenticada de Indexación con `lorenalvarez30@gmail.com`.
+- Código final `d8cebcb0` en `main`; Vercel `auto-articulos-web` = `Ready`.
+- Evidencia funcional: producción muestra la nueva pantalla, el selector y el estado persistido. No se modificó la preferencia de la cuenta durante la verificación.
 
 ## Checkpoint — revisión factual de blogs — 2026-10-21 — código publicado, producción pendiente
 

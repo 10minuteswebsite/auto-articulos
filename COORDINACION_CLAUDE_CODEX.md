@@ -5,6 +5,8 @@
 - Publicado únicamente en `main`: `7531dc5c`.
 - `User.disableIndexing` es la preferencia por cuenta; el selector explícito del lote prevalece y la API aplica fallback server-side.
 - Evidencia: login público 200 y commit visible en GitHub. Sin sesión autenticada/dependencias locales, no se declara cierre productivo.
+- Corrección posterior: los primeros deployments fallaron porque Prisma no exponía el campo nuevo en el cliente generado. `d8cebcb0` usa consultas SQL parametrizadas para la preferencia, quedó `Ready` en `la-solucion-web/auto-articulos-web` y la pantalla se verificó autenticada en producción con Lorena, sin cambiar su valor.
+- Estado: CERRADO y documentado. El siguiente punto cero es `d8cebcb0` + deployment `Ready`.
 
 ## Claude — mensaje de login genérico — 2026-10-21
 

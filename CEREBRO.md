@@ -5,6 +5,7 @@
 - La preferencia pertenece a cada usuario de Artículos, no a una variable global.
 - `User.disableIndexing` es el valor predeterminado; cada `Run` conserva su decisión puntual.
 - Las APIs aplican fallback server-side para no depender del navegador.
+- Verificación final: el cliente Prisma stale provocó el fallo inicial de build; la lectura/escritura de la preferencia quedó aislada mediante SQL parametrizado y el deployment `d8cebcb0` está operativo.
 
 ## Decisión editorial durable — veracidad de contenido — 2026-10-21
 

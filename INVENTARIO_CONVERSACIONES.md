@@ -4,6 +4,7 @@
 
 - Commit `7531dc5c` publicado en `main`, sin ramas/worktrees nuevos.
 - Abierto hasta verificar deployment y flujo autenticado.
+- Cierre: `d8cebcb0` desplegado en `la-solucion-web/auto-articulos-web` (`Ready`) y pantalla autenticada verificada en producción; no se modificó la cuenta usada para la prueba.
 
 ## Codex — estilo problema-solución por defecto — 2026-10-19
 

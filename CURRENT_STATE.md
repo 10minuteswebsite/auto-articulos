@@ -1,11 +1,12 @@
 # HANDOFF VIGENTE — 2026-10-19
 
-## CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21 — despliegue pendiente de confirmar
+## CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21 — desplegado y verificado
 
-- Producción pública: `articulos.lasolucionweb.net/login` respondió 200; no hubo sesión autenticada disponible.
-- `main`/GitHub: commit `7531dc5c` (`feat: persist article indexing preference`).
+- Producción pública: `articulos.lasolucionweb.net/login` respondió 200. Después del despliegue se verificó autenticadamente `/dashboard/configuracion/indexacion` con la cuenta `lorenalvarez30@gmail.com`.
+- `main`/GitHub: corrección final `d8cebcb0` (`fix: avoid stale prisma user client for indexing preference`).
+- Vercel `la-solucion-web/auto-articulos-web`: deployment asociado a `d8cebcb0`, estado `Ready`.
 - `User.disableIndexing` se guarda con migración, aparece en Configuración → Indexación y alimenta Publicar/Oportunidades; una decisión explícita del selector prevalece.
-- No se pudo ejecutar typecheck/tests: faltan `node_modules`/`tsc`. Deployment y prueba autenticada quedan pendientes.
+- Los deployments anteriores fallaron por el cliente Prisma stale; la corrección final usa SQL parametrizado para la preferencia y el deployment quedó `Ready`. La pantalla productiva cargó correctamente la preferencia persistida sin modificarla.
 
 ## Cierre condicionado — revisión factual de blogs — 2026-10-21
 
