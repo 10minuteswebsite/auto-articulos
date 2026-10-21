@@ -2440,3 +2440,27 @@ Parte B por ser ya historial.
 
 - Publicado en `main`; Vercel `success`; smoke público OK; migración segura #81 `Success`.
 - No se modificaron datos ajenos ni se aceptó `--accept-data-loss`.
+
+### `CODEX - META HISTORIAS Y CARRUSELES`
+
+Entrada agregada por la tarea programada diaria de propagación (2026-10-21), a partir de la
+sección "Codex — META historias y carruseles — 2026-10-20" de `COORDINACION_CLAUDE_CODEX.md`.
+
+- Agente: Codex.
+- Proyecto: Instagram Stories y carruseles de cinco diapositivas (commit `f0e40a4d`), integrado
+  y publicado directamente en `main` (sin rama propia; se preservaron cambios locales existentes
+  mediante stash recuperable antes de sincronizar e integrar). Verificación local: worker
+  `20/20`, carrusel `4/4`, builds correctos.
+- Rama: ninguna — trabajo hecho directo sobre `main`. Sin reserva activa.
+- Estado al momento de esa entrada: pendiente de la siguiente sesión aplicar la migración
+  `20261020130000_add_social_opportunity_assets`, verificar deployment y probar producción con
+  sesión real. Verificado hoy contra `git log`: ambos pasos se completaron el mismo día
+  (`af32e2b` migración vía workflow, `15dbad9` registro de deployment en
+  `CONTROLADOR_DE_VERSIONES.md`), por lo que no se duplica aquí ese detalle.
+- Importante para cualquiera que retome esto: horas más tarde, el mismo 2026-10-20, tres commits
+  (`43d1ad5`, `8022e9b`, `1cc0639`) deshabilitaron los carruseles de Instagram de forma global
+  (generación, publicación en el worker y la ruta de publicación), dejando solo Instagram Stories
+  activo. Esos tres commits no agregaron entrada propia en `COORDINACION_CLAUDE_CODEX.md`, así que
+  esta tarea de propagación no tiene una sección de origen para ellos, pero se anota aquí para que
+  no se pierda el contexto: los carruseles de esta conversación quedaron desactivados en
+  producción, no retirados (la oportunidad se conserva en historial para reactivación futura).
