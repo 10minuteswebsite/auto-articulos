@@ -1,5 +1,11 @@
 # CHECKPOINTS
 
+## Checkpoint — control de no indexar artículos — 2026-10-21 — abierto
+
+- Punto cero: login público de Artículos = 200; sin sesión autenticada.
+- Commit `7531dc5c` en `main`; alcance: preferencia por usuario, migración, Configuración, Publicar y Oportunidades.
+- Falta cerrar: deployment `success`, guardar/recargar en producción y pruebas con dependencias disponibles.
+
 ## Checkpoint — revisión factual de blogs — 2026-10-21 — en curso
 
 - Task: `REVISION-CONTENIDO-BLOGS-20261021`.

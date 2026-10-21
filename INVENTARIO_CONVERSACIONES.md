@@ -1,5 +1,10 @@
 # Inventario de conversaciones
 
+## Codex — CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21
+
+- Commit `7531dc5c` publicado en `main`, sin ramas/worktrees nuevos.
+- Abierto hasta verificar deployment y flujo autenticado.
+
 ## Codex — estilo problema-solución por defecto — 2026-10-19
 
 - Task `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`; commit `e0b6cf8a` publicado en `main`; deployment `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ` (`success`).

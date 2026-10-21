@@ -1,5 +1,10 @@
 # CONTROLADOR DE VERSIONES
 
+## Registro — 2026-10-21 — CONTROL NO INDEXAR ARTÍCULOS
+
+- Commit `7531dc5c` publicado en `main`; no se creó rama ni worktree.
+- Deployment productivo: pendiente de verificación explícita.
+
 ## Versión — 2026-10-21 — mensaje de login genérico
 
 - Commit `45569e14` en `main`; worker por GitHub Actions (toma `main` en cada corrida). Sin migraciones.

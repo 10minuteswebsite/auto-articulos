@@ -1,5 +1,11 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## Codex — CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21
+
+- Publicado únicamente en `main`: `7531dc5c`.
+- `User.disableIndexing` es la preferencia por cuenta; el selector explícito del lote prevalece y la API aplica fallback server-side.
+- Evidencia: login público 200 y commit visible en GitHub. Sin sesión autenticada/dependencias locales, no se declara cierre productivo.
+
 ## Claude — mensaje de login genérico — 2026-10-21
 
 - Capitán de migración: Claude reclamó para este cambio; sin migraciones. Task `LOGIN-MENSAJE-GENERICO-20261021`.

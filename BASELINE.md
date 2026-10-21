@@ -1,5 +1,11 @@
 # BASELINE — Contrato previo HUB/OAuth
 
+## Contrato añadido — control de autoindexación por usuario — 2026-10-21
+
+- Configuración debe persistir si los nuevos artículos solicitan indexación automática.
+- Publicar y Oportunidades deben iniciar el selector con esa preferencia; una decisión explícita prevalece.
+- Default histórico: indexación activada (`false`).
+
 ## Contrato editorial — veracidad y fuentes — 2026-10-21
 
 - Los prompts de escritura de artículos, títulos y FAQs no pueden inventar datos, fechas, leyes, nombres, cifras ni estados actuales.
