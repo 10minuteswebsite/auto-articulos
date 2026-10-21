@@ -1,12 +1,13 @@
 # HANDOFF VIGENTE — 2026-10-19
 
-## En curso — estado HUB→MCP para Redes — 2026-10-21
+## Cierre condicionado — estado HUB→MCP para Redes — 2026-10-21
 
 - Task ID: `MCP-HUB-REDES-20261021`.
-- Punto cero: `origin/main` en `c47b4878`; producción pública confirma ambos descubrimientos OAuth MCP 200, `/api/mcp/capabilities` 401 sin autenticación y scopes `oportunidades:leer`/`oportunidades:publicar`.
-- Cambio preparado: el MCP consulta el permiso efectivo de Redes del HUB; filtra herramientas/prompts sociales, comunica el estado en `initialize` y devuelve un mensaje accionable si se intenta operar con Redes apagado.
+- Commit publicado en `main`: `fd19b682` (`fix: propagate HUB Redes entitlement to MCP`).
+- Producción pública posterior: Artículos `/login` 200, Redes `/login` 200, descubrimiento OAuth MCP 200 y `/api/mcp/capabilities` 401 sin autenticación.
+- Cambio: el MCP consulta el permiso efectivo de Redes del HUB; filtra herramientas/prompts sociales, comunica el estado en `initialize` y devuelve un mensaje accionable si se intenta operar con Redes apagado.
 - Pruebas locales: 247/247; `git diff --check` limpio. Typecheck bloqueado por error preexistente no relacionado: `latestBingChange` declarado sin uso en `bing-client-change.test.ts`.
-- Estado: pendiente de commit, deployment y verificación autenticada en producción.
+- Limitación: falta prueba autenticada de `initialize`/`tools/list` con una cuenta HUB activada y desactivada; no se declara verificación funcional completa ni éxito de deployment Vercel sin esa evidencia.
 
 ## CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21 — desplegado y verificado
 

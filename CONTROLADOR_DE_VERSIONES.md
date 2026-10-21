@@ -1,12 +1,15 @@
 # CONTROLADOR DE VERSIONES
 
-## En curso — MCP HUB→Redes — 2026-10-21
+## Versión — MCP HUB→Redes — 2026-10-21 — cierre condicionado
 
 - Task ID: `MCP-HUB-REDES-20261021`.
 - Punto cero: `origin/main` = `c47b4878`; checkout único autorizado, sin ramas ni worktrees adicionales.
 - Alcance: `apps/web/src/app/api/mcp/route.ts`, catálogo/prompts MCP y prueba de regresión; sin migración ni cambios de datos.
 - Verificación previa: 247/247 pruebas; typecheck tiene un fallo preexistente en `bing-client-change.test.ts` por `latestBingChange` no usado.
-- Publicación y deployment: pendientes; no declarar éxito hasta comprobar producción autenticada.
+- Commit publicado: `fd19b682` en `main`.
+- Smoke productivo: `/login` de Artículos y Redes 200; descubrimiento MCP 200; capacidades sin token 401.
+- Deployment Vercel: no se pudo asociar un deployment al SHA desde la inspección disponible; no se declara `Ready` por inferencia.
+- Pendiente: prueba autenticada de activación/desactivación HUB→MCP; el typecheck conserva un fallo preexistente en `bing-client-change.test.ts`.
 
 ## Versión — 2026-10-21 — regla factual de contenido
 
