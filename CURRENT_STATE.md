@@ -9,7 +9,9 @@
 - Verificación en producción: último error P2022 a las 15:56:14; después, ninguno. Acceso real desde el HUB a las 16:03:00: `GET /auth/hub` 303 sin error. Smoke: `/login` Artículos y Redes 200, `/api/me` sin sesión 401.
 - Corrección del cierre previo: el cierre «CERRADO» de `d8cebcb0` era prematuro, no se había aplicado la migración.
 - Lección: migración antes o junto con el merge; verificar la columna en la base, no solo una pantalla.
-- Pendiente: opción `safe_user_indexing_preference` en `migrate.yml` para repetibilidad.
+- Repetibilidad: opción `safe_user_indexing_preference` añadida a `migrate.yml` (commit `5e03ce76`, solo aditiva, no ejecutada porque la columna ya existe).
+- Punto cero siguiente: `main` en `5e03ce76`; producción sana (`/login` 200 en Artículos y Redes, `/api/me` 401 sin sesión, `/auth/hub` con código inválido 307, con acceso real 303). Estado: CERRADO.
+- BASELINE no cambia: no hubo cambio visual ni de comportamiento protegido.
 
 ## Cierre condicionado — estado HUB→MCP para Redes — 2026-10-21
 

@@ -5575,3 +5575,5 @@ valores — 2026-10-19").
 ## Registro — 2026-10-21 — ARTICULOS-500-AUTH-HUB
 
 - Sin commit de código ni deployment. Cambio de datos: columna `User.disableIndexing` aplicada manualmente en Supabase; migración `20261021120000_add_user_indexing_preference` ya estaba en `main`.
+
+- Commits: `1a6b48ba` (documentación) y `5e03ce76` (`migrate.yml`, opción aditiva). Producción verificada después.

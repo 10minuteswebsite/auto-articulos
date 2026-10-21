@@ -407,3 +407,5 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Punto cero: `main` en `1c8d2803`; producción con 500 por columna `User.disableIndexing` ausente.
 - Corrección: ALTER TABLE aditivo en Supabase (Milton). Sin cambio de código.
 - Cierre: `/auth/hub` 303 (16:03) sin P2022; `/login` 200 en Artículos y Redes. Siguiente punto cero: producción con la columna aplicada.
+
+- Cierre final: commit `5e03ce76` en `main` (opción `safe_user_indexing_preference` en `migrate.yml`). Smoke de producción posterior sano. CERRADO.

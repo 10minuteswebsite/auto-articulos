@@ -1,5 +1,10 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Causa raíz durable — columna nueva en schema sin migración aplicada — 2026-10-21
+
+- `ARTICULOS-500-AUTH-HUB-20261021`: declarar un campo en `schema.prisma` hace que Prisma lo pida en TODAS las consultas de `User`; si la columna no existe en la base, falla todo el acceso (P2022), no solo la pantalla nueva.
+- Regla: la migración se aplica en la base antes o junto con el despliegue, y el cierre se verifica en la base y con un acceso real, no solo con una pantalla que use SQL a mano. Para columnas nuevas hay un botón seguro en `migrate.yml` (`safe_*`); no usar `db push` (ver `ALERTA_SCHEMA_DESALINEADO_HUB.md`).
+
 ## Decisión durable — autoindexación configurable por usuario — 2026-10-21
 
 - La preferencia pertenece a cada usuario de Artículos, no a una variable global.
