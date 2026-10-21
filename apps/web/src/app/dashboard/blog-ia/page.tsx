@@ -120,7 +120,10 @@ export default function BlogIaPage() {
         navText: sg.nav.length ? linksToText(sg.nav) : f.navText,
         footerText: sg.footerLinks.length ? linksToText(sg.footerLinks) : f.footerText,
       }));
-      setNotice("Esto fue lo que encontramos en tu sitio. Revisa cada dato antes de continuar: puede que algo no sea correcto.");
+      const found = !!(sg.name || sg.logoUrl || sg.accentColor || sg.whatsapp || sg.nav.length || sg.footerLinks.length);
+      setNotice(found
+        ? "Esto fue lo que encontramos en tu sitio. Revisa cada dato antes de continuar: puede que algo no sea correcto."
+        : "Leímos tu sitio pero no encontramos datos para sugerirte (puede que arme su contenido con JavaScript). Escríbelos a mano.");
     } catch {
       setError("No pudimos conectar con el servidor. Inténtalo de nuevo.");
     } finally {
