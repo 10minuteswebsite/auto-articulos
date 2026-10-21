@@ -1,5 +1,9 @@
 # Inventario de conversaciones
 
+## Claude — AUTO ARTICULOS 500 — 2026-10-21
+
+- Cerrado: columna `disableIndexing` aplicada en producción; sin reservas activas. Corrige el cierre de Codex «CONTROL NO INDEXAR ARTÍCULOS» (migración no aplicada).
+
 ## Codex — CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21
 
 - Commit `7531dc5c` publicado en `main`, sin ramas/worktrees nuevos.

@@ -1,5 +1,10 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## Claude — AUTO ARTICULOS 500 en /auth/hub — 2026-10-21
+
+- Task `ARTICULOS-500-AUTH-HUB-20261021`. Causa: columna `User.disableIndexing` ausente en producción (migración `20261021120000` del commit `7531dc5c` nunca aplicada). Arreglo: ALTER TABLE aditivo ejecutado por Milton en Supabase.
+- Verificado: `/auth/hub` 303 a las 16:03 sin P2022. Esto reabre y corrige el cierre de «CONTROL NO INDEXAR ARTÍCULOS».
+
 ## Codex — CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21
 
 - Publicado únicamente en `main`: `7531dc5c`.

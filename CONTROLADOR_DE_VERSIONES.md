@@ -5570,3 +5570,8 @@ valores — 2026-10-19").
 - Vercel: deployments del commit funcional `success`; smoke `articulos`/`redes` OK.
 - Migración segura: workflow #81 (`39347494879`) `Success`; no se aceptó pérdida de datos.
 - Limitaciones: smoke en `seototal` devuelve 307 al HUB por diseño; typecheck aislado conserva el error previo `latestBingChange` no usado.
+
+
+## Registro — 2026-10-21 — ARTICULOS-500-AUTH-HUB
+
+- Sin commit de código ni deployment. Cambio de datos: columna `User.disableIndexing` aplicada manualmente en Supabase; migración `20261021120000_add_user_indexing_preference` ya estaba en `main`.

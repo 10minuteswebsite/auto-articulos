@@ -1,5 +1,16 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## INCIDENTE AUTO ARTICULOS 500 en /auth/hub — 2026-10-21 — resuelto y verificado
+
+- Task ID: `ARTICULOS-500-AUTH-HUB-20261021`.
+- Síntoma: `articulos.lasolucionweb.net/auth/hub?app=seo-total&code=...` devolvía HTTP 500 al entrar desde el HUB.
+- Causa raíz (logs de Vercel): `PrismaClientKnownRequestError P2022`, la columna `User.disableIndexing` no existía en la base de producción. El commit `7531dc5c` (Codex, CONTROL NO INDEXAR ARTÍCULOS) la declaró en `schema.prisma` junto con la migración `20261021120000`, que nunca se aplicó; todas las consultas de `User` por Prisma fallaban (también `/api/me` raw 42703 y la revalidación de acceso HUB).
+- Corrección: Milton ejecutó en Supabase `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "disableIndexing" BOOLEAN NOT NULL DEFAULT false;` (aditivo, sin tocar datos). No hubo cambio de código ni deployment.
+- Verificación en producción: último error P2022 a las 15:56:14; después, ninguno. Acceso real desde el HUB a las 16:03:00: `GET /auth/hub` 303 sin error. Smoke: `/login` Artículos y Redes 200, `/api/me` sin sesión 401.
+- Corrección del cierre previo: el cierre «CERRADO» de `d8cebcb0` era prematuro, no se había aplicado la migración.
+- Lección: migración antes o junto con el merge; verificar la columna en la base, no solo una pantalla.
+- Pendiente: opción `safe_user_indexing_preference` en `migrate.yml` para repetibilidad.
+
 ## Cierre condicionado — estado HUB→MCP para Redes — 2026-10-21
 
 - Task ID: `MCP-HUB-REDES-20261021`.
