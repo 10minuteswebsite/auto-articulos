@@ -1,5 +1,13 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## Claude — mensaje de login genérico — 2026-10-21
+
+- Capitán de migración: Claude reclamó para este cambio; sin migraciones. Task `LOGIN-MENSAJE-GENERICO-20261021`.
+- Alcance: solo texto de error en `apps/worker`. Protegido: lógica de login, PLATFORM_SERVERS, reintentos.
+- Decisión de Milton: el mensaje no debe nombrar servidores.
+- Siguiente paso: observar el próximo fallo de login real y confirmar el texto en la interfaz.
+
+
 ## Codex — META historias y carruseles — 2026-10-20
 
 - Commit `f0e40a4d` integrado y publicado en `main`.

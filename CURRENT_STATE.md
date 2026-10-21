@@ -1,5 +1,13 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## Cierre — mensaje de login genérico — 2026-10-21
+
+- Task ID: `LOGIN-MENSAJE-GENERICO-20261021`. Commit `45569e14` en `main` (worker: `categorySync.ts`, `automation/10minutesWebsite.ts`).
+- Punto cero previo: `main` en `270eafa9`, workers `success`. Sin migración, datos ni permisos.
+- Cambio: los errores de inicio de sesión ya no nombran dominios ni servidores ni el «detalle técnico»; solo indican que las credenciales guardadas no sirven.
+- Verificación: `tsc` sin errores nuevos en los archivos tocados. El worker toma el código de `main` en cada corrida; la comprobación con un login fallido real queda pendiente de un caso natural.
+
+
 ## META — historias y carruseles — 2026-10-20
 
 - Commit en `main`: `943a0231` (`fix(web): remove unused admin image flag`), deployment Vercel `9ikVLnzfaDe8nZAMR2JdTarnx5x8`, `Ready`.

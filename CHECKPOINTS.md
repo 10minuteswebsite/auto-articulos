@@ -1,5 +1,11 @@
 # CHECKPOINTS
 
+## Checkpoint — mensaje de login genérico — 2026-10-21
+
+- Task `LOGIN-MENSAJE-GENERICO-20261021`; código `45569e14` en `main`. Punto cero previo `270eafa9`.
+- Sin migración. Solo textos de error del worker. E2E con credenciales inválidas reales: pendiente.
+
+
 ## Checkpoint — META historias y carruseles — 2026-10-20 — pendiente de producción
 
 - Commits de código: `f0e40a4d` y corrección de build `943a0231` en `main`; deployment Vercel `9ikVLnzfaDe8nZAMR2JdTarnx5x8`, `Ready`.

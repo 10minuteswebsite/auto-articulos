@@ -1,5 +1,10 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — 2026-10-21 — mensaje de login genérico
+
+- Commit `45569e14` en `main`; worker por GitHub Actions (toma `main` en cada corrida). Sin migraciones.
+
+
 ## Versión — 2026-10-20 — META historias y carruseles
 
 - Commit: `f0e40a4d` en `main`, enviado a GitHub.
