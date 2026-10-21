@@ -591,8 +591,8 @@ export async function POST(request: Request) {
     // por día, no cuántas propuestas se crean (decisión de Milton, 2026-10-11).
     // Se comprueba al pulsar «Publicar» (publish/route.ts) y, como respaldo, en
     // el worker. Cada pulsación crea una propuesta por red.
-    const integrationsWithinLimit: string[] = [...integrations];
-    const remainingByPlatform = new Map<string, number>(integrations.map((platform) => [platform, 1]));
+    const integrationsWithinLimit: string[] = integrations.filter((platform) => platform !== "instagram-carousel");
+    const remainingByPlatform = new Map<string, number>(integrationsWithinLimit.map((platform) => [platform, 1]));
 
     if (integrationsWithinLimit.length === 0) {
       console.warn("[social-opportunities/generate] red solicitada sin conexión efectiva", {
