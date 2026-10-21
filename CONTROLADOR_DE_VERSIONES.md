@@ -7,7 +7,7 @@
 - Migraciones: `20261016120000_add_blog_ia`, `20261021120000_blog_ia_wizard`; aplicadas antes del despliegue por el workflow (run `39668041448`), idempotentes, con verificación posterior.
 - Verificación previa: web 288/288, blog 52/52, worker 26/26 (+6 sitemap), build web (Vercel) y worker OK; typecheck solo con el fallo preexistente de `bing-client-change.test.ts`.
 - Deployment Vercel: `success` para el commit fusionado. Smoke público OK.
-- Pendiente: prueba autenticada y todo lo que depende de Cloudflare.
+- Verificación autenticada hecha (ver CURRENT_STATE). Posterior: PR #641 `dd9f6728` (texto del análisis vacío). Pendiente: todo lo que depende de Cloudflare.
 
 ## Versión — MCP HUB→Redes — 2026-10-21 — cierre condicionado
 

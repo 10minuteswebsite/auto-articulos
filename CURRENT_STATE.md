@@ -1,13 +1,13 @@
 # HANDOFF VIGENTE — 2026-10-19
 
-## BLOG IA Fases 2-3 — 2026-10-21 — en `main`, OCULTO a clientes; verificación autenticada pendiente
+## BLOG IA Fases 2-3 — 2026-10-21 — en `main`, OCULTO a clientes; verificado en producción con sesión real
 
 - Task ID: `BLOG-IA-FASE-2-3-20261021`. PR #598 fusionado: commit `74f61ee09d964ac28b080205abc4335d0514a402`.
 - Orden: migración ANTES del código. Workflow `Migración manual de base de datos` con la opción nueva `safe_blog_ia` (run `39668041448`, rama del PR): aplicó SOLO `20261016120000_add_blog_ia` y `20261021120000_blog_ia_wizard` (límite de bloqueo 5 s) y su verificación de solo lectura pasó (valor `BLOG`, tabla `BlogIaBlog`, 6 columnas, `hostname` opcional). El paso general `migrate deploy` se omitió a propósito.
 - Vercel (`auto-articulos-web` y `web`): `success` en la vista previa y en el commit fusionado.
 - Producción pública posterior: Artículos y Redes `/login` 200; `/api/me` 401; `/api/blog-ia` y `/api/blog-ia/analyze` 401 sin sesión; `/dashboard/blog-ia` sin sesión 307 al login; el login no menciona BLOG IA.
 - BLOG IA está OCULTO a los clientes por orden de Milton: módulo opt-in `secret` (solo admin o «Habilitado»), 403/«Página no disponible» sin nombrarlo, y el gancho de «Actualizaciones» ignora los commits de BLOG IA. No hay Worker, D1 con datos ni dominio público: el Worker del blog NO está desplegado (en Cloudflare existen D1 `blog-ia` y R2 `blog-ia-media`, vacíos y privados).
-- Pendiente obligatorio: prueba AUTENTICADA en producción (cuenta cliente sin el módulo: sin menú ni pantalla; cuenta admin: pantalla visible) y confirmación de que `/dashboard` sigue cargando. No se declara cierre funcional completo hasta entonces. Aún sin E2E real: Worker/D1/R2/Custom Hostnames, OpenAI dentro de la cola, Search Console del blog.
+- Verificación AUTENTICADA en producción (2026-10-21, panel lateral): admin `miltondavila@gmail.com` ve la pantalla BLOG IA, el asistente guarda marca y valida dominios, `/dashboard` y `/api/blog-ia` 200; cliente `lorenalvarez30@gmail.com`: `/dashboard` 200, menú SIN BLOG IA, `/dashboard/blog-ia` = «Página no disponible», `/api/blog-ia` 403 «No disponible para tu cuenta.», sin la palabra «BLOG IA» en pantalla. Fix posterior PR #641 (`dd9f6728`, aviso del análisis vacío) desplegado, Vercel `success`. Aún sin E2E real: Worker/D1/R2/Custom Hostnames, OpenAI dentro de la cola, Search Console del blog.
 - Capitanía de migración liberada.
 
 ## INCIDENTE AUTO ARTICULOS 500 en /auth/hub — 2026-10-21 — resuelto y verificado
