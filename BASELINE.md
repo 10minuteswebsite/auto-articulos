@@ -1,5 +1,12 @@
 # BASELINE — Contrato previo HUB/OAuth
 
+## Contrato editorial — veracidad y fuentes — 2026-10-21
+
+- Los prompts de escritura de artículos, títulos y FAQs no pueden inventar datos, fechas, leyes, nombres, cifras ni estados actuales.
+- Todo dato externo, cambiante o sensible debe estar respaldado por material suministrado o por una fuente directa y trazable de un organismo gubernamental, regulador, universidad, asociación profesional, investigación primaria u otra institución autorizada.
+- Si no existe respaldo, el modelo debe omitir la afirmación o declarar que no pudo verificarse; nunca debe fabricar citas o URLs.
+- Este contrato no aplica al prompt de 10MWS y no reemplaza los prompts editoriales existentes.
+
 ## Contrato añadido — META historias y carruseles — 2026-10-20
 
 - Carrusel Instagram: exactamente cinco láminas, `1080×1350`, numeradas `01/05` a `05/05`.

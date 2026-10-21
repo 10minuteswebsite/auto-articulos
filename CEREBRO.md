@@ -1,5 +1,9 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión editorial durable — veracidad de contenido — 2026-10-21
+
+Toda escritura asistida debe separar evidencia de inferencia. Los prompts de artículos, títulos y FAQs deben rechazar invenciones, omitir datos no verificables y pedir fuentes directas de organismos gubernamentales o instituciones reconocidas para afirmaciones externas, cambiantes o sensibles. Esta regla se añade como capa de seguridad y no reemplaza las instrucciones editoriales existentes. El prompt de 10MWS queda fuera del alcance.
+
 ## Decisión editorial durable — 2026-10-19
 
 - Por decisión de Milton, el predeterminado global pasó de STANDARD a `GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION`, mediante backfill de `User.defaultPromptId`; el selector individual permanece intacto.

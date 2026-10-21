@@ -1,5 +1,11 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## En curso — revisión factual de blogs — 2026-10-21
+
+- Punto cero local: checkout detached en `origin/main`/`14fc2333`; no se creó rama ni worktree.
+- Cambio local: norma factual añadida a generación de artículos, títulos y FAQs; 10MWS no modificado.
+- Aún no es cierre productivo: faltan pruebas, publicación a `main`, deployment y verificación en producción.
+
 ## Cierre — mensaje de login genérico — 2026-10-21
 
 - Task ID: `LOGIN-MENSAJE-GENERICO-20261021`. Commit `45569e14` en `main` (worker: `categorySync.ts`, `automation/10minutesWebsite.ts`).

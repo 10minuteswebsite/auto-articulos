@@ -2464,3 +2464,9 @@ sección "Codex — META historias y carruseles — 2026-10-20" de `COORDINACION
   esta tarea de propagación no tiene una sección de origen para ellos, pero se anota aquí para que
   no se pierda el contexto: los carruseles de esta conversación quedaron desactivados en
   producción, no retirados (la oportunidad se conserva en historial para reactivación futura).
+# REVISION-CONTENIDO-BLOGS-20261021
+
+- Solicitud de Inés: evitar falsedades en artículos generados por IA.
+- Implementación: regla de autocontrol factual y fuentes serias en generación de artículos, títulos y FAQs; no se destruyó el contenido existente de los prompts ni se tocó 10MWS.
+- Estado: en verificación; falta publicar y comprobar producción.
+

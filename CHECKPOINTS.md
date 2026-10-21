@@ -1,5 +1,13 @@
 # CHECKPOINTS
 
+## Checkpoint — revisión factual de blogs — 2026-10-21 — en curso
+
+- Task: `REVISION-CONTENIDO-BLOGS-20261021`.
+- Punto cero: `origin/main` en `14fc2333`; producción aún debe verificarse contra el deployment vigente antes de declarar el cierre.
+- Código local: regla factual en generador de artículos, FAQs y títulos; test unitario de contrato añadido.
+- Exclusión respetada: no se modificó el prompt de 10MWS.
+- Cierre condicionado a: suite relevante, commit en `main`, deployment `success` y comprobación HTTP/funcional en producción.
+
 ## Checkpoint — mensaje de login genérico — 2026-10-21
 
 - Task `LOGIN-MENSAJE-GENERICO-20261021`; código `45569e14` en `main`. Punto cero previo `270eafa9`.

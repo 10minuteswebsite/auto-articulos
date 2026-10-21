@@ -12584,3 +12584,10 @@ en producción esa misma tarde del 2026-10-20, sin que los commits que lo hicier
 propia entrada firmada en este documento.
 
 Responsable: Claude (tarea programada diaria de propagación).
+# Task `REVISION-CONTENIDO-BLOGS-20261021` — regla factual para prompts de escritura
+
+- Alcance: prompts del sistema que generan artículos, títulos y FAQs; se excluye expresamente el prompt de 10MWS.
+- Regla durable: no inventar hechos, cifras, fechas, leyes, nombres ni afirmaciones actuales; omitir lo no verificable; exigir fuentes directas, trazables y preferentemente gubernamentales o institucionales serias cuando la afirmación sea externa o sensible.
+- Cambio aplicado: `apps/worker/src/automation/generateCustomArticle.ts`, `apps/worker/src/faqPrompt.ts`, `apps/web/src/lib/title-generation-core.ts`.
+- Verificación pendiente: tests, publicación desde `main` y comprobación HTTP del deployment productivo.
+
