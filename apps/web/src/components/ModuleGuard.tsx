@@ -129,7 +129,7 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
       >
         <div style={{ fontSize: 40, marginBottom: 12 }}></div>
         <h2 style={{ fontSize: 22, color: "#1d1d1f", margin: "0 0 10px" }}>
-          Módulo en mantenimiento
+          {matchingModule.secret ? "Página no disponible" : "Módulo en mantenimiento"}
         </h2>
         <p
           style={{
@@ -139,9 +139,16 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
             margin: "0 0 20px",
           }}
         >
-          La sección <strong>{matchingModule.label}</strong> se encuentra
-          temporalmente en desarrollo o mantenimiento para tu cuenta. Vuelve a
-          intentarlo más tarde o contacta al administrador.
+          {matchingModule.secret ? (
+            // Función oculta (p. ej. BLOG IA): no se nombra, para que ningún cliente sepa que existe.
+            <>Esta página no está disponible para tu cuenta.</>
+          ) : (
+            <>
+              La sección <strong>{matchingModule.label}</strong> se encuentra
+              temporalmente en desarrollo o mantenimiento para tu cuenta. Vuelve a
+              intentarlo más tarde o contacta al administrador.
+            </>
+          )}
         </p>
         <Link
           href="/dashboard"

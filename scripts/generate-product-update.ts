@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { prisma } from "@auto-articulos/db";
+import { hiddenFeatureOf } from "./product-update-hidden";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const MODEL = process.env.PRODUCT_UPDATE_MODEL ?? "gpt-5-mini";
@@ -88,6 +89,8 @@ async function main() {
 
   const subject = git("show", "-s", "--format=%s", commit);
   const diff = git("show", "--format=", "--no-ext-diff", commit);
+  const hidden = hiddenFeatureOf(subject, git("show", "--format=", "--name-only", commit).split("\n").filter(Boolean));
+  if (hidden) return console.log(`[actualizaciones] ${commit}: pertenece a «${hidden}», función oculta; no se anuncia a los clientes.`);
   const update = await generate(commit, subject, diff);
   if (!valid(update)) return console.log(`[actualizaciones] ${commit}: sin cambio visible para usuarios.`);
 

@@ -122,8 +122,8 @@ function moduleEnabled(raw?: string | null): boolean {
 export function authorize(actor: Actor): Result<string> {
   if (!actor.userId) return fail(401, "No autorizado");
   const isAdmin = actor.role === "admin";
-  if (!isAdmin && !moduleEnabled(actor.disabledModules)) return fail(403, "BLOG IA todavía no está habilitado para tu cuenta.");
-  if (!isAdmin && !actor.articulosAllowed) return fail(403, "Tu cuenta no tiene acceso al producto ARTICULOS.");
+  if (!isAdmin && !moduleEnabled(actor.disabledModules)) return fail(403, "No disponible para tu cuenta.");
+  if (!isAdmin && !actor.articulosAllowed) return fail(403, "No disponible para tu cuenta.");
   return { ok: true, value: actor.userId };
 }
 

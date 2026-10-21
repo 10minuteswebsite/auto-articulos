@@ -125,3 +125,14 @@ test("seototal: 'Deshabilitado' oculta Redes", () => {
   const user = { role: "user", disabledModules: JSON.stringify({ "oportunidades-redes": "disabled" }) };
   assert.equal(getEffectiveDisabledModules(user, []).includes("oportunidades-redes"), true);
 });
+
+test("BLOG IA es una función oculta: opt-in, secreta y nunca visible para un cliente normal", () => {
+  const mod = SYSTEM_MODULES.find((m) => m.id === "blog-ia");
+  assert.ok(mod && mod.optIn === true && mod.secret === true);
+  // Un cliente normal (sin «Habilitado») la tiene deshabilitada, también con otras cuentas o con módulos globales vacíos.
+  for (const disabledModules of [null, "{}", "[]", JSON.stringify({ "blog-ia": "inherit" }), JSON.stringify({ "blog-ia": "disabled" })]) {
+    assert.ok(getEffectiveDisabledModules({ role: "user", disabledModules }, []).includes("blog-ia"), String(disabledModules));
+  }
+  assert.equal(getEffectiveDisabledModules({ role: "user", disabledModules: enabled("blog-ia") }, []).includes("blog-ia"), false);
+  assert.deepEqual(getEffectiveDisabledModules({ role: "admin", disabledModules: null }, []), []);
+});
