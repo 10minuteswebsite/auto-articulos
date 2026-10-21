@@ -27,6 +27,7 @@ const MAX_EXCLUDED_TOPICS_LEN = 500;
 
 export async function GET() {
   const user = await getCurrentUser();
+  const indexingPreference = await prisma.$queryRaw<Array<{ disableIndexing: boolean }>>`SELECT "disableIndexing" FROM "User" WHERE id = ${user.id}`;
   const actingAdmin = await getActingAdmin();
   const globalDisabledModules = await getGlobalDisabledModules();
   const socialHost = await getSocialHostContext();
@@ -51,7 +52,7 @@ export async function GET() {
         ? { id: actingAdmin.id, email: actingAdmin.email, name: displayName(actingAdmin) }
         : null,
       maxTitlesPerBatch: user.maxTitlesPerBatch,
-      disableIndexing: user.disableIndexing,
+      disableIndexing: Boolean(indexingPreference[0]?.disableIndexing),
       dailyArticleLimit: user.dailyArticleLimit,
       monthlyArticleLimit: user.monthlyArticleLimit,
       // Servidor donde vive su cuenta de la plataforma. La interfaz lo usa
@@ -136,14 +137,14 @@ export async function PATCH(request: NextRequest) {
     timeZone?: string;
     excludedTopics?: string | null;
     hasImageCredits?: boolean;
-    disableIndexing?: boolean;
   } = {};
 
-  if ("disableIndexing" in body) {
-    if (typeof body.disableIndexing !== "boolean") {
-      return NextResponse.json({ error: "disableIndexing debe ser booleano" }, { status: 400 });
-    }
-    data.disableIndexing = body.disableIndexing;
+  const disableIndexing = body.disableIndexing;
+  if ("disableIndexing" in body && typeof disableIndexing !== "boolean") {
+    return NextResponse.json({ error: "disableIndexing debe ser booleano" }, { status: 400 });
+  }
+  if (typeof disableIndexing === "boolean") {
+    await prisma.$executeRaw`UPDATE "User" SET "disableIndexing" = ${disableIndexing} WHERE id = ${userId}`;
   }
 
   if ("contentLanguage" in body) {

@@ -47,10 +47,10 @@ export async function POST(request: NextRequest) {
         hasImageCredits: true,
         defaultPromptId: true,
         platformDomain: true,
-        disableIndexing: true,
       },
     }),
   ]);
+  const indexingPreference = await prisma.$queryRaw<Array<{ disableIndexing: boolean }>>`SELECT "disableIndexing" FROM "User" WHERE id = ${userId}`;
   if (!(await checkTrialAccess(user))) {
     return NextResponse.json(
       {
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
           userId,
           categoryId: group.categoryId,
           status: "running",
-          disableIndexing: typeof disableIndexing === "boolean" ? disableIndexing : user.disableIndexing,
+          disableIndexing: typeof disableIndexing === "boolean" ? disableIndexing : Boolean(indexingPreference[0]?.disableIndexing),
           // Ver POST /api/runs: vacío deja NULL y el worker usa el idioma
           // configurado del usuario.
           contentLanguage:
