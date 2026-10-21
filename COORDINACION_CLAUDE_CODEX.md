@@ -2,6 +2,7 @@
 
 ## Claude — BLOG IA: Fases 2 y 3 (wizard, portadas, desactivar/reactivar, sitemap) — 2026-10-21
 
+- **Capitán de migración:** Claude — reclamado 2026-10-21 para este lote (migraciones `20261016120000_add_blog_ia` y `20261021120000_blog_ia_wizard`); el reclamo del 15/10 (solo documentación) se liberó y quedó absorbido. Nadie más ejecuta Prisma hasta su liberación.
 - Task `BLOG-IA-FASE-2-3-20261021`. Milton es el dueño de la decisión; Claude es propietario del proyecto, Codex responde preguntas (canal fuera del repo). Estado: PR abierto, SIN fusionar; Milton autorizó subir a GitHub, la fusión se confirma aparte.
 - Qué entra: módulo opt-in `blog-ia` (solo admins y cuentas «Habilitado»; nadie más lo ve), pantalla `/dashboard/blog-ia` y rutas `/api/blog-ia/*`; `apps/blog` (Worker del blog público, aún NO desplegado: no hay Worker, D1, R2 ni Custom Hostnames reales); portadas con OpenAI calidad baja; cola BLOG (`publishMethod = BLOG`); sitemap diario del blog por la conexión de Search Console ya existente.
 - Decisiones de Milton: con BLOG IA activo el artículo va SOLO al blog; al desactivar, las publicaciones se detienen y NO se cambia `publishMethod`; sin prompt por defecto (si el lote no tiene prompt, se pide elegir uno); imágenes: OpenAI calidad baja (≈0,005 USD/imagen).
