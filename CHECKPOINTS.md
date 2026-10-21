@@ -358,3 +358,13 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Smoke: Artículos y Redes OK; endpoints protegidos 307/401 según contrato.
 - Migración: workflow #81 (`39347494879`) `Success`, sin `--accept-data-loss`.
 - Código/documentación en `main`; no se creó rama nueva ni worktree.
+
+
+## Checkpoint — Google Business: mensaje de error accionable — 2026-10-21
+
+- Código integrado en `main`: `6ec4fa8ca6c9f5a172c5934baab80d63b6661424`.
+- Cambio: el error de conexión de Google Business Profile muestra una explicación sobre correo/cuenta incorrecta o ficha no verificada y un botón para volver a Conexiones de Google Business Profile.
+- No se incluyeron la maqueta HTML, migraciones, permisos ni publicaciones.
+- `git diff --check`: correcto. Typecheck y suite web quedan no concluyentes por errores preexistentes y restricción IPC del entorno.
+- Estado de producción: deployment de Vercel pendiente de confirmación; no se forzó OAuth ni se publicó contenido.
+- Estado documental: ARCHIVADO como pendiente de verificación productiva.
