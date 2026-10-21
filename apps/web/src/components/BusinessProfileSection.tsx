@@ -6,6 +6,7 @@ import { buttonStyle, disabledStyle, secondaryButtonStyle } from "./dashboard-ui
 import { CONNECTION_LABELS, CONNECTION_SELECT_STYLE, ConnectionActions, ConnectionActiveBox, ConnectionCard, ConnectionGuide, ConnectionMessage } from "./connection-ui";
 import { CONNECTION_GUIDES } from "@/lib/connection-guides";
 import { friendlyConnectionError } from "@/lib/composio-error-message";
+import { useConnectionNotice } from "./connection-return-context";
 
 type LocationOption = {
   accountName: string;
@@ -34,6 +35,7 @@ type PostPeerStatus = {
 const linkButton = { ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" } as const;
 
 export default function BusinessProfileSection() {
+  const returnNotice = useConnectionNotice("business-profile");
   const [data, setData] = useState<BusinessProfileData | null>(null);
   const [postPeer, setPostPeer] = useState<PostPeerStatus | null>(null);
   const [selected, setSelected] = useState("");
@@ -124,6 +126,17 @@ export default function BusinessProfileSection() {
       lead="En este sitio conectas la cuenta de Google que administra tu Perfil de Negocio para que SEO TOTAL pueda publicar las novedades o el contenido seleccionado por la IA que tú apruebes. Sigue las instrucciones paso a paso."
       note={`Cuando el sistema detecte una oportunidad para Google Business Profile en ${MENU_NAMES.redes}, preparará una publicación con el formato permitido por Google, imagen y enlace al artículo. No se publicará cada artículo automáticamente.`}
     >
+      {returnNotice && (
+        <div style={{ marginBottom: 14 }}>
+          <ConnectionMessage ok={returnNotice.ok}>{returnNotice.text}</ConnectionMessage>
+          <a
+            href="/dashboard/configuracion/conexiones?conexion=business-profile&vista=difusion"
+            style={{ display: "inline-flex", alignItems: "center", marginTop: 8, padding: "9px 14px", borderRadius: 9, background: "#1d1d1f", color: "#ffffff", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
+          >
+            Volver a Conexiones de Google Business Profile
+          </a>
+        </div>
+      )}
       {data === null ? (
         <p style={{ color: "#6e6e73", fontSize: 14 }}>Cargando…</p>
       ) : !connected ? (

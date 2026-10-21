@@ -24,5 +24,11 @@ export function useConnectionNotice(id?: string): { ok: boolean; text: string } 
     return noun ? { ok: true, text: `Autorización completada. Ahora elige y aprueba ${noun} que usará SEO TOTAL.` } : null;
   }
   if (resultado === "forbidden") return { ok: false, text: "Tu cuenta no tiene esta red habilitada. Pídele acceso al administrador." };
+  if (id === "business-profile") {
+    return {
+      ok: false,
+      text: "Hubo un problema con tu cuenta de Google Business Profile. Al parecer, el correo electrónico que intentaste asociar no es el correcto o no administra ninguna ficha verificada, y no hemos podido conectarnos. Ubica el correo electrónico correcto y vuelve a intentarlo.",
+    };
+  }
   return { ok: false, text: "No se pudo completar la conexión. Inténtalo de nuevo." };
 }
