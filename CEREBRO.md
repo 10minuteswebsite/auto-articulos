@@ -1,5 +1,11 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión durable — BLOG IA es una función oculta con migración «segura» propia — 2026-10-21
+
+- BLOG IA (destino de salida: el artículo va solo al blog del cliente) se fusionó oculto: nada visible para los clientes hasta orden de Milton. Mecanismos: `optIn` + `secret` en `modules.ts`, `ModuleGuard` y APIs sin nombrar la función, y `scripts/product-update-hidden.ts` para que el gancho post-commit no la anuncie en «Actualizaciones». Para abrirla: quitar `optIn`/`secret` y vaciar `HIDDEN_FEATURES`.
+- Migraciones: nunca `migrate deploy` completo (arrastraría migraciones pendientes ajenas). Opción `safe_blog_ia` del workflow: solo las 2 migraciones de BLOG IA, con `lock_timeout` 5 s (si la base está ocupada aborta sin dejar nada a medias) y verificación de solo lectura. Ensayada con copia de base: aplica, repite sin efecto, y el aborto por bloqueo no deja residuos.
+- El Worker del blog público (`apps/blog`) y sus D1/R2 en Cloudflare son infraestructura aparte: aún sin desplegar.
+
 ## Causa raíz durable — columna nueva en schema sin migración aplicada — 2026-10-21
 
 - `ARTICULOS-500-AUTH-HUB-20261021`: declarar un campo en `schema.prisma` hace que Prisma lo pida en TODAS las consultas de `User`; si la columna no existe en la base, falla todo el acceso (P2022), no solo la pantalla nueva.

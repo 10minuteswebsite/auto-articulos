@@ -1,5 +1,15 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## BLOG IA Fases 2-3 — 2026-10-21 — en `main`, OCULTO a clientes; verificación autenticada pendiente
+
+- Task ID: `BLOG-IA-FASE-2-3-20261021`. PR #598 fusionado: commit `74f61ee09d964ac28b080205abc4335d0514a402`.
+- Orden: migración ANTES del código. Workflow `Migración manual de base de datos` con la opción nueva `safe_blog_ia` (run `39668041448`, rama del PR): aplicó SOLO `20261016120000_add_blog_ia` y `20261021120000_blog_ia_wizard` (límite de bloqueo 5 s) y su verificación de solo lectura pasó (valor `BLOG`, tabla `BlogIaBlog`, 6 columnas, `hostname` opcional). El paso general `migrate deploy` se omitió a propósito.
+- Vercel (`auto-articulos-web` y `web`): `success` en la vista previa y en el commit fusionado.
+- Producción pública posterior: Artículos y Redes `/login` 200; `/api/me` 401; `/api/blog-ia` y `/api/blog-ia/analyze` 401 sin sesión; `/dashboard/blog-ia` sin sesión 307 al login; el login no menciona BLOG IA.
+- BLOG IA está OCULTO a los clientes por orden de Milton: módulo opt-in `secret` (solo admin o «Habilitado»), 403/«Página no disponible» sin nombrarlo, y el gancho de «Actualizaciones» ignora los commits de BLOG IA. No hay Worker, D1 con datos ni dominio público: el Worker del blog NO está desplegado (en Cloudflare existen D1 `blog-ia` y R2 `blog-ia-media`, vacíos y privados).
+- Pendiente obligatorio: prueba AUTENTICADA en producción (cuenta cliente sin el módulo: sin menú ni pantalla; cuenta admin: pantalla visible) y confirmación de que `/dashboard` sigue cargando. No se declara cierre funcional completo hasta entonces. Aún sin E2E real: Worker/D1/R2/Custom Hostnames, OpenAI dentro de la cola, Search Console del blog.
+- Capitanía de migración liberada.
+
 ## INCIDENTE AUTO ARTICULOS 500 en /auth/hub — 2026-10-21 — resuelto y verificado
 
 - Task ID: `ARTICULOS-500-AUTH-HUB-20261021`.

@@ -1,5 +1,11 @@
 # CHECKPOINTS
 
+## Checkpoint — BLOG IA Fases 2-3 — 2026-10-21 — fusionado, oculto; autenticado pendiente
+
+- Task: `BLOG-IA-FASE-2-3-20261021`; punto cero: `origin/main` = `74f61ee0`.
+- Migraciones aditivas aplicadas ANTES por `safe_blog_ia` (run `39668041448`) y verificadas; Vercel `success`; smoke público OK; módulo invisible para clientes.
+- Pendiente obligatorio: verificación autenticada en producción (ver CURRENT_STATE).
+
 ## Checkpoint — HUB→MCP reconoce activación de Redes — 2026-10-21 — condicionado
 
 - Task: `MCP-HUB-REDES-20261021`; punto cero `origin/main` = `c47b4878`.
