@@ -10,7 +10,7 @@
 
 Toda escritura asistida debe separar evidencia de inferencia. Los prompts de artículos, títulos y FAQs deben rechazar invenciones, omitir datos no verificables y pedir fuentes directas de organismos gubernamentales o instituciones reconocidas para afirmaciones externas, cambiantes o sensibles. Esta regla se añade como capa de seguridad y no reemplaza las instrucciones editoriales existentes. El prompt de 10MWS queda fuera del alcance.
 
-Estado de activación: código en `main` (`04910056`); no se afirma activación en producción hasta verificar el deployment Vercel correspondiente.
+Estado de activación: código en `main` (`04910056`), deployment Vercel `6wAi9CqW6tjQTeW9qxpiHPkuUiYd` `Ready`, smoke HTTP OK.
 
 ## Decisión editorial durable — 2026-10-19
 

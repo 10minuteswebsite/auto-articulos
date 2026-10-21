@@ -12596,6 +12596,6 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Regla durable: no inventar hechos, cifras, fechas, leyes, nombres ni afirmaciones actuales; omitir lo no verificable; exigir fuentes directas, trazables y preferentemente gubernamentales o institucionales serias cuando la afirmación sea externa o sensible.
 - Cambio aplicado: `apps/worker/src/automation/generateCustomArticle.ts`, `apps/worker/src/faqPrompt.ts`, `apps/web/src/lib/title-generation-core.ts`.
 - Commit publicado en `main`: `04910056`.
-- Smoke HTTP público: OK; Vercel Production/READY de este SHA no confirmado porque la cuenta disponible no ve `auto-articulos-web`.
-- Estado de cierre: código publicado, producción pendiente; no declarar éxito productivo.
+- Vercel confirmó Production `Ready`, deployment `6wAi9CqW6tjQTeW9qxpiHPkuUiYd`, sirviendo `04910056`; smoke HTTP público OK.
+- Estado de cierre: VERIFICADO en producción. El commit documental posterior no modifica runtime.
 

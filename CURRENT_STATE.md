@@ -13,8 +13,8 @@
 - Commit publicado en `main`: `04910056a6f6bd5c081b33970baf76c5b27deec0`.
 - Cambio: norma factual añadida a generación de artículos, títulos y FAQs; 10MWS no modificado.
 - Punto cero productivo confirmado por smoke HTTP: Artículos y Redes responden `/login` 200, rutas protegidas 307/401; esto confirma salud pública, no el SHA servido.
-- Deployment Vercel del commit: NO CONFIRMADO. La cuenta Vercel disponible no tiene acceso a `auto-articulos-web`; no se declara producción actualizada.
-- Estado: CÓDIGO PUBLICADO / PRODUCCIÓN PENDIENTE. Siguiente punto cero: deployment `Production/READY` identificado por Vercel con este SHA.
+- Deployment Vercel productivo: `6wAi9CqW6tjQTeW9qxpiHPkuUiYd`, estado `Ready`, aliases productivos activos; Vercel muestra el commit `04910056`.
+- Estado: VERIFICADO. El commit documental posterior `0d64c780` no cambia runtime.
 
 ## Cierre — mensaje de login genérico — 2026-10-21
 

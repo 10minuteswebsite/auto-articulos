@@ -13,7 +13,8 @@
 - Código: regla factual en generador de artículos, FAQs y títulos; test unitario de contrato añadido.
 - Exclusión respetada: no se modificó el prompt de 10MWS.
 - Smoke HTTP público: OK en Artículos y Redes (`/login` 200; protegidas 307/401).
-- Cierre condicionado a: acceso al proyecto Vercel `auto-articulos-web`, deployment `Production/READY` de `04910056` y verificación posterior. No se declara VERIFICADO.
+- Deployment Vercel productivo: `6wAi9CqW6tjQTeW9qxpiHPkuUiYd`, `Ready`, con el commit `04910056`.
+- Estado: VERIFICADO. El commit documental `0d64c780` no altera runtime.
 
 ## Checkpoint — mensaje de login genérico — 2026-10-21
 

@@ -10,13 +10,13 @@ Conversación/proyecto: `REVISION-CONTENIDO-BLOGS-20261021`
 Cambios incluidos: autocontrol de veracidad y fuentes en artículos, títulos y FAQs.
 Archivos eliminados: ninguno. Migraciones: ninguna.
 Auditoría: diff revisado; `git diff --check` solo reporta líneas en blanco finales preexistentes en documentación; hook de tests no ejecutó por falta de `node_modules`.
-Deployment/Vercel: pendiente; la cuenta autenticada no tiene acceso al proyecto productivo `auto-articulos-web`.
-Dominio: smoke HTTP público OK, sin prueba de correspondencia SHA/deployment.
-Producción verificada: no; el estándar exige identificar `Production/READY` del commit.
-Problemas conocidos: falta acceso Vercel y dependencias locales.
+Deployment/Vercel: `6wAi9CqW6tjQTeW9qxpiHPkuUiYd`, `Ready`, producción sirviendo `04910056`.
+Dominio: smoke HTTP público OK en Artículos y Redes.
+Producción verificada: sí; Vercel muestra `main` y `04910056`.
+Problemas conocidos: la suite local no ejecutó por falta de `node_modules`.
 Responsable: Codex.
-Siguiente acción: autenticar la cuenta Vercel del equipo `la-solucion-web`, desplegar/verificar `04910056` y actualizar este registro.
-Estado: PREPARADA — NO DECLARAR DESPLEGADA.
+Siguiente acción: ninguna funcional; el cierre documental posterior no modifica runtime.
+Estado: VERIFICADA.
 ## Registro — 2026-10-21 — CONTROL NO INDEXAR ARTÍCULOS
 
 - Commit `7531dc5c` publicado en `main`; no se creó rama ni worktree.
