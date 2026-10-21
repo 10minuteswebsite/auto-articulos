@@ -536,9 +536,17 @@ model BlogIaBlog {
   id        String   @id @default(cuid())
   userId    String   @unique
   tenantId  String   @unique
-  hostname  String   @unique
+  // Vacío mientras la persona no ha elegido el dominio (paso 3 del wizard).
+  hostname  String?  @unique
   // draft_setup | pending_dns | pending_tls | active | suspended | domain_error
   status    String   @default("draft_setup")
+  // Marca, idioma, WhatsApp y sitio principal que captura el wizard (Fase 2).
+  config        Json?
+  provisionedAt DateTime? // el Worker BLOG IA confirmó blog.provision
+  dnsVerified   Boolean  @default(false)
+  tlsReady      Boolean  @default(false)
+  activatedAt   DateTime? // la persona pulsó «Activar» (paso 4)
+  lastError     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

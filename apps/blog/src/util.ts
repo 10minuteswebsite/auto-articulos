@@ -11,7 +11,7 @@ export function esc(value: unknown): string {
 
 /** Rutas fijas del sitio: ningún slug de artículo o categoría puede usarlas. */
 export const RESERVED_SLUGS = new Set([
-  "categoria", "buscar", "page", "sitemap", "sitemap-articles", "robots", "api", "assets", "feed", "favicon",
+  "categoria", "buscar", "page", "sitemap", "sitemap-articles", "robots", "api", "assets", "feed", "favicon", "media",
 ]);
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

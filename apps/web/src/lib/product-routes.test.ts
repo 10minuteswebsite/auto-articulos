@@ -108,7 +108,7 @@ test("la vista por productos solo se activa si /api/me ya llegó y el módulo no
 
 test("cada carpeta de dashboard tiene una decisión explícita de producto", () => {
   const expected = new Map<string, string>([
-    ["actualizaciones", "COMPARTIDO"], ["articulos", "ARTICULOS"], ["como-funciona", "COMPARTIDO"],
+    ["actualizaciones", "COMPARTIDO"], ["articulos", "ARTICULOS"], ["blog-ia", "ARTICULOS"], ["como-funciona", "COMPARTIDO"],
     ["composio", "ADMIN"], ["configuracion", "COMPARTIDO"], ["estadisticas", "ARTICULOS"],
     ["historial", "COMPARTIDO"], ["mi-acceso", "COMPARTIDO"], ["oportunidades", "ARTICULOS"],
     ["oportunidades-redes", "REDES"], ["postpeer", "ADMIN"], ["publicaciones-en-curso", "COMPARTIDO"],

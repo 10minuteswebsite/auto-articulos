@@ -15,7 +15,14 @@ test("MCP catalog has unique tools and every personal-token tool is visible", ()
 test("MCP prompts are named, unique and expose the expected workflows", () => {
   const prompts = listPromptsPayload();
   assert.equal(new Set(prompts.map((prompt) => prompt.name)).size, PROMPTS.length);
-  assert.deepEqual(prompts.map((prompt) => prompt.name), ["empezar", "publicar_contenido", "diagnosticar_cuenta"]);
+  assert.deepEqual(prompts.map((prompt) => prompt.name), [
+    "empezar",
+    "publicar_contenido",
+    "programar_publicaciones",
+    "publicar_en_redes",
+    "automatizar_redes",
+    "diagnosticar_cuenta",
+  ]);
 });
 
 test("protocol envelope uses MCP JSON-RPC version and preserves ids", () => {

@@ -11,10 +11,13 @@
 // Configuración (variables del worker, no por usuario):
 //   BLOG_IA_API_URL  origen de la API de ingestión (https://api.blog.…)
 //   BLOG_IA_SECRET   secreto compartido de firma
+//   BLOG_IA_IMAGE_PROVIDER  "openai" (por defecto, ≈0,005 USD/imagen) o "fal" (Ideogram V3, ≈0,03 USD)
+//   BLOG_IA_IMAGE_QUALITY   "low" (por defecto) o "medium" (≈0,015 USD/imagen, solo OpenAI)
+//   OPENAI_IMAGE_API_KEY / FAL_API_KEY  claves de imagen que ya usa SEO Total (sin clave: se publica sin portada)
 //
-// Pendiente de decidir con Milton: qué prompt usar si la cuenta no tiene
-// ninguno (aquí no existe el flujo "estándar" de 10minutesWebsite). Mientras
-// tanto se usa DEFAULT_BLOG_PROMPT.
+// Prompt de redacción: SOLO el que la persona eligió para el lote (decisión de
+// Milton, 2026-10-21). Si no hay ninguno, el lote se detiene y se le pide
+// elegir uno; no existe un prompt por defecto inventado.
 //
 // No se envía aviso a Google/Bing con `notifyGoogle`/`notifyBing`: están
 // pensados para el sitio de 10minutesWebsite. La indexación del subdominio
@@ -22,6 +25,7 @@
 
 import { prisma, Prisma } from "@auto-articulos/db";
 import { MAX_ATTEMPTS, sendBlogIaEvent } from "@auto-articulos/shared";
+import { generateBlogCover, optimizeCover, resolveCoverProvider, resolveCoverQuality } from "./automation/blogCoverImage";
 import { createBlogIaPublisher, BlogIaPublishError } from "./automation/blogIaPublisher";
 import { markTitleError, restoreUnfinishedTitlesToOpportunities } from "./queue";
 
@@ -43,11 +47,6 @@ type RunForBlog = Prisma.RunGetPayload<{
 
 type TitleForBlog = NonNullable<Awaited<ReturnType<typeof prisma.title.findFirst>>>;
 
-export const DEFAULT_BLOG_PROMPT =
-  "Write a complete, useful, well-structured SEO article for a company blog. Answer the reader's search intent directly, " +
-  "use clear H2/H3 headings, short paragraphs, and practical, accurate information. Do not invent statistics, laws, " +
-  "prices or sources; when a fact depends on location or date, say so.";
-
 async function haltRun(runId: string, titleId: string, message: string): Promise<boolean> {
   await markTitleError(titleId, message);
   await prisma.run.updateMany({
@@ -58,7 +57,13 @@ async function haltRun(runId: string, titleId: string, message: string): Promise
   return true;
 }
 
-export async function processBlogRunTitle(run: RunForBlog, nextTitle: TitleForBlog): Promise<boolean> {
+/** Solo para pruebas locales: sustituir la redacción y la portada sin llamar a ninguna IA. */
+export interface BlogRunOverrides {
+  generate?: Parameters<typeof createBlogIaPublisher>[0]["generate"];
+  cover?: Parameters<typeof createBlogIaPublisher>[0]["cover"];
+}
+
+export async function processBlogRunTitle(run: RunForBlog, nextTitle: TitleForBlog, overrides: BlogRunOverrides = {}): Promise<boolean> {
   const apiUrl = process.env.BLOG_IA_API_URL;
   const secret = process.env.BLOG_IA_SECRET;
   if (!apiUrl || !secret) {
@@ -66,11 +71,11 @@ export async function processBlogRunTitle(run: RunForBlog, nextTitle: TitleForBl
   }
 
   const blog = await prisma.blogIaBlog.findUnique({ where: { userId: run.userId } });
-  if (!blog || blog.status !== "active") {
+  if (!blog || blog.status !== "active" || !blog.hostname) {
     return haltRun(
       run.id,
       nextTitle.id,
-      "Tu BLOG IA todavía no está activo (falta terminar la conexión del dominio o la suscripción está suspendida). Complétalo en BLOG IA y vuelve a intentarlo.",
+      "Tu BLOG IA no está activo (falta terminar la conexión, está desactivado o la suscripción está suspendida). Las publicaciones se detienen hasta que lo actives o reactives en BLOG IA; luego vuelve a intentarlo.",
     );
   }
 
@@ -81,6 +86,15 @@ export async function processBlogRunTitle(run: RunForBlog, nextTitle: TitleForBl
       run.id,
       nextTitle.id,
       "No se encontró un idioma de redacción configurado para este lote ni en el perfil del usuario. Configúralo en Configuración antes de reintentar.",
+    );
+  }
+
+  const promptText = run.prompt?.prompt?.trim() || null;
+  if (!promptText) {
+    return haltRun(
+      run.id,
+      nextTitle.id,
+      "Selecciona un prompt de redacción para este lote antes de publicar en BLOG IA. BLOG IA no usa un prompt por defecto.",
     );
   }
 
@@ -99,10 +113,22 @@ export async function processBlogRunTitle(run: RunForBlog, nextTitle: TitleForBl
     tenantId: blog.tenantId,
     blogBaseUrl: `https://${blog.hostname}`,
     send: (event) => sendBlogIaEvent({ apiUrl, secret }, event),
-    promptText: run.prompt?.prompt || DEFAULT_BLOG_PROMPT,
+    promptText,
     contentLanguage: effectiveLanguage,
     authorName: [run.user.firstName, run.user.lastName].filter(Boolean).join(" ") || run.user.name || null,
     category: { id: run.category.id, name: run.category.name },
+    generate: overrides.generate,
+    cover: overrides.cover ?? (async (title, summary) => {
+      const generated = await generateBlogCover({
+        title,
+        summary,
+        provider: resolveCoverProvider(process.env.BLOG_IA_IMAGE_PROVIDER),
+        quality: resolveCoverQuality(process.env.BLOG_IA_IMAGE_QUALITY),
+        openaiKey: process.env.OPENAI_IMAGE_API_KEY,
+        falKey: process.env.FAL_API_KEY,
+      });
+      return generated ? optimizeCover(generated.bytes) : null;
+    }),
   });
 
   try {

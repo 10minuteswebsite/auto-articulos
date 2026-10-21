@@ -14,6 +14,7 @@ import type { Env } from "./types";
 import type { Stmt } from "./db";
 import { isValidSlug, normalizeHost, stripTags, truncate } from "./util";
 import { sanitizeHtml } from "./sanitize";
+import { storeMedia } from "./media";
 
 export const MAX_BODY_BYTES = 2 * 1024 * 1024;
 const MAX_SKEW_SECONDS = 300;
@@ -74,6 +75,10 @@ export async function handleIngest(env: Env, req: Request): Promise<Response> {
 
   if (req.method !== "POST") return json(405, { ok: false, error: "Método no permitido" }, { allow: "POST" });
   try {
+    const source = req.headers.get("cf-connecting-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+    if (env.ingestRateLimit && !env.ingestRateLimit.allow(source, (env.now?.() ?? new Date()).getTime())) {
+      return json(429, { ok: false, error: "Demasiadas solicitudes; inténtalo más tarde" }, { "retry-after": String(env.ingestRateLimit.retryAfterSeconds((env.now?.() ?? new Date()).getTime())) });
+    }
     const body = await req.text();
     if (enc.encode(body).length > MAX_BODY_BYTES) throw new IngestError(413, "Cuerpo demasiado grande");
     await verify(env, req, body);
@@ -142,6 +147,7 @@ async function build(env: Env, type: string, tenantId: string, d: Json, nowIso: 
     case "blog.subscription.resume":
       return { stmts: [{ sql: "UPDATE tenants SET subscription_state = 'active' WHERE id = ?", params: [tenantId] }], result: "applied" };
     case "blog.domain.change": return domainChange(env, tenantId, d, nowIso);
+    case "media.upload": return mediaUpload(env, tenantId, d);
     default: throw new IngestError(400, `Tipo de evento no soportado: ${type}`);
   }
 }
@@ -185,6 +191,15 @@ function categoryUpsert(tenantId: string, d: Json) {
 }
 
 async function articleUpsert(env: Env, tenantId: string, d: Json, nowIso: string) {
+  const subscription = await env.db.first<{ subscription_state: string }>(
+    "SELECT subscription_state FROM tenants WHERE id = ?",
+    [tenantId],
+  );
+  if (subscription?.subscription_state === "suspended") {
+    // 503 permite que SEO Total conserve el evento y lo reintente al reactivar
+    // la cuenta; no se registra como un error permanente del contenido.
+    throw new IngestError(503, "La suscripción del blog está suspendida");
+  }
   const sourceId = str(d.source_article_id, "source_article_id", 120);
   const slug = str(d.slug, "slug", 120);
   if (!isValidSlug(slug)) throw new IngestError(400, "Slug de artículo inválido o reservado");
@@ -195,7 +210,7 @@ async function articleUpsert(env: Env, tenantId: string, d: Json, nowIso: string
   const publishedAt = isoDate(d.published_at, "published_at");
   const id = cid(tenantId, sourceId);
 
-  const current = await env.db.first<{ revision: number }>("SELECT revision FROM articles WHERE id = ? AND tenant_id = ?", [id, tenantId]);
+  const current = await env.db.first<{ revision: number; slug: string }>("SELECT revision, slug FROM articles WHERE id = ? AND tenant_id = ?", [id, tenantId]);
   if (current && current.revision >= revision) return { stmts: [], result: "stale" };
 
   const clash = await env.db.first("SELECT id FROM articles WHERE tenant_id = ? AND slug = ? AND id != ?", [tenantId, slug, id]);
@@ -212,8 +227,20 @@ async function articleUpsert(env: Env, tenantId: string, d: Json, nowIso: string
   const cover = str(d.cover_image_url, "cover_image_url", 1000, false);
   if (cover && !/^https:\/\//i.test(cover)) throw new IngestError(400, "cover_image_url debe ser https");
 
+  // Cambio de slug: la URL anterior pasa a 301 hacia la nueva. Si el slug nuevo
+  // coincide con una redirección vieja de este mismo artículo, esa redirección se retira.
+  const redirects: Stmt[] = [];
+  if (current && current.slug !== slug) {
+    redirects.push({
+      sql: "INSERT OR REPLACE INTO slug_redirects (tenant_id, old_slug, article_id, created_at) VALUES (?, ?, ?, ?)",
+      params: [tenantId, current.slug, id, nowIso],
+    });
+  }
+  redirects.push({ sql: "DELETE FROM slug_redirects WHERE tenant_id = ? AND old_slug = ?", params: [tenantId, slug] });
+
   return {
     stmts: [
+      ...redirects,
       {
         sql: `INSERT INTO articles (id, tenant_id, source_article_id, slug, title, excerpt, body_html, cover_image_url, cover_alt, author,
                 seo_title, meta_description, language, status, revision, published_at, updated_at)
@@ -271,4 +298,41 @@ async function domainChange(env: Env, tenantId: string, d: Json, nowIso: string)
   });
   stmts.push({ sql: "UPDATE blogs SET status = ? WHERE tenant_id = ? AND status IN ('draft_setup','pending_dns','pending_tls','active')", params: [status, tenantId] });
   return { stmts, result: "applied" };
+}
+
+/**
+ * Sube una imagen (base64) al almacén del blog. El id lo elige SEO Total y es
+ * estable (`cover-<articulo>`), así la URL pública `/media/<id>` se conoce antes
+ * de subirla y reenviar el evento nunca duplica. Un id ya usado por OTRO cliente
+ * se rechaza: las imágenes no se cruzan entre clientes.
+ */
+async function mediaUpload(env: Env, tenantId: string, d: Json) {
+  if (!env.media) throw new IngestError(503, "El almacén de imágenes no está configurado");
+  const id = str(d.id, "id", 80);
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) throw new IngestError(400, "Id de imagen inválido");
+  const mime = str(d.mime, "mime", 40);
+  const b64 = str(d.data_base64, "data_base64", MAX_BODY_BYTES);
+  const existing = await env.db.first<{ tenant_id: string }>("SELECT tenant_id FROM media WHERE id = ?", [id]);
+  if (existing) {
+    if (existing.tenant_id !== tenantId) throw new IngestError(409, "Ese id de imagen pertenece a otro cliente");
+    return { stmts: [], result: "applied" }; // ya subida: no se repite
+  }
+  let bytes: Uint8Array;
+  try {
+    bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  } catch {
+    throw new IngestError(400, "Imagen en base64 inválida");
+  }
+  try {
+    await storeMedia(
+      env.db,
+      env.media,
+      { tenantId, bytes, mime, altText: str(d.alt, "alt", 300, false) },
+      "",
+      id,
+    );
+  } catch (e) {
+    throw new IngestError(400, e instanceof Error ? e.message : "Imagen inválida");
+  }
+  return { stmts: [], result: "applied" };
 }

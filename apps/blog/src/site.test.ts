@@ -179,3 +179,86 @@ test("el acento se oscurece hasta cumplir contraste AA", async () => {
   const m = /--accent:(#[0-9a-f]{6})\}<\/style>/.exec(css);
   assert.ok(m && m[1] !== "#ffff00");
 });
+
+test("cambio de slug: la URL anterior responde 301 a la nueva, sin cruzar clientes", async () => {
+  const env = await setup();
+  await send(env, "t1", "article.publish", articleData(1, { slug: "viejo", title: "Guía" }));
+  await send(env, "t2", "article.publish", articleData(1, { slug: "otro", title: "Otro cliente" }));
+  assert.equal((await get(env, "blog.uno.test", "/viejo/")).status, 200);
+
+  const up = await send(env, "t1", "article.update", articleData(1, { slug: "nuevo", title: "Guía", revision: 2 }));
+  assert.equal(up.json.result, "applied");
+  const moved = await get(env, "blog.uno.test", "/viejo/");
+  assert.equal(moved.status, 301);
+  assert.equal(moved.headers.get("location"), "https://blog.uno.test/nuevo/");
+  assert.equal((await get(env, "blog.uno.test", "/nuevo/")).status, 200);
+
+  // Otro cliente con el mismo slug viejo no hereda la redirección.
+  assert.equal((await get(env, "blog.dos.test", "/viejo/")).status, 404);
+});
+
+test("redirecciones en cadena y artículo despublicado: no redirigen a un artículo caído", async () => {
+  const env = await setup();
+  await send(env, "t1", "article.publish", articleData(1, { slug: "a", title: "Guía" }));
+  await send(env, "t1", "article.update", articleData(1, { slug: "b", title: "Guía", revision: 2 }));
+  await send(env, "t1", "article.update", articleData(1, { slug: "c", title: "Guía", revision: 3 }));
+  assert.equal((await get(env, "blog.uno.test", "/a/")).headers.get("location"), "https://blog.uno.test/c/");
+  assert.equal((await get(env, "blog.uno.test", "/b/")).headers.get("location"), "https://blog.uno.test/c/");
+  await send(env, "t1", "article.unpublish", { source_article_id: articleData(1).source_article_id });
+  assert.equal((await get(env, "blog.uno.test", "/a/")).status, 404);
+});
+
+test("volver a un slug antiguo retira su redirección y el artículo se sirve normal", async () => {
+  const env = await setup();
+  await send(env, "t1", "article.publish", articleData(1, { slug: "a", title: "Guía" }));
+  await send(env, "t1", "article.update", articleData(1, { slug: "b", title: "Guía", revision: 2 }));
+  await send(env, "t1", "article.update", articleData(1, { slug: "a", title: "Guía", revision: 3 }));
+  assert.equal((await get(env, "blog.uno.test", "/a/")).status, 200);
+  assert.equal((await get(env, "blog.uno.test", "/b/")).status, 301);
+});
+
+// ---- imágenes (media.upload + /media/<id>)
+import { memoryMediaStore } from "./media";
+const PNG_B64 = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3, 4]).toString("base64");
+
+test("media.upload guarda la imagen y se sirve solo en el host de su cliente", async () => {
+  const env = makeEnv({ media: memoryMediaStore() });
+  await provisionTenant(env, "t1", "blog.uno.test", { name: "Uno" });
+  await provisionTenant(env, "t2", "blog.dos.test", { name: "Dos" });
+  const up = await send(env, "t1", "media.upload", { id: "cover-abc123", mime: "image/png", data_base64: PNG_B64, alt: "Portada" });
+  assert.equal(up.status, 200);
+  const ok = await get(env, "blog.uno.test", "/media/cover-abc123");
+  assert.equal(ok.status, 200);
+  assert.equal(ok.headers.get("content-type"), "image/png");
+  assert.match(ok.headers.get("cache-control") ?? "", /immutable/);
+  assert.equal(ok.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(new Uint8Array(await ok.arrayBuffer()).length, 12);
+  // Otro cliente no la ve ni puede reclamar el mismo id.
+  assert.equal((await get(env, "blog.dos.test", "/media/cover-abc123")).status, 404);
+  const steal = await send(env, "t2", "media.upload", { id: "cover-abc123", mime: "image/png", data_base64: PNG_B64 });
+  assert.equal(steal.status, 409);
+});
+
+test("media.upload es idempotente y rechaza tipos no permitidos, base64 roto y falta de almacén", async () => {
+  const env = makeEnv({ media: memoryMediaStore() });
+  await provisionTenant(env, "t1", "blog.uno.test", { name: "Uno" });
+  const a = await send(env, "t1", "media.upload", { id: "cover-x", mime: "image/png", data_base64: PNG_B64 }, "evt-fijo");
+  const b = await send(env, "t1", "media.upload", { id: "cover-x", mime: "image/png", data_base64: PNG_B64 }, "evt-fijo");
+  const c = await send(env, "t1", "media.upload", { id: "cover-x", mime: "image/png", data_base64: PNG_B64 }, "otro-evento");
+  assert.deepEqual([a.json.result, b.json.result, c.status], ["applied", "duplicate", 200]);
+  assert.equal((await send(env, "t1", "media.upload", { id: "cover-y", mime: "text/html", data_base64: PNG_B64 })).status, 400);
+  assert.equal((await send(env, "t1", "media.upload", { id: "cover-z", mime: "image/png", data_base64: "%%%" })).status, 400);
+  assert.equal((await send(env, "t1", "media.upload", { id: "Cover_Z", mime: "image/png", data_base64: PNG_B64 })).status, 400);
+  const sinAlmacen = makeEnv();
+  await provisionTenant(sinAlmacen, "t1", "blog.uno.test", { name: "Uno" });
+  assert.equal((await send(sinAlmacen, "t1", "media.upload", { id: "cover-w", mime: "image/png", data_base64: PNG_B64 })).status, 503);
+});
+
+test("la portada subida aparece en el artículo", async () => {
+  const env = makeEnv({ media: memoryMediaStore() });
+  await provisionTenant(env, "t1", "blog.uno.test", { name: "Uno" });
+  await send(env, "t1", "media.upload", { id: "cover-art1", mime: "image/png", data_base64: PNG_B64 });
+  await send(env, "t1", "article.publish", articleData(1, { slug: "con-portada", cover_image_url: "https://blog.uno.test/media/cover-art1" }));
+  const html = await (await get(env, "blog.uno.test", "/con-portada/")).text();
+  assert.match(html, /\/media\/cover-art1/);
+});

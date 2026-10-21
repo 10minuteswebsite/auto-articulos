@@ -11,26 +11,27 @@
 import type { Env, TenantCtx } from "./types";
 import { handleIngest } from "./ingest";
 import {
-  resolveTenant, listArticles, countArticles, getArticleBySlug, getCategoryBySlug, listCategoriesWithCounts,
+  resolveTenant, listArticles, countArticles, getArticleBySlug, getRedirectSlug, getCategoryBySlug, listCategoriesWithCounts,
   categoriesOfArticle, relatedArticles, searchArticles, sitemapArticles, PAGE_SIZE,
 } from "./repo";
 import { homePage, categoryPage, articlePage, searchPage, notFoundPage, suspendedPage } from "./render/pages";
 import { sitemapIndex, sitemapArticlesXml, sitemapCategoriesXml, robotsTxt } from "./seo";
 import { normalizeHost, RESERVED_SLUGS } from "./util";
+import { securityHeaders } from "./security";
 
 const CACHE_PUBLIC = "public, max-age=60, s-maxage=300, stale-while-revalidate=600";
 
 function html(body: string, status = 200, cache = CACHE_PUBLIC, req?: Request): Response {
   return new Response(req?.method === "HEAD" ? null : body, {
     status,
-    headers: { "content-type": "text/html; charset=utf-8", "cache-control": cache, "x-content-type-options": "nosniff", "referrer-policy": "strict-origin-when-cross-origin" },
+    headers: { ...securityHeaders(), "content-type": "text/html; charset=utf-8", "cache-control": cache },
   });
 }
 function xml(body: string, req: Request, type = "application/xml"): Response {
-  return new Response(req.method === "HEAD" ? null : body, { status: 200, headers: { "content-type": `${type}; charset=utf-8`, "cache-control": CACHE_PUBLIC } });
+  return new Response(req.method === "HEAD" ? null : body, { status: 200, headers: { ...securityHeaders(), "content-type": `${type}; charset=utf-8`, "cache-control": CACHE_PUBLIC } });
 }
 const redirect = (location: string) => new Response(null, { status: 301, headers: { location, "cache-control": "public, max-age=3600" } });
-const plain404 = () => new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+const plain404 = () => new Response("Not found", { status: 404, headers: { ...securityHeaders(), "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
 
 export async function handle(env: Env, req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -38,7 +39,7 @@ export async function handle(env: Env, req: Request): Promise<Response> {
 
   if (host === normalizeHost(env.apiHost)) {
     if (url.pathname === "/api/ingest") return handleIngest(env, req);
-    if (url.pathname === "/api/health") return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
+    if (url.pathname === "/api/health") return new Response(JSON.stringify({ ok: true }), { headers: { ...securityHeaders(), "content-type": "application/json", "cache-control": "no-store" } });
     return plain404();
   }
 
@@ -84,6 +85,18 @@ async function route(env: Env, ctx: TenantCtx, url: URL, req: Request): Promise<
     return xml(sitemapCategoriesXml(ctx, cats), req);
   }
 
+  // Imágenes del cliente: /media/<id> (sin barra final, nunca se redirige).
+  const mediaMatch = /^\/media\/([a-z0-9-]+)$/.exec(path);
+  if (mediaMatch) {
+    const row = await env.db.first<{ r2_key: string; mime: string }>("SELECT r2_key, mime FROM media WHERE id = ? AND tenant_id = ?", [mediaMatch[1], ctx.tenantId]);
+    const obj = row && env.media ? await env.media.get(row.r2_key) : null;
+    if (!row || !obj) return notFound();
+    return new Response(req.method === "HEAD" ? null : await obj.arrayBuffer(), {
+      status: 200,
+      headers: { "content-type": row.mime, "cache-control": "public, max-age=31536000, immutable", "x-content-type-options": "nosniff", "content-security-policy": "default-src 'none'; sandbox" },
+    });
+  }
+
   // URL canónica: siempre con barra final (301).
   if (!path.endsWith("/")) return redirect(`${ctx.baseUrl}${path}/${url.search}`);
 
@@ -123,7 +136,11 @@ async function route(env: Env, ctx: TenantCtx, url: URL, req: Request): Promise<
 
   if (segs.length === 1 && !RESERVED_SLUGS.has(segs[0]) && /^[a-z0-9-]+$/.test(segs[0])) {
     const article = await getArticleBySlug(env, ctx.tenantId, segs[0]);
-    if (!article) return notFound();
+    if (!article) {
+      // URL anterior de un artículo cuyo slug cambió: 301 permanente a la nueva.
+      const current = await getRedirectSlug(env, ctx.tenantId, segs[0]);
+      return current ? redirect(`${ctx.baseUrl}/${current}/`) : notFound();
+    }
     const [cats, related] = await Promise.all([
       categoriesOfArticle(env, ctx.tenantId, article.id),
       relatedArticles(env, ctx.tenantId, article.id),

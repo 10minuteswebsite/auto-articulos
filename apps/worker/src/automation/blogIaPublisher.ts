@@ -32,6 +32,12 @@ export interface BlogIaPublisherContext {
   /** Categoría de SEO Total del lote; el blog la recibe como categoría propia. */
   category: { id: string; name: string; description?: string };
   generate?: GenerateFn;
+  /**
+   * Portada opcional (generador de imágenes). Devuelve los bytes YA optimizados
+   * o null. Si falta o falla, el artículo se publica sin imagen: la portada
+   * nunca bloquea una publicación.
+   */
+  cover?: (title: string, summary: string) => Promise<{ bytes: Uint8Array; mime: string } | null>;
   now?: () => Date;
 }
 
@@ -87,6 +93,30 @@ export function createBlogIaPublisher(ctx: BlogIaPublisherContext): ArticlePubli
         data: { id: categoryId, slug: slugify(ctx.category.name) || categoryId.toLowerCase(), name: ctx.category.name, description: ctx.category.description ?? "" },
       });
 
+      // Portada: se sube al blog con un id estable (`cover-<articulo>`), así la URL
+      // pública se conoce antes y reintentar no duplica la imagen.
+      let coverUrl: string | undefined = input.imageUrl;
+      if (!coverUrl && ctx.cover) {
+        try {
+          const cover = await ctx.cover(generated.title, generated.summary);
+          if (cover) {
+            const mediaId = `cover-${sourceId}`;
+            await send({
+              eventId: `media:${mediaId}`,
+              type: "media.upload",
+              tenantId: ctx.tenantId,
+              data: { id: mediaId, mime: cover.mime, data_base64: Buffer.from(cover.bytes).toString("base64"), alt: generated.title },
+            });
+            coverUrl = `${ctx.blogBaseUrl.replace(/\/$/, "")}/media/${mediaId}`;
+            await input.onStep("Portada generada y guardada en el blog.");
+          } else {
+            await input.onStep("No se pudo generar la portada; el artículo se publica sin imagen.");
+          }
+        } catch (e) {
+          await input.onStep(`La portada no se pudo guardar (${(e as Error).message}); el artículo se publica sin imagen.`);
+        }
+      }
+
       const publish = (slug: string) =>
         send({
           eventId: `publish:${sourceId}:1:${slug}`,
@@ -97,7 +127,7 @@ export function createBlogIaPublisher(ctx: BlogIaPublisherContext): ArticlePubli
             body_html: generated.contentHtml, category_ids: [categoryId], language: ctx.contentLanguage,
             author: ctx.authorName ?? undefined, published_at: (ctx.now?.() ?? new Date()).toISOString(),
             // Con `imageUrl` (imagen ya alojada) se envía portada; sin ella el blog muestra el marcador neutro.
-            ...(input.imageUrl ? { cover_image_url: input.imageUrl, cover_alt: generated.title } : {}),
+            ...(coverUrl ? { cover_image_url: coverUrl, cover_alt: generated.title } : {}),
           },
         });
 

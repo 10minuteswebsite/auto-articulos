@@ -63,6 +63,21 @@ CREATE TABLE IF NOT EXISTS articles (
 );
 CREATE INDEX IF NOT EXISTS idx_articles_list ON articles(tenant_id, status, published_at DESC);
 
+-- Metadatos de medios; el binario vive en R2, nunca en D1.
+CREATE TABLE IF NOT EXISTS media (
+  id          TEXT PRIMARY KEY,
+  tenant_id   TEXT NOT NULL REFERENCES tenants(id),
+  article_id  TEXT,
+  r2_key      TEXT NOT NULL UNIQUE,
+  mime        TEXT NOT NULL,
+  byte_size   INTEGER NOT NULL,
+  width       INTEGER,
+  height      INTEGER,
+  alt_text    TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_media_tenant_article ON media(tenant_id, article_id);
+
 CREATE TABLE IF NOT EXISTS article_categories (
   tenant_id   TEXT NOT NULL,
   article_id  TEXT NOT NULL REFERENCES articles(id),

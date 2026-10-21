@@ -85,6 +85,16 @@ export function getArticleBySlug(env: Env, tenantId: string, slug: string) {
   return env.db.first<ArticleRow>("SELECT * FROM articles WHERE tenant_id = ? AND slug = ? AND status = 'published'", [tenantId, slug]);
 }
 
+/** Slug actual del artículo publicado al que apunta una URL anterior (cambio de slug), si existe. */
+export async function getRedirectSlug(env: Env, tenantId: string, oldSlug: string): Promise<string | null> {
+  const row = await env.db.first<{ slug: string }>(
+    `SELECT a.slug FROM slug_redirects r JOIN articles a ON a.id = r.article_id AND a.tenant_id = r.tenant_id
+     WHERE r.tenant_id = ? AND r.old_slug = ? AND a.status = 'published'`,
+    [tenantId, oldSlug],
+  );
+  return row?.slug ?? null;
+}
+
 export function getCategoryBySlug(env: Env, tenantId: string, slug: string) {
   return env.db.first<CategoryRow>("SELECT * FROM categories WHERE tenant_id = ? AND slug = ? AND status = 'active'", [tenantId, slug]);
 }

@@ -45,6 +45,7 @@ export const PRODUCT_ROUTES: ReadonlyArray<readonly [string, ProductScope]> = [
   // Artículos.
   ["/dashboard/publicar", "ARTICULOS"],
   ["/dashboard/oportunidades", "ARTICULOS"],
+  ["/dashboard/blog-ia", "ARTICULOS"],
   ["/dashboard/estadisticas", "ARTICULOS"], // hoy solo cuenta artículos (dashboard-stats)
   ["/dashboard/configuracion/inicial", "ARTICULOS"],
   ["/dashboard/configuracion/cuenta", "ARTICULOS"],
@@ -82,6 +83,7 @@ export const PRODUCT_ROUTES: ReadonlyArray<readonly [string, ProductScope]> = [
  */
 const PRODUCT_API_ROUTES: ReadonlyArray<readonly [string, HostProductScope]> = [
   ["/api/runs", "ARTICULOS"],
+  ["/api/blog-ia", "ARTICULOS"],
   ["/api/opportunities", "ARTICULOS"],
   ["/api/title-generation", "ARTICULOS"],
   ["/api/titles", "ARTICULOS"],

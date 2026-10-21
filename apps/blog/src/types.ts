@@ -1,4 +1,6 @@
 import type { Db } from "./db";
+import type { RateLimit } from "./security";
+import type { R2BucketLike } from "./media";
 
 export interface Env {
   db: Db;
@@ -10,6 +12,9 @@ export interface Env {
   now?: () => Date;
   /** Origen público de un hostname (por defecto https://hostname; en local, http + puerto). */
   originFor?: (hostname: string) => string;
+  ingestRateLimit?: RateLimit;
+  /** Almacén de imágenes (R2 en Cloudflare; memoria en local/pruebas). Sin él, media.upload responde 503. */
+  media?: R2BucketLike;
 }
 
 export interface Brand {

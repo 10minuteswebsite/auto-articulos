@@ -7,6 +7,7 @@ import { createServer } from "node:http";
 import { Readable } from "node:stream";
 import { handle } from "../app";
 import { sqliteAdapter } from "./sqlite-adapter";
+import { memoryMediaStore } from "../media";
 
 const PORT = Number(process.env.PORT ?? 8787);
 const DB_FILE = process.env.BLOG_DB ?? "/tmp/blog-ia-local.sqlite";
@@ -16,6 +17,7 @@ const env = {
   ingestSecret: process.env.INGEST_SECRET ?? "local-dev-secret",
   apiHost: process.env.API_HOST ?? "api.blog.localhost",
   originFor: (h: string) => `http://${h}:${PORT}`,
+  media: memoryMediaStore(), // solo local: se pierde al reiniciar (en Cloudflare es R2)
 };
 
 createServer(async (req, res) => {

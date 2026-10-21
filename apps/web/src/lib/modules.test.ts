@@ -44,7 +44,7 @@ test("los administradores lo ven siempre (lista vacía)", () => {
 // «SEPARACION DE SEO TOTAL», Lote 2). Este test fija que no se cuele ningún otro
 // por descuido: un módulo opt-in nuevo debe añadirse aquí a propósito.
 test("Redes y la vista por productos son módulos opt-in", () => {
-  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), ["oportunidades-redes", "vista-productos"]);
+  assert.deepEqual(SYSTEM_MODULES.filter((m) => m.optIn).map((m) => m.id), ["oportunidades-redes", "vista-productos", "blog-ia"]);
 });
 
 test("la vista por productos NO la ve un usuario normal, ni con el ocultar global vacío", () => {
