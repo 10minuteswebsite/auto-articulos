@@ -289,3 +289,11 @@ La limpieza de cookies OAuth en errores ya no es una reparación pendiente. `cle
 
 - El cambio bilingüe está publicado en `main` y la columna editorial fue aplicada en producción mediante el workflow seguro #81.
 - La primera ejecución amplia fue rechazada por Prisma al detectar posible pérdida de 115 valores de `allowDevToPublishing`; se corrigió el procedimiento y no se forzó esa pérdida.
+
+
+## Cierre operativo — Hub native access projection — 2026-10-22
+
+- Production reconciliation completed: 12 active/trialing Redes tenants found, 12 projected, 0 failures.
+- The Hub remains commercial authority; Auto Artículos/Redes maintains the local projection required by native tenant features and MCP authorization.
+- Public boundary evidence: unsigned sync request rejected with 401 Invalid product client; unauthenticated MCP request rejected with 401 No autenticado.
+- Direct tenant-authenticated MCP E2E remains pending and is not inferred from the code alone.
