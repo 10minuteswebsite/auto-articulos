@@ -1,5 +1,9 @@
 ## Coordinación — Redes sin imágenes (og:image por timeout) (Claude) — 2026-10-22
 
+## Claude — BLOG IA separado: capitanía liberada — 2026-10-22
+
+- Task `BLOG-IA-INDEPENDENCIA-20261022`. **Capitán de migración liberó el lote:** Claude. PR #652 fusionado (`dba1dca2`), Vercel success, login 200 en Artículos y Redes; sin migraciones. Repo propio `10minuteswebsite/blog-ia` (rediseño del blog público y SEO en local, aún sin desplegar). Los dominios los resuelve otra aplicación (orden de Milton).
+
 - Task `REDES-IMAGENES-20261022`. Pedido de Milton: varias redes (Tumblr, Pinterest, Google Business, Threads, Instagram, Facebook…) dejaron de publicar imágenes; resolver con Composio/PostPeer si hace falta.
 - **Capitán de migración:** Claude — reclamado para este lote (sin migración); se libera al verificar producción.
 - Causa raíz (evidencia: log del worker 22/10 17:04 y Historial de Lorena): el worker lee la `og:image` de la página del artículo del cliente (`segurosdesaludyvida.com/categ/…`, ~1,2 s por página desde fuera) y desde GitHub Actions agotó el tiempo («The operation was aborted due to timeout»). Cada red pide esa misma página por separado y en ráfaga (3 jobs `procesar` + varias redes) → Google Business falló con «no tiene og:image», Tumblr/Pinterest con «no aceptó la imagen» (mensaje mal clasificado: «imagen» contiene «image») y LinkedIn publicó «(solo texto)».
