@@ -1,5 +1,9 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — Redes: og:image robusta (PR pendiente de número) — 2026-10-22
+
+- Task ID: `REDES-IMAGENES-20261022`. Solo worker (`socialPublish.ts`) y `friendly-error.ts`; el worker corre desde `main` en cada ejecución, no hay despliegue de Vercel propio. Sin migración.
+
 ## Versión — conexión BLOG IA (configuración, sin código nuevo) — 2026-10-21
 
 - Task ID: `BLOG-IA-CONEXION-SEOTOTAL-20261021`. Código: PR #645 (`cb69c12a`, solo entorno de workflows). Configuración externa: secreto/variable de GitHub, variables de Vercel Production, secreto del Worker rotado. Redespliegue de Vercel del mismo commit `Ready`. Verificación en CURRENT_STATE.

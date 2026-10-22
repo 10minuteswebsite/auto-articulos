@@ -108,11 +108,18 @@ function describeFetchError(err: unknown): string {
  * TLS de forma intermitente, no por artículo caído). 3 intentos con espera
  * creciente antes de rendirse.
  */
-async function fetchWithRetry(url: string, init: RequestInit, attempts = 3): Promise<Response> {
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit & { timeoutMs?: number },
+  attempts = 3,
+): Promise<Response> {
+  const { timeoutMs, ...rest } = init;
   let lastError: unknown;
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
-      return await fetch(url, init);
+      // Un temporizador NUEVO por intento: un `AbortSignal.timeout` compartido ya
+      // vencido hacía fallar al instante los reintentos (solo había un intento real).
+      return await fetch(url, timeoutMs ? { ...rest, signal: AbortSignal.timeout(timeoutMs) } : rest);
     } catch (err) {
       lastError = err;
       if (attempt < attempts) {
@@ -143,7 +150,7 @@ async function validateArticleUrl(url: string): Promise<void> {
   try {
     const res = await fetchWithRetry(url, {
       redirect: "follow",
-      signal: AbortSignal.timeout(10000),
+      timeoutMs: 20000,
       // Algunos hostings bloquean o frenan pedidos sin User-Agent de
       // navegador (los tratan como bots) — el worker corre desde GitHub
       // Actions sin este header por defecto.
@@ -169,12 +176,33 @@ async function validateArticleUrl(url: string): Promise<void> {
  * No generamos una imagen alternativa para LinkedIn: así la publicación usa
  * exactamente la imagen destacada/OG del artículo, igual que su vista previa.
  */
+const OG_IMAGE_TTL_MS = 10 * 60 * 1000;
+const ogImageCache = new Map<string, { at: number; promise: Promise<string | null> }>();
+
 export async function getArticleOpenGraphImage(articleUrl: string): Promise<string | null> {
+  // Todas las redes de una misma publicación piden la MISMA página casi a la vez. Con el
+  // sitio del cliente lento (1-2 s por página) esa ráfaga agotaba el tiempo y las redes
+  // fallaban sin imagen (22/10/2026). Una sola lectura compartida, y solo se recuerda si salió bien.
+  const hit = ogImageCache.get(articleUrl);
+  if (hit && Date.now() - hit.at < OG_IMAGE_TTL_MS) return hit.promise;
+  const promise = fetchArticleOpenGraphImage(articleUrl);
+  ogImageCache.set(articleUrl, { at: Date.now(), promise });
+  void promise.then((url) => {
+    if (!url && ogImageCache.get(articleUrl)?.promise === promise) ogImageCache.delete(articleUrl);
+  });
+  return promise;
+}
+
+async function fetchArticleOpenGraphImage(articleUrl: string): Promise<string | null> {
   try {
     const res = await fetchWithRetry(articleUrl, {
       redirect: "follow",
-      signal: AbortSignal.timeout(10000),
-      headers: { Accept: "text/html,application/xhtml+xml" },
+      timeoutMs: 20000,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml",
+      },
     });
     if (!res.ok) return null;
 
@@ -344,7 +372,7 @@ export async function getArticleBodyMarkdown(articleUrl: string): Promise<string
 /** Quita barras negras incorporadas en la imagen OG antes de subirla a redes. */
 async function normalizeSocialImage(imageUrl: string, targetAspect = 3 / 4): Promise<string> {
   try {
-    const response = await fetchWithRetry(imageUrl, { signal: AbortSignal.timeout(15000) });
+    const response = await fetchWithRetry(imageUrl, { timeoutMs: 15000 });
     if (!response.ok) return imageUrl;
     const source = Buffer.from(await response.arrayBuffer());
     const image = sharp(source);
@@ -432,7 +460,7 @@ async function getRehostedThreadsImage(titleId: string, articleUrl: string): Pro
   if (!ogImageUrl) return null;
 
   try {
-    const response = await fetchWithRetry(ogImageUrl, { signal: AbortSignal.timeout(15000) });
+    const response = await fetchWithRetry(ogImageUrl, { timeoutMs: 15000 });
     if (!response.ok) {
       return { url: ogImageUrl, source: "direct", fallbackReason: `descarga de la imagen OG devolvió HTTP ${response.status}` };
     }
@@ -451,7 +479,7 @@ async function getRehostedThreadsImage(titleId: string, articleUrl: string): Pro
       contentType: "image/jpeg",
       allowOverwrite: true,
     });
-    const publicCheck = await fetchWithRetry(blob.url, { method: "HEAD", signal: AbortSignal.timeout(10000) });
+    const publicCheck = await fetchWithRetry(blob.url, { method: "HEAD", timeoutMs: 10000 });
     if (publicCheck.ok) return { url: blob.url, source: "blob" };
     return { url: ogImageUrl, source: "direct", fallbackReason: `el Blob subido no respondió público (HTTP ${publicCheck.status})` };
   } catch (error) {
@@ -474,7 +502,7 @@ async function getRehostedImageForTumblr(titleId: string, articleUrl: string): P
   if (!ogImageUrl) return null;
 
   try {
-    const response = await fetchWithRetry(ogImageUrl, { signal: AbortSignal.timeout(15000) });
+    const response = await fetchWithRetry(ogImageUrl, { timeoutMs: 15000 });
     if (!response.ok) {
       return { url: ogImageUrl, source: "direct", fallbackReason: `descarga de la imagen OG devolvió HTTP ${response.status}` };
     }
@@ -487,7 +515,7 @@ async function getRehostedImageForTumblr(titleId: string, articleUrl: string): P
       contentType: "image/jpeg",
       allowOverwrite: true,
     });
-    const publicCheck = await fetchWithRetry(blob.url, { method: "HEAD", signal: AbortSignal.timeout(10000) });
+    const publicCheck = await fetchWithRetry(blob.url, { method: "HEAD", timeoutMs: 10000 });
     if (publicCheck.ok) return { url: blob.url, source: "blob" };
     return { url: ogImageUrl, source: "direct", fallbackReason: `el Blob subido no respondió público (HTTP ${publicCheck.status})` };
   } catch (error) {
@@ -500,7 +528,7 @@ async function getRehostedImageForTumblr(titleId: string, articleUrl: string): P
 async function getPinterestImage(titleId: string, articleUrl: string): Promise<string | null> {
   const ogImageUrl = await getArticleOpenGraphImage(articleUrl);
   if (!ogImageUrl) return null;
-  const response = await fetchWithRetry(ogImageUrl, { signal: AbortSignal.timeout(15000) });
+  const response = await fetchWithRetry(ogImageUrl, { timeoutMs: 15000 });
   if (!response.ok) throw new Error(`No se pudo descargar la imagen OG para Pinterest (HTTP ${response.status}).`);
   const normalized = await sharp(Buffer.from(await response.arrayBuffer()))
     .rotate()

@@ -11,6 +11,7 @@ export type ErrorKind =
   | "BUSY"        // límite de uso o cuota
   | "DUPLICATE"   // publicación repetida
   | "MEDIA"       // la red no aceptó la imagen o el enlace
+  | "SITE"        // no se pudo obtener la imagen de la página del artículo
   | "UNREACHABLE"; // la red no respondió
 
 export function classifyTechnicalError(raw: unknown): ErrorKind | null {
@@ -23,6 +24,7 @@ export function classifyTechnicalError(raw: unknown): ErrorKind | null {
   if (t.includes("permission_denied") || t.includes("does not have sufficient permission") || /\b403\b/.test(t)) return "NO_ACCESS";
   if (t.includes("quota") || t.includes("rate limit") || t.includes("resource_exhausted") || t.includes("too many") || /\(#(4|17|32|613)\)/.test(t) || /\b429\b/.test(t)) return "BUSY";
   if (t.includes("duplicate") || t.includes("already posted") || t.includes("already exists")) return "DUPLICATE";
+  if (t.includes("og:image") || t.includes("imagen og")) return "SITE";
   if (t.includes("image") || t.includes("media") || t.includes("aspect ratio") || t.includes("file size") || t.includes("could not fetch") || t.includes("unable to fetch") || t.includes("invalid url")) return "MEDIA";
   if (/\b5\d\d\b/.test(t) || t.includes("timeout") || t.includes("timed out") || t.includes("econn") || t.includes("fetch failed") || t.includes("network")) return "UNREACHABLE";
   return null;
@@ -48,6 +50,7 @@ const PUBLISH_MESSAGES: Record<ErrorKind, string> = {
   BUSY: "La red está limitando las publicaciones por ahora. Se reintentará más tarde.",
   DUPLICATE: "La red rechazó la publicación por repetida. Genera una propuesta nueva.",
   MEDIA: "La red no aceptó la imagen o el enlace de esta publicación. Prueba con otra propuesta.",
+  SITE: "No pudimos obtener la imagen de la página de tu artículo (tardó demasiado en responder). Pulsa Reintentar.",
   UNREACHABLE: "No pudimos comunicarnos con la red. Se reintentará más tarde.",
 };
 

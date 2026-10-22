@@ -1,3 +1,13 @@
+## Coordinación — Redes sin imágenes (og:image por timeout) (Claude) — 2026-10-22
+
+- Task `REDES-IMAGENES-20261022`. Pedido de Milton: varias redes (Tumblr, Pinterest, Google Business, Threads, Instagram, Facebook…) dejaron de publicar imágenes; resolver con Composio/PostPeer si hace falta.
+- **Capitán de migración:** Claude — reclamado para este lote (sin migración); se libera al verificar producción.
+- Causa raíz (evidencia: log del worker 22/10 17:04 y Historial de Lorena): el worker lee la `og:image` de la página del artículo del cliente (`segurosdesaludyvida.com/categ/…`, ~1,2 s por página desde fuera) y desde GitHub Actions agotó el tiempo («The operation was aborted due to timeout»). Cada red pide esa misma página por separado y en ráfaga (3 jobs `procesar` + varias redes) → Google Business falló con «no tiene og:image», Tumblr/Pinterest con «no aceptó la imagen» (mensaje mal clasificado: «imagen» contiene «image») y LinkedIn publicó «(solo texto)».
+- Defecto adicional: `fetchWithRetry` recibía un único `AbortSignal.timeout(10000)`; vencido el primero, los otros 2 reintentos abortaban al instante → no había reintento real.
+- No era Composio ni PostPeer: la imagen nunca llegaba a ellos. Las redes que fallaron con la autorización (Blogger, expirada) son otro asunto.
+- Cambio: `apps/worker/src/socialPublish.ts` — temporizador nuevo por intento (`timeoutMs`), 20 s para página/og:image, User-Agent de navegador, y lectura de og:image compartida entre redes (caché 10 min solo de aciertos + dedupe de la lectura en vuelo); `packages/shared/src/friendly-error.ts` — «sin og:image» ahora dice que no se pudo obtener la imagen de la página y pide Reintentar. +1 prueba (friendly-publish-error 8/8).
+- Pendiente de verificación en producción: reintentar Tumblr/Pinterest/Google Business de Lorena tras el despliegue (requiere el «sí» de Milton por publicar de verdad).
+
 ## Coordinación — conexiones en pestaña nueva y lista vacía (Claude) — 2026-10-22
 
 - Task `CONEXIONES-PESTANA-NUEVA-20261022`. Pedido de Milton: que toda conexión abra en pestaña nueva (si falla, la persona no sale de SEO TOTAL) y revisar el aviso de Google que salía al conectar Facebook/Pinterest de Vicente Sánchez.

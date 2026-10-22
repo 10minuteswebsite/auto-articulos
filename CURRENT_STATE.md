@@ -1,3 +1,9 @@
+## Punto cero vigente — Redes: lectura de og:image robusta — 2026-10-22
+
+- Task ID: `REDES-IMAGENES-20261022`. Causa: timeouts al leer la página del artículo desde GitHub Actions (una sola espera real de 10 s, repetida por cada red). Arreglo en el worker + mensaje de error correcto. Detalle en Coordinación.
+- Pruebas: `friendly-publish-error` 8/8 (con la ruta relativa del worktree; el `node_modules` enlazado apunta al checkout principal). Typecheck del worker no es concluyente aquí por el mismo enlace.
+- NO verificado en producción aún (ver Coordinación). Los fallos de Blogger por autorización vencida son independientes y siguen abiertos.
+
 ## Punto cero vigente — conexiones en pestaña nueva y lista vacía de Facebook/Pinterest — 2026-10-22
 
 - Task ID: `CONEXIONES-PESTANA-NUEVA-20261022`. PR #653 fusionado en `main` (`2b81b829`); Vercel `success` (web y auto-articulos-web), `/login` 200.
