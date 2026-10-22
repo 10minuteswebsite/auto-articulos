@@ -12640,3 +12640,57 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Evidencia previa: producción pública responde descubrimiento OAuth MCP 200 en ambos productos y capacidades sin token 401. Local: 247/247 pruebas; typecheck detenido por fallo preexistente de variable no usada en `bing-client-change.test.ts`.
 - Commit publicado en `main`: `fd19b682`. Smoke HTTP posterior OK en ambos productos y en los documentos públicos MCP. No se pudo asociar un deployment Vercel al SHA desde la inspección disponible y no hay sesión/token de usuario para probar autenticadamente los dos estados del HUB; queda como verificación pendiente, no como éxito supuesto.
 
+## Claude (tarea programada diaria de propagación) — 2026-10-22
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-21 (arriba,
+cerca del inicio del archivo, en el bloque "HANDOFF VIGENTE"; corresponde al commit `b895028`).
+`git fetch origin main` no mostró anomalías. Desde esa firma hasta `fce77bf` (`origin/main` al
+momento de esta corrida) aparecieron nueve entradas nuevas sin firma propia, todas también cerca
+del inicio del archivo: "Claude — AUTO ARTICULOS 500 en /auth/hub — 2026-10-21", "Claude — BLOG
+IA: SEO Total conectado al Worker — 2026-10-21", "Claude — BLOG IA: blog público probado con
+dominio de prueba — 2026-10-21", "Claude — BLOG IA: Worker desplegado en Cloudflare — 2026-10-21",
+"Claude — BLOG IA: Fases 2 y 3 — 2026-10-21", "Codex — CONTROL NO INDEXAR ARTÍCULOS — 2026-10-21",
+"Claude — mensaje de login genérico — 2026-10-21", "Task `REVISION-CONTENIDO-BLOGS-20261021`" y
+"Codex — MCP: estado explícito de activación HUB→Redes — 2026-10-21".
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: sin cambios de esta tarea. Las nueve entradas ya tenían su
+  versión/commit/deployment registrados ahí (cerca del inicio del archivo), agregados por un
+  proceso ajeno a esta tarea de propagación. Verificado uno por uno contra el texto de origen: no
+  falta ninguno, no se duplicó nada.
+- `INVENTARIO_CONVERSACIONES.md`: ya tenía registradas "Claude — AUTO ARTICULOS 500" y "Codex —
+  CONTROL NO INDEXAR ARTÍCULOS" (Parte B, cerca del inicio), y "REVISION-CONTENIDO-BLOGS-20261021"
+  al final del documento. Faltaban seis conversaciones nuevas sin registrar: se agregaron
+  "Claude — BLOG IA: SEO Total conectado al Worker", "Claude — BLOG IA: blog público probado con
+  dominio de prueba", "Claude — BLOG IA: Worker desplegado en Cloudflare", "Claude — BLOG IA:
+  Fases 2 y 3", "Claude — mensaje de login genérico" y "Codex — MCP: estado explícito de
+  activación HUB→Redes", todas fechadas 2026-10-21. Ninguna tiene reserva activa: para BLOG IA se
+  verificó en vivo con `git worktree list` y `git branch -a` (sin resultado) que no queda rama ni
+  worktree pendiente, y la propia entrada de origen dice "LIBERADO" para la capitanía de
+  migración; las demás no abrieron rama ni worktree propio. Todo a Parte B (historial), sin tocar
+  la Parte A.
+- `apps/web/src/content/manual-usuario.ts`: se agregó una nota ("Actualización 2026-10-21") en la
+  sección Asistentes IA, debajo del párrafo que ya explicaba qué hace el asistente cuando algo
+  aparece "sin conectar": ahora, si el módulo de Redes de la cuenta no está habilitado desde el
+  HUB, el asistente no ofrece ni intenta acciones de Redes y avisa con claridad que hay que
+  activar SEO Total Redes desde el HUB (viene de "Codex — MCP: estado explícito de activación
+  HUB→Redes — 2026-10-21", verificado contra el diff real del commit `fd19b682` en
+  `apps/web/src/app/api/mcp/route.ts`). El cambio de texto del mensaje de login genérico (commit
+  `45569e14`) no necesitó edición: el manual ya describía ese mensaje sin nombrar servidores desde
+  antes (línea ~17), así que la entrada de origen no lo contradice. BLOG IA sigue oculto a los
+  clientes por orden expresa de Milton (ver la propia entrada de "Fases 2 y 3"); no se documentó
+  en el manual, tal como esa misma entrada indica.
+- `TO-DO.md`: sin cambios. Los pendientes mencionados en las nueve entradas (Custom Hostnames y R2
+  real de BLOG IA, confirmar el texto del login en la interfaz, prueba autenticada de
+  activación/desactivación HUB→MCP) son pasos de verificación operativa de tareas ya ejecutadas
+  dentro de proyectos activos, no ideas sueltas sin ejecutar todavía.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. Ninguna de las nueve entradas describe un árbol
+  de git enredado, ramas pisadas o commits mezclados; la liberación de la capitanía de migración
+  de BLOG IA es el protocolo normal, no un hallazgo de árbol.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva para
+Milton: ninguna.
+
+Responsable: Claude (tarea programada diaria de propagación).
+
