@@ -72,6 +72,9 @@ jobs:
       OPENAI_IMAGE_API_KEY: ${{ secrets.OPENAI_IMAGE_API_KEY }}
       FAL_API_KEY: ${{ secrets.FAL_API_KEY }}
       IMAGE_PROVIDER: ${{ vars.IMAGE_PROVIDER }}
+      # BLOG IA (cola `publishMethod = BLOG`): inertes mientras ninguna cuenta use BLOG IA.
+      BLOG_IA_API_URL: ${{ vars.BLOG_IA_API_URL }}
+      BLOG_IA_SECRET: ${{ secrets.BLOG_IA_SECRET }}
       GOOGLE_SEARCH_CONSOLE_CLIENT_ID: ${{ secrets.GOOGLE_SEARCH_CONSOLE_CLIENT_ID }}
       GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET: ${{ secrets.GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET }}
       BING_WEBMASTER_CLIENT_ID: ${{ secrets.BING_WEBMASTER_CLIENT_ID }}
