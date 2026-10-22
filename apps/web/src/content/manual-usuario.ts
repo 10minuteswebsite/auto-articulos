@@ -370,6 +370,8 @@ En Redes, tu asistente puede preparar y publicar tus redes y blogs por nombre (F
 
 Tu asistente de IA maneja lo que SEO TOTAL le permite hacer: crear títulos, publicar y revisar el estado de tu cuenta. No conecta ni repara Google Search Console, Analytics, Bing ni tus redes: eso lo haces tú en Configuración → Conexiones. Si algo aparece «sin conectar», te lo dirá y seguirá con lo que sí puede hacer, sin pedirte contraseñas ni que vuelvas a autorizar.
 
+**Actualización 2026-10-21:** si el módulo de Redes de tu cuenta no está habilitado desde el HUB, tu asistente no te ofrecerá ni intentará acciones de Redes (propuestas, publicación, historial social): te avisará con claridad que primero debes activar SEO Total Redes desde el HUB.
+
 Si usas ChatGPT, la conexión se renueva sola cada hora sin pedirte volver a autorizar. Hasta el 14 de octubre de 2026 esa renovación fallaba, y por eso ChatGPT pedía autorizar de nuevo (o mostraba «Internal error») en las tareas programadas. Si todavía te lo pide una vez tras la corrección, autoriza una última vez y no debería repetirse.
 
 La protección de publicación no depende solo de las instrucciones del asistente:
