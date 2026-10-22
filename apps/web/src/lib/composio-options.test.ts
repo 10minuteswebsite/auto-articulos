@@ -175,3 +175,11 @@ test("Pinterest: lista los tableros con su privacidad y recomienda el único", (
   assert.equal(two.some((o) => o.recommended), false);
   assert.match(two[0].detail ?? "", /secreto/);
 });
+
+test("Facebook y Pinterest: una lista vacía previa no tapa las Páginas ni los tableros reales", () => {
+  const paginas = { data: { permissions: [], data: [{ id: "123", name: "Mi Página", access_token: "x" }] } };
+  assert.deepEqual(buildOptions("facebook", paginas, { confirmedDomain: null }).map((o) => o.label), ["Mi Página"]);
+  const tableros = { errors: [], items: [{ id: "9", name: "Recetas", privacy: "PUBLIC" }], bookmark: null };
+  assert.deepEqual(buildOptions("pinterest", tableros, { confirmedDomain: null }).map((o) => o.label), ["Recetas"]);
+  assert.deepEqual(buildOptions("pinterest", { items: [] }, { confirmedDomain: null }), []);
+});

@@ -66,6 +66,19 @@ const APP_NOTES: Record<string, string> = {
   pinterest: "Permite publicar tus artículos como Pins con imagen y enlace en el tablero de Pinterest que elijas.",
 };
 
+const EMPTY_OPTIONS_MESSAGE: Record<string, string> = {
+  google_search_console:
+    "No se encontró ninguna propiedad disponible en esta cuenta de Google. Comprueba que sea la cuenta correcta y que tenga acceso de propietario o usuario completo a Search Console. Si el sitio sí aparece en Search Console, desconecta esta conexión y vuelve a conectarla con esa cuenta.",
+  google_analytics:
+    "No se encontró ninguna propiedad de Analytics en esta cuenta de Google. Comprueba que sea la cuenta correcta y que tenga acceso a la propiedad. Si sí la tiene, desconecta esta conexión y vuelve a conectarla con esa cuenta.",
+  facebook:
+    "No se encontró ninguna Página de Facebook en esta cuenta. Comprueba que seas administrador de la Página y que hayas marcado esa Página al aceptar los permisos. Luego pulsa «Nueva conexión» otra vez.",
+  instagram:
+    "No se encontró ninguna cuenta de Instagram profesional vinculada a una Página de Facebook. Comprueba que la cuenta sea profesional y esté vinculada, y vuelve a conectar.",
+  pinterest:
+    "No se encontró ningún tablero en esta cuenta de Pinterest. Crea un tablero en Pinterest (o comprueba que sea la cuenta correcta) y pulsa «Nueva conexión» otra vez.",
+};
+
 const CHOOSE_TITLE: Record<string, string> = {
   google_search_console: "Elige el sitio que usarás",
   google_analytics: "Elige la propiedad que usarás",
@@ -225,6 +238,15 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
     }
   }, [load, openChoices, apps]);
 
+  // Al volver de la pestaña de conexión, se relee el estado real.
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    document.addEventListener("visibilitychange", refresh);
+    return () => document.removeEventListener("visibilitychange", refresh);
+  }, [load]);
+
   async function post(path: string, payload: Record<string, unknown>) {
     const response = await fetch(path, {
       method: "POST",
@@ -237,13 +259,25 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
   async function connect(app: string) {
     setBusy(app);
     setMessage(null);
+    // La pestaña se abre en el clic (antes del await) para que el navegador no la bloquee;
+    // así, si la conexión falla, la persona sigue dentro de SEO TOTAL en su pestaña original.
+    const tab = window.open("about:blank", "_blank");
     try {
       const { ok, body } = await post("/api/composio/connect", { app });
       if (!ok || !body.redirectUrl) {
+        tab?.close();
         setMessage({ ok: false, text: friendlyConnectionError(body.error, "No se pudo iniciar la conexión. Inténtalo de nuevo.") });
         return;
       }
-      window.location.href = body.redirectUrl as string;
+      if (tab) {
+        tab.location.href = body.redirectUrl as string;
+        setMessage({ ok: true, text: "Se abrió una pestaña nueva para conectar. Al terminar, vuelve a esta pestaña." });
+      } else {
+        window.location.href = body.redirectUrl as string;
+      }
+    } catch (error) {
+      tab?.close();
+      throw error;
     } finally {
       setBusy(null);
     }
@@ -472,7 +506,7 @@ export default function ComposioConnect({ apps, embedded = false, inline = false
                   {choice.error && <p style={{ fontSize: 13, color: "#c62828" }}>{choice.error}</p>}
                   {!choice.loading && !choice.error && choice.options.length === 0 && (
                     <p style={{ ...mutedStyle, color: "#c62828" }}>
-                      No se encontró ninguna propiedad disponible en esta cuenta de Google. Comprueba que sea la cuenta correcta y que tenga acceso de propietario o usuario completo a Search Console. Si el sitio sí aparece en Search Console, desconecta esta conexión y vuelve a conectarla con esa cuenta.
+                      {EMPTY_OPTIONS_MESSAGE[connection.app]}
                     </p>
                   )}
                   {choice.options.length > 0 && (() => {
