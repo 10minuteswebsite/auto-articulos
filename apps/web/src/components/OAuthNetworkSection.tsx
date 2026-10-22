@@ -228,7 +228,7 @@ export default function OAuthNetworkSection({ config, allowed = true, adminExtra
   // En Instagram y Facebook la guía de conexión la muestra el bloque de Composio (vía por defecto de todas las cuentas).
   const guide = hideUnlessConnectedOrAdmin ? undefined : CONNECTION_GUIDES[config.id];
   const connectLink = (
-    <a href={config.connectPath ?? `${base}/connect`} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+    <a href={config.connectPath ?? `${base}/connect`} target="_blank" rel="noopener" style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
       {CONNECTION_LABELS.connect}
     </a>
   );

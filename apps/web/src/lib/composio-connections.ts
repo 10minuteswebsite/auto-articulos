@@ -18,7 +18,7 @@ import {
 } from "./composio";
 import { hasOptInModuleAccess } from "./modules";
 import { defaultSitemapUrl, isSitemapListed, type SitemapOutcome } from "./composio-sitemap";
-import { lockableDomain, applyAnalyticsTraffic, applySearchConsoleStats, buildOptions, markCurrentSelection, summarizeAnalyticsReport, summarizeSearchConsoleQuery, type AnalyticsTraffic, type SearchConsoleStats, type SelectionOption } from "./composio-options";
+import { describeShape, lockableDomain, applyAnalyticsTraffic, applySearchConsoleStats, buildOptions, markCurrentSelection, summarizeAnalyticsReport, summarizeSearchConsoleQuery, type AnalyticsTraffic, type SearchConsoleStats, type SelectionOption } from "./composio-options";
 import { validateAndRegisterTrialDomain } from "./domain-validation";
 
 /**
@@ -318,6 +318,7 @@ export async function getSelectionOptions(
     });
     const confirmedDomain = await confirmedDomainOf(user.id);
     let options = buildOptions(app, result.data, { confirmedDomain });
+    if (options.length === 0) console.warn(`[composio] ${app}: lista vacía; forma de la respuesta ${describeShape(result.data)}`);
     if (app === "google_analytics" && options.length > 1) {
       // Varias propiedades pueden llamarse igual: se lee de qué sitio recibe visitas cada una.
       const traffic: Record<string, AnalyticsTraffic | null> = {};

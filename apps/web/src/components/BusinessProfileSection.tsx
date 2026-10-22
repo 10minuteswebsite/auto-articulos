@@ -143,7 +143,7 @@ export default function BusinessProfileSection() {
         <>
           {guide && <ConnectionGuide steps={guide.steps} ifFails={guide.ifFails} signupUrl={guide.signupUrl} signupLabel={guide.signupLabel} />}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
-            <a href="/api/postpeer/connect" style={linkButton}>{CONNECTION_LABELS.connect}</a>
+            <a href="/api/postpeer/connect" target="_blank" rel="noopener" style={linkButton}>{CONNECTION_LABELS.connect}</a>
           </div>
         </>
       ) : needsLocation ? (
@@ -178,7 +178,7 @@ export default function BusinessProfileSection() {
                 <button type="button" onClick={() => void load(true)} disabled={loadingLocations} style={{ ...secondaryButtonStyle, opacity: loadingLocations ? 0.55 : 1 }}>
                   {loadingLocations ? "Buscando fichas…" : retrySeconds ? "Espera para buscar fichas" : "Buscar fichas disponibles"}
                 </button>
-                <a href="/api/postpeer/connect" style={{ ...secondaryButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{CONNECTION_LABELS.connect}</a>
+                <a href="/api/postpeer/connect" target="_blank" rel="noopener" style={{ ...secondaryButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{CONNECTION_LABELS.connect}</a>
               </div>
             </div>
           )}
@@ -198,7 +198,7 @@ export default function BusinessProfileSection() {
           <ConnectionActions
             network="business-profile"
             endpoint="/api/business-profile/test"
-            connect={<a href="/api/postpeer/connect" style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{CONNECTION_LABELS.connect}</a>}
+            connect={<a href="/api/postpeer/connect" target="_blank" rel="noopener" style={{ ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>{CONNECTION_LABELS.connect}</a>}
             disconnect={<button type="button" onClick={() => disconnect(postPeerConnected)} style={{ ...secondaryButtonStyle, color: "#c62828" }}>{CONNECTION_LABELS.disconnect}</button>}
           />
         </>
