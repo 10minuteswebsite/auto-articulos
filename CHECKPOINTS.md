@@ -1,3 +1,11 @@
+## Checkpoint — acceso Hub reflejado en lista nativa y MCP — 2026-10-22
+
+- Se añadió la entrada server-to-server firmada para que tenants concedidos desde Hub existan también en la aplicación nativa.
+- El endpoint es idempotente: mismo tenant y producto no crean usuarios o entitlements duplicados.
+- Revocación recibida con `allowed=false` deja el entitlement local INACTIVE y la frontera MCP vuelve a negar Redes.
+- Producción pública verificada: login y OAuth discovery responden; MCP sin sesión responde 401. Falta prueba autenticada y confirmación de reconciliación masiva.
+
+
 # CHECKPOINTS
 
 ## Checkpoint — BLOG IA conexión verificada en D1 y limpieza — 2026-10-21
