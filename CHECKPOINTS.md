@@ -1,3 +1,8 @@
+## Checkpoint — Redes sin imágenes por timeout de og:image — 2026-10-22
+
+- Task `REDES-IMAGENES-20261022`; base `origin/main` = `2a4aa6f3`. Cambia solo el worker de redes (`socialPublish.ts`) y el texto de error compartido; sin base de datos.
+- Punto de partida de la siguiente IA: comprobar en el Historial de Lorena que Reintentar publica con imagen en Tumblr/Pinterest/Google Business y que el log del worker ya no muestra «aborted due to timeout» en og:image.
+
 ## Checkpoint — conexiones en pestaña nueva — 2026-10-22
 
 - Task `CONEXIONES-PESTANA-NUEVA-20261022`; `origin/main` = `2b81b829` (PR #653) con Vercel `success`. Cambia solo componentes web y `composio-options.ts`; sin base de datos ni rutas del servidor.

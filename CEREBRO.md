@@ -297,3 +297,7 @@ La limpieza de cookies OAuth en errores ya no es una reparación pendiente. `cle
 - The Hub remains commercial authority; Auto Artículos/Redes maintains the local projection required by native tenant features and MCP authorization.
 - Public boundary evidence: unsigned sync request rejected with 401 Invalid product client; unauthenticated MCP request rejected with 401 No autenticado.
 - Direct tenant-authenticated MCP E2E remains pending and is not inferred from the code alone.
+
+## Causa raíz — Redes publicaban sin imagen (2026-10-22)
+
+La imagen de TODAS las redes sale de la `og:image` de la página del artículo del cliente. Esa lectura se repetía por red, con un único temporizador de 10 s compartido por los reintentos (inútiles tras vencer). Un sitio de cliente lento + ráfaga de jobs = «sin imagen» o error. Regla: leer una vez, compartir, y nunca reutilizar un `AbortSignal.timeout` entre intentos. Mensaje de error: «imagen» (español) contiene «image», por eso todo se clasificaba como «la red no aceptó la imagen».
