@@ -1,5 +1,11 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión durable — dominios de clientes de BLOG IA en un dominio DEDICADO (opción B) — 2026-10-21
+
+- Decisión de Milton: los blogs de clientes se conectan por Cloudflare for SaaS (Custom Hostnames) sobre un dominio NUEVO y exclusivo para BLOG IA (p. ej. `edge.<dominio-nuevo>` como `BLOG_IA_CNAME_TARGET`), NO sobre `lasolucionweb.net`. Motivo: aislamiento — para que el Worker atienda los dominios de clientes hace falta una ruta que cubre toda la zona; en la zona de producción podría capturar `hub`, `articulos`, `quiz`, etc. Además es neutro para marca blanca.
+- Estado verificado (panel, solo lectura): en `lasolucionweb.net` Cloudflare for SaaS NO está activado y no hay Custom Hostnames. Descartada la opción C (apuntar al `workers.dev`): Cloudflare responde 403 al forzar `Host`.
+- Pasos: Milton compra el dominio y lo añade a Cloudflare y activa SaaS + DNS (la IA no puede: cambios de DNS/dominios y compras); la IA configura el Worker (rutas), `BLOG_IA_CNAME_TARGET` y ajusta el asistente (Cloudflare puede pedir un TXT de validación además del CNAME). Piloto de 3 negocios: alta manual de cada dominio en el panel; automatizar por API (token en Vercel) después del piloto.
+
 ## Decisión durable — la clave compartida SEO Total ↔ BLOG IA vive solo en tres sitios y se rota al conectar — 2026-10-21
 
 - `INGEST_SECRET` (Cloudflare) = `BLOG_IA_SECRET` (GitHub Actions y Vercel Production). Nunca en el repositorio ni en documentos; la IA la genera, la guarda en los 3 sitios y destruye su copia. Al rotarla hay que actualizar los 3 y redesplegar Vercel (las variables solo se leen en un despliegue nuevo).

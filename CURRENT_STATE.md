@@ -1,5 +1,10 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## BLOG IA — decisión: dominio dedicado para dominios de clientes (B) — 2026-10-21
+
+- Task ID: `BLOG-IA-DOMINIOS-CLIENTES-20261021`. Decisión de Milton: opción B (dominio nuevo solo para BLOG IA). Detalle y motivo en `CEREBRO.md`. Sin cambios de código ni de infraestructura en este paso.
+- Pendiente de Milton: elegir/comprar el dominio y añadirlo a Cloudflare; activar Cloudflare for SaaS y el DNS (lo bloquea el clasificador a la IA). Después la IA configura el Worker y `BLOG_IA_CNAME_TARGET`. BLOG IA sigue oculto a los clientes.
+
 ## BLOG IA — conexión verificada en la base del Worker y datos de prueba limpiados — 2026-10-21
 
 - Task ID: `BLOG-IA-LIMPIEZA-20261021` (cierra los pendientes de `BLOG-IA-CONEXION-SEOTOTAL-20261021`).
