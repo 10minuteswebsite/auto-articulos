@@ -1,5 +1,9 @@
 # CHECKPOINTS
 
+## Checkpoint — BLOG IA blog público probado con dominio de mentira — 2026-10-21
+
+- Task: `BLOG-IA-DOMINIO-PRUEBA-20261021`; `blogtest.lasolucionweb.net` sirve el blog de prueba por HTTPS real (home/artículo/categoría/sitemaps/robots/404/301/cabeceras) y la suspensión responde 503 sin caché. Queda suspendido. Pendiente: Custom Hostnames de clientes, R2 real, conexión con SEO Total (ver CURRENT_STATE).
+
 ## Checkpoint — BLOG IA Worker en Cloudflare — 2026-10-21 — desplegado, sin conectar
 
 - Task: `BLOG-IA-WORKER-CLOUDFLARE-20261021`; punto cero: `origin/main` = `58786850` + este cierre.

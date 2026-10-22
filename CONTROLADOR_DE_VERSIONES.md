@@ -1,5 +1,9 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — BLOG IA dominio de prueba — 2026-10-21
+
+- Task ID: `BLOG-IA-DOMINIO-PRUEBA-20261021`. Sin cambios de código ni despliegues de SEO Total; solo infraestructura Cloudflare: dominio personalizado `blogtest.lasolucionweb.net` → Worker `blog-ia` (versión `4b2645f6-0862-4ac4-8f23-d2aff8924f97`) y datos falsos en D1. Verificación y estado final en CURRENT_STATE.
+
 ## Versión — BLOG IA Worker (Cloudflare) — 2026-10-21
 
 - Task ID: `BLOG-IA-WORKER-CLOUDFLARE-20261021`. Sin cambios en la web ni en el worker de Vercel/GitHub; solo infraestructura nueva en Cloudflare y `apps/blog/wrangler.toml` en el repositorio.

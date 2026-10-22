@@ -1,5 +1,10 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión durable — dominio de prueba bajo la zona propia, suspendido al terminar — 2026-10-21
+
+- El render público del blog se probó con un subdominio de la zona de la plataforma (`blogtest.lasolucionweb.net`, dominio personalizado del Worker) porque `workers.dev` rechaza `Host` forzado (403). El flujo real de clientes (CNAME del cliente → Custom Hostnames de Cloudflare for SaaS) sigue sin probar.
+- Un blog de prueba público se deja SUSPENDIDO (503 sin caché) para que no lo indexen; se retira borrando el dominio del Worker y sus filas de D1. Los cambios de DNS/dominios los confirma Milton en el panel: el clasificador de seguridad impide que la IA los ejecute.
+
 ## Decisión durable — Worker de BLOG IA en workers.dev hasta tener dominio de prueba — 2026-10-21
 
 - La API de ingestión vive en `blog-ia.10minuteswebsite.workers.dev` (sin tocar el DNS de `lasolucionweb.net`); los blogs públicos de clientes necesitarán Custom Hostnames (Cloudflare for SaaS) sobre una zona con origen de respaldo. `workers.dev` rechaza `Host` forzado (403): el render público solo se prueba con un dominio real.
