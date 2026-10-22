@@ -1,5 +1,16 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## BLOG IA — prueba real con dominio de mentira `blogtest.lasolucionweb.net` — 2026-10-21 — verificada
+
+- Task ID: `BLOG-IA-DOMINIO-PRUEBA-20261021`. Punto cero previo: `main` = `c138bccb` (Worker `blog-ia` ya desplegado).
+- FOTO PREVIA DNS de `lasolucionweb.net`: 12 registros (avatar-runtime, formularios, apex y `www` (A), articulos/cursos/redes/seototal (CNAME Vercel) y los Workers hub, nadia-velasquez, quiz, staging-hub); NO existía `blogtest`.
+- Cambio (confirmado por Milton con un clic en el panel; el clasificador bloquea que lo haga la IA): Worker `blog-ia` → dominio personalizado `blogtest.lasolucionweb.net` (un registro DNS nuevo + certificado de Cloudflare). Ningún registro existente se tocó.
+- Datos falsos en la D1 `blog-ia` (insertados por la consola del panel): tenant `blogtest-tenant`, marca «Blog de Prueba», dominio verificado/TLS ready, categoría `pruebas`, artículo `articulo-de-prueba`.
+- VERIFICACIÓN en producción (HTTPS real, certificado válido, `ssl_verify_result=0`): home y artículo 200; título/`h1` correctos; canonical `https://blogtest.lasolucionweb.net/articulo-de-prueba/`; JSON-LD BlogPosting/BreadcrumbList/Organization; categoría 200; `robots.txt` con el sitemap del host; `sitemap.xml`, `sitemap-articles.xml` (home + artículo); slug inexistente 404; sin barra final 301; CSP/nosniff/X-Frame-Options/Referrer-Policy presentes; vista en navegador real correcta. SUSPENSIÓN real: tras `subscription_state='suspended'` home y artículo responden 503 con `cache-control: no-store` y «temporalmente fuera de servicio».
+- Estado final: el blog de mentira queda SUSPENDIDO (503), no muestra contenido. Siguen existiendo el dominio `blogtest` y los datos falsos; retirar: borrar el dominio en Workers → blog-ia → Domains y las filas `blogtest-tenant` en D1.
+- FOTO POSTERIOR: Artículos/Redes/seototal `/login` 200, hub 307, quiz 200, superlinks 200, Worker health 200.
+- NO verificado: reanudación desde SEO Total; Custom Hostnames de CLIENTES (Cloudflare for SaaS, CNAME de cliente) y su TLS; `media.upload` a R2 real y portada en el artículo; OpenAI en la cola real; Search Console/Bing del blog; conexión de SEO Total al Worker (variables `BLOG_IA_*` + rotación de la clave). BLOG IA sigue OCULTO a los clientes de SEO Total.
+
 ## BLOG IA — Worker desplegado en Cloudflare (sin conectar a SEO Total) — 2026-10-21
 
 - Task ID: `BLOG-IA-WORKER-CLOUDFLARE-20261021`. Punto cero de producción: `main` = `58786850`, Vercel `success`, Artículos/Redes `/login` 200.

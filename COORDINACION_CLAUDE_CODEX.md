@@ -5,6 +5,11 @@
 - Task `ARTICULOS-500-AUTH-HUB-20261021`. Causa: columna `User.disableIndexing` ausente en producción (migración `20261021120000` del commit `7531dc5c` nunca aplicada). Arreglo: ALTER TABLE aditivo ejecutado por Milton en Supabase.
 - Verificado: `/auth/hub` 303 a las 16:03 sin P2022. Esto reabre y corrige el cierre de «CONTROL NO INDEXAR ARTÍCULOS».
 
+## Claude — BLOG IA: blog público probado con dominio de prueba — 2026-10-21
+
+- Task `BLOG-IA-DOMINIO-PRUEBA-20261021`. `blogtest.lasolucionweb.net` (dominio personalizado del Worker `blog-ia`, confirmado por Milton en el panel) sirve un blog de MENTIRA por HTTPS real; verificadas home/artículo/categoría/sitemaps/robots/404/301/cabeceras y la suspensión (503 sin caché). Quedó SUSPENDIDO. Detalle y fotos previa/posterior en `CURRENT_STATE.md`.
+- Pendiente: Custom Hostnames de clientes, R2 real de imágenes, conectar SEO Total (`BLOG_IA_*`). BLOG IA sigue oculto a los clientes.
+
 ## Claude — BLOG IA: Worker desplegado en Cloudflare — 2026-10-21
 
 - Task `BLOG-IA-WORKER-CLOUDFLARE-20261021`. Worker `blog-ia` + D1 `blog-ia` + R2 `blog-ia-media` NUEVOS en la cuenta de Cloudflare de Milton; ningún Worker, D1, R2, DNS o ruta existente se tocó. Verificado con eventos firmados reales (401 sin firma/firma falsa, `applied`, replay `duplicate`); datos de prueba borrados; acceso de `wrangler` revocado. Detalle y fotos previa/posterior en `CURRENT_STATE.md`.
