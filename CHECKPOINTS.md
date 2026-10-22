@@ -1,5 +1,9 @@
 # CHECKPOINTS
 
+## Checkpoint — BLOG IA conexión verificada en D1 y limpieza — 2026-10-21
+
+- Task: `BLOG-IA-LIMPIEZA-20261021`; alta de SEO Total confirmada en la base del Worker; datos de `blogtest` borrados (1 tenant restante). Pendiente: retirar el dominio `blogtest` (DNS, Milton), `BLOG_IA_CNAME_TARGET`/Custom Hostnames de clientes, R2 real, Search Console/Bing del blog.
+
 ## Checkpoint — SEO Total conectado al Worker de BLOG IA — 2026-10-21
 
 - Task: `BLOG-IA-CONEXION-SEOTOTAL-20261021`; clave rotada, variables en GitHub y Vercel Production, redespliegue `Ready`, alta firmada de prueba aceptada sin error. Pendiente: lectura directa en D1, `BLOG_IA_CNAME_TARGET`/Custom Hostnames de clientes, R2 real, limpieza de residuos de prueba (ver CURRENT_STATE).

@@ -1,5 +1,13 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## BLOG IA — conexión verificada en la base del Worker y datos de prueba limpiados — 2026-10-21
+
+- Task ID: `BLOG-IA-LIMPIEZA-20261021` (cierra los pendientes de `BLOG-IA-CONEXION-SEOTOTAL-20261021`).
+- VERIFICACIÓN directa (consola de D1 `blog-ia`, solo lectura): el alta que SEO Total envió desde producción existe: tenant `t_cms8c1zrr0000iilb6or98tr5`, dominio `blog.prueba-conexion.invalid` (`pending_dns`), marca «La Solución Web (prueba)». Conexión SEO Total (Vercel Production) → Worker confirmada de punta a punta con la clave rotada.
+- LIMPIEZA: borrados todos los datos del blog de mentira `blogtest-tenant` (articles, categories, article_categories, domains, blogs, publish_events, audit_log, tenants; 0 filas de media/slug_redirects). Comprobación posterior: 1 tenant, 0 de `blogtest`, 1 dominio, 0 artículos, 0 categorías, 2 eventos. `https://blogtest.lasolucionweb.net/...` ya no sirve contenido.
+- SE CONSERVA a propósito el tenant del alta de prueba de la cuenta administradora: borrarlo dejaría el registro de SEO Total (marcado como aprovisionado) apuntando a un tenant inexistente y el asistente fallaría con 404 no reintentable. Se reutiliza cambiando el dominio en el asistente cuando haya uno real.
+- PENDIENTE de Milton (cambio de DNS, lo bloquea el clasificador a la IA): retirar el dominio personalizado `blogtest.lasolucionweb.net` del Worker `blog-ia` (Workers → blog-ia → Domains) si ya no se quiere. Producción sana: Artículos/Redes `/login` 200, Worker health 200. BLOG IA sigue OCULTO a los clientes.
+
 ## BLOG IA — SEO Total conectado al Worker (variables y clave rotada) — 2026-10-21
 
 - Task ID: `BLOG-IA-CONEXION-SEOTOTAL-20261021`. Punto cero: `main` = `cb69c12a` (PR #645) y Vercel producción `Ready`.
