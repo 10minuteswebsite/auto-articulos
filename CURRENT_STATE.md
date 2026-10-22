@@ -1,3 +1,11 @@
+## Punto cero vigente — conexiones en pestaña nueva y lista vacía de Facebook/Pinterest — 2026-10-22
+
+- Task ID: `CONEXIONES-PESTANA-NUEVA-20261022`. PR #653 fusionado en `main` (`2b81b829`); Vercel `success` (web y auto-articulos-web), `/login` 200.
+- Comportamiento vigente: todo botón de conectar (Composio, PostPeer/Threads, Perfil de Negocio, X, Bing) abre en pestaña nueva; Composio relee el estado al volver a la pestaña. Si el navegador bloquea la pestaña, se usa la misma.
+- El aviso de lista vacía es propio de cada app (antes decía «cuenta de Google» también en Pinterest y Facebook). La búsqueda de listas en `composio-options.ts` ya no se queda con una lista vacía previa; pruebas del archivo: 19 pasan.
+- Cuando una lista llega vacía el servidor registra `[composio] <app>: lista vacía; forma de la respuesta …` (solo nombres de campos y tamaños, sin tokens).
+- NO verificado: el caso de Vicente Sánchez (Facebook con Página real y Pinterest) sigue sin comprobarse; requiere su sesión («Probar conexión») y leer el log de Vercel. Punto de partida de la siguiente IA.
+
 ## Punto cero vigente — recepción de acceso firmado desde Hub — 2026-10-22
 
 - La aplicación recibe ahora la proyección firmada del Hub en `/api/integrations/hub/access-sync`.

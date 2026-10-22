@@ -1,3 +1,8 @@
+## Checkpoint — conexiones en pestaña nueva — 2026-10-22
+
+- Task `CONEXIONES-PESTANA-NUEVA-20261022`; `origin/main` = `2b81b829` (PR #653) con Vercel `success`. Cambia solo componentes web y `composio-options.ts`; sin base de datos ni rutas del servidor.
+- Pendiente: probar con la cuenta de Vicente Sánchez (Probar conexión y logs `[composio] … lista vacía`) para saber si el vacío era la lista tapada o una cuenta sin Páginas/tableros.
+
 ## Checkpoint — acceso Hub reflejado en lista nativa y MCP — 2026-10-22
 
 - Se añadió la entrada server-to-server firmada para que tenants concedidos desde Hub existan también en la aplicación nativa.
