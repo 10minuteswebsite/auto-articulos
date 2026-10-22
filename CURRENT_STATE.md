@@ -1,3 +1,12 @@
+## Punto cero vigente — recepción de acceso firmado desde Hub — 2026-10-22
+
+- La aplicación recibe ahora la proyección firmada del Hub en `/api/integrations/hub/access-sync`.
+- La ruta autentica el cliente de plataforma, resuelve el tenant por `hubUserId` o email y sincroniza de forma idempotente el entitlement local de ARTICULOS o REDES.
+- La frontera MCP conserva la regla: Redes solo funciona con entitlement REDES activo/grace válido; un usuario vinculado al Hub sin esa fila queda bloqueado.
+- Commit publicado en `main`: `b352054fd7f6490592e197ec2b1f79a69fd00045`; la última compilación Vercel de producción quedó encolada para ese commit.
+- Falta la comprobación productiva final de build READY, la reconciliación iniciada desde el Hub y una sesión MCP autenticada.
+
+
 # HANDOFF VIGENTE — 2026-10-19
 
 ## BLOG IA — conexión de dominio para CUALQUIER proveedor — 2026-10-21
