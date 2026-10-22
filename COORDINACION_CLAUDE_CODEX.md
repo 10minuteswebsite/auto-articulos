@@ -1,3 +1,9 @@
+## Coordinación — conexiones en pestaña nueva y lista vacía (Claude) — 2026-10-22
+
+- Task `CONEXIONES-PESTANA-NUEVA-20261022`. Pedido de Milton: que toda conexión abra en pestaña nueva (si falla, la persona no sale de SEO TOTAL) y revisar el aviso de Google que salía al conectar Facebook/Pinterest de Vicente Sánchez.
+- Causa del aviso: texto fijo de Search Console mostrado en todas las apps cuando la lista llega vacía. La conexión es Composio, no PostPeer. Hallazgo adicional: `findArray` devolvía una lista vacía previa y tapaba la real; corregido con prueba. Causa real en la cuenta de Vicente NO confirmada.
+- Decisión: PR normal a `main` (el push directo lo bloquea el clasificador). Siguiente paso: Vicente pulsa «Probar conexión» y se lee el log de Vercel.
+
 ## Coordinación — proyección de entitlements del Hub — 2026-10-22
 
 - Auto Artículos/Redes no debe inferir acceso solo por existir un usuario local. El entitlement REDES es la barrera que consume el MCP.
