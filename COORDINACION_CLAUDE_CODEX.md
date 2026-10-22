@@ -1,3 +1,11 @@
+## Coordinación — proyección de entitlements del Hub — 2026-10-22
+
+- Auto Artículos/Redes no debe inferir acceso solo por existir un usuario local. El entitlement REDES es la barrera que consume el MCP.
+- El endpoint `/api/integrations/hub/access-sync` acepta únicamente el cliente firmado por el Hub y mantiene los vínculos Auth0 existentes cuando la notificación no trae `auth0_sub`.
+- La lista nativa se actualiza tanto por callback normal como por eventos Stripe/admin del Hub y reconciliación.
+- E2E pendiente: validar con un tenant real que la sesión lanzada desde el Hub puede usar MCP de Redes después de la proyección.
+
+
 # HANDOFF VIGENTE — 2026-10-19
 
 ## Claude — AUTO ARTICULOS 500 en /auth/hub — 2026-10-21
