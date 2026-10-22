@@ -1,3 +1,11 @@
+## Decisión durable — Hub como autoridad y proyección nativa para Redes — 2026-10-22
+
+- Hub es la autoridad comercial de acceso; Auto Artículos/Redes mantiene una proyección local necesaria para su lista nativa y para la autorización del MCP.
+- La proyección se acepta solo por credenciales de integración del Hub, no por un navegador ni por un campo enviado por el tenant.
+- Las entregas repetidas son esperadas y deben ser idempotentes; las revocaciones se representan como INACTIVE para conservar historial.
+- Un tenant Hub con acceso a Redes pero sin fila local debe quedar bloqueado hasta que la proyección sea recibida; esto evita permitir MCP por defecto.
+
+
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
 ## Decisión durable — dominios de clientes de BLOG IA en un dominio DEDICADO (opción B) — 2026-10-21
