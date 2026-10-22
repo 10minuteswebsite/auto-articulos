@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@auto-articulos/db";
 import { createHubSessionContextToken, createSessionToken, HUB_SESSION_CONTEXT_COOKIE, SESSION_COOKIE } from "@/lib/session";
 import { applyCookie, cookieEnvForHost } from "@/lib/shared-cookies";
+import { syncLocalProductEntitlement } from "@/lib/hub-sync";
 
 export const runtime = "nodejs";
 
@@ -86,6 +87,13 @@ export async function GET(request: NextRequest) {
       },
     });
   }
+
+  await syncLocalProductEntitlement(
+    user.id,
+    appSlug === "auto-redes" ? "REDES" : "ARTICULOS",
+    true,
+    `Acceso concedido por lanzamiento Hub: ${appSlug}`,
+  );
 
   const token = await createSessionToken(user.id);
   const hubContextToken = await createHubSessionContextToken(user.id);
