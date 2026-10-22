@@ -1,6 +1,6 @@
 # CONTROLADOR DE VERSIONES
 
-## Versión — Redes: og:image robusta (PR pendiente de número) — 2026-10-22
+## Versión — Redes: og:image robusta (PR #655, `7a0589d3`) — 2026-10-22
 
 - Task ID: `REDES-IMAGENES-20261022`. Solo worker (`socialPublish.ts`) y `friendly-error.ts`; el worker corre desde `main` en cada ejecución, no hay despliegue de Vercel propio. Sin migración.
 

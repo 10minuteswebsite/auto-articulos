@@ -6,7 +6,9 @@
 - Defecto adicional: `fetchWithRetry` recibía un único `AbortSignal.timeout(10000)`; vencido el primero, los otros 2 reintentos abortaban al instante → no había reintento real.
 - No era Composio ni PostPeer: la imagen nunca llegaba a ellos. Las redes que fallaron con la autorización (Blogger, expirada) son otro asunto.
 - Cambio: `apps/worker/src/socialPublish.ts` — temporizador nuevo por intento (`timeoutMs`), 20 s para página/og:image, User-Agent de navegador, y lectura de og:image compartida entre redes (caché 10 min solo de aciertos + dedupe de la lectura en vuelo); `packages/shared/src/friendly-error.ts` — «sin og:image» ahora dice que no se pudo obtener la imagen de la página y pide Reintentar. +1 prueba (friendly-publish-error 8/8).
-- Pendiente de verificación en producción: reintentar Tumblr/Pinterest/Google Business de Lorena tras el despliegue (requiere el «sí» de Milton por publicar de verdad).
+- Fusionado: PR #655, `main` = `7a0589d3`. VERIFICADO EN PRODUCCIÓN (22/10 17:19-17:23, con el «sí» de Milton): reintentos de Tumblr, Pinterest (x3), Threads (x2) y Google Business (x4, incl. los ya encolados) → todos «published»; el log del worker no muestra «aborted due to timeout» ni «solo texto»; Tumblr `Publicado… postId 831195280587276288`; Pinterest generó la imagen con IA y publicó.
+- NO verificado: que la imagen se vea en cada post público (no se abrió cada uno); Instagram/Facebook sin fallo reciente que reproducir. Blogger sigue con «token expirado» (reconectar en Conexiones, independiente).
+- **Capitanía de migración liberada** por Claude (22/10/2026, sin migración).
 
 ## Coordinación — conexiones en pestaña nueva y lista vacía (Claude) — 2026-10-22
 

@@ -1,7 +1,7 @@
 ## Checkpoint — Redes sin imágenes por timeout de og:image — 2026-10-22
 
 - Task `REDES-IMAGENES-20261022`; base `origin/main` = `2a4aa6f3`. Cambia solo el worker de redes (`socialPublish.ts`) y el texto de error compartido; sin base de datos.
-- Punto de partida de la siguiente IA: comprobar en el Historial de Lorena que Reintentar publica con imagen en Tumblr/Pinterest/Google Business y que el log del worker ya no muestra «aborted due to timeout» en og:image.
+- `main` = `7a0589d3` (PR #655), verificado en producción: reintentos de Tumblr/Pinterest/Threads/Google Business de Lorena publicados sin timeouts. Punto de partida: abrir un post público por red para confirmar la imagen; reconectar Blogger.
 
 ## Checkpoint — conexiones en pestaña nueva — 2026-10-22
 
