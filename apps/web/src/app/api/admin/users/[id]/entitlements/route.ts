@@ -4,7 +4,6 @@ import { auditLog } from "@/lib/audit";
 import { requireAdmin } from "@/lib/current-user";
 import { hasProductAccess, PRODUCTS, type ProductKey } from "@/lib/product-access";
 import { computeNextEntitlement } from "@/lib/product-entitlement-transition";
-import { syncBlogIaSubscription } from "@/lib/blog-ia-subscription";
 
 /*
  * ADMINISTRACIÓN DE DERECHOS POR PRODUCTO (proyecto «SEPARACION DE SEO TOTAL»,
@@ -168,12 +167,6 @@ export async function PUT(
     });
 
     const effective = await hasProductAccess(id, product);
-    if (product === "ARTICULOS") {
-      const targetUser = await prisma.user.findUnique({ where: { id }, select: { publishMethod: true } });
-      if (targetUser) {
-        await syncBlogIaSubscription(id, effective.allowed, entitlement.version, targetUser.publishMethod);
-      }
-    }
     return NextResponse.json({ entitlement, effective }, { headers: NO_STORE });
   } catch (error) {
     console.error("[admin/entitlements] PUT falló:", error);

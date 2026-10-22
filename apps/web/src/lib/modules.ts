@@ -89,17 +89,6 @@ export const SYSTEM_MODULES: SystemModule[] = [
     optIn: true,
   },
   {
-    // BLOG IA (Fase 2, local): wizard para publicar en un blog propio. Opt-in:
-    // lo ven los administradores y solo quien tenga «Habilitado» en
-    // Administración → Usuarios. Nadie más nota cambios (BROWSER/MCP intactos).
-    id: "blog-ia",
-    label: "BLOG IA",
-    href: "/dashboard/blog-ia",
-    description: "Configura tu blog en tu propio dominio y publica en él los artículos de SEO Total.",
-    optIn: true,
-    secret: true,
-  },
-  {
     id: "conexion-composio",
     label: "Conexión por Composio",
     href: "/dashboard/configuracion/conexiones",

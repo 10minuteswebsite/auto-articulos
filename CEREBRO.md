@@ -8,6 +8,10 @@
 
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión durable — BLOG IA y Artículos son dos programas, dos cobros — 2026-10-22
+
+- Decisión de Milton: BLOG IA se contrata aparte y se sirve del motor de Artículos (si también se contrata); módulos separados para poder venderlos por separado, también en GitHub. Repo propio `10minuteswebsite/blog-ia`; Artículos conserva solo el conector. La integración con el HUB la hace Mario.
+
 ## Decisión durable — dominios de clientes de BLOG IA en un dominio DEDICADO (opción B) — 2026-10-21
 
 - Decisión de Milton: los blogs de clientes se conectan por Cloudflare for SaaS (Custom Hostnames) sobre un dominio NUEVO y exclusivo para BLOG IA (p. ej. `edge.<dominio-nuevo>` como `BLOG_IA_CNAME_TARGET`), NO sobre `lasolucionweb.net`. Motivo: aislamiento — para que el Worker atienda los dominios de clientes hace falta una ruta que cubre toda la zona; en la zona de producción podría capturar `hub`, `articulos`, `quiz`, etc. Además es neutro para marca blanca.
