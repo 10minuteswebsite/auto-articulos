@@ -12702,3 +12702,11 @@ Milton: ninguna.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+
+
+## Cierre operativo — Hub native access projection — 2026-10-22
+
+- The production Hub reconciliation returned found=12, projected=12, failed=[].
+- The integration is now wired for Stripe subscription/invoice changes, admin grants, admin revokes and idempotent initial reconciliation.
+- Auto production deployment dpl_5Lj4PdaSoV8w5HAFDNwWoV8LGCRV from f6ce1d9d is READY. Unsigned projection returned 401 Invalid product client; MCP without a tenant session returned 401 No autenticado.
+- Direct authenticated tenant MCP observation remains pending; no success is claimed without that session.
