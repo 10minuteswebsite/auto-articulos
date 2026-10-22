@@ -10,6 +10,30 @@
 - Abierto hasta verificar deployment y flujo autenticado.
 - Cierre: `d8cebcb0` desplegado en `la-solucion-web/auto-articulos-web` (`Ready`) y pantalla autenticada verificada en producción; no se modificó la cuenta usada para la prueba.
 
+## Claude — BLOG IA: SEO Total conectado al Worker — 2026-10-21
+
+- Task `BLOG-IA-CONEXION-SEOTOTAL-20261021`. Responsable/dueño del proyecto: Claude. Configuración externa (claves/variables de GitHub y Vercel, secreto del Worker rotado); PR #645, sin ramas ni worktrees propios. Sin reservas activas. BLOG IA sigue oculto a los clientes (orden de Milton). Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
+## Claude — BLOG IA: blog público probado con dominio de prueba — 2026-10-21
+
+- Task `BLOG-IA-DOMINIO-PRUEBA-20261021`. Solo infraestructura Cloudflare (dominio `blogtest.lasolucionweb.net`), sin cambios de código ni ramas/worktrees. Sin reservas activas. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
+## Claude — BLOG IA: Worker desplegado en Cloudflare — 2026-10-21
+
+- Task `BLOG-IA-WORKER-CLOUDFLARE-20261021`. Worker `blog-ia` + D1 `blog-ia` + R2 `blog-ia-media` nuevos en la cuenta de Cloudflare de Milton; sin tocar infraestructura existente ni ramas/worktrees de git. Sin reservas activas. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
+## Claude — BLOG IA: Fases 2 y 3 (wizard, portadas, desactivar/reactivar, sitemap) — 2026-10-21
+
+- Task `BLOG-IA-FASE-2-3-20261021`. Capitán de migración: Claude — LIBERADO el 2026-10-21 tras aplicar y verificar el lote (migraciones `20261016120000_add_blog_ia` y `20261021120000_blog_ia_wizard`); verificado en vivo (`git worktree list` y `git branch -a` sin rama/worktree de BLOG IA pendiente el 2026-10-22) que no queda ninguna reserva activa. Commit fusionado en `main`: `74f61ee0` (PR #598). Milton es dueño de la decisión; Claude es propietario del proyecto; Codex responde preguntas (canal fuera del repo). BLOG IA sigue oculto a los clientes. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
+## Claude — mensaje de login genérico — 2026-10-21
+
+- Task `LOGIN-MENSAJE-GENERICO-20261021`. Capitán de migración: Claude (sin migraciones). Commit `45569e14` en `main`; sin ramas/worktrees propios. Sin reservas activas. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
+## Codex — MCP: estado explícito de activación HUB→Redes — 2026-10-21
+
+- Task `MCP-HUB-REDES-20261021`. Commit `fd19b682` publicado en `main`; sin ramas ni worktrees nuevos (checkout único autorizado). Sin reservas activas. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
 ## Codex — estilo problema-solución por defecto — 2026-10-19
 
 - Task `PROMPT-DEFAULT-PROBLEMA-SOLUCION-20261019`; commit `e0b6cf8a` publicado en `main`; deployment `3FJBdcyeAsh7Kh3Q2CYVrtqLV5fJ` (`success`).
