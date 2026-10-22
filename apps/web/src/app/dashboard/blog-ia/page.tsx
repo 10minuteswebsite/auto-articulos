@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { COMMON_MISTAKES, GENERIC_GUIDE, PROVIDERS, guideById, renderSteps } from "@/lib/blog-ia-dns-help";
 
 type Stage = "not_started" | "brand" | "domain" | "dns" | "tls" | "ready_to_activate" | "active" | "suspended" | "deactivated" | "error";
 
@@ -204,6 +205,7 @@ export default function BlogIaPage() {
               </table>
               <p style={hint}>Estado: <strong>{view.stage === "dns" ? "Pendiente" : view.stage === "tls" ? "Certificado en proceso" : view.stage === "error" ? "Necesita corrección" : "Pendiente"}</strong>. Los cambios de DNS pueden tardar en propagarse; no podemos prometer un tiempo exacto.</p>
               <button style={primary} disabled={busy} onClick={() => call("/api/blog-ia/verify", "POST")}>Verificar conexión</button>
+              <DnsHelp hostname={view.dns.host} target={view.dns.target} />
             </div>
           )}
         </section>
@@ -260,11 +262,64 @@ export default function BlogIaPage() {
   );
 }
 
-function CopyButton({ text }: { text: string }) {
+/** Pasos para crear el registro en el proveedor del cliente, con detección automática. */
+function DnsHelp({ hostname, target }: { hostname: string; target: string }) {
+  const [info, setInfo] = useState<{ providerId: string | null; providerName: string | null; label: string; full: string } | null>(null);
+  const [providerId, setProviderId] = useState("generic");
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/blog-ia/dns-help", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hostname }) })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!alive || !d) return;
+        setInfo(d);
+        if (d.providerId) setProviderId(d.providerId);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [hostname]);
+
+  const label = info?.label ?? hostname.split(".")[0];
+  const full = info?.full ?? hostname;
+  const guide = guideById(providerId);
+  const steps = renderSteps(guide, { label, full, target });
+  const message = `Hola, necesito que crees este registro DNS en el proveedor de mi dominio:\n\nTipo: CNAME\nNombre: ${label} (o ${full})\nDestino: ${target}\n\nEs para conectar mi blog en ${full}. Gracias.`;
+
+  return (
+    <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid #e8e8ed" }}>
+      <h3 style={{ margin: "0 0 6px", fontSize: 16 }}>¿Cómo lo hago en mi proveedor?</h3>
+      {info?.providerName ? (
+        <p style={hint}>Detectamos que tu dominio usa <strong>{info.providerName}</strong>. Si no es así, elige otro:</p>
+      ) : (
+        <p style={hint}>Elige dónde administras tu dominio. Si no sabes cuál es, deja «Otro proveedor» y sigue la guía general.</p>
+      )}
+      <select aria-label="Proveedor de tu dominio" style={{ ...input, marginTop: 8, maxWidth: 360 }} value={providerId} onChange={(e) => setProviderId(e.target.value)}>
+        {PROVIDERS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        <option value={GENERIC_GUIDE.id}>{GENERIC_GUIDE.name}</option>
+      </select>
+      <ol style={{ ...hint, paddingLeft: 20, marginTop: 12 }}>
+        {steps.map((s, i) => <li key={i} style={{ marginBottom: 4 }}>{s}</li>)}
+      </ol>
+      {guide.tip && <p style={hint}><strong>Ojo:</strong> {guide.tip}</p>}
+      <details style={{ marginTop: 8 }}>
+        <summary style={{ ...hint, cursor: "pointer" }}>Errores frecuentes</summary>
+        <ul style={{ ...hint, paddingLeft: 20 }}>{COMMON_MISTAKES.map((m, i) => <li key={i}>{m.replaceAll("{label}", label)}</li>)}</ul>
+      </details>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+        <CopyButton text={message} label="Copiar instrucciones" />
+        <a href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noreferrer" style={{ padding: "2px 10px", fontSize: 12, border: "1px solid #d2d2d7", borderRadius: 8, background: "#fff", color: "#1d1d1f", textDecoration: "none" }}>Enviar por WhatsApp</a>
+        <a href={`mailto:?subject=${encodeURIComponent("Registro DNS para mi blog")}&body=${encodeURIComponent(message)}`} style={{ padding: "2px 10px", fontSize: 12, border: "1px solid #d2d2d7", borderRadius: 8, background: "#fff", color: "#1d1d1f", textDecoration: "none" }}>Enviar por correo</a>
+      </div>
+      <p style={hint}>¿Lo administra otra persona? Envíale estas instrucciones y listo.</p>
+    </div>
+  );
+}
+
+function CopyButton({ text, label: buttonLabel }: { text: string; label?: string }) {
   const [done, setDone] = useState(false);
   return (
-    <button type="button" onClick={() => navigator.clipboard?.writeText(text).then(() => { setDone(true); setTimeout(() => setDone(false), 1500); }).catch(() => {})} style={{ marginLeft: 6, padding: "2px 10px", fontSize: 12, border: "1px solid #d2d2d7", borderRadius: 8, background: "#fff", cursor: "pointer" }}>
-      {done ? "Copiado" : "Copiar"}
+    <button type="button" onClick={() => navigator.clipboard?.writeText(text).then(() => { setDone(true); setTimeout(() => setDone(false), 1500); }).catch(() => {})} style={{ marginLeft: 6, padding: "2px 10px", fontSize: 12, border: "1px solid #d2d2d7", borderRadius: 8, background: "#fff", color: "#1d1d1f", cursor: "pointer" }}>
+      {done ? "Copiado" : (buttonLabel ?? "Copiar")}
     </button>
   );
 }

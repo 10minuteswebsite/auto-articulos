@@ -1,5 +1,12 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## BLOG IA — conexión de dominio para CUALQUIER proveedor — 2026-10-21
+
+- Task ID: `BLOG-IA-DNS-PROVEEDORES-20261021`. Orden de Milton: la conexión del dominio debe ser sencilla y servir para todos los proveedores, no solo GoDaddy.
+- Cambio (solo web, módulo oculto `blog-ia`): `lib/blog-ia-dns-help.ts` (detección del proveedor por servidores de nombres + guías de 14 proveedores y una genérica con los valores rellenados), ruta `POST /api/blog-ia/dns-help` (consulta pública de NS, solo lectura, 30 consultas/10 min), pantalla «¿Cómo lo hago en mi proveedor?» con selector, errores frecuentes, «Copiar instrucciones», WhatsApp y correo para delegar. Arreglo de un fallo visual previo: los botones «Copiar» tenían texto blanco sobre fondo blanco. +5 pruebas (web 293/293).
+- Verificado en navegador local: `blog.totalinfoai.com` → detecta GoDaddy y rellena los pasos; cambiar a Namecheap muestra sus pasos. NO verificado en producción con un dominio real: la sección del DNS solo aparece cuando `BLOG_IA_CNAME_TARGET` está definido (pendiente del dominio dedicado).
+- Pendiente (decisión de producto): conexión de UN CLIC (Domain Connect: GoDaddy, IONOS, Cloudflare, Squarespace…) requiere registrar plantillas con cada proveedor; la API directa de GoDaddy exige que el cliente entregue su clave/secreto, por lo que NO se usa. BLOG IA sigue oculto a los clientes.
+
 ## BLOG IA — decisión: dominio dedicado para dominios de clientes (B) — 2026-10-21
 
 - Task ID: `BLOG-IA-DOMINIOS-CLIENTES-20261021`. Decisión de Milton: opción B (dominio nuevo solo para BLOG IA). Detalle y motivo en `CEREBRO.md`. Sin cambios de código ni de infraestructura en este paso.
