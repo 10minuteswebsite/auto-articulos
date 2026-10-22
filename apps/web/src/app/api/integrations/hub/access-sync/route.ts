@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         phone,
         passwordHash,
         hubUserId,
-        hubAuth0Sub: auth0Sub,
+        ...(auth0Sub ? { hubAuth0Sub: auth0Sub } : {}),
         hubSyncedAt: new Date(),
         role,
         trialUnlocked: allowed,
