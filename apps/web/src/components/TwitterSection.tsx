@@ -200,6 +200,8 @@ export default function TwitterSection() {
               ) : (
                 <a
                   href="/api/search-integrations/twitter/connect"
+                  target="_blank"
+                  rel="noopener"
                   className="secondary"
                   style={{ ...secondaryButtonStyle, textDecoration: "none", display: "inline-flex" }}
                 >

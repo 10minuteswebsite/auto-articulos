@@ -47,7 +47,12 @@ export async function canUseSocialModule(userId: string): Promise<boolean> {
     where: { id: userId },
     select: {
       role: true,
+      hubUserId: true,
       disabledModules: true,
+      productEntitlements: {
+        where: { product: "REDES" },
+        select: { status: true, graceUntil: true },
+      },
       allowInstagramPublishing: true,
       allowFacebookPublishing: true,
       allowLinkedInPublishing: true,
@@ -60,7 +65,30 @@ export async function canUseSocialModule(userId: string): Promise<boolean> {
     },
   });
   if (!user) return false;
-  return hasSocialModuleAccess(user, await getSocialHostContext());
+
+  const context = await getSocialHostContext();
+  const entitlement = user.productEntitlements[0];
+
+  // The Hub is authoritative for identities that came through the unified
+  // login. An explicit local projection wins over the legacy module rule.
+  if (user.role === "admin") return true;
+  if (entitlement) {
+    if (entitlement.status === "ACTIVE") return true;
+    if (
+      entitlement.status === "GRACE" &&
+      entitlement.graceUntil &&
+      entitlement.graceUntil.getTime() > Date.now()
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  // Fail closed for a Hub-linked user until the first successful projection;
+  // otherwise the old host-wide Redes exception could grant MCP access.
+  if (user.hubUserId) return false;
+
+  return hasSocialModuleAccess(user, context);
 }
 
 export type SocialModuleAccessUser = {

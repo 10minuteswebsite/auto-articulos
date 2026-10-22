@@ -13,6 +13,77 @@ type HubSyncResult = {
 
 export type HubProductSlug = "seo-total" | "auto-redes";
 
+type HubLocalProduct = "ARTICULOS" | "REDES";
+
+function localProductForHubSlug(appSlug: HubProductSlug): HubLocalProduct {
+  return appSlug === "auto-redes" ? "REDES" : "ARTICULOS";
+}
+
+/**
+ * Projects the Hub decision into the local product-entitlement table. The
+ * projection is idempotent and writes an audit event only when the decision
+ * or its source changes. A successful Hub denial creates an explicit INACTIVE
+ * row so legacy Redes access cannot reopen the product accidentally.
+ */
+export async function syncLocalProductEntitlement(
+  userId: string,
+  product: HubLocalProduct,
+  allowed: boolean,
+  reason = "Sincronización de acceso desde Hub",
+): Promise<void> {
+  const nextStatus = allowed ? "ACTIVE" : "INACTIVE";
+
+  await prisma.$transaction(async (tx) => {
+    const current = await tx.productEntitlement.findUnique({
+      where: { userId_product: { userId, product } },
+      select: { status: true, source: true, graceUntil: true },
+    });
+
+    const currentGrace = current?.graceUntil?.getTime() ?? null;
+    const changed =
+      !current ||
+      current.status !== nextStatus ||
+      current.source !== "HUB" ||
+      currentGrace !== null;
+
+    if (!changed) return;
+
+    await tx.productEntitlement.upsert({
+      where: { userId_product: { userId, product } },
+      create: {
+        userId,
+        product,
+        status: nextStatus,
+        graceUntil: null,
+        source: "HUB",
+        note: reason,
+        updatedBy: "hub-sync",
+      },
+      update: {
+        status: nextStatus,
+        graceUntil: null,
+        source: "HUB",
+        version: { increment: 1 },
+        note: reason,
+        updatedBy: "hub-sync",
+      },
+    });
+
+    await tx.productEntitlementEvent.create({
+      data: {
+        userId,
+        product,
+        fromStatus: current?.status ?? null,
+        toStatus: nextStatus,
+        fromGraceUntil: current?.graceUntil ?? null,
+        toGraceUntil: null,
+        source: "HUB",
+        reason,
+      },
+    });
+  });
+}
+
 function getHubConfig() {
   const baseUrl = (process.env.HUB_BASE_URL || DEFAULT_HUB_URL).replace(/\/$/, "");
   const clientId = process.env.AUTO_ARTICULOS_HUB_CLIENT_ID;
@@ -59,6 +130,13 @@ export async function refreshHubAccessForUser(userId: string, appSlug: HubProduc
     allowed = payload.allowed;
     accessCache.set(cacheKey, { allowed, expiresAt: Date.now() + ACCESS_CACHE_MS });
   }
+
+  await syncLocalProductEntitlement(
+    userId,
+    localProductForHubSlug(appSlug),
+    allowed,
+    `Revalidación Hub: ${appSlug}=${allowed ? "allowed" : "denied"}`,
+  );
 
   if (allowed) {
     await prisma.user.update({ where: { id: userId }, data: { trialUnlocked: true } });

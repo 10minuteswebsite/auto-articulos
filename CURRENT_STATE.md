@@ -1,3 +1,26 @@
+## Punto cero vigente — Redes: lectura de og:image robusta — 2026-10-22
+
+- Task ID: `REDES-IMAGENES-20261022`. Causa: timeouts al leer la página del artículo desde GitHub Actions (una sola espera real de 10 s, repetida por cada red). Arreglo en el worker + mensaje de error correcto. Detalle en Coordinación.
+- Pruebas: `friendly-publish-error` 8/8 (con la ruta relativa del worktree; el `node_modules` enlazado apunta al checkout principal). Typecheck del worker no es concluyente aquí por el mismo enlace.
+- Fusionado `7a0589d3` (PR #655) y verificado en producción con reintentos reales de Lorena (ver Coordinación). Falta solo ver cada post público. Los fallos de Blogger por autorización vencida son independientes y siguen abiertos.
+
+## Punto cero vigente — conexiones en pestaña nueva y lista vacía de Facebook/Pinterest — 2026-10-22
+
+- Task ID: `CONEXIONES-PESTANA-NUEVA-20261022`. PR #653 fusionado en `main` (`2b81b829`); Vercel `success` (web y auto-articulos-web), `/login` 200.
+- Comportamiento vigente: todo botón de conectar (Composio, PostPeer/Threads, Perfil de Negocio, X, Bing) abre en pestaña nueva; Composio relee el estado al volver a la pestaña. Si el navegador bloquea la pestaña, se usa la misma.
+- El aviso de lista vacía es propio de cada app (antes decía «cuenta de Google» también en Pinterest y Facebook). La búsqueda de listas en `composio-options.ts` ya no se queda con una lista vacía previa; pruebas del archivo: 19 pasan.
+- Cuando una lista llega vacía el servidor registra `[composio] <app>: lista vacía; forma de la respuesta …` (solo nombres de campos y tamaños, sin tokens).
+- NO verificado: el caso de Vicente Sánchez (Facebook con Página real y Pinterest) sigue sin comprobarse; requiere su sesión («Probar conexión») y leer el log de Vercel. Punto de partida de la siguiente IA.
+
+## Punto cero vigente — recepción de acceso firmado desde Hub — 2026-10-22
+
+- La aplicación recibe ahora la proyección firmada del Hub en `/api/integrations/hub/access-sync`.
+- La ruta autentica el cliente de plataforma, resuelve el tenant por `hubUserId` o email y sincroniza de forma idempotente el entitlement local de ARTICULOS o REDES.
+- La frontera MCP conserva la regla: Redes solo funciona con entitlement REDES activo/grace válido; un usuario vinculado al Hub sin esa fila queda bloqueado.
+- Commit publicado en `main`: `b352054fd7f6490592e197ec2b1f79a69fd00045`; la última compilación Vercel de producción quedó encolada para ese commit.
+- Falta la comprobación productiva final de build READY, la reconciliación iniciada desde el Hub y una sesión MCP autenticada.
+
+
 # HANDOFF VIGENTE — 2026-10-19
 
 ## BLOG IA — separado como programa independiente — 2026-10-22
@@ -454,3 +477,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Smoke público OK en Artículos y Redes; `seototal` conserva 307 al HUB.
 - Migración segura #81 (`39347494879`) `Success`, columna aplicada sin pérdida de datos.
 - Queda como pendiente no bloqueante el error previo de typecheck `latestBingChange` no usado.
+
+
+## Cierre operativo — Hub projection verification — 2026-10-22
+
+- Hub production reconciliation was executed with the real admin session: found=12, projected=12, failed=[].
+- Auto production commit f6ce1d9d5618630d08c89c8798825e8422460ebe is READY. The signed projection route is reachable through middleware and rejects unsigned requests with 401 Invalid product client; unauthenticated MCP rejects with 401 No autenticado.
+- The local REDES entitlement is now the explicit authorization boundary for Hub-linked users, while revocations preserve the local row as inactive.
+- A tenant-authenticated MCP session was not available for direct browser E2E; this remains the only unobserved verification item.

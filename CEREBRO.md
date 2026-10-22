@@ -1,3 +1,11 @@
+## Decisión durable — Hub como autoridad y proyección nativa para Redes — 2026-10-22
+
+- Hub es la autoridad comercial de acceso; Auto Artículos/Redes mantiene una proyección local necesaria para su lista nativa y para la autorización del MCP.
+- La proyección se acepta solo por credenciales de integración del Hub, no por un navegador ni por un campo enviado por el tenant.
+- Las entregas repetidas son esperadas y deben ser idempotentes; las revocaciones se representan como INACTIVE para conservar historial.
+- Un tenant Hub con acceso a Redes pero sin fila local debe quedar bloqueado hasta que la proyección sea recibida; esto evita permitir MCP por defecto.
+
+
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
 ## Decisión durable — BLOG IA y Artículos son dos programas, dos cobros — 2026-10-22
@@ -285,3 +293,15 @@ La limpieza de cookies OAuth en errores ya no es una reparación pendiente. `cle
 
 - El cambio bilingüe está publicado en `main` y la columna editorial fue aplicada en producción mediante el workflow seguro #81.
 - La primera ejecución amplia fue rechazada por Prisma al detectar posible pérdida de 115 valores de `allowDevToPublishing`; se corrigió el procedimiento y no se forzó esa pérdida.
+
+
+## Cierre operativo — Hub native access projection — 2026-10-22
+
+- Production reconciliation completed: 12 active/trialing Redes tenants found, 12 projected, 0 failures.
+- The Hub remains commercial authority; Auto Artículos/Redes maintains the local projection required by native tenant features and MCP authorization.
+- Public boundary evidence: unsigned sync request rejected with 401 Invalid product client; unauthenticated MCP request rejected with 401 No autenticado.
+- Direct tenant-authenticated MCP E2E remains pending and is not inferred from the code alone.
+
+## Causa raíz — Redes publicaban sin imagen (2026-10-22)
+
+La imagen de TODAS las redes sale de la `og:image` de la página del artículo del cliente. Esa lectura se repetía por red, con un único temporizador de 10 s compartido por los reintentos (inútiles tras vencer). Un sitio de cliente lento + ráfaga de jobs = «sin imagen» o error. Regla: leer una vez, compartir, y nunca reutilizar un `AbortSignal.timeout` entre intentos. Mensaje de error: «imagen» (español) contiene «image», por eso todo se clasificaba como «la red no aceptó la imagen».

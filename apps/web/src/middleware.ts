@@ -35,6 +35,9 @@ const PUBLIC_PATHS = [
   // sesión, así que no puede pasar por el gate de abajo. No expone nada sin
   // un Bearer `sta_` válido.
   "/api/mcp/token-lookup",
+  // Hub projects access server-to-server with signed platform credentials;
+  // it does not carry a browser session cookie.
+  "/api/integrations/hub/access-sync",
 ];
 
 /** Endpoint del servidor MCP; se autentica con Bearer, no con cookie. */

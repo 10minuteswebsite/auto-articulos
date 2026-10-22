@@ -40,16 +40,22 @@ const str = (value: unknown): string | null =>
   typeof value === "string" && value.trim() !== "" ? value.trim() : null;
 
 /** Primer arreglo de objetos que cumple `test`, buscando hasta 4 niveles. */
-function findArray(data: unknown, test: (item: Json) => boolean, depth = 0): Json[] | null {
+function findArray(data: unknown, test: (item: Json) => boolean): Json[] | null {
+  // Una lista vacía que aparece antes (permisos, errores, paginación) no debe tapar la lista real:
+  // se busca primero una con elementos y solo si no hay ninguna se acepta una vacía.
+  return findArrayWith(data, test, false, 0) ?? findArrayWith(data, test, true, 0);
+}
+
+function findArrayWith(data: unknown, test: (item: Json) => boolean, allowEmpty: boolean, depth: number): Json[] | null {
   if (Array.isArray(data)) {
     const items = data.filter(isObject);
     if (items.length > 0 && items.every(test)) return items;
-    if (data.length === 0) return [];
+    if (data.length === 0 && allowEmpty) return [];
     return null;
   }
   if (!isObject(data) || depth > 4) return null;
   for (const value of Object.values(data)) {
-    const found = findArray(value, test, depth + 1);
+    const found = findArrayWith(value, test, allowEmpty, depth + 1);
     if (found) return found;
   }
   return null;
@@ -351,4 +357,12 @@ export function applySearchConsoleStats(
         : `28 días: ${t.clicks} clics · ${t.impressions} impresiones`;
     return { ...option, detail: [option.detail, hint].filter(Boolean).join(" · ") };
   });
+}
+
+/** Forma de una respuesta sin valores (solo nombres de campos y largos de listas): sirve para diagnosticar listas vacías sin registrar tokens. */
+export function describeShape(data: unknown, depth = 0): string {
+  if (Array.isArray(data)) return `[${data.length}${data.length > 0 && depth < 4 ? `:${describeShape(data[0], depth + 1)}` : ""}]`;
+  if (!isObject(data)) return data === null ? "null" : typeof data;
+  if (depth >= 4) return "{…}";
+  return `{${Object.entries(data).map(([key, value]) => `${key}:${describeShape(value, depth + 1)}`).join(",")}}`;
 }

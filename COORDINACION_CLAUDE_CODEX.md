@@ -1,3 +1,29 @@
+## Coordinación — Redes sin imágenes (og:image por timeout) (Claude) — 2026-10-22
+
+- Task `REDES-IMAGENES-20261022`. Pedido de Milton: varias redes (Tumblr, Pinterest, Google Business, Threads, Instagram, Facebook…) dejaron de publicar imágenes; resolver con Composio/PostPeer si hace falta.
+- **Capitán de migración:** Claude — reclamado para este lote (sin migración); se libera al verificar producción.
+- Causa raíz (evidencia: log del worker 22/10 17:04 y Historial de Lorena): el worker lee la `og:image` de la página del artículo del cliente (`segurosdesaludyvida.com/categ/…`, ~1,2 s por página desde fuera) y desde GitHub Actions agotó el tiempo («The operation was aborted due to timeout»). Cada red pide esa misma página por separado y en ráfaga (3 jobs `procesar` + varias redes) → Google Business falló con «no tiene og:image», Tumblr/Pinterest con «no aceptó la imagen» (mensaje mal clasificado: «imagen» contiene «image») y LinkedIn publicó «(solo texto)».
+- Defecto adicional: `fetchWithRetry` recibía un único `AbortSignal.timeout(10000)`; vencido el primero, los otros 2 reintentos abortaban al instante → no había reintento real.
+- No era Composio ni PostPeer: la imagen nunca llegaba a ellos. Las redes que fallaron con la autorización (Blogger, expirada) son otro asunto.
+- Cambio: `apps/worker/src/socialPublish.ts` — temporizador nuevo por intento (`timeoutMs`), 20 s para página/og:image, User-Agent de navegador, y lectura de og:image compartida entre redes (caché 10 min solo de aciertos + dedupe de la lectura en vuelo); `packages/shared/src/friendly-error.ts` — «sin og:image» ahora dice que no se pudo obtener la imagen de la página y pide Reintentar. +1 prueba (friendly-publish-error 8/8).
+- Fusionado: PR #655, `main` = `7a0589d3`. VERIFICADO EN PRODUCCIÓN (22/10 17:19-17:23, con el «sí» de Milton): reintentos de Tumblr, Pinterest (x3), Threads (x2) y Google Business (x4, incl. los ya encolados) → todos «published»; el log del worker no muestra «aborted due to timeout» ni «solo texto»; Tumblr `Publicado… postId 831195280587276288`; Pinterest generó la imagen con IA y publicó.
+- NO verificado: que la imagen se vea en cada post público (no se abrió cada uno); Instagram/Facebook sin fallo reciente que reproducir. Blogger sigue con «token expirado» (reconectar en Conexiones, independiente).
+- **Capitanía de migración liberada** por Claude (22/10/2026, sin migración).
+
+## Coordinación — conexiones en pestaña nueva y lista vacía (Claude) — 2026-10-22
+
+- Task `CONEXIONES-PESTANA-NUEVA-20261022`. Pedido de Milton: que toda conexión abra en pestaña nueva (si falla, la persona no sale de SEO TOTAL) y revisar el aviso de Google que salía al conectar Facebook/Pinterest de Vicente Sánchez.
+- Causa del aviso: texto fijo de Search Console mostrado en todas las apps cuando la lista llega vacía. La conexión es Composio, no PostPeer. Hallazgo adicional: `findArray` devolvía una lista vacía previa y tapaba la real; corregido con prueba. Causa real en la cuenta de Vicente NO confirmada.
+- Decisión: PR normal a `main` (el push directo lo bloquea el clasificador). Siguiente paso: Vicente pulsa «Probar conexión» y se lee el log de Vercel.
+
+## Coordinación — proyección de entitlements del Hub — 2026-10-22
+
+- Auto Artículos/Redes no debe inferir acceso solo por existir un usuario local. El entitlement REDES es la barrera que consume el MCP.
+- El endpoint `/api/integrations/hub/access-sync` acepta únicamente el cliente firmado por el Hub y mantiene los vínculos Auth0 existentes cuando la notificación no trae `auth0_sub`.
+- La lista nativa se actualiza tanto por callback normal como por eventos Stripe/admin del Hub y reconciliación.
+- E2E pendiente: validar con un tenant real que la sesión lanzada desde el Hub puede usar MCP de Redes después de la proyección.
+
+
 # HANDOFF VIGENTE — 2026-10-19
 
 ## Claude — BLOG IA separado de Artículos — 2026-10-22
@@ -12698,3 +12724,11 @@ Milton: ninguna.
 
 Responsable: Claude (tarea programada diaria de propagación).
 
+
+
+## Cierre operativo — Hub native access projection — 2026-10-22
+
+- The production Hub reconciliation returned found=12, projected=12, failed=[].
+- The integration is now wired for Stripe subscription/invoice changes, admin grants, admin revokes and idempotent initial reconciliation.
+- Auto production deployment dpl_5Lj4PdaSoV8w5HAFDNwWoV8LGCRV from f6ce1d9d is READY. Unsigned projection returned 401 Invalid product client; MCP without a tenant session returned 401 No autenticado.
+- Direct authenticated tenant MCP observation remains pending; no success is claimed without that session.

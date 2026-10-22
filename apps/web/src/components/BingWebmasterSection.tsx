@@ -223,6 +223,8 @@ export default function BingWebmasterSection() {
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
           <a
             href="/api/search-integrations/bing/connect"
+            target="_blank"
+            rel="noopener"
             aria-disabled={connecting}
             onClick={(e) => {
               if (connecting) {
@@ -264,6 +266,8 @@ export default function BingWebmasterSection() {
           </p>
           <a
             href="/api/search-integrations/bing/connect"
+            target="_blank"
+            rel="noopener"
             aria-disabled={connecting}
             onClick={(e) => {
               if (connecting) {

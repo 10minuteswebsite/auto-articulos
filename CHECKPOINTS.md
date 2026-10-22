@@ -1,3 +1,21 @@
+## Checkpoint — Redes sin imágenes por timeout de og:image — 2026-10-22
+
+- Task `REDES-IMAGENES-20261022`; base `origin/main` = `2a4aa6f3`. Cambia solo el worker de redes (`socialPublish.ts`) y el texto de error compartido; sin base de datos.
+- `main` = `7a0589d3` (PR #655), verificado en producción: reintentos de Tumblr/Pinterest/Threads/Google Business de Lorena publicados sin timeouts. Punto de partida: abrir un post público por red para confirmar la imagen; reconectar Blogger.
+
+## Checkpoint — conexiones en pestaña nueva — 2026-10-22
+
+- Task `CONEXIONES-PESTANA-NUEVA-20261022`; `origin/main` = `2b81b829` (PR #653) con Vercel `success`. Cambia solo componentes web y `composio-options.ts`; sin base de datos ni rutas del servidor.
+- Pendiente: probar con la cuenta de Vicente Sánchez (Probar conexión y logs `[composio] … lista vacía`) para saber si el vacío era la lista tapada o una cuenta sin Páginas/tableros.
+
+## Checkpoint — acceso Hub reflejado en lista nativa y MCP — 2026-10-22
+
+- Se añadió la entrada server-to-server firmada para que tenants concedidos desde Hub existan también en la aplicación nativa.
+- El endpoint es idempotente: mismo tenant y producto no crean usuarios o entitlements duplicados.
+- Revocación recibida con `allowed=false` deja el entitlement local INACTIVE y la frontera MCP vuelve a negar Redes.
+- Producción pública verificada: login y OAuth discovery responden; MCP sin sesión responde 401. Falta prueba autenticada y confirmación de reconciliación masiva.
+
+
 # CHECKPOINTS
 
 ## Checkpoint — BLOG IA independiente (repo y app propios) — 2026-10-22
@@ -436,3 +454,11 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Cierre: `/auth/hub` 303 (16:03) sin P2022; `/login` 200 en Artículos y Redes. Siguiente punto cero: producción con la columna aplicada.
 
 - Cierre final: commit `5e03ce76` en `main` (opción `safe_user_indexing_preference` en `migrate.yml`). Smoke de producción posterior sano. CERRADO.
+
+
+## Cierre operativo — Hub native access projection — 2026-10-22
+
+- Reconciliation evidence: found=12, projected=12, failed=[] from the production Hub admin endpoint.
+- The signed Hub projection and explicit REDES ProductEntitlement checks are now part of the durable authorization path.
+- Auto production commit f6ce1d9d is READY and public smoke checks pass at the route boundary.
+- A tenant-authenticated MCP browser session was not available for direct E2E and remains explicitly pending.

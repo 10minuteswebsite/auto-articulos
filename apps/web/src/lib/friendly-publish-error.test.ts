@@ -37,3 +37,9 @@ test("vacío y la palabra del proveedor", () => {
   assert.match(friendlyPublishError(""), /No se pudo publicar/);
   assert.doesNotMatch(friendlyPublishError("Falló la conexión con Composio para tu cuenta"), /composio/i);
 });
+
+test("sin og:image de la página del artículo no culpa a la red ni a la imagen", () => {
+  const out = friendlyPublishError("El artículo no tiene una og:image pública para Google Business Profile.", "Google Business");
+  assert.match(out, /página de tu artículo/);
+  assert.doesNotMatch(out, /no aceptó/);
+});
