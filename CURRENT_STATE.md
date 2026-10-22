@@ -1,5 +1,11 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## BLOG IA — separado como programa independiente — 2026-10-22
+
+- Task ID: `BLOG-IA-INDEPENDENCIA-20261022`. Orden de Milton: BLOG IA es un programa aparte (cobro aparte) que usa el motor de Artículos; todo separado, también en GitHub.
+- Hecho: repositorio privado `10minuteswebsite/blog-ia` (Worker, contrato, núcleo del asistente, app web propia con BD y sesión propias, CI; 52 + 44 pruebas). En Artículos se quitaron el asistente (`/api/blog-ia/*`, página, libs), el módulo/menú «BLOG IA», la sincronización de suscripción y `apps/blog`; los documentos de diseño se movieron al repo nuevo. Queda solo el conector (`BLOG_IA_CONECTOR.md`). Base de datos de Artículos intacta (sin migración).
+- Pendiente: HUB y vínculo cuenta↔cuenta (Mario), dominio «puerta de entrada», despliegue de la app web de BLOG IA. BLOG IA sigue oculto a los clientes.
+
 ## BLOG IA — conexión de dominio para CUALQUIER proveedor — 2026-10-21
 
 - Task ID: `BLOG-IA-DNS-PROVEEDORES-20261021`. Orden de Milton: la conexión del dominio debe ser sencilla y servir para todos los proveedores, no solo GoDaddy.

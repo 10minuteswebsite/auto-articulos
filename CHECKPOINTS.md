@@ -1,5 +1,9 @@
 # CHECKPOINTS
 
+## Checkpoint — BLOG IA independiente (repo y app propios) — 2026-10-22
+
+- Task: `BLOG-IA-INDEPENDENCIA-20261022`; repo `blog-ia` con pruebas verdes; limpieza de Artículos sin tocar la base de datos. Pendiente: verificar despliegue de Artículos tras el merge.
+
 ## Checkpoint — BLOG IA conexión verificada en D1 y limpieza — 2026-10-21
 
 - Task: `BLOG-IA-LIMPIEZA-20261021`; alta de SEO Total confirmada en la base del Worker; datos de `blogtest` borrados (1 tenant restante). Pendiente: retirar el dominio `blogtest` (DNS, Milton), `BLOG_IA_CNAME_TARGET`/Custom Hostnames de clientes, R2 real, Search Console/Bing del blog.

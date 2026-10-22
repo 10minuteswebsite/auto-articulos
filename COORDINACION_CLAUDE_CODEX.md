@@ -1,5 +1,9 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## Claude — BLOG IA separado de Artículos — 2026-10-22
+
+- Task `BLOG-IA-INDEPENDENCIA-20261022`. BLOG IA pasa a repo, base de datos y sesión propios; Artículos queda con el conector (`BLOG_IA_CONECTOR.md`). Sin migraciones. BLOG IA sigue oculto a los clientes.
+
 ## Claude — AUTO ARTICULOS 500 en /auth/hub — 2026-10-21
 
 - Task `ARTICULOS-500-AUTH-HUB-20261021`. Causa: columna `User.disableIndexing` ausente en producción (migración `20261021120000` del commit `7531dc5c` nunca aplicada). Arreglo: ALTER TABLE aditivo ejecutado por Milton en Supabase.
