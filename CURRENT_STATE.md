@@ -1,5 +1,13 @@
 # HANDOFF VIGENTE — 2026-10-19
 
+## BLOG IA — SEO Total conectado al Worker (variables y clave rotada) — 2026-10-21
+
+- Task ID: `BLOG-IA-CONEXION-SEOTOTAL-20261021`. Punto cero: `main` = `cb69c12a` (PR #645) y Vercel producción `Ready`.
+- Cambios: (1) clave `INGEST_SECRET` del Worker ROTADA con `wrangler secret put` (login OAuth temporal, revocado al terminar); (2) GitHub: secreto `BLOG_IA_SECRET` + variable `BLOG_IA_API_URL=https://blog-ia.10minuteswebsite.workers.dev`; PR #645 pasa ambas a `worker.yml` y `worker-test.yml` (solo 2 líneas de entorno, inertes mientras ninguna cuenta use BLOG IA); (3) Vercel `auto-articulos-web`, entorno Production: `BLOG_IA_API_URL` (Config) y `BLOG_IA_SECRET` (Secret) añadidas por el panel; redespliegue de `cb69c12` confirmado por Milton (el clasificador impide que la IA dispare despliegues): `Ready`. NO se añadió `BLOG_IA_CNAME_TARGET` a propósito (falta el origen de respaldo de Custom Hostnames, cambio de DNS).
+- VERIFICACIÓN: rotación (clave falsa → 401; clave nueva pasa la firma, 404 «tenant desconocido» con un tenant inexistente); tras el redespliegue Artículos `/login` 200; como administrador (`miltondavila@gmail.com`, por el HUB) el asistente guardó el dominio de mentira `blog.prueba-conexion.invalid` → `pending_dns` SIN error y `lastError` vacío, lo que implica que el Worker aceptó el alta firmada con la clave nueva. La copia local de la clave fue destruida (no está en repo, canal ni disco).
+- NO verificado: lectura directa del tenant en D1 (la sesión de Cloudflare del panel expiró; consulta pendiente); verificación de dominio de CLIENTE (falta `BLOG_IA_CNAME_TARGET` y el origen de respaldo); `media.upload` a R2, OpenAI en la cola real y Search Console del blog.
+- Residuos de prueba a limpiar: en el Worker, el tenant del alta de prueba (`pending_dns`, hostname `blog.prueba-conexion.invalid`) y los datos del blog `blogtest` (suspendido, dominio personalizado `blogtest.lasolucionweb.net`); en SEO Total, el registro de BLOG IA de la cuenta administradora (sin activar; `publishMethod` NO cambió). BLOG IA sigue OCULTO a los clientes (comprobado también con la cuenta de Lorena: «Página no disponible»).
+
 ## BLOG IA — prueba real con dominio de mentira `blogtest.lasolucionweb.net` — 2026-10-21 — verificada
 
 - Task ID: `BLOG-IA-DOMINIO-PRUEBA-20261021`. Punto cero previo: `main` = `c138bccb` (Worker `blog-ia` ya desplegado).
