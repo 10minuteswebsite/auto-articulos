@@ -440,3 +440,11 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Cierre: `/auth/hub` 303 (16:03) sin P2022; `/login` 200 en Artículos y Redes. Siguiente punto cero: producción con la columna aplicada.
 
 - Cierre final: commit `5e03ce76` en `main` (opción `safe_user_indexing_preference` en `migrate.yml`). Smoke de producción posterior sano. CERRADO.
+
+
+## Cierre operativo — Hub native access projection — 2026-10-22
+
+- Reconciliation evidence: found=12, projected=12, failed=[] from the production Hub admin endpoint.
+- The signed Hub projection and explicit REDES ProductEntitlement checks are now part of the durable authorization path.
+- Auto production commit f6ce1d9d is READY and public smoke checks pass at the route boundary.
+- A tenant-authenticated MCP browser session was not available for direct E2E and remains explicitly pending.
