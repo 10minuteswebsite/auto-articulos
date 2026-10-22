@@ -1,5 +1,9 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — conexión BLOG IA (configuración, sin código nuevo) — 2026-10-21
+
+- Task ID: `BLOG-IA-CONEXION-SEOTOTAL-20261021`. Código: PR #645 (`cb69c12a`, solo entorno de workflows). Configuración externa: secreto/variable de GitHub, variables de Vercel Production, secreto del Worker rotado. Redespliegue de Vercel del mismo commit `Ready`. Verificación en CURRENT_STATE.
+
 ## Versión — BLOG IA dominio de prueba — 2026-10-21
 
 - Task ID: `BLOG-IA-DOMINIO-PRUEBA-20261021`. Sin cambios de código ni despliegues de SEO Total; solo infraestructura Cloudflare: dominio personalizado `blogtest.lasolucionweb.net` → Worker `blog-ia` (versión `4b2645f6-0862-4ac4-8f23-d2aff8924f97`) y datos falsos en D1. Verificación y estado final en CURRENT_STATE.

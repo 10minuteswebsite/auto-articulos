@@ -1,5 +1,9 @@
 # CHECKPOINTS
 
+## Checkpoint — SEO Total conectado al Worker de BLOG IA — 2026-10-21
+
+- Task: `BLOG-IA-CONEXION-SEOTOTAL-20261021`; clave rotada, variables en GitHub y Vercel Production, redespliegue `Ready`, alta firmada de prueba aceptada sin error. Pendiente: lectura directa en D1, `BLOG_IA_CNAME_TARGET`/Custom Hostnames de clientes, R2 real, limpieza de residuos de prueba (ver CURRENT_STATE).
+
 ## Checkpoint — BLOG IA blog público probado con dominio de mentira — 2026-10-21
 
 - Task: `BLOG-IA-DOMINIO-PRUEBA-20261021`; `blogtest.lasolucionweb.net` sirve el blog de prueba por HTTPS real (home/artículo/categoría/sitemaps/robots/404/301/cabeceras) y la suspensión responde 503 sin caché. Queda suspendido. Pendiente: Custom Hostnames de clientes, R2 real, conexión con SEO Total (ver CURRENT_STATE).

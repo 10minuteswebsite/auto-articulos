@@ -5,6 +5,10 @@
 - Task `ARTICULOS-500-AUTH-HUB-20261021`. Causa: columna `User.disableIndexing` ausente en producción (migración `20261021120000` del commit `7531dc5c` nunca aplicada). Arreglo: ALTER TABLE aditivo ejecutado por Milton en Supabase.
 - Verificado: `/auth/hub` 303 a las 16:03 sin P2022. Esto reabre y corrige el cierre de «CONTROL NO INDEXAR ARTÍCULOS».
 
+## Claude — BLOG IA: SEO Total conectado al Worker — 2026-10-21
+
+- Task `BLOG-IA-CONEXION-SEOTOTAL-20261021`. Clave rotada, `BLOG_IA_*` en GitHub (PR #645) y Vercel Production, redespliegue `Ready`; alta firmada de prueba aceptada sin error. Falta `BLOG_IA_CNAME_TARGET`/Custom Hostnames de clientes, R2 real y limpieza de residuos de prueba. BLOG IA sigue oculto a clientes. Detalle en `CURRENT_STATE.md`.
+
 ## Claude — BLOG IA: blog público probado con dominio de prueba — 2026-10-21
 
 - Task `BLOG-IA-DOMINIO-PRUEBA-20261021`. `blogtest.lasolucionweb.net` (dominio personalizado del Worker `blog-ia`, confirmado por Milton en el panel) sirve un blog de MENTIRA por HTTPS real; verificadas home/artículo/categoría/sitemaps/robots/404/301/cabeceras y la suspensión (503 sin caché). Quedó SUSPENDIDO. Detalle y fotos previa/posterior en `CURRENT_STATE.md`.

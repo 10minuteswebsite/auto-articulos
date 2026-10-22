@@ -1,5 +1,10 @@
 # CEREBRO — Decisión durable HUB, OAuth y dominios
 
+## Decisión durable — la clave compartida SEO Total ↔ BLOG IA vive solo en tres sitios y se rota al conectar — 2026-10-21
+
+- `INGEST_SECRET` (Cloudflare) = `BLOG_IA_SECRET` (GitHub Actions y Vercel Production). Nunca en el repositorio ni en documentos; la IA la genera, la guarda en los 3 sitios y destruye su copia. Al rotarla hay que actualizar los 3 y redesplegar Vercel (las variables solo se leen en un despliegue nuevo).
+- Los cambios de producción que ejecuta Milton por clic (confirmar dominios, redesplegar) no los puede hacer la IA: lo bloquea el clasificador de seguridad. Las variables NO secretas (URL) las puede cargar la IA; los secretos los pega el usuario.
+
 ## Decisión durable — dominio de prueba bajo la zona propia, suspendido al terminar — 2026-10-21
 
 - El render público del blog se probó con un subdominio de la zona de la plataforma (`blogtest.lasolucionweb.net`, dominio personalizado del Worker) porque `workers.dev` rechaza `Host` forzado (403). El flujo real de clientes (CNAME del cliente → Custom Hostnames de Cloudflare for SaaS) sigue sin probar.
