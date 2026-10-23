@@ -294,7 +294,7 @@ export class DuplicateTitleError extends Error {
   }
 }
 
-function resolveBaseUrl(platformDomain?: string | null): string {
+export function resolveBaseUrl(platformDomain?: string | null): string {
   return platformBaseUrl(platformDomain);
 }
 
@@ -671,7 +671,7 @@ export async function fetchLanguages(
   }
 }
 
-async function login(
+export async function login(
   page: Page,
   baseUrl: string,
   credentials: TenMinutesWebsiteCredentials,
@@ -1840,7 +1840,7 @@ async function dismissImageGenerationDisclaimer(
   );
 }
 
-async function generateImage(
+export async function generateImage(
   page: Page,
   title: string,
   summary: string,
