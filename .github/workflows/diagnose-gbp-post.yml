@@ -1,0 +1,29 @@
+name: Diagnóstico - publicaciones de Google Business de un usuario
+
+on:
+  workflow_dispatch:
+    inputs:
+      user_email:
+        description: "Correo del usuario"
+        required: true
+        type: string
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DATABASE_URL }}
+      USER_EMAIL: ${{ inputs.user_email }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
+      - name: Leer publicaciones
+        working-directory: apps/worker
+        run: npx tsx src/diagnose-gbp-post.ts
