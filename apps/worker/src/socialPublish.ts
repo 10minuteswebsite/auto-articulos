@@ -214,7 +214,18 @@ async function fetchArticleOpenGraphImage(articleUrl: string): Promise<string | 
     );
     if (!match?.[1]) return null;
 
-    return new URL(match[1].replace(/&amp;/g, "&"), res.url).toString();
+    const declared = new URL(match[1].replace(/&amp;/g, "&"), res.url).toString();
+    // Algunos artículos conservan una og:image antigua que ya devuelve 404.
+    // No entregamos esa URL a ninguna red: buscamos una imagen real del cuerpo.
+    const declaredCheck = await fetchWithRetry(declared, { method: "HEAD", timeoutMs: 10000 });
+    if (declaredCheck.ok) return declared;
+    const imageMatches = [...html.matchAll(/<img\b[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>/gi)];
+    for (const imageMatch of imageMatches) {
+      const candidate = new URL(imageMatch[1].replace(/&amp;/g, "&"), res.url).toString();
+      const candidateCheck = await fetchWithRetry(candidate, { method: "HEAD", timeoutMs: 10000 });
+      if (candidateCheck.ok) return candidate;
+    }
+    return null;
   } catch (error) {
     console.warn(`No se pudo obtener og:image del artículo: ${describeFetchError(error)}`);
     return null;
@@ -462,7 +473,7 @@ async function getRehostedThreadsImage(titleId: string, articleUrl: string): Pro
   try {
     const response = await fetchWithRetry(ogImageUrl, { timeoutMs: 15000 });
     if (!response.ok) {
-      return { url: ogImageUrl, source: "direct", fallbackReason: `descarga de la imagen OG devolvió HTTP ${response.status}` };
+      throw new Error(`descarga de la imagen OG devolvió HTTP ${response.status}`);
     }
 
     // Threads rechaza algunas OG en WebP/AVIF/SVG o con dimensiones/peso
@@ -481,11 +492,11 @@ async function getRehostedThreadsImage(titleId: string, articleUrl: string): Pro
     });
     const publicCheck = await fetchWithRetry(blob.url, { method: "HEAD", timeoutMs: 10000 });
     if (publicCheck.ok) return { url: blob.url, source: "blob" };
-    return { url: ogImageUrl, source: "direct", fallbackReason: `el Blob subido no respondió público (HTTP ${publicCheck.status})` };
+    throw new Error(`el Blob subido no respondió público (HTTP ${publicCheck.status})`);
   } catch (error) {
     const reason = describeFetchError(error);
     console.warn(`No se pudo re-alojar la imagen OG para Threads, se usa el enlace directo: ${reason}`);
-    return { url: ogImageUrl, source: "direct", fallbackReason: reason };
+    return null;
   }
 }
 
@@ -504,7 +515,7 @@ async function getRehostedImageForTumblr(titleId: string, articleUrl: string): P
   try {
     const response = await fetchWithRetry(ogImageUrl, { timeoutMs: 15000 });
     if (!response.ok) {
-      return { url: ogImageUrl, source: "direct", fallbackReason: `descarga de la imagen OG devolvió HTTP ${response.status}` };
+      throw new Error(`descarga de la imagen OG devolvió HTTP ${response.status}`);
     }
     const normalized = await sharp(Buffer.from(await response.arrayBuffer()))
       .rotate()
@@ -517,11 +528,11 @@ async function getRehostedImageForTumblr(titleId: string, articleUrl: string): P
     });
     const publicCheck = await fetchWithRetry(blob.url, { method: "HEAD", timeoutMs: 10000 });
     if (publicCheck.ok) return { url: blob.url, source: "blob" };
-    return { url: ogImageUrl, source: "direct", fallbackReason: `el Blob subido no respondió público (HTTP ${publicCheck.status})` };
+    throw new Error(`el Blob subido no respondió público (HTTP ${publicCheck.status})`);
   } catch (error) {
     const reason = describeFetchError(error);
     console.warn(`No se pudo re-alojar la imagen OG para Tumblr, se usa el enlace directo: ${reason}`);
-    return { url: ogImageUrl, source: "direct", fallbackReason: reason };
+    return null;
   }
 }
 
