@@ -12736,3 +12736,61 @@ Responsable: Claude (tarea programada diaria de propagación).
 - The integration is now wired for Stripe subscription/invoice changes, admin grants, admin revokes and idempotent initial reconciliation.
 - Auto production deployment dpl_5Lj4PdaSoV8w5HAFDNwWoV8LGCRV from f6ce1d9d is READY. Unsigned projection returned 401 Invalid product client; MCP without a tenant session returned 401 No autenticado.
 - Direct authenticated tenant MCP observation remains pending; no success is claimed without that session.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-23
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-22 (arriba, línea
+~12677; corresponde al commit `7763652`, que a su vez cerraba contra `fce77bf`). `git fetch origin
+main` no mostró anomalías. Desde `7763652` hasta `2e2af01` (`origin/main` al momento de esta corrida)
+aparecieron, sobre este mismo documento, siete entradas nuevas sin firma propia: "Coordinación —
+Redes sin imágenes (og:image por timeout)" (encabezado huérfano, sin cuerpo propio), "Claude — BLOG
+IA separado: capitanía liberada", el bloque de la Task `REDES-IMAGENES-20261022` (capitanía liberada
+tras verificar producción), "Coordinación — conexiones en pestaña nueva y lista vacía", "Coordinación
+— proyección de entitlements del Hub", "Claude — BLOG IA separado de Artículos" (cerca del inicio,
+bajo el HANDOFF VIGENTE) y "Cierre operativo — Hub native access projection" (al final, arriba de esta
+misma entrada) — todas fechadas 2026-10-22.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: ya tenía registrados `BLOG-IA-INDEPENDENCIA-20261022` y
+  `REDES-IMAGENES-20261022` (agregados por un proceso ajeno a esta tarea). Faltaban dos: se agregó
+  "Versión — conexiones en pestaña nueva y lista vacía (PR #653, `2b81b82`) — 2026-10-22" (Task
+  `CONEXIONES-PESTANA-NUEVA-20261022`) y "Versión — proyección de entitlements del Hub (Hub native
+  access projection) — 2026-10-22", con los seis commits directos a `main` (`70026ba`, `6e3ae2a`,
+  `a2c76cc`, `704f45b`, `b352054`, `f6ce1d9d`), el deployment `dpl_5Lj4PdaSoV8w5HAFDNwWoV8LGCRV` y el
+  resultado de la reconciliación de producción, tomados tal cual del "Cierre operativo" de arriba.
+- `INVENTARIO_CONVERSACIONES.md`: faltaban las cuatro conversaciones de hoy sin registrar. Se
+  agregaron, al inicio del documento (Parte B/historial): "Claude — BLOG IA separado: capitanía
+  liberada", "Claude — Redes sin imágenes: og:image con reintentos reales", "Claude — conexiones en
+  pestaña nueva y lista vacía" y "Coordinación — proyección de entitlements del Hub (Hub native access
+  projection)". Ninguna tiene reserva activa: las tres primeras dicen explícitamente "capitanía
+  liberada"/"verificado en producción" en su propia entrada de origen, y la de entitlements del Hub
+  se publicó directo en `main` sin rama propia; verificado también contra `git branch -a` y
+  `git ls-remote --heads origin` (sin rama/worktree pendiente para estas cuatro tareas puntuales; hay
+  varias ramas remotas sueltas de días anteriores — `claude/buzon-hub`, `claude/hub-alineacion-cierre`,
+  `codex/hub-seo-total-migration`, etc. — que no corresponden a ninguna de las siete entradas nuevas
+  de esta corrida, así que no se tocó la Parte A por ellas). Todo a Parte B, sin tocar la Parte A.
+- `apps/web/src/content/manual-usuario.ts`: se agregó una nota ("Actualización 2026-10-22") al final
+  de la sección "Cómo conectar cada red social, explicado para cualquier persona": ahora el botón de
+  conexión de cualquier red social, de Bing Webmaster Tools, de Google Business Profile o de X abre
+  una pestaña nueva en vez de sacar a la persona de SEO TOTAL (viene de "Coordinación — conexiones en
+  pestaña nueva y lista vacía — 2026-10-22" / Task `CONEXIONES-PESTANA-NUEVA-20261022`, verificado
+  contra el diff real del commit `2b81b82` en `ComposioConnect.tsx`, `BingWebmasterSection.tsx`,
+  `BusinessProfileSection.tsx`, `OAuthNetworkSection.tsx` y `TwitterSection.tsx`). El arreglo de
+  `og:image` (Task `REDES-IMAGENES-20261022`) no necesitó edición: el manual no cita el texto exacto
+  de los mensajes de error que cambiaron, y el flujo general que ya describía ("si una publicación
+  falla, queda en Historial con el motivo y el botón Reintentar") sigue siendo cierto. La proyección
+  de entitlements del Hub tampoco necesitó edición: es una corrección interna de control de acceso;
+  el manual ya explica desde el 2026-10-21 qué hace el asistente cuando el módulo de Redes no está
+  habilitado desde el HUB, y esa descripción no cambia. BLOG IA sigue oculto a los clientes por orden
+  expresa de Milton; no se documentó en el manual.
+- `TO-DO.md`: sin cambios. Los pendientes mencionados ("E2E pendiente: validar con un tenant real...",
+  "Vicente pulsa Probar conexión y se lee el log de Vercel") son pasos de verificación operativa de
+  tareas ya ejecutadas dentro de proyectos activos, no ideas sueltas sin ejecutar todavía.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. Ninguna de las siete entradas describe un árbol de
+  git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva para
+Milton: ninguna.
+
+Responsable: Claude (tarea programada diaria de propagación).
