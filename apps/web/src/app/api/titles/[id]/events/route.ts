@@ -15,10 +15,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const userId = await getCurrentUserId();
-  // Historial es compartido por Artículos y Redes. La misma API sirve los
-  // eventos de ambos productos, así que la compuerta debe seguir el host
-  // desde el que se abrió la pantalla; exigir siempre ARTICULOS hacía que
-  // el log de Redes devolviera 403 y pareciera vacío en producción.
+  // Historial es compartido, pero conserva la compuerta del producto desde el
+  // que se solicita para no ampliar acceso entre productos.
   const product = productOfHost(_request.nextUrl.hostname) === "REDES" ? "REDES" : "ARTICULOS";
   const denied = await requireProductAccess(userId, product, "/api/titles/[id]/events");
   if (denied) return denied;

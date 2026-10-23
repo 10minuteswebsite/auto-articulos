@@ -597,7 +597,9 @@ export async function generateAiSocialImage(params: {
   // las piezas (PERSON_PHOTO_RATE; 0 = apagado hasta verificar que el
   // generador conserva su rostro) — esa decisión la toma el código.
   const logoUrls = [params.businessLogoUrl, params.businessLogoUrl2].filter((url): url is string => Boolean(url));
-  const logoPng = params.businessLogoUrl ? await fetchImageAsPng(params.businessLogoUrl) : null;
+  // Puede existir únicamente el segundo logo; usar siempre el primer recurso
+  // disponible evita declarar logo en el briefing y luego pegar null.
+  const logoPng = logoUrls[0] ? await fetchImageAsPng(logoUrls[0]) : null;
   const personUrls = [params.profilePhotoUrl, params.profilePhotoUrl2, params.profilePhotoUrl3].filter((url): url is string => Boolean(url));
   const wantPerson = personUrls.length > 0 && (params.forcePerson ?? Math.random() < PERSON_PHOTO_RATE);
   const personUrl = wantPerson ? personUrls[Math.floor(Math.random() * personUrls.length)] : null;
