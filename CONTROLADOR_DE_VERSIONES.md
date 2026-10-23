@@ -8,6 +8,17 @@
 
 - Task ID: `REDES-IMAGENES-20261022`. Solo worker (`socialPublish.ts`) y `friendly-error.ts`; el worker corre desde `main` en cada ejecución, no hay despliegue de Vercel propio. Sin migración.
 
+## Versión — conexiones en pestaña nueva y lista vacía (PR #653, `2b81b82`) — 2026-10-22
+
+- Task ID: `CONEXIONES-PESTANA-NUEVA-20261022`. Solo `apps/web` (componentes de conexión: Composio, Bing Webmaster Tools, Business Profile/PostPeer, OAuthNetworkSection, Twitter/X); sin migraciones. +8 pruebas en `composio-options.test.ts`.
+
+## Versión — proyección de entitlements del Hub (Hub native access projection) — 2026-10-22
+
+- Commits en `main`, publicados directo (sin PR): `70026ba` (proyecta acceso de producto del Hub a entitlements locales), `6e3ae2a` (exige el entitlement de Redes del Hub en el límite del MCP), `a2c76cc` (persiste el acceso de producto del Hub en el callback), `704f45b` (endpoint idempotente de proyección de acceso del Hub), `b352054` (conserva el vínculo nativo de Auth0 durante la sincronización de acceso), `f6ce1d9d` (permite que la proyección firmada del Hub pase por el middleware).
+- Deployment Vercel `dpl_5Lj4PdaSoV8w5HAFDNwWoV8LGCRV` desde `f6ce1d9d`: `READY`.
+- Verificación: reconciliación de producción `found=12, projected=12, failed=[]`. Proyección sin firmar devolvió 401 «Invalid product client»; MCP sin sesión de tenant devolvió 401 «No autenticado».
+- Pendiente: observación directa con una sesión de tenant MCP autenticada real; no se declara éxito sin esa verificación.
+
 ## Versión — conexión BLOG IA (configuración, sin código nuevo) — 2026-10-21
 
 - Task ID: `BLOG-IA-CONEXION-SEOTOTAL-20261021`. Código: PR #645 (`cb69c12a`, solo entorno de workflows). Configuración externa: secreto/variable de GitHub, variables de Vercel Production, secreto del Worker rotado. Redespliegue de Vercel del mismo commit `Ready`. Verificación en CURRENT_STATE.
