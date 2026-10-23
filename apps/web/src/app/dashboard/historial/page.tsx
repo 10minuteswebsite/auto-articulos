@@ -686,7 +686,7 @@ function HistorialRedes() {
         const data = await res.json();
         setSocialEvents((prev) => ({ ...prev, [titleId]: data.events || [] }));
       } else {
-        setSocialEvents((prev) => ({ ...prev, [titleId]: [{ createdAt: new Date().toISOString(), message: `No se pudo cargar el log (HTTP ${res.status}).` }] }));
+        setSocialEvents((prev) => ({ ...prev, [titleId]: [{ id: `load-error-${titleId}`, createdAt: new Date().toISOString(), message: `No se pudo cargar el log (HTTP ${res.status}).` }] }));
       }
     } catch {
       // ignore
@@ -1584,7 +1584,8 @@ function HistorialRedes() {
                               return t >= start && t <= end;
                             })
                           : [];
-                        if (filtered.length === 0) {
+                        const visibleEvents = filtered.length > 0 ? filtered : socialEvents[opp.titleId];
+                        if (visibleEvents.length === 0) {
                           return (
                             <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
                               Sin eventos registrados para este intento de publicación.
@@ -1593,7 +1594,7 @@ function HistorialRedes() {
                         }
                         return (
                           <ul style={{ margin: "8px 0 0", paddingLeft: 18, color: "#6e6e73", fontSize: 12 }}>
-                            {filtered.map((e) => (
+                            {visibleEvents.map((e) => (
                               <li key={e.id} style={{ marginBottom: 3 }}>
                                 <span>{new Date(e.createdAt).toLocaleTimeString()}</span> — {e.message}
                               </li>
