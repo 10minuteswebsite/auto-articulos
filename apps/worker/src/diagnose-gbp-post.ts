@@ -10,7 +10,7 @@ async function main() {
   const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (!user) throw new Error(`No existe el usuario ${email}.`);
   const posts = await prisma.businessProfilePost.findMany({
-    where: { userId: user.id },
+    where: { title: { run: { userId: user.id } } },
     orderBy: { createdAt: "desc" },
     take: 6,
   });
