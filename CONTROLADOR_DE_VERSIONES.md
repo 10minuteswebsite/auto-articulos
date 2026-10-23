@@ -5631,3 +5631,7 @@ valores — 2026-10-19").
 ## 2026-10-23 — bd0ce517 (PR #658)
 
 - fix: evento de error del log con `id`; repara el build roto de `ced2c1b7`/`124701d2`/`a05c59ee`. Vercel `success`; log verificado en producción (Vicente). Producción estuvo en `16bbbca4` hasta este commit.
+
+## 2026-10-23 — cf4a5953 (#660), #661, #662
+
+- #660 sin foto no se publica (nunca el logo); #661 diagnóstico de edición (solo lectura); #662 `repair-article-image` (artículo 103390 reparado, foto pública 200). Vercel `success` en #660.

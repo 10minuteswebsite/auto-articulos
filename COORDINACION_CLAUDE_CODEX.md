@@ -12805,3 +12805,7 @@ Responsable: Claude (tarea programada diaria de propagación).
 ## REDES-LOG-IMAGENES-VICENTE-20261023 — 2026-10-23
 
 - Alcance: log de Historial de Redes y publicación con imagen (usuario vicente.sanchez@expglobalspain.com). Punto cero real: producción en `16bbbca4` (3 commits posteriores con build fallido). Hecho: PR #658 (`bd0ce517`). Evidencia: `/api/titles/{id}/events` 404→200; log visible en pantalla; Tumblr, Pinterest, Instagram, Threads y Facebook publicados con enlace en el título de Cartagena. Pendiente: Google Business («Internal error encountered»), reconexión de Threads, reintento del Instagram del 22/10. Siguiente IA: leer la respuesta completa de PostPeer para Google Business antes de cambiar código.
+
+## REDES-LOG-IMAGENES-VICENTE-20261023 — cierre parcial 2026-10-23
+
+- Hecho: foto del artículo 103390 reparada en la plataforma (404→200), regla «sin foto no se publica», log visible. Evidencia: runs 39950421551 (diagnóstico) y 39968437869 (reparación); pantalla de Vicente con el motivo del cupo. Abierto: las 3 pendientes (Google Business, Instagram, Threads) esperan cupo diario; Threads requiere reconexión. Siguiente IA: reintentar cuando el cupo se reinicie y verificar publicación con foto real.
