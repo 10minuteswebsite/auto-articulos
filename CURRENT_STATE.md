@@ -1,3 +1,12 @@
+## Punto cero vigente — Redes: foto reparada, sin logo, pendientes frenadas por cupo — 2026-10-23
+
+- Task ID: `REDES-LOG-IMAGENES-VICENTE-20261023` (cierre). `main` incluye PR #660 (`cf4a5953`: sin foto no se publica, nunca el logo), #661 (diagnóstico de edición) y #662 (reparar foto de un artículo publicado).
+- Causa raíz de «sus fotos» y de Google Business: el artículo 103390 (Cartagena, Vicente) se guardó en la plataforma con la referencia de imagen pero SIN archivo (404). El worker tomaba la primera `<img>` del cuerpo = logo 358x179; Tumblr/Pinterest «publicaron» el logo y Google Business lo rechazó («Internal error encountered»).
+- Reparación hecha: workflow `repair-article-image.yml` (run 39968437869) regeneró la foto en la pantalla de edición `direct-edit-articles?articles_id_=103390` y guardó. Verificado: la og:image pública del artículo pasó de 404 a 200 `image/webp`. Gasto: 1 crédito de imagen de Vicente.
+- Prueba de que Google Business funciona con foto real: hoy 12:45 UTC publicó otro artículo de Vicente (`vender-una-propiedad-heredada-en-espana-`).
+- PENDIENTE (no publicadas aún): Google Business, Instagram y Threads del artículo de Cartagena. Reintentar en pantalla devuelve «Ya llegaste al cupo de publicaciones de hoy (1)» en las tres: el cupo diario de 1 por red ya lo ocupó otro artículo de hoy. Threads además tiene la autorización vencida (Vicente debe reconectar). Siguiente paso: tras el reinicio del cupo (día de Vicente) o si Milton sube el cupo en Administración, pulsar Reintentar y verificar enlace y log.
+- Tumblr, Pinterest, LinkedIn y Facebook de ese artículo ya estaban publicados con el logo (antes del fix); borrarlos o republicarlos con la foto nueva es decisión de Milton.
+
 ## Punto cero vigente — Redes: log visible y despliegue reparado — 2026-10-23
 
 - Task ID: `REDES-LOG-IMAGENES-VICENTE-20261023`. `main` = `bd0ce517` (PR #658), Vercel web y auto-articulos-web `success`; worker `social-worker` corrió con ese commit.
