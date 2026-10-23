@@ -148,6 +148,9 @@ export function productOfPath(pathname: string | null | undefined): ProductScope
 export function productOfApiPath(pathname: string | null | undefined): HostProductScope | "COMPARTIDO" {
   if (!pathname) return "COMPARTIDO";
   const clean = pathname.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
+  // Historial se consulta desde ambos productos. El endpoint comprueba
+  // después que el título pertenece al usuario y aplica la compuerta del host.
+  if (/^\/api\/titles\/[^/]+\/events$/.test(clean)) return "COMPARTIDO";
   let best: readonly [string, HostProductScope] | null = null;
   for (const entry of PRODUCT_API_ROUTES) {
     const [prefix] = entry;
