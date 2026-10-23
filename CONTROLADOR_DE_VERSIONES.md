@@ -1,12 +1,12 @@
 # CONTROLADOR DE VERSIONES
 
-## En curso — LOG de Historial en Redes — 2026-10-23
+## Versión — LOG de Historial y JPEG público para Google Business — 2026-10-23
 
 - Task ID: `REDES-HISTORIAL-LOG-20261023`.
 - Punto cero: producción funcional documentada en `main`; el checkout autorizado está detached y no tiene cambios previos del usuario.
 - Hallazgo: `/api/titles/[id]/events` exigía acceso `ARTICULOS` incluso cuando Historial se abría desde `redes.lasolucionweb.net`; con enforcement activo, la carga del log devolvía 403.
-- Corrección propuesta: la API selecciona `REDES` o `ARTICULOS` según el host receptor, conservando la misma autorización por usuario y el mismo payload de eventos.
-- Estado: pendiente de pruebas/build, commit en `main`, deployment y verificación autenticada en producción.
+- Corrección: la API selecciona `REDES` o `ARTICULOS` según el host receptor; Google Business siempre recibe una copia JPEG pública re-alojada, independientemente del formato original.
+- Estado: código listo para publicar y verificar en el proyecto productivo correcto.
 
 ## Versión — BLOG IA fuera de Artículos — 2026-10-22
 

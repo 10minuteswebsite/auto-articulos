@@ -25,11 +25,9 @@ const POSTPEER_GBP_READY = process.env.POSTPEER_GBP_CONSUMER_READY === "true";
 async function getGoogleBusinessImageUrl(titleId: string, imageUrl: string): Promise<string> {
   const response = await fetch(imageUrl, { signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error(`La imagen del artículo no se pudo descargar (HTTP ${response.status}).`);
-  const contentType = response.headers.get("content-type")?.split(";")[0].trim().toLowerCase();
-  if (contentType !== "image/webp") return imageUrl;
-
-  // Es la misma imagen del artículo, con las mismas dimensiones y sin recorte;
-  // solo se cambia WEBP a JPEG porque Google documenta PHOTO/JPG/PNG para GBP.
+  // Google Business rechaza de forma intermitente URLs del hosting del cliente,
+  // WebP/AVIF/SVG y respuestas con cabeceras que no parecen una foto. Siempre
+  // entregamos una copia pública JPEG, con la misma imagen y sin recorte.
   const jpeg = await sharp(Buffer.from(await response.arrayBuffer()))
     .jpeg({ quality: 95, mozjpeg: true })
     .toBuffer();

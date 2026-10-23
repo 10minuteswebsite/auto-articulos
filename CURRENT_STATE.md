@@ -490,4 +490,5 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Problema reportado: las publicaciones fallidas muestran el mensaje genérico de imagen/enlace y el control «Ver log del proceso» no muestra el log en `redes.lasolucionweb.net/dashboard/historial`.
 - Causa confirmada: la API de eventos protegía el recurso compartido con el entitlement `ARTICULOS`, no con el producto del host. En Redes la petición podía devolver 403.
 - Fix local preparado en `apps/web/src/app/api/titles/[id]/events/route.ts`: compuerta basada en `productOfHost(request.nextUrl.hostname)`.
-- No se declara corregido en producción hasta completar commit en `main`, deployment `Ready` y prueba autenticada de abrir el log.
+- Refuerzo añadido: Google Business siempre convierte y re-aloja la imagen en JPEG público antes de enviarla a PostPeer/Google, no solo cuando el origen era WebP.
+- No se declara corregido en producción hasta completar commit en `main`, deployment `Ready` y prueba autenticada de abrir el log y reintentar imagen.
