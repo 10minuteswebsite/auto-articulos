@@ -2999,3 +2999,52 @@ async function saveAndGetUrl(
 
   return { url: null, titleUsed: titleInUse };
 }
+
+
+/**
+ * Diagnóstico de solo lectura (23/10/2026, Vicente Sánchez): su artículo de Cartagena quedó
+ * publicado con la foto en 404. Entra a la cuenta, localiza el artículo por título y vuelca el
+ * HTML de su fila del listado y de su pantalla de edición, con capturas, para poder reparar
+ * la foto sin adivinar la interfaz. No modifica nada.
+ */
+export async function inspectArticleForImageRepair(
+  credentials: TenMinutesWebsiteCredentials,
+  title: string,
+  outDir: string,
+  onStep: OnStep,
+): Promise<void> {
+  const { mkdirSync, writeFileSync } = await import("node:fs");
+  mkdirSync(outDir, { recursive: true });
+  const baseUrl = resolveBaseUrl(credentials.platformDomain);
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
+    await login(page, baseUrl, credentials, onStep);
+    await page.goto(`${baseUrl}/dashboard/user_buyer_seller_articles.php`, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
+    const href = await findArticleByTitle(page, title);
+    await onStep(`Enlace público del artículo en el listado: ${href}`);
+    const rowHtml = await page.locator("table tbody tr").first().innerHTML().catch(() => "(sin fila)");
+    writeFileSync(`${outDir}/row.html`, rowHtml);
+    await page.screenshot({ path: `${outDir}/list.png`, fullPage: true });
+    const links = await page.locator("table tbody tr").first().locator("a, button").evaluateAll((els) =>
+      els.map((e) => `${e.tagName} class="${e.className}" href="${(e as HTMLAnchorElement).href ?? ""}" text="${(e.textContent ?? "").trim().slice(0, 40)}" title="${e.getAttribute("title") ?? ""}"`),
+    ).catch(() => []);
+    await onStep(`Acciones de la fila: ${links.join(" || ")}`);
+    let n = 0;
+    for (const link of links) {
+      const m = link.match(/href="([^"]+)"/);
+      if (!m?.[1] || !/edit|editar|modif|update/i.test(link + m[1])) continue;
+      n += 1;
+      const editPage = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
+      await login(editPage, baseUrl, credentials, async () => {});
+      await editPage.goto(m[1], { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
+      await editPage.waitForTimeout(3000);
+      writeFileSync(`${outDir}/edit-${n}.html`, await editPage.content());
+      await editPage.screenshot({ path: `${outDir}/edit-${n}.png`, fullPage: true });
+      await onStep(`Pantalla de edición ${n}: ${m[1]} (${await editPage.title()})`);
+      await editPage.close();
+    }
+  } finally {
+    await browser.close();
+  }
+}
