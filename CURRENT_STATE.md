@@ -485,3 +485,9 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Auto production commit f6ce1d9d5618630d08c89c8798825e8422460ebe is READY. The signed projection route is reachable through middleware and rejects unsigned requests with 401 Invalid product client; unauthenticated MCP rejects with 401 No autenticado.
 - The local REDES entitlement is now the explicit authorization boundary for Hub-linked users, while revocations preserve the local row as inactive.
 - A tenant-authenticated MCP session was not available for direct browser E2E; this remains the only unobserved verification item.
+## 2026-10-23 — diagnóstico LOG de Historial Redes
+
+- Problema reportado: las publicaciones fallidas muestran el mensaje genérico de imagen/enlace y el control «Ver log del proceso» no muestra el log en `redes.lasolucionweb.net/dashboard/historial`.
+- Causa confirmada: la API de eventos protegía el recurso compartido con el entitlement `ARTICULOS`, no con el producto del host. En Redes la petición podía devolver 403.
+- Fix local preparado en `apps/web/src/app/api/titles/[id]/events/route.ts`: compuerta basada en `productOfHost(request.nextUrl.hostname)`.
+- No se declara corregido en producción hasta completar commit en `main`, deployment `Ready` y prueba autenticada de abrir el log.

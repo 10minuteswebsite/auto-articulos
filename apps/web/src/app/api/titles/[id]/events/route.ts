@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
+import { productOfHost } from "@/lib/product-routes";
 
 /**
  * Log completo de un título (incluye capturas de diagnóstico en base64), a
@@ -14,7 +15,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const userId = await getCurrentUserId();
-  const denied = await requireProductAccess(userId, "ARTICULOS", "/api/titles/[id]/events");
+  // Historial es compartido por Artículos y Redes. La misma API sirve los
+  // eventos de ambos productos, así que la compuerta debe seguir el host
+  // desde el que se abrió la pantalla; exigir siempre ARTICULOS hacía que
+  // el log de Redes devolviera 403 y pareciera vacío en producción.
+  const product = productOfHost(_request.nextUrl.hostname) === "REDES" ? "REDES" : "ARTICULOS";
+  const denied = await requireProductAccess(userId, product, "/api/titles/[id]/events");
   if (denied) return denied;
   const { id } = await params;
 

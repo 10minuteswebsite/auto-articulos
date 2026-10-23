@@ -12794,3 +12794,10 @@ No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta ta
 Milton: ninguna.
 
 Responsable: Claude (tarea programada diaria de propagación).
+## Codex — LOG de Historial en Redes — 2026-10-23
+
+- Task `REDES-HISTORIAL-LOG-20261023`.
+- Evidencia inicial: en la captura de producción de `redes.lasolucionweb.net/dashboard/historial`, cada publicación muestra «Ver log del proceso» pero el log no aparece al abrirlo.
+- Causa confirmada en código: la ruta compartida `/api/titles/[id]/events` llamaba a `requireProductAccess(..., "ARTICULOS", ...)`; Redes recibía 403 bajo enforcement, por lo que la UI no tenía eventos que renderizar.
+- Cambio preparado: seleccionar la compuerta por host (`REDES` para `redes.lasolucionweb.*`, `ARTICULOS` para `articulos.lasolucionweb.*`). Sin migración ni cambio de datos.
+- Estado: pendiente de verificación local disponible, publicación y prueba E2E autenticada.

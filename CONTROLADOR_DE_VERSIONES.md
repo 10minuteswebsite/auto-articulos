@@ -1,5 +1,13 @@
 # CONTROLADOR DE VERSIONES
 
+## En curso — LOG de Historial en Redes — 2026-10-23
+
+- Task ID: `REDES-HISTORIAL-LOG-20261023`.
+- Punto cero: producción funcional documentada en `main`; el checkout autorizado está detached y no tiene cambios previos del usuario.
+- Hallazgo: `/api/titles/[id]/events` exigía acceso `ARTICULOS` incluso cuando Historial se abría desde `redes.lasolucionweb.net`; con enforcement activo, la carga del log devolvía 403.
+- Corrección propuesta: la API selecciona `REDES` o `ARTICULOS` según el host receptor, conservando la misma autorización por usuario y el mismo payload de eventos.
+- Estado: pendiente de pruebas/build, commit en `main`, deployment y verificación autenticada en producción.
+
 ## Versión — BLOG IA fuera de Artículos — 2026-10-22
 
 - Task ID: `BLOG-IA-INDEPENDENCIA-20261022`. Solo código (eliminaciones y conector); sin migraciones ni cambios de entorno. Verificación en CURRENT_STATE.
