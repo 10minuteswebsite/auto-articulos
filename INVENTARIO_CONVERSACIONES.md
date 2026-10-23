@@ -1,5 +1,21 @@
 # Inventario de conversaciones
 
+## Claude — BLOG IA separado: capitanía liberada — 2026-10-22
+
+- Task `BLOG-IA-INDEPENDENCIA-20261022`. Capitán de migración: Claude — LIBERADO el 2026-10-22 tras fusionar PR #652 (`dba1dca2`), con Vercel success y login 200 verificado en Artículos y Redes; sin migraciones. BLOG IA pasa a repo propio (`10minuteswebsite/blog-ia`, rediseño del blog público y SEO en local, aún sin desplegar); Artículos queda solo con el conector (`BLOG_IA_CONECTOR.md`). Los dominios los resuelve otra aplicación (orden de Milton). Sin reservas activas. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
+## Claude — Redes sin imágenes: og:image con reintentos reales — 2026-10-22
+
+- Task `REDES-IMAGENES-20261022`. Capitán de migración: Claude — reclamado para este lote (sin migración) y LIBERADO el 2026-10-22 al verificar en producción. Causa raíz: el worker leía la `og:image` de la página del cliente con un único `AbortSignal.timeout` compartido entre los 3 reintentos, así que el primer timeout abortaba los demás sin reintentar de verdad; varias redes pedían la misma página por separado y en ráfaga. Arreglo en `apps/worker/src/socialPublish.ts` (temporizador propio por intento, 20 s, User-Agent de navegador, lectura de `og:image` compartida entre redes) y `packages/shared/src/friendly-error.ts`. Fusionado: PR #655 (`7a0589d3`). Verificado en producción el 22/10 17:19-17:23: Tumblr, Pinterest, Threads y Google Business volvieron a publicar con imagen. Sin reservas activas. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
+## Claude — conexiones en pestaña nueva y lista vacía — 2026-10-22
+
+- Task `CONEXIONES-PESTANA-NUEVA-20261022`. Pedido de Milton: que toda conexión abra en pestaña nueva (si falla, la persona no sale de SEO TOTAL) y revisar el aviso de Google Search Console que salía al conectar Facebook/Pinterest de Vicente Sánchez. Fusionado como PR #653 (`2b81b82`); sin ramas ni worktrees propios. Sin reservas activas. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
+## Coordinación — proyección de entitlements del Hub (Hub native access projection) — 2026-10-22
+
+- Trabajo sobre `/api/integrations/hub/access-sync` y la proyección de acceso del Hub a entitlements locales (middleware, callback, eventos Stripe/admin y reconciliación idempotente). Commits `70026ba`, `6e3ae2a`, `a2c76cc`, `704f45b`, `b352054`, `f6ce1d9d` publicados directo en `main`, sin ramas ni worktrees propios. Cierre operativo: reconciliación en producción `found=12, projected=12, failed=[]`; deployment `dpl_5Lj4PdaSoV8w5HAFDNwWoV8LGCRV` (commit `f6ce1d9d`) `READY`. Pendiente: validar con una sesión de tenant autenticada real que el MCP de Redes funciona tras la proyección. Sin reservas activas. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
 ## Claude — AUTO ARTICULOS 500 — 2026-10-21
 
 - Cerrado: columna `disableIndexing` aplicada en producción; sin reservas activas. Corrige el cierre de Codex «CONTROL NO INDEXAR ARTÍCULOS» (migración no aplicada).
