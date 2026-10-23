@@ -166,6 +166,8 @@ Si una red no aparece, primero pide al administrador que active el permiso corre
 
 **Si aparece un error:** revisa primero que el permiso esté activado por el administrador, que estés usando la cuenta correcta y que no hayas copiado espacios al principio o al final. En Bluesky debe ser una App Password. Si sigue fallando, copia el mensaje exacto del aviso y envíalo al administrador; no envíes contraseñas ni tokens.
 
+**Actualización 2026-10-22:** al pulsar el botón de conexión de cualquier red social, de Bing Webmaster Tools, de Google Business Profile o de X, ahora se abre una **pestaña nueva** para completar la autorización; tu pestaña de SEO TOTAL no se cierra ni cambia. Si la conexión falla, sigues exactamente donde estabas, sin perder tu lugar. Al terminar (o si falla), cierra esa pestaña nueva y vuelve a la de SEO TOTAL.
+
 ### Personalización del contenido
 
 Puedes elegir tu idioma habitual de redacción, agregar una firma al final de los artículos y guardar teléfono de contacto para los botones de llamada o WhatsApp dentro de tus artículos. También puedes subir tu foto y logo para piezas de redes sociales y definir instrucciones para el estilo de imágenes e infografías. Además puedes indicar en dónde están tus clientes y en dónde está tu negocio para que la publicación inteligente cree títulos ultra geolocalizados combinando ambos datos, y escribir un Segmento de No Publicar con los temas que la publicación inteligente debe descartar siempre.
