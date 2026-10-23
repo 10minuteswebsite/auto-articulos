@@ -50,7 +50,7 @@ const PUBLISH_MESSAGES: Record<ErrorKind, string> = {
   BUSY: "La red está limitando las publicaciones por ahora. Se reintentará más tarde.",
   DUPLICATE: "La red rechazó la publicación por repetida. Genera una propuesta nueva.",
   MEDIA: "La red no aceptó la imagen o el enlace de esta publicación. Prueba con otra propuesta.",
-  SITE: "No pudimos obtener la imagen de la página de tu artículo (tardó demasiado en responder). Pulsa Reintentar.",
+  SITE: "No se encontró la foto de tu artículo (no existe en tu sitio o tardó en responder), y no publicamos sin ella. Revisa que la foto se vea en el artículo y pulsa Reintentar.",
   UNREACHABLE: "No pudimos comunicarnos con la red. Se reintentará más tarde.",
 };
 
