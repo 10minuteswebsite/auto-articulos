@@ -215,16 +215,16 @@ async function fetchArticleOpenGraphImage(articleUrl: string): Promise<string | 
     if (!match?.[1]) return null;
 
     const declared = new URL(match[1].replace(/&amp;/g, "&"), res.url).toString();
-    // Algunos artículos conservan una og:image antigua que ya devuelve 404.
-    // No entregamos esa URL a ninguna red: buscamos una imagen real del cuerpo.
-    const declaredCheck = await fetchWithRetry(declared, { method: "HEAD", timeoutMs: 10000 });
-    if (declaredCheck.ok) return declared;
-    const imageMatches = [...html.matchAll(/<img\b[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>/gi)];
-    for (const imageMatch of imageMatches) {
-      const candidate = new URL(imageMatch[1].replace(/&amp;/g, "&"), res.url).toString();
-      const candidateCheck = await fetchWithRetry(candidate, { method: "HEAD", timeoutMs: 10000 });
-      if (candidateCheck.ok) return candidate;
+    // Si la foto declarada ya no existe (404) NO se sustituye por otra imagen del
+    // cuerpo de la página: la primera <img> suele ser el logo del cliente y las redes
+    // publicaban el logo como si fuera la foto (Vicente, 23/10/2026). Sin foto no se publica.
+    let declaredCheck = await fetchWithRetry(declared, { method: "HEAD", timeoutMs: 10000 });
+    // Algunos hostings no aceptan HEAD; con esos se confirma con un GET antes de darla por perdida.
+    if (!declaredCheck.ok && [403, 405, 501].includes(declaredCheck.status)) {
+      declaredCheck = await fetchWithRetry(declared, { timeoutMs: 15000 });
     }
+    if (declaredCheck.ok) return declared;
+    console.warn(`La og:image del artículo no existe (HTTP ${declaredCheck.status}): ${declared}. No se publicará con otra imagen.`);
     return null;
   } catch (error) {
     console.warn(`No se pudo obtener og:image del artículo: ${describeFetchError(error)}`);
