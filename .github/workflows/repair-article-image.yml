@@ -1,0 +1,57 @@
+name: Reparar foto de un artículo
+
+# Repara la foto en 404 de UN artículo ya publicado (ver apps/worker/src/repair-article-image.ts).
+# Se dispara a mano; consume un crédito de imagen de la cuenta indicada.
+
+on:
+  workflow_dispatch:
+    inputs:
+      user_email:
+        description: "Correo del usuario"
+        required: true
+        type: string
+      article_id:
+        description: "N° del artículo en la plataforma (articles_id_)"
+        required: true
+        type: string
+      article_url:
+        description: "URL pública del artículo"
+        required: true
+        type: string
+
+concurrency:
+  group: repair-article-image
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DATABASE_URL }}
+      CREDENTIALS_ENCRYPTION_KEY: ${{ secrets.CREDENTIALS_ENCRYPTION_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_IMAGE_API_KEY: ${{ secrets.OPENAI_IMAGE_API_KEY }}
+      FAL_API_KEY: ${{ secrets.FAL_API_KEY }}
+      IMAGE_PROVIDER: ${{ vars.IMAGE_PROVIDER }}
+      USER_EMAIL: ${{ inputs.user_email }}
+      ARTICLE_ID: ${{ inputs.article_id }}
+      ARTICLE_URL: ${{ inputs.article_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
+      - run: npx playwright install --with-deps chromium
+      - name: Reparar foto
+        working-directory: apps/worker
+        run: npx tsx src/repair-article-image.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: repair-out
+          path: apps/worker/repair-out
