@@ -98,6 +98,9 @@ const PRODUCT_API_ROUTES: ReadonlyArray<readonly [string, HostProductScope]> = [
   ["/api/languages", "ARTICULOS"],
   ["/api/google-analytics", "ARTICULOS"],
   ["/api/business-profile", "ARTICULOS"],
+  // La prueba de Google Business se ejecuta desde Conexiones de Redes;
+  // debe atravesar el límite como REDES aunque la API legacy comparta prefijo.
+  ["/api/business-profile/test", "REDES"],
   ["/api/search-integrations/google", "ARTICULOS"],
   ["/api/search-integrations/bing", "ARTICULOS"],
   ["/api/social-opportunities", "REDES"],
