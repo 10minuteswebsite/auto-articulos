@@ -5627,3 +5627,7 @@ valores — 2026-10-19").
 - Sin commit de código ni deployment. Cambio de datos: columna `User.disableIndexing` aplicada manualmente en Supabase; migración `20261021120000_add_user_indexing_preference` ya estaba en `main`.
 
 - Commits: `1a6b48ba` (documentación) y `5e03ce76` (`migrate.yml`, opción aditiva). Producción verificada después.
+
+## 2026-10-23 — bd0ce517 (PR #658)
+
+- fix: evento de error del log con `id`; repara el build roto de `ced2c1b7`/`124701d2`/`a05c59ee`. Vercel `success`; log verificado en producción (Vicente). Producción estuvo en `16bbbca4` hasta este commit.
