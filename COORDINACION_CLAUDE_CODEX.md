@@ -12801,3 +12801,7 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Causa confirmada en código: la ruta compartida `/api/titles/[id]/events` llamaba a `requireProductAccess(..., "ARTICULOS", ...)`; Redes recibía 403 bajo enforcement, por lo que la UI no tenía eventos que renderizar.
 - Cambio: seleccionar la compuerta por host (`REDES` para `redes.lasolucionweb.*`, `ARTICULOS` para `articulos.lasolucionweb.*`) y re-alojar siempre la imagen de Google Business como JPEG público. Sin migración ni cambio de datos.
 - Estado: pendiente de publicar en el proyecto Vercel productivo correcto y completar la prueba E2E autenticada.
+
+## REDES-LOG-IMAGENES-VICENTE-20261023 — 2026-10-23
+
+- Alcance: log de Historial de Redes y publicación con imagen (usuario vicente.sanchez@expglobalspain.com). Punto cero real: producción en `16bbbca4` (3 commits posteriores con build fallido). Hecho: PR #658 (`bd0ce517`). Evidencia: `/api/titles/{id}/events` 404→200; log visible en pantalla; Tumblr, Pinterest, Instagram, Threads y Facebook publicados con enlace en el título de Cartagena. Pendiente: Google Business («Internal error encountered»), reconexión de Threads, reintento del Instagram del 22/10. Siguiente IA: leer la respuesta completa de PostPeer para Google Business antes de cambiar código.

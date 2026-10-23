@@ -1,3 +1,11 @@
+## Punto cero vigente — Redes: log visible y despliegue reparado — 2026-10-23
+
+- Task ID: `REDES-LOG-IMAGENES-VICENTE-20261023`. `main` = `bd0ce517` (PR #658), Vercel web y auto-articulos-web `success`; worker `social-worker` corrió con ese commit.
+- Causa raíz del log vacío: `ced2c1b7` añadió un evento de error sin `id` (campo obligatorio de `TitleEventRow`) → build de Vercel fallido en `ced2c1b7`, `124701d2` y `a05c59ee`; producción siguió en `16bbbca4`, donde el middleware clasificaba `/api/titles/{id}/events` como ARTICULOS y devolvía 404 «Esta ruta pertenece al otro producto».
+- Verificado en producción con la sesión de Vicente: `/events` 200 con eventos reales; «Ver log del proceso» muestra la lista. Título de Cartagena: Tumblr, Pinterest, Instagram, Threads y Facebook `published` con enlace.
+- ABIERTO: Google Business sigue en error tras el despliegue: `Google Business post creation failed: Internal error encountered.` (PostPeer devuelve un id pero Google rechaza). No atribuible a la imagen (JPEG público ya re-alojado). Hipótesis sin probar: el contenido enviado lleva la URL del artículo y puede traer el marcador literal `[ENLACE]`. También abiertos: Threads de Vicente con autorización vencida (reconectar en Conexiones) e Instagram del 22/10 en error (intento anterior a los arreglos; reintentar).
+- Lección: no dar por desplegado un commit de `main` sin mirar el estado de Vercel (`gh api repos/.../commits/<sha>/status`).
+
 ## Punto cero vigente — Redes: lectura de og:image robusta — 2026-10-22
 
 - Task ID: `REDES-IMAGENES-20261022`. Causa: timeouts al leer la página del artículo desde GitHub Actions (una sola espera real de 10 s, repetida por cada red). Arreglo en el worker + mensaje de error correcto. Detalle en Coordinación.
