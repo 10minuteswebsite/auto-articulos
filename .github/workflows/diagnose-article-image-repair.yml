@@ -1,0 +1,41 @@
+name: Diagnóstico - pantalla de edición de artículo
+
+on:
+  workflow_dispatch:
+    inputs:
+      user_email:
+        description: "Correo del usuario"
+        required: true
+        type: string
+      article_title:
+        description: "Título exacto del artículo"
+        required: true
+        type: string
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DATABASE_URL }}
+      CREDENTIALS_ENCRYPTION_KEY: ${{ secrets.CREDENTIALS_ENCRYPTION_KEY }}
+      USER_EMAIL: ${{ inputs.user_email }}
+      ARTICLE_TITLE: ${{ inputs.article_title }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
+      - run: npx playwright install --with-deps chromium
+      - name: Inspeccionar
+        working-directory: apps/worker
+        run: npx tsx src/diagnose-article-image-repair.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: diag-out
+          path: apps/worker/diag-out
