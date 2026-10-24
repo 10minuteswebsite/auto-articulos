@@ -1,5 +1,26 @@
 # Inventario de conversaciones
 
+## Codex — LOG de Historial en Redes — 2026-10-23
+
+- Task `REDES-HISTORIAL-LOG-20261023`. Causa: la ruta compartida `/api/titles/[id]/events` exigía
+  acceso `ARTICULOS` también cuando Historial se abría desde `redes.lasolucionweb.*`, por lo que bajo
+  enforcement la carga del log devolvía 403. Corrección: la compuerta se elige por host (`REDES` o
+  `ARTICULOS`) y Google Business siempre recibe la imagen re-alojada como JPEG público. Verificado en
+  producción con la cuenta de Vicente Sánchez (ver `REDES-LOG-IMAGENES-VICENTE-20261023` abajo y
+  `CONTROLADOR_DE_VERSIONES.md`). Sin ramas ni worktrees propios (verificado contra `git branch -a` y
+  `git worktree list`). Sin reservas activas.
+
+## REDES-LOG-IMAGENES-VICENTE-20261023 — 2026-10-23
+
+- Verificación en producción con cuenta real (`vicente.sanchez@expglobalspain.com`) tras el PR #658
+  (`bd0ce517`): log de Historial visible; publicaron con enlace en el título de Cartagena Tumblr,
+  Pinterest, Instagram, Threads y Facebook. Google Business devolvió «Internal error encountered»;
+  Threads necesita reconexión; el Instagram del 22/10 necesita reintento. Cierre parcial: la foto del
+  artículo 103390 se reparó (404→200) y se aplicó la regla «sin foto no se publica»; las 3 pendientes
+  quedaron frenadas por el cupo diario, no por error de código. Sin ramas ni worktrees propios
+  (verificado contra `git branch -a` y `git worktree list`). Sin reservas activas. Detalle en
+  Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
+
 ## Claude — BLOG IA separado: capitanía liberada — 2026-10-22
 
 - Task `BLOG-IA-INDEPENDENCIA-20261022`. Capitán de migración: Claude — LIBERADO el 2026-10-22 tras fusionar PR #652 (`dba1dca2`), con Vercel success y login 200 verificado en Artículos y Redes; sin migraciones. BLOG IA pasa a repo propio (`10minuteswebsite/blog-ia`, rediseño del blog público y SEO en local, aún sin desplegar); Artículos queda solo con el conector (`BLOG_IA_CONECTOR.md`). Los dominios los resuelve otra aplicación (orden de Milton). Sin reservas activas. Detalle en Coordinación y `CONTROLADOR_DE_VERSIONES.md`.
