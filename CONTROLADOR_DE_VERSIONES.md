@@ -1,5 +1,29 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — verificación en producción con cuenta real (Vicente) — REDES-LOG-IMAGENES-VICENTE-20261023 — 2026-10-23
+
+Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("REDES-LOG-IMAGENES-VICENTE-20261023 — 2026-10-23" y
+"REDES-LOG-IMAGENES-VICENTE-20261023 — cierre parcial 2026-10-23"); complementa el registro de
+`bd0ce517` (PR #658) y `cf4a5953`/#661/#662 ya anotados más abajo, con los resultados de la
+verificación real que faltaban.
+
+- Task ID: `REDES-LOG-IMAGENES-VICENTE-20261023`. Alcance: log de Historial de Redes y publicación con
+  imagen, cuenta de `vicente.sanchez@expglobalspain.com`. Punto cero real: producción en `16bbbca4`
+  (con 3 commits posteriores de build fallido).
+- Verificación tras PR #658 (`bd0ce517`): `/api/titles/{id}/events` pasó de 404 a 200; el log quedó
+  visible en pantalla. Publicaron con enlace en el título de Cartagena: Tumblr, Pinterest, Instagram,
+  Threads y Facebook.
+- Pendiente de esa ronda: Google Business devolvía «Internal error encountered»; Threads necesita
+  reconexión; el Instagram del 22/10 necesita reintento.
+- Cierre parcial: la foto del artículo 103390 se reparó en la plataforma (404→200, runs `39950421551`
+  diagnóstico y `39968437869` reparación) y se aplicó la regla «sin foto no se publica» (nunca usa el
+  logo como reemplazo). Verificado en pantalla de Vicente.
+- Abierto al cierre de esta corrida: las 3 pendientes (Google Business, Instagram, Threads) quedaron
+  frenadas por el cupo diario, no por error de código; Threads además requiere reconexión manual de la
+  cuenta.
+- Siguiente IA: para Google Business, leer la respuesta completa de PostPeer antes de cambiar código;
+  para las demás, reintentar cuando el cupo se reinicie y verificar con foto real.
+
 ## Versión — LOG de Historial y JPEG público para Google Business — 2026-10-23
 
 - Task ID: `REDES-HISTORIAL-LOG-20261023`.
