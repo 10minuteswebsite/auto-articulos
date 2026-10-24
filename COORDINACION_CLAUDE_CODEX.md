@@ -397,7 +397,7 @@ Punto de entrada obligatorio: leer este bloque, el último checkpoint y `BASELIN
 - Estado: PRODUCCIÓN al fusionar el PR de este cambio (sin migración). Capitanía reclamada al empezar y liberada al entregar.
 - CAUSA: `GET /api/configuration-status` (`apps/web/src/app/api/configuration-status/route.ts`) marcaba `business-profile` como configurado solo si existía `BusinessProfileIntegration.locationName` (la conexión histórica directa con Google). Las cuentas conectadas por PostPeer (la vía actual, p. ej. Lorena, ACTIVE) tienen `PostPeerConnection` y no esa fila, así que la pantalla de la conexión mostraba «Conectado» pero la tarjeta de Conexiones (`ConexionesView.tsx`, que pinta el ✓ con ese estado) no. Afectaba a TODOS los usuarios conectados por PostPeer; Threads ya tenía la misma regla (`postPeerThreads`).
 - ARREGLO: `configured = locationName || PostPeerConnection.status === "ACTIVE"`, la misma regla que usa `BusinessProfileSection`. Sin cambio de texto ni de manual.
-- Verificación: sin errores de tipos nuevos en el archivo; comprobación en producción pendiente tras el despliegue (Lorena y otra cuenta con Google Business).
+- Verificación: PR #584 fusionado y desplegado (2026-10-14); Milton confirmó que ya ve el ✓ en producción. CERRADO.
 
 ## Claude — Fix «Nancy Cruz: sin cupo para publicar artículos sin haber publicado hoy» — 2026-10-14
 
