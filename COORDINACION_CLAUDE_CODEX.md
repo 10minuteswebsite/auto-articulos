@@ -12809,3 +12809,49 @@ Responsable: Claude (tarea programada diaria de propagación).
 ## REDES-LOG-IMAGENES-VICENTE-20261023 — cierre parcial 2026-10-23
 
 - Hecho: foto del artículo 103390 reparada en la plataforma (404→200), regla «sin foto no se publica», log visible. Evidencia: runs 39950421551 (diagnóstico) y 39968437869 (reparación); pantalla de Vicente con el motivo del cupo. Abierto: las 3 pendientes (Google Business, Instagram, Threads) esperan cupo diario; Threads requiere reconexión. Siguiente IA: reintentar cuando el cupo se reinicie y verificar publicación con foto real.
+
+## Claude (tarea programada diaria de propagación) — 2026-10-24
+
+Punto de partida: la última entrada firmada por esta misma tarea era la del 2026-10-23 (arriba, línea
+~12740; corresponde al commit `12277f8`). `git fetch origin main` no mostró anomalías. Desde `12277f8`
+hasta `81a435f` (`origin/main` al momento de esta corrida) aparecieron, sobre este mismo documento,
+tres entradas nuevas sin firma propia, todas fechadas 2026-10-23: "Codex — LOG de Historial en Redes"
+(Task `REDES-HISTORIAL-LOG-20261023`), "REDES-LOG-IMAGENES-VICENTE-20261023" y
+"REDES-LOG-IMAGENES-VICENTE-20261023 — cierre parcial". El resto de los commits del rango
+(`590551a`, `0551441`, `81a435f`, `cf4a595`, `d783f4c`, `7a67be7`, `ced2c1b`, `16bbbca`, `49386a0`,
+`a05c59e`, `124701d`, `bd0ce51`, entre otros) no tocó `COORDINACION_CLAUDE_CODEX.md`, así que quedan
+fuera del alcance de esta corrida.
+
+Propagado por documento:
+
+- `CONTROLADOR_DE_VERSIONES.md`: la entrada "Codex — LOG de Historial en Redes" ya estaba propagada
+  (sección "Versión — LOG de Historial y JPEG público para Google Business — 2026-10-23", presente
+  desde antes de esta corrida). Faltaban los resultados reales de verificación en producción de
+  `REDES-LOG-IMAGENES-VICENTE-20261023` (ambas entradas, la inicial y el cierre parcial): se agregó
+  "Versión — verificación en producción con cuenta real (Vicente) — REDES-LOG-IMAGENES-VICENTE-20261023
+  — 2026-10-23", arriba de todo, con los datos que no estaban en el registro breve ya existente de
+  `bd0ce517`/`cf4a5953`/#661/#662 (plataformas publicadas, error de Google Business, pendientes de
+  reconexión y los runs de diagnóstico/reparación de la foto 103390).
+- `INVENTARIO_CONVERSACIONES.md`: ninguna de las tres entradas nuevas tenía registro en este
+  documento. Se agregaron, al inicio (Parte B/historial): "Codex — LOG de Historial en Redes" y
+  "REDES-LOG-IMAGENES-VICENTE-20261023" (combinando la entrada inicial y el cierre parcial, que son el
+  mismo task). Verificado contra `git branch -a` y `git worktree list`: no hay ramas ni worktrees
+  pendientes para estos dos tasks, así que todo fue a Parte B, sin tocar la Parte A.
+- `apps/web/src/content/manual-usuario.ts`: sin cambios. El fix de Historial (`REDES-HISTORIAL-LOG-
+  20261023`) no cambia ningún flujo visible: el manual ya explica que una publicación fallida queda en
+  Historial con el motivo en español y el botón Reintentar, sin citar el texto exacto de los mensajes
+  de error. La regla «sin foto no se publica» mencionada en el cierre parcial de
+  `REDES-LOG-IMAGENES-VICENTE-20261023` tampoco necesita edición por el mismo motivo: el manual no
+  enumera razones específicas de falla, solo dice que el motivo aparece explicado. El resto de las dos
+  entradas de Vicente es verificación operativa interna (cupo diario, reconexión pendiente de Threads),
+  no un cambio de pantalla, flujo o mensaje nuevo.
+- `TO-DO.md`: sin cambios. Las dos menciones de "Siguiente IA" (leer la respuesta de PostPeer para
+  Google Business; reintentar cuando el cupo se reinicie) son continuación operativa de una tarea ya en
+  curso, no una idea suelta sin ejecutar todavía.
+- `REPARADOR_DEL_ARBOL_PRINCIPAL.md`: sin cambios. Ninguna de las tres entradas describe un árbol de
+  git enredado, ramas pisadas o commits mezclados.
+
+No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta tarea. Duda nueva para
+Milton: ninguna.
+
+Responsable: Claude (tarea programada diaria de propagación).
