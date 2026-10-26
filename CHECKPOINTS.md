@@ -1,3 +1,7 @@
+## Checkpoint — Redes: logo vigente y subida — 2026-10-26
+
+- Task `REDES-LOGO-VIGENTE-20261026`; `origin/main` incluye #672 y #675 (`aa46a0d6`), desplegados. Sin migración. Verificación en producción pendiente de la subida real de un logo.
+
 ## Punto cero vigente — cierre de REDES-LOG-IMAGENES-VICENTE-20261023 (traspaso) — 2026-10-26
 
 - Estado final verificado el 23/10: log de Historial visible; foto del artículo 103390 reparada (404→200); regla «sin foto no se publica, nunca el logo» en `main` (#660). Tumblr, Pinterest, LinkedIn y Facebook del artículo de Cartagena salieron antes con el logo; Instagram y Threads de ese artículo NO se publicaron.

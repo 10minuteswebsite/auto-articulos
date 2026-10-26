@@ -1,3 +1,8 @@
+## Coordinación — Redes: logo vigente y subida (cierre, Claude) — 2026-10-26
+
+- Fusionados #672 y #675 por orden de Milton. Alcance: reutilización de imágenes del worker, uploader y página de Contenido, ruta `/api/me/upload-image`. Sin cambios de esquema.
+- Decisión: diagnóstico explícito (errores con motivo) más `select` mínimo, en vez de tocar la base. Evidencia: pruebas `aiImageReuse` 2/2; sharp probado local. Producción NO verificada por la IA (sin sesión ni logs). Siguiente paso: ver arriba, en CURRENT_STATE.
+
 ## Coordinación — Redes sin imágenes (og:image por timeout) (Claude) — 2026-10-22
 
 ## Claude — BLOG IA separado: capitanía liberada — 2026-10-22

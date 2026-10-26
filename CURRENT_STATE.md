@@ -1,3 +1,10 @@
+## Punto cero vigente — Redes: logo vigente y subida de imágenes — 2026-10-26 (cierre)
+
+- Task ID: `REDES-LOGO-VIGENTE-20261026`. `main` incluye PR #672 (`08bc1b51`: huella de logos en `reuse.json`, relectura tras guardar, errores de subida con motivo real) y PR #675 (`aa46a0d6`: `user.update` con `select` mínimo en `/api/me/upload-image`).
+- Vercel web y auto-articulos-web `success` en ambos commits.
+- Hallazgos NO probados en vivo: (1) logo viejo repetido = reutilización 48 h sin mirar el logo; (2) «Error al subir la imagen.» de Mauricio Medina = 500 sin motivo; el #675 es una hipótesis (columna ausente en producción). La IA no puede iniciar sesión ni leer los logs de Vercel (equipo `la-solucion-web`).
+- Punto de partida: Milton o Mauricio suben un logo; si falla, copiar el texto rojo y buscar «[upload-image] fallo al guardar la imagen» en los logs de `web`. Después, reintentar una publicación y ver «Logos de la cuenta usados» en el log del worker.
+
 ## Punto cero vigente — cierre de REDES-LOG-IMAGENES-VICENTE-20261023 (traspaso) — 2026-10-26
 
 - Estado final verificado el 23/10: log de Historial visible; foto del artículo 103390 reparada (404→200); regla «sin foto no se publica, nunca el logo» en `main` (#660). Tumblr, Pinterest, LinkedIn y Facebook del artículo de Cartagena salieron antes con el logo; Instagram y Threads de ese artículo NO se publicaron.
