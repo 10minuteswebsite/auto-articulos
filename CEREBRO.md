@@ -315,3 +315,7 @@ La limpieza de cookies OAuth en errores ya no es una reparación pendiente. `cle
 ## Causa raíz — Redes publicaban sin imagen (2026-10-22)
 
 La imagen de TODAS las redes sale de la `og:image` de la página del artículo del cliente. Esa lectura se repetía por red, con un único temporizador de 10 s compartido por los reintentos (inútiles tras vencer). Un sitio de cliente lento + ráfaga de jobs = «sin imagen» o error. Regla: leer una vez, compartir, y nunca reutilizar un `AbortSignal.timeout` entre intentos. Mensaje de error: «imagen» (español) contiene «image», por eso todo se clasificaba como «la red no aceptó la imagen».
+
+## Causa raíz — «{BIO_AUTOR}» visible al final del artículo (2026-10-26)
+
+Un marcador escrito en un estilo de redacción solo se sustituye si `sanitizeGeneratedArticleResult` lo conoce (hoy: TELEFONO, PHONE_NUMBER, NUMERO-WHATSAPP, NOMBRE_AUTOR, CIUDAD_ESTADO). Cualquier otro marcador que la IA copie llega crudo al artículo. `{BIO_AUTOR}` no tiene campo en la base de datos. Regla: antes de añadir un marcador a un prompt, confirmar que el worker lo resuelve; ante un marcador crudo en un artículo, buscar primero en el texto del estilo guardado, no en el código.

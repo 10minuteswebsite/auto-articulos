@@ -529,3 +529,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Fix local preparado en `apps/web/src/app/api/titles/[id]/events/route.ts`: compuerta basada en `productOfHost(request.nextUrl.hostname)`.
 - Refuerzo añadido: Google Business siempre convierte y re-aloja la imagen en JPEG público antes de enviarla a PostPeer/Google, no solo cuando el origen era WebP.
 - No se declara corregido en producción hasta completar commit en `main`, deployment `Ready` y prueba autenticada de abrir el log y reintentar imagen.
+
+## Punto cero vigente — Artículos: marcador `{BIO_AUTOR}` visible en el artículo — 2026-10-26
+
+- Task ID: `ARTICULOS-BIO-AUTOR-20261026`. Sin cambios de código ni migración.
+- Síntoma: el artículo `rosaliamartin.com/categ/-que-hacer-si-los-documentos-no-coinciden-con-la-realidad-fisica-de-tu-propiedad-en-el-ejido-` termina con «Por Rosalia Martin — {BIO_AUTOR}».
+- Causa raíz: `{BIO_AUTOR}` vive en el TEXTO de tres estilos de redacción guardados (Maestro v4.0 ×3, Guía/Paso a Paso ×3, Problema–Solución ×2, todos en el punto 2.5). `sanitizeGeneratedArticleResult` (`apps/worker/src/automation/generateCustomArticle.ts`) solo reemplaza `{TELEFONO}`, `{PHONE_NUMBER}`, `{NUMERO-WHATSAPP}`, `{NOMBRE_AUTOR}` y `{CIUDAD_ESTADO}`. No existe campo de bio en `schema.prisma` ni código que lo resuelva, así que la IA copió el marcador.
+- Decisión de Milton: se corrige el prompt, no el código. Prompts limpios entregados en el chat (se quitó el marcador y las frases que dependían de él; el resto idéntico). El prompt Comparativo no tenía el marcador.
+- NO verificado: que Milton haya pegado los prompts limpios en Configuración → Contenido; el artículo de Rosalia ya publicado sigue con el marcador hasta corregirlo a mano o regenerarlo. Pueden existir otros estilos con el marcador no revisados.

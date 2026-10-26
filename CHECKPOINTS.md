@@ -492,3 +492,7 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - The signed Hub projection and explicit REDES ProductEntitlement checks are now part of the durable authorization path.
 - Auto production commit f6ce1d9d is READY and public smoke checks pass at the route boundary.
 - A tenant-authenticated MCP browser session was not available for direct E2E and remains explicitly pending.
+
+## Checkpoint — Artículos: `{BIO_AUTOR}` en estilos de redacción — 2026-10-26
+
+- Task `ARTICULOS-BIO-AUTOR-20261026`. Diagnóstico cerrado; sin código. Punto de partida: Milton pega los prompts limpios en Configuración → Contenido y revisa el próximo artículo generado.
