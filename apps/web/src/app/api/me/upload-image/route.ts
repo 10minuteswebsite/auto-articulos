@@ -153,7 +153,9 @@ export async function POST(request: NextRequest) {
     addRandomSuffix: true,
   });
 
-  await prisma.user.update({ where: { id: userId }, data: { [FIELD_BY_TYPE[type]]: blob.url } });
+  // select mínimo: sin él Prisma relee TODAS las columnas del usuario y basta que falte una
+  // en la base de datos (migración sin aplicar) para que guardar un logo falle.
+  await prisma.user.update({ where: { id: userId }, data: { [FIELD_BY_TYPE[type]]: blob.url }, select: { id: true } });
 
   // Devolvemos también el peso final en KB para que el UI pueda mostrar
   // "guardada (45KB)" al usuario.
@@ -177,7 +179,7 @@ export async function DELETE(request: NextRequest) {
   }
   const type = rawType as UploadType;
 
-  await prisma.user.update({ where: { id: userId }, data: { [FIELD_BY_TYPE[type]]: null } });
+  await prisma.user.update({ where: { id: userId }, data: { [FIELD_BY_TYPE[type]]: null }, select: { id: true } });
 
   return NextResponse.json({ ok: true });
 }
