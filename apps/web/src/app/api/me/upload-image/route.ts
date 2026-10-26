@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
-import { put } from "@vercel/blob";
-import sharp from "sharp";
 
 // Dimensiones objetivo para que el archivo salga chico y se vea bien
 // compuesto en los prompts de imagen de redes sociales (carruseles,
@@ -88,62 +86,79 @@ export async function POST(request: NextRequest) {
 
   const inputBuffer = Buffer.from(await file.arrayBuffer());
 
-  let resizedBuffer: Buffer;
-  let outputType: "image/jpeg" | "image/png";
-  let ext: "jpg" | "png";
-  if (isProfile) {
-    outputType = "image/jpeg";
-    ext = "jpg";
-    resizedBuffer = await sharp(inputBuffer)
-      .rotate()
-      .resize(TARGET.profile.width, TARGET.profile.height, {
-        fit: "cover",
-        position: "centre",
-      })
-      .jpeg({ quality: 82, mozjpeg: true })
-      .toBuffer();
-  } else {
-    outputType = "image/png";
-    ext = "png";
-    resizedBuffer = await sharp(inputBuffer)
-      .resize(TARGET.logo.width, TARGET.logo.height, {
-        fit: "contain",
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png({ compressionLevel: 9 })
-      .toBuffer();
+  // sharp y @vercel/blob se cargan aquí y no al inicio del archivo: si alguno falla al cargar en el
+  // servidor, antes toda la ruta daba 500 sin mensaje; ahora el fallo se captura y se explica.
+  const { put } = await import("@vercel/blob");
+  let sharp: typeof import("sharp").default | null = null;
+  try {
+    sharp = (await import("sharp")).default;
+  } catch (err) {
+    console.error("[upload-image] sharp no cargó; se guarda la imagen original sin optimizar:", err);
   }
 
-  // Salvavidas: si la primera pasada quedó pesada (raro en la práctica),
-  // reintentamos con más compresión para no superar el límite de salida.
-  if (resizedBuffer.length > MAX_OUTPUT_BYTES) {
+  let resizedBuffer: Buffer;
+  let outputType: string;
+  let ext: string;
+  if (!sharp) {
+    // Sin optimizador se guarda el archivo tal cual (ya validado: JPG/PNG/WEBP y máximo 4MB).
+    resizedBuffer = inputBuffer;
+    outputType = file.type === "image/jpg" ? "image/jpeg" : file.type;
+    ext = outputType === "image/png" ? "png" : outputType === "image/webp" ? "webp" : "jpg";
+  } else {
     if (isProfile) {
+      outputType = "image/jpeg";
+      ext = "jpg";
       resizedBuffer = await sharp(inputBuffer)
         .rotate()
         .resize(TARGET.profile.width, TARGET.profile.height, {
           fit: "cover",
           position: "centre",
         })
-        .jpeg({ quality: 65, mozjpeg: true })
+        .jpeg({ quality: 82, mozjpeg: true })
         .toBuffer();
     } else {
+      outputType = "image/png";
+      ext = "png";
       resizedBuffer = await sharp(inputBuffer)
         .resize(TARGET.logo.width, TARGET.logo.height, {
           fit: "contain",
           background: { r: 0, g: 0, b: 0, alpha: 0 },
         })
-        .png({ compressionLevel: 9, palette: true })
+        .png({ compressionLevel: 9 })
         .toBuffer();
     }
-  }
 
-  if (resizedBuffer.length > MAX_OUTPUT_BYTES) {
-    return NextResponse.json(
-      {
-        error: `Tras la optimización la imagen aún pesa ${(resizedBuffer.length / 1024).toFixed(0)}KB, por encima del máximo de ${MAX_OUTPUT_BYTES / 1024}KB. Intenta con otra imagen.`,
-      },
-      { status: 400 },
-    );
+    // Salvavidas: si la primera pasada quedó pesada (raro en la práctica),
+    // reintentamos con más compresión para no superar el límite de salida.
+    if (resizedBuffer.length > MAX_OUTPUT_BYTES) {
+      if (isProfile) {
+        resizedBuffer = await sharp(inputBuffer)
+          .rotate()
+          .resize(TARGET.profile.width, TARGET.profile.height, {
+            fit: "cover",
+            position: "centre",
+          })
+          .jpeg({ quality: 65, mozjpeg: true })
+          .toBuffer();
+      } else {
+        resizedBuffer = await sharp(inputBuffer)
+          .resize(TARGET.logo.width, TARGET.logo.height, {
+            fit: "contain",
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+          })
+          .png({ compressionLevel: 9, palette: true })
+          .toBuffer();
+      }
+    }
+
+    if (resizedBuffer.length > MAX_OUTPUT_BYTES) {
+      return NextResponse.json(
+        {
+          error: `Tras la optimización la imagen aún pesa ${(resizedBuffer.length / 1024).toFixed(0)}KB, por encima del máximo de ${MAX_OUTPUT_BYTES / 1024}KB. Intenta con otra imagen.`,
+        },
+        { status: 400 },
+      );
+    }
   }
 
   const prefix = BLOB_PREFIX_BY_TYPE[type];
