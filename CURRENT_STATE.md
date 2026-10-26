@@ -1,3 +1,8 @@
+## Punto cero vigente — Redes: asistente de Juan publica (E2E confirmado) — 2026-10-26
+
+- Task ID: `REDES-PERMISOS-ASISTENTE-20261026` (cierre final). Milton confirmó que la prueba con el asistente de Juan Carvajal funcionó tras PR #668 + SQL aplicado (`sin_permisos = 0`). Resuelve el pendiente «NO verificado» del punto cero anterior.
+- Evidencia: confirmación de Milton en chat; no se leyó el Historial de Juan ni se abrió cada publicación. Qué redes publicaron exactamente no quedó registrado aquí.
+
 ## Punto cero vigente — Artículos: editor de prompts para administradores en Contenido — 2026-10-26
 
 - Task ID: `ARTICULOS-PROMPTS-ADMIN-20261026`. `main` incluye PR #670 (`ccfe4f37`); Vercel web y auto-articulos-web `success`.
