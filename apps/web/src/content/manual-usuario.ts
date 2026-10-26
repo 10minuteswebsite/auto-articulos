@@ -332,6 +332,8 @@ Ruta: /dashboard/configuracion/contenido
 
 Define la firma de los artículos, teléfono de contacto, hasta 3 fotos tuyas y hasta 2 logos, el estilo de redacción por defecto, las ubicaciones para títulos geolocalizados, y el Segmento de No Publicar. Solo la primera foto y el primer logo son obligatorios; el resto es opcional y le da al sistema más variedad para elegir. Estas imágenes se usan cuando el generador de imágenes con IA para redes sociales está activo en tu cuenta (lo activa el administrador).
 
+**Solo administradores:** en esta misma pantalla aparece "Agregar nuevo estilo de redacción (Prompt)", donde se crean, editan y eliminan los estilos de redacción que los usuarios eligen para sus artículos. Los usuarios normales no ven esa sección.
+
 El campo de firma se llama "Firma al Final del Artículo y Disclosure": además de tu firma, se sugiere agregar una aclaración legal (disclosure) que indique que no eres asesor en materias legales, fiscales, financieras o de seguros.
 
 **Ubicaciones para títulos geolocalizados:** escribe, separadas por comas, las ciudades o países de donde son tus clientes reales (ej. "Colombia, Bogotá, Ecuador, Caracas") y por separado dónde está u opera tu negocio (ej. "Miami, Orlando, Homestead"). La publicación inteligente puede combinar ambos datos para crear títulos ultra segmentados como "Cómo invertir en propiedades en Homestead si vives en Colombia". Dejar los campos vacíos no cambia nada de tu cuenta.

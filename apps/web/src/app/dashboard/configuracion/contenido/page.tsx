@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
+import PromptStylesAdmin from "@/components/PromptStylesAdmin";
 import PhotoLogoUploader, { type UploadType } from "@/components/PhotoLogoUploader";
 import {
   sectionStyle,
@@ -62,12 +63,21 @@ export default function ConfiguracionContenidoPage() {
   } | null>(null);
   const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   const [hostReady, setHostReady] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const signaturePercent = Math.min(
     100,
     Math.round((articleSignature.length / MAX_SIGNATURE_LEN) * 100),
   );
   const signatureBarColor = signaturePercent >= 95 ? "#ff3b30" : "#1d1d1f";
+
+  const loadPrompts = useCallback(async () => {
+    const res = await fetch("/api/prompts", { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      setPrompts(data.prompts ?? []);
+    }
+  }, []);
 
   const loadContent = useCallback(async () => {
     const [meRes, promptsRes] = await Promise.all([
@@ -80,6 +90,7 @@ export default function ConfiguracionContenidoPage() {
     }
     if (meRes.ok) {
       const data = await meRes.json();
+      setIsAdmin(data.role === "admin");
       setArticleSignature(data.articleSignature ?? "");
       setDefaultPromptId(data.defaultPromptId ?? "");
       setPhone(data.phone ?? "");
@@ -333,6 +344,9 @@ export default function ConfiguracionContenidoPage() {
             </button>
           </div>
         </section>
+
+        {/* Prompts de redacción: crear, editar y eliminar (solo administradores) */}
+        {isAdmin && <PromptStylesAdmin prompts={prompts} onChanged={loadPrompts} />}
 
         {/* Firma / Texto al Final del Artículo */}
         <section style={sectionStyle}>
