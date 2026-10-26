@@ -73,7 +73,9 @@ export default function PhotoLogoUploader({
       await onUpload(type, file);
       setLocalPreview(null);
     } catch {
-      // El padre maneja el error
+      // El padre maneja el error. La vista previa local NO se queda: si no se
+      // guardó, la página debe seguir mostrando la imagen que de verdad está guardada.
+      setLocalPreview(null);
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }

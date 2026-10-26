@@ -330,7 +330,7 @@ Guarda las credenciales de la plataforma, sincroniza categorías e idiomas y eli
 
 Ruta: /dashboard/configuracion/contenido
 
-Define la firma de los artículos, teléfono de contacto, hasta 3 fotos tuyas y hasta 2 logos, el estilo de redacción por defecto, las ubicaciones para títulos geolocalizados, y el Segmento de No Publicar. Solo la primera foto y el primer logo son obligatorios; el resto es opcional y le da al sistema más variedad para elegir. Estas imágenes se usan cuando el generador de imágenes con IA para redes sociales está activo en tu cuenta (lo activa el administrador).
+Define la firma de los artículos, teléfono de contacto, hasta 3 fotos tuyas y hasta 2 logos, el estilo de redacción por defecto, las ubicaciones para títulos geolocalizados, y el Segmento de No Publicar. Solo la primera foto y el primer logo son obligatorios; el resto es opcional y le da al sistema más variedad para elegir. Estas imágenes se usan cuando el generador de imágenes con IA para redes sociales está activo en tu cuenta (lo activa el administrador). Al reemplazar un logo, la página vuelve a leer lo guardado y te avisa si no quedó guardado; las imágenes de redes que ya estaban generadas con el logo anterior se descartan y se crean de nuevo con el logo vigente.
 
 **Solo administradores:** en esta misma pantalla aparece "Agregar nuevo estilo de redacción (Prompt)", donde se crean, editan y eliminan los estilos de redacción que los usuarios eligen para sus artículos. Los usuarios normales no ven esa sección.
 
