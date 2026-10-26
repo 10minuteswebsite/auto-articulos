@@ -1,5 +1,9 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — Artículos: editor de prompts para administradores en Contenido (PR #670, `ccfe4f37`) — ARTICULOS-PROMPTS-ADMIN-20261026 — 2026-10-26
+
+- Solo interfaz: nuevo `PromptStylesAdmin.tsx` y su uso en `configuracion/contenido/page.tsx`, más el manual. Sin migración, sin API nueva. Rollback: revertir #670.
+
 ## Versión — Redes: permisos aprobados por defecto (PR #668, `c0884753`) — REDES-PERMISOS-ASISTENTE-20261026 — 2026-10-26
 
 - Cambia `schema.prisma` (defaults) y añade la migración `20261026120000_social_publishing_default_on`; el despliegue web no aplica migraciones: el SQL lo corrió Milton en Supabase y se verificó (`sin_permisos = 0`). Sin riesgo de orden: no se añade ninguna columna.

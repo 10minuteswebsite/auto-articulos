@@ -1,3 +1,11 @@
+## Punto cero vigente — Artículos: editor de prompts para administradores en Contenido — 2026-10-26
+
+- Task ID: `ARTICULOS-PROMPTS-ADMIN-20261026`. `main` incluye PR #670 (`ccfe4f37`); Vercel web y auto-articulos-web `success`.
+- Hallazgo: en el historial del código el editor de estilos de redacción nunca estuvo en Configuración → Contenido; vive en Administración → Usuarios → Prompts. Contenido solo tenía el selector del estilo por defecto.
+- Cambio: componente `PromptStylesAdmin` en Contenido (crear/editar/eliminar), visible solo si `/api/me` devuelve `role = admin`; usa `/api/admin/prompts` (`requireAdmin` en servidor). Manual actualizado. Sin migración.
+- Verificado en producción: el código nuevo se sirve en articulos.lasolucionweb.net; con sesión de usuario normal el editor no aparece. NO verificado por la IA: verlo con sesión de administrador (no puede iniciar sesión); lo confirma Milton.
+- Con «Acceder como» otro usuario el editor no se muestra (se toma el rol efectivo).
+
 ## Punto cero vigente — Redes: permisos de publicación aprobados por defecto — 2026-10-26
 
 - Task ID: `REDES-PERMISOS-ASISTENTE-20261026`. `main` incluye PR #668 (`c0884753`): 8 casillas `allow*Publishing` (Instagram, Facebook, LinkedIn, Threads, Pinterest, Tumblr, Bluesky, Google Business) con `DEFAULT true`; Blogger y X fuera por orden de Milton.

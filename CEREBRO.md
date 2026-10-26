@@ -1,3 +1,8 @@
+## Decisión durable — los estilos de redacción se administran también desde Contenido — 2026-10-26
+
+- Orden de Milton: los administradores deben poder crear y editar prompts de artículos en Configuración → Contenido. El servidor sigue exigiendo rol admin; la sección está oculta para usuarios normales.
+- Lección: la pantalla de Contenido nunca tuvo el editor; el gestor original está en Administración → Usuarios → Prompts. Ante «se perdió X», revisar el historial antes de suponer una regresión.
+
 ## Decisión durable — redes aprobadas por defecto; el Hub solo confirma el derecho REDES — 2026-10-26
 
 - Decisión de Milton: las 8 redes (sin Blogger ni X) nacen aprobadas y se rellenaron las cuentas existentes. El Hub debe comprobar que el derecho REDES esté `ACTIVE`; las casillas ya no son un paso manual.

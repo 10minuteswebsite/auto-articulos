@@ -12864,3 +12864,8 @@ Responsable: Claude (tarea programada diaria de propagación).
 ## REDES-PERMISOS-ASISTENTE-20261026 — cierre 2026-10-26
 - Hecho: causa raíz hallada, Juan arreglado, PR #668 fusionado, SQL aplicado y verificado, lista `PERMISOS_PARA_EL_HUB.md`, mensaje de instrucciones para el asistente. Docs de cierre actualizados (CURRENT_STATE, CHECKPOINTS, CONTROLADOR, CEREBRO).
 - Pendiente: E2E de Juan por el asistente. Siguiente paso: que el Hub compruebe el derecho REDES `ACTIVE` al dar de alta.
+
+## ARTICULOS-PROMPTS-ADMIN-20261026 — cierre 2026-10-26
+- Pedido de Milton: que los administradores vuelvan a ver/crear/editar prompts de artículos en Configuración → Contenido.
+- Hecho: PR #670 fusionado (`ccfe4f37`), despliegue Vercel `success`, manual actualizado, docs de cierre (CURRENT_STATE, CHECKPOINTS, CONTROLADOR, CEREBRO).
+- Pendiente: Milton confirma visualmente el editor con su sesión de administrador.
