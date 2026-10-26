@@ -1,3 +1,7 @@
+## Checkpoint — Redes: logo vigente — 2026-10-26
+
+- Task `REDES-LOGO-VIGENTE-20261026`; PR #672 abierto (sin fusionar). Punto de partida: fusionar, subir un logo nuevo en Contenido y reintentar una publicación; el log debe decir «Logos de la cuenta usados» con la URL nueva.
+
 ## Checkpoint — Artículos: editor de prompts en Contenido — 2026-10-26
 
 - Task `ARTICULOS-PROMPTS-ADMIN-20261026`; `origin/main` incluye #670 (`ccfe4f37`). Sin migración ni cambios de API.

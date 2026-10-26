@@ -1,3 +1,9 @@
+## Punto cero vigente — Redes: logo vigente en las imágenes — 2026-10-26 (PR #672, pendiente de fusión)
+
+- Task ID: `REDES-LOGO-VIGENTE-20261026`. Causa raíz: `generateAiSocialImage` reutilizaba 48 h la imagen ya generada (`<pathPrefix>/reuse.json`) sin mirar el logo, así que tras cambiar el logo se repetía el antiguo (inferida del código; no reproducida en vivo, la IA no puede iniciar sesión).
+- Cambio: `reuse.json` guarda la huella de los logos y solo se reutiliza si coincide (los registros viejos sin huella se descartan); se lee sin caché; el log del worker lista los logos usados. En Contenido, si la subida falla ya no queda una vista previa engañosa y tras guardar se relee `/api/me` para confirmar. Sin migración.
+- NO fusionado ni verificado en producción: el clasificador bloqueó el merge del PR #672. Falta fusionar, que corra el worker y que Milton cambie un logo y reintente una publicación.
+
 ## Punto cero vigente — Artículos: editor de prompts para administradores en Contenido — 2026-10-26
 
 - Task ID: `ARTICULOS-PROMPTS-ADMIN-20261026`. `main` incluye PR #670 (`ccfe4f37`); Vercel web y auto-articulos-web `success`.

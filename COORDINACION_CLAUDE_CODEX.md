@@ -1,3 +1,9 @@
+## Coordinación — Redes: logo vigente (Claude) — 2026-10-26
+
+- Pedido de Milton: que las imágenes de Redes usen siempre el logo guardado en Configuración → Contenido y que cambiarlo funcione. Alcance: `aiImageGenerator.ts` (reutilización), `PhotoLogoUploader.tsx` y la página de Contenido. No se tocó el esquema.
+- Decisión: huella de logos en `reuse.json` en vez de borrar cachés; no se arriesga el ahorro de tokens de los reintentos con el mismo logo.
+- Evidencia: pruebas `aiImageReuse` 2/2; typecheck sin errores en los archivos tocados. Producción NO verificada (merge bloqueado). Siguiente paso: fusionar #672.
+
 ## Coordinación — Redes sin imágenes (og:image por timeout) (Claude) — 2026-10-22
 
 ## Claude — BLOG IA separado: capitanía liberada — 2026-10-22
