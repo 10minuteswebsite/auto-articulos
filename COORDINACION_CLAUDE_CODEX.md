@@ -1,3 +1,9 @@
+## Coordinación — cierre de REDES-IMAGENES-20261022 (Claude) — 2026-10-26
+
+- Estado: el arreglo de `og:image` (PR #655, `7a0589d3`) está en `main` y verificado con reintentos reales de Lorena (ver el cierre del 22/10). Capitanía de migración liberada (`status`: «No hay capitán activo»).
+- Hallazgo del 22/10 17:24 UTC en la cuenta de Vicente Sánchez: la `og:image` del artículo 103390 daba 404 (el archivo no existía en su sitio), distinta causa. La opción «imagen de respaldo con IA» NO se implementó: ese caso lo resolvió después la sesión REDES-LOG-IMAGENES-VICENTE-20261023 (foto reparada con `repair-article-image.yml` y regla «sin foto no se publica», #660). Sigue abierto allí: Google Business «Internal error» y reconexión de Threads de Vicente.
+- Conversación archivada por orden de Milton tras este cierre.
+
 ## Coordinación — Redes: subida de logos reparada (cierre, Claude) — 2026-10-26
 
 - Fusionados #675 y #678 por orden de Milton. La causa fue la carga de la ruta (no el guardado); se aisló con peticiones GET/POST en la sesión de Mauricio. Sin cambios de esquema.
