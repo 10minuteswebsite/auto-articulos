@@ -12877,3 +12877,7 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Pedido de Milton: explicar por qué un artículo de Rosalia Martin termina con «{BIO_AUTOR}».
 - Hecho: causa raíz hallada (marcador en el texto de 3 estilos, sin resolutor ni campo de bio); prompts limpios entregados por chat; docs de cierre (CURRENT_STATE, CHECKPOINTS, CONTROLADOR, CEREBRO).
 - Pendiente: Milton pega los prompts limpios en la app; artículo de Rosalia ya publicado sin corregir; posibles otros estilos con el marcador.
+
+## REDES-LOG-IMAGENES-VICENTE-20261023 — cierre de sesión 2026-10-26
+
+- Cerrada por Milton («cierra esto y archiva»). Resumen y pendientes en `CURRENT_STATE.md` (Punto cero «cierre … (traspaso)»). Lo único abierto: causa de Google Business, Threads (reconexión) e Instagram sin reintentar. Cupo de Vicente restaurado a `{}`.
