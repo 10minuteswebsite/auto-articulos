@@ -124,27 +124,27 @@ model User {
   workerBusyUntil                   DateTime?
   // Control de acceso a publicación en Instagram. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowInstagramPublishing          Boolean       @default(false)
+  allowInstagramPublishing          Boolean       @default(true)
   // Control de acceso a publicación en LinkedIn. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowLinkedInPublishing           Boolean       @default(false)
+  allowLinkedInPublishing           Boolean       @default(true)
   // Control de acceso a publicación en Threads. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowThreadsPublishing            Boolean       @default(false)
-  allowFacebookPublishing           Boolean       @default(false)
+  allowThreadsPublishing            Boolean       @default(true)
+  allowFacebookPublishing           Boolean       @default(true)
   // Control de acceso a publicación en Pinterest. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowPinterestPublishing          Boolean       @default(false)
+  allowPinterestPublishing          Boolean       @default(true)
   // Control de acceso a publicación en Tumblr. Solo el admin puede
   // activarlo por usuario. Default: false (nadie tiene acceso).
-  allowTumblrPublishing             Boolean       @default(false)
+  allowTumblrPublishing             Boolean       @default(true)
   // Control de acceso a publicación en Bluesky. Solo el admin puede activarlo.
-  allowBlueskyPublishing            Boolean       @default(false)
+  allowBlueskyPublishing            Boolean       @default(true)
   // Control de acceso a publicación en Mastodon. Solo el admin puede activarlo.
   allowMastodonPublishing           Boolean       @default(false)
   allowBloggerPublishing            Boolean       @default(false)
   // Control de acceso a publicación en Google Business Profile mediante PostPeer.
-  allowGoogleBusinessPublishing     Boolean       @default(false)
+  allowGoogleBusinessPublishing     Boolean       @default(true)
   // El generador de imágenes IA está habilitado para todas las cuentas,
   // incluidas las nuevas. No se apaga desde la ficha individual.
   aiImageGenerationEnabled          Boolean       @default(true)
