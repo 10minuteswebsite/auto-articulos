@@ -1,3 +1,8 @@
+## Checkpoint — Artículos: editor de prompts en Contenido — 2026-10-26
+
+- Task `ARTICULOS-PROMPTS-ADMIN-20261026`; `origin/main` incluye #670 (`ccfe4f37`). Sin migración ni cambios de API.
+- Punto de partida: confirmación visual de Milton como administrador en `/dashboard/configuracion/contenido`.
+
 ## Checkpoint — Redes: permisos por defecto — 2026-10-26
 
 - Task `REDES-PERMISOS-ASISTENTE-20261026`; `origin/main` incluye #668 (`c0884753`). Migración aplicada en producción por Milton (`sin_permisos = 0`). Sin cambios de código funcional más allá de los defaults del esquema.
