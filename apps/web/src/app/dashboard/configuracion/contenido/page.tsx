@@ -240,6 +240,24 @@ export default function ConfiguracionContenidoPage() {
         setImageUploadError(msg);
         throw new Error(msg);
       }
+      // Se vuelve a leer lo guardado en el servidor: la página muestra lo que
+      // realmente quedó, no lo que se espera que haya quedado.
+      const savedRes = await fetch("/api/me", { cache: "no-store" });
+      const saved = savedRes.ok ? await savedRes.json().catch(() => null) : null;
+      const savedUrl: string | null | undefined = saved
+        ? {
+            profile: saved.profilePhotoUrl,
+            profile2: saved.profilePhotoUrl2,
+            profile3: saved.profilePhotoUrl3,
+            logo: saved.businessLogoUrl,
+            logo2: saved.businessLogoUrl2,
+          }[type]
+        : undefined;
+      if (savedUrl !== undefined && savedUrl !== data.url) {
+        const msg = "La imagen se subió pero no quedó guardada en tu cuenta. Intenta de nuevo.";
+        setImageUploadError(msg);
+        throw new Error(msg);
+      }
       if (type === "profile" || type === "profile2" || type === "profile3") {
         setProfilePhotoUrls((current) => ({ ...current, [type]: data.url }));
       } else {

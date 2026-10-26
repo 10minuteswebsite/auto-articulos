@@ -507,26 +507,37 @@ export interface AiImageResult {
  */
 const REUSE_MAX_AGE_MS = 48 * 60 * 60 * 1000;
 
+/** Huella de los logos vigentes: si el usuario cambia un logo, la imagen guardada con el anterior ya no sirve. */
+export function logoFingerprint(logoUrls: Array<string | null | undefined>): string {
+  return logoUrls.filter(Boolean).join("|");
+}
+
 export function isReusableAiImage(
-  data: { imageUrl?: unknown; prompt?: unknown; createdAt?: unknown } | null | undefined,
+  data: { imageUrl?: unknown; prompt?: unknown; createdAt?: unknown; logoKey?: unknown } | null | undefined,
   now: number,
+  logoKey?: string,
 ): data is { imageUrl: string; prompt: string; createdAt: number } {
   return Boolean(
     data &&
+      (logoKey === undefined || (typeof data.logoKey === "string" ? data.logoKey : "") === logoKey) &&
       typeof data.imageUrl === "string" && data.imageUrl.startsWith("https://") &&
       typeof data.prompt === "string" && data.prompt.length > 0 &&
       typeof data.createdAt === "number" && now - data.createdAt >= 0 && now - data.createdAt <= REUSE_MAX_AGE_MS,
   );
 }
 
-async function findReusableAiImage(pathPrefix: string): Promise<AiImageResult | null> {
+async function findReusableAiImage(pathPrefix: string, logoKey: string): Promise<AiImageResult | null> {
   try {
     const { blobs } = await list({ prefix: `${pathPrefix}/reuse.json`, limit: 1 });
     if (!blobs[0]) return null;
-    const res = await fetch(blobs[0].url, { signal: AbortSignal.timeout(10000) });
+    // El archivo se sobrescribe en la misma ruta: sin esto la CDN puede devolver la versión vieja.
+    const res = await fetch(`${blobs[0].url}?t=${Date.now()}`, { cache: "no-store", signal: AbortSignal.timeout(10000) });
     if (!res.ok) return null;
-    const data = (await res.json()) as { imageUrl?: unknown; prompt?: unknown; createdAt?: unknown };
-    if (!isReusableAiImage(data, Date.now())) return null;
+    const data = (await res.json()) as { imageUrl?: unknown; prompt?: unknown; createdAt?: unknown; logoKey?: unknown };
+    if (!isReusableAiImage(data, Date.now(), logoKey)) {
+      console.log("[AI Image] Imagen guardada descartada: los logos de la cuenta cambiaron o venció; se genera de nuevo.");
+      return null;
+    }
     const head = await fetch(data.imageUrl, { method: "HEAD", signal: AbortSignal.timeout(10000) });
     if (!head.ok) return null;
     console.log(`[AI Image] Reutilizada la imagen ya generada (sin gasto nuevo): ${data.imageUrl}`);
@@ -536,9 +547,9 @@ async function findReusableAiImage(pathPrefix: string): Promise<AiImageResult | 
   }
 }
 
-async function saveReusableAiImage(pathPrefix: string, imageUrl: string, prompt: string): Promise<void> {
+async function saveReusableAiImage(pathPrefix: string, imageUrl: string, prompt: string, logoKey: string): Promise<void> {
   try {
-    await put(`${pathPrefix}/reuse.json`, JSON.stringify({ imageUrl, prompt, createdAt: Date.now() }), {
+    await put(`${pathPrefix}/reuse.json`, JSON.stringify({ imageUrl, prompt, createdAt: Date.now(), logoKey }), {
       access: "public",
       contentType: "application/json",
       addRandomSuffix: false,
@@ -571,7 +582,7 @@ export async function generateAiSocialImage(params: {
   // Las pruebas de diagnóstico (forcePerson / systemPromptOverride) siempre generan de nuevo.
   const canReuse = params.forcePerson === undefined && !params.systemPromptOverride;
   if (canReuse) {
-    const reused = await findReusableAiImage(params.pathPrefix);
+    const reused = await findReusableAiImage(params.pathPrefix, logoFingerprint([params.businessLogoUrl, params.businessLogoUrl2]));
     if (reused) return reused;
   }
 
@@ -711,12 +722,13 @@ export async function generateAiSocialImage(params: {
           : providerLabel === "gpt-image-2"
             ? "openai/gpt-image-2/edit"
             : "gpt-image-1-mini";
+    console.log(`[AI Image] Logos de la cuenta usados: ${logoUrls.length ? logoUrls.join(" , ") : "ninguno"}`);
     console.log(
       `[AI Image] Generada con ${modelLabel}: ${blob.url} (${(finalBuffer.length / 1024).toFixed(0)}KB) — ` +
         `etiquetas: ${decision.tagString} — texto: "${decision.message}"` +
         `${logoUrls.length > 0 ? ` +logo(${logoUrls.length})` : ""}${personUrl ? " +persona" : ""}`,
     );
-    if (canReuse) await saveReusableAiImage(params.pathPrefix, blob.url, prompt);
+    if (canReuse) await saveReusableAiImage(params.pathPrefix, blob.url, prompt, logoFingerprint(logoUrls));
     return { imageUrl: blob.url, prompt };
   } catch (err) {
     console.warn("[AI Image] Fallo generando imagen con IA:", err);
