@@ -12855,3 +12855,7 @@ No hubo ninguna acción destructiva, migración ni deploy ejecutados por esta ta
 Milton: ninguna.
 
 Responsable: Claude (tarea programada diaria de propagación).
+
+## 2026-10-26 — Permisos de redes activados por defecto (Claude)
+- **Capitán de migración:** Claude — migración `20261026120000_social_publishing_default_on` (default true en 8 redes + relleno de cuentas existentes; Blogger y X fuera). Causa: caso Juan Carvajal (las casillas nacían en falso y el Hub no las envía).
+- Pendiente: aplicar el SQL en producción (no hay paso automático) y liberar capitanía.
