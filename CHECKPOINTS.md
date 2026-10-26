@@ -1,3 +1,7 @@
+## Checkpoint — Redes: subida de logos reparada — 2026-10-26
+
+- Task `REDES-LOGO-VIGENTE-20261026`; `origin/main` incluye #672, #675 y #678 (`7e782228`). Subida verificada en producción (Mauricio Medina). Pendiente: publicación real con el logo nuevo.
+
 ## Checkpoint — Redes: logo vigente y subida — 2026-10-26
 
 - Task `REDES-LOGO-VIGENTE-20261026`; `origin/main` incluye #672 y #675 (`aa46a0d6`), desplegados. Sin migración. Verificación en producción pendiente de la subida real de un logo.
