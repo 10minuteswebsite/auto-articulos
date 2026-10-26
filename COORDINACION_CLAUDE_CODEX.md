@@ -12869,3 +12869,6 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Pedido de Milton: que los administradores vuelvan a ver/crear/editar prompts de artículos en Configuración → Contenido.
 - Hecho: PR #670 fusionado (`ccfe4f37`), despliegue Vercel `success`, manual actualizado, docs de cierre (CURRENT_STATE, CHECKPOINTS, CONTROLADOR, CEREBRO).
 - Pendiente: Milton confirma visualmente el editor con su sesión de administrador.
+
+## REDES-PERMISOS-ASISTENTE-20261026 — CERRADO 2026-10-26
+- E2E confirmado por Milton: el asistente de Juan publica. Sin pendientes. Siguiente paso para el Hub: comprobar derecho REDES `ACTIVE` al dar de alta (ver `PERMISOS_PARA_EL_HUB.md`).

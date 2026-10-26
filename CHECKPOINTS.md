@@ -1,3 +1,7 @@
+## Checkpoint — E2E permisos de redes — 2026-10-26
+
+- Task `REDES-PERMISOS-ASISTENTE-20261026`; `main` con #668 y #669. Prueba de Juan con su asistente: funcionó (confirmado por Milton). Caso cerrado; Blogger y X fuera por orden.
+
 ## Checkpoint — Artículos: editor de prompts en Contenido — 2026-10-26
 
 - Task `ARTICULOS-PROMPTS-ADMIN-20261026`; `origin/main` incluye #670 (`ccfe4f37`). Sin migración ni cambios de API.
