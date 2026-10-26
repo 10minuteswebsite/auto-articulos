@@ -1,3 +1,8 @@
+## Decisión durable — redes aprobadas por defecto; el Hub solo confirma el derecho REDES — 2026-10-26
+
+- Decisión de Milton: las 8 redes (sin Blogger ni X) nacen aprobadas y se rellenaron las cuentas existentes. El Hub debe comprobar que el derecho REDES esté `ACTIVE`; las casillas ya no son un paso manual.
+- Causa raíz: dos puertas con reglas distintas (web de Redes abre todo; MCP lee casillas). Con las casillas en true coinciden. Detalle y lista para el Hub: `PERMISOS_PARA_EL_HUB.md`.
+
 ## Decisión durable — Hub como autoridad y proyección nativa para Redes — 2026-10-22
 
 - Hub es la autoridad comercial de acceso; Auto Artículos/Redes mantiene una proyección local necesaria para su lista nativa y para la autorización del MCP.

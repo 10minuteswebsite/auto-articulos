@@ -1,5 +1,10 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión — Redes: permisos aprobados por defecto (PR #668, `c0884753`) — REDES-PERMISOS-ASISTENTE-20261026 — 2026-10-26
+
+- Cambia `schema.prisma` (defaults) y añade la migración `20261026120000_social_publishing_default_on`; el despliegue web no aplica migraciones: el SQL lo corrió Milton en Supabase y se verificó (`sin_permisos = 0`). Sin riesgo de orden: no se añade ninguna columna.
+- PR #669: anotación de la liberación de capitanía y este cierre. E2E del asistente de Juan pendiente.
+
 ## Versión — verificación en producción con cuenta real (Vicente) — REDES-LOG-IMAGENES-VICENTE-20261023 — 2026-10-23
 
 Propagado desde `COORDINACION_CLAUDE_CODEX.md` ("REDES-LOG-IMAGENES-VICENTE-20261023 — 2026-10-23" y
