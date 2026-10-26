@@ -1,3 +1,8 @@
+## Checkpoint — Redes: permisos por defecto — 2026-10-26
+
+- Task `REDES-PERMISOS-ASISTENTE-20261026`; `origin/main` incluye #668 (`c0884753`). Migración aplicada en producción por Milton (`sin_permisos = 0`). Sin cambios de código funcional más allá de los defaults del esquema.
+- Punto de partida: prueba real de Juan Carvajal con su asistente en cada red conectada (pendiente).
+
 ## Punto cero vigente — Redes: foto reparada, sin logo, pendientes frenadas por cupo — 2026-10-23
 
 - Task ID: `REDES-LOG-IMAGENES-VICENTE-20261023` (cierre). `main` incluye PR #660 (`cf4a5953`: sin foto no se publica, nunca el logo), #661 (diagnóstico de edición) y #662 (reparar foto de un artículo publicado).

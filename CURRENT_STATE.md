@@ -1,3 +1,10 @@
+## Punto cero vigente — Redes: permisos de publicación aprobados por defecto — 2026-10-26
+
+- Task ID: `REDES-PERMISOS-ASISTENTE-20261026`. `main` incluye PR #668 (`c0884753`): 8 casillas `allow*Publishing` (Instagram, Facebook, LinkedIn, Threads, Pinterest, Tumblr, Bluesky, Google Business) con `DEFAULT true`; Blogger y X fuera por orden de Milton.
+- Producción: Milton aplicó el SQL de `20261026120000_social_publishing_default_on` en Supabase; verificación `sin_permisos = 0`. La cuenta de Juan Carvajal (#115) se arregló además a mano (Módulo de Redes activado y 8 redes aprobadas), verificada tras recargar.
+- Causa raíz: la web en redes.lasolucionweb.com ignora las casillas (`redesHost`), el MCP no; el Hub no las envía y nacían en false. Inferida del código, no probada en vivo.
+- NO verificado: que el asistente de Juan publique en las redes conectadas (E2E pendiente; lo repite Juan). Una red no conectada seguirá «sin conectar».
+
 ## Punto cero vigente — Redes: foto reparada, sin logo, pendientes frenadas por cupo — 2026-10-23
 
 - Task ID: `REDES-LOG-IMAGENES-VICENTE-20261023` (cierre). `main` incluye PR #660 (`cf4a5953`: sin foto no se publica, nunca el logo), #661 (diagnóstico de edición) y #662 (reparar foto de un artículo publicado).

@@ -12859,3 +12859,8 @@ Responsable: Claude (tarea programada diaria de propagación).
 ## 2026-10-26 — Permisos de redes activados por defecto (Claude)
 - **Capitán de migración:** Claude — migración `20261026120000_social_publishing_default_on` (default true en 8 redes + relleno de cuentas existentes; Blogger y X fuera). Causa: caso Juan Carvajal (las casillas nacían en falso y el Hub no las envía).
 - Pendiente: aplicar el SQL en producción (no hay paso automático) y liberar capitanía.
+- **Capitán de migración liberó el lote (2026-10-26):** Claude. Resultado: PR #668 fusionado; SQL aplicado por Milton en Supabase; verificación `sin_permisos = 0`. Pendiente: Juan Carvajal repite la publicación en LinkedIn con su asistente.
+
+## REDES-PERMISOS-ASISTENTE-20261026 — cierre 2026-10-26
+- Hecho: causa raíz hallada, Juan arreglado, PR #668 fusionado, SQL aplicado y verificado, lista `PERMISOS_PARA_EL_HUB.md`, mensaje de instrucciones para el asistente. Docs de cierre actualizados (CURRENT_STATE, CHECKPOINTS, CONTROLADOR, CEREBRO).
+- Pendiente: E2E de Juan por el asistente. Siguiente paso: que el Hub compruebe el derecho REDES `ACTIVE` al dar de alta.
