@@ -1,3 +1,11 @@
+## Punto cero vigente — cierre de REDES-LOG-IMAGENES-VICENTE-20261023 (traspaso) — 2026-10-26
+
+- Estado final verificado el 23/10: log de Historial visible; foto del artículo 103390 reparada (404→200); regla «sin foto no se publica, nunca el logo» en `main` (#660). Tumblr, Pinterest, LinkedIn y Facebook del artículo de Cartagena salieron antes con el logo; Instagram y Threads de ese artículo NO se publicaron.
+- Prueba de cupo (autorizada por Milton): se subió a 2 el cupo de Google Business, Instagram y Threads solo de Vicente (`set-user-social-limits.yml`, run 39974527982) y se RESTAURÓ a `{}` (run 39975131193, verificado en el log). Con el cupo libre y la foto buena, Google Business siguió fallando: «Internal error encountered». Por tanto el cupo NO era la causa única y la foto tampoco.
+- ABIERTO — causa de Google Business sin confirmar. Siguiente paso: ejecutar `diagnose-gbp-post.yml` (solo lectura, ya corregido en #667; las 2 ejecuciones del 23/10 fallaron por la consulta anterior) con `vicente.sanchez@expglobalspain.com` y comparar texto y respuesta de PostPeer contra la publicación que sí funcionó (`vender-una-propiedad-heredada-en-espana-`). No cambiar código antes de ver esa respuesta.
+- ABIERTO — Threads de Vicente con autorización vencida (reconectar en Conexiones); Instagram del 22/10 sin reintentar con la foto nueva.
+- Aviso: este cierre no vuelve a probar producción; revisar el estado actual de las pendientes antes de actuar (otras sesiones cambiaron `main` después, p. ej. #672 sobre el logo).
+
 ## Punto cero vigente — Redes: asistente de Juan publica (E2E confirmado) — 2026-10-26
 
 - Task ID: `REDES-PERMISOS-ASISTENTE-20261026` (cierre final). Milton confirmó que la prueba con el asistente de Juan Carvajal funcionó tras PR #668 + SQL aplicado (`sin_permisos = 0`). Resuelve el pendiente «NO verificado» del punto cero anterior.
