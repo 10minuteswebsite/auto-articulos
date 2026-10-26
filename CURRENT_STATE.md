@@ -1,3 +1,10 @@
+## Punto cero vigente — Redes: subida de logos/fotos reparada — 2026-10-26
+
+- Task ID: `REDES-LOGO-VIGENTE-20261026` (cierre). `main` incluye #672, #675 y #678 (`7e782228`), Vercel web y auto-articulos-web `success`.
+- Causa raíz (evidencia en producción con la sesión de Mauricio Medina): la ruta `/api/me/upload-image` fallaba al CARGAR (hasta un GET daba 500 vacío en vez de 405), por lo que cada subida daba «Error al subir la imagen.». El #678 carga `sharp` y `@vercel/blob` dentro del handler (si `sharp` falla, guarda el original). Cuál de los dos fallaba no se determinó (no hay acceso a los logs de Vercel); el #675 (select mínimo) quedó como defensa.
+- Verificado en producción: GET 405; Milton subió Logo 1 y Logo 2 en la cuenta de Mauricio, la página mostró «Logo guardado (7KB)» y `/api/me` devuelve las dos URLs nuevas de Vercel Blob.
+- NO verificado: que una publicación nueva use el logo nuevo (el #672 descarta imágenes con logo anterior). Punto de partida: reintentar una publicación de Mauricio y buscar «Logos de la cuenta usados» en el log del worker.
+
 ## Punto cero vigente — Redes: logo vigente y subida de imágenes — 2026-10-26 (cierre)
 
 - Task ID: `REDES-LOGO-VIGENTE-20261026`. `main` incluye PR #672 (`08bc1b51`: huella de logos en `reuse.json`, relectura tras guardar, errores de subida con motivo real) y PR #675 (`aa46a0d6`: `user.update` con `select` mínimo en `/api/me/upload-image`).

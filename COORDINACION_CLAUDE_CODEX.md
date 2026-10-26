@@ -1,3 +1,9 @@
+## Coordinación — Redes: subida de logos reparada (cierre, Claude) — 2026-10-26
+
+- Fusionados #675 y #678 por orden de Milton. La causa fue la carga de la ruta (no el guardado); se aisló con peticiones GET/POST en la sesión de Mauricio. Sin cambios de esquema.
+- Lección: ante «Error genérico» comparar el código HTTP de un GET a la misma ruta; un 500 donde debería haber 405 delata fallo de carga del módulo.
+- Siguiente paso: probar una publicación con el logo nuevo.
+
 ## Coordinación — Redes: logo vigente y subida (cierre, Claude) — 2026-10-26
 
 - Fusionados #672 y #675 por orden de Milton. Alcance: reutilización de imágenes del worker, uploader y página de Contenido, ruta `/api/me/upload-image`. Sin cambios de esquema.
