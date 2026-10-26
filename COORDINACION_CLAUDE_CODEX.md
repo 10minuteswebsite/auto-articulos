@@ -12872,3 +12872,8 @@ Responsable: Claude (tarea programada diaria de propagación).
 
 ## REDES-PERMISOS-ASISTENTE-20261026 — CERRADO 2026-10-26
 - E2E confirmado por Milton: el asistente de Juan publica. Sin pendientes. Siguiente paso para el Hub: comprobar derecho REDES `ACTIVE` al dar de alta (ver `PERMISOS_PARA_EL_HUB.md`).
+
+## ARTICULOS-BIO-AUTOR-20261026 — cierre 2026-10-26
+- Pedido de Milton: explicar por qué un artículo de Rosalia Martin termina con «{BIO_AUTOR}».
+- Hecho: causa raíz hallada (marcador en el texto de 3 estilos, sin resolutor ni campo de bio); prompts limpios entregados por chat; docs de cierre (CURRENT_STATE, CHECKPOINTS, CONTROLADOR, CEREBRO).
+- Pendiente: Milton pega los prompts limpios en la app; artículo de Rosalia ya publicado sin corregir; posibles otros estilos con el marcador.

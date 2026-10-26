@@ -5668,3 +5668,7 @@ valores — 2026-10-19").
 ## 2026-10-23 — cf4a5953 (#660), #661, #662
 
 - #660 sin foto no se publica (nunca el logo); #661 diagnóstico de edición (solo lectura); #662 `repair-article-image` (artículo 103390 reparado, foto pública 200). Vercel `success` en #660.
+
+## 2026-10-26 — ARTICULOS-BIO-AUTOR-20261026 (solo documentación)
+
+- Sin cambio de versión de código: la causa estaba en el texto de los prompts guardados, no en el worker. Rollback: no aplica.
