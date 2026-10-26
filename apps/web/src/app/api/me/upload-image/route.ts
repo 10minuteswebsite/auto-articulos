@@ -53,6 +53,21 @@ const MAX_OUTPUT_BYTES = 200 * 1024;
 const ALLOWED_INPUT_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 export async function POST(request: NextRequest) {
+  try {
+    return await handleUpload(request);
+  } catch (err) {
+    // Sin esto un fallo interno (Blob, sharp, base de datos) llega al navegador como
+    // una página de error sin JSON y la persona solo ve «Error al subir la imagen».
+    const detail = err instanceof Error ? err.message : String(err);
+    console.error("[upload-image] fallo al guardar la imagen:", err);
+    return NextResponse.json(
+      { error: `No se pudo guardar la imagen: ${detail.slice(0, 200)}` },
+      { status: 500 },
+    );
+  }
+}
+
+async function handleUpload(request: NextRequest) {
   const userId = await getCurrentUserId();
 
   const formData = await request.formData();

@@ -236,7 +236,7 @@ export default function ConfiguracionContenidoPage() {
       const res = await fetch("/api/me/upload-image", { method: "POST", body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const msg = data.error ?? "Error al subir la imagen.";
+        const msg = data.error ?? `Error al subir la imagen (código ${res.status}).`;
         setImageUploadError(msg);
         throw new Error(msg);
       }
