@@ -133,6 +133,20 @@ export const SOCIAL_PUBLISHING_PERMISSION_KEYS = [
   "allowGoogleBusinessPublishing",
 ] as const;
 
+/** Contrato de alta: toda red nace disponible y la conexión OAuth sigue siendo necesaria. */
+export const DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS = {
+  allowInstagramPublishing: true,
+  allowFacebookPublishing: true,
+  allowLinkedInPublishing: true,
+  allowThreadsPublishing: true,
+  allowPinterestPublishing: true,
+  allowTumblrPublishing: true,
+  allowBlueskyPublishing: true,
+  allowBloggerPublishing: true,
+  allowGoogleBusinessPublishing: true,
+  allowMastodonPublishing: true,
+} as const;
+
 export type SocialPublishingPermissionUser = {
   role?: string | null;
 } & Partial<Record<(typeof SOCIAL_PUBLISHING_PERMISSION_KEYS)[number], boolean | null>>;

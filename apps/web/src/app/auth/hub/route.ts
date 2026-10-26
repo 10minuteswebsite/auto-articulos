@@ -5,6 +5,7 @@ import { prisma } from "@auto-articulos/db";
 import { createHubSessionContextToken, createSessionToken, HUB_SESSION_CONTEXT_COOKIE, SESSION_COOKIE } from "@/lib/session";
 import { applyCookie, cookieEnvForHost } from "@/lib/shared-cookies";
 import { syncLocalProductEntitlement } from "@/lib/hub-sync";
+import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
 
 export const runtime = "nodejs";
 
@@ -72,6 +73,7 @@ export async function GET(request: NextRequest) {
         hubSyncedAt: new Date(),
         role: launch.platform_role === "admin" ? "admin" : "user",
         trialUnlocked: true,
+        ...DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS,
       },
     });
   } else {

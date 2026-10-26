@@ -559,3 +559,9 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Causa raíz: `{BIO_AUTOR}` vive en el TEXTO de tres estilos de redacción guardados (Maestro v4.0 ×3, Guía/Paso a Paso ×3, Problema–Solución ×2, todos en el punto 2.5). `sanitizeGeneratedArticleResult` (`apps/worker/src/automation/generateCustomArticle.ts`) solo reemplaza `{TELEFONO}`, `{PHONE_NUMBER}`, `{NUMERO-WHATSAPP}`, `{NOMBRE_AUTOR}` y `{CIUDAD_ESTADO}`. No existe campo de bio en `schema.prisma` ni código que lo resuelva, así que la IA copió el marcador.
 - Decisión de Milton: se corrige el prompt, no el código. Prompts limpios entregados en el chat (se quitó el marcador y las frases que dependían de él; el resto idéntico). El prompt Comparativo no tenía el marcador.
 - NO verificado: que Milton haya pegado los prompts limpios en Configuración → Contenido; el artículo de Rosalia ya publicado sigue con el marcador hasta corregirlo a mano o regenerarlo. Pueden existir otros estilos con el marcador no revisados.
+## Punto cero de la revisión de altas de Redes — 2026-10-26
+
+- `origin/main`/checkout: `78f09e3f`.
+- Se detectó una inconsistencia: Blogger y Mastodon nacían con `false`; los caminos de alta tampoco imponían explícitamente el contrato común.
+- Corrección preparada localmente para los cuatro caminos de alta y migración para existentes. Producción, GitHub y deployment todavía no verificados en esta corrida: DNS no resolvió y faltan dependencias locales (`tsx`, `tsc`).
+- Estado: ABIERTO; no afirmar publicación completa hasta tener migración, deployment `Ready` y prueba autenticada de una cuenta nueva.

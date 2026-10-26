@@ -204,3 +204,8 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Código productivo: `0c3b7197`; Vercel `success`.
 - Esquema productivo: `Category.contentLanguage` aplicado por workflow seguro #81 (`39347494879`).
 - No se permite aceptar pérdida de datos para resolver migraciones no relacionadas.
+## Contrato preparado — altas de Redes con todas las redes activadas — 2026-10-26
+
+- Toda cuenta nueva debe guardar en `true` los permisos de Instagram, Facebook, LinkedIn, Threads, Pinterest, Tumblr, Bluesky, Blogger, Google Business y Mastodon.
+- La conexión de cada proveedor sigue siendo requisito separado; ON significa que el asistente no debe ocultar/bloquear la red por una aprobación administrativa inicial.
+- Implementación local pendiente de publicar y verificar en producción: task `REDES-ALTA-ON-TODAS-20261026`.

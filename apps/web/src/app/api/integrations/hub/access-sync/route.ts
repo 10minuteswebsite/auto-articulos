@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { prisma } from "@auto-articulos/db";
 import { syncLocalProductEntitlement } from "@/lib/hub-sync";
+import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
 
 export const runtime = "nodejs";
 
@@ -85,6 +86,7 @@ export async function POST(request: NextRequest) {
         hubSyncedAt: new Date(),
         role,
         trialUnlocked: allowed,
+        ...DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS,
       },
     });
   } else {

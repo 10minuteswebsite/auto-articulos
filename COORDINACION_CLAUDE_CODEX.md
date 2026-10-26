@@ -12892,3 +12892,10 @@ Responsable: Claude (tarea programada diaria de propagación).
 ## REDES-LOG-IMAGENES-VICENTE-20261023 — cierre de sesión 2026-10-26
 
 - Cerrada por Milton («cierra esto y archiva»). Resumen y pendientes en `CURRENT_STATE.md` (Punto cero «cierre … (traspaso)»). Lo único abierto: causa de Google Business, Threads (reconexión) e Instagram sin reintentar. Cupo de Vicente restaurado a `{}`.
+## Coordinación — todas las redes nacen activadas — 2026-10-26
+
+- Task `REDES-ALTA-ON-TODAS-20261026`. Punto cero local: `origin/main` = `78f09e3f`; producción no se pudo consultar desde este entorno porque GitHub/DNS no resolvió.
+- Hallazgo: Blogger y Mastodon tenían default `false`; además los cuatro caminos de alta no fijaban explícitamente el contrato común. LinkedIn y Google Business quedan incluidos en el mismo contrato.
+- Cambio preparado: `DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS` aplicado a alta pública, alta desde HUB, sincronización HUB y alta administrativa; defaults Prisma de Blogger/Mastodon a `true`; migración aditiva `20261026130000_enable_all_social_publishing_defaults` actualiza cuentas existentes.
+- Verificación local bloqueada por dependencias ausentes (`tsx` y `tsc` no están instalados). `git diff --check` pasó.
+- Pendiente obligatorio: ejecutar la migración en producción, publicar en `main`, comprobar deployment `Ready` y crear una cuenta de prueba desde HUB verificando las diez columnas en ON; no se declara cerrado antes de esa evidencia.

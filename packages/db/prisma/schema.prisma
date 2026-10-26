@@ -141,8 +141,8 @@ model User {
   // Control de acceso a publicación en Bluesky. Solo el admin puede activarlo.
   allowBlueskyPublishing            Boolean       @default(true)
   // Control de acceso a publicación en Mastodon. Solo el admin puede activarlo.
-  allowMastodonPublishing           Boolean       @default(false)
-  allowBloggerPublishing            Boolean       @default(false)
+  allowMastodonPublishing           Boolean       @default(true)
+  allowBloggerPublishing            Boolean       @default(true)
   // Control de acceso a publicación en Google Business Profile mediante PostPeer.
   allowGoogleBusinessPublishing     Boolean       @default(true)
   // El generador de imágenes IA está habilitado para todas las cuentas,

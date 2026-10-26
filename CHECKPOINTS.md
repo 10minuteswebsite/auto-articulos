@@ -64,6 +64,13 @@
 
 # CHECKPOINTS
 
+## Checkpoint — todas las redes nacen activadas — 2026-10-26 — pendiente de producción
+
+- Task `REDES-ALTA-ON-TODAS-20261026`; punto cero `origin/main` = `78f09e3f`.
+- Código preparado para que Instagram, Facebook, LinkedIn, Threads, Pinterest, Tumblr, Bluesky, Blogger, Google Business y Mastodon nazcan en ON en todos los caminos de alta.
+- Migración nueva: `20261026130000_enable_all_social_publishing_defaults`; aún no aplicada en producción.
+- Tests/typecheck no ejecutables en este checkout: faltan `tsx` y `tsc`. No publicar ni declarar cierre sin instalar/usar las dependencias del pipeline y verificar una cuenta real.
+
 ## Checkpoint — BLOG IA independiente (repo y app propios) — 2026-10-22
 
 - Task: `BLOG-IA-INDEPENDENCIA-20261022`; repo `blog-ia` con pruebas verdes; limpieza de Artículos sin tocar la base de datos. Pendiente: verificar despliegue de Artículos tras el merge.

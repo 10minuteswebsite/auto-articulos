@@ -13,6 +13,7 @@ import {
 import { auditLog } from "@/lib/audit";
 import { ensureDefaultEntitlements } from "@/lib/product-access";
 import { getCurrentUserId, requireAdmin } from "@/lib/current-user";
+import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
 import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
@@ -736,6 +737,7 @@ export async function POST(request: NextRequest) {
       dailyArticleLimit,
       maxTitlesPerBatch,
       platformDomain,
+      ...DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS,
     },
     select: {
       id: true,

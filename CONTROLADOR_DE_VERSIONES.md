@@ -1,5 +1,12 @@
 # CONTROLADOR DE VERSIONES
 
+## Versión preparada — Redes: alta con todas las redes ON — REDES-ALTA-ON-TODAS-20261026
+
+- Punto cero: `origin/main` = `78f09e3f`.
+- Incluye contrato compartido de permisos para los cuatro caminos de creación de usuario, defaults Prisma de Blogger/Mastodon y migración `20261026130000_enable_all_social_publishing_defaults` para datos existentes.
+- Estado: preparado localmente; no publicado ni verificado en producción por falta de red/dependencias en este entorno.
+
+
 ## Versión — Artículos: editor de prompts para administradores en Contenido (PR #670, `ccfe4f37`) — ARTICULOS-PROMPTS-ADMIN-20261026 — 2026-10-26
 
 - Solo interfaz: nuevo `PromptStylesAdmin.tsx` y su uso en `configuracion/contenido/page.tsx`, más el manual. Sin migración, sin API nueva. Rollback: revertir #670.

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { isNetworkApprovedForPublishing, type SocialPublishingPermissionUser, hasSocialPublishingApproval, hasSocialModuleAccess, openAllNetworks } from "./social-access";
+import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS, isNetworkApprovedForPublishing, type SocialPublishingPermissionUser, hasSocialPublishingApproval, hasSocialModuleAccess, openAllNetworks } from "./social-access";
 import { hasLegacySocialModuleAccess } from "@auto-articulos/shared";
 
 test("oculta difusión para un usuario sin aprobaciones de redes o blogs", () => {
@@ -8,6 +8,15 @@ test("oculta difusión para un usuario sin aprobaciones de redes o blogs", () =>
     hasSocialPublishingApproval({ role: "user" }),
     false,
   );
+});
+
+test("el contrato de alta deja todas las redes en ON", () => {
+  for (const key of [
+    "allowInstagramPublishing", "allowFacebookPublishing", "allowLinkedInPublishing",
+    "allowThreadsPublishing", "allowPinterestPublishing", "allowTumblrPublishing",
+    "allowBlueskyPublishing", "allowBloggerPublishing", "allowGoogleBusinessPublishing",
+    "allowMastodonPublishing",
+  ] as const) assert.equal(DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS[key], true, key);
 });
 
 test("muestra difusión cuando Administración aprueba una red o blog", () => {
