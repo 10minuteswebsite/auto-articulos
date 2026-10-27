@@ -1,0 +1,44 @@
+name: Prueba BLOG IA - vincular cuenta de Lorena
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan = solo mostrar (no escribe) | link = crear y vincular | unlink = deshacer"
+        required: true
+        default: plan
+        type: choice
+        options: [plan, link, unlink]
+      previous_method:
+        description: "Solo para unlink: método de publicación al que volver (BROWSER o MCP)"
+        required: false
+        default: BROWSER
+
+jobs:
+  link:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DATABASE_URL }}
+      BLOG_IA_API_URL: ${{ vars.BLOG_IA_API_URL }}
+      BLOG_IA_SECRET: ${{ secrets.BLOG_IA_SECRET }}
+      MODE: ${{ inputs.mode }}
+      PREVIOUS_METHOD: ${{ inputs.previous_method }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Generar cliente de Prisma
+        run: npx prisma generate --schema=packages/db/prisma/schema.prisma
+
+      - name: Vincular (según el modo elegido)
+        working-directory: apps/worker
+        run: npx tsx src/link-blog-ia-test.ts
