@@ -209,3 +209,7 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Toda cuenta nueva debe guardar en `true` los permisos de Instagram, Facebook, LinkedIn, Threads, Pinterest, Tumblr, Bluesky, Blogger, Google Business y Mastodon.
 - La conexión de cada proveedor sigue siendo requisito separado; ON significa que el asistente no debe ocultar/bloquear la red por una aprobación administrativa inicial.
 - Implementación local pendiente de publicar y verificar en producción: task `REDES-ALTA-ON-TODAS-20261026`.
+## Contrato verificado — altas con todas las redes ON — 2026-10-26
+
+- Producción recibió la migración segura en run `40423874512`; los defaults de las diez redes quedan activados para cuentas existentes y nuevas.
+- La conexión OAuth/API de cada proveedor sigue siendo independiente de este permiso.

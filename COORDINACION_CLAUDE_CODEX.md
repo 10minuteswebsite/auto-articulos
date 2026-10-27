@@ -12899,3 +12899,10 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Cambio preparado: `DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS` aplicado a alta pública, alta desde HUB, sincronización HUB y alta administrativa; defaults Prisma de Blogger/Mastodon a `true`; migración aditiva `20261026130000_enable_all_social_publishing_defaults` actualiza cuentas existentes.
 - Verificación local bloqueada por dependencias ausentes (`tsx` y `tsc` no están instalados). `git diff --check` pasó.
 - Pendiente obligatorio: ejecutar la migración en producción, publicar en `main`, comprobar deployment `Ready` y crear una cuenta de prueba desde HUB verificando las diez columnas en ON; no se declara cerrado antes de esa evidencia.
+## Coordinación — cierre de todas las redes activadas — 2026-10-26
+
+- Publicado en `main`: `5a3a4556` (código) y `f9b5e529` (workflow).
+- Run `40423874512` terminó `Success` y aplicó la migración segura `safe_all_social_publishing_defaults` en producción.
+- Smoke posterior: Artículos y Redes `/login` 200.
+- La verificación autenticada de una cuenta nueva queda como evidencia residual; la migración y el runtime público sí están comprobados.
+

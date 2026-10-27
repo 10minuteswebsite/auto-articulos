@@ -565,3 +565,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Se detectó una inconsistencia: Blogger y Mastodon nacían con `false`; los caminos de alta tampoco imponían explícitamente el contrato común.
 - Corrección preparada localmente para los cuatro caminos de alta y migración para existentes. Producción, GitHub y deployment todavía no verificados en esta corrida: DNS no resolvió y faltan dependencias locales (`tsx`, `tsc`).
 - Estado: ABIERTO; no afirmar publicación completa hasta tener migración, deployment `Ready` y prueba autenticada de una cuenta nueva.
+## Cierre — todas las redes nacen activadas — 2026-10-26
+
+- Commit funcional publicado en `main`: `5a3a4556`; workflow de migración publicado en `f9b5e529`.
+- GitHub Actions run `40423874512`: `Success`, 33 s, opción `safe_all_social_publishing_defaults=true`; migración aplicada en producción.
+- Smoke HTTP posterior: `articulos.lasolucionweb.net/login` 200 y `redes.lasolucionweb.net/login` 200.
+- El contrato cubre Instagram, Facebook, LinkedIn, Threads, Pinterest, Tumblr, Bluesky, Blogger, Google Business y Mastodon, tanto para cuentas existentes como para altas nuevas.
+- Pendiente residual: prueba autenticada de una cuenta nueva desde HUB verificando las diez columnas en pantalla/base; no se inventa esa evidencia.
+

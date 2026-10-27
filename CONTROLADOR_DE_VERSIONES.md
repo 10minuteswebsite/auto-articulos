@@ -5679,3 +5679,8 @@ valores — 2026-10-19").
 ## 2026-10-26 — ARTICULOS-BIO-AUTOR-20261026 (solo documentación)
 
 - Sin cambio de versión de código: la causa estaba en el texto de los prompts guardados, no en el worker. Rollback: no aplica.
+## Versión — cierre productivo de altas con todas las redes ON — 2026-10-26
+
+- Commits: `5a3a4556` y `f9b5e529`, publicados en `main`.
+- Migración: run GitHub Actions `40423874512`, `Success`, `safe_all_social_publishing_defaults=true`.
+- Verificación pública: `articulos.lasolucionweb.net/login` y `redes.lasolucionweb.net/login` respondieron 200.

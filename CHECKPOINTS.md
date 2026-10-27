@@ -519,3 +519,9 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 ## Checkpoint — Artículos: `{BIO_AUTOR}` en estilos de redacción — 2026-10-26
 
 - Task `ARTICULOS-BIO-AUTOR-20261026`. Diagnóstico cerrado; sin código. Punto de partida: Milton pega los prompts limpios en Configuración → Contenido y revisa el próximo artículo generado.
+## Checkpoint — todas las redes activadas en producción — 2026-10-26
+
+- `main` = `f9b5e529`.
+- Run `40423874512` `Success`: migración `20261026130000_enable_all_social_publishing_defaults` aplicada con la opción segura dedicada.
+- Smoke HTTP: Artículos `/login` 200; Redes `/login` 200.
+- Residual: falta E2E autenticado de alta nueva/HUB para observar las diez columnas; no afecta la evidencia de migración ni el contrato de código.
