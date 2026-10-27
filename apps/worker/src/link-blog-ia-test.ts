@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { prisma } from "@auto-articulos/db";
+import sharp from "sharp";
 import { sendBlogIaEvent } from "@auto-articulos/shared";
 
 /**
@@ -10,6 +11,7 @@ import { sendBlogIaEvent } from "@auto-articulos/shared";
  *
  * MODE=plan   (por defecto) no escribe nada: imprime qué haría.
  * MODE=link   envía los eventos firmados a BLOG IA y escribe en la base.
+ * MODE=logo   recorta el margen vacío del logo y lo sube al blog (media.upload + settings.update).
  * MODE=unlink deshace el vínculo: publishMethod vuelve a PREVIOUS_METHOD
  *             (BROWSER por defecto) y el blog queda suspendido.
  */
@@ -64,6 +66,31 @@ async function main() {
   const secret = process.env.BLOG_IA_SECRET;
   if (!apiUrl || !secret) throw new Error("Faltan BLOG_IA_API_URL / BLOG_IA_SECRET");
   const cfg = { apiUrl, secret };
+
+  if (mode === "logo") {
+    if (!existing) throw new Error("El blog aún no existe: ejecuta MODE=link primero");
+    const source = brand().logoUrl;
+    const res = await fetch(source);
+    if (!res.ok) throw new Error(`No se pudo bajar el logo (${res.status})`);
+    const input = Buffer.from(await res.arrayBuffer());
+    // Recorta el margen transparente/blanco (el dibujo ocupaba ~58 % de la altura) y deja 6 px de aire.
+    const trimmed = await sharp(input).trim({ threshold: 10 }).extend({ top: 6, bottom: 6, left: 6, right: 6, background: { r: 255, g: 255, b: 255, alpha: 0 } }).resize({ width: 640, withoutEnlargement: true }).png().toBuffer();
+    const meta = await sharp(trimmed).metadata();
+    console.log(`Logo recortado: ${meta.width}x${meta.height} (${trimmed.length} bytes)`);
+    const mediaId = `logo-${existing.userId}-v2`.toLowerCase();
+    const up = await sendBlogIaEvent(cfg, {
+      eventId: `logo-media-${mediaId}`,
+      type: "media.upload",
+      tenantId,
+      data: { id: mediaId, mime: "image/png", data_base64: trimmed.toString("base64"), alt: "Logo de Seguros de Salud y Vida" },
+    });
+    console.log("media.upload:", up.result);
+    const logoUrl = `https://${existing.hostname}/media/${mediaId}`;
+    const set = await sendBlogIaEvent(cfg, { eventId: `logo-settings-${mediaId}`, type: "blog.settings.update", tenantId, data: { brand: { logoUrl } } });
+    console.log("blog.settings.update:", set.result, logoUrl);
+    await prisma.blogIaBlog.update({ where: { userId: user.id }, data: { config: { ...brand(), logoUrl } } });
+    return;
+  }
 
   if (mode === "unlink") {
     if (existing) {

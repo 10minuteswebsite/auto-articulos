@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "plan = solo mostrar (no escribe) | link = crear y vincular | unlink = deshacer"
+        description: "plan = solo mostrar | link = crear y vincular | logo = recortar y subir el logo | unlink = deshacer"
         required: true
         default: plan
         type: choice
-        options: [plan, link, unlink]
+        options: [plan, link, logo, unlink]
       previous_method:
         description: "Solo para unlink: método de publicación al que volver (BROWSER o MCP)"
         required: false

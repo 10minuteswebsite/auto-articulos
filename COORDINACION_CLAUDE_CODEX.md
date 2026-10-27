@@ -12912,3 +12912,9 @@ Responsable: Claude (tarea programada diaria de propagación).
 - **Capitán de migración:** Claude — reclamado para este lote. Sin migración.
 - Cambio: `.github/workflows/link-blog-ia-test.yml` + `apps/worker/src/link-blog-ia-test.ts`. Workflow MANUAL con modos `plan` (no escribe), `link` y `unlink`. Crea el blog de prueba `blogia-lorena.lasolucionweb.net` (dominio ya añadido al Worker `blog-ia` en Cloudflare), lo vincula en `BlogIaBlog` y pone `publishMethod = BLOG` SOLO para `lorenalvarez30@gmail.com` (HUB 00006). Inerte hasta ejecutarlo.
 - Decisión de producto (Milton): BLOG IA solo funciona con Artículos; salidas = 10MWS o BLOG IA; subdominio de inicio automático. Ver `TODO.md` del repo blog-ia.
+
+## 2026-10-27 · Claude · BLOG IA: logo recortado de Lorena + liberación del lote anterior
+
+- Liberado el lote del PR #681 (workflow de prueba, sin migración). Ejecutado `plan` y `link`: blog `blogia-lorena.lasolucionweb.net` creado, vinculado y `publishMethod = BLOG` solo para `lorenalvarez30@gmail.com`.
+- **Capitán de migración:** Claude — reclamado para este lote (sin migración): `MODE=logo` en `link-blog-ia-test` recorta el margen vacío del logo (sharp `trim`) y lo sube al blog con `media.upload` + `blog.settings.update`.
+- BLOG IA (repo blog-ia): subdominio de inicio `*.lasolucionweb.net` ahora `noindex, nofollow` (cabecera, meta y robots.txt); cabecera 72 px y logo 48 px (40 px móvil).
