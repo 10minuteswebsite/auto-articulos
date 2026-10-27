@@ -12924,3 +12924,9 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Liberado el lote del PR #682 (MODE=logo). **Capitán de migración:** Claude — reclamado para este lote, sin migración.
 - Cambio: `/api/runs` marca cada título con `indexingNotApplicable` cuando el artículo está en el blog BLOG IA que aún usa su dirección de inicio (`*.lasolucionweb.net`, con «no indexar» a propósito). El Historial entonces NO dice «Sitemap: se enviará a Google» ni ofrece «Comprobar indexación»; explica que Google lo leerá cuando se conecte el dominio propio. Lógica en `apps/web/src/lib/blog-ia-indexing.ts` (+2 pruebas). Manual de usuario actualizado (sección Historial).
 - Prueba de extremo a extremo hecha con Lorena (HUB 00006): blog `blogia-lorena.lasolucionweb.net` creado, vinculado y publicando. Bug del idioma `es_ES` corregido en el Worker de BLOG IA.
+
+## 2026-10-27 · Claude · BLOG IA: logo de Lorena a 360×120 (lote sin migración)
+
+- Liberado el lote del PR #683 (Historial: mensajes de indexación para BLOG IA con dirección de inicio). Sin migración.
+- **Capitán de migración:** Claude — reclamado para este lote: `MODE=logo` del workflow `link-blog-ia-test` ahora recorta y deja el logo en ≤360×120 (antes 640×200; pesaba 73 KB para mostrarse a 147×48). Misma regla que el asistente de BLOG IA (`apps/web/src/lib/logo.ts` en el repo blog-ia).
+- BLOG IA (repo blog-ia), mismo día: caja de contacto «Conversemos» dentro del artículo con mensaje con el título; limpieza del cuerpo de los artículos; `no-transform`; ver `TODO.md` de blog-ia (registro maestro de pedidos).
