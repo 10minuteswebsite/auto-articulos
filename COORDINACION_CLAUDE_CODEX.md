@@ -12906,3 +12906,9 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Smoke posterior: Artículos y Redes `/login` 200.
 - La verificación autenticada de una cuenta nueva queda como evidencia residual; la migración y el runtime público sí están comprobados.
 
+
+## 2026-10-27 · Claude · BLOG IA: workflow de prueba con la cuenta de Lorena (PR #681)
+
+- **Capitán de migración:** Claude — reclamado para este lote. Sin migración.
+- Cambio: `.github/workflows/link-blog-ia-test.yml` + `apps/worker/src/link-blog-ia-test.ts`. Workflow MANUAL con modos `plan` (no escribe), `link` y `unlink`. Crea el blog de prueba `blogia-lorena.lasolucionweb.net` (dominio ya añadido al Worker `blog-ia` en Cloudflare), lo vincula en `BlogIaBlog` y pone `publishMethod = BLOG` SOLO para `lorenalvarez30@gmail.com` (HUB 00006). Inerte hasta ejecutarlo.
+- Decisión de producto (Milton): BLOG IA solo funciona con Artículos; salidas = 10MWS o BLOG IA; subdominio de inicio automático. Ver `TODO.md` del repo blog-ia.
