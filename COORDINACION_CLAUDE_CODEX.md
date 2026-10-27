@@ -1,3 +1,12 @@
+## Coordinación — MCP-CLOUDFLARE-BIC-20261027 — Codex — 2026-10-27
+
+CF publicado y comprobado sin DNS ni tokens nuevos: excepción BIC mínima,
+18/18 controles. El cliente confirma desaparición1010 y reporta401; no cerrar
+autenticación. Se prepara observabilidad de rechazo sin secretos y se conserva
+el token vigente. Sin migraciones ni dispatch de publicaciones. No hay otra
+capitanía activa en la lectura inicial. Tipos/builds/258web+26worker PASS.
+[Recibos y siguiente verificación](docs/audits/mcp-cloudflare-bic-20261027.md).
+
 ## Coordinación — MCP: 403 de MUSE por Origin (Claude) — 2026-10-27
 
 - **Capitán de migración:** Claude — LIBERADO el 2026-10-27 tras verificar producción (sin migración; PR #686).

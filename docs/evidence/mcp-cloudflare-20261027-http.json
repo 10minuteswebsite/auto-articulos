@@ -1,0 +1,255 @@
+{
+  "time_utc": "2026-10-27T18:17:47.111655+00:00",
+  "tests": [
+    {
+      "case": "mcp_without_token",
+      "host": "articulos.lasolucionweb.net",
+      "status": 401,
+      "expected": 401,
+      "pass": true,
+      "body": "{\"error\":\"No autenticado\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::kq9vn-1793125061086-86db169b35b4",
+        "cf-ray": "a513b2ef2ff74517-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "mcp_invalid_token",
+      "host": "articulos.lasolucionweb.net",
+      "status": 401,
+      "expected": 401,
+      "pass": true,
+      "body": "{\"error\":\"No autenticado\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::ppbzt-1793125061485-82a7cfff89b5",
+        "cf-ray": "a513b2f19e66c009-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "mcp_meta_invalid_token",
+      "host": "articulos.lasolucionweb.net",
+      "status": 401,
+      "expected": 401,
+      "pass": true,
+      "body": "{\"error\":\"No autenticado\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::7qhsx-1793125061842-d9fa90675db2",
+        "cf-ray": "a513b2f3efd758be-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "mcp_foreign_origin_without_token",
+      "host": "articulos.lasolucionweb.net",
+      "status": 403,
+      "expected": 403,
+      "pass": true,
+      "body": "{\"error\":\"Origen no permitido\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::k2gvc-1793125062144-d0e1ff2c69e2",
+        "cf-ray": "a513b2f61d1f676e-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "protected_resource",
+      "host": "articulos.lasolucionweb.net",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "body": "{\"resource\":\"https://articulos.lasolucionweb.net/api/mcp\",\"authorization_servers\":[\"https://articulos.lasolucionweb.net\"],\"scopes_supported\":[\"oportunidades:leer\",\"oportunidades:publicar\"],\"bearer_methods_supported\":[\"he",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::iad1::6ttpm-1793125062486-9747820feed8",
+        "cf-ray": "a513b2f80e770d71-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "authorization_discovery",
+      "host": "articulos.lasolucionweb.net",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "body": "{\"issuer\":\"https://articulos.lasolucionweb.net\",\"authorization_endpoint\":\"https://articulos.lasolucionweb.net/api/oauth2/authorize\",\"token_endpoint\":\"https://articulos.lasolucionweb.net/api/oauth2/token\",\"grant_types_sup",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::iad1::4ktsq-1793125062924-f4a6c51e4748",
+        "cf-ray": "a513b2fa8ce253f9-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "oauth_authorize_invalid_request",
+      "host": "articulos.lasolucionweb.net",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "body": "{\"error\":\"invalid_request\",\"error_description\":\"Solo se admite response_type=code.\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::iad1::kg2ng-1793125063369-7d720f085268",
+        "cf-ray": "a513b2fdbe43bd4b-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "oauth_token_wrong_method",
+      "host": "articulos.lasolucionweb.net",
+      "status": 405,
+      "expected": 405,
+      "pass": true,
+      "body": "",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::iad1::gl9k7-1793125063685-75198ed14dfe",
+        "cf-ray": "a513b2ffdfffed8a-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "outside_rule_login",
+      "host": "articulos.lasolucionweb.net",
+      "status": 403,
+      "expected": 403,
+      "pass": true,
+      "body": "error code: 1010\n",
+      "headers": {
+        "server": "cloudflare",
+        "cf-ray": "a513b301d906134f-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "mcp_without_token",
+      "host": "redes.lasolucionweb.net",
+      "status": 401,
+      "expected": 401,
+      "pass": true,
+      "body": "{\"error\":\"No autenticado\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::dgl6k-1793125064301-18d375c836d3",
+        "cf-ray": "a513b3031ab653e1-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "mcp_invalid_token",
+      "host": "redes.lasolucionweb.net",
+      "status": 401,
+      "expected": 401,
+      "pass": true,
+      "body": "{\"error\":\"No autenticado\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::kp5nd-1793125064669-403e829c732f",
+        "cf-ray": "a513b3057aaabfd1-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "mcp_meta_invalid_token",
+      "host": "redes.lasolucionweb.net",
+      "status": 401,
+      "expected": 401,
+      "pass": true,
+      "body": "{\"error\":\"No autenticado\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::k8tfl-1793125065113-96b53cdc48ac",
+        "cf-ray": "a513b3085b8fac88-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "mcp_foreign_origin_without_token",
+      "host": "redes.lasolucionweb.net",
+      "status": 403,
+      "expected": 403,
+      "pass": true,
+      "body": "{\"error\":\"Origen no permitido\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::rn58d-1793125065425-bb521a17b6ae",
+        "cf-ray": "a513b30abf32846c-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "protected_resource",
+      "host": "redes.lasolucionweb.net",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "body": "{\"resource\":\"https://redes.lasolucionweb.net/api/mcp\",\"authorization_servers\":[\"https://redes.lasolucionweb.net\"],\"scopes_supported\":[\"oportunidades:leer\",\"oportunidades:publicar\"],\"bearer_methods_supported\":[\"header\"]}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::iad1::xd8dl-1793125065791-19604d2d8b4d",
+        "cf-ray": "a513b30c9d99f2d2-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "authorization_discovery",
+      "host": "redes.lasolucionweb.net",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "body": "{\"issuer\":\"https://redes.lasolucionweb.net\",\"authorization_endpoint\":\"https://redes.lasolucionweb.net/api/oauth2/authorize\",\"token_endpoint\":\"https://redes.lasolucionweb.net/api/oauth2/token\",\"grant_types_supported\":[\"au",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::iad1::6btl6-1793125066211-043b72be971d",
+        "cf-ray": "a513b30f1c9a8141-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "oauth_authorize_invalid_request",
+      "host": "redes.lasolucionweb.net",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "body": "{\"error\":\"invalid_request\",\"error_description\":\"Solo se admite response_type=code.\"}",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::iad1::mwj92-1793125066525-8a86310994c8",
+        "cf-ray": "a513b311995f3ce4-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "oauth_token_wrong_method",
+      "host": "redes.lasolucionweb.net",
+      "status": 405,
+      "expected": 405,
+      "pass": true,
+      "body": "",
+      "headers": {
+        "server": "cloudflare",
+        "x-vercel-id": "iad1::iad1::t2jb8-1793125066850-18d3cb5c1cf0",
+        "cf-ray": "a513b3139d5cfa9b-ATL"
+      },
+      "exit_code": 0
+    },
+    {
+      "case": "outside_rule_login",
+      "host": "redes.lasolucionweb.net",
+      "status": 403,
+      "expected": 403,
+      "pass": true,
+      "body": "error code: 1010\n",
+      "headers": {
+        "server": "cloudflare",
+        "cf-ray": "a513b3155dcbc460-ATL"
+      },
+      "exit_code": 0
+    }
+  ]
+}

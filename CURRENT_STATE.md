@@ -1,3 +1,15 @@
+## MCP-CLOUDFLARE-BIC-20261027 — perímetro corregido; autenticación MUSE abierta
+
+Regla Cloudflare `bc768b93c8584a57acddd2c285d9fc0c` activa: BIC OFF solo en
+dos hosts y cinco rutas MCP/OAuth exactas. BIC global ON;18/18 controles
+productivos PASS. Artículos y Redes permanecen en Vercel. Sin DNS ni tokens
+cambiados. El cliente confirma que desapareció1010 y ahora recibe401.
+Token personal existente/no revocado y sin tokens OAuth en la base nativa;
+no concluir que la credencial de MUSE sea igual a la vigente. Diagnóstico
+seguro `[mcp-auth]` preparado; publicación y E2E positivo pendientes.
+258 pruebas web+26 worker, tipos/builds y diff PASS.
+[Registro y siguiente punto cero](docs/audits/mcp-cloudflare-bic-20261027.md).
+
 ## Punto cero vigente — MCP: 403 de Meta MUSE por Origin — 2026-10-27
 
 - Task ID: `MCP-ORIGIN-403-20261027`. `main` incluye PR #686 (`2250eaf4`); Vercel web y auto-articulos-web `success`. Sin migración.

@@ -1,5 +1,13 @@
 # CONTROLADOR DE VERSIONES
 
+## MCP-CLOUDFLARE-BIC-20261027 — 2026-10-27
+
+Regla CF `bc768b93c8584a57acddd2c285d9fc0c` publicada;18/18 controles.
+Código base d0690cde. Diagnóstico de rechazos MCP sin secretos preparado,
+con autenticación sin cambios.258 pruebas web+26 worker/tipos/builds PASS.
+Publicación del diagnóstico y prueba MUSE200 pendientes; cliente real401.
+[Registro principal](docs/audits/mcp-cloudflare-bic-20261027.md).
+
 ## Versión preparada — Redes: alta con todas las redes ON — REDES-ALTA-ON-TODAS-20261026
 
 - Punto cero: `origin/main` = `78f09e3f`.

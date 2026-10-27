@@ -1,3 +1,11 @@
+## Checkpoint — MCP-CLOUDFLARE-BIC-20261027 — 2026-10-27
+
+Perímetro CF corregido: regla `bc768b93c8584a57acddd2c285d9fc0c`, BIC global
+ON,18 pruebas HTTP PASS. Runtime app previo d0690cde/Vercel READY. Cliente
+MUSE ahora401; autenticación todavía abierta. Diagnóstico sin secretos
+preparado,258 pruebas web+26 worker/tipos/builds PASS; no E2E positivo.
+[Continuidad exacta](docs/audits/mcp-cloudflare-bic-20261027.md).
+
 ## Checkpoint — MCP: Origin con Bearer — 2026-10-27
 
 - Task `MCP-ORIGIN-403-20261027`; `origin/main` incluye #686 (`2250eaf4`), desplegado. Falta confirmación de Patricia con MUSE.

@@ -1,5 +1,13 @@
 # BASELINE — Contrato previo HUB/OAuth
 
+## MCP-CLOUDFLARE-BIC-20261027 — contrato de protección
+
+Solo los dos hosts `.net` y las cinco rutas exactas MCP/OAuth del registro
+quedan exentos de BIC; global ON. Sin token401; Origin ajeno sin Bearer403;
+discovery público200; resto de rutas mantiene protección.18 controles reales
+PASS. Los logs de rechazo no exponen tokens; E2E MUSE autenticado sigue abierto.
+[Contrato y evidencia](docs/audits/mcp-cloudflare-bic-20261027.md).
+
 ## Contrato añadido — control de autoindexación por usuario — 2026-10-21
 
 - Configuración debe persistir si los nuevos artículos solicitan indexación automática.

@@ -13,6 +13,7 @@ import {
 import { applyCookie } from "./lib/shared-cookies";
 import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
 import { isMcpOriginAllowed } from "./lib/mcp/origin";
+import { mcpAuthDiagnostic } from "./lib/mcp/auth-diagnostics";
 import { productOfApiPath, productOfHost, productOfPath, type HostProductScope } from "./lib/product-routes";
 import { isSeoTotalHumanEntry } from "./lib/seo-total-hub-redirect";
 
@@ -257,6 +258,7 @@ async function handleMcpAuth(request: NextRequest) {
   }
 
   if (!userId) {
+    console.warn("[mcp-auth] rejected", JSON.stringify(mcpAuthDiagnostic(authorization, request.headers.get("cf-ray"))));
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
 
@@ -281,10 +283,17 @@ async function resolvePersonalToken(request: NextRequest, bearer: string): Promi
       method: "POST",
       headers: { authorization: `Bearer ${bearer}` },
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.warn("[mcp-auth] personal_lookup_rejected", JSON.stringify({
+        ...mcpAuthDiagnostic(request.headers.get("authorization"), request.headers.get("cf-ray")),
+        status: response.status,
+      }));
+      return null;
+    }
     const data = (await response.json()) as { userId?: string };
     return data.userId ?? null;
   } catch {
+    console.warn("[mcp-auth] personal_lookup_failed", JSON.stringify(mcpAuthDiagnostic(request.headers.get("authorization"), request.headers.get("cf-ray"))));
     return null;
   }
 }

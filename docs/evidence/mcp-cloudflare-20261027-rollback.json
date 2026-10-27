@@ -1,0 +1,14 @@
+{
+  "zone": "lasolucionweb.net",
+  "zone_id": "b2fcfe38fbdf5911022c4b495cac6ed2",
+  "global_bic_before": true,
+  "rule_name": "MCP Articulos y Redes - clientes IA",
+  "expression": "(http.host in {\"articulos.lasolucionweb.net\" \"redes.lasolucionweb.net\"} and http.request.uri.path in {\"/api/mcp\" \"/.well-known/oauth-protected-resource\" \"/.well-known/oauth-authorization-server\" \"/api/oauth2/authorize\" \"/api/oauth2/token\"})",
+  "only_action": {
+    "bic": false
+  },
+  "rollback": "Desactivar únicamente esta regla nueva. No cambiar el ajuste BIC global ni reglas previas.",
+  "backup_scope": "Capturas UI del ajuste global y del listado Configuration Rules; no exportación completa de WAF.",
+  "rule_id": "bc768b93c8584a57acddd2c285d9fc0c",
+  "global_bic_after": true
+}

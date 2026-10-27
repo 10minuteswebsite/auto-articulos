@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { bingClientChangedAt, bingNeedsReconnect, latestBingChange } from "./bing-client-change";
+import { bingClientChangedAt, bingNeedsReconnect } from "./bing-client-change";
 
 test("sin fecha de cambio no se avisa a nadie", () => {
   assert.equal(bingClientChangedAt({}), null);

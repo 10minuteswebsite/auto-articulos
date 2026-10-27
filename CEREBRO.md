@@ -1,3 +1,13 @@
+## MCP: separar perímetro, credencial y autorización — 2026-10-27
+
+MCP-CLOUDFLARE-BIC-20261027: Cloudflare puede bloquear antes de Vercel aunque
+la app esté alojada en Vercel. Excepción BIC solo por host/ruta exactos, con
+auth intacta. Un401 posterior requiere verificar la credencial recibida; no
+rotar tokens ni conceder permisos para ocultarlo. Muse usa credenciales
+surrogadas por Sentinel: que su agente vea un código no prueba un fallo.
+Registrar solo familia y Ray ID acotado; jamás valor/hash/cabeceras completas.
+[Causa confirmada y límites](docs/audits/mcp-cloudflare-bic-20261027.md).
+
 ## MCP: orden de las revisiones (2026-10-27)
 
 - La revisión de `Origin` va después de saber si hay Bearer: asistentes que llaman desde sus servidores (Meta MUSE) mandan un `Origin` propio. Un token inválido da 401; un 403 en `/api/mcp` apunta a esta regla (o a algo delante del servidor).
