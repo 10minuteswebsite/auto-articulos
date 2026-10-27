@@ -3,7 +3,7 @@
 - **Capitán de migración:** Claude — LIBERADO el 2026-10-27 tras verificar producción (sin migración; PR #686).
 - Hecho por orden de Milton (autorizó relajar la regla). Nota de proceso: el push se hizo antes del reclamo del capitán (sin otro capitán activo, nadie pisado); el reclamo se hizo antes de fusionar.
 - Decisión: Origin ajeno permitido solo con Bearer; el token sigue siendo obligatorio. Evidencia en CURRENT_STATE.md.
-- Siguiente paso: Patricia reintenta con MUSE; si persiste el 403, revisar logs.
+- Corrección: el 403 de Patricia era de Cloudflare (error 1010, Browser Integrity Check), no de este código. Sigue ABIERTO: Milton lo dejó por ahora; falta la Configuration Rule en Cloudflare (detalle en CURRENT_STATE.md).
 
 ## Coordinación — Redes: subida de logos reparada (cierre, Claude) — 2026-10-26
 
