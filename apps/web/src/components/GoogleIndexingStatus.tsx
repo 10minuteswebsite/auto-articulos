@@ -29,6 +29,23 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
 
   const indexed = status === "indexed";
 
+  // BLOG IA en su dirección de inicio: va con «no indexar» a propósito. No se envía sitemap ni se puede comprobar
+  // indexación, así que se explica en vez de prometer algo que no va a ocurrir.
+  if (title.indexingNotApplicable) {
+    return (
+      <div style={{ marginTop: 7, fontSize: 12 }}>
+        <div style={{ color: "#6e6e73" }}>
+          Tu blog está en su dirección de inicio y Google todavía no lo lee. Se indexará cuando conectes tu propio dominio.
+        </div>
+        {title.businessProfilePost?.status === "sent" && (
+          <div style={{ color: "#16803c" }}>
+            {`✓ Publicado en Google Business Profile${title.businessProfilePost.sentAt ? `: ${new Date(title.businessProfilePost.sentAt).toLocaleString("es-US")}` : ""}`}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (status === "not_configured") {
     return (
       <div style={{ marginTop: 7, fontSize: 12 }}>

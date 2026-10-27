@@ -1932,16 +1932,18 @@ function TitleRowWithLog({ title }: { title: TitleRow }) {
               Ver artículo &rarr;
             </a>
             <GoogleIndexingStatus title={title} />
-            <button
-              type="button"
-              onClick={inspectIndexing}
-              disabled={inspecting}
-              className="link-button"
-              style={{ marginTop: 6, padding: 0, border: 0, background: "transparent", fontSize: 12, cursor: inspecting ? "wait" : "pointer" }}
-            >
-              {inspecting ? "Comprobando indexación…" : "Comprobar indexación"}
-            </button>
-            {inspectionMessage && <div style={{ marginTop: 4, fontSize: 12, color: "#6e6e73" }}>{inspectionMessage}</div>}
+            {!title.indexingNotApplicable && (
+              <button
+                type="button"
+                onClick={inspectIndexing}
+                disabled={inspecting}
+                className="link-button"
+                style={{ marginTop: 6, padding: 0, border: 0, background: "transparent", fontSize: 12, cursor: inspecting ? "wait" : "pointer" }}
+              >
+                {inspecting ? "Comprobando indexación…" : "Comprobar indexación"}
+              </button>
+            )}
+            {!title.indexingNotApplicable && inspectionMessage && <div style={{ marginTop: 4, fontSize: 12, color: "#6e6e73" }}>{inspectionMessage}</div>}
             {title.threadsPublishStatus && (
               <div
                 style={{

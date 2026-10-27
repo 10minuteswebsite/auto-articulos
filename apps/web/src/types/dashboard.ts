@@ -29,6 +29,8 @@ export interface TitleRow {
   bingIndexingMessage: string | null;
   bingIndexingAt: string | null;
   lastSitemapSentAt: string | null;
+  /** true si se publicó en un BLOG IA que aún usa su dirección de inicio (no se indexa a propósito). */
+  indexingNotApplicable?: boolean;
   businessProfilePost: {
     status: string;
     sentAt: string | null;

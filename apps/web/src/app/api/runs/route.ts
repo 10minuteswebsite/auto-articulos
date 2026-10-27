@@ -6,6 +6,7 @@ import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { loadPublishedTitles, splitAlreadyPublished } from "@/lib/published-titles";
+import { isIndexingNotApplicable, starterHostOf } from "@/lib/blog-ia-indexing";
 
 // Bug de consumo de datos encontrado el 30/7/2026: este endpoint se
 // consulta con polling frecuente (Inicio) y en cada visita al Historial, y
@@ -45,7 +46,16 @@ export async function GET() {
     },
     take: 20,
   });
-  return NextResponse.json({ runs });
+  // Un blog de BLOG IA que todavía vive en su dirección de inicio (*.lasolucionweb.net) va con «no indexar» a propósito:
+  // Google no lo leerá hasta que la persona conecte su dominio. Esas publicaciones no deben mostrar «Sitemap: se enviará
+  // a Google» ni «Comprobar indexación», que no serían ciertos.
+  const blog = await prisma.blogIaBlog.findUnique({ where: { userId }, select: { hostname: true } });
+  const starterHost = starterHostOf(blog?.hostname);
+  const withFlags = runs.map((run) => ({
+    ...run,
+    titles: run.titles.map((t) => ({ ...t, indexingNotApplicable: isIndexingNotApplicable(starterHost, t.articleUrl) })),
+  }));
+  return NextResponse.json({ runs: withFlags });
 }
 
 export async function POST(request: NextRequest) {
