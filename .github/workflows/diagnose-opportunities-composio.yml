@@ -1,0 +1,35 @@
+name: Diagnóstico - Oportunidades por Composio (solo lectura)
+
+on:
+  workflow_dispatch:
+    inputs:
+      account_numbers:
+        description: "Números de cuenta de Administración, separados por coma (ej. 102,529)"
+        required: true
+
+jobs:
+  diagnosticar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DATABASE_URL }}
+      CREDENTIALS_ENCRYPTION_KEY: ${{ secrets.CREDENTIALS_ENCRYPTION_KEY }}
+      ACCOUNT_NUMBERS: ${{ inputs.account_numbers }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Generar cliente de Prisma
+        run: npx prisma generate --schema=packages/db/prisma/schema.prisma
+
+      - name: Ejecutar diagnóstico (solo lectura; no imprime correos, apellidos ni dominios)
+        working-directory: apps/worker
+        run: npx tsx src/diagnose-opportunities-composio.ts
