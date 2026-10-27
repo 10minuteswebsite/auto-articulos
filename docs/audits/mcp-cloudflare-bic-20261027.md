@@ -4,7 +4,8 @@
 
 Cloudflare 1010 corregido y verificado en ambos productos. La prueba real del
 cliente pasó a 401; autenticación de MUSE todavía ABIERTA. Diagnóstico seguro
-preparado para publicar y correlacionar el siguiente intento. No declarar E2E.
+publicado y verificado; falta correlacionar el siguiente intento real de MUSE.
+No declarar E2E.
 
 ## Punto cero y causa confirmada
 
@@ -74,9 +75,29 @@ Validación local: `npm run verify` PASS (tipos/build web/build worker y26
 pruebas worker);258 pruebas web PASS, incluidas las de diagnóstico/Origin.
 URL de base de pruebas apuntada a localhost; ninguna publicación real.
 
+## Publicación del diagnóstico y control productivo
+
+Commit `654b311cdd07e094de43061b046a551aba753b6c` en main, Vercel producción
+READY `dpl_919g1r4DimziKbKUs7pqvRkZ9yBn`. Ambos alias .net apuntan a este
+deployment; los dos checks Vercel de GitHub terminaron success.
+
+A las18:52:47–51 UTC se hicieron cuatro controles deliberadamente negativos:
+sin token y con PAT falso en cada host, todos401 de la aplicación. Los logs
+del deployment muestran las seis líneas esperadas: missing/rejected y
+personal/personal_lookup_rejected401/rejected. Ray IDs:
+`a513e65bd9fed8c6-ATL`, `a513e65d89038c9c-ATL`,
+`a513e66e0b31726a-ATL`, `a513e66fb8eeb08e-ATL`.
+Esto verifica el diagnóstico y el rechazo seguro; NO valida el token de MUSE.
+[Recibos del diagnóstico](../evidence/mcp-cloudflare-20261027-diagnostic-http.json).
+
+Limitación del conector Vercel observada: la búsqueda textual mcp-auth no
+devolvió estas líneas de middleware. La consulta sin query sí las devuelve;
+filtrar después por `[mcp-auth]` y Ray ID, sin inferir ausencia de tráfico de
+una búsqueda vacía.
+
 ## Siguiente verificación obligatoria
 
-1. Confirmar Vercel READY para el diagnóstico y sus logs con token falso.
+1. READY y logs con token falso confirmados; conservar este punto cero.
 2. Reintentar initialize/tools/list desde MUSE con la credencial guardada.
 3. Correlacionar `[mcp-auth]` y Ray ID: missing/unsupported/other_bearer
    orienta a envío o sustitución del conector; personal_lookup401 exige

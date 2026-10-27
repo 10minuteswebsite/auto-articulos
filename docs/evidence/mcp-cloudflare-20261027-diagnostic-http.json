@@ -1,0 +1,42 @@
+[
+  {
+    "host": "articulos.lasolucionweb.net",
+    "case": "missing",
+    "utc": "2026-10-27T18:52:47.443950+00:00",
+    "status": 401,
+    "cf_ray": "a513e65bd9fed8c6-ATL",
+    "vercel_id": "iad1::jt5lk-1793127167427-284b04770c84",
+    "body": "{\"error\":\"No autenticado\"}",
+    "pass": true
+  },
+  {
+    "host": "articulos.lasolucionweb.net",
+    "case": "personal-invalid",
+    "utc": "2026-10-27T18:52:49.929568+00:00",
+    "status": 401,
+    "cf_ray": "a513e65d89038c9c-ATL",
+    "vercel_id": "iad1::dpmkw-1793127167680-e0ff8abd579b",
+    "body": "{\"error\":\"No autenticado\"}",
+    "pass": true
+  },
+  {
+    "host": "redes.lasolucionweb.net",
+    "case": "missing",
+    "utc": "2026-10-27T18:52:50.350686+00:00",
+    "status": 401,
+    "cf_ray": "a513e66e0b31726a-ATL",
+    "vercel_id": "iad1::gb2st-1793127170338-d19756498561",
+    "body": "{\"error\":\"No autenticado\"}",
+    "pass": true
+  },
+  {
+    "host": "redes.lasolucionweb.net",
+    "case": "personal-invalid",
+    "utc": "2026-10-27T18:52:51.300006+00:00",
+    "status": 401,
+    "cf_ray": "a513e66fb8eeb08e-ATL",
+    "vercel_id": "iad1::4qlkx-1793127170633-67061185ae4a",
+    "body": "{\"error\":\"No autenticado\"}",
+    "pass": true
+  }
+]

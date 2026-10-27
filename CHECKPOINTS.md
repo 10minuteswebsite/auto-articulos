@@ -1,3 +1,11 @@
+### MCP-CLOUDFLARE-BIC-20261027 — diagnóstico publicado18:53 UTC
+
+`654b311c` / Vercel `dpl_919g1r4DimziKbKUs7pqvRkZ9yBn` READY en ambos
+hosts; checks Vercel success. Cuatro controles401 con token ausente/falso y
+seis registros seguros de middleware correlacionados PASS. No cambiar
+credenciales. Próximo paso: un tools/list real desde MUSE, todavía pendiente.
+[Recibos y límites](docs/audits/mcp-cloudflare-bic-20261027.md).
+
 ## Checkpoint — MCP-CLOUDFLARE-BIC-20261027 — 2026-10-27
 
 Perímetro CF corregido: regla `bc768b93c8584a57acddd2c285d9fc0c`, BIC global

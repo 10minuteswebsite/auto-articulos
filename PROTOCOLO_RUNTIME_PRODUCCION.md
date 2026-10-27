@@ -16,4 +16,9 @@ en texto plano desde la base; solo se guarda un hash. No rotarlo para un
 diagnóstico sin autorización específica. Los logs `[mcp-auth]` guardan solo
 familia, identificador acotado y estado de lookup, nunca credenciales.
 
+Diagnóstico en producción `654b311c` / `dpl_919g1r4DimziKbKUs7pqvRkZ9yBn`,
+READY y logs correlacionados con cuatro controles negativos. Consultar logs
+de Vercel sin query textual y filtrar después por mcp-auth/Ray ID: el filtro
+textual no devolvía líneas de middleware en la comprobación realizada.
+
 [Estado, recibos y pasos siguientes](docs/audits/mcp-cloudflare-bic-20261027.md).

@@ -6,7 +6,10 @@ productivos PASS. Artículos y Redes permanecen en Vercel. Sin DNS ni tokens
 cambiados. El cliente confirma que desapareció1010 y ahora recibe401.
 Token personal existente/no revocado y sin tokens OAuth en la base nativa;
 no concluir que la credencial de MUSE sea igual a la vigente. Diagnóstico
-seguro `[mcp-auth]` preparado; publicación y E2E positivo pendientes.
+seguro `[mcp-auth]` publicado en `654b311c`, Vercel READY
+`dpl_919g1r4DimziKbKUs7pqvRkZ9yBn`; cuatro controles HTTP y sus seis
+registros de rechazo verificados en ambos dominios. E2E positivo pendiente:
+se pidió una nueva llamada tools/list real a MUSE sin cambiar su token.
 258 pruebas web+26 worker, tipos/builds y diff PASS.
 [Registro y siguiente punto cero](docs/audits/mcp-cloudflare-bic-20261027.md).
 
