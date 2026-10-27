@@ -5,7 +5,8 @@
 - Causa raíz (inferida del código y reproducida en producción; NO vista en los logs): el middleware devolvía 403 «Origen no permitido» a cualquier `Origin` ajeno ANTES de mirar el token. Un token inválido da 401, no 403.
 - Cambio: `lib/mcp/origin.ts`; un `Origin` ajeno se acepta solo con `Authorization: Bearer` (el token se verifica igual). Sin Bearer sigue 403. 3 pruebas unitarias.
 - Verificado en producción (ambos hosts): `Origin` meta.ai + Bearer falso pasó de 403 a 401; sin Bearer sigue 403.
-- NO verificado: que MUSE mande `Origin` y que Patricia ya liste herramientas con su token real. Punto de partida: pedirle que reintente; si sigue 403, mirar los logs de Vercel/Cloudflare (regla ajena al código).
+- CAUSA REAL DEL 403 DE PATRICIA (hallada después, 27/10 16:53 UTC): Cloudflare, no el código. MUSE devolvió «Error 1010 browser_signature_banned» (zona `redes.lasolucionweb.net`): el Browser Integrity Check de la zona `lasolucionweb.net` bloquea ciertos User-Agent antes de llegar a Vercel. Reproducido: `Python-urllib/3.11` y `libwww-perl/6` dan 403/1010; python-requests, Go, node, axios, okhttp, Wget, Mozilla y vacío pasan (401). El arreglo del Origin (#686) es correcto pero NO resolvía este caso.
+- ABIERTO: Milton decidió dejarlo por ahora (2026-10-27). Solución pendiente, solo en el panel de Cloudflare: Configuration Rule con ruta que empiece por `/api/mcp` (y `/oauth`, `/.well-known`) y Browser Integrity Check = Off. La IA no tiene acceso a Cloudflare. Verificar después con `curl` y `User-Agent: Python-urllib/3.11` (debe dar 401, no 403) y que Patricia reintente con MUSE.
 
 ## Punto cero vigente — Redes: subida de logos/fotos reparada — 2026-10-26
 
