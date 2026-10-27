@@ -12,6 +12,7 @@ import {
 } from "./lib/session";
 import { applyCookie } from "./lib/shared-cookies";
 import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
+import { isMcpOriginAllowed } from "./lib/mcp/origin";
 import { productOfApiPath, productOfHost, productOfPath, type HostProductScope } from "./lib/product-routes";
 import { isSeoTotalHumanEntry } from "./lib/seo-total-hub-redirect";
 
@@ -103,7 +104,13 @@ export async function middleware(request: NextRequest) {
   // ruta protegida — así los route handlers que reutiliza el MCP siguen
   // funcionando sin cambios.
   if (pathname === MCP_PATH) {
-    if (!isAllowedMcpOrigin(request)) {
+    if (
+      !isMcpOriginAllowed(
+        request.headers.get("origin"),
+        request.nextUrl.origin,
+        request.headers.get("authorization"),
+      )
+    ) {
       return NextResponse.json({ error: "Origen no permitido" }, { status: 403 });
     }
     return handleMcpAuth(request);
@@ -280,16 +287,6 @@ async function resolvePersonalToken(request: NextRequest, bearer: string): Promi
   } catch {
     return null;
   }
-}
-
-/**
- * Streamable HTTP exige bloquear Origins ajenos cuando el header está presente
- * para evitar que una web maliciosa use el navegador como puente hacia el MCP.
- * Los clientes server-to-server, como Alexa+, no envían Origin y se permiten.
- */
-function isAllowedMcpOrigin(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  return !origin || origin === request.nextUrl.origin;
 }
 
 export const config = {
