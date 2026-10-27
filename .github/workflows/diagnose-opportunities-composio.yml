@@ -5,7 +5,12 @@ on:
     inputs:
       account_numbers:
         description: "Números de cuenta de Administración, separados por coma (ej. 102,529)"
-        required: true
+        required: false
+        default: ""
+      account_hashes:
+        description: "Huellas de correo (16 caracteres), separadas por coma"
+        required: false
+        default: ""
 
 jobs:
   diagnosticar:
@@ -16,6 +21,7 @@ jobs:
       DIRECT_URL: ${{ secrets.DATABASE_URL }}
       CREDENTIALS_ENCRYPTION_KEY: ${{ secrets.CREDENTIALS_ENCRYPTION_KEY }}
       ACCOUNT_NUMBERS: ${{ inputs.account_numbers }}
+      ACCOUNT_HASHES: ${{ inputs.account_hashes }}
     steps:
       - uses: actions/checkout@v4
 

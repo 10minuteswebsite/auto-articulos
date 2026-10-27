@@ -1,9 +1,13 @@
 import "dotenv/config";
+import { createHash } from "node:crypto";
 import { prisma } from "@auto-articulos/db";
 import {
+  buildConnectionState,
   composioListSearchConsoleSites,
   composioQuerySearchAnalytics,
   decryptSecret,
+  methodFor,
+  resolveConnection,
 } from "@auto-articulos/shared";
 
 // Diagnóstico de solo lectura (27/10/2026): usuarios que ven "No hay evidencia
@@ -18,6 +22,15 @@ const NUMBERS = (process.env.ACCOUNT_NUMBERS ?? "")
   .split(",")
   .map((v) => Number(v.trim()))
   .filter((n) => Number.isInteger(n) && n > 0);
+
+// Identificación por huella (16 primeros caracteres del SHA-256 del correo en
+// minúsculas): el correo nunca aparece en el registro público.
+const HASHES = (process.env.ACCOUNT_HASHES ?? "")
+  .split(",")
+  .map((v) => v.trim().toLowerCase())
+  .filter(Boolean);
+const hashEmail = (email: string) =>
+  createHash("sha256").update(email.trim().toLowerCase()).digest("hex").slice(0, 16);
 
 const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -45,11 +58,11 @@ function safeError(err: unknown, hide: string[]) {
 }
 
 async function main() {
-  if (NUMBERS.length === 0) throw new Error("Falta ACCOUNT_NUMBERS (ej. 102,529).");
+  if (NUMBERS.length === 0 && HASHES.length === 0) throw new Error("Falta ACCOUNT_NUMBERS o ACCOUNT_HASHES.");
 
   // Misma regla que /api/admin/users: numeroCuenta = puesto por antigüedad.
   const all = await prisma.user.findMany({
-    select: { id: true, firstName: true, name: true, selectedSiteDomain: true, selectedSitePanel: true },
+    select: { id: true, email: true, role: true, disabledModules: true, firstName: true, name: true, selectedSiteDomain: true, selectedSitePanel: true },
     orderBy: { createdAt: "asc" },
   });
   console.log(`Usuarios totales: ${all.length}`);
@@ -73,11 +86,14 @@ async function main() {
   previousStart.setUTCDate(previousStart.getUTCDate() - 44);
   console.log(`Ventana actual: ${isoDate(currentStart)} a ${isoDate(end)} | previa: ${isoDate(previousStart)} a ${isoDate(previousEnd)}`);
 
-  for (const n of NUMBERS) {
-    const u = all[n - 1];
-    console.log(`\n===== Cuenta #${n} =====`);
+  const targets: Array<{ label: string; u: (typeof all)[number] | undefined }> = [
+    ...NUMBERS.map((n) => ({ label: `#${n}`, u: all[n - 1] })),
+    ...HASHES.map((h) => ({ label: `huella ${h}`, u: all.find((x) => hashEmail(x.email) === h) })),
+  ];
+  for (const { label, u } of targets) {
+    console.log(`\n===== Cuenta ${label} =====`);
     if (!u) {
-      console.log("No existe esa posición.");
+      console.log("No existe.");
       continue;
     }
     const first = (u.firstName || u.name || "").split(/\s+/)[0] ?? "";
@@ -103,7 +119,7 @@ async function main() {
     console.log("GA4 propio:", Boolean(ga4?.siteUrl), "| Bing propio:", Boolean(bing?.siteUrl));
     console.log(`Conexiones Composio de GSC (todas): ${conns.length}`);
     conns.forEach((c, i) =>
-      console.log(`  #${i + 1} estado=${c.status} siteUrl=${c.siteUrl ? kindOf(c.siteUrl) : "VACÍO"} coincideConSitioSeleccionado=${c.siteDomain === domain} actualizada=${isoDate(c.updatedAt)}`),
+      console.log(`  #${i + 1} estado=${c.status} siteUrl=${c.siteUrl ? kindOf(c.siteUrl) : "VACÍO"} sitioGuardado=${c.siteDomain === "" ? "VACÍO" : c.siteDomain === domain ? "igual" : rootOf(c.siteDomain) === rootOf(domain) ? "mismo-dominio-distinto-texto" : "DISTINTO"} actualizada=${isoDate(c.updatedAt)}`),
     );
     for (const c of cache) {
       const p = c.payload as { currentRows?: unknown[]; previousRows?: unknown[]; rows?: unknown[] } | null;
@@ -111,7 +127,19 @@ async function main() {
     }
     if (cache.length === 0) console.log("Caché: ninguna (nunca hubo una consulta buena guardada)");
 
-    const conn = conns.find((c) => c.siteDomain === domain && c.status === "ACTIVE") ?? conns.find((c) => c.status === "ACTIVE");
+    // Réplica EXACTA de resolveSearchConsoleForUser (apps/web): la conexión
+    // Composio solo cuenta si su sitio coincide con el seleccionado o está vacío.
+    const webConn = conns.find((c) => !domain || c.siteDomain === domain || c.siteDomain === "");
+    let moduleEnabled = u.role === "admin";
+    if (!moduleEnabled) {
+      try { moduleEnabled = JSON.parse(u.disabledModules ?? "{}")?.["conexion-composio"] === "enabled"; } catch { moduleEnabled = false; }
+    }
+    const state = buildConnectionState({ own: own ? { id: "x" } : null, composio: webConn ?? null });
+    const method = methodFor({ app: "google_search_console", userId: u.id, userEmail: u.email, moduleEnabled, routeIsComposio: false });
+    const resolvedConn = resolveConnection({ method, hasOwn: state.hasOwn, composio: state.composio });
+    console.log(`MÓDULO Composio habilitado=${moduleEnabled} | método=${method} | conexión Composio válida según la web=${Boolean(webConn)} | RESULTADO: fuente=${resolvedConn.source}${resolvedConn.reason ? " (" + resolvedConn.reason + ")" : ""}`);
+    console.log(`=> hasSearchConsole en la ruta: ${Boolean(own) || resolvedConn.source === "COMPOSIO"}`);
+    const conn = (webConn?.status === "ACTIVE" && webConn.siteUrl ? webConn : null) ?? conns.find((c) => c.status === "ACTIVE" && c.siteUrl);
     if (!apiKey || !conn?.siteUrl) {
       console.log("No se puede consultar: falta API key o conexión Composio activa con sitio.");
       continue;
