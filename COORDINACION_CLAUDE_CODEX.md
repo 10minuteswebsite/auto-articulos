@@ -1,3 +1,11 @@
+## MCP-CREDENTIAL-LOGIC-20261027 — Codex — revisión
+
+Rutas/config/UI/OAuth/Hub leídos sobre main e3613783.9 pruebas sin red con
+DB en memoria:4 defectos reproducibles; sin reparación ni migración. No otra
+capitanía activa. Ensayo productivo preparado, no ejecutado: auto-review exige
+autorización explícita para crear/eliminar fixture. Pregunta pendiente.
+[Fuente, plan y límites](docs/audits/mcp-auth-logic-20261027.md).
+
 ## MCP-MUSE-READONLY-20261027 — Codex — 19:26 EDT
 
 Orden: analizar antes de reparar. Leídos runtime/GitHub/logs/CF y metadatos

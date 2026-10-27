@@ -1,3 +1,11 @@
+## MCP-CREDENTIAL-LOGIC-20261027 — revisión
+
+9 pruebas aisladas PASS reproducen4 defectos; son evidencia de bugs, no de
+reparación. Base productiva e3613783 READY. Corregir emisión explícita,
+metadatos, errores503/401 y producto Hub; preservar credenciales. Positivo
+productivo temporal bloqueado por auto-review, autorización pendiente.
+[Continuidad](docs/audits/mcp-auth-logic-20261027.md).
+
 ## MCP-MUSE-READONLY-20261027 — 19:26 EDT
 
 Solo análisis. Producción27499e7f READY; ambos controles propios401 de app.

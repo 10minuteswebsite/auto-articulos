@@ -1,5 +1,11 @@
 # Runtime productivo — Artículos y Redes
 
+`MCP-CREDENTIAL-LOGIC-20261027`: reproducción local confirma que token
+compartido se reemplaza sin aviso, createdAt no fecha su última rotación y
+el lookup503 se transforma en401. Contexto Hub MCP no fija producto. No
+reparado aún. Prueba productiva temporal espera autorización; no ejecutada.
+[Revisión y plan](docs/audits/mcp-auth-logic-20261027.md).
+
 Auditoría19:26 EDT `MCP-MUSE-READONLY-20261027`: no cambios de runtime.
 Personal_lookup401 precede a la consulta de derechos Hub; un log de rechazo
 no identifica al dueño del token. No atribuir a un tenant por hora solamente.

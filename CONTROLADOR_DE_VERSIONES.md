@@ -1,3 +1,10 @@
+## MCP-CREDENTIAL-LOGIC-20261027 — revisión documental
+
+Base productiva e3613783/VercelGrjjoydb2VxuFEV26fYrVeDn1jeR READY.
+Solo memoria y fuente de ensayo en texto; sin código/migración/config.
+9 escenarios locales, positivo de producción pendiente de autorización.
+[Hallazgos y plan](docs/audits/mcp-auth-logic-20261027.md).
+
 ## MCP-MUSE-READONLY-20261027 — cierre documental
 
 Base productiva27499e7f / VercelGBo3JqNgx78ehCz4bBt7Djk6MNGN READY.

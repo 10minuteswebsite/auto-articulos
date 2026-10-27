@@ -1,3 +1,14 @@
+## MCP-CREDENTIAL-LOGIC-20261027 — revisión completa, reparación propuesta
+
+Base e3613783/VercelGrjjoydb2VxuFEV26fYrVeDn1jeR READY.9 escenarios locales
+con rutas reales reproducen: sustitución silenciosa del token compartido,
+fecha sin rotación,503 interno→401 y contexto Hub de Redes ausente. Algoritmo
+sin cambio;30 registros con forma compatible, sin leer hashes. No causa
+individual confirmada de Patricia. Ensayo productivo temporal preparado y
+rechazado por auto-review: requiere autorización explícita, pregunta pendiente.
+No se ejecutó; sin filas/config/código productivo cambiados. Token real intacto.
+[Revisión, prueba y plan](docs/audits/mcp-auth-logic-20261027.md).
+
 ## MCP-MUSE-READONLY-20261027 — análisis19:26 EDT, sin reparación
 
 Producción27499e7f/VercelGBo3JqNgx78ehCz4bBt7Djk6MNGN READY. Informe del

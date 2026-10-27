@@ -1,3 +1,11 @@
+## MCP-CREDENTIAL-LOGIC-20261027 — evitar inferencias sobre tokens
+
+El PAT es único por usuario y compartido por productos. El POST lo reemplaza
+sin cambiar createdAt: esa fecha no prueba continuidad de la credencial.
+Un401 también puede ocultar dependencia caída: simulación503→401. No rotar
+tokens ni atribuir un rechazo a un tenant sin correlación.9 escenarios
+aislados reproducen4 defectos, no son E2E ni reparación. [Detalle](docs/audits/mcp-auth-logic-20261027.md).
+
 ## MCP: separar perímetro, credencial y autorización — 2026-10-27
 
 MCP-CLOUDFLARE-BIC-20261027: Cloudflare puede bloquear antes de Vercel aunque
