@@ -74,10 +74,10 @@ async function main() {
     if (!res.ok) throw new Error(`No se pudo bajar el logo (${res.status})`);
     const input = Buffer.from(await res.arrayBuffer());
     // Recorta el margen transparente/blanco (el dibujo ocupaba ~58 % de la altura) y deja 6 px de aire.
-    const trimmed = await sharp(input).trim({ threshold: 10 }).extend({ top: 6, bottom: 6, left: 6, right: 6, background: { r: 255, g: 255, b: 255, alpha: 0 } }).resize({ width: 640, withoutEnlargement: true }).png().toBuffer();
+    const trimmed = await sharp(input).trim({ threshold: 10 }).resize({ width: 348, height: 108, fit: "inside", withoutEnlargement: true }).extend({ top: 6, bottom: 6, left: 6, right: 6, background: { r: 255, g: 255, b: 255, alpha: 0 } }).png().toBuffer();
     const meta = await sharp(trimmed).metadata();
     console.log(`Logo recortado: ${meta.width}x${meta.height} (${trimmed.length} bytes)`);
-    const mediaId = `logo-${existing.userId}-v2`.toLowerCase();
+    const mediaId = `logo-${existing.userId}-v3`.toLowerCase();
     const up = await sendBlogIaEvent(cfg, {
       eventId: `logo-media-${mediaId}`,
       type: "media.upload",
