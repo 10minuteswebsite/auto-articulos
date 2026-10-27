@@ -1,3 +1,12 @@
+## Punto cero vigente — MCP: 403 de Meta MUSE por Origin — 2026-10-27
+
+- Task ID: `MCP-ORIGIN-403-20261027`. `main` incluye PR #686 (`2250eaf4`); Vercel web y auto-articulos-web `success`. Sin migración.
+- Caso: Patricia Remuzgo (SEO Total) con Meta MUSE recibía HTTP 403 en `tools/list` en `redes.lasolucionweb.net/api/mcp` desde el 26/10; no salieron sus artículos de las 7 y las 12.
+- Causa raíz (inferida del código y reproducida en producción; NO vista en los logs): el middleware devolvía 403 «Origen no permitido» a cualquier `Origin` ajeno ANTES de mirar el token. Un token inválido da 401, no 403.
+- Cambio: `lib/mcp/origin.ts`; un `Origin` ajeno se acepta solo con `Authorization: Bearer` (el token se verifica igual). Sin Bearer sigue 403. 3 pruebas unitarias.
+- Verificado en producción (ambos hosts): `Origin` meta.ai + Bearer falso pasó de 403 a 401; sin Bearer sigue 403.
+- NO verificado: que MUSE mande `Origin` y que Patricia ya liste herramientas con su token real. Punto de partida: pedirle que reintente; si sigue 403, mirar los logs de Vercel/Cloudflare (regla ajena al código).
+
 ## Punto cero vigente — Redes: subida de logos/fotos reparada — 2026-10-26
 
 - Task ID: `REDES-LOGO-VIGENTE-20261026` (cierre). `main` incluye #672, #675 y #678 (`7e782228`), Vercel web y auto-articulos-web `success`.

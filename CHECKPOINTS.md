@@ -1,3 +1,7 @@
+## Checkpoint — MCP: Origin con Bearer — 2026-10-27
+
+- Task `MCP-ORIGIN-403-20261027`; `origin/main` incluye #686 (`2250eaf4`), desplegado. Falta confirmación de Patricia con MUSE.
+
 ## Checkpoint — Redes: subida de logos reparada — 2026-10-26
 
 - Task `REDES-LOGO-VIGENTE-20261026`; `origin/main` incluye #672, #675 y #678 (`7e782228`). Subida verificada en producción (Mauricio Medina). Pendiente: publicación real con el logo nuevo.
