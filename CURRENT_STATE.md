@@ -1,3 +1,13 @@
+## MCP-MUSE-READONLY-20261027 — análisis19:26 EDT, sin reparación
+
+Producción27499e7f/VercelGBo3JqNgx78ehCz4bBt7Djk6MNGN READY. Informe del
+cliente repite Ray12:53; controles propios19:22 siguen401 de app, no1010.
+Nuevo POST Redes18:57 muestra personal_lookup401, dueño no identificado;
+no atribuir a Patricia/MUSE sin correlación. Token de Patricia no revocado.
+Ese rechazo ocurre antes de consultar al Hub. Solo memoria documental;
+sin código/config/datos cambiados. Falta una llamada nueva con hora/HTTP/Ray.
+[Análisis y evidencia](docs/audits/mcp-muse-readonly-20261027.md).
+
 ## MCP-CLOUDFLARE-BIC-20261027 — perímetro corregido; autenticación MUSE abierta
 
 Regla Cloudflare `bc768b93c8584a57acddd2c285d9fc0c` activa: BIC OFF solo en

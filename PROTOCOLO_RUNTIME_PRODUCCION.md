@@ -1,5 +1,10 @@
 # Runtime productivo — Artículos y Redes
 
+Auditoría19:26 EDT `MCP-MUSE-READONLY-20261027`: no cambios de runtime.
+Personal_lookup401 precede a la consulta de derechos Hub; un log de rechazo
+no identifica al dueño del token. No atribuir a un tenant por hora solamente.
+[Evidencia y pendiente](docs/audits/mcp-muse-readonly-20261027.md).
+
 ## MCP-CLOUDFLARE-BIC-20261027
 
 Aplicación Next.js en Vercel (`auto-articulos-web`); dominios `.net` protegidos

@@ -1,3 +1,10 @@
+## MCP-MUSE-READONLY-20261027 — cierre documental
+
+Base productiva27499e7f / VercelGBo3JqNgx78ehCz4bBt7Djk6MNGN READY.
+Solo documentación: sin diferencias funcionales ni reparación nueva.
+Dos controles negativos productivos401; no se declara E2E de MUSE.
+[Evidencia](docs/audits/mcp-muse-readonly-20261027.md).
+
 ### MCP-CLOUDFLARE-BIC-20261027 — código productivo
 
 Código `654b311c`, Vercel `dpl_919g1r4DimziKbKUs7pqvRkZ9yBn` READY;

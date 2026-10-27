@@ -1,3 +1,11 @@
+## MCP-MUSE-READONLY-20261027 — 19:26 EDT
+
+Solo análisis. Producción27499e7f READY; ambos controles propios401 de app.
+Informe repite1010 histórico. Logs18:57 Redes: token personal rechazado401,
+sin dueño atribuible. Token Patricia no revocado; fallo anterior a Hub.
+Siguiente: correlacionar una llamada NUEVA de MUSE, sin cambiar token.
+[Registro](docs/audits/mcp-muse-readonly-20261027.md).
+
 ### MCP-CLOUDFLARE-BIC-20261027 — diagnóstico publicado18:53 UTC
 
 `654b311c` / Vercel `dpl_919g1r4DimziKbKUs7pqvRkZ9yBn` READY en ambos
