@@ -12918,3 +12918,9 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Liberado el lote del PR #681 (workflow de prueba, sin migración). Ejecutado `plan` y `link`: blog `blogia-lorena.lasolucionweb.net` creado, vinculado y `publishMethod = BLOG` solo para `lorenalvarez30@gmail.com`.
 - **Capitán de migración:** Claude — reclamado para este lote (sin migración): `MODE=logo` en `link-blog-ia-test` recorta el margen vacío del logo (sharp `trim`) y lo sube al blog con `media.upload` + `blog.settings.update`.
 - BLOG IA (repo blog-ia): subdominio de inicio `*.lasolucionweb.net` ahora `noindex, nofollow` (cabecera, meta y robots.txt); cabecera 72 px y logo 48 px (40 px móvil).
+
+## 2026-10-27 · Claude · Historial: mensajes de indexación para BLOG IA (PR siguiente al #682)
+
+- Liberado el lote del PR #682 (MODE=logo). **Capitán de migración:** Claude — reclamado para este lote, sin migración.
+- Cambio: `/api/runs` marca cada título con `indexingNotApplicable` cuando el artículo está en el blog BLOG IA que aún usa su dirección de inicio (`*.lasolucionweb.net`, con «no indexar» a propósito). El Historial entonces NO dice «Sitemap: se enviará a Google» ni ofrece «Comprobar indexación»; explica que Google lo leerá cuando se conecte el dominio propio. Lógica en `apps/web/src/lib/blog-ia-indexing.ts` (+2 pruebas). Manual de usuario actualizado (sección Historial).
+- Prueba de extremo a extremo hecha con Lorena (HUB 00006): blog `blogia-lorena.lasolucionweb.net` creado, vinculado y publicando. Bug del idioma `es_ES` corregido en el Worker de BLOG IA.

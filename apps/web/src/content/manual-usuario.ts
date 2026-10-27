@@ -249,6 +249,8 @@ En articulos.lasolucionweb.com (.com o .net) el Historial muestra solo artículo
 
 Si un artículo muestra un error, lee el mensaje antes de repetir la acción. Si el problema indica una conexión, revisa primero Configuración.
 
+Si tu blog todavía está en su dirección de inicio, el Historial no promete envío de sitemap ni deja comprobar la indexación: ese blog va con «no indexar» a propósito y Google no lo leerá hasta que conectes tu propio dominio. Cuando lo conectes, esos mensajes vuelven a aparecer.
+
 ## Cómo funciona esta aplicación
 
 Ruta: /dashboard/como-funciona
