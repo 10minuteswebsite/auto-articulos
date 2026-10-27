@@ -1,3 +1,7 @@
+## Checkpoint — cierre REDES-IMAGENES-20261022 — 2026-10-26
+
+- Sin cambios de código nuevos. Punto de partida: los pendientes de Vicente (Google Business, Threads) viven en el cierre REDES-LOG-IMAGENES-VICENTE-20261023; el arreglo de lectura de og:image (#655) no necesita más acciones.
+
 ## Checkpoint — Redes: subida de logos reparada — 2026-10-26
 
 - Task `REDES-LOGO-VIGENTE-20261026`; `origin/main` incluye #672, #675 y #678 (`7e782228`). Subida verificada en producción (Mauricio Medina). Pendiente: publicación real con el logo nuevo.
