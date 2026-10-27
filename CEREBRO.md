@@ -1,3 +1,7 @@
+## MCP: orden de las revisiones (2026-10-27)
+
+- La revisión de `Origin` va después de saber si hay Bearer: asistentes que llaman desde sus servidores (Meta MUSE) mandan un `Origin` propio. Un token inválido da 401; un 403 en `/api/mcp` apunta a esta regla (o a algo delante del servidor).
+
 ## Decisión durable — los estilos de redacción se administran también desde Contenido — 2026-10-26
 
 - Orden de Milton: los administradores deben poder crear y editar prompts de artículos en Configuración → Contenido. El servidor sigue exigiendo rol admin; la sección está oculta para usuarios normales.

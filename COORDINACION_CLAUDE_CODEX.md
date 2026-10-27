@@ -1,3 +1,10 @@
+## Coordinación — MCP: 403 de MUSE por Origin (Claude) — 2026-10-27
+
+- **Capitán de migración:** Claude — LIBERADO el 2026-10-27 tras verificar producción (sin migración; PR #686).
+- Hecho por orden de Milton (autorizó relajar la regla). Nota de proceso: el push se hizo antes del reclamo del capitán (sin otro capitán activo, nadie pisado); el reclamo se hizo antes de fusionar.
+- Decisión: Origin ajeno permitido solo con Bearer; el token sigue siendo obligatorio. Evidencia en CURRENT_STATE.md.
+- Siguiente paso: Patricia reintenta con MUSE; si persiste el 403, revisar logs.
+
 ## Coordinación — Redes: subida de logos reparada (cierre, Claude) — 2026-10-26
 
 - Fusionados #675 y #678 por orden de Milton. La causa fue la carga de la ruta (no el guardado); se aisló con peticiones GET/POST en la sesión de Mauricio. Sin cambios de esquema.
