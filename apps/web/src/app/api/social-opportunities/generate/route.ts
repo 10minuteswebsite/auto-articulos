@@ -41,6 +41,33 @@ type EditorialProfile = {
   contentLanguage: string;
 };
 
+async function isPublicArticleUrl(url: string, allowedHost: string | null): Promise<boolean> {
+  if (!/^https?:\/\//i.test(url) || !allowedHost) return false;
+  let original: URL;
+  try {
+    original = new URL(url);
+  } catch {
+    return false;
+  }
+  const normalizeHost = (host: string) => host.toLowerCase().replace(/^www\./, "");
+  if (normalizeHost(original.hostname) !== normalizeHost(allowedHost)) return false;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: controller.signal,
+      headers: { Accept: "text/html,application/xhtml+xml" },
+    });
+    return response.status >= 200 && response.status < 300 && normalizeHost(new URL(response.url).hostname) === normalizeHost(allowedHost);
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 const formulas = [
   `Fórmula: Historia personal / Anécdota cercana.
    Pautas: Empieza contando una pequeña anécdota en primera persona como si le hablaras a un amigo (Ej: "Ayer conversaba con una cliente...", "Estaba revisando unos casos de..."). Relata la lección y dile que escribiste un post rápido en tu blog para ayudarlos en esa situación.`,
@@ -214,6 +241,7 @@ function pathnameOf(url: string): string {
  * entre lo que ya existe.
  */
 async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[]> {
+  const account = await prisma.user.findUnique({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const gsc = await prisma.searchIntegration.findFirst({ where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) } });
   const resolvedGsc = await resolveSearchConsoleForUser(userId, user.selectedSiteDomain ?? "");
@@ -423,7 +451,18 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
       return (b.article.processedAt?.getTime() ?? 0) - (a.article.processedAt?.getTime() ?? 0);
     });
 
-  return ranked.map(({ article }): ArticleCandidate => ({
+  const verified: typeof ranked = [];
+  // Verificar por lotes evita que una URL rota o eliminada llegue a Redes y
+  // limita la concurrencia contra el sitio público de la cuenta.
+  for (let index = 0; index < ranked.length; index += 8) {
+    const batch = ranked.slice(index, index + 8);
+    const available = await Promise.all(batch.map(({ article }) => isPublicArticleUrl(article.articleUrl!, account?.selectedSiteDomain ?? null)));
+    batch.forEach((candidate, batchIndex) => {
+      if (available[batchIndex]) verified.push(candidate);
+    });
+  }
+
+  return verified.map(({ article }): ArticleCandidate => ({
     id: article.id,
     finalTitle: article.finalTitle,
     text: article.text,

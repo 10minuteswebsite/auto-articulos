@@ -647,3 +647,10 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - La variación entre redes se mantiene: la clave de bloqueo incluye la red y la selección diaria evita reutilizar el mismo artículo entre redes cuando hay candidatos alternativos.
 - Pendiente: pruebas con dependencias instaladas, deployment y verificación productiva.
 
+# Incidente Redes — propuestas con URL inexistente — 2026-10-28
+
+- Evidencia productiva: la URL `https://www.inesgarcia-arcaya.com/404` responde HTTP 404; la URL de downsizing mostrada en Redes responde HTTP 200.
+- Causa confirmada: `selectTrendingArticles()` filtraba por `Title.status=success` y `articleUrl` no nula, pero no comprobaba la disponibilidad pública actual de la URL.
+- Corrección preparada: Redes verifica la URL con GET, sigue redirecciones y solo acepta HTTP 2xx antes de crear propuestas; las URLs 4xx/5xx o inaccesibles quedan fuera.
+- Pendiente: pruebas con dependencias instaladas, deployment y verificación productiva de una generación nueva.
+
