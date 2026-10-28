@@ -1,3 +1,10 @@
+## MCP-AUTH-FIX-20261027 — Codex — EN CURSO
+
+- **Capitán de migración:** Codex. Solo metadatos nullable de credencial;
+  sin cambiar valores/revocación de clientes. Reparación autorizada por el
+  usuario; fixture temporal autorizado y limpiado, baseline tools/list200 en
+  ambos hosts, alterado/revocado401. Código, UI, pruebas y cierre en preparación.
+
 ## MCP-CREDENTIAL-LOGIC-20261027 — Codex — revisión
 
 Rutas/config/UI/OAuth/Hub leídos sobre main e3613783.9 pruebas sin red con

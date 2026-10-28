@@ -588,6 +588,10 @@ model McpApiToken {
   userId     String    @unique
   tokenHash  String    @unique
   name       String    @default("Asistente IA")
+  // Fecha y revisión de la credencial actual; null conserva como desconocida
+  // la última emisión de los registros anteriores, sin rotar sus secretos.
+  issuedAt   DateTime?
+  credentialVersion String?
   lastUsedAt DateTime?
   createdAt  DateTime  @default(now())
   revokedAt  DateTime?

@@ -1,5 +1,11 @@
 # Runtime productivo — Artículos y Redes
 
+`MCP-AUTH-FIX-20261027`: aplicada solo metadata nullable issuedAt y
+credentialVersion, sin backfill/rotación. Código preparado: lookup10s sin
+redirects,401 vs503 explícitos; uso persistido, revisión contra carreras,
+producto Hub confiable.300 pruebas PASS, deploy y controles finales pendientes.
+[Evidencia y rollback](docs/audits/mcp-auth-fix-20261027.md).
+
 `MCP-CREDENTIAL-LOGIC-20261027`: reproducción local confirma que token
 compartido se reemplaza sin aviso, createdAt no fecha su última rotación y
 el lookup503 se transforma en401. Contexto Hub MCP no fija producto. No

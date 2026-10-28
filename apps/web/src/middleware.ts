@@ -14,6 +14,7 @@ import { applyCookie } from "./lib/shared-cookies";
 import { MCP_API_TOKEN_PREFIX } from "./lib/mcp/api-token-prefix";
 import { isMcpOriginAllowed } from "./lib/mcp/origin";
 import { mcpAuthDiagnostic } from "./lib/mcp/auth-diagnostics";
+import { lookupPersonalMcpToken } from "./lib/mcp/personal-token-lookup";
 import { productOfApiPath, productOfHost, productOfPath, type HostProductScope } from "./lib/product-routes";
 import { isSeoTotalHumanEntry } from "./lib/seo-total-hub-redirect";
 
@@ -54,8 +55,7 @@ const NO_CACHE_HEADERS = {
 };
 
 function hubProductSlugForHost(hostname: string) {
-  const host = hostname.toLowerCase();
-  return host === "redes.lasolucionweb.net"
+  return productOfHost(hostname) === "REDES"
     ? "auto-redes"
     : "seo-total";
 }
@@ -246,7 +246,21 @@ async function handleMcpAuth(request: NextRequest) {
     // dueño de la cuenta operando sus propios datos con cualquier asistente
     // (Claude, ChatGPT, Meta MUSE, etc.), no un cliente de terceros con
     // permisos acotados — por eso lleva todos los scopes existentes.
-    userId = await resolvePersonalToken(request, bearer);
+    const result = await lookupPersonalMcpToken(new URL("/api/mcp/token-lookup", request.url), bearer);
+    if (result.kind !== "authenticated") {
+      console.warn("[mcp-auth] personal_lookup_rejected", JSON.stringify({
+        ...mcpAuthDiagnostic(authorization, request.headers.get("cf-ray")),
+        status: result.status ?? null,
+        reason: result.kind,
+      }));
+    }
+    if (result.kind === "unavailable") {
+      return NextResponse.json({ error: "No se pudo validar la conexión en este momento. Inténtalo de nuevo en un momento." }, {
+        status: 503,
+        headers: { "Retry-After": "5", "Cache-Control": "no-store" },
+      });
+    }
+    userId = result.kind === "authenticated" ? result.userId : null;
   } else {
     const oauth = await verifyMcpAccessToken(bearer);
     const sessionUserId = oauth ? null : await verifySessionToken(bearer);
@@ -265,37 +279,12 @@ async function handleMcpAuth(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", userId);
   requestHeaders.set("x-mcp-scopes", scopes.join(" "));
+  requestHeaders.set("x-hub-product-slug", hubProductSlugForHost(request.nextUrl.hostname));
+  requestHeaders.delete("x-auth-source");
+  requestHeaders.delete("x-acting-admin-id");
   // Deliberadamente NO se propaga la suplantación de admin: un token de
   // máquina no debería poder operar la cuenta de otro usuario por voz.
   return NextResponse.next({ request: { headers: requestHeaders } });
-}
-
-/**
- * El token personal se verifica por hash contra la base (para poder
- * revocarlo desde Configuración) y Prisma no corre en el Edge Runtime del
- * middleware — se resuelve con un `fetch` interno, server a server, a
- * `/api/mcp/token-lookup` (nodejs). Mismo patrón que recomienda Vercel para
- * este split edge/node.
- */
-async function resolvePersonalToken(request: NextRequest, bearer: string): Promise<string | null> {
-  try {
-    const response = await fetch(new URL("/api/mcp/token-lookup", request.url), {
-      method: "POST",
-      headers: { authorization: `Bearer ${bearer}` },
-    });
-    if (!response.ok) {
-      console.warn("[mcp-auth] personal_lookup_rejected", JSON.stringify({
-        ...mcpAuthDiagnostic(request.headers.get("authorization"), request.headers.get("cf-ray")),
-        status: response.status,
-      }));
-      return null;
-    }
-    const data = (await response.json()) as { userId?: string };
-    return data.userId ?? null;
-  } catch {
-    console.warn("[mcp-auth] personal_lookup_failed", JSON.stringify(mcpAuthDiagnostic(request.headers.get("authorization"), request.headers.get("cf-ray"))));
-    return null;
-  }
 }
 
 export const config = {

@@ -1,0 +1,15 @@
+{
+  "migration": "20261027235000_mcp_credential_metadata",
+  "columns": [
+    {
+      "column_name": "credentialVersion",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "issuedAt",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "YES"
+    }
+  ]
+}

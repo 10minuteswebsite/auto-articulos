@@ -24,19 +24,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Token inválido" }, { status: 401 });
   }
 
-  const token = await prisma.mcpApiToken.findFirst({
-    where: { tokenHash: hashMcpApiToken(bearer), revokedAt: null },
-    select: { userId: true },
-  });
+  const tokenHash = hashMcpApiToken(bearer);
+  let token;
+  try {
+    token = await prisma.mcpApiToken.findFirst({
+      where: { tokenHash, revokedAt: null },
+      select: { id: true, userId: true },
+    });
+  } catch {
+    console.warn("[mcp-auth] token_lookup_unavailable");
+    return NextResponse.json({ error: "Validación de conexión temporalmente no disponible" }, { status: 503, headers: { "Retry-After": "5", "Cache-Control": "no-store" } });
+  }
   if (!token) {
     return NextResponse.json({ error: "Token inválido o revocado" }, { status: 401 });
   }
 
-  // No bloquear la respuesta por esto: es solo para mostrar "último uso" en
-  // Configuración, no afecta la autenticación de este request.
-  prisma.mcpApiToken
-    .update({ where: { userId: token.userId }, data: { lastUsedAt: new Date() } })
-    .catch(() => {});
+  // Persistir antes de responder; el fallo de esta métrica no invalida una
+  // credencial comprobada. No marcar como usado un reemplazo concurrente.
+  await prisma.mcpApiToken.updateMany({
+    where: { id: token.id, tokenHash, revokedAt: null },
+    data: { lastUsedAt: new Date() },
+  }).catch(() => console.warn("[mcp-auth] token_usage_unavailable"));
 
-  return NextResponse.json({ userId: token.userId });
+  return NextResponse.json({ userId: token.userId }, { headers: { "Cache-Control": "no-store" } });
 }

@@ -1,0 +1,70 @@
+{
+  "task": "MCP-CREDENTIAL-LOGIC-20261027",
+  "started_utc": "2026-10-27T23:48:52.850217+00:00",
+  "isolated_native_id": "audit_mcp_f9ab3ffe9ff005878c6ef829",
+  "checks": [
+    {
+      "utc": "2026-10-27T23:48:55.909290+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/mcp",
+      "case": "valid-temporary-tools-list",
+      "status": 200,
+      "cf_ray": "a5159822ae1df2ce-ATL",
+      "vercel_id": "iad1::iad1::2wt75-1793144934906-5af159c3a72f",
+      "redirect": null,
+      "tools_count": 28
+    },
+    {
+      "utc": "2026-10-27T23:48:56.881016+00:00",
+      "host": "articulos.lasolucionweb.net",
+      "path": "/api/mcp",
+      "case": "valid-temporary-tools-list",
+      "status": 200,
+      "cf_ray": "a515982a8923b0d9-ATL",
+      "vercel_id": "iad1::iad1::4z2dj-1793144936172-b883b2abed3f",
+      "redirect": null,
+      "tools_count": 28
+    },
+    {
+      "utc": "2026-10-27T23:48:57.426278+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/mcp",
+      "case": "altered-temporary-credential",
+      "status": 401,
+      "cf_ray": "a515983059aeb0b7-ATL",
+      "vercel_id": "iad1::t8dnl-1793144937108-a742bc8e6ec5",
+      "redirect": null,
+      "error": "No autenticado"
+    },
+    {
+      "utc": "2026-10-27T23:48:59.351233+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/mcp",
+      "case": "revoked-temporary-credential",
+      "status": 401,
+      "cf_ray": "a515983d3ae94f98-ATL",
+      "vercel_id": "iad1::mwxd9-1793144939101-f9eeed7434cf",
+      "redirect": null,
+      "error": "No autenticado"
+    },
+    {
+      "utc": "2026-10-27T23:48:59.825507+00:00",
+      "host": "articulos.lasolucionweb.net",
+      "path": "/api/mcp",
+      "case": "revoked-temporary-credential",
+      "status": 401,
+      "cf_ray": "a515983fc99a9613-ATL",
+      "vercel_id": "iad1::zq2zj-1793144939562-138f3175d265",
+      "redirect": null,
+      "error": "No autenticado"
+    }
+  ],
+  "cleanup": [
+    {
+      "tokens_remaining": 0,
+      "users_remaining": 0
+    }
+  ],
+  "result": "PASS",
+  "finished_utc": "2026-10-27T23:49:02.867263+00:00"
+}

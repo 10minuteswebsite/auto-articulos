@@ -1,3 +1,10 @@
+## MCP-AUTH-FIX-20261027 — código verificado localmente
+
+Base cb5d6d4c/VercelHhtzBbqTjggzeA82BhRsDufEQafC READY. SQL aditivo
+20261027235000 aplicado por consulta acotada;2 columnas nullable verificadas.
+300 pruebas/tipos/builds PASS. Falta publicar y comprobar el nuevo artefacto.
+[Registro](docs/audits/mcp-auth-fix-20261027.md).
+
 ## MCP-CREDENTIAL-LOGIC-20261027 — revisión documental
 
 Base productiva e3613783/VercelGrjjoydb2VxuFEV26fYrVeDn1jeR READY.

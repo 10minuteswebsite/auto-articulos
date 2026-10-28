@@ -1,3 +1,12 @@
+## MCP-AUTH-FIX-20261027 — contrato de credenciales
+
+La revisión opaca por emisión protege reemplazo y revocación concurrentes;
+CREATE evita pisar la primera emisión. Metadata antigua sin emisión conocida
+se conserva null, nunca se deduce de createdAt. Lookup caído503 no debe
+desconectar al usuario como token inválido401. Producto MCP derivado del host,
+no del cliente.300 pruebas y baseline productivo200; nuevo deploy pendiente.
+[Decisión y evidencia](docs/audits/mcp-auth-fix-20261027.md).
+
 ## MCP-CREDENTIAL-LOGIC-20261027 — evitar inferencias sobre tokens
 
 El PAT es único por usuario y compartido por productos. El POST lo reemplaza

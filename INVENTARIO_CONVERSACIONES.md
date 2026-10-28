@@ -1,5 +1,10 @@
 # Inventario de conversaciones
 
+## MCP-AUTH-FIX-20261027 — reserva activa — Codex
+
+MCP token/configuración/middleware, metadatos Prisma y sus pruebas. Única
+rama main; sin worktrees. Capitanía de migración Codex, liberación al cierre.
+
 ## Codex — LOG de Historial en Redes — 2026-10-23
 
 - Task `REDES-HISTORIAL-LOG-20261023`. Causa: la ruta compartida `/api/titles/[id]/events` exigía

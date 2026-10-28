@@ -1,3 +1,10 @@
+## MCP-AUTH-FIX-20261027 — prepublicación
+
+Baseline productivo200 y negativos401 PASS con fixture ya eliminado0/0.
+Metadata nullable aplicada;300 pruebas/tipos/builds PASS. Código listo en
+main local; falta Vercel y ensayo UI/API final sin clientes reales.
+[Evidencia](docs/audits/mcp-auth-fix-20261027.md).
+
 ## MCP-CREDENTIAL-LOGIC-20261027 — revisión
 
 9 pruebas aisladas PASS reproducen4 defectos; son evidencia de bugs, no de
