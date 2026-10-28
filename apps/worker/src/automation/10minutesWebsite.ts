@@ -2725,6 +2725,15 @@ async function saveAndGetUrl(
       );
     }
 
+    // El sondeo de arriba vuelve a disparar `change` sobre `#type` mientras
+    // el botón sigue deshabilitado, y ese evento puede devolver
+    // `#activate_indexing` a su valor por defecto (marcado) DESPUÉS de la
+    // verificación anterior. Se reaplica y verifica una vez más, ya sin
+    // ningún evento por delante, inmediatamente antes del clic real.
+    if (disableIndexing) {
+      indexingConfirmed = await applyIndexingPreference(page, disableIndexing, onStep);
+    }
+
     // Diagnóstico agregado el 30/8/2026: el resultado real del clic se
     // tragaba en silencio (`.catch(() => {})`), así que no se podía saber si
     // Playwright de verdad hizo clic o si sus propios chequeos de
