@@ -632,3 +632,10 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - El contrato cubre Instagram, Facebook, LinkedIn, Threads, Pinterest, Tumblr, Bluesky, Blogger, Google Business y Mastodon, tanto para cuentas existentes como para altas nuevas.
 - Pendiente residual: prueba autenticada de una cuenta nueva desde HUB verificando las diez columnas en pantalla/base; no se inventa esa evidencia.
 
+# Incidente Redes — idioma de captions — 2026-10-28
+
+- Punto cero productivo: el artículo `How to Buy a Condominium in Coral Gables from New York` está en inglés; la publicación de Instagram `DfDUKH5nQpd` fue publicada el 28/10 a las 04:41 p. m. con caption en español.
+- Causa confirmada en `apps/web/src/app/api/social-opportunities/generate/route.ts`: el prompt social solo trataba el valor exacto `en` como inglés. Los códigos persistidos reales pueden ser `en_VI`, `en-US` u otra variante con prefijo inglés, por lo que caían al español.
+- Corrección local: `describeSocialContentLanguage()` normaliza códigos `en`, `en_*` y `en-*`; el generador común aplica el idioma a todas las redes.
+- Pendiente de cierre: ejecutar pruebas con dependencias instaladas, publicar desde `main`, regenerar/verificar una propuesta en producción y decidir con confirmación explícita si se edita el post público ya publicado.
+

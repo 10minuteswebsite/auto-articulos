@@ -233,3 +233,9 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 
 - Producción recibió la migración segura en run `40423874512`; los defaults de las diez redes quedan activados para cuentas existentes y nuevas.
 - La conexión OAuth/API de cada proveedor sigue siendo independiente de este permiso.
+# Registro — corrección de coherencia de idioma en Redes — 2026-10-28
+
+- Contrato: el caption de cada red debe usar el mismo idioma de contenido que el artículo/cuenta, independientemente del idioma de la interfaz.
+- Causa observada: comparación exacta `contentLanguage === "en"` ignoraba códigos ingleses regionales como `en_VI`.
+- Cambio preparado: resolver el idioma por prefijo `en` con separador de código (`_` o `-`) y reutilizarlo en el prompt social común.
+- Evidencia productiva previa: `https://www.instagram.com/p/DfDUKH5nQpd/` muestra el caption en español para un artículo en inglés.

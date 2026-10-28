@@ -12981,3 +12981,10 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Liberado el lote del PR #683 (Historial: mensajes de indexación para BLOG IA con dirección de inicio). Sin migración.
 - **Capitán de migración:** Claude — reclamado para este lote: `MODE=logo` del workflow `link-blog-ia-test` ahora recorta y deja el logo en ≤360×120 (antes 640×200; pesaba 73 KB para mostrarse a 147×48). Misma regla que el asistente de BLOG IA (`apps/web/src/lib/logo.ts` en el repo blog-ia).
 - BLOG IA (repo blog-ia), mismo día: caja de contacto «Conversemos» dentro del artículo con mensaje con el título; limpieza del cuerpo de los artículos; `no-transform`; ver `TODO.md` de blog-ia (registro maestro de pedidos).
+# Handoff — PROBLEMA CAPTION ESPANOL — 2026-10-28
+
+- Se verificó producción con la sesión de `info@inesgarcia-arcaya.com`: historial de Redes muestra una publicación Instagram del artículo inglés como publicada; el permalink público `DfDUKH5nQpd` muestra caption en español.
+- Diagnóstico: `generateGPTCopy()` usaba comparación exacta `profile.contentLanguage === "en"`; la configuración admite códigos externos regionales, por ejemplo `en_VI`.
+- Implementación preparada: `apps/web/src/lib/social-language.ts` + prueba de códigos `en`, `en_VI`, `en-US`, `es` y `fr_FR`; el route social usa el helper común.
+- Verificación bloqueada localmente: falta `tsx` en `node_modules`; instalar dependencias o ejecutar CI antes de declarar el commit verificado.
+- No se editó el post público existente: cualquier edición de contenido en Instagram requiere confirmación inmediata antes de transmitir el nuevo caption.

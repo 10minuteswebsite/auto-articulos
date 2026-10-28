@@ -18,6 +18,7 @@ import { getGoogleAnalyticsSignals, summarizeGoogleAnalyticsSignals } from "@/li
 import { getBingSignals } from "@/lib/bing-signals";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { describeSocialContentLanguage } from "@/lib/social-language";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
@@ -119,7 +120,7 @@ async function generateGPTCopy(
     ? `La publicación representa a ${profile.name}. Usa esa identidad solo si encaja naturalmente y nunca inventes profesión, certificaciones, clientes, resultados o experiencias personales.\n` +
       (profile.businessLocations ? `Ubicaciones declaradas del negocio: ${profile.businessLocations}. No agregues otras.\n` : "")
     : "No hay identidad profesional verificada disponible. No inventes nombre, profesión, ubicación, clientes ni anécdotas personales; escribe desde la utilidad del contenido y usa primera persona solo de forma editorial, sin afirmaciones biográficas.\n";
-  const language = profile?.contentLanguage === "en" ? "inglés" : "español";
+  const language = describeSocialContentLanguage(profile?.contentLanguage);
   try {
     const callModel = (extraMessages: Array<{ role: "assistant" | "user"; content: string }>) => fetch(OPENAI_CHAT_URL, {
       method: "POST",
