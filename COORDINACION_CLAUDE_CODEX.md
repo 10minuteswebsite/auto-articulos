@@ -12988,3 +12988,4 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Implementación preparada: `apps/web/src/lib/social-language.ts` + prueba de códigos `en`, `en_VI`, `en-US`, `es` y `fr_FR`; el route social usa el helper común.
 - Verificación bloqueada localmente: falta `tsx` en `node_modules`; instalar dependencias o ejecutar CI antes de declarar el commit verificado.
 - No se editó el post público existente: cualquier edición de contenido en Instagram requiere confirmación inmediata antes de transmitir el nuevo caption.
+- Publicación de código verificada: `53377ae9` en `main`; checks Vercel `web` y `auto-articulos-web` = `success`.

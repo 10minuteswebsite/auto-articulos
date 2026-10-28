@@ -637,5 +637,6 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Punto cero productivo: el artículo `How to Buy a Condominium in Coral Gables from New York` está en inglés; la publicación de Instagram `DfDUKH5nQpd` fue publicada el 28/10 a las 04:41 p. m. con caption en español.
 - Causa confirmada en `apps/web/src/app/api/social-opportunities/generate/route.ts`: el prompt social solo trataba el valor exacto `en` como inglés. Los códigos persistidos reales pueden ser `en_VI`, `en-US` u otra variante con prefijo inglés, por lo que caían al español.
 - Corrección local: `describeSocialContentLanguage()` normaliza códigos `en`, `en_*` y `en-*`; el generador común aplica el idioma a todas las redes.
-- Pendiente de cierre: ejecutar pruebas con dependencias instaladas, publicar desde `main`, regenerar/verificar una propuesta en producción y decidir con confirmación explícita si se edita el post público ya publicado.
+- Publicado en `main`: commit `53377ae9`; Vercel Production `web` y `auto-articulos-web` terminaron `success`.
+- Pendiente de cierre funcional: ejecutar pruebas con dependencias instaladas, regenerar/verificar una propuesta en producción y decidir con confirmación explícita si se edita el post público ya publicado.
 
