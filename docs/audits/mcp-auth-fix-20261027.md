@@ -65,16 +65,43 @@ temporalmente ausente; se repitió secuencialmente y pasó. No se cambió códig
 ajeno para ocultar el fallo. Problemas de tipos de mocks corregidos antes del
 PASS. Configuración de tests localhost, sin secretos productivos.
 
-## Estado de publicación
+## Publicación y verificación final
 
-Código preparado y migración aditiva aplicada. Publicación y verificación
-posterior en Vercel pendientes. El ensayo final comprobará login/configuración,
-reemplazo rechazado/confirmado, revisión obsoleta, uso/emisión, tools/list,
-revocación y limpieza. UI interna con cuenta temporal, nunca un cliente.
+Código `620e0cc98e93c8f014c2760f5bead485cd700542`, main; Vercel
+`dpl_7wM3UkkfJHLUe9jstGuZSm5wHMVV` READY, proyecto auto-articulos-web.
+Ensayo productivo del27/10,20:12–20:14 EDT (28/10,00:12–00:14 UTC):
+18 controles API PASS. [Recibo completo sin secretos](../evidence/mcp-auth-postdeploy-20261027.json).
 
-Se guardó solo una huella agregada de las30 credenciales existentes para
-comparar al cierre sin leer valores/hash individuales. Verificación pendiente.
-El ensayo final no enviará mensajes ni publicará contenido.
+- PAT vigente200/tools-list en ambos hosts. Este fixture tenía una concesión
+  nativa REDES propia y temporal:35 herramientas; el baseline sin esa concesión
+  listaba28. No se alteró el catálogo ni se llamó tools/call.
+- Login nativo200. Metadatos legacy sin inventar issuedAt y sin token/hash.
+- Reemplazo sin intención409; token original conserva200. Reemplazo explícito
+  con revisión vigente200; anterior401 y nuevo200 en ambos hosts.
+- Reemplazo y revocación con revisión obsoleta409; vigente conserva200.
+- issuedAt y lastUsedAt persistidos; respuesta no-store. Al cancelar la
+  confirmación desde la UI, la revisión no cambió. Revocación actual200;
+  credencial revocada401 en ambos hosts.
+
+UI productiva comprobada en navegador interno: sesión MCP Auth Audit,
+producto Redes, token activo, advertencia compartida, fechas, Reemplazar y
+Revocar. Se abrió la confirmación y se canceló, sin emitir desde la UI.
+[Captura sin secretos](../evidence/mcp-auth-ui-20261027.png).
+Se cerró solo la sesión nativa mediante POST; la configuración volvió a/login.
+No se usó GET/logout que continuaría hacia el Hub.
+
+Limpieza verificada:0 usuarios,0 tokens y0 concesiones del fixture. Se eliminó
+el archivo temporal de acceso y la caché CLI creada por esta tarea. Sin
+correos, publicaciones, herramientas de escritura, suscripciones ni cargos.
+La comparación agregada de las30 credenciales reales confirmó mismo conteo y
+misma huella de id/usuario/hash/revocación. El recibo guarda solo el booleano,
+nunca hashes individuales ni la huella: [integridad](../evidence/mcp-customer-credential-integrity-20261027.json).
+
+Los logs de Vercel se correlacionaron con el Ray del token de ensayo ya
+reemplazado:401 esperado, no fallo productivo nuevo. El503 de dependencia y
+el contexto de los cuatro hosts se verificaron con las rutas/middleware reales
+en pruebas aisladas; no se provocó una caída de base/Hub en producción.
+La capitanía de migración Codex quedó liberada tras estos resultados.
 
 ## Límites y rollback
 

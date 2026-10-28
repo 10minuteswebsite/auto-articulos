@@ -1,0 +1,223 @@
+{
+  "task": "MCP-AUTH-FIX-20261027",
+  "started_utc": "2026-10-28T00:12:07.427126+00:00",
+  "isolated_native_id": "audit_mcp_339ff3f36f09cb715715f130",
+  "checks": [
+    {
+      "case": "legacy-current-credential-valid",
+      "utc": "2026-10-28T00:12:10.736956+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/mcp",
+      "method": "POST",
+      "status": 200,
+      "cf_ray": "a515ba2e9ec515f6-ATL",
+      "vercel_id": "iad1::iad1::t5v5g-1793146329459-8114774886a0",
+      "cache_control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "tools_count": 35
+    },
+    {
+      "case": "legacy-current-credential-valid",
+      "utc": "2026-10-28T00:12:11.800029+00:00",
+      "host": "articulos.lasolucionweb.net",
+      "path": "/api/mcp",
+      "method": "POST",
+      "status": 200,
+      "cf_ray": "a515ba397c696772-ATL",
+      "vercel_id": "iad1::iad1::hv6mx-1793146331213-466d6065e04d",
+      "cache_control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "tools_count": 35
+    },
+    {
+      "case": "native-fixture-login",
+      "utc": "2026-10-28T00:12:12.306202+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/auth/login",
+      "method": "POST",
+      "status": 200,
+      "cf_ray": "a515ba3eeb53a31f-ATL",
+      "vercel_id": "iad1::iad1::gmszw-1793146332020-b6b70cf33f9d",
+      "cache_control": "no-store, no-cache, must-revalidate"
+    },
+    {
+      "case": "legacy-metadata-no-guessed-issuance",
+      "utc": "2026-10-28T00:12:12.804150+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/configuracion/mcp-token",
+      "method": "GET",
+      "status": 200,
+      "cf_ray": "a515ba420cd77bd1-ATL",
+      "vercel_id": "iad1::iad1::d7tgn-1793146332598-efde0c0e3017",
+      "cache_control": "no-store"
+    },
+    {
+      "case": "silent-replacement-denied",
+      "utc": "2026-10-28T00:12:13.298803+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/configuracion/mcp-token",
+      "method": "POST",
+      "status": 409,
+      "cf_ray": "a515ba45395933ef-ATL",
+      "vercel_id": "iad1::iad1::f6fkm-1793146333078-237a00fab971",
+      "cache_control": "no-store",
+      "code": "TOKEN_REPLACEMENT_REQUIRED"
+    },
+    {
+      "case": "original-still-valid-after-denied-replacement",
+      "utc": "2026-10-28T00:12:14.088489+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/mcp",
+      "method": "POST",
+      "status": 200,
+      "cf_ray": "a515ba485fa2a6b1-ATL",
+      "vercel_id": "iad1::iad1::mwxd9-1793146333523-8ee9b212a4de",
+      "cache_control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "tools_count": 35
+    },
+    {
+      "case": "confirmed-current-replacement",
+      "utc": "2026-10-28T00:12:14.633731+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/configuracion/mcp-token",
+      "method": "POST",
+      "status": 200,
+      "cf_ray": "a515ba4d39ce5620-ATL",
+      "vercel_id": "iad1::iad1::gmszw-1793146334361-f4895abe0f36",
+      "cache_control": "no-store"
+    },
+    {
+      "case": "replaced-fixture-credential-denied",
+      "utc": "2026-10-28T00:12:14.995554+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/mcp",
+      "method": "POST",
+      "status": 401,
+      "cf_ray": "a515ba509ca4b84c-ATL",
+      "vercel_id": "iad1::m4lz5-1793146334848-f34241a95607",
+      "cache_control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+    },
+    {
+      "case": "new-current-credential-valid",
+      "utc": "2026-10-28T00:12:15.744911+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/mcp",
+      "method": "POST",
+      "status": 200,
+      "cf_ray": "a515ba531b6d9e86-ATL",
+      "vercel_id": "iad1::iad1::shs9w-1793146335261-29a45506e43b",
+      "cache_control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "tools_count": 35
+    },
+    {
+      "case": "new-current-credential-valid",
+      "utc": "2026-10-28T00:12:16.555060+00:00",
+      "host": "articulos.lasolucionweb.net",
+      "path": "/api/mcp",
+      "method": "POST",
+      "status": 200,
+      "cf_ray": "a515ba579daf9309-ATL",
+      "vercel_id": "iad1::iad1::nlcx5-1793146336016-99ea03f36229",
+      "cache_control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "tools_count": 35
+    },
+    {
+      "case": "stale-replacement-denied",
+      "utc": "2026-10-28T00:12:16.940294+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/configuracion/mcp-token",
+      "method": "POST",
+      "status": 409,
+      "cf_ray": "a515ba5c9ee52181-ATL",
+      "vercel_id": "iad1::iad1::n8jr7-1793146336763-a43d8de871b2",
+      "cache_control": "no-store",
+      "code": "TOKEN_STATE_CHANGED"
+    },
+    {
+      "case": "stale-revocation-denied",
+      "utc": "2026-10-28T00:12:17.322098+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/configuracion/mcp-token",
+      "method": "DELETE",
+      "status": 409,
+      "cf_ray": "a515ba5f0a81d608-ATL",
+      "vercel_id": "iad1::iad1::vn2rx-1793146337152-66b33d154049",
+      "cache_control": "no-store",
+      "code": "TOKEN_STATE_CHANGED"
+    },
+    {
+      "case": "current-survives-stale-actions",
+      "utc": "2026-10-28T00:12:18.007129+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/mcp",
+      "method": "POST",
+      "status": 200,
+      "cf_ray": "a515ba616b22b82c-ATL",
+      "vercel_id": "iad1::iad1::f6fkm-1793146337521-9868a681845c",
+      "cache_control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "tools_count": 35
+    },
+    {
+      "case": "issuance-and-usage-recorded",
+      "utc": "2026-10-28T00:12:18.467337+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/configuracion/mcp-token",
+      "method": "GET",
+      "status": 200,
+      "cf_ray": "a515ba65ac44b040-ATL",
+      "vercel_id": "iad1::iad1::mqpq5-1793146338284-15d9c2161306",
+      "cache_control": "no-store"
+    },
+    {
+      "case": "browser-cancel-did-not-replace",
+      "utc": "2026-10-28T00:14:02.381826+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/configuracion/mcp-token",
+      "method": "GET",
+      "status": 200,
+      "cf_ray": "a515bceedc2372a2-ATL",
+      "vercel_id": "iad1::iad1::zxx2p-1793146442087-2a9518eca8c8",
+      "cache_control": "no-store"
+    },
+    {
+      "case": "confirmed-current-revocation",
+      "utc": "2026-10-28T00:14:02.881011+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/configuracion/mcp-token",
+      "method": "DELETE",
+      "status": 200,
+      "cf_ray": "a515bcf1fab2fbcf-ATL",
+      "vercel_id": "iad1::iad1::tbwpj-1793146442590-584c4769200c",
+      "cache_control": "no-store"
+    },
+    {
+      "case": "revoked-current-denied",
+      "utc": "2026-10-28T00:14:03.650543+00:00",
+      "host": "redes.lasolucionweb.net",
+      "path": "/api/mcp",
+      "method": "POST",
+      "status": 401,
+      "cf_ray": "a515bcf52fdeb078-ATL",
+      "vercel_id": "iad1::sgzqm-1793146443097-bd8172ff2691",
+      "cache_control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+    },
+    {
+      "case": "revoked-current-denied",
+      "utc": "2026-10-28T00:14:04.266348+00:00",
+      "host": "articulos.lasolucionweb.net",
+      "path": "/api/mcp",
+      "method": "POST",
+      "status": 401,
+      "cf_ray": "a515bcf9fd0fafc6-ATL",
+      "vercel_id": "iad1::8pmvf-1793146443924-2dcc9b88526a",
+      "cache_control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+    }
+  ],
+  "cleanup": [
+    {
+      "product_rows_remaining": 0,
+      "tokens_remaining": 0,
+      "users_remaining": 0
+    }
+  ],
+  "result": "PASS",
+  "finished_utc": "2026-10-28T00:14:07.373848+00:00"
+}

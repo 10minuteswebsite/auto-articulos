@@ -1,9 +1,13 @@
-## MCP-AUTH-FIX-20261027 — Codex — EN CURSO
+## MCP-AUTH-FIX-20261027 — Codex — CIERRE
 
-- **Capitán de migración:** Codex. Solo metadatos nullable de credencial;
-  sin cambiar valores/revocación de clientes. Reparación autorizada por el
-  usuario; fixture temporal autorizado y limpiado, baseline tools/list200 en
-  ambos hosts, alterado/revocado401. Código, UI, pruebas y cierre en preparación.
+Capitán de migración liberó el lote: Codex. Código620e0cc9 publicado,
+Vercel7wM3UkkfJHLUe9jstGuZSm5wHMVV READY. Solo metadata nullable aplicada,
+sin backfill.300 pruebas y18 controles API PASS; UI/confirmación cancelada,
+revocación y cleanup0/0/0 verificados.30 credenciales reales intactas.
+Sin reservas, ramas/worktrees, secretos/env/WAF/DNS ni clientes modificados.
+MUSE/Patricia aún requiere prueba desde su asistente, conservando su token.
+
+[Registro y evidencia](docs/audits/mcp-auth-fix-20261027.md).
 
 ## MCP-CREDENTIAL-LOGIC-20261027 — Codex — revisión
 

@@ -1,13 +1,16 @@
 # BASELINE — Contrato previo HUB/OAuth
 
-## MCP-AUTH-FIX-20261027 — contrato añadido
+## MCP-AUTH-FIX-20261027 — contrato añadido y verificado
 
-Token activo: reemplazo/revocación requieren intención y revisión actual;
-UI no puede emitir mientras desconoce estado. Aviso de efecto compartido en
-Artículos/Redes. Emisión antigua desconocida no se inventa. Credencial mala401;
-dependencia caída503/Retry-After. Producto Hub fijado por host .net/.com.
-Conservados OAuth, scopes, prompts y comprobantes de publicación. Preparado;
-verificación visual/API productiva pendiente. [Registro](docs/audits/mcp-auth-fix-20261027.md).
+UI productiva: espera metadata, distingue Generar/Reemplazar, advierte que el
+PAT es compartido entre Artículos y Redes y pide confirmación. Cancelarla no
+cambia la credencial; GET/reload nunca recupera el secreto. Muestra emisión y
+último uso; legacy desconocido queda No registrado. API exige intención/revisión
+vigente; conflictos409, inválido401, dependencia503/Retry-After/no-store.
+Producto Hub por host .net/.com. OAuth/scopes/prompts/comprobantes intactos.
+Código620e0cc9 READY; UI y18 controles API PASS con fixture limpiado0/0/0.
+
+[Registro y evidencia](docs/audits/mcp-auth-fix-20261027.md).
 
 ## MCP-CLOUDFLARE-BIC-20261027 — contrato de protección
 

@@ -1,9 +1,13 @@
-## MCP-AUTH-FIX-20261027 — código verificado localmente
+## MCP-AUTH-FIX-20261027 — código productivo620e0cc9
 
-Base cb5d6d4c/VercelHhtzBbqTjggzeA82BhRsDufEQafC READY. SQL aditivo
-20261027235000 aplicado por consulta acotada;2 columnas nullable verificadas.
-300 pruebas/tipos/builds PASS. Falta publicar y comprobar el nuevo artefacto.
-[Registro](docs/audits/mcp-auth-fix-20261027.md).
+main620e0cc98e93c8f014c2760f5bead485cd700542, Vercel
+ dpl_7wM3UkkfJHLUe9jstGuZSm5wHMVV READY. SQL acotado20261027235000
+aplicado: issuedAt/credentialVersion nullable; sin UPDATE/backfill.
+300 tests/tipos/builds y18 controles API/UI PASS. Cleanup0/0/0 y30
+credenciales reales intactas. Rollback a cb5d6d4c conservando las columnas.
+El cierre documental posterior no cambia la implementación. MUSE no certificado.
+
+[Registro y evidencia](docs/audits/mcp-auth-fix-20261027.md).
 
 ## MCP-CREDENTIAL-LOGIC-20261027 — revisión documental
 

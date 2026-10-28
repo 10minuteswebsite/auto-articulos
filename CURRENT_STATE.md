@@ -1,12 +1,15 @@
-## MCP-AUTH-FIX-20261027 — preparado para publicación
+## MCP-AUTH-FIX-20261027 — publicado y verificado
 
-Ensayo autorizado productivo: PAT válido200/tools-list en ambos hosts,
-alterado/revocado401 y cleanup0/0. Correcciones de reemplazo/revocación con
-revisión, errores503/401, producto Hub, emisión/uso y UI preparadas. Migración
-solo2 columnas nullable aplicada/verificada, sin cambiar credenciales previas.
-274 web+26 worker/tipos/builds/diff PASS. Publicación/verificación final y
-comparación agregada de30 credenciales pendientes. MUSE/Patricia no verificado.
-[Registro](docs/audits/mcp-auth-fix-20261027.md).
+Código620e0cc9 / Vercel dpl_7wM3UkkfJHLUe9jstGuZSm5wHMVV READY.
+300 pruebas PASS;18 controles API productivos PASS y UI nativa verificada.
+Reemplazo/revocación exigen revisión vigente; lookup401 vs503; contexto Hub
+.net/.com confiable; emisión/uso persistidos. Solo2 columnas nullable nuevas.
+Fixture REDES propio:35 herramientas en ambos hosts, revocado401, limpieza
+0 usuarios/0 tokens/0 concesiones.30 credenciales reales intactas por comparación
+agregada. Capitanía liberada. MUSE/Patricia sigue pendiente de tools/list real
+con su credencial guardada; no atribuirle token inválido ni afirmar conexión.
+
+[Registro y evidencia](docs/audits/mcp-auth-fix-20261027.md).
 
 ## MCP-CREDENTIAL-LOGIC-20261027 — revisión completa, reparación propuesta
 

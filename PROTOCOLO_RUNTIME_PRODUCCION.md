@@ -1,9 +1,11 @@
 # Runtime productivo — Artículos y Redes
 
-`MCP-AUTH-FIX-20261027`: aplicada solo metadata nullable issuedAt y
-credentialVersion, sin backfill/rotación. Código preparado: lookup10s sin
-redirects,401 vs503 explícitos; uso persistido, revisión contra carreras,
-producto Hub confiable.300 pruebas PASS, deploy y controles finales pendientes.
+`MCP-AUTH-FIX-20261027`: código620e0cc9, Vercel
+`dpl_7wM3UkkfJHLUe9jstGuZSm5wHMVV` READY. Metadata nullable aplicada sin
+backfill. Emisión/revocación con revisión, lookup10s/redirect:error y401 vs503,
+uso persistido, producto Hub confiable .net/.com.300 pruebas y18 controles API
+productivos PASS; UI verificada. Fixture limpiado0/0/0,30 credenciales reales
+intactas. MUSE requiere tools/list real con su credencial guardada.
 [Evidencia y rollback](docs/audits/mcp-auth-fix-20261027.md).
 
 `MCP-CREDENTIAL-LOGIC-20261027`: reproducción local confirma que token

@@ -1,9 +1,13 @@
 # Inventario de conversaciones
 
-## MCP-AUTH-FIX-20261027 — reserva activa — Codex
+## MCP-AUTH-FIX-20261027 — cerrado — Codex
 
-MCP token/configuración/middleware, metadatos Prisma y sus pruebas. Única
-rama main; sin worktrees. Capitanía de migración Codex, liberación al cierre.
+MCP/configuración/middleware, metadatos y pruebas publicados620e0cc9 READY.
+Capitanía liberada, sin reservas activas. main único, sin ramas/worktrees nuevos.
+Ensayo API/UI limpiado0/0/0;30 credenciales reales intactas. MUSE/Patricia aún
+requiere confirmar su propia llamada, sin modificar tokens de clientes.
+
+[Registro y evidencia](docs/audits/mcp-auth-fix-20261027.md).
 
 ## Codex — LOG de Historial en Redes — 2026-10-23
 

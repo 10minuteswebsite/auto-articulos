@@ -1,9 +1,13 @@
-## MCP-AUTH-FIX-20261027 — prepublicación
+## MCP-AUTH-FIX-20261027 — cierre verificado20:14 EDT
 
-Baseline productivo200 y negativos401 PASS con fixture ya eliminado0/0.
-Metadata nullable aplicada;300 pruebas/tipos/builds PASS. Código listo en
-main local; falta Vercel y ensayo UI/API final sin clientes reales.
-[Evidencia](docs/audits/mcp-auth-fix-20261027.md).
+Punto de continuación: código620e0cc9, Vercel7wM3UkkfJHLUe9jstGuZSm5wHMVV
+READY.300 tests+18 controles API PASS, UI token activo y confirmación cancelada.
+Fixture35 tools por su concesión REDES; revocado401 y cleanup0/0/0.
+30 credenciales reales intactas; metadata aditiva nullable aplicada.
+Pendiente exclusivo del caso MUSE: tools/list desde ese cliente con su token
+actual y hora/HTTP/Ray; no recuperar/rotar credenciales sin autorización.
+
+[Registro y evidencia](docs/audits/mcp-auth-fix-20261027.md).
 
 ## MCP-CREDENTIAL-LOGIC-20261027 — revisión
 
