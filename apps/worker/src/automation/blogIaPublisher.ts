@@ -55,8 +55,12 @@ export class BlogIaPublishError extends Error {
   }
 }
 
+export const BLOG_IA_LENGTH = { minWords: 1000, maxWords: 1400 } as const;
+
 export function createBlogIaPublisher(ctx: BlogIaPublisherContext): ArticlePublisher {
-  const generate: GenerateFn = ctx.generate ?? generateCustomArticle;
+  // BLOG IA publica guías completas: de 1,000 a 1,400 palabras. Solo esta ruta usa la política; 10MWS y MCP no cambian.
+  const generate: GenerateFn =
+    ctx.generate ?? ((title, prompt, language, author) => generateCustomArticle(title, prompt, language, author, BLOG_IA_LENGTH));
 
   const send: SendFn = async (event) => {
     try {
