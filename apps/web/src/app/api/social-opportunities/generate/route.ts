@@ -628,7 +628,7 @@ export async function POST(request: Request) {
     });
 
     // El historial completo evita que una oportunidad ya publicada,
-    // descartada o fallida vuelva a aparecer. Cada formato de Instagram
+    // descartada, borrada o fallida vuelva a aparecer. Cada formato de Instagram
     // (story/post/reel-image/carousel/infografia) cuenta como su propio
     // canal — pedido explícito de Milton (20/8/2026): antes se colapsaban
     // todos como un único "instagram", así que un artículo que ya tenía una
@@ -637,13 +637,9 @@ export async function POST(request: Request) {
     const previousOpportunities = await prisma.socialOpportunity.findMany({
       where: {
         userId,
-        // "skipped" (botón Descartar) no debe bloquear el artículo para
-        // siempre — descartar una idea significa "no esta, dame otra
-        // después", no "este artículo ya no puede tener oportunidades
-        // nunca más". Reportado por Milton (21/8/2026): tras descartar 52
-        // propuestas en lote para "empezar de cero", seguía sin poder
-        // generar nuevas porque estas igual contaban como "ya usado".
-        status: { not: "skipped" },
+        // Los descartes y los borrados masivos se conservan como memoria
+        // editorial: si la persona dijo que no quería ese artículo para una
+        // red, no debe reaparecer inmediatamente en esa misma red.
         OR: [
           { titleId: { in: allCandidates.map((article) => article.id) } },
           { articleUrl: { in: allCandidates.map((article) => article.articleUrl).filter((url): url is string => Boolean(url)) } },

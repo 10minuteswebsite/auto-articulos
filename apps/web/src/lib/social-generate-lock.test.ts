@@ -11,3 +11,15 @@ test("generar propuestas: el bloqueo advisory no se lee con $queryRaw", () => {
   assert.ok(source.includes('$executeRawUnsafe("SELECT pg_advisory_xact_lock'));
   assert.equal(/\$queryRaw(Unsafe)?\(\s*["`]SELECT pg_advisory/.test(source), false);
 });
+
+test("generar propuestas: conserva descartes como memoria editorial", () => {
+  const source = readFileSync(join(process.cwd(), "src/app/api/social-opportunities/generate/route.ts"), "utf8");
+  assert.match(source, /const previousOpportunities = await prisma\.socialOpportunity\.findMany\(\{\s*where:/s);
+  assert.doesNotMatch(source, /status:\s*\{\s*not:\s*"skipped"\s*\}/);
+});
+
+test("borrar pendientes: los marca descartados en vez de eliminarlos", () => {
+  const source = readFileSync(join(process.cwd(), "src/app/api/social-opportunities/route.ts"), "utf8");
+  assert.match(source, /if \(scope === "pending"\)[\s\S]*?socialOpportunity\.updateMany/s);
+  assert.match(source, /Borrado por el usuario; no volver a ofrecer esta propuesta/);
+});

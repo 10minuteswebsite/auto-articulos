@@ -640,3 +640,10 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Publicado en `main`: commit `53377ae9`; Vercel Production `web` y `auto-articulos-web` terminaron `success`.
 - Pendiente de cierre funcional: ejecutar pruebas con dependencias instaladas, regenerar/verificar una propuesta en producción y decidir con confirmación explícita si se edita el post público ya publicado.
 
+# Incidente Redes — repetición de propuestas descartadas — 2026-10-28
+
+- Causa confirmada: `Borrar todas` eliminaba físicamente las propuestas `pending`; la siguiente generación no tenía memoria de la decisión editorial.
+- Corrección preparada: el borrado de pendientes ahora las marca `skipped` con motivo, y el generador conserva todos los registros por artículo/red para bloquear su repetición en esa red.
+- La variación entre redes se mantiene: la clave de bloqueo incluye la red y la selección diaria evita reutilizar el mismo artículo entre redes cuando hay candidatos alternativos.
+- Pendiente: pruebas con dependencias instaladas, deployment y verificación productiva.
+
