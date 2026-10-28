@@ -102,6 +102,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const indexingPreference = await prisma.$queryRaw<Array<{ disableIndexing: boolean }>>`SELECT "disableIndexing" FROM "User" WHERE id = ${userId}`;
+  const effectiveDisableIndexing =
+    typeof disableIndexing === "boolean"
+      ? disableIndexing
+      : Boolean(indexingPreference[0]?.disableIndexing);
+
   if (activeRun) {
     return NextResponse.json(
       {
@@ -210,7 +216,7 @@ export async function POST(request: NextRequest) {
           userId,
           categoryId,
           status: "running",
-          disableIndexing: Boolean(disableIndexing),
+          disableIndexing: effectiveDisableIndexing,
           contentLanguage: normalizedContentLanguage,
           promptId:
             typeof promptId === "string" && promptId.trim()
