@@ -124,6 +124,16 @@ export async function POST(request: NextRequest) {
     },
   });
 
+  // La selección es un contrato explícito: el servidor publica únicamente
+  // los IDs recibidos y nunca completa el lote con otros títulos.
+  const selectedTitleIds = new Set(titleIds);
+  if (selectedTitles.length !== selectedTitleIds.size) {
+    return NextResponse.json(
+      { error: "La selección enviada no coincide con los títulos solicitados." },
+      { status: 409 },
+    );
+  }
+
   if (selectedTitles.length === 0) {
     return NextResponse.json(
       { error: "No se encontraron títulos para publicar." },
