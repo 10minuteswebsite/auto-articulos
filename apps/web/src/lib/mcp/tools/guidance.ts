@@ -1,4 +1,6 @@
 import { BASE_USER_MANUAL } from "@/content/manual-usuario";
+import { getCurrentUserId } from "@/lib/current-user";
+import { canUseSocialModule } from "@/lib/social-access";
 import { toolText, type ToolDef } from "./shared";
 
 /**
@@ -45,6 +47,32 @@ function sectionsMatching(manual: string, filtro: string): string {
 }
 
 export const GUIDANCE_TOOLS: ToolDef[] = [
+  {
+    name: "mostrar_menu",
+    title: "Mostrar menú de casos de uso",
+    description: "Accionador directo para MENU. Devuelve cinco casos numerados de Artículos y, si Redes está habilitado, cinco casos separados de Redes. Usa esta tool cuando la persona escriba MENU; ofrece MÁS ARTÍCULOS o MÁS REDES para ampliar.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    requiredScope: "oportunidades:leer",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    handler: async () => {
+      const socialEnabled = await canUseSocialModule(await getCurrentUserId());
+      const articles = [
+        "1) Ver y publicar títulos propios.",
+        "2) Generar títulos con IA.",
+        "3) Crear oportunidades con datos de Search Console.",
+        "4) Revisar publicaciones, estados y enlaces.",
+        "5) Consultar o cambiar preferencias de contenido.",
+      ];
+      const social = [
+        "1) Ver redes conectadas y cupo diario.",
+        "2) Generar propuestas para una o varias redes.",
+        "3) Editar una propuesta pendiente.",
+        "4) Publicar propuestas con confirmación.",
+        "5) Revisar estados, enlaces, errores y reintentos.",
+      ];
+      return toolText(`ARTÍCULOS\n${articles.join("\n")}\n${socialEnabled ? `\nREDES Y BLOGS\n${social.join("\n")}` : "\nREDES Y BLOGS: no habilitado por el HUB."}\n\nEscribe «MÁS ARTÍCULOS» o «MÁS REDES» para ver cinco casos adicionales.`);
+    },
+  },
   {
     name: "ver_manual_seo_total",
     title: "Ver el manual de SEO Total",
