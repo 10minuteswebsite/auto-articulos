@@ -1,3 +1,7 @@
+## HISTORIAL-INDEXACION-SIMPLE-20261029
+
+Código `22cb96b9` (PR #694), Vercel READY. Solo UI + manual, sin migración. Rollback: revertir el PR #694.
+
 ## MCP-AUTH-FIX-20261027 — código productivo620e0cc9
 
 main620e0cc98e93c8f014c2760f5bead485cd700542, Vercel

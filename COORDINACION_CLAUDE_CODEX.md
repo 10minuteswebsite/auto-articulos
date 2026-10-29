@@ -13029,3 +13029,5 @@ Capitanía liberada. Responsable: Claude.
 ARCHIVADA. Responsable: Claude.
 
 - **Capitán de migración:** Claude — indexación simple en Historial (solo UI, sin migración), 2026-10-29. Liberado al fusionar.
+
+**Cierre (2026-10-29):** indexación simple del Historial en producción (`22cb96b9`). Capitanía liberada. Pendiente: confirmar visualmente con Lorena y probar «Enviar ahora». Responsable: Claude.
