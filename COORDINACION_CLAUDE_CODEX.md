@@ -1,3 +1,11 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — CERRADO Y ARCHIVADO
+
+- **Capitán de migración:** Claude — reclamó y liberó este lote documental (sin migración, sin código).
+- Código `2f2b862d` (PR #701) y documentación (#702) ya en `main`. Rollback: revertir #701.
+- Comprobación en vivo, 2026-10-29, con la cuenta de una usuaria afectada: la tarjeta de Search Console de Conexiones solo lee Composio (`/api/composio/status`); mostraba «No conectada» porque su fila de Composio estaba en `NOT_CONNECTED`, y por eso sin botón «Desconectar». Oportunidades ya no mostraba el aviso rojo viejo. Milton confirmó después que el caso quedó resuelto.
+- Hueco conocido, sin cambiar: esa tarjeta no muestra ni permite quitar una conexión propia de Google guardada. No se tocó código en este cierre.
+- Honesto: la causa exacta de la conexión rota en esa cuenta no se aisló (el servidor bloqueó la lectura del estado de la conexión propia). Pulsar «Analizar» quedó bloqueado por propuestas pendientes; no se borraron.
+
 ## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — LIBERACIÓN
 
 - **Capitán de migración liberó el lote:** Claude. Código `2f2b862d` (PR #701)

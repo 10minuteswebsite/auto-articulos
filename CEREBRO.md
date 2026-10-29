@@ -370,3 +370,9 @@ La imagen de TODAS las redes sale de la `og:image` de la página del artículo d
 ## Causa raíz — «{BIO_AUTOR}» visible al final del artículo (2026-10-26)
 
 Un marcador escrito en un estilo de redacción solo se sustituye si `sanitizeGeneratedArticleResult` lo conoce (hoy: TELEFONO, PHONE_NUMBER, NUMERO-WHATSAPP, NOMBRE_AUTOR, CIUDAD_ESTADO). Cualquier otro marcador que la IA copie llega crudo al artículo. `{BIO_AUTOR}` no tiene campo en la base de datos. Regla: antes de añadir un marcador a un prompt, confirmar que el worker lo resuelve; ante un marcador crudo en un artículo, buscar primero en el texto del estilo guardado, no en el código.
+
+## Oportunidades sin evidencia — cerrado 2026-10-29
+
+- Causa: el resolvedor de Search Console ignoraba Composio (`COMPOSIO_CONSUMER_READY.google_search_console = false`). Arreglo conservador en `apps/web/src/lib/search-console-source.ts`, usado por `/api/opportunities`; caché de 20 días con copia de la última consulta buena.
+- Lección: la tarjeta de Conexiones de Search Console solo pinta Composio; una conexión propia vieja puede quedar invisible y sin botón de desconectar.
+- Lección: probar con la cuenta real exige la sesión del navegador correcto; con varias ventanas de Chrome conectadas, mirar la de esa usuaria.
