@@ -14,7 +14,6 @@ import { auditLog } from "@/lib/audit";
 import { ensureDefaultEntitlements } from "@/lib/product-access";
 import { getCurrentUserId, requireAdmin } from "@/lib/current-user";
 import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
-import { newUserDefaultPromptData } from "@/lib/default-prompt";
 import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
@@ -738,8 +737,6 @@ export async function POST(request: NextRequest) {
       dailyArticleLimit,
       maxTitlesPerBatch,
       platformDomain,
-      platformDomainConfirmedAt: new Date(),
-      ...(await newUserDefaultPromptData()),
       ...DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS,
     },
     select: {
