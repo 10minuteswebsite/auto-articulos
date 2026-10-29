@@ -4,7 +4,6 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 import { prisma } from "@auto-articulos/db";
 import { syncLocalProductEntitlement } from "@/lib/hub-sync";
 import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
-import { newUserDefaultPromptData } from "@/lib/default-prompt";
 
 export const runtime = "nodejs";
 
@@ -87,7 +86,6 @@ export async function POST(request: NextRequest) {
         hubSyncedAt: new Date(),
         role,
         trialUnlocked: allowed,
-        ...(await newUserDefaultPromptData()),
         ...DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS,
       },
     });

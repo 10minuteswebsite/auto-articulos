@@ -52,9 +52,6 @@ model User {
   // servidor real de la cuenta. "net" (valor por defecto, sin cambios para
   // nadie existente) o "site".
   platformDomain                    String        @default("net")
-  // Cuándo la persona confirmó su región (Europa -> site, resto -> net). Las altas desde el Hub no traen
-  // región: quedan en NULL y la app se lo pregunta una sola vez al primer ingreso. Cuentas anteriores: ya confirmadas.
-  platformDomainConfirmedAt         DateTime?
   // Dominio real elegido durante la primera conexión. Es independiente del
   // servidor de acceso (net/site/tagcrush) y del idioma del panel.
   selectedSiteDomain                String?
