@@ -758,3 +758,17 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Decisión de Milton pendiente (no corregido): una propuesta con estado `error` cuenta como «usada» para ese artículo y esa red y no se vuelve a ofrecer.
 - Fuera de alcance: el texto generado a veces inventa anécdotas (fórmula «Historia personal»).
 - Lorena no se diagnosticó.
+
+## Cierre — Redes: «No hay artículos disponibles» falso (#698) y error de foto explicado (#703) — 2026-10-29
+
+- PR #698 (1bbf65e5) y PR #703 (0d2ffc45) en producción, CI verde, sin migración.
+- #698: el filtro de URL del 28/10 ya no depende de `User.selectedSiteDomain`; solo un 404/410 descarta un artículo; el aviso de lista vacía distingue sin artículos / URL caída / ya usados.
+- #703: el error de falta de foto nombra el artículo y el sitio y dice qué hacer; `inspectArticlePage()` omite del listado artículos con página completa sin `og:image`.
+- Verificado en producción vía Hub (impersonación de milton):
+  - Rosa María Bello (business.rosabello@gmail.com): «Crear propuesta» en LinkedIn generó 1 propuesta con artículo real (sin publicar).
+  - MCV Real Estate (realestatemov@gmail.com): «Crear propuesta» en LinkedIn generó 1 propuesta con artículo real (sin publicar); en Historial el error de Google Business ya muestra el mensaje nuevo de foto con el nombre del artículo y movrealestate.com.
+- NO verificado en producción: que «Crear propuesta» omita artículos sin foto (realestatemov ya tenía 1 pendiente, la generación responde «ya tienes 1 pendiente»). Solo pruebas unitarias.
+- No se pudo comparar con el estado anterior en esas cuentas: no está probado que la causa original fuera el filtro de dominio.
+- Los 9 «sin publicar» de realestatemov siguen en error hasta que se agregue la foto en movrealestate.com (servidor distinto). No se pulsó Reintentar ni Publicar.
+- Pendiente de decisión de Milton: una propuesta con estado `error` cuenta como «usada» para ese artículo y red y no se vuelve a ofrecer.
+- No tocado: «proceso interrumpido» de `cleanup.ts`. Observación: el texto generado a veces inventa anécdotas (fórmula «Historia personal»). Lorena no se diagnosticó.
