@@ -18,6 +18,7 @@ import { processMcpRunTitle } from "./mcpQueue";
 import { processBlogRunTitle } from "./blogIaQueue";
 import {
   findAlreadyPublishedForTitle,
+  recordPublishedSiteTitle,
   removePublishedOpportunity,
 } from "./publishedGuard";
 
@@ -419,6 +420,12 @@ async function processRunTitle(
       },
     });
     await onStep("Artículo publicado con éxito.");
+    await recordPublishedSiteTitle({
+      userId: run.userId,
+      siteDomain: run.category.siteDomain,
+      title: result.finalTitle || nextTitle.text,
+      url: result.articleUrl,
+    });
     // Si el rescate de atascados se adelantó y devolvió este tema a
     // Oportunidades mientras se publicaba, se retira: ya está publicado.
     await removePublishedOpportunity({

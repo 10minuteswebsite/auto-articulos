@@ -327,6 +327,7 @@ const ARTICLE_HARD_TIMEOUT_MS = 6 * 60 * 1000;
 const CONTENT_GENERATION_TIMEOUT_MS = 90_000;
 const IMAGE_GENERATION_TIMEOUT_MS = 90_000;
 const SAVE_VERIFICATION_TIMEOUT_MS = 90_000;
+const SAVE_VERIFICATION_BACKOFF_MS = [3_000, 5_000, 8_000, 12_000, 15_000];
 
 /**
  * Encontrado en producción el 4/8/2026: cuando la cuenta de 10minutesWebsite
@@ -3017,6 +3018,7 @@ async function saveAndGetUrl(
     `Buscando el artículo publicado por su título: "${titleInUse}"...`,
   );
   const deadline = Date.now() + SAVE_VERIFICATION_TIMEOUT_MS;
+  let verificationPass = 0;
   while (Date.now() < deadline) {
     try {
       await page.goto(`${baseUrl}/dashboard/user_buyer_seller_articles.php`, {
@@ -3066,7 +3068,12 @@ async function saveAndGetUrl(
         `Fallo de navegación al revisar el listado (se reintenta): ${err instanceof Error ? err.message : String(err)}`,
       );
     }
-    await page.waitForTimeout(1500);
+    // Espera progresiva (29/10/2026, aviso de 10minutesWebsite: demasiadas
+    // lecturas del listado). Antes eran 1,5 s fijos (~60 cargas por artículo,
+    // multiplicadas por hasta 40 lanes y 3 intentos); ahora ~8 cargas en los
+    // mismos 90 s, sin quitar la verificación que evita duplicados.
+    await page.waitForTimeout(SAVE_VERIFICATION_BACKOFF_MS[Math.min(verificationPass, SAVE_VERIFICATION_BACKOFF_MS.length - 1)]);
+    verificationPass += 1;
   }
 
   return { url: null, titleUsed: titleInUse };

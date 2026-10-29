@@ -13083,3 +13083,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** liberado por Claude — 2026-10-29: Redes (PR #698 y #703), sin migración.
 
 - **Capitán de migración:** Claude — 2026-10-29: altas del Hub (región .site/.net y prompt problema-solución por defecto). Migración 20261029190000_platform_domain_confirmed_default_prompt: aplicar en producción ANTES de fusionar el PR.
+
+- **Capitán de migración:** Claude — reclamo 2026-10-29: títulos del sitio en Supabase (sitemap, una vez, aditivo) + menos lecturas del listado de 10MWS. Migración `20261029180000_site_article_titles`. PR abierto, sin fusionar hasta aplicar la migración.
