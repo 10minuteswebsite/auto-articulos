@@ -13071,3 +13071,5 @@ ARCHIVADA. Responsable: Claude.
 **Cierre final (2026-10-29):** Milton confirmó que el resultado quedó como esperaba («espectacular»). Estado: CERRADO. ARCHIVADA. Pendiente menor sin bloquear: prueba de «Enviar ahora» con Lorena. Responsable: Claude.
 
 - **Capitán de migración:** Claude — 2026-10-29: Redes, mensajes de foto claros y revisión previa de foto (sin migración). Liberación al verificar en producción.
+
+- **Capitán de migración:** liberado por Claude — 2026-10-29: Redes (PR #698 y #703), sin migración.
