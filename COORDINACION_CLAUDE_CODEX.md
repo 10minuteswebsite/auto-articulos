@@ -1,3 +1,11 @@
+## INICIO-BOTONES-CREDITOS-IMAGEN-20261030 — Claude — CERRADO
+
+- PR #715 (`86fca786`) en `main`, Vercel web y auto-articulos-web en success. Sin migración. Rollback: revertir #715.
+- El aviso rojo del Inicio ahora tiene «Servicio al cliente» (enlace de ayuda del servidor, pestaña nueva; reemplaza a «Solicitar créditos», que llevaba al mismo enlace) y «Ya recibí mis créditos» (PATCH /api/me `hasImageCredits:true` y quita el aviso).
+- Verificado en producción en el navegador de Milton con la sesión del cliente 13: ambos botones visibles; «Servicio al cliente» apunta a https://www.10minuteswebsite.com/ayuda con target `_blank`.
+- NO verificado: pulsar «Ya recibí mis créditos» (habría escrito `true` en la cuenta real del cliente sin saber si tiene créditos). Pendiente confirmar si de verdad le faltan créditos.
+- Capitanía liberada por Claude.
+
 ## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — Claude — RECLAMO
 
 - **Capitán de migración:** Claude — reclamado el 2026-10-29 (sin migración). Punto cero: `main` = `9b3c63f7`.
