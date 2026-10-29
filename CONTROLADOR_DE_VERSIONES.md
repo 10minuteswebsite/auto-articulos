@@ -1,3 +1,8 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029
+
+Código `2f2b862d` (PR #701), Vercel READY. Sin migración. Rollback: revertir #701.
+Verificación funcional con cuenta real pendiente.
+
 ## MCP-USE-CASES-20261029 — en preparación
 
 - Añadidas `editar_propuesta_social` y `cambiar_preferencias_contenido`, sin

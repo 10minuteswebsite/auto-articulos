@@ -1,3 +1,23 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — publicado; verificación funcional pendiente
+
+Código `2f2b862d` (PR #701) en `main`, Vercel web y auto-articulos-web success.
+Causa medida en producción (diagnóstico y censo de solo lectura, #685/#689/#699):
+para Search Console el resolvedor elige siempre la conexión propia
+(`COMPOSIO_CONSUMER_READY.google_search_console = false`). De 122 usuarios, 23
+solo tienen Composio (veían «No hay evidencia»), 54 tienen ambas (51 ganan la
+propia) y 2 tienen la propia con error guardado. Ahora, en Oportunidades, la
+propia sana sigue ganando y Composio toma el relevo si no hay propia o la propia
+guardó error. Además: mensajes de «sin evidencia» por caso, caché de 20 días con
+copia de respaldo de la última consulta buena, aviso rojo viejo oculto si hay
+Composio activo, manual actualizado. Sitemaps e indexación no se tocan. Sin
+migraciones. Rollback: revertir el PR #701.
+Verificado: 9 pruebas nuevas PASS, tipos sin errores en los archivos tocados,
+despliegue verde. NO verificado: el flujo real con una cuenta afectada (hay que
+pulsar «Analizar» con una cuenta solo-Composio). Caso aparte, no resuelto por
+código: una cuenta cuya propiedad conectada en Search Console es la versión
+`http://` sin datos; requiere registrar la propiedad correcta en Search Console.
+Capitanía liberada. Responsable: Claude.
+
 ## MCP-USE-CASES-20261029 — preparado, pendiente de publicación
 
 ### Extensión MENU y actualización del cliente
