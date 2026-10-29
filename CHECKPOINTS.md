@@ -572,3 +572,9 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Run `40423874512` `Success`: migración `20261026130000_enable_all_social_publishing_defaults` aplicada con la opción segura dedicada.
 - Smoke HTTP: Artículos `/login` 200; Redes `/login` 200.
 - Residual: falta E2E autenticado de alta nueva/HUB para observar las diez columnas; no afecta la evidencia de migración ni el contrato de código.
+
+
+## Checkpoint — No indexar en 10MWS — 2026-10-29
+
+- Punto cero: `main` = `38621d27` (PR #691). Prueba E2E real con Inés García: artículo 104488 con «Activate Indexing» = No y `noindex,nofollow` público.
+- Antes del arreglo: 104484 `index,follow` y log «sigue activada». Sin migraciones. Pendiente aparte: BLOG IA no recibe la orden de no indexar.
