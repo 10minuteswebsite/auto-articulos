@@ -1,3 +1,7 @@
+## Checkpoint — MCP/Cloudflare 1010 cerrado — 2026-10-29
+
+- Task `MCP-ORIGIN-403-20261027`; el 403 de MUSE (Cloudflare 1010) quedó resuelto por otra instancia, verificado en producción. Sin commits pendientes de esta sesión.
+
 ## HISTORIAL-INDEXACION-SIMPLE-20261029 — publicado y verificado en producción
 
 Código `22cb96b9` (PR #694) en `main`, Vercel web y auto-articulos-web success.

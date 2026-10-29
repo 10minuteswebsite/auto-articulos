@@ -47,7 +47,7 @@ capitanía activa en la lectura inicial. Tipos/builds/258web+26worker PASS.
 - **Capitán de migración:** Claude — LIBERADO el 2026-10-27 tras verificar producción (sin migración; PR #686).
 - Hecho por orden de Milton (autorizó relajar la regla). Nota de proceso: el push se hizo antes del reclamo del capitán (sin otro capitán activo, nadie pisado); el reclamo se hizo antes de fusionar.
 - Decisión: Origin ajeno permitido solo con Bearer; el token sigue siendo obligatorio. Evidencia en CURRENT_STATE.md.
-- Corrección: el 403 de Patricia era de Cloudflare (error 1010, Browser Integrity Check), no de este código. Sigue ABIERTO: Milton lo dejó por ahora; falta la Configuration Rule en Cloudflare (detalle en CURRENT_STATE.md).
+- Corrección: el 403 de Patricia era de Cloudflare (error 1010, Browser Integrity Check), no de este código. CERRADO 2026-10-29: otra instancia lo resolvió en Cloudflare; verificado en producción (Python-urllib y libwww-perl: 403/1010 → 401). Pendiente solo que Patricia confirme con MUSE. Rama de esta sesión eliminada.
 
 ## Coordinación — Redes: subida de logos reparada (cierre, Claude) — 2026-10-26
 
