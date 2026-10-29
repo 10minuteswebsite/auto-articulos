@@ -1,3 +1,10 @@
+## CREDITOS-IMAGEN-ANTONIO-20261029 — Claude — PRUEBA REAL CERRADA
+
+- Milton pulsó «Ya recibí mis créditos» en la cuenta del cliente 13 (`hasImageCredits` pasó a `true`: confirma que el botón del Inicio persiste y quita el aviso). Con su autorización se publicó UN artículo real con un título propio del cliente («Cómo invertir en propiedades en Fort Lauderdale si vivo en Argentina», categoría Fort Lauderdale Real Estate).
+- Resultado en producción: la imagen con IA se generó (5:32 p. m.) y el Historial marca Completado, 1/1 publicado, en 4 min 59 s. Conclusión: el `false` del 27/10 era un falso positivo o ya estaba resuelto; el cliente SÍ tiene créditos de imagen.
+- Causa del aviso de MUSE: `hasImageCredits=false` puesto por el worker el 27/10 y nunca devuelto a `true` (nada lo reinicia salvo el botón o un admin). Ya reinició a `true`.
+- Notas: el primer intento mostró un reinicio de la barra (5 %) a mitad del proceso; no hubo error. Sin cambios de código.
+
 ## INICIO-BOTONES-CREDITOS-IMAGEN-20261030 — Claude — CERRADO
 
 - PR #715 (`86fca786`) en `main`, Vercel web y auto-articulos-web en success. Sin migración. Rollback: revertir #715.
