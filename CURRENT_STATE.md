@@ -1,5 +1,13 @@
 ## MCP-USE-CASES-20261029 — preparado, pendiente de publicación
 
+### Extensión MENU y actualización del cliente
+
+- El `initialize` anuncia `updatePolicy: refresh-on-connect`, obliga a refrescar
+  `initialize`, `prompts/list` y `tools/list`, y prohíbe inventar capacidades o
+  actualizar credenciales/software sin autorización del cliente.
+- El prompt `menu` responde a `MENU` con cinco casos de Artículos y cinco
+  separados de Redes, más `MÁS ARTÍCULOS`/`MÁS REDES` para ampliar.
+
 - Añadidas `editar_propuesta_social` y `cambiar_preferencias_contenido`; no se
   modificaron auth, entitlement HUB, OAuth ni publicación existente.
 - Typecheck de `apps/web` pasa. La suite completa conserva un fallo heredado en

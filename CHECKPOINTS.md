@@ -4,6 +4,10 @@
 
 ## MCP-USE-CASES-20261029 — antes de publicación
 
+Extensión posterior: `initialize` anuncia política de refresco al conectar y
+el prompt `menu` ofrece cinco casos por producto, separados y numerados, con
+opción de pedir más.
+
 - Punto cero: `origin/main` `9a685bb9`; smoke público OK en ambos hosts y MCP
   devuelve 401 sin credencial.
 - Cambio: dos tools nuevas, sin migración, reutilizando `PATCH /api/me` y

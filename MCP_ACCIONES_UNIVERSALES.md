@@ -38,6 +38,11 @@ confirmación explícita.
 
 ### Actualización 29/10/2026 — cobertura segura de casos de uso
 
+El servidor también anuncia en `initialize` que el cliente debe refrescar
+capacidades al conectar (`refresh-on-connect`) y no inventar herramientas o
+prompts fuera del catálogo recibido. La palabra `MENU` activa un prompt con
+cinco opciones de Artículos y cinco de Redes separadas, ampliables por tanda.
+
 Se añadieron `editar_propuesta_social` (solo propuestas `pending`, con vista
 previa y comprobante) y `cambiar_preferencias_contenido` (actualización parcial
 confirmada de preferencias no secretas). Reutilizan las rutas web existentes.
