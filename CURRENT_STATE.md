@@ -1,3 +1,7 @@
+## CREDITOS-IMAGEN-ANTONIO-20261029 — CERRADO
+
+Cliente 13: créditos de imagen confirmados por publicación real (1/1 publicado). El aviso de MUSE venía de un `hasImageCredits=false` heredado del 27/10. Ya en `true`. Sin código.
+
 ## INICIO-BOTONES-CREDITOS-IMAGEN-20261030 — CERRADO
 
 PR #715 en producción y botones verificados a la vista con el cliente 13. Abierto: la acción de «Ya recibí mis créditos» no se probó con datos reales, y sigue sin saberse si al cliente de verdad le faltan créditos. Capitanía liberada.
