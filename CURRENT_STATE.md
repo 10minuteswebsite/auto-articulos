@@ -1,3 +1,7 @@
+## INICIO-BOTONES-CREDITOS-IMAGEN-20261030 — CERRADO
+
+PR #715 en producción y botones verificados a la vista con el cliente 13. Abierto: la acción de «Ya recibí mis créditos» no se probó con datos reales, y sigue sin saberse si al cliente de verdad le faltan créditos. Capitanía liberada.
+
 ## ENTRADA-SIN-ESPERA-20261029 — CERRADO Y ARCHIVADO
 
 Cerrado por orden de Milton (2026-10-29). No reabrir sin un caso nuevo; el resto de ~3 s en frío es conocido y aceptado.
