@@ -390,3 +390,7 @@ URL o sin `og:image`, pero no debe recorrer todo el inventario antes de crear
 una propuesta. El contrato es inspeccionar una ventana acotada y detenerse al
 encontrar un candidato válido; así la protección no bloquea la generación.
 
+
+## Entrada lenta tras el HUB — causa raíz (2026-10-29)
+
+`getCurrentUserId` revalidaba el acceso con el Hub en cada petición protegida; la caché de 60 s no evitaba consulta, transacción ni UPDATE, y el `fetch` no tenía timeout. El dashboard dispara ~12 APIs a la vez (`/api/me` ×5), con `connection_limit=1`, así que se encolaban hasta 13 s. Regla: una decisión del Hub vigente no toca la base; las revalidaciones concurrentes se comparten; todo `fetch` externo en la ruta caliente lleva timeout.
