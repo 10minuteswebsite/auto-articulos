@@ -52,6 +52,28 @@ interface ConfigurationAlert {
 
 const showReconnectAlert = true;
 
+// Cuenta que ya completó el asistente en este navegador: el Inicio pinta las
+// tarjetas al instante y las APIs solo las afinan (antes esperaban cinco
+// consultas, hasta ~25 s, con la pantalla vacía).
+const WIZARD_DONE_KEY = "inicio-wizard-complete";
+
+function readWizardDone(): boolean {
+  try {
+    return window.localStorage.getItem(WIZARD_DONE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeWizardDone(done: boolean) {
+  try {
+    if (done) window.localStorage.setItem(WIZARD_DONE_KEY, "1");
+    else window.localStorage.removeItem(WIZARD_DONE_KEY);
+  } catch {
+    // Sin almacenamiento disponible: el Inicio solo espera a las APIs como antes.
+  }
+}
+
 export default function InicioPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -130,7 +152,10 @@ export default function InicioPage() {
       }
 
       if (!complete) everIncompleteRef.current = true;
-      setShowWizard(everIncompleteRef.current ? true : !complete);
+      const wizardVisible = everIncompleteRef.current ? true : !complete;
+      if (!wizardVisible) writeWizardDone(true);
+      else if (!complete) writeWizardDone(false);
+      setShowWizard(wizardVisible);
       const pendingAlerts = Array.isArray(configurationData?.checks)
         ? configurationData.checks.filter(
             (check: ConfigurationAlert & { configured: boolean }) =>
@@ -185,7 +210,10 @@ export default function InicioPage() {
   const visibleProductCards = PRODUCT_CARDS.filter((card) => hasProductFor(card.href));
 
   useEffect(() => {
-    setHostProduct(productOfHost(window.location.hostname));
+    const currentHostProduct = productOfHost(window.location.hostname);
+    setHostProduct(currentHostProduct);
+    // Redes nunca muestra el asistente; una cuenta que ya lo completó tampoco.
+    if (currentHostProduct === "REDES" || readWizardDone()) setShowWizard(false);
     checkWizardStatus();
   }, [checkWizardStatus]);
 
