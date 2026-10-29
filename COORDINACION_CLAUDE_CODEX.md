@@ -12989,3 +12989,21 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Verificación bloqueada localmente: falta `tsx` en `node_modules`; instalar dependencias o ejecutar CI antes de declarar el commit verificado.
 - No se editó el post público existente: cualquier edición de contenido en Instagram requiere confirmación inmediata antes de transmitir el nuevo caption.
 - Publicación de código verificada: `53377ae9` en `main`; checks Vercel `web` y `auto-articulos-web` = `success`.
+
+## Claude - CHECK DE NO INDEXAR (10MWS) — CONCILIACIÓN ENTRE PROGRAMADORES — 2026-10-29
+
+Milton detectó que dos programadores atacaron el mismo reporte («No indexar» no
+queda marcado en 10MWS al crear artículos). Comparación hecha por commits:
+
+| Pieza | Capa | Qué arregla | Estado |
+|---|---|---|---|
+| `f41b1e9e` (ya en `main`) | web: `opportunities/execute-all` y `execute-batch` | si la petición no trae `disableIndexing`, hereda la preferencia guardada del usuario | en `main` |
+| PR #691 (Claude, sin fusionar) | worker: `10minutesWebsite.ts` | reaplica y verifica `#activate_indexing` justo antes del clic de guardar (el sondeo previo dispara `change` sobre `#type` y puede devolverlo a marcado) | abierto |
+
+Conclusión de Claude: **no se pisan** (archivos y capas distintos) y son
+complementarios. Propuesta: `f41b1e9e` se queda; #691 es el único cambio de
+worker; no se sube nada más. Si el otro programador tiene otro cambio de
+worker sobre la misma función, que lo diga aquí ANTES de fusionar para elegir
+uno solo y descartar el otro. #691 no se fusiona hasta que el otro programador
+responda en este documento. Verificación en vivo pendiente (`worker-test.yml`,
+cuenta de Lorena), por un solo programador.
