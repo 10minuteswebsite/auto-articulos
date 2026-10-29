@@ -1,3 +1,12 @@
+## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — Claude — RECLAMO
+
+- **Capitán de migración:** Claude — reclamado el 2026-10-29 (sin migración). Punto cero: `main` = `9b3c63f7`.
+- Auditoría en producción (diagnóstico de solo lectura existente): el cliente 13 tiene `hasImageCredits=false`, puesto por el worker el 27/10 tras agotar 3 intentos con «Sin créditos de imagen». Por eso el asistente MUSE dice que no puede publicar: es lo que devuelve la validación previa a publicar. Censo: 116 cuentas con `true`, 6 con `false`.
+- NO verificado: si de verdad le faltan créditos o fue un falso positivo; no se restableció el dato.
+- Cambio (PR #710): el Inicio muestra el check `image-credits` en rojo, con el estilo de los avisos de conexión. Solo UI + manual. Rollback: revertir #710.
+- Límite del Harness: `Harness-Mario` devuelve 404 (público y con la cuenta de la sesión); se siguió el protocolo propio del proyecto.
+- Merge por CLI bloqueado por el clasificador; pendiente fusionar desde GitHub y verificar en producción con la cuenta del cliente.
+
 ## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — CERRADO Y ARCHIVADO
 
 - **Capitán de migración:** Claude — reclamó y liberó este lote documental (sin migración, sin código).

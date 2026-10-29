@@ -1,3 +1,7 @@
+## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — PR #710 abierto, sin fusionar
+
+El Inicio mostrará en rojo «Sin créditos de imagen» cuando `hasImageCredits=false`. Sin migración. Verificación en producción PENDIENTE (requiere fusionar el PR y mirar el Inicio con la cuenta afectada). Rollback: revertir #710. Capitanía reclamada por Claude hasta verificar.
+
 ## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — CERRADO
 
 Resuelto y confirmado por Milton con la cuenta afectada (2026-10-29). Código

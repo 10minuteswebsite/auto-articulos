@@ -135,7 +135,7 @@ export default function InicioPage() {
         ? configurationData.checks.filter(
             (check: ConfigurationAlert & { configured: boolean }) =>
               showReconnectAlert &&
-              ["google-search-console-reconnect", "google-analytics-reconnect", "bing-reconnect", "location"].includes(check.id) && !check.configured,
+              ["google-search-console-reconnect", "google-analytics-reconnect", "bing-reconnect", "location", "image-credits"].includes(check.id) && !check.configured,
           )
         : [];
       setConfigurationAlerts(pendingAlerts);
@@ -227,6 +227,7 @@ export default function InicioPage() {
         const isAnalytics = alert.id === "google-analytics-reconnect";
         const isLocation = alert.id === "location";
         const isBing = alert.id === "bing-reconnect";
+        const isImageCredits = alert.id === "image-credits";
         const tone = isLocation
           ? { border: "#0071e3", background: "#f0f7ff", color: "#00458f", button: "#0071e3" }
           : isAnalytics
@@ -252,10 +253,12 @@ export default function InicioPage() {
           >
             <div style={{ flex: "1 1 260px", minWidth: 0 }}>
               <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                {isLocation ? "Una sola vez · Tu ubicación" : isBing ? "CAMBIO DE PROVEEDOR · Bing Webmaster Tools" : isAnalytics ? "PASO 2 DE 2 · Google Analytics" : "PASO 1 DE 2 · Google Search Console"}
+                {isLocation ? "Una sola vez · Tu ubicación" : isImageCredits ? "Sin créditos de imagen" : isBing ? "CAMBIO DE PROVEEDOR · Bing Webmaster Tools" : isAnalytics ? "PASO 2 DE 2 · Google Analytics" : "PASO 1 DE 2 · Google Search Console"}
               </p>
               <p style={{ margin: 0, fontSize: 15, fontWeight: 800, lineHeight: 1.45, overflowWrap: "anywhere" }}>
-                {isLocation || isBing ? "" : "SOLICITUD DE ACTUALIZACIÓN: "}{(alert.description ?? alert.label).trim()}
+                {isImageCredits
+                  ? "No puedes publicar hasta tener créditos de imagen. Solicítalos y, cuando te los den, confírmalo en Publicar con el botón «Ya recibí mis créditos»."
+                  : `${isLocation || isBing ? "" : "SOLICITUD DE ACTUALIZACIÓN: "}${(alert.description ?? alert.label).trim()}`}
               </p>
             </div>
             <Link
@@ -272,7 +275,7 @@ export default function InicioPage() {
                 whiteSpace: "nowrap",
               }}
             >
-              {isLocation ? "Indicar mi ubicación" : "Reconectar ahora"}
+              {isLocation ? "Indicar mi ubicación" : isImageCredits ? "Solicitar créditos" : "Reconectar ahora"}
             </Link>
           </div>
         );
