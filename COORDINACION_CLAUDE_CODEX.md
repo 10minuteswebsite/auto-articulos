@@ -1,3 +1,10 @@
+## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — Claude — CERRADO
+
+- PR #710 (`1c33e100`) en `main`, Vercel web y auto-articulos-web en success. Sin migración. Rollback: revertir #710.
+- Verificado en producción el 2026-10-29 en el navegador de Milton, ya con la sesión del cliente 13: `/api/me` devuelve `hasImageCredits:false`, `configuration-status` marca `image-credits` sin configurar, y el Inicio muestra el aviso rojo «Sin créditos de imagen» con el botón «Solicitar créditos», sobre las tarjetas.
+- Observación: el Inicio no pinta nada hasta que responden 5 peticiones (`/api/configuration-status` tardó ~4,5 s, `/api/me` ~2 s); en la primera carga se ve vacío unos 10 s. No se tocó.
+- NO verificado: si al cliente de verdad le faltan créditos (no se restableció su dato ni se probó publicar). Capitanía liberada por Claude.
+
 ## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — Claude — RECLAMO
 
 - **Capitán de migración:** Claude — reclamado el 2026-10-29 (sin migración). Punto cero: `main` = `9b3c63f7`.
