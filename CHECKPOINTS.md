@@ -1,3 +1,19 @@
+## HISTORIAL-INDEXACION-SIMPLE-20261029 — publicado y verificado en producción
+
+Código `22cb96b9` (PR #694) en `main`, Vercel web y auto-articulos-web success.
+Pedido de Milton: el Historial daba demasiada información de indexación. Ahora
+cada artículo muestra solo Google («Sitemap enviado a Google» verde / «Sitemap
+por enviar a Google» gris + nota «un envío al día» + «Enviar ahora») y Bing
+(«Artículo enviado a Bing» / «Artículo por enviar a Bing» + «Enviar ahora»).
+Un envío manual a Google marca todos los artículos publicados del usuario
+(`/api/sitemap/send`). Quitados el error rojo de inspección y «Comprobar
+indexación». Sin migraciones. Manual actualizado. Primer build falló por un
+`fechaCorta` sin usar (mío); corregido y tipos limpios.
+Verificado en producción: el bundle servido en articulos.lasolucionweb.net trae
+el texto nuevo y ya no el viejo. NO verificado: vista con artículos reales
+(cuenta de prueba sin ejecuciones; falta ver con Lorena) ni el clic de «Enviar
+ahora». Capitanía liberada. Responsable: Claude.
+
 ## MCP-AUTH-FIX-20261027 — cierre verificado20:14 EDT
 
 Punto de continuación: código620e0cc9, Vercel7wM3UkkfJHLUe9jstGuZSm5wHMVV
