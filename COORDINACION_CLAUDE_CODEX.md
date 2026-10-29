@@ -13073,3 +13073,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-10-29: Redes, mensajes de foto claros y revisión previa de foto (sin migración). Liberación al verificar en producción.
 
 - **Capitán de migración:** liberado por Claude — 2026-10-29: Redes (PR #698 y #703), sin migración.
+
+- **Capitán de migración:** Claude — 2026-10-29: altas del Hub (región .site/.net y prompt problema-solución por defecto). Migración 20261029190000_platform_domain_confirmed_default_prompt: aplicar en producción ANTES de fusionar el PR.

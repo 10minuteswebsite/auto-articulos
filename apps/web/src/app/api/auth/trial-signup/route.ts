@@ -7,6 +7,7 @@ import { TRIAL_DAYS } from "@/lib/trial";
 import { ensureDefaultEntitlements } from "@/lib/product-access";
 import { applyCookie } from "@/lib/shared-cookies";
 import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
+import { newUserDefaultPromptData } from "@/lib/default-prompt";
 
 // Registro público desde el botón "Solicitar prueba" en Login — pedido
 // explícito del usuario, 13/8/2026. A diferencia de POST /api/admin/users
@@ -100,6 +101,8 @@ export async function POST(request: NextRequest) {
       passwordHash,
       initialPasswordEncrypted,
       platformDomain,
+      platformDomainConfirmedAt: new Date(),
+      ...(await newUserDefaultPromptData()),
       isTrialSignup: true,
       trialStartedAt: new Date(),
       trialUnlocked: false,

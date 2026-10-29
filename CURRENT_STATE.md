@@ -758,3 +758,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Decisión de Milton pendiente (no corregido): una propuesta con estado `error` cuenta como «usada» para ese artículo y esa red y no se vuelve a ofrecer.
 - Fuera de alcance: el texto generado a veces inventa anécdotas (fórmula «Historia personal»).
 - Lorena no se diagnosticó.
+
+# Altas desde el Hub: servidor y prompt por defecto — 2026-10-29
+
+- Hallazgo: el Hub (`auth/hub` y `integrations/hub/access-sync`) no manda continente; esas cuentas quedaban siempre en `.net`. Ninguna alta (Hub, registro de prueba, administración) guardaba `defaultPromptId`: el lote del 19/10 solo cubrió cuentas existentes ese día.
+- Cambio (código local, sin fusionar): campo `User.platformDomainConfirmedAt`; las altas del Hub quedan sin confirmar y el panel pregunta una vez «Europa / Resto del mundo» (`RegionQuestionScreen`, `POST /api/me/region`; Europa -> `site`, resto -> `net`; nunca a administradores ni «Acceder como»). Las cuatro altas guardan «GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION» (`lib/default-prompt.ts`).
+- Migración `20261029190000_platform_domain_confirmed_default_prompt`: agrega la columna, marca TODAS las cuentas existentes como confirmadas (no se les pregunta nada) y asigna el prompt a las cuentas creadas desde el 19/10/2026 19:00 UTC con estándar. Limitación: no distingue a quien eligió el estándar a propósito después de esa fecha.
+- ORDEN OBLIGATORIO: aplicar la migración en producción ANTES de fusionar (incidente del 16/9: el build no corre `migrate deploy`; sin la columna `/dashboard` da 500).
+- Pendiente: PR, migración, CI, fusión y verificación con una cuenta nueva del Hub. Las cuentas del Hub ya existentes en Europa siguen en `.net`.
