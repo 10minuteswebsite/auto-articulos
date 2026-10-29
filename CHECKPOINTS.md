@@ -647,3 +647,9 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
   salida al primer candidato válido.
 - No se revirtió ninguna adhesión de hoy. E2E autenticado aún pendiente.
 
+## Checkpoint — REDES-GENERACION-ESPERA-20261029 — CERRADO Y ARCHIVADO
+
+- Confirmación funcional de Milton en producción: «ok funcionó».
+- Punto cero final: `main` en `3391990b`; sin migración ni cambios de datos.
+- Capitanía liberada. Reabrir únicamente con un caso nuevo.
+

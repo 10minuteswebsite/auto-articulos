@@ -5767,3 +5767,10 @@ valores — 2026-10-19").
 - Publicado directamente en `main`; sin migraciones ni cambios de datos.
 - E2E autenticado pendiente.
 
+## Cierre — REDES-GENERACION-ESPERA-20261029
+
+- Código `82ca8b0c` y documentación `3391990b` publicados en `main`.
+- Producción confirmada funcionalmente por Milton después de la corrección.
+- Sin migración. Estado: CERRADO Y ARCHIVADO. Rollback: revertir `82ca8b0c` si
+  aparece una regresión nueva y reproducible.
+

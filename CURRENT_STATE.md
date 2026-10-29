@@ -837,3 +837,13 @@ Rollback: revertir el PR (las tablas nuevas pueden quedarse).
 - Publicado directamente en `main`; sin migración ni datos. Falta repetir la
   prueba autenticada con una cuenta de Redes.
 
+## REDES-GENERACION-ESPERA-20261029 — CERRADO Y ARCHIVADO
+
+- Milton confirmó en producción que «Crear propuestas» volvió a funcionar.
+- Punto cero final: `main` en `3391990b`; corrección funcional `82ca8b0c`.
+- Se conserva todo lo añadido hoy: validación de URL/foto, generación paralela,
+  timeout seguro y mensaje de error no JSON. La regresión fue acotada sin
+  revertir esos cambios.
+- Sin migración ni cambios de datos. Task archivado; reabrir solo con un caso
+  nuevo.
+

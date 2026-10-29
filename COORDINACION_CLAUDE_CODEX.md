@@ -13114,3 +13114,10 @@ ARCHIVADA. Responsable: Claude.
 - Publicado en `main`; E2E autenticado pendiente de una cuenta habilitada para
   Redes.
 
+## REDES-GENERACION-ESPERA-20261029 — cierre final — Codex
+
+- Milton confirmó que la generación volvió a funcionar en producción.
+- Cierre: `82ca8b0c` (código) y `3391990b` (documentación) en `main`.
+- Se libera la capitanía. No quedan acciones funcionales ni reservas abiertas.
+- No reabrir salvo nueva evidencia del mismo flujo.
+
