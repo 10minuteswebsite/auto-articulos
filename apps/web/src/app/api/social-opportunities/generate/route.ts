@@ -439,7 +439,11 @@ async function selectTrendingArticles(userId: string): Promise<{ candidates: Art
   // Redes y limita la concurrencia contra el sitio público de la cuenta. Solo
   // un 404/410 o una página completa sin og:image descartan el artículo; un
   // bloqueo, timeout o error no prueba nada (ver lib/social-article-url.ts).
-  for (let index = 0; index < ranked.length; index += 8) {
+  // Solo hace falta encontrar un candidato válido: después el flujo crea como
+  // máximo una propuesta por red. Inspeccionar todos los artículos publicados
+  // hacía que esta protección agotara el timeout antes de generar propuestas.
+  const maxArticlesToInspect = 24;
+  for (let index = 0; index < Math.min(ranked.length, maxArticlesToInspect); index += 8) {
     const batch = ranked.slice(index, index + 8);
     const states = await Promise.all(batch.map(({ article }) => inspectArticlePage(article.articleUrl!)));
     batch.forEach((candidate, batchIndex) => {
@@ -450,6 +454,7 @@ async function selectTrendingArticles(userId: string): Promise<{ candidates: Art
         if (noImageTitles.length < 3) noImageTitles.push(candidate.article.finalTitle || candidate.article.articleUrl || "Sin título");
       } else verified.push(candidate);
     });
+    if (verified.length > 0) break;
   }
 
   const candidates = verified.map(({ article }): ArticleCandidate => ({

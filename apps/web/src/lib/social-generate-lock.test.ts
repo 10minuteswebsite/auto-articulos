@@ -25,6 +25,12 @@ test("generar propuestas: no serializa una llamada de IA por red", () => {
   assert.match(source, /export const maxDuration = 60/);
 });
 
+test("generar propuestas: no inspecciona todos los artículos antes de crear", () => {
+  const source = readFileSync(join(process.cwd(), "src/app/api/social-opportunities/generate/route.ts"), "utf8");
+  assert.match(source, /const maxArticlesToInspect = 24/);
+  assert.match(source, /if \(verified\.length > 0\) break/);
+});
+
 test("borrar pendientes: los marca descartados en vez de eliminarlos", () => {
   const source = readFileSync(join(process.cwd(), "src/app/api/social-opportunities/route.ts"), "utf8");
   assert.match(source, /if \(scope === "pending"\)[\s\S]*?socialOpportunity\.updateMany/s);
