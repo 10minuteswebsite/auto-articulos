@@ -1,3 +1,11 @@
+## ENTRADA-SIN-ESPERA-20261029 — publicado y verificado
+
+Código `9c136189` (PR #712), Vercel web y auto-articulos-web success. Sin migración. Rollback: revertir #712.
+Punto cero medido (carga nueva desde el HUB): documento 11,8 s, 12 llamadas simultáneas (`/api/me` ×5) de hasta 13 s, tarjetas a los 27 s. Causa: la revalidación con el Hub (sin timeout) repetía consulta, transacción y UPDATE en cada petición. (Los 500 vistos antes eran de #708 sin su migración; ya revertido en #709.)
+Cambio: `hub-sync.ts` sin consulta ni escritura si la decisión tiene <60 s, una revalidación compartida, timeout 3 s, fallo recordado 30 s; Inicio pinta tarjetas al instante si el asistente ya está completo (marca en localStorage `inicio-wizard-complete`) o en Redes.
+Verificado en producción (cuenta real, navegador interno): documento 2,7–4,3 s en frío, 0,58 s en caliente; tarjetas 0,3 s después del documento. Prueba nueva `hub-sync-access.test.ts` PASS.
+Residual: tras >60 s sin uso queda ~3 s por la consulta real al Hub y el arranque en frío; mejora posible: servir la decisión vencida y revalidar en segundo plano. Primera visita sin marca en el navegador sigue esperando a las APIs. No verificado: cuenta sin acceso a Redes (su tarjeta podría verse un instante).
+
 ## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — PR #710 abierto, sin fusionar
 
 El Inicio mostrará en rojo «Sin créditos de imagen» cuando `hasImageCredits=false`. Sin migración. Verificación en producción PENDIENTE (requiere fusionar el PR y mirar el Inicio con la cuenta afectada). Rollback: revertir #710. Capitanía reclamada por Claude hasta verificar.
