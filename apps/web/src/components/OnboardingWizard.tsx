@@ -1,5 +1,6 @@
 "use client";
 
+import LocationStep from "@/components/LocationStep";
 import { MENU_NAMES } from "@/lib/menu-names";
 import { useEffect, useState, useCallback, useRef, type FormEvent } from "react";
 import Link from "next/link";
@@ -49,6 +50,9 @@ export default function OnboardingWizard({
   // Vacío a propósito hasta que /api/me diga el servidor real: mientras
   // tanto el texto usa el término genérico y nunca la marca equivocada.
   const [platformDomain, setPlatformDomain] = useState<string>("");
+  // Cuenta nueva del Hub: primero se pide la ubicación (de ella salen el servidor y el país de los artículos).
+  const [locationRequired, setLocationRequired] = useState(false);
+  const [savedLocation, setSavedLocation] = useState({ country: "", city: "", timeZone: "" });
   const [selectedSitePanel, setSelectedSitePanel] = useState("");
   const [siteSelectionConfirmed, setSiteSelectionConfirmed] = useState(false);
   // Detección REAL de sitios/paneles antes de confirmar dominio (ver
@@ -168,6 +172,8 @@ export default function OnboardingWizard({
         const lang = data.contentLanguage || "";
         setContentLanguage(lang);
         setSelectedLang(lang || "es");
+        setLocationRequired(data.locationRequired === true);
+        setSavedLocation({ country: data.country ?? "", city: data.city ?? "", timeZone: data.timeZone ?? "" });
         if (typeof data.platformDomain === "string") {
           setPlatformDomain(data.platformDomain);
         }
@@ -655,6 +661,8 @@ export default function OnboardingWizard({
       </div>
     );
   }
+
+  if (locationRequired) return <LocationStep initial={savedLocation} />;
 
   return (
     <div style={{ marginTop: 24, marginBottom: 24 }}>
