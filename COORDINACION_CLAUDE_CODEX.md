@@ -1,3 +1,7 @@
+## BLOG-IA-LONGITUD-20261027 — Claude — FUSIONADO (PR #690), Worker por desplegar
+
+- Capitanía liberada. Sin migraciones. Pendiente de quien despliegue: `worker.yml` sobre `main` y prueba con Lorena. BLOG IA vive en `10minuteswebsite/blog-ia`; aquí solo queda el conector.
+
 ## Coordinación — BLOG IA: longitud mínima de 1,000 palabras (Claude) — 2026-10-27
 
 - Task `BLOG-IA-LONGITUD-20261027`. Pedido de Milton: artículos de BLOG IA con mínimo 1,000 palabras. **Capitán de migración:** Claude, sin migración (no hay tablas ni columnas nuevas).

@@ -1,3 +1,15 @@
+## BLOG-IA-LONGITUD-20261027 — fusionado; Worker SIN desplegar
+
+PR #690 fusionado en `main` (`27525996`). BLOG IA genera 1,000–1,400 palabras
+(`BLOG_IA_LENGTH`); el resto de salidas conserva el tope de 1,200. 4 pruebas nuevas
+PASS. Verificado: fusión limpia, Vercel de ese commit pendiente al cerrar.
+NO verificado en producción: el generador vive en el Worker de Auto Artículos, que
+se despliega a mano (`worker.yml`, workflow_dispatch); el último despliegue
+(`4928fc5`) NO incluye este cambio. Hasta lanzarlo, los artículos de BLOG IA siguen
+con el largo anterior. Siguiente punto cero: lanzar `worker.yml` sobre `main` y
+publicar un artículo de prueba por BLOG IA contando palabras. Estilo «Guías» de
+Lorena sigue sin poner. Responsable: Claude.
+
 ## CREDITOS-IMAGEN-ANTONIO-20261029 — CERRADO
 
 Cliente 13: créditos de imagen confirmados por publicación real (1/1 publicado). El aviso de MUSE venía de un `hasImageCredits=false` heredado del 27/10. Ya en `true`. Sin código.

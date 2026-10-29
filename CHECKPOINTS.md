@@ -1,3 +1,7 @@
+## Checkpoint — BLOG-IA-LONGITUD-20261027 — fusionado, Worker pendiente — 2026-10-29
+
+- PR #690 en `main` (`27525996`). Falta desplegar `worker.yml` y probar un artículo real de BLOG IA (≥1,000 palabras). Ver CURRENT_STATE.
+
 ## Checkpoint — Oportunidades sin evidencia — CERRADO 2026-10-29
 
 - Task `OPORTUNIDADES-SIN-EVIDENCIA-20261029`: resuelto y confirmado por Milton en la cuenta afectada. Código `2f2b862d` en `main`. Archivado; capitanía liberada.
