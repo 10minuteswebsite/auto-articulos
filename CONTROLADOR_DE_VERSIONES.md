@@ -5774,3 +5774,9 @@ valores — 2026-10-19").
 - Sin migración. Estado: CERRADO Y ARCHIVADO. Rollback: revertir `82ca8b0c` si
   aparece una regresión nueva y reproducible.
 
+
+## TITULOS-DEL-SITIO-EN-SUPABASE-20261029
+
+PR #706, merge `90aaf0a6` en `main`, Vercel READY. Migración
+`20261029180000_site_article_titles` aplicada a mano antes del merge. Rollback:
+revertir #706; las tablas nuevas pueden quedarse.

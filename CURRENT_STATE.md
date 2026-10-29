@@ -801,28 +801,28 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Origen: traspaso de otro programador (archivado por Milton); solo diagnóstico, sin código. Responsable ahora: Claude (esta sesión).
 - Verificado en código: el prompt del worker usa solo `targetLanguage` (`generateCustomArticle.ts:113`); `describeContentLanguage` descarta la región; `User.country` no llega al prompt.
 - Pendiente de Milton: aprobar la regla y la fuente de país antes de implementar. Sin implementar. Las cuentas del Hub no traen país.
-## TITULOS-DEL-SITIO-EN-SUPABASE-20261029 — preparado, pendiente de migración y publicación
+## TITULOS-DEL-SITIO-EN-SUPABASE-20261029 — CERRADO Y ARCHIVADO (E2E real pendiente)
 
-Pedido de Milton tras aviso de 10minutesWebsite (lecturas excesivas del listado).
-Hallazgo: el análisis de Oportunidades NO toca 10MWS; la carga venía del worker
-de publicación (login por artículo, listado cada 1,5 s hasta 90 s, hasta 3
-intentos, hasta 40 lanes). Cambios: (1) tablas `SiteArticleTitle` y
-`SiteTitleSeed` (solo título y enlace; llenado ÚNICO desde el sitemap de
-SearchIntegration/Composio, sin sitemap no se llena; aditivo con cada
-publicación); (2) la guardia anti-canibalización (web, Publicar y worker) y el
-análisis de Oportunidades usan esa tabla además de `Title`; (3) espera
-progresiva en la verificación posterior al guardado (~8 cargas en vez de ~60).
-Migración `20261029180000_site_article_titles` (solo tablas nuevas): aplicar
-ANTES o junto con el merge. Pruebas: 5 nuevas PASS, tipos limpios. Falla ajena
-y previa: `paidApiGuard` por `blogCoverImage.ts`. NO verificado en producción.
-Rollback: revertir el PR (las tablas nuevas pueden quedarse).
+PR #706, merge `90aaf0a6` en `main`; Vercel web READY; worker en Actions toma
+`main` en cada corrida (corridas posteriores en success, sin errores de tabla).
+Causa medida en código: el análisis de Oportunidades NO toca 10MWS; la carga
+venía de la publicación (login por artículo, listado cada 1,5 s hasta 90 s,
+hasta 3 intentos, hasta 40 lanes). Hecho: (1) tablas `SiteArticleTitle` y
+`SiteTitleSeed` (solo título y enlace); llenado ÚNICO desde el sitemap de
+SearchIntegration/Composio, sin sitemap no se llena, aditivo con cada
+publicación; (2) anticanibalización de Publicar, Oportunidades y worker usa
+esas tablas además de `Title`; (3) espera progresiva tras guardar (~8 cargas
+del listado en 90 s en vez de ~60). Lecturas tolerantes y tope de 8 s: nunca
+bloquea un artículo. Migración `20261029180000_site_article_titles` aplicada a
+mano por Milton en Supabase (solo tablas nuevas + RLS; `migrate.yml` abortó por
+deriva previa `allowDevToPublishing`, sin aceptar pérdida de datos).
+Verificado: tipos web y worker limpios, 306 pruebas web y 6 nuevas PASS.
+NO verificado: lectura real del sitemap con una cuenta (SiteTitleSeed «done»)
+ni medición de lecturas por publicación en 10MWS. No cubierto: tope de sesiones
+simultáneas contra 10MWS (hasta 40 lanes). Falla previa ajena: `paidApiGuard`
+por `blogCoverImage.ts`. Rollback: revertir #706 (las tablas pueden quedarse).
+Responsable: Claude. Capitanía liberada.
 
-# INCIDENTE 29/10/2026 — PR #708 tumbó el panel (500) — revertido con #709
-
-- Síntoma: tras fusionar #708, `/dashboard`, `/api/me` y `configuration-status` dieron 500 durante varios minutos. Rollback: PR #709; servicio recuperado.
-- Causa (registros de Vercel, 11:04): `PrismaClientKnownRequestError P2022 — The column User.platformDomainConfirmedAt does not exist in the current database`. La columna estaba declarada en `schema.prisma`, así que entraba en TODA consulta de `User`; la base que usa la app no la tenía al desplegar, aunque Milton dice haber ejecutado el SQL (ahora Supabase sí la muestra: se aplicó después o en otro proyecto/esquema; sin confirmar).
-- Corrección (v2): `platformDomainConfirmedAt` YA NO está en `schema.prisma`; se lee/escribe solo con SQL directo y a prueba de fallos (`lib/platform-domain-confirmation.ts`, mismo patrón que `disableIndexing`). Si la columna falta, la app sigue funcionando y simplemente no pregunta la ubicación. La migración `20261029190000` sigue siendo necesaria para que la pregunta funcione.
-- Regla aprendida: NUNCA declarar en `schema.prisma` una columna que la base de producción aún no tiene; y verificar con una consulta a `information_schema` ANTES de fusionar, no solo confiar en «ya la apliqué».
 ## REDES-GENERACION-ESPERA-20261029 — código publicado; E2E autenticado pendiente
 
 - Punto cero: `main`/producción servía `fc812368`; la ruta de propuestas podía
