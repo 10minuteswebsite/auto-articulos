@@ -66,6 +66,8 @@ export async function GET() {
       clientLocations: user.clientLocations,
       businessLocations: user.businessLocations,
       country: user.country,
+      // Cuenta nueva del Hub sin región confirmada: el asistente inicial pide la ubicación primero.
+      locationRequired: user.role !== "admin" && !user.platformDomainConfirmedAt,
       city: user.city,
       timeZone: user.timeZone,
       excludedTopics: user.excludedTopics,

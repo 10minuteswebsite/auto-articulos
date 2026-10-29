@@ -41,6 +41,7 @@ export async function getCurrentUser() {
       clientLocations: true,
       businessLocations: true,
       country: true,
+      platformDomainConfirmedAt: true,
       city: true,
       timeZone: true,
       excludedTopics: true,

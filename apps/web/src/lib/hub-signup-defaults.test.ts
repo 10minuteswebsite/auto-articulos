@@ -47,3 +47,14 @@ test("la migración confirma las cuentas existentes y corrige solo las nuevas si
   assert.match(sql, /UPDATE "User" SET "platformDomainConfirmedAt" = NOW\(\)/);
   assert.match(sql, /"defaultPromptId" IS NULL\s+AND "createdAt" >= TIMESTAMP '2026-10-19 19:00:00'/);
 });
+
+test("el asistente inicial pide la ubicación primero a las cuentas nuevas del Hub", () => {
+  const wizard = read("src/components/OnboardingWizard.tsx");
+  assert.match(wizard, /setLocationRequired\(data\.locationRequired === true\)/);
+  assert.match(wizard, /if \(locationRequired\) return <LocationStep initial=\{savedLocation\} \/>/);
+  const me = read("src/app/api/me/route.ts");
+  assert.match(me, /locationRequired: user\.role !== "admin" && !user\.platformDomainConfirmedAt/);
+  const step = read("src/components/LocationStep.tsx");
+  assert.match(step, /method: "PATCH"/);
+  assert.match(step, /country, city: city\.trim\(\), timeZone/);
+});
