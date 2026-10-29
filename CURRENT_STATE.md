@@ -746,3 +746,15 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Revisión previa: `inspectArticlePage()` (`lib/social-article-url.ts`) descarta del listado los artículos con 404/410 o con página completa sin `og:image`; 403/5xx/timeout/página a medias no descartan. El aviso de lista vacía distingue: sin artículos / URL caída / sin foto / ya usados.
 - No cambiado a propósito: el mensaje «proceso interrumpido» de `cleanup.ts` (la causa real de un proceso muerto es desconocida) y el hecho de que una propuesta con error cuenta como «usada» (decisión de Milton pendiente).
 - Pruebas: 26 pasan (`social-article-url`, `friendly-publish-error`, `social-language`). Pendiente: CI de Vercel, deployment y verificación en producción con realestatemov.
+
+# Cierre — Redes «No hay artículos disponibles» falso (PR #698 y #703) — 2026-10-29
+
+- PR #698 (1bbf65e5) y PR #703 (0d2ffc45) en producción, CI verde.
+- Verificación en producción vía Hub con impersonación de milton:
+  - Rosa María Bello (business.rosabello@gmail.com): 6 propuestas publicadas, 0 pendientes. «Crear propuesta» en LinkedIn generó 1 propuesta con artículo real; quedó pendiente, sin publicar.
+  - MCV Real Estate (realestatemov@gmail.com, cuenta del aviso original): 20 propuestas (publicadas y con error). «Crear propuesta» en LinkedIn y en Pinterest generaron propuestas con artículos que sí tienen foto; quedaron pendientes, sin publicar.
+- No se vio el estado previo al arreglo en esas cuentas: no está probado que el filtro de dominio fuera la causa; sí está probado que hoy genera.
+- Causa de los 9 «sin publicar» de realestatemov: 3 artículos de movrealestate.com no declaran `og:image`. Lo resuelve en mensajes el PR #703; la foto de esos artículos se arregla en su sitio.
+- Decisión de Milton pendiente (no corregido): una propuesta con estado `error` cuenta como «usada» para ese artículo y esa red y no se vuelve a ofrecer.
+- Fuera de alcance: el texto generado a veces inventa anécdotas (fórmula «Historia personal»).
+- Lorena no se diagnosticó.
