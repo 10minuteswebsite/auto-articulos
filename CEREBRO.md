@@ -1,3 +1,13 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — decisión
+
+Medir antes de arreglar: las hipótesis iniciales (consulta única de Composio,
+caché corta) no eran la causa; el censo mostró que el resolvedor ignora Composio
+para Search Console. Se eligió la regla conservadora (la propia sana gana;
+Composio como relevo) porque preferir Composio siempre habría movido a 51
+usuarios que hoy funcionan. El diagnóstico de solo lectura vive en
+`apps/worker/src/diagnose-opportunities-composio.ts` (entrada `censo` o huellas
+de correo; nunca imprime datos personales: el repositorio es público).
+
 ## MCP-USE-CASES-20261029 — decisión arquitectónica
 
 El backend ya soportaba editar una propuesta social pendiente y actualizar

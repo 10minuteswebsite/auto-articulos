@@ -1,3 +1,7 @@
+## Checkpoint — Oportunidades sin evidencia — 2026-10-29
+
+- Task `OPORTUNIDADES-SIN-EVIDENCIA-20261029`; código `2f2b862d` en `main`, desplegado. Pendiente: probar «Analizar» con una cuenta solo-Composio. Capitanía liberada.
+
 ## Checkpoint — MCP/Cloudflare 1010 cerrado — 2026-10-29
 
 - Task `MCP-ORIGIN-403-20261027`; el 403 de MUSE (Cloudflare 1010) quedó resuelto por otra instancia, verificado en producción. Sin commits pendientes de esta sesión.

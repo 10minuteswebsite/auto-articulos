@@ -1,3 +1,15 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — LIBERACIÓN
+
+- **Capitán de migración liberó el lote:** Claude. Código `2f2b862d` (PR #701)
+  publicado en `main`, Vercel web y auto-articulos-web en success. Sin
+  migraciones. Verificación funcional con una cuenta real: PENDIENTE (requiere
+  pulsar «Analizar» con una cuenta que solo tenga Composio; no se suplantó a nadie).
+- Fallo heredado ajeno a este lote: `social-language.test.ts` falla también sin
+  estos cambios (288/290 pruebas pasan).
+- Límite del Harness: `Harness-Mario` devolvió 404 (público y con la cuenta de
+  GitHub de la sesión); no se pudo leer `IA_JOURNEY.md`. Se siguió el protocolo
+  propio del proyecto.
+
 ## MCP-USE-CASES-20261029 — Codex — preparación
 
 Trabajo en `main`, sobre `origin/main` `9a685bb9`. Cambio preparado en catálogo
