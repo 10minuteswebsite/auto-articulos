@@ -18,6 +18,13 @@ test("generar propuestas: conserva descartes como memoria editorial", () => {
   assert.doesNotMatch(source, /status:\s*\{\s*not:\s*"skipped"\s*\}/);
 });
 
+test("generar propuestas: no serializa una llamada de IA por red", () => {
+  const source = readFileSync(join(process.cwd(), "src/app/api/social-opportunities/generate/route.ts"), "utf8");
+  assert.match(source, /const generatedCopies = await Promise\.all\(copyJobs\)/);
+  assert.match(source, /AbortSignal\.timeout\(OPENAI_TIMEOUT_MS\)/);
+  assert.match(source, /export const maxDuration = 60/);
+});
+
 test("borrar pendientes: los marca descartados en vez de eliminarlos", () => {
   const source = readFileSync(join(process.cwd(), "src/app/api/social-opportunities/route.ts"), "utf8");
   assert.match(source, /if \(scope === "pending"\)[\s\S]*?socialOpportunity\.updateMany/s);

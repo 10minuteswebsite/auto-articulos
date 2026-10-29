@@ -24,6 +24,12 @@ import { inspectArticlePage } from "@/lib/social-article-url";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
+// La generación de Redes hace varias llamadas externas. El límite explícito
+// evita que una función de Vercel se quede esperando hasta devolver HTML de
+// timeout al navegador.
+export const maxDuration = 60;
+const OPENAI_TIMEOUT_MS = 20_000;
+
 // Bloqueo global temporal: los carruseles permanecen en historial, pero no se generan nuevas propuestas.
 const INSTAGRAM_CAROUSELS_ENABLED = false;
 
@@ -125,6 +131,7 @@ async function generateGPTCopy(
   try {
     const callModel = (extraMessages: Array<{ role: "assistant" | "user"; content: string }>) => fetch(OPENAI_CHAT_URL, {
       method: "POST",
+      signal: AbortSignal.timeout(OPENAI_TIMEOUT_MS),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${OPENAI_API_KEY}`,
@@ -751,32 +758,42 @@ export async function POST(request: Request) {
     const createdOpportunities: any[] = [];
     const googleAnalyticsContext = JSON.stringify(summarizeGoogleAnalyticsSignals(await getGoogleAnalyticsSignals(userId)));
 
-    for (const article of candidates) {
-      for (const platform of integrationsWithinLimit) {
-        if ((remainingByPlatform.get(platform) ?? 0) <= 0) continue;
-        const opportunityKey = `${article.id}:${normalizePlatform(platform)}`;
-        if (activeKeys.has(opportunityKey)) continue;
+    // Las redes no dependen unas de otras. Generar sus copys en paralelo
+    // reduce el tiempo total de N llamadas de IA a la duración de la más lenta
+    // y evita que «Crear propuestas» alcance el timeout de la función.
+    const copyJobs = candidates.flatMap((article) =>
+      integrationsWithinLimit
+        .filter((platform) => (remainingByPlatform.get(platform) ?? 0) > 0 && !activeKeys.has(`${article.id}:${platform}`))
+        .map(async (platform) => ({
+          article,
+          platform,
+          copyText: await generateGPTCopy(
+            platform,
+            article.finalTitle || article.text,
+            article.summary || "",
+            article.searchQueries,
+            googleAnalyticsContext,
+            editorialUser ? {
+              name: [editorialUser.firstName, editorialUser.lastName].filter(Boolean).join(" ") || editorialUser.name || null,
+              businessLocations: editorialUser.businessLocations,
+              contentLanguage: editorialUser.contentLanguage,
+            } : undefined,
+          ),
+        })),
+    );
+    const generatedCopies = await Promise.all(copyJobs);
 
-      const profile = editorialUser ? {
-        name: [editorialUser.firstName, editorialUser.lastName].filter(Boolean).join(" ") || editorialUser.name || null,
-        businessLocations: editorialUser.businessLocations,
-        contentLanguage: editorialUser.contentLanguage,
-      } : undefined;
-      const copyText = await generateGPTCopy(
-        platform,
-        article.finalTitle || article.text,
-        article.summary || "",
-        article.searchQueries,
-        googleAnalyticsContext,
-        profile,
-      );
+    for (const { article, platform, copyText } of generatedCopies) {
+      if ((remainingByPlatform.get(platform) ?? 0) <= 0) continue;
+      const opportunityKey = `${article.id}:${normalizePlatform(platform)}`;
+      if (activeKeys.has(opportunityKey)) continue;
 
-        // Serializa por usuario + URL + red/formato para que dos clics
-        // simultáneos no creen la misma oportunidad. Se mantiene dentro de
-        // una transacción y no requiere confiar solo en el estado local de
-        // activeKeys.
-        const lockKey = `${userId}:${article.articleUrl || article.id}:${platform}`;
-        const opp = await prisma.$transaction(async (tx) => {
+      // Serializa por usuario + URL + red/formato para que dos clics
+      // simultáneos no creen la misma oportunidad. Se mantiene dentro de
+      // una transacción y no requiere confiar solo en el estado local de
+      // activeKeys.
+      const lockKey = `${userId}:${article.articleUrl || article.id}:${platform}`;
+      const opp = await prisma.$transaction(async (tx) => {
           // $executeRawUnsafe, no $queryRawUnsafe: pg_advisory_xact_lock devuelve
           // `void` y Prisma no puede leer esa columna (500 en producción desde 2026-10-06).
           await tx.$executeRawUnsafe("SELECT pg_advisory_xact_lock(hashtext($1))", lockKey);
@@ -804,20 +821,19 @@ export async function POST(request: Request) {
               status: "pending",
             },
           });
-        });
-        if (!opp) {
-          activeKeys.add(opportunityKey);
-          continue;
-        }
-
-        // La imagen la genera el worker (processNextOpportunityImage) en
-        // background para no agotar el timeout de Vercel Functions con la
-        // llamada a DALL-E. El usuario la ve aparecer automáticamente.
-
-        createdOpportunities.push(opp);
+      });
+      if (!opp) {
         activeKeys.add(opportunityKey);
-        remainingByPlatform.set(platform, (remainingByPlatform.get(platform) ?? 1) - 1);
+        continue;
       }
+
+      // La imagen la genera el worker (processNextOpportunityImage) en
+      // background para no agotar el timeout de Vercel Functions con la
+      // llamada a DALL-E. El usuario la ve aparecer automáticamente.
+
+      createdOpportunities.push(opp);
+      activeKeys.add(opportunityKey);
+      remainingByPlatform.set(platform, (remainingByPlatform.get(platform) ?? 1) - 1);
     }
 
     const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });

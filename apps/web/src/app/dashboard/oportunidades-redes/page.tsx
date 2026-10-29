@@ -61,6 +61,17 @@ const fallbackStages = [
   "Guardando propuestas",
 ];
 
+/** Vercel puede responder HTML en un timeout; nunca intentes parsearlo como JSON. */
+async function readJsonResponse(response: Response): Promise<Record<string, any>> {
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.toLowerCase().includes("application/json")) {
+    throw new Error(response.status === 504 || response.status === 524
+      ? "La generación tardó demasiado. No se creó ninguna propuesta; vuelve a intentarlo en unos segundos."
+      : `El servidor respondió con un formato inesperado (HTTP ${response.status}).`);
+  }
+  return await response.json() as Record<string, any>;
+}
+
 type NetworkGroup = "meta" | "otras";
 
 /** Redes de la pantalla, agrupadas: META (Instagram, Threads, Facebook) y el resto. */
@@ -253,7 +264,7 @@ export default function OportunidadesRedesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ networks: [network] }),
       });
-      const data = await res.json();
+      const data = await readJsonResponse(res);
       if (res.ok) {
         const gscUsed = data.message?.includes("Google Search Console") ?? false;
         setUsedGsc(gscUsed);
@@ -286,7 +297,7 @@ export default function OportunidadesRedesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ networks }),
       });
-      const data = await res.json();
+      const data = await readJsonResponse(res);
       if (res.ok) {
         setMessage({ kind: "success", text: data.message || "Propuestas generadas con éxito." });
         loadOpportunities();
@@ -412,7 +423,7 @@ export default function OportunidadesRedesPage() {
         setSkipModal(null);
         loadOpportunities();
       } else {
-        const data = await res.json();
+        const data = await readJsonResponse(res);
         setMessage({ kind: "error", text: data.error || "Error al descartar." });
       }
     } catch {
