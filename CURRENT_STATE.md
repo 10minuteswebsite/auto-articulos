@@ -12,6 +12,7 @@ pública. Residual: 104484 sigue indexable (sin tocar); la plantilla del sitio
 añade además una etiqueta `index, follow` genérica (el más restrictivo gana);
 Lorena publica por BLOG IA, cuyo publicador aún no envía el campo de indexación.
 [Registro](COORDINACION_CLAUDE_CODEX.md).
+Confirmación de Milton (2026-10-29): la reparación quedó correcta tras revisión manual del artículo 104488. Estado: CERRADO.
 
 ## MCP-AUTH-FIX-20261027 — publicado y verificado
 

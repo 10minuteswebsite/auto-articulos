@@ -578,3 +578,5 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 
 - Punto cero: `main` = `38621d27` (PR #691). Prueba E2E real con Inés García: artículo 104488 con «Activate Indexing» = No y `noindex,nofollow` público.
 - Antes del arreglo: 104484 `index,follow` y log «sigue activada». Sin migraciones. Pendiente aparte: BLOG IA no recibe la orden de no indexar.
+
+- Cierre: Confirmación de Milton (2026-10-29): la reparación quedó correcta tras revisión manual del artículo 104488. Estado: CERRADO.
