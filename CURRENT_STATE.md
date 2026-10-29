@@ -825,3 +825,15 @@ Rollback: revertir el PR (las tablas nuevas pueden quedarse).
   Redes, por lo que falta ejecutar «Crear propuestas» con una cuenta autorizada.
 - Rollback: revertir `ee4066d8`.
 
+## REDES-GENERACION-ESPERA-20261029 — regresión corregida — `82ca8b0c`
+
+- La causa real no fue una nueva función de IA: `860fb2e` empezó a descargar y
+  analizar la página completa de todos los artículos antes de generar. Con
+  muchos artículos agotaba la función serverless.
+- Corrección puntual: conserva la validación de URL/`og:image`, pero inspecciona
+  como máximo 24 artículos y se detiene al encontrar el primer candidato válido.
+  No se revirtió ninguna mejora añadida hoy; también se conservan la generación
+  concurrente y el manejo de respuestas no JSON.
+- Publicado directamente en `main`; sin migración ni datos. Falta repetir la
+  prueba autenticada con una cuenta de Redes.
+

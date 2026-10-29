@@ -383,3 +383,10 @@ Los copys por red son independientes y deben paralelizarse; cada llamada debe
 tener timeout acotado y la UI validar `content-type` antes de parsear JSON. Un
 timeout no puede convertirse en `Unexpected token '<'`.
 
+## Actualización — REDES-GENERACION-ESPERA-20261029
+
+La validación de una página pública es necesaria para no ofrecer artículos sin
+URL o sin `og:image`, pero no debe recorrer todo el inventario antes de crear
+una propuesta. El contrato es inspeccionar una ventana acotada y detenerse al
+encontrar un candidato válido; así la protección no bloquea la generación.
+

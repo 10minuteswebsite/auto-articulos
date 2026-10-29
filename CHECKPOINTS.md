@@ -639,3 +639,11 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - `git diff --check` y revisión del diff PASS; smoke público 307→`/login`, 200.
 - Falta prueba autenticada; no se declara cierre funcional definitivo.
 
+## Checkpoint — REDES-GENERACION-ESPERA-20261029 — regresión corregida
+
+- `82ca8b0c` publicado en `main`.
+- Regresión aislada en `860fb2e`: inspección completa de todos los artículos
+  antes de generar. Se mantiene la protección de URL/foto, limitada a 24 y con
+  salida al primer candidato válido.
+- No se revirtió ninguna adhesión de hoy. E2E autenticado aún pendiente.
+

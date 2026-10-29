@@ -13104,3 +13104,13 @@ ARCHIVADA. Responsable: Claude.
 - Pendiente honesto: E2E autenticado con una cuenta habilitada para Redes; la
   sesión interna disponible fue redirigida a Artículos.
 
+## REDES-GENERACION-ESPERA-20261029 — corrección de regresión — Codex
+
+- Comparación con el último estado de ayer aisló `860fb2e`: sustituyó
+  `isArticleUrlGone` por `inspectArticlePage` para todos los artículos
+  rankeados. Eso añade lecturas HTML/`og:image` en lotes y explica el timeout.
+- `82ca8b0c` limita la inspección a 24 candidatos y corta al primero válido.
+  Mantiene la validación de foto, las mejoras de hoy y no revierte commits.
+- Publicado en `main`; E2E autenticado pendiente de una cuenta habilitada para
+  Redes.
+

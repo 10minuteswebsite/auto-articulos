@@ -5760,3 +5760,10 @@ valores — 2026-10-19").
 - Commit visible en GitHub; HTTP público de Redes 307→`/login`, login 200.
 - E2E autenticado pendiente por falta de sesión habilitada para Redes.
 
+## Versión — corrección de regresión Redes — `82ca8b0c`
+
+- Mantiene las mejoras de generación y corrige solo la espera introducida por
+  `860fb2e`: inspección de artículos acotada a 24 y corte al primer válido.
+- Publicado directamente en `main`; sin migraciones ni cambios de datos.
+- E2E autenticado pendiente.
+
