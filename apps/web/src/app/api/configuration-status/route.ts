@@ -391,7 +391,10 @@ export async function GET() {
   // depende del interruptor piloto `showReconnectNotice`: es un estado roto
   // real, no una campaña de migración, y debe verlo cualquier cuenta
   // afectada.
-  const hasRealAccessError = Boolean(googleIntegration?.lastAccessError);
+  // Si hay una conexión de Composio activa con sitio elegido, el error guardado
+  // de la conexión propia vieja ya no manda (Oportunidades usa Composio cuando
+  // la propia está rota): no se muestra un aviso que ninguna acción atiende.
+  const hasRealAccessError = Boolean(googleIntegration?.lastAccessError) && !hasActiveComposioSearchConsole;
 
   if (hasRealAccessError) {
     checks.push({
