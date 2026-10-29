@@ -435,7 +435,7 @@ La plataforma cuenta con un diseño minimalista y limpio en blanco impecable, si
 ## Pre-Validación Inteligente antes de Publicar
 
 Tanto en **${MENU_NAMES.propios}** (/dashboard/publicar) como en **${MENU_NAMES.ia}** (/dashboard/oportunidades), el sistema cuenta con un panel de protección preventiva (**PreValidationGuard**):
-- **Temas ya publicados (2026-10-16):** el sistema no vuelve a publicar un tema que ya figura publicado en tu sitio, para no canibalizar tu propio contenido. Lo revisa lo más temprano posible: **Oportunidades** ya no te ofrece un tema que se publicó, **Publicar** te avisa con el enlace del artículo existente cuando lo escribes de nuevo, y el sistema lo comprueba otra vez justo antes de redactar, antes de gastar texto, imagen o FAQ. Si aparece en Historial «ya está publicado en tu sitio», abre el enlace que trae: ese es el artículo vigente.
+- **Temas ya publicados (2026-10-16):** el sistema no vuelve a publicar un tema que ya figura publicado en tu sitio, para no canibalizar tu propio contenido. Lo revisa lo más temprano posible: **Oportunidades** ya no te ofrece un tema que se publicó, **Publicar** te avisa con el enlace del artículo existente cuando lo escribes de nuevo, y el sistema lo comprueba otra vez justo antes de redactar, antes de gastar texto, imagen o FAQ. Si aparece en Historial «ya está publicado en tu sitio», abre el enlace que trae: ese es el artículo vigente. Para saber qué ya existe, el sistema guarda en su propia base solo los **títulos** de los artículos de tu sitio: la primera vez los lee de tu sitemap (si tu sitio no tiene sitemap, simplemente no se llena) y después suma cada artículo que publica. Así Oportunidades ya no tiene que revisar tu panel una y otra vez.
 - Si falta algún requisito previo (credenciales de la plataforma, categorías sincronizadas, idioma de redacción o Search Console), la plataforma te muestra una tarjeta clara con un checklist interactivo indicando exactamente qué falta y un botón directo para resolverlo.
 - **Créditos de imagen:** Si ya recibiste créditos, pulsa **Ya recibí mis créditos** para intentar publicar de inmediato y para que el sistema deje de mostrarte el aviso. Esa confirmación queda guardada en tu cuenta (no solo en la pantalla actual), así que no debería reaparecer al refrescar, ni en otra pestaña o dispositivo. El aviso solo vuelve a aparecer cuando una creación de artículo comprueba, tras agotar los reintentos, que 10minutesWebsite realmente se quedó sin créditos — nunca por errores pasajeros o visitas a la pantalla.
 
@@ -575,7 +575,7 @@ Comprueba que tienes categorías sincronizadas, un idioma elegido y que no hay o
 
 ### Aviso de falta de créditos de imagen
 
-Si aparece el aviso de créditos de imagen, significa que la pantalla todavía no reconoce saldo para ilustrar artículos. Si ya te los asignaron, pulsa **Ya recibí mis créditos** y vuelve a intentar. Si la operación sigue detenida, solicita créditos o consulta a soporte.
+Si tu cuenta se queda sin créditos de imagen, el aviso rojo **Sin créditos de imagen** aparece también en el **Inicio**, arriba de las tarjetas, con el botón **Solicitar créditos**. Dentro de Publicar y Oportunidades puedes pulsar **Ya recibí mis créditos**. Si aparece el aviso de créditos de imagen, significa que la pantalla todavía no reconoce saldo para ilustrar artículos. Si ya te los asignaron, pulsa **Ya recibí mis créditos** y vuelve a intentar. Si la operación sigue detenida, solicita créditos o consulta a soporte.
 
 ### Un título falla porque la categoría ya no existe
 

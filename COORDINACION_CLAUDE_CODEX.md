@@ -1,3 +1,20 @@
+## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — Claude — RECLAMO
+
+- **Capitán de migración:** Claude — reclamado el 2026-10-29 (sin migración). Punto cero: `main` = `9b3c63f7`.
+- Auditoría en producción (diagnóstico de solo lectura existente): el cliente 13 tiene `hasImageCredits=false`, puesto por el worker el 27/10 tras agotar 3 intentos con «Sin créditos de imagen». Por eso el asistente MUSE dice que no puede publicar: es lo que devuelve la validación previa a publicar. Censo: 116 cuentas con `true`, 6 con `false`.
+- NO verificado: si de verdad le faltan créditos o fue un falso positivo; no se restableció el dato.
+- Cambio (PR #710): el Inicio muestra el check `image-credits` en rojo, con el estilo de los avisos de conexión. Solo UI + manual. Rollback: revertir #710.
+- Límite del Harness: `Harness-Mario` devuelve 404 (público y con la cuenta de la sesión); se siguió el protocolo propio del proyecto.
+- Merge por CLI bloqueado por el clasificador; pendiente fusionar desde GitHub y verificar en producción con la cuenta del cliente.
+
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — CERRADO Y ARCHIVADO
+
+- **Capitán de migración:** Claude — reclamó y liberó este lote documental (sin migración, sin código).
+- Código `2f2b862d` (PR #701) y documentación (#702) ya en `main`. Rollback: revertir #701.
+- Comprobación en vivo, 2026-10-29, con la cuenta de una usuaria afectada: la tarjeta de Search Console de Conexiones solo lee Composio (`/api/composio/status`); mostraba «No conectada» porque su fila de Composio estaba en `NOT_CONNECTED`, y por eso sin botón «Desconectar». Oportunidades ya no mostraba el aviso rojo viejo. Milton confirmó después que el caso quedó resuelto.
+- Hueco conocido, sin cambiar: esa tarjeta no muestra ni permite quitar una conexión propia de Google guardada. No se tocó código en este cierre.
+- Honesto: la causa exacta de la conexión rota en esa cuenta no se aisló (el servidor bloqueó la lectura del estado de la conexión propia). Pulsar «Analizar» quedó bloqueado por propuestas pendientes; no se borraron.
+
 ## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — LIBERACIÓN
 
 - **Capitán de migración liberó el lote:** Claude. Código `2f2b862d` (PR #701)
@@ -13071,3 +13088,36 @@ ARCHIVADA. Responsable: Claude.
 **Cierre final (2026-10-29):** Milton confirmó que el resultado quedó como esperaba («espectacular»). Estado: CERRADO. ARCHIVADA. Pendiente menor sin bloquear: prueba de «Enviar ahora» con Lorena. Responsable: Claude.
 
 - **Capitán de migración:** Claude — 2026-10-29: Redes, mensajes de foto claros y revisión previa de foto (sin migración). Liberación al verificar en producción.
+
+- **Capitán de migración:** liberado por Claude — 2026-10-29: Redes (PR #698 y #703), sin migración.
+
+- **Capitán de migración:** Claude — 2026-10-29: altas del Hub (región .site/.net y prompt problema-solución por defecto). Migración 20261029190000_platform_domain_confirmed_default_prompt: aplicar en producción ANTES de fusionar el PR.
+
+- **Capitán de migración:** Claude — reclamo 2026-10-29: títulos del sitio en Supabase (sitemap, una vez, aditivo) + menos lecturas del listado de 10MWS. Migración `20261029180000_site_article_titles`. PR abierto, sin fusionar hasta aplicar la migración.
+## REDES-GENERACION-ESPERA-20261029 — Codex — publicado, E2E pendiente
+
+- `ee4066d8` corrige `Unexpected token '<'`: el endpoint ya no serializa los
+  copys de redes y OpenAI tiene timeout por llamada; la UI valida JSON antes de
+  parsear la respuesta. Sin auth, permisos, proveedor, base de datos ni migración.
+- Push directo a `main`; sin ramas ni worktrees nuevos. GitHub visible y smoke
+  público 307→`/login`, `/login` 200.
+- Pendiente honesto: E2E autenticado con una cuenta habilitada para Redes; la
+  sesión interna disponible fue redirigida a Artículos.
+
+## REDES-GENERACION-ESPERA-20261029 — corrección de regresión — Codex
+
+- Comparación con el último estado de ayer aisló `860fb2e`: sustituyó
+  `isArticleUrlGone` por `inspectArticlePage` para todos los artículos
+  rankeados. Eso añade lecturas HTML/`og:image` en lotes y explica el timeout.
+- `82ca8b0c` limita la inspección a 24 candidatos y corta al primero válido.
+  Mantiene la validación de foto, las mejoras de hoy y no revierte commits.
+- Publicado en `main`; E2E autenticado pendiente de una cuenta habilitada para
+  Redes.
+
+## REDES-GENERACION-ESPERA-20261029 — cierre final — Codex
+
+- Milton confirmó que la generación volvió a funcionar en producción.
+- Cierre: `82ca8b0c` (código) y `3391990b` (documentación) en `main`.
+- Se libera la capitanía. No quedan acciones funcionales ni reservas abiertas.
+- No reabrir salvo nueva evidencia del mismo flujo.
+

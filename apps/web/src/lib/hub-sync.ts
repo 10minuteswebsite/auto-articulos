@@ -3,7 +3,14 @@ import { normalizeLegacyPhone } from "./phone";
 
 const DEFAULT_HUB_URL = "https://hub.lasolucionweb.net";
 const ACCESS_CACHE_MS = 60_000;
+const ACCESS_FAILURE_CACHE_MS = 30_000;
+const HUB_ACCESS_TIMEOUT_MS = 3_000;
 const accessCache = new Map<string, { allowed: boolean; expiresAt: number }>();
+// Un fallo del Hub se recuerda unos segundos: sin esto, cada petición del
+// dashboard (la página y sus APIs a la vez) espera el fallo por su cuenta.
+const accessFailureCache = new Map<string, number>();
+// Peticiones simultáneas del mismo usuario comparten una sola revalidación.
+const inflightAccess = new Map<string, Promise<void>>();
 
 type HubSyncResult = {
   hub_user_id: string;
@@ -98,21 +105,36 @@ function getHubConfig() {
  * a successful negative response is enforced locally on the next request.
  */
 export async function refreshHubAccessForUser(userId: string, appSlug: HubProductSlug = "seo-total") {
+  const cacheKey = `${userId}:${appSlug}`;
+  const cached = accessCache.get(cacheKey);
+  // Decisión del Hub ya proyectada en la base hace menos de un minuto: no hay
+  // nada que consultar ni escribir (antes cada petición repetía 4+ consultas).
+  if (cached && cached.expiresAt > Date.now()) return;
+  const failedUntil = accessFailureCache.get(cacheKey);
+  if (failedUntil && failedUntil > Date.now()) return;
+
+  const running = inflightAccess.get(cacheKey);
+  if (running) return running;
+
+  const task = revalidateHubAccess(userId, appSlug, cacheKey).finally(() => {
+    inflightAccess.delete(cacheKey);
+  });
+  inflightAccess.set(cacheKey, task);
+  return task;
+}
+
+async function revalidateHubAccess(userId: string, appSlug: HubProductSlug, cacheKey: string) {
   const config = getHubConfig();
   if (!config) return;
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { hubUserId: true },
+    select: { hubUserId: true, trialUnlocked: true },
   });
   if (!user?.hubUserId) return;
 
-  const cacheKey = `${userId}:${appSlug}`;
-  const cached = accessCache.get(cacheKey);
   let allowed: boolean;
-  if (cached && cached.expiresAt > Date.now()) {
-    allowed = cached.allowed;
-  } else {
+  try {
     const response = await fetch(`${config.baseUrl}/api/integrations/auto-articulos/access`, {
       method: "POST",
       headers: {
@@ -122,14 +144,18 @@ export async function refreshHubAccessForUser(userId: string, appSlug: HubProduc
       },
       body: JSON.stringify({ hub_user_id: user.hubUserId, app: appSlug }),
       cache: "no-store",
+      signal: AbortSignal.timeout(HUB_ACCESS_TIMEOUT_MS),
     });
     const payload = (await response.json().catch(() => ({}))) as { allowed?: unknown; error?: string };
     if (!response.ok || typeof payload.allowed !== "boolean") {
       throw new Error(payload.error || `Hub respondió ${response.status} al verificar acceso.`);
     }
     allowed = payload.allowed;
-    accessCache.set(cacheKey, { allowed, expiresAt: Date.now() + ACCESS_CACHE_MS });
+  } catch (error) {
+    accessFailureCache.set(cacheKey, Date.now() + ACCESS_FAILURE_CACHE_MS);
+    throw error;
   }
+  accessCache.set(cacheKey, { allowed, expiresAt: Date.now() + ACCESS_CACHE_MS });
 
   await syncLocalProductEntitlement(
     userId,
@@ -139,7 +165,9 @@ export async function refreshHubAccessForUser(userId: string, appSlug: HubProduc
   );
 
   if (allowed) {
-    await prisma.user.update({ where: { id: userId }, data: { trialUnlocked: true } });
+    if (!user.trialUnlocked) {
+      await prisma.user.update({ where: { id: userId }, data: { trialUnlocked: true } });
+    }
     return;
   }
 

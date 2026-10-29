@@ -33,3 +33,4 @@ export * from "./friendly-error";
 export * from "./published-title";
 export * from "./social-limits";
 export * from "./social-day";
+export * from "./site-titles";

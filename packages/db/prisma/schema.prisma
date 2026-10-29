@@ -210,6 +210,8 @@ model User {
   searchIntegrations         SearchIntegration[]
   opportunityGroups          OpportunityGroup[]
   opportunityEvidenceCaches  OpportunityEvidenceCache[]
+  siteArticleTitles          SiteArticleTitle[]
+  siteTitleSeeds             SiteTitleSeed[]
   businessProfileIntegration BusinessProfileIntegration?
   threadsIntegration         ThreadsIntegration?
   twitterIntegration         TwitterIntegration?
@@ -892,6 +894,46 @@ model OpportunityEvidenceCache {
 
   @@unique([userId, siteDomain, panel, source])
   @@index([userId, expiresAt])
+}
+
+// Títulos de los artículos que ya existen en el sitio de cada usuario, para la
+// guardia anti-canibalización sin salir a 10minutesWebsite. Solo se guarda el
+// título (y el enlace como evidencia). Es ADITIVA: se llena una vez desde el
+// sitemap del sitio y después crece con cada artículo que la plataforma publica.
+model SiteArticleTitle {
+  id         String   @id @default(cuid())
+  userId     String
+  siteDomain String   @default("")
+  title      String
+  // normalizeTitleKey(title): evita duplicados y es lo que se compara.
+  titleKey   String
+  url        String
+  // "sitemap" | "published"
+  source     String   @default("sitemap")
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, siteDomain, titleKey])
+  @@index([userId, siteDomain])
+}
+
+// Marca de que el llenado inicial desde el sitemap ya se hizo (una sola vez por
+// usuario y sitio). status: "done" | "error" (se reintenta pasado un rato).
+model SiteTitleSeed {
+  id           String   @id @default(cuid())
+  userId       String
+  siteDomain   String   @default("")
+  status       String
+  titlesFound  Int      @default(0)
+  sitemapUrl   String?
+  errorMessage String?
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, siteDomain])
 }
 
 enum CategorySyncStatus {

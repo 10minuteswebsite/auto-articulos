@@ -1,3 +1,7 @@
+## Checkpoint — Oportunidades sin evidencia — CERRADO 2026-10-29
+
+- Task `OPORTUNIDADES-SIN-EVIDENCIA-20261029`: resuelto y confirmado por Milton en la cuenta afectada. Código `2f2b862d` en `main`. Archivado; capitanía liberada.
+
 ## Checkpoint — Oportunidades sin evidencia — 2026-10-29
 
 - Task `OPORTUNIDADES-SIN-EVIDENCIA-20261029`; código `2f2b862d` en `main`, desplegado. Pendiente: probar «Analizar» con una cuenta solo-Composio. Capitanía liberada.
@@ -624,3 +628,28 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Antes del arreglo: 104484 `index,follow` y log «sigue activada». Sin migraciones. Pendiente aparte: BLOG IA no recibe la orden de no indexar.
 
 - Cierre: Confirmación de Milton (2026-10-29): la reparación quedó correcta tras revisión manual del artículo 104488. Estado: CERRADO.
+
+## Checkpoint — Entrada sin espera tras el HUB — 2026-10-29
+
+- Punto cero: `main` con `9c136189` (PR #712). Carga desde el HUB: antes 27 s hasta las tarjetas; ahora documento 2,7–4,3 s en frío / 0,58 s en caliente y tarjetas al instante. Detalle en `CURRENT_STATE.md`. Sin migraciones.
+## Checkpoint — REDES-GENERACION-ESPERA-20261029 — publicado, E2E pendiente
+
+- `ee4066d8` en `main`, sin migración ni cambios de datos.
+- Copys en paralelo, timeout de OpenAI y manejo de HTML de timeout en la UI.
+- `git diff --check` y revisión del diff PASS; smoke público 307→`/login`, 200.
+- Falta prueba autenticada; no se declara cierre funcional definitivo.
+
+## Checkpoint — REDES-GENERACION-ESPERA-20261029 — regresión corregida
+
+- `82ca8b0c` publicado en `main`.
+- Regresión aislada en `860fb2e`: inspección completa de todos los artículos
+  antes de generar. Se mantiene la protección de URL/foto, limitada a 24 y con
+  salida al primer candidato válido.
+- No se revirtió ninguna adhesión de hoy. E2E autenticado aún pendiente.
+
+## Checkpoint — REDES-GENERACION-ESPERA-20261029 — CERRADO Y ARCHIVADO
+
+- Confirmación funcional de Milton en producción: «ok funcionó».
+- Punto cero final: `main` en `3391990b`; sin migración ni cambios de datos.
+- Capitanía liberada. Reabrir únicamente con un caso nuevo.
+

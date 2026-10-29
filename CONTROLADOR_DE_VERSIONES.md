@@ -5748,3 +5748,29 @@ valores — 2026-10-19").
 - Commits: `4dffbef5`, `2bb897e1`, `04b7ce27`; fusionados en `main` como `38621d27` (PR #691). Convive con `f41b1e9e` (Oportunidades hereda la preferencia guardada).
 - Despliegue: worker toma `main` en cada corrida; verificado con `worker-test.yml` (run `40871774772`) y lote real de Inés García.
 - Rollback: revertir `38621d27`. Sin migraciones.
+
+### ENTRADA-SIN-ESPERA-20261029
+
+- PR #712, commit `9c136189` en `main`; Vercel web y auto-articulos-web success. Rollback: revertir #712. Verificado en producción con cuenta real.
+## Versión — REDES-GENERACION-ESPERA-20261029 — `ee4066d8`
+
+- Publicada directamente en `main`, sin ramas/worktrees ni migraciones:
+  generación concurrente, timeout explícito de OpenAI y manejo UI de respuestas
+  no JSON de Vercel.
+- Commit visible en GitHub; HTTP público de Redes 307→`/login`, login 200.
+- E2E autenticado pendiente por falta de sesión habilitada para Redes.
+
+## Versión — corrección de regresión Redes — `82ca8b0c`
+
+- Mantiene las mejoras de generación y corrige solo la espera introducida por
+  `860fb2e`: inspección de artículos acotada a 24 y corte al primer válido.
+- Publicado directamente en `main`; sin migraciones ni cambios de datos.
+- E2E autenticado pendiente.
+
+## Cierre — REDES-GENERACION-ESPERA-20261029
+
+- Código `82ca8b0c` y documentación `3391990b` publicados en `main`.
+- Producción confirmada funcionalmente por Milton después de la corrección.
+- Sin migración. Estado: CERRADO Y ARCHIVADO. Rollback: revertir `82ca8b0c` si
+  aparece una regresión nueva y reproducible.
+

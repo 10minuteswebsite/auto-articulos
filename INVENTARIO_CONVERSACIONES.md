@@ -2562,3 +2562,14 @@ sección "Codex — META historias y carruseles — 2026-10-20" de `COORDINACION
 - Estado: en verificación; falta publicar y comprobar producción.
 - Actualización: publicado en `main` como `04910056`; deployment Vercel `6wAi9CqW6tjQTeW9qxpiHPkuUiYd` `Ready` y smoke HTTP OK.
 
+## REDES-GENERACION-ESPERA-20261029 — Codex — publicado, pendiente E2E
+
+- `ee4066d8` en `main`; sin migración, reserva de rama/worktree, credenciales o
+  datos modificados. Falta prueba autenticada con módulo Redes habilitado.
+
+## REDES-GENERACION-ESPERA-20261029 — CERRADO Y ARCHIVADO
+
+- Milton confirmó la generación funcional en producción. Código `82ca8b0c` y
+  cierre documental `3391990b` en `main`; sin reservas activas.
+- No reabrir sin evidencia nueva.
+

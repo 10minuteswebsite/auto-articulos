@@ -239,3 +239,10 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 - Causa observada: comparación exacta `contentLanguage === "en"` ignoraba códigos ingleses regionales como `en_VI`.
 - Cambio preparado: resolver el idioma por prefijo `en` con separador de código (`_` o `-`) y reutilizarlo en el prompt social común.
 - Evidencia productiva previa: `https://www.instagram.com/p/DfDUKH5nQpd/` muestra el caption en español para un artículo en inglés.
+## Contrato añadido — generación de propuestas no bloqueante — 2026-10-29
+
+- Crear propuestas para varias redes no serializa las llamadas de copy de IA.
+- Si Vercel responde HTML por timeout, la interfaz muestra un mensaje claro y
+  no un error de parseo JSON.
+- Implementado en `ee4066d8`; E2E autenticado pendiente.
+
