@@ -653,3 +653,15 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Punto cero final: `main` en `3391990b`; sin migración ni cambios de datos.
 - Capitanía liberada. Reabrir únicamente con un caso nuevo.
 
+
+## Checkpoint — REDES-NO-ARTICULOS-FALSO-20261029 — CERRADO
+
+- PR #698 (`1bbf65e5`), #703 (`0d2ffc45`) y #704 (`e26a3e32`) en `main`; CI Vercel verde.
+- Verificado en producción vía Hub (impersonación de Milton): Rosa María Bello y realestatemov generan propuestas con artículos reales. Propuestas de prueba dejadas pendientes, sin publicar.
+- No probado: el estado previo al arreglo en esas cuentas. Sin migración.
+
+## Checkpoint — ALTAS-HUB-UBICACION-20261029 — CERRADO (con incidente)
+
+- PR #708 tumbó el panel (500, P2022) y se revirtió con #709. Rehecho a prueba de caídas en #711 (`06e7564a`); notas en #718 (`b46c0f1c`).
+- Migración `20261029190000` aplicada por Milton en Supabase `uqqclaezxagukoyiiiol` (~17:30). Tras aplicarla, `/api/me` ya no registra «column does not exist».
+- Pendiente: primera alta real del Hub viendo «¿Dónde estás?». Capitanía liberada.

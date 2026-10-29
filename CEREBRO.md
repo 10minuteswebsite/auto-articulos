@@ -394,3 +394,15 @@ encontrar un candidato válido; así la protección no bloquea la generación.
 ## Entrada lenta tras el HUB — causa raíz (2026-10-29)
 
 `getCurrentUserId` revalidaba el acceso con el Hub en cada petición protegida; la caché de 60 s no evitaba consulta, transacción ni UPDATE, y el `fetch` no tenía timeout. El dashboard dispara ~12 APIs a la vez (`/api/me` ×5), con `connection_limit=1`, así que se encolaban hasta 13 s. Regla: una decisión del Hub vigente no toca la base; las revalidaciones concurrentes se comparten; todo `fetch` externo en la ruta caliente lleva timeout.
+
+## Regla — columnas nuevas: nunca en `schema.prisma` antes que en producción (2026-10-29)
+
+Declarar `User.platformDomainConfirmedAt` en el esquema la metió en TODA consulta de `User`; la base de producción no la tenía y `/dashboard`, `/api/me` y `configuration-status` dieron 500 (`P2022`). La columna de esta función se lee/escribe solo con SQL directo y `try/catch` (`lib/platform-domain-confirmation.ts`, igual que `disableIndexing`): si falta, la app sigue y no pregunta. Verificar con `information_schema` en el proyecto correcto ANTES de fusionar; «ya la apliqué» no basta.
+
+## Decisión — ubicación obligatoria al inicio y país como fuente (2026-10-29)
+
+El Hub no manda continente ni país. Las cuentas nuevas del Hub (sin región confirmada) ven primero «¿Dónde estás?» (país, ciudad, zona horaria); el país asigna el servidor y queda guardado en `User.country`, fuente para el prompt de artículos por país (traspaso aún sin implementar). Las cuentas existentes se marcaron confirmadas.
+
+## Causa raíz — «No hay artículos disponibles» falso (2026-10-29)
+
+Probable (por código): el filtro de URL del 28/10 exigía que `selectedSiteDomain` coincidiera y descartaba ante 403/timeout. Confirmado aparte en realestatemov: 3 artículos de otro servidor sin `og:image`, y las propuestas con estado `error` cuentan como «usadas» (decisión pendiente de Milton).
