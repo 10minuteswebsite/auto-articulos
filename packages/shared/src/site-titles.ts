@@ -110,8 +110,11 @@ async function defaultFetchText(url: string): Promise<string> {
 export async function readSitemapTitles(
   sitemapUrl: string,
   fetchText: FetchText = defaultFetchText,
+  deadlineMs = 8_000,
 ): Promise<SitemapTitle[]> {
   if (!isSafeSitemapUrl(sitemapUrl)) throw new Error("Dirección de sitemap no permitida.");
+  // Presupuesto total: leer el sitemap nunca debe demorar el análisis que lo pide.
+  const deadline = Date.now() + deadlineMs;
   const queue = [sitemapUrl];
   const visited = new Set<string>();
   const found = new Map<string, SitemapTitle>();
@@ -120,6 +123,7 @@ export async function readSitemapTitles(
     const next = queue.shift()!;
     if (visited.has(next)) continue;
     visited.add(next);
+    if (Date.now() > deadline) throw new Error("Tiempo agotado leyendo el sitemap.");
     files += 1;
     let xml: string;
     try {

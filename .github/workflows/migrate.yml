@@ -83,6 +83,11 @@ on:
         required: false
         default: false
         type: boolean
+      safe_site_article_titles:
+        description: "Crear solo las tablas nuevas de títulos del sitio (SiteArticleTitle y SiteTitleSeed)"
+        required: false
+        default: false
+        type: boolean
       sync_hub_users:
         description: "Sincronizar todos los usuarios existentes con el Hub sin modificar datos operativos"
         required: false
@@ -271,6 +276,16 @@ jobs:
           npx prisma db execute \
             --url "$MIGRATION_DATABASE_URL" \
             --file packages/db/prisma/migrations/20261026130000_enable_all_social_publishing_defaults/migration.sql
+      - name: Crear tablas de títulos del sitio
+        if: ${{ inputs.safe_site_article_titles }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"
+          MIGRATION_DATABASE_URL="${MIGRATION_DATABASE_URL/?pgbouncer=true/}"
+          npx prisma db execute \
+            --url "$MIGRATION_DATABASE_URL" \
+            --file packages/db/prisma/migrations/20261029180000_site_article_titles/migration.sql
       - name: Verificar BLOG IA en la base (solo lectura)
         if: ${{ inputs.safe_blog_ia }}
         shell: bash
@@ -291,7 +306,7 @@ jobs:
             npx prisma db push --schema=packages/db/prisma/schema.prisma \
             --accept-data-loss
       - name: Aplicar migraciones con Session pooler
-        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_problem_solution_default_prompt && !inputs.safe_category_editorial_language && !inputs.safe_blogger_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.safe_postpeer_social_connections && !inputs.safe_remove_devto_integration && !inputs.safe_blog_ia && !inputs.safe_hub_identity_mapping && !inputs.safe_meta_social_opportunity_assets && !inputs.safe_user_indexing_preference && !inputs.safe_all_social_publishing_defaults && !inputs.sync_hub_users && !inputs.force_sync }}
+        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_problem_solution_default_prompt && !inputs.safe_category_editorial_language && !inputs.safe_blogger_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.safe_postpeer_social_connections && !inputs.safe_remove_devto_integration && !inputs.safe_blog_ia && !inputs.safe_hub_identity_mapping && !inputs.safe_meta_social_opportunity_assets && !inputs.safe_user_indexing_preference && !inputs.safe_all_social_publishing_defaults && !inputs.safe_site_article_titles && !inputs.sync_hub_users && !inputs.force_sync }}
         shell: bash
         run: |
           MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"

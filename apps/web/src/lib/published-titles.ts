@@ -24,7 +24,7 @@ export async function loadPublishedTitles(userId: string, siteDomain?: string | 
     prisma.siteArticleTitle.findMany({
       where: { userId, ...(siteDomain ? { siteDomain } : {}) },
       select: { title: true, url: true },
-    }),
+    }).catch(() => [] as Array<{ title: string; url: string }>),
   ]);
   return [
     ...published,

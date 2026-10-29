@@ -34,7 +34,7 @@ export async function findAlreadyPublishedForTitle(params: {
   const siteTitles = await prisma.siteArticleTitle.findMany({
     where: { userId: params.userId, ...(params.siteDomain ? { siteDomain: params.siteDomain } : {}) },
     select: { title: true, url: true },
-  });
+  }).catch(() => [] as Array<{ title: string; url: string }>);
   return findPublishedTitleMatch(params.text, [
     ...published,
     ...siteTitles.map((row) => ({ text: row.title, finalTitle: null as string | null, articleUrl: row.url as string | null, publishedAt: null })),

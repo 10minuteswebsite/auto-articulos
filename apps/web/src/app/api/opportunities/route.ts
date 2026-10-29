@@ -340,7 +340,7 @@ export async function POST(request: Request) {
       where: { userId, ...(selectedSiteDomain ? { siteDomain: selectedSiteDomain } : {}) },
       select: { title: true },
       take: 3000,
-    });
+    }).catch(() => [] as Array<{ title: string }>);
     // Ejemplos reales de lo que YA se publicó en cada categoría (pedido de
     // Milton, 2/9/2026, caso Guillermo Martínez): el nombre de la categoría
     // sola no basta para que la IA sepa qué tema cubre de verdad. Con hasta
