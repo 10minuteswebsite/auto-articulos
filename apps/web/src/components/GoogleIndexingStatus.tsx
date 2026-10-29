@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { TitleRow } from "@/types/dashboard";
 
 // Pedido explícito del usuario (13/8/2026): los estados intermedios/pendientes
@@ -25,9 +26,8 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
   // "Comprobar indexación" y una copia inicial con useState dejaba visible
   // el resultado anterior hasta recargar toda la página.
   const status = title.googleIndexingStatus;
-  const message = title.googleIndexingMessage;
-
-  const indexed = status === "indexed";
+  const [enviando, setEnviando] = useState<"google" | "bing" | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // BLOG IA en su dirección de inicio: va con «no indexar» a propósito. No se envía sitemap ni se puede comprobar
   // indexación, así que se explica en vez de prometer algo que no va a ocurrir.
@@ -65,17 +65,73 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
     );
   }
 
+  const googleSent = Boolean(title.lastSitemapSentAt);
+  const bingSent = title.bingIndexingStatus === "submitted";
+  const bingConfigured = title.bingIndexingStatus !== "not_configured";
+
+  async function enviar(url: string, clave: "google" | "bing") {
+    setEnviando(clave);
+    setError(null);
+    try {
+      const res = await fetch(url, { method: "POST" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) setError(body.error ?? "No se pudo enviar. Inténtalo de nuevo.");
+      // Un envío cubre a todos los artículos: se recarga todo el Historial.
+      else window.dispatchEvent(new Event("historial:reload"));
+    } finally {
+      setEnviando(null);
+    }
+  }
+
+  const botonStyle = {
+    marginTop: 3,
+    padding: 0,
+    border: 0,
+    background: "transparent",
+    fontSize: 12,
+    cursor: "pointer",
+  } as const;
+
   return (
     <div style={{ marginTop: 7, fontSize: 12 }}>
-      {title.lastSitemapSentAt ? (
-        <div style={{ color: "#16803c" }}>
-          {`✓ Sitemap enviado a Google · ${fechaCorta(title.lastSitemapSentAt)}`}
-        </div>
+      {googleSent ? (
+        <div style={{ color: "#16803c" }}>Sitemap enviado a Google</div>
       ) : (
         <div style={{ color: "#6e6e73" }}>
-          Sitemap: se enviará a Google en el próximo envío diario.
+          <div>Sitemap por enviar a Google</div>
+          <div style={{ fontSize: 11 }}>
+            Google permite un envío al día. Yo lo envío solo cuando corresponde;
+            si lo envías ahora, cuenta como el envío de hoy.
+          </div>
+          <button
+            type="button"
+            className="link-button"
+            style={botonStyle}
+            disabled={enviando !== null}
+            onClick={() => enviar("/api/sitemap/send", "google")}
+          >
+            {enviando === "google" ? "Enviando…" : "Enviar ahora"}
+          </button>
         </div>
       )}
+      {bingConfigured &&
+        (bingSent ? (
+          <div style={{ color: "#16803c" }}>Artículo enviado a Bing</div>
+        ) : (
+          <div style={{ color: "#6e6e73" }}>
+            <div>Artículo por enviar a Bing</div>
+            <button
+              type="button"
+              className="link-button"
+              style={botonStyle}
+              disabled={enviando !== null}
+              onClick={() => enviar("/api/bing/master-index", "bing")}
+            >
+              {enviando === "bing" ? "Enviando…" : "Enviar ahora"}
+            </button>
+          </div>
+        ))}
+      {error && <div style={{ color: "#ff3b30", marginTop: 2 }}>{error}</div>}
       {title.businessProfilePost && (
         <div
           style={{
@@ -95,34 +151,6 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
               : title.businessProfilePost.status === "error"
                 ? "Error al publicar en Google Business Profile."
                 : "Publicando en Google Business Profile..."}
-        </div>
-      )}
-      {(status === "error" || indexed) && (
-        <div style={{ color: status === "error" ? "#ff3b30" : "#16803c" }}>
-          {status === "error"
-            ? "Google: no se pudo consultar la indexación"
-            : "✓ Indexada en Google"}
-        </div>
-      )}
-      {message && status === "error" && (
-        <div style={{ color: "#6e6e73", marginTop: 2 }}>{message}</div>
-      )}
-      {/* Bing Indexing Status.
-          Pedido explícito del usuario (11/8/2026): el error "InvalidToken" de
-          Bing es intermitente del lado de Bing (reintenta 2 veces con token
-          fresco en notifyBing() y aun así falla para algunos títulos del
-          mismo lote, con el mismo token válido) — no es algo que más
-          reintentos de nuestro código vayan a resolver, y el artículo ya se
-          publicó bien de todas formas (esto es solo la indexación instantánea
-          opcional). Se deja de mostrar el estado "error" para no alarmar por
-          algo fuera de nuestro control; "submitted" sigue mostrándose. */}
-      {title.bingIndexingStatus &&
-        title.bingIndexingStatus !== "not_configured" &&
-        title.bingIndexingStatus !== "error" && (
-        <div style={{ color: title.bingIndexingStatus === "submitted" ? "#16803c" : "#6e6e73" }}>
-          {title.bingIndexingStatus === "submitted"
-            ? `✓ Aviso enviado a Bing${title.bingIndexingAt ? ` · ${fechaCorta(title.bingIndexingAt)}` : ""}`
-            : `Bing: ${title.bingIndexingStatus}`}
         </div>
       )}
     </div>
