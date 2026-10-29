@@ -628,3 +628,7 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Antes del arreglo: 104484 `index,follow` y log «sigue activada». Sin migraciones. Pendiente aparte: BLOG IA no recibe la orden de no indexar.
 
 - Cierre: Confirmación de Milton (2026-10-29): la reparación quedó correcta tras revisión manual del artículo 104488. Estado: CERRADO.
+
+## Checkpoint — Entrada sin espera tras el HUB — 2026-10-29
+
+- Punto cero: `main` con `9c136189` (PR #712). Carga desde el HUB: antes 27 s hasta las tarjetas; ahora documento 2,7–4,3 s en frío / 0,58 s en caliente y tarjetas al instante. Detalle en `CURRENT_STATE.md`. Sin migraciones.

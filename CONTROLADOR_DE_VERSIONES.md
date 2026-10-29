@@ -5748,3 +5748,7 @@ valores — 2026-10-19").
 - Commits: `4dffbef5`, `2bb897e1`, `04b7ce27`; fusionados en `main` como `38621d27` (PR #691). Convive con `f41b1e9e` (Oportunidades hereda la preferencia guardada).
 - Despliegue: worker toma `main` en cada corrida; verificado con `worker-test.yml` (run `40871774772`) y lote real de Inés García.
 - Rollback: revertir `38621d27`. Sin migraciones.
+
+### ENTRADA-SIN-ESPERA-20261029
+
+- PR #712, commit `9c136189` en `main`; Vercel web y auto-articulos-web success. Rollback: revertir #712. Verificado en producción con cuenta real.
