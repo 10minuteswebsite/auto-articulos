@@ -376,3 +376,10 @@ Un marcador escrito en un estilo de redacción solo se sustituye si `sanitizeGen
 - Causa: el resolvedor de Search Console ignoraba Composio (`COMPOSIO_CONSUMER_READY.google_search_console = false`). Arreglo conservador en `apps/web/src/lib/search-console-source.ts`, usado por `/api/opportunities`; caché de 20 días con copia de la última consulta buena.
 - Lección: la tarjeta de Conexiones de Search Console solo pinta Composio; una conexión propia vieja puede quedar invisible y sin botón de desconectar.
 - Lección: probar con la cuenta real exige la sesión del navegador correcto; con varias ventanas de Chrome conectadas, mirar la de esa usuaria.
+## Decisión — REDES-GENERACION-ESPERA-20261029
+
+La API de generación cruza dependencias externas desde una función serverless.
+Los copys por red son independientes y deben paralelizarse; cada llamada debe
+tener timeout acotado y la UI validar `content-type` antes de parsear JSON. Un
+timeout no puede convertirse en `Unexpected token '<'`.
+

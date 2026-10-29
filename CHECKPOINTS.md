@@ -632,3 +632,10 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 ## Checkpoint — Entrada sin espera tras el HUB — 2026-10-29
 
 - Punto cero: `main` con `9c136189` (PR #712). Carga desde el HUB: antes 27 s hasta las tarjetas; ahora documento 2,7–4,3 s en frío / 0,58 s en caliente y tarjetas al instante. Detalle en `CURRENT_STATE.md`. Sin migraciones.
+## Checkpoint — REDES-GENERACION-ESPERA-20261029 — publicado, E2E pendiente
+
+- `ee4066d8` en `main`, sin migración ni cambios de datos.
+- Copys en paralelo, timeout de OpenAI y manejo de HTML de timeout en la UI.
+- `git diff --check` y revisión del diff PASS; smoke público 307→`/login`, 200.
+- Falta prueba autenticada; no se declara cierre funcional definitivo.
+

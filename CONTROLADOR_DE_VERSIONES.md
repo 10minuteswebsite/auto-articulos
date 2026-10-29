@@ -5752,3 +5752,11 @@ valores — 2026-10-19").
 ### ENTRADA-SIN-ESPERA-20261029
 
 - PR #712, commit `9c136189` en `main`; Vercel web y auto-articulos-web success. Rollback: revertir #712. Verificado en producción con cuenta real.
+## Versión — REDES-GENERACION-ESPERA-20261029 — `ee4066d8`
+
+- Publicada directamente en `main`, sin ramas/worktrees ni migraciones:
+  generación concurrente, timeout explícito de OpenAI y manejo UI de respuestas
+  no JSON de Vercel.
+- Commit visible en GitHub; HTTP público de Redes 307→`/login`, login 200.
+- E2E autenticado pendiente por falta de sesión habilitada para Redes.
+

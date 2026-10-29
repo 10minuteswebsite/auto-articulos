@@ -813,3 +813,15 @@ Rollback: revertir el PR (las tablas nuevas pueden quedarse).
 - Causa (registros de Vercel, 11:04): `PrismaClientKnownRequestError P2022 — The column User.platformDomainConfirmedAt does not exist in the current database`. La columna estaba declarada en `schema.prisma`, así que entraba en TODA consulta de `User`; la base que usa la app no la tenía al desplegar, aunque Milton dice haber ejecutado el SQL (ahora Supabase sí la muestra: se aplicó después o en otro proyecto/esquema; sin confirmar).
 - Corrección (v2): `platformDomainConfirmedAt` YA NO está en `schema.prisma`; se lee/escribe solo con SQL directo y a prueba de fallos (`lib/platform-domain-confirmation.ts`, mismo patrón que `disableIndexing`). Si la columna falta, la app sigue funcionando y simplemente no pregunta la ubicación. La migración `20261029190000` sigue siendo necesaria para que la pregunta funcione.
 - Regla aprendida: NUNCA declarar en `schema.prisma` una columna que la base de producción aún no tiene; y verificar con una consulta a `information_schema` ANTES de fusionar, no solo confiar en «ya la apliqué».
+## REDES-GENERACION-ESPERA-20261029 — código publicado; E2E autenticado pendiente
+
+- Punto cero: `main`/producción servía `fc812368`; la ruta de propuestas podía
+  devolver HTML de timeout y la UI lo analizaba como JSON.
+- Causa: copy de cada red secuencial y sin timeout por llamada de IA.
+- Corrección publicada: `ee4066d8` en `main`; copys en paralelo, timeout de 20 s,
+  `maxDuration = 60` y manejo de respuestas no JSON. Sin migración ni datos.
+- Verificación: `git diff --check` PASS; commit visible en GitHub; Redes responde
+  307 a `/login` y `/login` 200. La cuenta interna disponible no tiene acceso a
+  Redes, por lo que falta ejecutar «Crear propuestas» con una cuenta autorizada.
+- Rollback: revertir `ee4066d8`.
+

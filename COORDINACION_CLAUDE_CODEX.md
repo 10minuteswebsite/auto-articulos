@@ -13094,3 +13094,13 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-10-29: altas del Hub (región .site/.net y prompt problema-solución por defecto). Migración 20261029190000_platform_domain_confirmed_default_prompt: aplicar en producción ANTES de fusionar el PR.
 
 - **Capitán de migración:** Claude — reclamo 2026-10-29: títulos del sitio en Supabase (sitemap, una vez, aditivo) + menos lecturas del listado de 10MWS. Migración `20261029180000_site_article_titles`. PR abierto, sin fusionar hasta aplicar la migración.
+## REDES-GENERACION-ESPERA-20261029 — Codex — publicado, E2E pendiente
+
+- `ee4066d8` corrige `Unexpected token '<'`: el endpoint ya no serializa los
+  copys de redes y OpenAI tiene timeout por llamada; la UI valida JSON antes de
+  parsear la respuesta. Sin auth, permisos, proveedor, base de datos ni migración.
+- Push directo a `main`; sin ramas ni worktrees nuevos. GitHub visible y smoke
+  público 307→`/login`, `/login` 200.
+- Pendiente honesto: E2E autenticado con una cuenta habilitada para Redes; la
+  sesión interna disponible fue redirigida a Artículos.
+
