@@ -1,3 +1,23 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — publicado; verificación funcional pendiente
+
+Código `2f2b862d` (PR #701) en `main`, Vercel web y auto-articulos-web success.
+Causa medida en producción (diagnóstico y censo de solo lectura, #685/#689/#699):
+para Search Console el resolvedor elige siempre la conexión propia
+(`COMPOSIO_CONSUMER_READY.google_search_console = false`). De 122 usuarios, 23
+solo tienen Composio (veían «No hay evidencia»), 54 tienen ambas (51 ganan la
+propia) y 2 tienen la propia con error guardado. Ahora, en Oportunidades, la
+propia sana sigue ganando y Composio toma el relevo si no hay propia o la propia
+guardó error. Además: mensajes de «sin evidencia» por caso, caché de 20 días con
+copia de respaldo de la última consulta buena, aviso rojo viejo oculto si hay
+Composio activo, manual actualizado. Sitemaps e indexación no se tocan. Sin
+migraciones. Rollback: revertir el PR #701.
+Verificado: 9 pruebas nuevas PASS, tipos sin errores en los archivos tocados,
+despliegue verde. NO verificado: el flujo real con una cuenta afectada (hay que
+pulsar «Analizar» con una cuenta solo-Composio). Caso aparte, no resuelto por
+código: una cuenta cuya propiedad conectada en Search Console es la versión
+`http://` sin datos; requiere registrar la propiedad correcta en Search Console.
+Capitanía liberada. Responsable: Claude.
+
 ## MCP-USE-CASES-20261029 — preparado, pendiente de publicación
 
 ### Extensión MENU y actualización del cliente
@@ -710,3 +730,19 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Corrección preparada: Redes verifica la URL con GET, sigue redirecciones y solo acepta HTTP 2xx antes de crear propuestas; las URLs 4xx/5xx o inaccesibles quedan fuera.
 - Pendiente: pruebas con dependencias instaladas, deployment y verificación productiva de una generación nueva.
 
+
+# Incidente Redes — «No hay artículos nuevos disponibles» falso — 2026-10-29
+
+- Síntoma: Redes respondía «Todos los artículos publicados ya tienen una propuesta generada» a cuentas con artículos publicables.
+- Causa probable (por código; sin datos de producción todavía): `isPublicArticleUrl()` (commit 5756cb14, 28/10) exigía que `User.selectedSiteDomain` coincidiera con el dominio del artículo. Ese campo puede estar vacío o guardar el nombre del panel, y entonces TODOS los artículos se descartaban. Además un 403 anti-bot, un timeout o un 5xx también los descartaba.
+- Corrección: `lib/social-article-url.ts` — solo un 404/410 descarta un artículo; ya no depende del dominio guardado de la cuenta; no consulta direcciones internas. El mensaje vacío se separa en: sin artículos / URL caída / ya usados en todas las redes. Se registra un `console.warn` con los conteos.
+- Prueba: `src/lib/social-article-url.test.ts` (5 pruebas, pasan). `social-generate-lock.test.ts` ya fallaba en main antes de este cambio (regex demasiado amplia sobre `status: { not: "skipped" }` de la selección diaria); no se tocó.
+- Pendiente: deployment, diagnóstico de lectura con realestatemov/Lorena en producción y verificación de una generación real.
+
+# Redes — error de foto explicado y revisión previa — 2026-10-29
+
+- Causa (realestatemov, 9 publicaciones sin publicar): 3 artículos de movrealestate.com (servidor distinto) no declaran `og:image` en su página; el worker no publica sin foto. El mensaje de error no nombraba el artículo ni qué arreglar.
+- Corrección: `friendlyPublishError(raw, platform, { articleTitle, articleUrl })` — para falta de foto nombra el artículo y el sitio y dice qué hacer (imagen destacada, revisar el servidor, Reintentar). Contexto pasado desde el worker (`socialPublish.ts`) y desde Historial.
+- Revisión previa: `inspectArticlePage()` (`lib/social-article-url.ts`) descarta del listado los artículos con 404/410 o con página completa sin `og:image`; 403/5xx/timeout/página a medias no descartan. El aviso de lista vacía distingue: sin artículos / URL caída / sin foto / ya usados.
+- No cambiado a propósito: el mensaje «proceso interrumpido» de `cleanup.ts` (la causa real de un proceso muerto es desconocida) y el hecho de que una propuesta con error cuenta como «usada» (decisión de Milton pendiente).
+- Pruebas: 26 pasan (`social-article-url`, `friendly-publish-error`, `social-language`). Pendiente: CI de Vercel, deployment y verificación en producción con realestatemov.

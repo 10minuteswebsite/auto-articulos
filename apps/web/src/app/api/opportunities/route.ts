@@ -9,11 +9,14 @@ import {
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { getStoredComposioApiKey } from "@/lib/composio";
+import { describeNoEvidence, shouldUseComposioFallback } from "@/lib/search-console-source";
 import { analyzeSeoOpportunities } from "@/lib/opportunity-analysis";
 import { getGoogleAnalyticsSignals, summarizeGoogleAnalyticsSignals } from "@/lib/google-analytics-signals";
 import { getBingSignals, summarizeBingSignals } from "@/lib/bing-signals";
 import {
   readFreshOpportunityEvidenceCache,
+  readLastGoodOpportunityEvidenceCache,
   writeOpportunityEvidenceCache,
 } from "@/lib/opportunity-evidence-cache";
 import { findPublishedTitleMatch, platformProductNameOrNeutral } from "@auto-articulos/shared";
@@ -215,7 +218,19 @@ export async function POST(request: Request) {
     let countryRows = cachedGsc?.countryRows ?? [];
     // Nunca congelar una respuesta vacía de Search Console durante el TTL.
     const hasCachedGscRows = currentRows.length > 0 || previousRows.length > 0;
-    const resolved = await resolveSearchConsoleForUser(userId, selectedSiteDomain ?? "");
+    const baseResolved = await resolveSearchConsoleForUser(userId, selectedSiteDomain ?? "");
+    // Caso «No hay evidencia» 29/10/2026: Composio activo pero ignorado por el
+    // resolvedor (ver search-console-source.ts). La propia sana sigue ganando.
+    const composioUsable = Boolean(
+      baseResolved.state.composio?.status === "ACTIVE" && baseResolved.state.composio.hasSelection,
+    );
+    const resolved = shouldUseComposioFallback({
+      source: baseResolved.source,
+      composioUsable,
+      ownHasError: Boolean(integration?.lastAccessError),
+    })
+      ? { ...baseResolved, source: "COMPOSIO" as const, apiKey: await getStoredComposioApiKey() }
+      : baseResolved;
     const hasSearchConsole = Boolean(integration?.siteUrl) || resolved.source === "COMPOSIO";
     // Bug real encontrado 29/9/2026 (cuenta de Flor Méndez): Google Search
     // Console puede rechazar la consulta con un error real y específico (ej.
@@ -299,6 +314,23 @@ export async function POST(request: Request) {
         countryRows = [];
       }
     }
+    // Si la consulta de hoy falló o salió vacía pero hubo una corrida buena
+    // antes, se usa esa copia (aunque esté vencida) en vez de dejar al usuario
+    // sin análisis. Solo entra en el camino de fallo: con datos vivos no cambia nada.
+    let staleEvidenceFrom: Date | null = null;
+    if (hasSearchConsole && currentRows.length === 0 && previousRows.length === 0) {
+      const lastGood = await readLastGoodOpportunityEvidenceCache<{
+        currentRows: Awaited<ReturnType<typeof queryGoogleSearchAnalytics>>;
+        previousRows: Awaited<ReturnType<typeof queryGoogleSearchAnalytics>>;
+        countryRows: Awaited<ReturnType<typeof queryGoogleSearchAnalytics>>;
+      }>({ ...cacheScope, source: "gsc" });
+      if (lastGood && (lastGood.payload.currentRows?.length ?? 0) + (lastGood.payload.previousRows?.length ?? 0) > 0) {
+        currentRows = lastGood.payload.currentRows ?? [];
+        previousRows = lastGood.payload.previousRows ?? [];
+        countryRows = lastGood.payload.countryRows ?? [];
+        staleEvidenceFrom = lastGood.fetchedAt;
+      }
+    }
     const existing = await existingPromise;
     // Ejemplos reales de lo que YA se publicó en cada categoría (pedido de
     // Milton, 2/9/2026, caso Guillermo Martínez): el nombre de la categoría
@@ -341,9 +373,14 @@ export async function POST(request: Request) {
     if (currentRows.length === 0 && googleAnalyticsSignals.rows.length === 0 && bingSignals.rows.length === 0) {
       return NextResponse.json(
         {
-          error: gscError
-            ? `Google Search Console respondió con un error y no hay otra evidencia disponible (Google Analytics o Bing Webmaster Tools): ${gscError}`
-            : "No hay evidencia disponible en GSC, Google Analytics o Bing Webmaster Tools.",
+          error: describeNoEvidence({
+            hasSearchConsole,
+            gscError,
+            gaConnected: googleAnalyticsSignals.connected,
+            gaError: googleAnalyticsSignals.error,
+            bingConnected: bingSignals.connected,
+            bingError: bingSignals.error,
+          }),
         },
         { status: 422 },
       );
@@ -431,6 +468,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       groups: await list(userId, selectedSiteDomain),
       lastAnalysisAt: now,
+      ...(staleEvidenceFrom ? { staleEvidenceFrom } : {}),
     });
   } catch (error) {
     console.error("POST /api/opportunities falló:", error);

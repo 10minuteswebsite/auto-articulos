@@ -65,13 +65,34 @@ function networkLabel(platform: string): string {
   return names[p] ?? platform;
 }
 
+export type PublishErrorContext = { articleTitle?: string | null; articleUrl?: string | null };
+
+function hostOf(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/** Falta de foto: nombra el artículo y dice qué arreglar (la causa más común es el servidor del sitio). */
+function siteMessage(context?: PublishErrorContext): string {
+  const title = context?.articleTitle?.trim();
+  const host = hostOf(context?.articleUrl);
+  const what = title ? `«${title}»` : "el artículo";
+  const where = host ? ` en ${host}` : "";
+  return `La foto de portada de ${what} no se pudo leer${where}: su página no la entrega (og:image) y las redes no publican sin foto. Agrega la imagen destacada al artículo en tu sitio; si tu sitio está en otro servidor, revisa que ese servidor la publique. Cuando se vea, pulsa Reintentar.`;
+}
+
 /** Mensaje claro, en español y sin códigos, para una publicación que falló. */
-export function friendlyPublishError(raw: unknown, platform = "la red"): string {
+export function friendlyPublishError(raw: unknown, platform = "la red", context?: PublishErrorContext): string {
   const network = networkLabel(platform);
   const text = typeof raw === "string" ? raw.trim() : raw instanceof Error ? raw.message.trim() : "";
   const generic = `No se pudo publicar en ${network}. Se reintentará más tarde; si sigue igual, reconecta la red en Conexiones.`;
   if (!text) return generic;
   const kind = classifyTechnicalError(text);
+  if (kind === "SITE") return siteMessage(context);
   if (kind) return PUBLISH_MESSAGES[kind];
   if (!looksSpanish(text)) return generic;
   return stripTechnicalTail(text).replace(/composio/gi, "el proveedor de conexiones");

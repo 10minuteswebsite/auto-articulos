@@ -19,6 +19,7 @@ import { getBingSignals } from "@/lib/bing-signals";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 import { describeSocialContentLanguage } from "@/lib/social-language";
+import { inspectArticlePage } from "@/lib/social-article-url";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
@@ -40,33 +41,6 @@ type EditorialProfile = {
   businessLocations: string | null;
   contentLanguage: string;
 };
-
-async function isPublicArticleUrl(url: string, allowedHost: string | null): Promise<boolean> {
-  if (!/^https?:\/\//i.test(url) || !allowedHost) return false;
-  let original: URL;
-  try {
-    original = new URL(url);
-  } catch {
-    return false;
-  }
-  const normalizeHost = (host: string) => host.toLowerCase().replace(/^www\./, "");
-  if (normalizeHost(original.hostname) !== normalizeHost(allowedHost)) return false;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      redirect: "follow",
-      signal: controller.signal,
-      headers: { Accept: "text/html,application/xhtml+xml" },
-    });
-    return response.status >= 200 && response.status < 300 && normalizeHost(new URL(response.url).hostname) === normalizeHost(allowedHost);
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
 
 const formulas = [
   `Fórmula: Historia personal / Anécdota cercana.
@@ -240,8 +214,7 @@ function pathnameOf(url: string): string {
  * descubre temas sin artículo — decisión explícita de Milton: solo prioriza
  * entre lo que ya existe.
  */
-async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[]> {
-  const account = await prisma.user.findUnique({ where: { id: userId }, select: { selectedSiteDomain: true } });
+async function selectTrendingArticles(userId: string): Promise<{ candidates: ArticleCandidate[]; totalArticles: number; goneArticles: number; noImageArticles: number; noImageTitles: string[] }> {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const gsc = await prisma.searchIntegration.findFirst({ where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) } });
   const resolvedGsc = await resolveSearchConsoleForUser(userId, user.selectedSiteDomain ?? "");
@@ -452,17 +425,27 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
     });
 
   const verified: typeof ranked = [];
-  // Verificar por lotes evita que una URL rota o eliminada llegue a Redes y
-  // limita la concurrencia contra el sitio público de la cuenta.
+  let goneArticles = 0;
+  const noImageTitles: string[] = [];
+  let noImageArticles = 0;
+  // Verificar por lotes evita que una URL rota, eliminada o sin foto llegue a
+  // Redes y limita la concurrencia contra el sitio público de la cuenta. Solo
+  // un 404/410 o una página completa sin og:image descartan el artículo; un
+  // bloqueo, timeout o error no prueba nada (ver lib/social-article-url.ts).
   for (let index = 0; index < ranked.length; index += 8) {
     const batch = ranked.slice(index, index + 8);
-    const available = await Promise.all(batch.map(({ article }) => isPublicArticleUrl(article.articleUrl!, account?.selectedSiteDomain ?? null)));
+    const states = await Promise.all(batch.map(({ article }) => inspectArticlePage(article.articleUrl!)));
     batch.forEach((candidate, batchIndex) => {
-      if (available[batchIndex]) verified.push(candidate);
+      const state = states[batchIndex];
+      if (state === "gone") goneArticles += 1;
+      else if (state === "no-image") {
+        noImageArticles += 1;
+        if (noImageTitles.length < 3) noImageTitles.push(candidate.article.finalTitle || candidate.article.articleUrl || "Sin título");
+      } else verified.push(candidate);
     });
   }
 
-  return verified.map(({ article }): ArticleCandidate => ({
+  const candidates = verified.map(({ article }): ArticleCandidate => ({
     id: article.id,
     finalTitle: article.finalTitle,
     text: article.text,
@@ -470,6 +453,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
     articleUrl: article.articleUrl,
     searchQueries: queriesByPath.get(pathnameOf(article.articleUrl!)) ?? [],
   }));
+  return { candidates, totalArticles: ranked.length, goneArticles, noImageArticles, noImageTitles };
 }
 
 /**
@@ -646,7 +630,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const trendingCandidates = await selectTrendingArticles(userId);
+    const { candidates: trendingCandidates, totalArticles, goneArticles, noImageArticles, noImageTitles } = await selectTrendingArticles(userId);
     const candidateMap = new Map<string, ArticleCandidate>();
     for (const article of trendingCandidates) {
       candidateMap.set(article.id, article);
@@ -737,12 +721,28 @@ export async function POST(request: Request) {
       const pendingCount = await prisma.socialOpportunity.count({
         where: { userId, status: "pending" },
       });
+      // Tres causas distintas que antes compartían el mismo texto (incidente
+      // 29/10/2026): sin artículos, artículos con URL caída (404/410) y
+      // artículos ya usados en todas las redes conectadas.
+      console.warn("[social-opportunities/generate] sin candidatos", { userId, totalArticles, goneArticles, noImageArticles, pendingCount, requestedNetworks });
+      const noImageNote = noImageArticles > 0
+        ? `${noImageArticles === 1 ? "Un artículo no tiene" : `${noImageArticles} artículos no tienen`} foto de portada (og:image) en su página: ${noImageTitles.map((title) => `«${title}»`).join(", ")}${noImageArticles > noImageTitles.length ? " y otros" : ""}. Las redes no publican sin foto. Agrega la imagen destacada en tu sitio; si está en otro servidor, revisa que ese servidor la publique.`
+        : "";
+      const emptyReason =
+        totalArticles === 0
+          ? "Todavía no tienes artículos publicados con enlace. Publica un artículo y vuelve a intentarlo."
+          : goneArticles + noImageArticles === totalArticles
+            ? [
+                noImageNote,
+                goneArticles > 0 ? "Hay artículos que ya no están disponibles en tu sitio (la página responde «no encontrada»). Revisa que sigan publicados." : "",
+              ].filter(Boolean).join(" ")
+            : `Ya generaste propuestas para todos tus artículos disponibles en las redes conectadas. Publica un artículo nuevo para seguir.${noImageNote ? ` ${noImageNote}` : ""}`;
       return NextResponse.json(
         {
           error:
             pendingCount > 0
               ? `Ya tienes ${pendingCount} propuesta${pendingCount === 1 ? "" : "s"} pendiente${pendingCount === 1 ? "" : "s"} sin publicar — no se generan más hasta que se publiquen o se descarten. Revisa la lista de «Propuestas» más abajo.`
-              : "No hay artículos nuevos disponibles. Todos los artículos publicados ya tienen una propuesta generada.",
+              : emptyReason,
         },
         { status: 400 }
       );

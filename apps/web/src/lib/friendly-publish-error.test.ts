@@ -40,6 +40,24 @@ test("vacío y la palabra del proveedor", () => {
 
 test("sin og:image de la página del artículo no culpa a la red ni a la imagen", () => {
   const out = friendlyPublishError("El artículo no tiene una og:image pública para Google Business Profile.", "Google Business");
-  assert.match(out, /página de tu artículo/);
+  assert.match(out, /su página no la entrega/);
   assert.doesNotMatch(out, /no aceptó/);
+});
+
+test("sin foto nombra el artículo, el sitio y qué hacer", () => {
+  const out = friendlyPublishError("No se encontró la og:image del artículo", "Threads", {
+    articleTitle: "Cómo comprar propiedades en Barcelona",
+    articleUrl: "https://www.movrealestate.com/categ/como-comprar",
+  });
+  assert.match(out, /«Cómo comprar propiedades en Barcelona»/);
+  assert.match(out, /movrealestate\.com/);
+  assert.match(out, /imagen destacada/);
+  assert.match(out, /otro servidor/);
+  assert.match(out, /Reintentar/);
+});
+
+test("sin foto y sin contexto sigue siendo claro", () => {
+  const out = friendlyPublishError("El artículo no tiene una og:image pública para Google Business Profile.", "Google Business");
+  assert.match(out, /el artículo/);
+  assert.match(out, /imagen destacada/);
 });

@@ -1127,7 +1127,7 @@ function HistorialRedes() {
                             border: "1px solid rgba(255, 59, 48, 0.2)",
                           }}
                         >
-                          <strong>Error:</strong> {friendlyPublishError(opp.errorLog, opp.platform)}
+                          <strong>Error:</strong> {friendlyPublishError(opp.errorLog, opp.platform, { articleTitle: opp.articleTitle, articleUrl: opp.articleUrl })}
                         </div>
                       )}
                       {opp.titleId && (
@@ -1565,7 +1565,7 @@ function HistorialRedes() {
                         border: "1px solid rgba(255, 59, 48, 0.2)",
                       }}
                     >
-                      <strong>Error:</strong> {friendlyPublishError(opp.errorLog, opp.platform)}
+                      <strong>Error:</strong> {friendlyPublishError(opp.errorLog, opp.platform, { articleTitle: opp.articleTitle, articleUrl: opp.articleUrl })}
                     </div>
                   )}
                   {opp.titleId && (
