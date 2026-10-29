@@ -9,7 +9,6 @@ import ModuleGuard from "@/components/ModuleGuard";
 import ProductAccessGuard from "@/components/ProductAccessGuard";
 import StopImpersonationButton from "@/components/StopImpersonationButton";
 import TrialBlockedScreen from "@/components/TrialBlockedScreen";
-import RegionQuestionScreen from "@/components/RegionQuestionScreen";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
 import { displayName, getSessionContext } from "@/lib/current-user";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
@@ -35,8 +34,6 @@ export default async function DashboardLayout({
       ? "SEO TOTAL REDES"
       : "SEO TOTAL";
   const blocked = !actingAdmin && user.role !== "admin" && !(await checkTrialAccess(user));
-  // Altas desde el Hub: no traen continente; se pregunta una sola vez (nunca a administradores ni al «Acceder como»).
-  const needsRegion = !actingAdmin && user.role !== "admin" && !user.platformDomainConfirmedAt;
   // Router de acceso (Día Cero): apagado por defecto. Nunca para administradores ni al «Acceder como».
   if (!actingAdmin && user.role !== "admin") {
     const target = await resolveAccessRedirect(user, requestHeaders.get("host"));
@@ -252,8 +249,6 @@ export default async function DashboardLayout({
       </div>}
       {blocked ? (
         <TrialBlockedScreen />
-      ) : needsRegion ? (
-        <RegionQuestionScreen />
       ) : (
         <>
           {!showHubNavigation && (

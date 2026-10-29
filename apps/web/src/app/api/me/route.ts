@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { isValidTimeZone, platformBaseUrl } from "@auto-articulos/shared";
-import { isValidCountryCode } from "@/lib/countries";
+import { isValidCountryCode, platformDomainForCountry } from "@/lib/countries";
 import { getCurrentUser, getCurrentUserId, getActingAdmin, displayName } from "@/lib/current-user";
 
 import {
@@ -133,6 +133,8 @@ export async function PATCH(request: NextRequest) {
     clientLocations?: string | null;
     businessLocations?: string | null;
     country?: string;
+    platformDomain?: string;
+    platformDomainConfirmedAt?: Date;
     city?: string;
     timeZone?: string;
     excludedTopics?: string | null;
@@ -328,6 +330,13 @@ export async function PATCH(request: NextRequest) {
     data.country = country.toUpperCase();
     data.city = cleanCity;
     data.timeZone = timeZone;
+    // Cuenta nueva del Hub (región sin confirmar): el país decide el servidor, una sola vez.
+    // Europa -> .site, resto -> .net. Nunca cambia el servidor de una cuenta ya confirmada.
+    const current = await prisma.user.findUnique({ where: { id: userId }, select: { platformDomainConfirmedAt: true } });
+    if (current && !current.platformDomainConfirmedAt) {
+      data.platformDomain = platformDomainForCountry(country);
+      data.platformDomainConfirmedAt = new Date();
+    }
   }
 
   if ("hasImageCredits" in body) {

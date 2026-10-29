@@ -59,6 +59,7 @@ export async function GET() {
       select: {
         contentLanguage: true,
         country: true,
+        platformDomainConfirmedAt: true,
         city: true,
         timeZone: true,
         articleSignature: true,
@@ -192,7 +193,9 @@ export async function GET() {
       id: "location",
       label: "Ciudad, país y zona horaria",
       configured: Boolean(user?.country && user?.city && user?.timeZone),
-      required: false,
+      // Cuentas nuevas del Hub (sin región confirmada): la ubicación es un paso obligatorio, porque de
+      // ella salen el servidor (.site/.net) y el país de los artículos. Las cuentas anteriores no cambian.
+      required: !user?.platformDomainConfirmedAt,
       section: "platform",
       description: "Tu ciudad, país y zona horaria: con ellos tu día de publicación empieza y termina a medianoche en tu hora, y tu cupo diario se renueva cuando corresponde.",
       actionUrl: "/dashboard/configuracion/cuenta?ubicacion=1#ubicacion",

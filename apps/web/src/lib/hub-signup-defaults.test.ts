@@ -25,16 +25,20 @@ test("registro de prueba y alta de administrador ya traen la región confirmada;
   assert.doesNotMatch(read("src/app/api/integrations/hub/access-sync/route.ts"), /platformDomainConfirmedAt/);
 });
 
-test("el panel pregunta la región solo a cuentas sin confirmar, nunca a administradores ni «Acceder como»", () => {
-  const layout = read("src/app/dashboard/layout.tsx");
-  assert.match(layout, /const needsRegion = !actingAdmin && user\.role !== "admin" && !user\.platformDomainConfirmedAt/);
-  assert.match(layout, /needsRegion \? \(\s*<RegionQuestionScreen \/>/);
+test("la ubicación del cartel «Tu ubicación» decide el servidor, solo mientras no esté confirmado", () => {
+  const route = read("src/app/api/me/route.ts");
+  assert.match(route, /if \(current && !current\.platformDomainConfirmedAt\)/);
+  assert.match(route, /data\.platformDomain = platformDomainForCountry\(country\)/);
+  assert.match(route, /data\.platformDomainConfirmedAt = new Date\(\)/);
 });
 
-test("responder la región nunca cambia una cuenta ya confirmada y mapea Europa a .site", () => {
-  const route = read("src/app/api/me/region/route.ts");
-  assert.match(route, /where: \{ id: userId, platformDomainConfirmedAt: null \}/);
-  assert.match(route, /region === "europe" \? "site" : "net"/);
+test("la ubicación es un paso obligatorio solo para cuentas nuevas sin región confirmada", () => {
+  const route = read("src/app/api/configuration-status/route.ts");
+  assert.match(route, /required: !user\?\.platformDomainConfirmedAt/);
+});
+
+test("no hay pantalla bloqueante nueva en el panel", () => {
+  assert.doesNotMatch(read("src/app/dashboard/layout.tsx"), /RegionQuestion|needsRegion/);
 });
 
 test("la migración confirma las cuentas existentes y corrige solo las nuevas sin prompt", () => {
