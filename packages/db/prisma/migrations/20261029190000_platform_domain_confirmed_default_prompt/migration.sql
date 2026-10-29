@@ -1,8 +1,17 @@
--- 1) Región confirmada. Las altas desde el Hub no traen continente: quedan en NULL y la
---    app lo pregunta una sola vez. Todas las cuentas que ya existen se marcan como
---    confirmadas para no preguntarles nada.
-ALTER TABLE "User" ADD COLUMN "platformDomainConfirmedAt" TIMESTAMP(3);
-UPDATE "User" SET "platformDomainConfirmedAt" = NOW();
+-- 1) Región confirmada. Las altas desde el Hub no traen ubicación: quedan en NULL y el asistente
+--    inicial la pide una sola vez. Todas las cuentas que YA existen se marcan como confirmadas para
+--    no preguntarles nada. Idempotente: si la columna ya existe NO se vuelve a marcar (no se
+--    confirmarían por error las cuentas nuevas creadas después).
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+         WHERE table_name = 'User' AND column_name = 'platformDomainConfirmedAt'
+    ) THEN
+        ALTER TABLE "User" ADD COLUMN "platformDomainConfirmedAt" TIMESTAMP(3);
+        UPDATE "User" SET "platformDomainConfirmedAt" = NOW();
+    END IF;
+END $$;
 
 -- 2) Estilo predeterminado para cuentas creadas DESPUÉS del lote del 19/10/2026
 --    (20261019190000), que solo cubrió las cuentas existentes ese día. STANDARD es
