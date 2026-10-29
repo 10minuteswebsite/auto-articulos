@@ -215,7 +215,7 @@ Con eso se arman títulos de cola larga. Es más sencillo de lo que suena: en ve
 
 La pantalla está separada en tres pasos.
 
-Paso 1, pide el análisis. Si tienes más de un sitio, eliges para cuál generar contenido y pulsas Analizar. Tarda unos minutos y no debes cerrar la página. Si te falta conectar Google Search Console, elegir la propiedad, sincronizar categorías o configurar el idioma, la propia pantalla te lo dice con un enlace directo a donde se arregla.
+Paso 1, pide el análisis. Si tienes más de un sitio, eliges para cuál generar contenido y pulsas Analizar. Tarda unos minutos y no debes cerrar la página. Si te falta conectar Google Search Console, elegir la propiedad, sincronizar categorías o configurar el idioma, la propia pantalla te lo dice con un enlace directo a donde se arregla. Si Search Console está conectado por Composio, el análisis lo usa aunque antes hubiera una conexión propia con error. Si el análisis no encuentra datos, el mensaje te dice qué pasó: nada conectado, Search Console conectado pero sin datos en los últimos 45 días (revisa en Conexiones que la propiedad elegida sea la correcta: con https://, con www o el dominio completo), o un error de Google. Los datos de la última consulta buena se reutilizan hasta 20 días y, si una consulta nueva falla, se usa esa última copia.
 
 Paso 2, elige cómo se escribirán. Seleccionas el idioma de los artículos y el estilo de escritura. También puedes desactivar la indexación en buscadores, aunque por defecto queda activada, que es lo normal si quieres que Google los encuentre. Estas opciones solo afectan a lo que publiques desde esta pantalla; no cambian tu configuración general.
 
@@ -243,7 +243,7 @@ Consejo: edita el texto si necesitas adaptar el tono a tu marca antes de aprobar
 
 Ruta: /dashboard/historial
 
-Historial conserva las ejecuciones anteriores y el estado de los títulos. Puedes revisar cuáles se publicaron, cuáles tuvieron error y los mensajes asociados. También muestra información disponible sobre publicaciones en redes e intentos de indexación. Bajo cada artículo ves el estado del sitemap: «se enviará a Google en el próximo envío diario» mientras espera, y «✓ Sitemap enviado a Google» con la fecha cuando ya salió; esa línea se actualiza sola, sin recargar la página.
+Historial conserva las ejecuciones anteriores y el estado de los títulos. Puedes revisar cuáles se publicaron, cuáles tuvieron error y los mensajes asociados. También muestra información disponible sobre publicaciones en redes e intentos de indexación. Bajo cada artículo ves dos líneas. Google: «Sitemap enviado a Google» en verde, o «Sitemap por enviar a Google» en gris. Google permite un solo envío al día; la plataforma lo hace automáticamente cuando corresponde, y si pulsas «Enviar ahora» cuenta como el envío de hoy y todos los artículos de todos tus historiales pasan a verde. Bing: «Artículo enviado a Bing» en verde, o «Artículo por enviar a Bing» en gris con su botón «Enviar ahora».
 
 En articulos.lasolucionweb.com (.com o .net) el Historial muestra solo artículos y en redes.lasolucionweb.com (.com o .net) solo publicaciones en redes; en seototal muestra ambos.
 
@@ -435,7 +435,7 @@ La plataforma cuenta con un diseño minimalista y limpio en blanco impecable, si
 ## Pre-Validación Inteligente antes de Publicar
 
 Tanto en **${MENU_NAMES.propios}** (/dashboard/publicar) como en **${MENU_NAMES.ia}** (/dashboard/oportunidades), el sistema cuenta con un panel de protección preventiva (**PreValidationGuard**):
-- **Temas ya publicados (2026-10-16):** el sistema no vuelve a publicar un tema que ya figura publicado en tu sitio, para no canibalizar tu propio contenido. Lo revisa lo más temprano posible: **Oportunidades** ya no te ofrece un tema que se publicó, **Publicar** te avisa con el enlace del artículo existente cuando lo escribes de nuevo, y el sistema lo comprueba otra vez justo antes de redactar, antes de gastar texto, imagen o FAQ. Si aparece en Historial «ya está publicado en tu sitio», abre el enlace que trae: ese es el artículo vigente.
+- **Temas ya publicados (2026-10-16):** el sistema no vuelve a publicar un tema que ya figura publicado en tu sitio, para no canibalizar tu propio contenido. Lo revisa lo más temprano posible: **Oportunidades** ya no te ofrece un tema que se publicó, **Publicar** te avisa con el enlace del artículo existente cuando lo escribes de nuevo, y el sistema lo comprueba otra vez justo antes de redactar, antes de gastar texto, imagen o FAQ. Si aparece en Historial «ya está publicado en tu sitio», abre el enlace que trae: ese es el artículo vigente. Para saber qué ya existe, el sistema guarda en su propia base solo los **títulos** de los artículos de tu sitio: la primera vez los lee de tu sitemap (si tu sitio no tiene sitemap, simplemente no se llena) y después suma cada artículo que publica. Así Oportunidades ya no tiene que revisar tu panel una y otra vez.
 - Si falta algún requisito previo (credenciales de la plataforma, categorías sincronizadas, idioma de redacción o Search Console), la plataforma te muestra una tarjeta clara con un checklist interactivo indicando exactamente qué falta y un botón directo para resolverlo.
 - **Créditos de imagen:** Si ya recibiste créditos, pulsa **Ya recibí mis créditos** para intentar publicar de inmediato y para que el sistema deje de mostrarte el aviso. Esa confirmación queda guardada en tu cuenta (no solo en la pantalla actual), así que no debería reaparecer al refrescar, ni en otra pestaña o dispositivo. El aviso solo vuelve a aparecer cuando una creación de artículo comprueba, tras agotar los reintentos, que 10minutesWebsite realmente se quedó sin créditos — nunca por errores pasajeros o visitas a la pantalla.
 
@@ -575,7 +575,7 @@ Comprueba que tienes categorías sincronizadas, un idioma elegido y que no hay o
 
 ### Aviso de falta de créditos de imagen
 
-Si aparece el aviso de créditos de imagen, significa que la pantalla todavía no reconoce saldo para ilustrar artículos. Si ya te los asignaron, pulsa **Ya recibí mis créditos** y vuelve a intentar. Si la operación sigue detenida, solicita créditos o consulta a soporte.
+Si tu cuenta se queda sin créditos de imagen, el aviso rojo **Sin créditos de imagen** aparece también en el **Inicio**, arriba de las tarjetas, con los botones **Servicio al cliente** (abre la página de ayuda de tu proveedor para pedir los créditos) y **Ya recibí mis créditos** (confirma que ya los tienes y quita el aviso). Esa confirmación también está en Publicar y Oportunidades. Si aparece el aviso de créditos de imagen, significa que la pantalla todavía no reconoce saldo para ilustrar artículos. Si ya te los asignaron, pulsa **Ya recibí mis créditos** y vuelve a intentar. Si la operación sigue detenida, solicita créditos o consulta a soporte.
 
 ### Un título falla porque la categoría ya no existe
 

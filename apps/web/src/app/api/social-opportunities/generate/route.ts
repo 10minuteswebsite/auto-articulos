@@ -18,9 +18,17 @@ import { getGoogleAnalyticsSignals, summarizeGoogleAnalyticsSignals } from "@/li
 import { getBingSignals } from "@/lib/bing-signals";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { describeSocialContentLanguage } from "@/lib/social-language";
+import { inspectArticlePage } from "@/lib/social-article-url";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
+
+// La generación de Redes hace varias llamadas externas. El límite explícito
+// evita que una función de Vercel se quede esperando hasta devolver HTML de
+// timeout al navegador.
+export const maxDuration = 60;
+const OPENAI_TIMEOUT_MS = 20_000;
 
 // Bloqueo global temporal: los carruseles permanecen en historial, pero no se generan nuevas propuestas.
 const INSTAGRAM_CAROUSELS_ENABLED = false;
@@ -119,10 +127,11 @@ async function generateGPTCopy(
     ? `La publicación representa a ${profile.name}. Usa esa identidad solo si encaja naturalmente y nunca inventes profesión, certificaciones, clientes, resultados o experiencias personales.\n` +
       (profile.businessLocations ? `Ubicaciones declaradas del negocio: ${profile.businessLocations}. No agregues otras.\n` : "")
     : "No hay identidad profesional verificada disponible. No inventes nombre, profesión, ubicación, clientes ni anécdotas personales; escribe desde la utilidad del contenido y usa primera persona solo de forma editorial, sin afirmaciones biográficas.\n";
-  const language = profile?.contentLanguage === "en" ? "inglés" : "español";
+  const language = describeSocialContentLanguage(profile?.contentLanguage);
   try {
     const callModel = (extraMessages: Array<{ role: "assistant" | "user"; content: string }>) => fetch(OPENAI_CHAT_URL, {
       method: "POST",
+      signal: AbortSignal.timeout(OPENAI_TIMEOUT_MS),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${OPENAI_API_KEY}`,
@@ -212,7 +221,7 @@ function pathnameOf(url: string): string {
  * descubre temas sin artículo — decisión explícita de Milton: solo prioriza
  * entre lo que ya existe.
  */
-async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[]> {
+async function selectTrendingArticles(userId: string): Promise<{ candidates: ArticleCandidate[]; totalArticles: number; goneArticles: number; noImageArticles: number; noImageTitles: string[] }> {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const gsc = await prisma.searchIntegration.findFirst({ where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) } });
   const resolvedGsc = await resolveSearchConsoleForUser(userId, user.selectedSiteDomain ?? "");
@@ -422,7 +431,33 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
       return (b.article.processedAt?.getTime() ?? 0) - (a.article.processedAt?.getTime() ?? 0);
     });
 
-  return ranked.map(({ article }): ArticleCandidate => ({
+  const verified: typeof ranked = [];
+  let goneArticles = 0;
+  const noImageTitles: string[] = [];
+  let noImageArticles = 0;
+  // Verificar por lotes evita que una URL rota, eliminada o sin foto llegue a
+  // Redes y limita la concurrencia contra el sitio público de la cuenta. Solo
+  // un 404/410 o una página completa sin og:image descartan el artículo; un
+  // bloqueo, timeout o error no prueba nada (ver lib/social-article-url.ts).
+  // Solo hace falta encontrar un candidato válido: después el flujo crea como
+  // máximo una propuesta por red. Inspeccionar todos los artículos publicados
+  // hacía que esta protección agotara el timeout antes de generar propuestas.
+  const maxArticlesToInspect = 24;
+  for (let index = 0; index < Math.min(ranked.length, maxArticlesToInspect); index += 8) {
+    const batch = ranked.slice(index, index + 8);
+    const states = await Promise.all(batch.map(({ article }) => inspectArticlePage(article.articleUrl!)));
+    batch.forEach((candidate, batchIndex) => {
+      const state = states[batchIndex];
+      if (state === "gone") goneArticles += 1;
+      else if (state === "no-image") {
+        noImageArticles += 1;
+        if (noImageTitles.length < 3) noImageTitles.push(candidate.article.finalTitle || candidate.article.articleUrl || "Sin título");
+      } else verified.push(candidate);
+    });
+    if (verified.length > 0) break;
+  }
+
+  const candidates = verified.map(({ article }): ArticleCandidate => ({
     id: article.id,
     finalTitle: article.finalTitle,
     text: article.text,
@@ -430,6 +465,7 @@ async function selectTrendingArticles(userId: string): Promise<ArticleCandidate[
     articleUrl: article.articleUrl,
     searchQueries: queriesByPath.get(pathnameOf(article.articleUrl!)) ?? [],
   }));
+  return { candidates, totalArticles: ranked.length, goneArticles, noImageArticles, noImageTitles };
 }
 
 /**
@@ -606,7 +642,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const trendingCandidates = await selectTrendingArticles(userId);
+    const { candidates: trendingCandidates, totalArticles, goneArticles, noImageArticles, noImageTitles } = await selectTrendingArticles(userId);
     const candidateMap = new Map<string, ArticleCandidate>();
     for (const article of trendingCandidates) {
       candidateMap.set(article.id, article);
@@ -627,7 +663,7 @@ export async function POST(request: Request) {
     });
 
     // El historial completo evita que una oportunidad ya publicada,
-    // descartada o fallida vuelva a aparecer. Cada formato de Instagram
+    // descartada, borrada o fallida vuelva a aparecer. Cada formato de Instagram
     // (story/post/reel-image/carousel/infografia) cuenta como su propio
     // canal — pedido explícito de Milton (20/8/2026): antes se colapsaban
     // todos como un único "instagram", así que un artículo que ya tenía una
@@ -636,13 +672,9 @@ export async function POST(request: Request) {
     const previousOpportunities = await prisma.socialOpportunity.findMany({
       where: {
         userId,
-        // "skipped" (botón Descartar) no debe bloquear el artículo para
-        // siempre — descartar una idea significa "no esta, dame otra
-        // después", no "este artículo ya no puede tener oportunidades
-        // nunca más". Reportado por Milton (21/8/2026): tras descartar 52
-        // propuestas en lote para "empezar de cero", seguía sin poder
-        // generar nuevas porque estas igual contaban como "ya usado".
-        status: { not: "skipped" },
+        // Los descartes y los borrados masivos se conservan como memoria
+        // editorial: si la persona dijo que no quería ese artículo para una
+        // red, no debe reaparecer inmediatamente en esa misma red.
         OR: [
           { titleId: { in: allCandidates.map((article) => article.id) } },
           { articleUrl: { in: allCandidates.map((article) => article.articleUrl).filter((url): url is string => Boolean(url)) } },
@@ -668,7 +700,9 @@ export async function POST(request: Request) {
     // recogiendo el mismo artículo top-1 para ambas — nada lo impedía antes.
     const todayStart = startOfSocialDay();
     const todaysOpportunities = await prisma.socialOpportunity.findMany({
-      where: { userId, status: { not: "skipped" }, createdAt: { gte: todayStart } },
+      // Los descartes también cuentan como memoria editorial del día: no se
+      // debe volver a ofrecer automáticamente el mismo artículo/plataforma.
+      where: { userId, createdAt: { gte: todayStart } },
       select: { titleId: true, articleUrl: true },
     });
     const usedTodayIds = new Set(todaysOpportunities.map((o) => o.titleId).filter((id): id is string => Boolean(id)));
@@ -699,12 +733,28 @@ export async function POST(request: Request) {
       const pendingCount = await prisma.socialOpportunity.count({
         where: { userId, status: "pending" },
       });
+      // Tres causas distintas que antes compartían el mismo texto (incidente
+      // 29/10/2026): sin artículos, artículos con URL caída (404/410) y
+      // artículos ya usados en todas las redes conectadas.
+      console.warn("[social-opportunities/generate] sin candidatos", { userId, totalArticles, goneArticles, noImageArticles, pendingCount, requestedNetworks });
+      const noImageNote = noImageArticles > 0
+        ? `${noImageArticles === 1 ? "Un artículo no tiene" : `${noImageArticles} artículos no tienen`} foto de portada (og:image) en su página: ${noImageTitles.map((title) => `«${title}»`).join(", ")}${noImageArticles > noImageTitles.length ? " y otros" : ""}. Las redes no publican sin foto. Agrega la imagen destacada en tu sitio; si está en otro servidor, revisa que ese servidor la publique.`
+        : "";
+      const emptyReason =
+        totalArticles === 0
+          ? "Todavía no tienes artículos publicados con enlace. Publica un artículo y vuelve a intentarlo."
+          : goneArticles + noImageArticles === totalArticles
+            ? [
+                noImageNote,
+                goneArticles > 0 ? "Hay artículos que ya no están disponibles en tu sitio (la página responde «no encontrada»). Revisa que sigan publicados." : "",
+              ].filter(Boolean).join(" ")
+            : `Ya generaste propuestas para todos tus artículos disponibles en las redes conectadas. Publica un artículo nuevo para seguir.${noImageNote ? ` ${noImageNote}` : ""}`;
       return NextResponse.json(
         {
           error:
             pendingCount > 0
               ? `Ya tienes ${pendingCount} propuesta${pendingCount === 1 ? "" : "s"} pendiente${pendingCount === 1 ? "" : "s"} sin publicar — no se generan más hasta que se publiquen o se descarten. Revisa la lista de «Propuestas» más abajo.`
-              : "No hay artículos nuevos disponibles. Todos los artículos publicados ya tienen una propuesta generada.",
+              : emptyReason,
         },
         { status: 400 }
       );
@@ -713,32 +763,42 @@ export async function POST(request: Request) {
     const createdOpportunities: any[] = [];
     const googleAnalyticsContext = JSON.stringify(summarizeGoogleAnalyticsSignals(await getGoogleAnalyticsSignals(userId)));
 
-    for (const article of candidates) {
-      for (const platform of integrationsWithinLimit) {
-        if ((remainingByPlatform.get(platform) ?? 0) <= 0) continue;
-        const opportunityKey = `${article.id}:${normalizePlatform(platform)}`;
-        if (activeKeys.has(opportunityKey)) continue;
+    // Las redes no dependen unas de otras. Generar sus copys en paralelo
+    // reduce el tiempo total de N llamadas de IA a la duración de la más lenta
+    // y evita que «Crear propuestas» alcance el timeout de la función.
+    const copyJobs = candidates.flatMap((article) =>
+      integrationsWithinLimit
+        .filter((platform) => (remainingByPlatform.get(platform) ?? 0) > 0 && !activeKeys.has(`${article.id}:${platform}`))
+        .map(async (platform) => ({
+          article,
+          platform,
+          copyText: await generateGPTCopy(
+            platform,
+            article.finalTitle || article.text,
+            article.summary || "",
+            article.searchQueries,
+            googleAnalyticsContext,
+            editorialUser ? {
+              name: [editorialUser.firstName, editorialUser.lastName].filter(Boolean).join(" ") || editorialUser.name || null,
+              businessLocations: editorialUser.businessLocations,
+              contentLanguage: editorialUser.contentLanguage,
+            } : undefined,
+          ),
+        })),
+    );
+    const generatedCopies = await Promise.all(copyJobs);
 
-      const profile = editorialUser ? {
-        name: [editorialUser.firstName, editorialUser.lastName].filter(Boolean).join(" ") || editorialUser.name || null,
-        businessLocations: editorialUser.businessLocations,
-        contentLanguage: editorialUser.contentLanguage,
-      } : undefined;
-      const copyText = await generateGPTCopy(
-        platform,
-        article.finalTitle || article.text,
-        article.summary || "",
-        article.searchQueries,
-        googleAnalyticsContext,
-        profile,
-      );
+    for (const { article, platform, copyText } of generatedCopies) {
+      if ((remainingByPlatform.get(platform) ?? 0) <= 0) continue;
+      const opportunityKey = `${article.id}:${normalizePlatform(platform)}`;
+      if (activeKeys.has(opportunityKey)) continue;
 
-        // Serializa por usuario + URL + red/formato para que dos clics
-        // simultáneos no creen la misma oportunidad. Se mantiene dentro de
-        // una transacción y no requiere confiar solo en el estado local de
-        // activeKeys.
-        const lockKey = `${userId}:${article.articleUrl || article.id}:${platform}`;
-        const opp = await prisma.$transaction(async (tx) => {
+      // Serializa por usuario + URL + red/formato para que dos clics
+      // simultáneos no creen la misma oportunidad. Se mantiene dentro de
+      // una transacción y no requiere confiar solo en el estado local de
+      // activeKeys.
+      const lockKey = `${userId}:${article.articleUrl || article.id}:${platform}`;
+      const opp = await prisma.$transaction(async (tx) => {
           // $executeRawUnsafe, no $queryRawUnsafe: pg_advisory_xact_lock devuelve
           // `void` y Prisma no puede leer esa columna (500 en producción desde 2026-10-06).
           await tx.$executeRawUnsafe("SELECT pg_advisory_xact_lock(hashtext($1))", lockKey);
@@ -766,20 +826,19 @@ export async function POST(request: Request) {
               status: "pending",
             },
           });
-        });
-        if (!opp) {
-          activeKeys.add(opportunityKey);
-          continue;
-        }
-
-        // La imagen la genera el worker (processNextOpportunityImage) en
-        // background para no agotar el timeout de Vercel Functions con la
-        // llamada a DALL-E. El usuario la ve aparecer automáticamente.
-
-        createdOpportunities.push(opp);
+      });
+      if (!opp) {
         activeKeys.add(opportunityKey);
-        remainingByPlatform.set(platform, (remainingByPlatform.get(platform) ?? 1) - 1);
+        continue;
       }
+
+      // La imagen la genera el worker (processNextOpportunityImage) en
+      // background para no agotar el timeout de Vercel Functions con la
+      // llamada a DALL-E. El usuario la ve aparecer automáticamente.
+
+      createdOpportunities.push(opp);
+      activeKeys.add(opportunityKey);
+      remainingByPlatform.set(platform, (remainingByPlatform.get(platform) ?? 1) - 1);
     }
 
     const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });

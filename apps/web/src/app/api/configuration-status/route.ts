@@ -1,3 +1,4 @@
+import { isPlatformDomainConfirmed } from "@/lib/platform-domain-confirmation";
 import { NextResponse } from "next/server";
 import { BING_RECONNECT_MESSAGE, integrationNeedsBingReconnect } from "@/lib/bing-client-change";
 import { prisma } from "@auto-articulos/db";
@@ -21,6 +22,7 @@ export const revalidate = 0;
 
 export async function GET() {
   const userId = await getCurrentUserId();
+  const regionConfirmed = await isPlatformDomainConfirmed(userId);
   const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, platformDomain: true } });
   const productName = account.platformDomain === "tagcrush" ? "tu plataforma" : "10minutesWebsite";
 
@@ -192,7 +194,9 @@ export async function GET() {
       id: "location",
       label: "Ciudad, país y zona horaria",
       configured: Boolean(user?.country && user?.city && user?.timeZone),
-      required: false,
+      // Cuentas nuevas del Hub (sin región confirmada): la ubicación es un paso obligatorio, porque de
+      // ella salen el servidor (.site/.net) y el país de los artículos. Las cuentas anteriores no cambian.
+      required: !regionConfirmed,
       section: "platform",
       description: "Tu ciudad, país y zona horaria: con ellos tu día de publicación empieza y termina a medianoche en tu hora, y tu cupo diario se renueva cuando corresponde.",
       actionUrl: "/dashboard/configuracion/cuenta?ubicacion=1#ubicacion",
@@ -391,7 +395,10 @@ export async function GET() {
   // depende del interruptor piloto `showReconnectNotice`: es un estado roto
   // real, no una campaña de migración, y debe verlo cualquier cuenta
   // afectada.
-  const hasRealAccessError = Boolean(googleIntegration?.lastAccessError);
+  // Si hay una conexión de Composio activa con sitio elegido, el error guardado
+  // de la conexión propia vieja ya no manda (Oportunidades usa Composio cuando
+  // la propia está rota): no se muestra un aviso que ninguna acción atiende.
+  const hasRealAccessError = Boolean(googleIntegration?.lastAccessError) && !hasActiveComposioSearchConsole;
 
   if (hasRealAccessError) {
     checks.push({

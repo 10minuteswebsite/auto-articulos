@@ -1,3 +1,21 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — decisión
+
+Medir antes de arreglar: las hipótesis iniciales (consulta única de Composio,
+caché corta) no eran la causa; el censo mostró que el resolvedor ignora Composio
+para Search Console. Se eligió la regla conservadora (la propia sana gana;
+Composio como relevo) porque preferir Composio siempre habría movido a 51
+usuarios que hoy funcionan. El diagnóstico de solo lectura vive en
+`apps/worker/src/diagnose-opportunities-composio.ts` (entrada `censo` o huellas
+de correo; nunca imprime datos personales: el repositorio es público).
+
+## MCP-USE-CASES-20261029 — decisión arquitectónica
+
+El backend ya soportaba editar una propuesta social pendiente y actualizar
+preferencias de cuenta, pero faltaban los accionadores MCP. Se añadieron ambas
+tools reutilizando rutas existentes, con confirmación ligada a usuario, tool y
+argumentos exactos. OAuth, reparación de integraciones e indexación individual
+quedan fuera porque no tienen flujo MCP/backend seguro equivalente.
+
 ## MCP-AUTH-FIX-20261027 — contrato de credenciales verificado
 
 PAT único y compartido: nunca reemplazarlo silenciosamente. CREATE único y
@@ -352,3 +370,27 @@ La imagen de TODAS las redes sale de la `og:image` de la página del artículo d
 ## Causa raíz — «{BIO_AUTOR}» visible al final del artículo (2026-10-26)
 
 Un marcador escrito en un estilo de redacción solo se sustituye si `sanitizeGeneratedArticleResult` lo conoce (hoy: TELEFONO, PHONE_NUMBER, NUMERO-WHATSAPP, NOMBRE_AUTOR, CIUDAD_ESTADO). Cualquier otro marcador que la IA copie llega crudo al artículo. `{BIO_AUTOR}` no tiene campo en la base de datos. Regla: antes de añadir un marcador a un prompt, confirmar que el worker lo resuelve; ante un marcador crudo en un artículo, buscar primero en el texto del estilo guardado, no en el código.
+
+## Oportunidades sin evidencia — cerrado 2026-10-29
+
+- Causa: el resolvedor de Search Console ignoraba Composio (`COMPOSIO_CONSUMER_READY.google_search_console = false`). Arreglo conservador en `apps/web/src/lib/search-console-source.ts`, usado por `/api/opportunities`; caché de 20 días con copia de la última consulta buena.
+- Lección: la tarjeta de Conexiones de Search Console solo pinta Composio; una conexión propia vieja puede quedar invisible y sin botón de desconectar.
+- Lección: probar con la cuenta real exige la sesión del navegador correcto; con varias ventanas de Chrome conectadas, mirar la de esa usuaria.
+## Decisión — REDES-GENERACION-ESPERA-20261029
+
+La API de generación cruza dependencias externas desde una función serverless.
+Los copys por red son independientes y deben paralelizarse; cada llamada debe
+tener timeout acotado y la UI validar `content-type` antes de parsear JSON. Un
+timeout no puede convertirse en `Unexpected token '<'`.
+
+## Actualización — REDES-GENERACION-ESPERA-20261029
+
+La validación de una página pública es necesaria para no ofrecer artículos sin
+URL o sin `og:image`, pero no debe recorrer todo el inventario antes de crear
+una propuesta. El contrato es inspeccionar una ventana acotada y detenerse al
+encontrar un candidato válido; así la protección no bloquea la generación.
+
+
+## Entrada lenta tras el HUB — causa raíz (2026-10-29)
+
+`getCurrentUserId` revalidaba el acceso con el Hub en cada petición protegida; la caché de 60 s no evitaba consulta, transacción ni UPDATE, y el `fetch` no tenía timeout. El dashboard dispara ~12 APIs a la vez (`/api/me` ×5), con `connection_limit=1`, así que se encolaban hasta 13 s. Regla: una decisión del Hub vigente no toca la base; las revalidaciones concurrentes se comparten; todo `fetch` externo en la ruta caliente lleva timeout.

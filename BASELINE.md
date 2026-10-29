@@ -88,7 +88,7 @@ Comportamiento que NO debe cambiar sin nueva verificación:
 
 - Un solo servidor `/api/mcp` para los tres productos y los seis dominios; sin token responde 401 (sin `WWW-Authenticate`, por Alexa+).
 - ChatGPT usa OAuth (`chatgpt-auto-articulos-v1`, PKCE); la renovación `grant_type=refresh_token` debe devolver 200 con par nuevo; un refresh inválido, `invalid_grant` 400. Claude/Muse/otras usan el token personal `sta_`.
-- Catálogo (33 herramientas): artículos (`listar_oportunidades`, `crear_oportunidades`, `crear_titulos_con_ia`, `publicar_*` con `confirmar=false` → comprobante → `confirmar=true`), cuenta, manual, estilos (`listar_estilos_escritura`, `cambiar_estilo_escritura_por_defecto`, parámetro `estilo`) y Redes (`ver_redes_sociales`, `generar_propuestas_sociales`, `listar_propuestas_sociales` con filtros `red`/`estado`/`id`, `publicar_propuestas_sociales` con `reintentar`, `publicar_propuesta_social`, `cancelar_propuesta_social`, `eliminar_propuestas_sociales`).
+- Catálogo actual: además de artículos, cuenta, manual, estilos y Redes, incluye `editar_propuesta_social` (solo pendientes, con comprobante) y `cambiar_preferencias_contenido` (actualización parcial confirmada).
 - Prompts MCP: `empezar`, `publicar_contenido`, `programar_publicaciones`, `publicar_en_redes`, `automatizar_redes`, `diagnosticar_cuenta` (la prueba `src/lib/mcp.test.ts` los exige).
 - Las `instructions` del servidor incluyen el resumen «QUÉ PUEDES HACER» y la automatización diaria (Muse y otros clientes leen `tools/list` e `instructions`, no siempre los prompts).
 - El asistente NO conecta ni diagnostica integraciones; el cupo diario de Redes limita publicaciones, no propuestas; todo publicar/cancelar/eliminar exige comprobante.
@@ -233,3 +233,16 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
 
 - Producción recibió la migración segura en run `40423874512`; los defaults de las diez redes quedan activados para cuentas existentes y nuevas.
 - La conexión OAuth/API de cada proveedor sigue siendo independiente de este permiso.
+# Registro — corrección de coherencia de idioma en Redes — 2026-10-28
+
+- Contrato: el caption de cada red debe usar el mismo idioma de contenido que el artículo/cuenta, independientemente del idioma de la interfaz.
+- Causa observada: comparación exacta `contentLanguage === "en"` ignoraba códigos ingleses regionales como `en_VI`.
+- Cambio preparado: resolver el idioma por prefijo `en` con separador de código (`_` o `-`) y reutilizarlo en el prompt social común.
+- Evidencia productiva previa: `https://www.instagram.com/p/DfDUKH5nQpd/` muestra el caption en español para un artículo en inglés.
+## Contrato añadido — generación de propuestas no bloqueante — 2026-10-29
+
+- Crear propuestas para varias redes no serializa las llamadas de copy de IA.
+- Si Vercel responde HTML por timeout, la interfaz muestra un mensaje claro y
+  no un error de parseo JSON.
+- Implementado en `ee4066d8`; E2E autenticado pendiente.
+

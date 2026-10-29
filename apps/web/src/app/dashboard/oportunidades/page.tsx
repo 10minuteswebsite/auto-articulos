@@ -981,20 +981,24 @@ export default function OportunidadesPage() {
               ).length;
               const overLimit = Number.isFinite(effectiveAvailable) && totalTitles > effectiveAvailable;
               const disabled = busyId !== null || !contentLanguage;
+              const allDisabled = disabled || selectedCount > 0;
               return (
                 <>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button
+                      type="button"
                       onClick={executeAll}
-                      disabled={disabled}
+                      disabled={allDisabled}
                       title={
                         !contentLanguage
                           ? "Debes configurar tu idioma de redacción en Configuración antes de publicar."
+                          : selectedCount > 0
+                            ? "Hay una selección activa. Usa «Publicar selección» o desmarca todos los títulos para publicar la categoría completa."
                           : undefined
                       }
                       style={disabledStyle(
                         { ...buttonStyle, marginTop: 0 },
-                        disabled,
+                        allDisabled,
                       )}
                     >
                       {busyId === "__all__"

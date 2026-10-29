@@ -1,3 +1,4 @@
+import { markPlatformDomainConfirmed } from "@/lib/platform-domain-confirmation";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
@@ -14,6 +15,7 @@ import { auditLog } from "@/lib/audit";
 import { ensureDefaultEntitlements } from "@/lib/product-access";
 import { getCurrentUserId, requireAdmin } from "@/lib/current-user";
 import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
+import { newUserDefaultPromptData } from "@/lib/default-prompt";
 import {
   parseUserDisabledModules,
   parseUserModuleOverrides,
@@ -737,6 +739,7 @@ export async function POST(request: NextRequest) {
       dailyArticleLimit,
       maxTitlesPerBatch,
       platformDomain,
+      ...(await newUserDefaultPromptData()),
       ...DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS,
     },
     select: {
@@ -757,6 +760,8 @@ export async function POST(request: NextRequest) {
   });
 
   auditLog("user_created", adminId, { newUserId: user.id, email: normalizedEmail, role });
+  // El servidor ya lo eligió el administrador: la región queda confirmada.
+  await markPlatformDomainConfirmed(user.id);
   // Derechos por producto de la cuenta nueva (Artículos activo, como hoy).
   await ensureDefaultEntitlements(user.id);
   return NextResponse.json({ user });

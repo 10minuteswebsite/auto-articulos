@@ -1,3 +1,51 @@
+## Checkpoint — Oportunidades sin evidencia — CERRADO 2026-10-29
+
+- Task `OPORTUNIDADES-SIN-EVIDENCIA-20261029`: resuelto y confirmado por Milton en la cuenta afectada. Código `2f2b862d` en `main`. Archivado; capitanía liberada.
+
+## Checkpoint — Oportunidades sin evidencia — 2026-10-29
+
+- Task `OPORTUNIDADES-SIN-EVIDENCIA-20261029`; código `2f2b862d` en `main`, desplegado. Pendiente: probar «Analizar» con una cuenta solo-Composio. Capitanía liberada.
+
+## Checkpoint — MCP/Cloudflare 1010 cerrado — 2026-10-29
+
+- Task `MCP-ORIGIN-403-20261027`; el 403 de MUSE (Cloudflare 1010) quedó resuelto por otra instancia, verificado en producción. Sin commits pendientes de esta sesión.
+
+## MCP-USE-CASES-20261029 — antes de publicación
+
+Extensión posterior: `initialize` anuncia política de refresco al conectar y
+el prompt `menu` ofrece cinco casos por producto, separados y numerados, con
+opción de pedir más.
+
+- Punto cero: `origin/main` `9a685bb9`; smoke público OK en ambos hosts y MCP
+  devuelve 401 sin credencial.
+- Cambio: dos tools nuevas, sin migración, reutilizando `PATCH /api/me` y
+  `PUT /api/social-opportunities`.
+- Typecheck OK; suite bloqueada por aserción heredada de
+  `social-generate-lock.test.ts`. No cerrar hasta resolver/registrar y verificar
+  las nuevas tools autenticadas en producción.
+- Suite final: 288/288 pruebas pasan; typecheck y `git diff --check` pasan.
+  Commit publicado: `3e6c9602`. Smoke postdeploy: login/.well-known 200 en
+  Artículos y Redes; MCP capabilities 401 sin credencial. E2E autenticado de
+  las dos tools no se declara ejecutado porque no hay token autorizado en este
+  entorno.
+
+## HISTORIAL-INDEXACION-SIMPLE-20261029 — publicado y verificado en producción
+
+Código `22cb96b9` (PR #694) en `main`, Vercel web y auto-articulos-web success.
+Pedido de Milton: el Historial daba demasiada información de indexación. Ahora
+cada artículo muestra solo Google («Sitemap enviado a Google» verde / «Sitemap
+por enviar a Google» gris + nota «un envío al día» + «Enviar ahora») y Bing
+(«Artículo enviado a Bing» / «Artículo por enviar a Bing» + «Enviar ahora»).
+Un envío manual a Google marca todos los artículos publicados del usuario
+(`/api/sitemap/send`). Quitados el error rojo de inspección y «Comprobar
+indexación». Sin migraciones. Manual actualizado. Primer build falló por un
+`fechaCorta` sin usar (mío); corregido y tipos limpios.
+Verificado en producción: el bundle servido en articulos.lasolucionweb.net trae
+el texto nuevo y ya no el viejo. NO verificado: vista con artículos reales
+(cuenta de prueba sin ejecuciones; falta ver con Lorena) ni el clic de «Enviar
+ahora». Capitanía liberada. Responsable: Claude.
+Confirmación de Milton (2026-10-29): «Quedó espectacular». Estado: CERRADO.
+
 ## MCP-AUTH-FIX-20261027 — cierre verificado20:14 EDT
 
 Punto de continuación: código620e0cc9, Vercel7wM3UkkfJHLUe9jstGuZSm5wHMVV
@@ -572,3 +620,36 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Run `40423874512` `Success`: migración `20261026130000_enable_all_social_publishing_defaults` aplicada con la opción segura dedicada.
 - Smoke HTTP: Artículos `/login` 200; Redes `/login` 200.
 - Residual: falta E2E autenticado de alta nueva/HUB para observar las diez columnas; no afecta la evidencia de migración ni el contrato de código.
+
+
+## Checkpoint — No indexar en 10MWS — 2026-10-29
+
+- Punto cero: `main` = `38621d27` (PR #691). Prueba E2E real con Inés García: artículo 104488 con «Activate Indexing» = No y `noindex,nofollow` público.
+- Antes del arreglo: 104484 `index,follow` y log «sigue activada». Sin migraciones. Pendiente aparte: BLOG IA no recibe la orden de no indexar.
+
+- Cierre: Confirmación de Milton (2026-10-29): la reparación quedó correcta tras revisión manual del artículo 104488. Estado: CERRADO.
+
+## Checkpoint — Entrada sin espera tras el HUB — 2026-10-29
+
+- Punto cero: `main` con `9c136189` (PR #712). Carga desde el HUB: antes 27 s hasta las tarjetas; ahora documento 2,7–4,3 s en frío / 0,58 s en caliente y tarjetas al instante. Detalle en `CURRENT_STATE.md`. Sin migraciones.
+## Checkpoint — REDES-GENERACION-ESPERA-20261029 — publicado, E2E pendiente
+
+- `ee4066d8` en `main`, sin migración ni cambios de datos.
+- Copys en paralelo, timeout de OpenAI y manejo de HTML de timeout en la UI.
+- `git diff --check` y revisión del diff PASS; smoke público 307→`/login`, 200.
+- Falta prueba autenticada; no se declara cierre funcional definitivo.
+
+## Checkpoint — REDES-GENERACION-ESPERA-20261029 — regresión corregida
+
+- `82ca8b0c` publicado en `main`.
+- Regresión aislada en `860fb2e`: inspección completa de todos los artículos
+  antes de generar. Se mantiene la protección de URL/foto, limitada a 24 y con
+  salida al primer candidato válido.
+- No se revirtió ninguna adhesión de hoy. E2E autenticado aún pendiente.
+
+## Checkpoint — REDES-GENERACION-ESPERA-20261029 — CERRADO Y ARCHIVADO
+
+- Confirmación funcional de Milton en producción: «ok funcionó».
+- Punto cero final: `main` en `3391990b`; sin migración ni cambios de datos.
+- Capitanía liberada. Reabrir únicamente con un caso nuevo.
+

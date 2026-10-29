@@ -1,5 +1,5 @@
 import { prisma } from "@auto-articulos/db";
-import { findPublishedTitleMatch } from "@auto-articulos/shared";
+import { findPublishedTitleMatch, normalizeTitleKey } from "@auto-articulos/shared";
 
 /**
  * Anti-canibalización al publicar: antes de abrir el sitio, generar texto con
@@ -31,7 +31,36 @@ export async function findAlreadyPublishedForTitle(params: {
       publishedAt: true,
     },
   });
-  return findPublishedTitleMatch(params.text, published);
+  const siteTitles = await prisma.siteArticleTitle.findMany({
+    where: { userId: params.userId, ...(params.siteDomain ? { siteDomain: params.siteDomain } : {}) },
+    select: { title: true, url: true },
+  }).catch(() => [] as Array<{ title: string; url: string }>);
+  return findPublishedTitleMatch(params.text, [
+    ...published,
+    ...siteTitles.map((row) => ({ text: row.title, finalTitle: null as string | null, articleUrl: row.url as string | null, publishedAt: null })),
+  ]);
+}
+
+/**
+ * Aditivo: cada artículo que la plataforma publica deja su título en
+ * SiteArticleTitle (solo el título y el enlace). Nunca rompe la publicación.
+ */
+export async function recordPublishedSiteTitle(params: {
+  userId: string;
+  siteDomain: string | null;
+  title: string;
+  url: string;
+}): Promise<void> {
+  const titleKey = normalizeTitleKey(params.title);
+  if (!titleKey) return;
+  try {
+    await prisma.siteArticleTitle.createMany({
+      data: [{ userId: params.userId, siteDomain: params.siteDomain ?? "", title: params.title, titleKey, url: params.url, source: "published" }],
+      skipDuplicates: true,
+    });
+  } catch (err) {
+    console.error("recordPublishedSiteTitle falló (se ignora):", err);
+  }
 }
 
 /**

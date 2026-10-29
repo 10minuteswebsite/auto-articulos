@@ -3,6 +3,72 @@
 - Task `BLOG-IA-LONGITUD-20261027`. Pedido de Milton: artículos de BLOG IA con mínimo 1,000 palabras. **Capitán de migración:** Claude, sin migración (no hay tablas ni columnas nuevas).
 - Cambio: `generateCustomArticle` acepta un 5.º parámetro OPCIONAL `length`; sin él conserva el tope de 1,200 palabras (10MWS y MCP no cambian). Solo `blogIaPublisher` lo usa (1,000–1,400); si el borrador sale con menos del 90 % del mínimo, un 2.º intento pide ampliar, y si sigue corto se publica el más largo en vez de fallar. Modelo sin cambios (gpt-4o-mini).
 - Pruebas: `generateCustomArticleLength.test.ts` (4). Manual sin cambios: BLOG IA sigue oculto a los clientes.
+## CREDITOS-IMAGEN-ANTONIO-20261029 — Claude — PRUEBA REAL CERRADA
+
+- Milton pulsó «Ya recibí mis créditos» en la cuenta del cliente 13 (`hasImageCredits` pasó a `true`: confirma que el botón del Inicio persiste y quita el aviso). Con su autorización se publicó UN artículo real con un título propio del cliente («Cómo invertir en propiedades en Fort Lauderdale si vivo en Argentina», categoría Fort Lauderdale Real Estate).
+- Resultado en producción: la imagen con IA se generó (5:32 p. m.) y el Historial marca Completado, 1/1 publicado, en 4 min 59 s. Conclusión: el `false` del 27/10 era un falso positivo o ya estaba resuelto; el cliente SÍ tiene créditos de imagen.
+- Causa del aviso de MUSE: `hasImageCredits=false` puesto por el worker el 27/10 y nunca devuelto a `true` (nada lo reinicia salvo el botón o un admin). Ya reinició a `true`.
+- Notas: el primer intento mostró un reinicio de la barra (5 %) a mitad del proceso; no hubo error. Sin cambios de código.
+
+## INICIO-BOTONES-CREDITOS-IMAGEN-20261030 — Claude — CERRADO
+
+- PR #715 (`86fca786`) en `main`, Vercel web y auto-articulos-web en success. Sin migración. Rollback: revertir #715.
+- El aviso rojo del Inicio ahora tiene «Servicio al cliente» (enlace de ayuda del servidor, pestaña nueva; reemplaza a «Solicitar créditos», que llevaba al mismo enlace) y «Ya recibí mis créditos» (PATCH /api/me `hasImageCredits:true` y quita el aviso).
+- Verificado en producción en el navegador de Milton con la sesión del cliente 13: ambos botones visibles; «Servicio al cliente» apunta a https://www.10minuteswebsite.com/ayuda con target `_blank`.
+- NO verificado: pulsar «Ya recibí mis créditos» (habría escrito `true` en la cuenta real del cliente sin saber si tiene créditos). Pendiente confirmar si de verdad le faltan créditos.
+- Capitanía liberada por Claude.
+
+## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — Claude — RECLAMO
+
+- **Capitán de migración:** Claude — reclamado el 2026-10-29 (sin migración). Punto cero: `main` = `9b3c63f7`.
+- Auditoría en producción (diagnóstico de solo lectura existente): el cliente 13 tiene `hasImageCredits=false`, puesto por el worker el 27/10 tras agotar 3 intentos con «Sin créditos de imagen». Por eso el asistente MUSE dice que no puede publicar: es lo que devuelve la validación previa a publicar. Censo: 116 cuentas con `true`, 6 con `false`.
+- NO verificado: si de verdad le faltan créditos o fue un falso positivo; no se restableció el dato.
+- Cambio (PR #710): el Inicio muestra el check `image-credits` en rojo, con el estilo de los avisos de conexión. Solo UI + manual. Rollback: revertir #710.
+- Límite del Harness: `Harness-Mario` devuelve 404 (público y con la cuenta de la sesión); se siguió el protocolo propio del proyecto.
+- Merge por CLI bloqueado por el clasificador; pendiente fusionar desde GitHub y verificar en producción con la cuenta del cliente.
+
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — CERRADO Y ARCHIVADO
+
+- **Capitán de migración:** Claude — reclamó y liberó este lote documental (sin migración, sin código).
+- Código `2f2b862d` (PR #701) y documentación (#702) ya en `main`. Rollback: revertir #701.
+- Comprobación en vivo, 2026-10-29, con la cuenta de una usuaria afectada: la tarjeta de Search Console de Conexiones solo lee Composio (`/api/composio/status`); mostraba «No conectada» porque su fila de Composio estaba en `NOT_CONNECTED`, y por eso sin botón «Desconectar». Oportunidades ya no mostraba el aviso rojo viejo. Milton confirmó después que el caso quedó resuelto.
+- Hueco conocido, sin cambiar: esa tarjeta no muestra ni permite quitar una conexión propia de Google guardada. No se tocó código en este cierre.
+- Honesto: la causa exacta de la conexión rota en esa cuenta no se aisló (el servidor bloqueó la lectura del estado de la conexión propia). Pulsar «Analizar» quedó bloqueado por propuestas pendientes; no se borraron.
+
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — LIBERACIÓN
+
+- **Capitán de migración liberó el lote:** Claude. Código `2f2b862d` (PR #701)
+  publicado en `main`, Vercel web y auto-articulos-web en success. Sin
+  migraciones. Verificación funcional con una cuenta real: PENDIENTE (requiere
+  pulsar «Analizar» con una cuenta que solo tenga Composio; no se suplantó a nadie).
+- Fallo heredado ajeno a este lote: `social-language.test.ts` falla también sin
+  estos cambios (288/290 pruebas pasan).
+- Límite del Harness: `Harness-Mario` devolvió 404 (público y con la cuenta de
+  GitHub de la sesión); no se pudo leer `IA_JOURNEY.md`. Se siguió el protocolo
+  propio del proyecto.
+
+## MCP-USE-CASES-20261029 — Codex — preparación
+
+Trabajo en `main`, sobre `origin/main` `9a685bb9`. Cambio preparado en catálogo
+MCP y documentación; no se toca OAuth, auth, HUB ni conexiones. Falta cerrar la
+aserción heredada de `social-generate-lock` y ejecutar smoke autenticado antes
+de publicar.
+
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — RECLAMO
+
+- **Capitán de migración:** Claude — reclamado el 2026-10-29 (sin migración) para
+  «Oportunidades: usar Composio cuando es la única conexión válida». Punto cero:
+  `main` = `9fcfd08f`. Se libera al verificar producción.
+- Causa medida en producción (diagnóstico y censo de solo lectura, PR #685/#689/#699):
+  `COMPOSIO_CONSUMER_READY.google_search_console = false` hace que el resolvedor
+  elija siempre la conexión propia. De 122 usuarios: 23 solo Composio (fuente
+  NONE → «No hay evidencia»), 54 con ambas (51 ganan la propia), 2 con propia
+  rota. Nadie resuelve a Composio hoy.
+- Regla elegida (conservadora, sin mover a los 51 que funcionan): la propia sigue
+  ganando mientras funciona; Composio toma el relevo si no hay propia o la propia
+  guardó error. Más: mensajes de «sin evidencia» por caso, caché de 20 días con
+  copia de respaldo, y el aviso rojo viejo se oculta si hay Composio activo.
+- No se tocan sitemaps ni indexación (comparten el resolvedor). Sin migraciones.
 
 ## MCP-AUTH-FIX-20261027 — Codex — CIERRE
 
@@ -53,7 +119,7 @@ capitanía activa en la lectura inicial. Tipos/builds/258web+26worker PASS.
 - **Capitán de migración:** Claude — LIBERADO el 2026-10-27 tras verificar producción (sin migración; PR #686).
 - Hecho por orden de Milton (autorizó relajar la regla). Nota de proceso: el push se hizo antes del reclamo del capitán (sin otro capitán activo, nadie pisado); el reclamo se hizo antes de fusionar.
 - Decisión: Origin ajeno permitido solo con Bearer; el token sigue siendo obligatorio. Evidencia en CURRENT_STATE.md.
-- Corrección: el 403 de Patricia era de Cloudflare (error 1010, Browser Integrity Check), no de este código. Sigue ABIERTO: Milton lo dejó por ahora; falta la Configuration Rule en Cloudflare (detalle en CURRENT_STATE.md).
+- Corrección: el 403 de Patricia era de Cloudflare (error 1010, Browser Integrity Check), no de este código. CERRADO 2026-10-29: otra instancia lo resolvió en Cloudflare; verificado en producción (Python-urllib y libwww-perl: 403/1010 → 401). Pendiente solo que Patricia confirme con MUSE. Rama de esta sesión eliminada.
 
 ## Coordinación — Redes: subida de logos reparada (cierre, Claude) — 2026-10-26
 
@@ -12987,3 +13053,98 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Liberado el lote del PR #683 (Historial: mensajes de indexación para BLOG IA con dirección de inicio). Sin migración.
 - **Capitán de migración:** Claude — reclamado para este lote: `MODE=logo` del workflow `link-blog-ia-test` ahora recorta y deja el logo en ≤360×120 (antes 640×200; pesaba 73 KB para mostrarse a 147×48). Misma regla que el asistente de BLOG IA (`apps/web/src/lib/logo.ts` en el repo blog-ia).
 - BLOG IA (repo blog-ia), mismo día: caja de contacto «Conversemos» dentro del artículo con mensaje con el título; limpieza del cuerpo de los artículos; `no-transform`; ver `TODO.md` de blog-ia (registro maestro de pedidos).
+# Handoff — PROBLEMA CAPTION ESPANOL — 2026-10-28
+
+- Se verificó producción con la sesión de `info@inesgarcia-arcaya.com`: historial de Redes muestra una publicación Instagram del artículo inglés como publicada; el permalink público `DfDUKH5nQpd` muestra caption en español.
+- Diagnóstico: `generateGPTCopy()` usaba comparación exacta `profile.contentLanguage === "en"`; la configuración admite códigos externos regionales, por ejemplo `en_VI`.
+- Implementación preparada: `apps/web/src/lib/social-language.ts` + prueba de códigos `en`, `en_VI`, `en-US`, `es` y `fr_FR`; el route social usa el helper común.
+- Verificación bloqueada localmente: falta `tsx` en `node_modules`; instalar dependencias o ejecutar CI antes de declarar el commit verificado.
+- No se editó el post público existente: cualquier edición de contenido en Instagram requiere confirmación inmediata antes de transmitir el nuevo caption.
+- Publicación de código verificada: `53377ae9` en `main`; checks Vercel `web` y `auto-articulos-web` = `success`.
+
+## Claude - CHECK DE NO INDEXAR (10MWS) — CONCILIACIÓN ENTRE PROGRAMADORES — 2026-10-29
+
+Milton detectó que dos programadores atacaron el mismo reporte («No indexar» no
+queda marcado en 10MWS al crear artículos). Comparación hecha por commits:
+
+| Pieza | Capa | Qué arregla | Estado |
+|---|---|---|---|
+| `f41b1e9e` (ya en `main`) | web: `opportunities/execute-all` y `execute-batch` | si la petición no trae `disableIndexing`, hereda la preferencia guardada del usuario | en `main` |
+| PR #691 (Claude, sin fusionar) | worker: `10minutesWebsite.ts` | reaplica y verifica `#activate_indexing` justo antes del clic de guardar (el sondeo previo dispara `change` sobre `#type` y puede devolverlo a marcado) | abierto |
+
+Conclusión de Claude: **no se pisan** (archivos y capas distintos) y son
+complementarios. Propuesta: `f41b1e9e` se queda; #691 es el único cambio de
+worker; no se sube nada más. Si el otro programador tiene otro cambio de
+worker sobre la misma función, que lo diga aquí ANTES de fusionar para elegir
+uno solo y descartar el otro. #691 no se fusiona hasta que el otro programador
+responda en este documento. Verificación en vivo pendiente (`worker-test.yml`,
+cuenta de Lorena), por un solo programador.
+
+**Liderazgo (orden de Milton, 2026-10-29):** Claude lidera esta conciliación, pero toma en cuenta lo ya hecho por el otro programador (`f41b1e9e` y anteriores) y decide de acuerdo con él. Se conserva su trabajo en `main`; Claude solo suma lo que falte.
+
+## Claude - CHECK DE NO INDEXAR (10MWS) — CIERRE — 2026-10-29
+
+Conciliación entre programadores: `f41b1e9e` (web, Oportunidades) y el PR #691
+(worker) se complementan; el otro programador confirmó que no tiene más cambios
+en el worker. Hallazgo decisivo de la prueba en vivo con Inés García: el worker
+de `main` no lograba desmarcar «Activate Indexing» (aviso «sigue activada») y
+publicaba indexable (artículo 104484). Se reescribió `applyIndexingPreference`
+(tres intentos verificados + diagnóstico) y, si no se logra, el artículo no se
+guarda y el usuario lee el motivo en claro (`IndexingNotAppliedError`).
+Verificación en producción tras fusionar (`38621d27`): lote nuevo, artículo
+104488, interruptor en No y `noindex,nofollow` público. Pendientes: 104484
+indexable (decisión de Milton); BLOG IA (Lorena) no envía el campo de
+indexación al blog; pruebas unitarias del nuevo error no escritas.
+Capitanía liberada. Responsable: Claude.
+
+**Cierre final (2026-10-29):** Confirmación de Milton (2026-10-29): la reparación quedó correcta tras revisión manual del artículo 104488. Estado: CERRADO.
+ARCHIVADA. Responsable: Claude.
+
+- **Capitán de migración:** Claude — indexación simple en Historial (solo UI, sin migración), 2026-10-29. Liberado al fusionar.
+
+**Cierre (2026-10-29):** indexación simple del Historial en producción (`22cb96b9`). Capitanía liberada. Pendiente: confirmar visualmente con Lorena y probar «Enviar ahora». Responsable: Claude.
+
+- **Capitán de migración:** Claude — 2026-10-29: Redes, verificación de URL y mensajes de "sin artículos" (sin migración). Liberación al verificar en producción.
+**Cierre final (2026-10-29):** Milton confirmó que el resultado quedó como esperaba («espectacular»). Estado: CERRADO. ARCHIVADA. Pendiente menor sin bloquear: prueba de «Enviar ahora» con Lorena. Responsable: Claude.
+
+- **Capitán de migración:** Claude — 2026-10-29: Redes, mensajes de foto claros y revisión previa de foto (sin migración). Liberación al verificar en producción.
+
+- **Capitán de migración:** liberado por Claude — 2026-10-29: Redes (PR #698 y #703), sin migración.
+
+- **Capitán de migración:** Claude — 2026-10-29: altas del Hub (región .site/.net y prompt problema-solución por defecto). Migración 20261029190000_platform_domain_confirmed_default_prompt: aplicar en producción ANTES de fusionar el PR.
+
+- **Capitán de migración:** Claude — reclamo 2026-10-29: títulos del sitio en Supabase (sitemap, una vez, aditivo) + menos lecturas del listado de 10MWS. Migración `20261029180000_site_article_titles`. PR abierto, sin fusionar hasta aplicar la migración.
+## REDES-GENERACION-ESPERA-20261029 — Codex — publicado, E2E pendiente
+
+- `ee4066d8` corrige `Unexpected token '<'`: el endpoint ya no serializa los
+  copys de redes y OpenAI tiene timeout por llamada; la UI valida JSON antes de
+  parsear la respuesta. Sin auth, permisos, proveedor, base de datos ni migración.
+- Push directo a `main`; sin ramas ni worktrees nuevos. GitHub visible y smoke
+  público 307→`/login`, `/login` 200.
+- Pendiente honesto: E2E autenticado con una cuenta habilitada para Redes; la
+  sesión interna disponible fue redirigida a Artículos.
+
+## REDES-GENERACION-ESPERA-20261029 — corrección de regresión — Codex
+
+- Comparación con el último estado de ayer aisló `860fb2e`: sustituyó
+  `isArticleUrlGone` por `inspectArticlePage` para todos los artículos
+  rankeados. Eso añade lecturas HTML/`og:image` en lotes y explica el timeout.
+- `82ca8b0c` limita la inspección a 24 candidatos y corta al primero válido.
+  Mantiene la validación de foto, las mejoras de hoy y no revierte commits.
+- Publicado en `main`; E2E autenticado pendiente de una cuenta habilitada para
+  Redes.
+
+## REDES-GENERACION-ESPERA-20261029 — cierre final — Codex
+
+- Milton confirmó que la generación volvió a funcionar en producción.
+- Cierre: `82ca8b0c` (código) y `3391990b` (documentación) en `main`.
+- Se libera la capitanía. No quedan acciones funcionales ni reservas abiertas.
+- No reabrir salvo nueva evidencia del mismo flujo.
+
+
+## ENTRADA-SIN-ESPERA-20261029 — CERRADO
+
+- Hecho: PR #712 (`9c136189`) y docs #714. Revalidación Hub acotada (caché 60 s, compartida, timeout 3 s, fallo 30 s) + Inicio pinta tarjetas al instante.
+- Evidencia: producción, cuenta real; tarjetas de 27 s a 0,3 s tras el documento; documento 0,58 s en caliente, 2,7–4,3 s en frío.
+- Decisiones: sin migración; PR en vez de push directo (clasificador). Siguiente paso posible (no pedido): servir decisión vencida y revalidar en segundo plano.
+- Responsable: Claude. Capitanía liberada.

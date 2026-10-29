@@ -141,7 +141,9 @@ export async function DELETE(request: NextRequest) {
     if (!(await canUseSocialModule(userId))) return NextResponse.json({ error: "Esta sección no está habilitada para tu cuenta. Pídele acceso al administrador." }, { status: 403 });
 
     // scope=pending: usado por el botón "Borrar todas" de Oportunidades en
-    // Redes Sociales, para borrar las propuestas pendientes. Sin ese
+    // Redes Sociales. Las propuestas se conservan como descartadas para
+    // recordar la decisión editorial y no volver a ofrecerlas en esa red.
+    // Sin ese
     // parámetro se mantiene el comportamiento original ("Borrar historial"
     // en /dashboard/historial): borra solo publicadas o con error. El scope
     // skipped permite borrar únicamente las propuestas descartadas desde
@@ -149,16 +151,20 @@ export async function DELETE(request: NextRequest) {
     const scope = request.nextUrl.searchParams.get("scope");
     // Opcional: limitar el borrado de pendientes a ciertas redes (p. ej. solo META).
     const onlyPlatforms = (request.nextUrl.searchParams.get("platforms") ?? "").split(",").map((value) => value.trim()).filter(Boolean);
-    await prisma.socialOpportunity.deleteMany({
-      where:
-        scope === "pending"
-          ? { userId, status: "pending", ...(onlyPlatforms.length > 0 ? { platform: { in: onlyPlatforms } } : {}) }
-          : scope === "skipped"
+    if (scope === "pending") {
+      await prisma.socialOpportunity.updateMany({
+        where: { userId, status: "pending", ...(onlyPlatforms.length > 0 ? { platform: { in: onlyPlatforms } } : {}) },
+        data: { status: "skipped", skipReason: "Borrado por el usuario; no volver a ofrecer esta propuesta." },
+      });
+    } else {
+      await prisma.socialOpportunity.deleteMany({
+        where: scope === "skipped"
             ? { userId, status: "skipped" }
             : scope === "unconfirmed"
               ? { userId, status: { notIn: ["pending", "published", "skipped"] } }
-          : { userId, status: { not: "pending" } },
-    });
+              : { userId, status: { not: "pending" } },
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch {

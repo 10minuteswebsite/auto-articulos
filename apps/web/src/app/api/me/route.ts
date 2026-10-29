@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { isValidTimeZone, platformBaseUrl } from "@auto-articulos/shared";
-import { isValidCountryCode } from "@/lib/countries";
+import { isValidCountryCode, platformDomainForCountry } from "@/lib/countries";
+import { isPlatformDomainConfirmed, markPlatformDomainConfirmed } from "@/lib/platform-domain-confirmation";
 import { getCurrentUser, getCurrentUserId, getActingAdmin, displayName } from "@/lib/current-user";
 
 import {
@@ -66,6 +67,8 @@ export async function GET() {
       clientLocations: user.clientLocations,
       businessLocations: user.businessLocations,
       country: user.country,
+      // Cuenta nueva del Hub sin región confirmada: el asistente inicial pide la ubicación primero.
+      locationRequired: user.role !== "admin" && !(await isPlatformDomainConfirmed(user.id)),
       city: user.city,
       timeZone: user.timeZone,
       excludedTopics: user.excludedTopics,
@@ -123,6 +126,7 @@ export async function GET() {
 export async function PATCH(request: NextRequest) {
   const userId = await getCurrentUserId();
   const body = await request.json();
+  let confirmRegionAfterSave = false;
   const data: {
     contentLanguage?: string;
     articleSignature?: string | null;
@@ -133,6 +137,7 @@ export async function PATCH(request: NextRequest) {
     clientLocations?: string | null;
     businessLocations?: string | null;
     country?: string;
+    platformDomain?: string;
     city?: string;
     timeZone?: string;
     excludedTopics?: string | null;
@@ -328,6 +333,12 @@ export async function PATCH(request: NextRequest) {
     data.country = country.toUpperCase();
     data.city = cleanCity;
     data.timeZone = timeZone;
+    // Cuenta nueva del Hub (región sin confirmar): el país decide el servidor, una sola vez.
+    // Europa -> .site, resto -> .net. Nunca cambia el servidor de una cuenta ya confirmada.
+    if (!(await isPlatformDomainConfirmed(userId))) {
+      data.platformDomain = platformDomainForCountry(country);
+      confirmRegionAfterSave = true;
+    }
   }
 
   if ("hasImageCredits" in body) {
@@ -364,6 +375,9 @@ export async function PATCH(request: NextRequest) {
       timeZone: true,
     },
   });
+
+  // Cuenta nueva del Hub: con el país guardado, la región queda confirmada (no se vuelve a preguntar).
+  if (confirmRegionAfterSave) await markPlatformDomainConfirmed(userId);
 
   return NextResponse.json(user);
 }

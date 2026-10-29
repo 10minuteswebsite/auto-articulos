@@ -1,3 +1,22 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029
+
+Código `2f2b862d` (PR #701), Vercel READY. Sin migración. Rollback: revertir #701.
+Verificación funcional con cuenta real pendiente.
+
+## MCP-USE-CASES-20261029 — en preparación
+
+- Añadidas `editar_propuesta_social` y `cambiar_preferencias_contenido`, sin
+  migraciones ni cambios de auth.
+- Typecheck OK; suite completa pendiente por aserción heredada de
+  `social-generate-lock.test.ts`. Publicación y verificación quedan abiertas.
+- Commit `3e6c9602` publicado en `main`. Verificación pública posterior OK
+  (200 en login/.well-known, 401 en capabilities sin credencial). Falta solo
+  prueba autenticada real de las nuevas tools con un token autorizado.
+
+## HISTORIAL-INDEXACION-SIMPLE-20261029
+
+Código `22cb96b9` (PR #694), Vercel READY. Solo UI + manual, sin migración. Rollback: revertir el PR #694.
+
 ## MCP-AUTH-FIX-20261027 — código productivo620e0cc9
 
 main620e0cc98e93c8f014c2760f5bead485cd700542, Vercel
@@ -5723,3 +5742,35 @@ valores — 2026-10-19").
 - Commits: `5a3a4556` y `f9b5e529`, publicados en `main`.
 - Migración: run GitHub Actions `40423874512`, `Success`, `safe_all_social_publishing_defaults=true`.
 - Verificación pública: `articulos.lasolucionweb.net/login` y `redes.lasolucionweb.net/login` respondieron 200.
+
+## Versión — No indexar en 10MWS — 2026-10-29
+
+- Commits: `4dffbef5`, `2bb897e1`, `04b7ce27`; fusionados en `main` como `38621d27` (PR #691). Convive con `f41b1e9e` (Oportunidades hereda la preferencia guardada).
+- Despliegue: worker toma `main` en cada corrida; verificado con `worker-test.yml` (run `40871774772`) y lote real de Inés García.
+- Rollback: revertir `38621d27`. Sin migraciones.
+
+### ENTRADA-SIN-ESPERA-20261029
+
+- PR #712, commit `9c136189` en `main`; Vercel web y auto-articulos-web success. Rollback: revertir #712. Verificado en producción con cuenta real.
+## Versión — REDES-GENERACION-ESPERA-20261029 — `ee4066d8`
+
+- Publicada directamente en `main`, sin ramas/worktrees ni migraciones:
+  generación concurrente, timeout explícito de OpenAI y manejo UI de respuestas
+  no JSON de Vercel.
+- Commit visible en GitHub; HTTP público de Redes 307→`/login`, login 200.
+- E2E autenticado pendiente por falta de sesión habilitada para Redes.
+
+## Versión — corrección de regresión Redes — `82ca8b0c`
+
+- Mantiene las mejoras de generación y corrige solo la espera introducida por
+  `860fb2e`: inspección de artículos acotada a 24 y corte al primer válido.
+- Publicado directamente en `main`; sin migraciones ni cambios de datos.
+- E2E autenticado pendiente.
+
+## Cierre — REDES-GENERACION-ESPERA-20261029
+
+- Código `82ca8b0c` y documentación `3391990b` publicados en `main`.
+- Producción confirmada funcionalmente por Milton después de la corrección.
+- Sin migración. Estado: CERRADO Y ARCHIVADO. Rollback: revertir `82ca8b0c` si
+  aparece una regresión nueva y reproducible.
+

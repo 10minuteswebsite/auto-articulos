@@ -1,5 +1,16 @@
 # Inventario de conversaciones
 
+## MCP-USE-CASES-20261029
+
+- Estado: implementación local preparada; no publicada.
+- Alcance: edición social pendiente y preferencias no secretas, sin variables
+  nuevas ni cambios de permisos.
+- Pendiente: contrato de prueba heredado y smoke autenticado postdeploy.
+
+## MCP-ORIGIN-403-20261027 — cerrado — Claude
+
+Diagnóstico del 403 de Meta MUSE (Patricia Remuzgo) en `/api/mcp`. Causa real: Cloudflare 1010 (Browser Integrity Check), resuelta por otra instancia y verificada en producción el 29/10 (403/1010 → 401). Aporte de esta sesión: PR #686 (Origin ajeno solo con Bearer; conservado, no necesario para este caso) y documentación #687/#688/#697. Capitanía liberada, rama remota eliminada, sin reservas activas. Falta solo que Patricia confirme con MUSE.
+
 ## MCP-AUTH-FIX-20261027 — cerrado — Codex
 
 MCP/configuración/middleware, metadatos y pruebas publicados620e0cc9 READY.
@@ -2550,4 +2561,15 @@ sección "Codex — META historias y carruseles — 2026-10-20" de `COORDINACION
 - Implementación: regla de autocontrol factual y fuentes serias en generación de artículos, títulos y FAQs; no se destruyó el contenido existente de los prompts ni se tocó 10MWS.
 - Estado: en verificación; falta publicar y comprobar producción.
 - Actualización: publicado en `main` como `04910056`; deployment Vercel `6wAi9CqW6tjQTeW9qxpiHPkuUiYd` `Ready` y smoke HTTP OK.
+
+## REDES-GENERACION-ESPERA-20261029 — Codex — publicado, pendiente E2E
+
+- `ee4066d8` en `main`; sin migración, reserva de rama/worktree, credenciales o
+  datos modificados. Falta prueba autenticada con módulo Redes habilitado.
+
+## REDES-GENERACION-ESPERA-20261029 — CERRADO Y ARCHIVADO
+
+- Milton confirmó la generación funcional en producción. Código `82ca8b0c` y
+  cierre documental `3391990b` en `main`; sin reservas activas.
+- No reabrir sin evidencia nueva.
 

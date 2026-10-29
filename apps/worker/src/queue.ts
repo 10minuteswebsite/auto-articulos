@@ -4,6 +4,7 @@ import {
   publishArticle,
   DailyLimitReachedError,
   DuplicateTitleError,
+  IndexingNotAppliedError,
 } from "./automation/10minutesWebsite";
 import {
   tryReserveUser,
@@ -17,6 +18,7 @@ import { processMcpRunTitle } from "./mcpQueue";
 import { processBlogRunTitle } from "./blogIaQueue";
 import {
   findAlreadyPublishedForTitle,
+  recordPublishedSiteTitle,
   removePublishedOpportunity,
 } from "./publishedGuard";
 
@@ -418,6 +420,12 @@ async function processRunTitle(
       },
     });
     await onStep("Artículo publicado con éxito.");
+    await recordPublishedSiteTitle({
+      userId: run.userId,
+      siteDomain: run.category.siteDomain,
+      title: result.finalTitle || nextTitle.text,
+      url: result.articleUrl,
+    });
     // Si el rescate de atascados se adelantó y devolvió este tema a
     // Oportunidades mientras se publicaba, se retira: ya está publicado.
     await removePublishedOpportunity({
@@ -492,6 +500,12 @@ async function processRunTitle(
     } else if (isPermanentWebsiteLoginIssue) {
       // Un correo inválido es un fallo permanente de configuración, no un
       // fallo transitorio del sitio: reintentarlo solo repite el mismo login.
+      await markTitleError(nextTitle.id, message);
+      await restoreUnfinishedTitlesToOpportunities(run.id, nextTitle.id);
+    } else if (err instanceof IndexingNotAppliedError) {
+      // «No indexar» no se pudo aplicar: reintentar repite el mismo fallo (y
+      // gasta imagen y redacción otra vez). Queda como error visible con el
+      // motivo en claro y se devuelve a Oportunidades para reintentarlo luego.
       await markTitleError(nextTitle.id, message);
       await restoreUnfinishedTitlesToOpportunities(run.id, nextTitle.id);
     } else if (err instanceof DailyLimitReachedError) {

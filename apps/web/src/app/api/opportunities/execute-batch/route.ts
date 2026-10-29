@@ -102,6 +102,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const indexingPreference = await prisma.$queryRaw<Array<{ disableIndexing: boolean }>>`SELECT "disableIndexing" FROM "User" WHERE id = ${userId}`;
+  const effectiveDisableIndexing =
+    typeof disableIndexing === "boolean"
+      ? disableIndexing
+      : Boolean(indexingPreference[0]?.disableIndexing);
+
   if (activeRun) {
     return NextResponse.json(
       {
@@ -123,6 +129,16 @@ export async function POST(request: NextRequest) {
       },
     },
   });
+
+  // La selección es un contrato explícito: el servidor publica únicamente
+  // los IDs recibidos y nunca completa el lote con otros títulos.
+  const selectedTitleIds = new Set(titleIds);
+  if (selectedTitles.length !== selectedTitleIds.size) {
+    return NextResponse.json(
+      { error: "La selección enviada no coincide con los títulos solicitados." },
+      { status: 409 },
+    );
+  }
 
   if (selectedTitles.length === 0) {
     return NextResponse.json(
@@ -200,7 +216,7 @@ export async function POST(request: NextRequest) {
           userId,
           categoryId,
           status: "running",
-          disableIndexing: Boolean(disableIndexing),
+          disableIndexing: effectiveDisableIndexing,
           contentLanguage: normalizedContentLanguage,
           promptId:
             typeof promptId === "string" && promptId.trim()

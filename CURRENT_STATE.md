@@ -1,3 +1,107 @@
+## CREDITOS-IMAGEN-ANTONIO-20261029 — CERRADO
+
+Cliente 13: créditos de imagen confirmados por publicación real (1/1 publicado). El aviso de MUSE venía de un `hasImageCredits=false` heredado del 27/10. Ya en `true`. Sin código.
+
+## INICIO-BOTONES-CREDITOS-IMAGEN-20261030 — CERRADO
+
+PR #715 en producción y botones verificados a la vista con el cliente 13. Abierto: la acción de «Ya recibí mis créditos» no se probó con datos reales, y sigue sin saberse si al cliente de verdad le faltan créditos. Capitanía liberada.
+
+## ENTRADA-SIN-ESPERA-20261029 — CERRADO Y ARCHIVADO
+
+Cerrado por orden de Milton (2026-10-29). No reabrir sin un caso nuevo; el resto de ~3 s en frío es conocido y aceptado.
+
+Código `9c136189` (PR #712), Vercel web y auto-articulos-web success. Sin migración. Rollback: revertir #712.
+Punto cero medido (carga nueva desde el HUB): documento 11,8 s, 12 llamadas simultáneas (`/api/me` ×5) de hasta 13 s, tarjetas a los 27 s. Causa: la revalidación con el Hub (sin timeout) repetía consulta, transacción y UPDATE en cada petición. (Los 500 vistos antes eran de #708 sin su migración; ya revertido en #709.)
+Cambio: `hub-sync.ts` sin consulta ni escritura si la decisión tiene <60 s, una revalidación compartida, timeout 3 s, fallo recordado 30 s; Inicio pinta tarjetas al instante si el asistente ya está completo (marca en localStorage `inicio-wizard-complete`) o en Redes.
+Verificado en producción (cuenta real, navegador interno): documento 2,7–4,3 s en frío, 0,58 s en caliente; tarjetas 0,3 s después del documento. Prueba nueva `hub-sync-access.test.ts` PASS.
+Residual: tras >60 s sin uso queda ~3 s por la consulta real al Hub y el arranque en frío; mejora posible: servir la decisión vencida y revalidar en segundo plano. Primera visita sin marca en el navegador sigue esperando a las APIs. No verificado: cuenta sin acceso a Redes (su tarjeta podría verse un instante).
+
+## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — PR #710 abierto, sin fusionar
+
+El Inicio mostrará en rojo «Sin créditos de imagen» cuando `hasImageCredits=false`. Sin migración. Verificación en producción PENDIENTE (requiere fusionar el PR y mirar el Inicio con la cuenta afectada). Rollback: revertir #710. Capitanía reclamada por Claude hasta verificar.
+
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — CERRADO
+
+Resuelto y confirmado por Milton con la cuenta afectada (2026-10-29). Código
+`2f2b862d` (PR #701) en `main`. Hueco abierto y sin prioridad: la tarjeta de
+Search Console en Conexiones solo refleja Composio, no la conexión propia de
+Google guardada. Archivado; no reabrir sin un caso nuevo.
+
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — publicado; verificación funcional pendiente
+
+Código `2f2b862d` (PR #701) en `main`, Vercel web y auto-articulos-web success.
+Causa medida en producción (diagnóstico y censo de solo lectura, #685/#689/#699):
+para Search Console el resolvedor elige siempre la conexión propia
+(`COMPOSIO_CONSUMER_READY.google_search_console = false`). De 122 usuarios, 23
+solo tienen Composio (veían «No hay evidencia»), 54 tienen ambas (51 ganan la
+propia) y 2 tienen la propia con error guardado. Ahora, en Oportunidades, la
+propia sana sigue ganando y Composio toma el relevo si no hay propia o la propia
+guardó error. Además: mensajes de «sin evidencia» por caso, caché de 20 días con
+copia de respaldo de la última consulta buena, aviso rojo viejo oculto si hay
+Composio activo, manual actualizado. Sitemaps e indexación no se tocan. Sin
+migraciones. Rollback: revertir el PR #701.
+Verificado: 9 pruebas nuevas PASS, tipos sin errores en los archivos tocados,
+despliegue verde. NO verificado: el flujo real con una cuenta afectada (hay que
+pulsar «Analizar» con una cuenta solo-Composio). Caso aparte, no resuelto por
+código: una cuenta cuya propiedad conectada en Search Console es la versión
+`http://` sin datos; requiere registrar la propiedad correcta en Search Console.
+Capitanía liberada. Responsable: Claude.
+
+## MCP-USE-CASES-20261029 — preparado, pendiente de publicación
+
+### Extensión MENU y actualización del cliente
+
+- El `initialize` anuncia `updatePolicy: refresh-on-connect`, obliga a refrescar
+  `initialize`, `prompts/list` y `tools/list`, y prohíbe inventar capacidades o
+  actualizar credenciales/software sin autorización del cliente.
+- El prompt `menu` responde a `MENU` con cinco casos de Artículos y cinco
+  separados de Redes, más `MÁS ARTÍCULOS`/`MÁS REDES` para ampliar.
+
+- Añadidas `editar_propuesta_social` y `cambiar_preferencias_contenido`; no se
+  modificaron auth, entitlement HUB, OAuth ni publicación existente.
+- Typecheck de `apps/web` pasa. La suite completa conserva un fallo heredado en
+  `social-generate-lock.test.ts` contra una forma antigua de la ruta.
+- Falta push, deployment READY y smoke autenticado de las nuevas tools antes de
+  cerrar el checkpoint.
+- Publicado en `main` con commit `3e6c9602`. Smoke productivo posterior: ambos
+  `/login` y ambos `/.well-known/oauth-protected-resource` responden 200; ambos
+  `/api/mcp/capabilities` responden 401 sin credencial. La comprobación
+  autenticada de `tools/list`/`tools/call` queda pendiente por no disponer aquí
+  de una credencial personal autorizada.
+
+## HISTORIAL-INDEXACION-SIMPLE-20261029 — publicado y verificado en producción
+
+Código `22cb96b9` (PR #694) en `main`, Vercel web y auto-articulos-web success.
+Pedido de Milton: el Historial daba demasiada información de indexación. Ahora
+cada artículo muestra solo Google («Sitemap enviado a Google» verde / «Sitemap
+por enviar a Google» gris + nota «un envío al día» + «Enviar ahora») y Bing
+(«Artículo enviado a Bing» / «Artículo por enviar a Bing» + «Enviar ahora»).
+Un envío manual a Google marca todos los artículos publicados del usuario
+(`/api/sitemap/send`). Quitados el error rojo de inspección y «Comprobar
+indexación». Sin migraciones. Manual actualizado. Primer build falló por un
+`fechaCorta` sin usar (mío); corregido y tipos limpios.
+Verificado en producción: el bundle servido en articulos.lasolucionweb.net trae
+el texto nuevo y ya no el viejo. NO verificado: vista con artículos reales
+(cuenta de prueba sin ejecuciones; falta ver con Lorena) ni el clic de «Enviar
+ahora». Capitanía liberada. Responsable: Claude.
+Confirmación de Milton (2026-10-29): «Quedó espectacular». Estado: CERRADO.
+
+## NO-INDEX-10MWS-20261029 — publicado y verificado en producción
+
+Código `38621d27` (PR #691) en `main`. Causa: el worker no lograba poner el
+interruptor «Activate Indexing» de 10MWS en No (log: «sigue activada») y
+publicaba igual, indexable. Ahora prueba tres formas (clic forzado, clic sobre
+el deslizador, valor por script), relee el estado real tras cada una y, si no
+queda en No, NO guarda y muestra al usuario: «No se pudo activar el «No
+indexar» que pediste…». Sin migraciones. Prueba real (cuenta Inés García,
+panel English.): antes, artículo 104484 salió `index,follow`; después, artículo
+104488 con interruptor en No en el editor y `noindex,nofollow` en la página
+pública. Residual: 104484 sigue indexable (sin tocar); la plantilla del sitio
+añade además una etiqueta `index, follow` genérica (el más restrictivo gana);
+Lorena publica por BLOG IA, cuyo publicador aún no envía el campo de indexación.
+[Registro](COORDINACION_CLAUDE_CODEX.md).
+Confirmación de Milton (2026-10-29): la reparación quedó correcta tras revisión manual del artículo 104488. Estado: CERRADO.
+
 ## MCP-AUTH-FIX-20261027 — publicado y verificado
 
 Código620e0cc9 / Vercel dpl_7wM3UkkfJHLUe9jstGuZSm5wHMVV READY.
@@ -55,7 +159,8 @@ se pidió una nueva llamada tools/list real a MUSE sin cambiar su token.
 - Cambio: `lib/mcp/origin.ts`; un `Origin` ajeno se acepta solo con `Authorization: Bearer` (el token se verifica igual). Sin Bearer sigue 403. 3 pruebas unitarias.
 - Verificado en producción (ambos hosts): `Origin` meta.ai + Bearer falso pasó de 403 a 401; sin Bearer sigue 403.
 - CAUSA REAL DEL 403 DE PATRICIA (hallada después, 27/10 16:53 UTC): Cloudflare, no el código. MUSE devolvió «Error 1010 browser_signature_banned» (zona `redes.lasolucionweb.net`): el Browser Integrity Check de la zona `lasolucionweb.net` bloquea ciertos User-Agent antes de llegar a Vercel. Reproducido: `Python-urllib/3.11` y `libwww-perl/6` dan 403/1010; python-requests, Go, node, axios, okhttp, Wget, Mozilla y vacío pasan (401). El arreglo del Origin (#686) es correcto pero NO resolvía este caso.
-- ABIERTO: Milton decidió dejarlo por ahora (2026-10-27). Solución pendiente, solo en el panel de Cloudflare: Configuration Rule con ruta que empiece por `/api/mcp` (y `/oauth`, `/.well-known`) y Browser Integrity Check = Off. La IA no tiene acceso a Cloudflare. Verificar después con `curl` y `User-Agent: Python-urllib/3.11` (debe dar 401, no 403) y que Patricia reintente con MUSE.
+- CERRADO 2026-10-29: resuelto en otra instancia (regla de Cloudflare). Verificado en producción el 29/10: `Python-urllib/3.11` y `libwww-perl/6` pasaron de 403/1010 a 401 en `redes.lasolucionweb.net/api/mcp`. NO verificado: que Patricia liste herramientas con MUSE. Lo que sigue abajo describe la solución que se pidió, ya aplicada.
+- (histórico) Milton decidió dejarlo por ahora (2026-10-27). Solución pendiente, solo en el panel de Cloudflare: Configuration Rule con ruta que empiece por `/api/mcp` (y `/oauth`, `/.well-known`) y Browser Integrity Check = Off. La IA no tiene acceso a Cloudflare. Verificar después con `curl` y `User-Agent: Python-urllib/3.11` (debe dar 401, no 403) y que Patricia reintente con MUSE.
 
 ## Punto cero vigente — Redes: subida de logos/fotos reparada — 2026-10-26
 
@@ -632,3 +737,131 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - El contrato cubre Instagram, Facebook, LinkedIn, Threads, Pinterest, Tumblr, Bluesky, Blogger, Google Business y Mastodon, tanto para cuentas existentes como para altas nuevas.
 - Pendiente residual: prueba autenticada de una cuenta nueva desde HUB verificando las diez columnas en pantalla/base; no se inventa esa evidencia.
 
+# Incidente Redes — idioma de captions — 2026-10-28
+
+- Punto cero productivo: el artículo `How to Buy a Condominium in Coral Gables from New York` está en inglés; la publicación de Instagram `DfDUKH5nQpd` fue publicada el 28/10 a las 04:41 p. m. con caption en español.
+- Causa confirmada en `apps/web/src/app/api/social-opportunities/generate/route.ts`: el prompt social solo trataba el valor exacto `en` como inglés. Los códigos persistidos reales pueden ser `en_VI`, `en-US` u otra variante con prefijo inglés, por lo que caían al español.
+- Corrección local: `describeSocialContentLanguage()` normaliza códigos `en`, `en_*` y `en-*`; el generador común aplica el idioma a todas las redes.
+- Publicado en `main`: commit `53377ae9`; Vercel Production `web` y `auto-articulos-web` terminaron `success`.
+- Pendiente de cierre funcional: ejecutar pruebas con dependencias instaladas, regenerar/verificar una propuesta en producción y decidir con confirmación explícita si se edita el post público ya publicado.
+
+# Incidente Redes — repetición de propuestas descartadas — 2026-10-28
+
+- Causa confirmada: `Borrar todas` eliminaba físicamente las propuestas `pending`; la siguiente generación no tenía memoria de la decisión editorial.
+- Corrección preparada: el borrado de pendientes ahora las marca `skipped` con motivo, y el generador conserva todos los registros por artículo/red para bloquear su repetición en esa red.
+- La variación entre redes se mantiene: la clave de bloqueo incluye la red y la selección diaria evita reutilizar el mismo artículo entre redes cuando hay candidatos alternativos.
+- Pendiente: pruebas con dependencias instaladas, deployment y verificación productiva.
+
+# Incidente Redes — propuestas con URL inexistente — 2026-10-28
+
+- Evidencia productiva: la URL `https://www.inesgarcia-arcaya.com/404` responde HTTP 404; la URL de downsizing mostrada en Redes responde HTTP 200.
+- Causa confirmada: `selectTrendingArticles()` filtraba por `Title.status=success` y `articleUrl` no nula, pero no comprobaba la disponibilidad pública actual de la URL.
+- Corrección preparada: Redes verifica la URL con GET, sigue redirecciones y solo acepta HTTP 2xx antes de crear propuestas; las URLs 4xx/5xx o inaccesibles quedan fuera.
+- Pendiente: pruebas con dependencias instaladas, deployment y verificación productiva de una generación nueva.
+
+
+# Incidente Redes — «No hay artículos nuevos disponibles» falso — 2026-10-29
+
+- Síntoma: Redes respondía «Todos los artículos publicados ya tienen una propuesta generada» a cuentas con artículos publicables.
+- Causa probable (por código; sin datos de producción todavía): `isPublicArticleUrl()` (commit 5756cb14, 28/10) exigía que `User.selectedSiteDomain` coincidiera con el dominio del artículo. Ese campo puede estar vacío o guardar el nombre del panel, y entonces TODOS los artículos se descartaban. Además un 403 anti-bot, un timeout o un 5xx también los descartaba.
+- Corrección: `lib/social-article-url.ts` — solo un 404/410 descarta un artículo; ya no depende del dominio guardado de la cuenta; no consulta direcciones internas. El mensaje vacío se separa en: sin artículos / URL caída / ya usados en todas las redes. Se registra un `console.warn` con los conteos.
+- Prueba: `src/lib/social-article-url.test.ts` (5 pruebas, pasan). `social-generate-lock.test.ts` ya fallaba en main antes de este cambio (regex demasiado amplia sobre `status: { not: "skipped" }` de la selección diaria); no se tocó.
+- Pendiente: deployment, diagnóstico de lectura con realestatemov/Lorena en producción y verificación de una generación real.
+
+# Redes — error de foto explicado y revisión previa — 2026-10-29
+
+- Causa (realestatemov, 9 publicaciones sin publicar): 3 artículos de movrealestate.com (servidor distinto) no declaran `og:image` en su página; el worker no publica sin foto. El mensaje de error no nombraba el artículo ni qué arreglar.
+- Corrección: `friendlyPublishError(raw, platform, { articleTitle, articleUrl })` — para falta de foto nombra el artículo y el sitio y dice qué hacer (imagen destacada, revisar el servidor, Reintentar). Contexto pasado desde el worker (`socialPublish.ts`) y desde Historial.
+- Revisión previa: `inspectArticlePage()` (`lib/social-article-url.ts`) descarta del listado los artículos con 404/410 o con página completa sin `og:image`; 403/5xx/timeout/página a medias no descartan. El aviso de lista vacía distingue: sin artículos / URL caída / sin foto / ya usados.
+- No cambiado a propósito: el mensaje «proceso interrumpido» de `cleanup.ts` (la causa real de un proceso muerto es desconocida) y el hecho de que una propuesta con error cuenta como «usada» (decisión de Milton pendiente).
+- Pruebas: 26 pasan (`social-article-url`, `friendly-publish-error`, `social-language`). Pendiente: CI de Vercel, deployment y verificación en producción con realestatemov.
+
+# Cierre — Redes «No hay artículos disponibles» falso (PR #698 y #703) — 2026-10-29
+
+- PR #698 (1bbf65e5) y PR #703 (0d2ffc45) en producción, CI verde.
+- Verificación en producción vía Hub con impersonación de milton:
+  - Rosa María Bello (business.rosabello@gmail.com): 6 propuestas publicadas, 0 pendientes. «Crear propuesta» en LinkedIn generó 1 propuesta con artículo real; quedó pendiente, sin publicar.
+  - MCV Real Estate (realestatemov@gmail.com, cuenta del aviso original): 20 propuestas (publicadas y con error). «Crear propuesta» en LinkedIn y en Pinterest generaron propuestas con artículos que sí tienen foto; quedaron pendientes, sin publicar.
+- No se vio el estado previo al arreglo en esas cuentas: no está probado que el filtro de dominio fuera la causa; sí está probado que hoy genera.
+- Causa de los 9 «sin publicar» de realestatemov: 3 artículos de movrealestate.com no declaran `og:image`. Lo resuelve en mensajes el PR #703; la foto de esos artículos se arregla en su sitio.
+- Decisión de Milton pendiente (no corregido): una propuesta con estado `error` cuenta como «usada» para ese artículo y esa red y no se vuelve a ofrecer.
+- Fuera de alcance: el texto generado a veces inventa anécdotas (fórmula «Historia personal»).
+- Lorena no se diagnosticó.
+
+# Altas desde el Hub: servidor y prompt por defecto — 2026-10-29
+
+- Hallazgo: el Hub (`auth/hub` y `integrations/hub/access-sync`) no manda continente; esas cuentas quedaban siempre en `.net`. Ninguna alta (Hub, registro de prueba, administración) guardaba `defaultPromptId`: el lote del 19/10 solo cubrió cuentas existentes ese día.
+- Cambio (código local, sin fusionar): campo `User.platformDomainConfirmedAt`. La ubicación es el PRIMER paso del asistente inicial (`LocationStep`, antes del Paso 1) y reutiliza el mismo guardado del cartel existente «Una sola vez · Tu ubicación» (país, ciudad y zona horaria, `PATCH /api/me`): para cuentas SIN región confirmada (altas nuevas del Hub) pasa a ser paso obligatorio (`configuration-status`, `required`), y al guardarlo el país decide el servidor (Europa -> `site`, resto -> `net`, `platformDomainForCountry`) y marca la región como confirmada. No cambia el servidor de cuentas ya confirmadas. Las cuatro altas guardan «GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION» (`lib/default-prompt.ts`). El país guardado es además la fuente para el prompt de artículos por país (traspaso aparte).
+- Migración `20261029190000_platform_domain_confirmed_default_prompt`: agrega la columna, marca TODAS las cuentas existentes como confirmadas (no se les pregunta nada) y asigna el prompt a las cuentas creadas desde el 19/10/2026 19:00 UTC con estándar. Limitación: no distingue a quien eligió el estándar a propósito después de esa fecha.
+- ORDEN OBLIGATORIO: aplicar la migración en producción ANTES de fusionar (incidente del 16/9: el build no corre `migrate deploy`; sin la columna `/dashboard` da 500).
+- Pendiente: PR, migración, CI, fusión y verificación con una cuenta nueva del Hub. Las cuentas del Hub ya existentes en Europa siguen en `.net`.
+
+# Prompts de artículos sin país destino — traspaso asumido — 2026-10-29
+
+- Origen: traspaso de otro programador (archivado por Milton); solo diagnóstico, sin código. Responsable ahora: Claude (esta sesión).
+- Verificado en código: el prompt del worker usa solo `targetLanguage` (`generateCustomArticle.ts:113`); `describeContentLanguage` descarta la región; `User.country` no llega al prompt.
+- Pendiente de Milton: aprobar la regla y la fuente de país antes de implementar. Sin implementar. Las cuentas del Hub no traen país.
+## TITULOS-DEL-SITIO-EN-SUPABASE-20261029 — preparado, pendiente de migración y publicación
+
+Pedido de Milton tras aviso de 10minutesWebsite (lecturas excesivas del listado).
+Hallazgo: el análisis de Oportunidades NO toca 10MWS; la carga venía del worker
+de publicación (login por artículo, listado cada 1,5 s hasta 90 s, hasta 3
+intentos, hasta 40 lanes). Cambios: (1) tablas `SiteArticleTitle` y
+`SiteTitleSeed` (solo título y enlace; llenado ÚNICO desde el sitemap de
+SearchIntegration/Composio, sin sitemap no se llena; aditivo con cada
+publicación); (2) la guardia anti-canibalización (web, Publicar y worker) y el
+análisis de Oportunidades usan esa tabla además de `Title`; (3) espera
+progresiva en la verificación posterior al guardado (~8 cargas en vez de ~60).
+Migración `20261029180000_site_article_titles` (solo tablas nuevas): aplicar
+ANTES o junto con el merge. Pruebas: 5 nuevas PASS, tipos limpios. Falla ajena
+y previa: `paidApiGuard` por `blogCoverImage.ts`. NO verificado en producción.
+Rollback: revertir el PR (las tablas nuevas pueden quedarse).
+
+# INCIDENTE 29/10/2026 — PR #708 tumbó el panel (500) — revertido con #709
+
+- Síntoma: tras fusionar #708, `/dashboard`, `/api/me` y `configuration-status` dieron 500 durante varios minutos. Rollback: PR #709; servicio recuperado.
+- Causa (registros de Vercel, 11:04): `PrismaClientKnownRequestError P2022 — The column User.platformDomainConfirmedAt does not exist in the current database`. La columna estaba declarada en `schema.prisma`, así que entraba en TODA consulta de `User`; la base que usa la app no la tenía al desplegar, aunque Milton dice haber ejecutado el SQL (ahora Supabase sí la muestra: se aplicó después o en otro proyecto/esquema; sin confirmar).
+- Corrección (v2): `platformDomainConfirmedAt` YA NO está en `schema.prisma`; se lee/escribe solo con SQL directo y a prueba de fallos (`lib/platform-domain-confirmation.ts`, mismo patrón que `disableIndexing`). Si la columna falta, la app sigue funcionando y simplemente no pregunta la ubicación. La migración `20261029190000` sigue siendo necesaria para que la pregunta funcione.
+- Regla aprendida: NUNCA declarar en `schema.prisma` una columna que la base de producción aún no tiene; y verificar con una consulta a `information_schema` ANTES de fusionar, no solo confiar en «ya la apliqué».
+## REDES-GENERACION-ESPERA-20261029 — código publicado; E2E autenticado pendiente
+
+- Punto cero: `main`/producción servía `fc812368`; la ruta de propuestas podía
+  devolver HTML de timeout y la UI lo analizaba como JSON.
+- Causa: copy de cada red secuencial y sin timeout por llamada de IA.
+- Corrección publicada: `ee4066d8` en `main`; copys en paralelo, timeout de 20 s,
+  `maxDuration = 60` y manejo de respuestas no JSON. Sin migración ni datos.
+- Verificación: `git diff --check` PASS; commit visible en GitHub; Redes responde
+  307 a `/login` y `/login` 200. La cuenta interna disponible no tiene acceso a
+  Redes, por lo que falta ejecutar «Crear propuestas» con una cuenta autorizada.
+- Rollback: revertir `ee4066d8`.
+
+## REDES-GENERACION-ESPERA-20261029 — regresión corregida — `82ca8b0c`
+
+- La causa real no fue una nueva función de IA: `860fb2e` empezó a descargar y
+  analizar la página completa de todos los artículos antes de generar. Con
+  muchos artículos agotaba la función serverless.
+- Corrección puntual: conserva la validación de URL/`og:image`, pero inspecciona
+  como máximo 24 artículos y se detiene al encontrar el primer candidato válido.
+  No se revirtió ninguna mejora añadida hoy; también se conservan la generación
+  concurrente y el manejo de respuestas no JSON.
+- Publicado directamente en `main`; sin migración ni datos. Falta repetir la
+  prueba autenticada con una cuenta de Redes.
+
+## REDES-GENERACION-ESPERA-20261029 — CERRADO Y ARCHIVADO
+
+- Milton confirmó en producción que «Crear propuestas» volvió a funcionar.
+- Punto cero final: `main` en `3391990b`; corrección funcional `82ca8b0c`.
+- Se conserva todo lo añadido hoy: validación de URL/foto, generación paralela,
+  timeout seguro y mensaje de error no JSON. La regresión fue acotada sin
+  revertir esos cambios.
+- Sin migración ni cambios de datos. Task archivado; reabrir solo con un caso
+  nuevo.
+
+
+# Cierre — altas del Hub: ubicación, servidor y prompt por defecto — 2026-10-29
+
+- En producción: PR #711 (06e7564a) tras el incidente de #708/#709. La región confirmada se lee con SQL directo y a prueba de fallos; el prompt «GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION» se guarda en las cuatro altas.
+- Migración `20261029190000` aplicada por Milton en el proyecto Supabase `uqqclaezxagukoyiiiol` (base nativa de producción, según HANDOFF.md) a las ~17:30. Antes de eso la consulta a `information_schema` devolvía 0 filas (la primera respuesta «sí existen» no coincidía). Tras aplicarla, 3 llamadas a `/api/me` (17:31) no generaron el aviso «column does not exist» en los registros de Vercel.
+- NO probado: una cuenta nueva real del Hub viendo «¿Dónde estás?» y quedando en `.site`/`.net` según su país. Pendiente de la primera alta real.
+- Las cuentas del Hub ya existentes en Europa siguen en `.net` (no hay forma de saberlo).
+- El traspaso «prompts con país destino» (regla sin aprobar) sigue sin implementar; ahora cuenta con el país obligatorio de las cuentas nuevas.

@@ -1,3 +1,4 @@
+import { markPlatformDomainConfirmed } from "@/lib/platform-domain-confirmation";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
@@ -7,6 +8,7 @@ import { TRIAL_DAYS } from "@/lib/trial";
 import { ensureDefaultEntitlements } from "@/lib/product-access";
 import { applyCookie } from "@/lib/shared-cookies";
 import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
+import { newUserDefaultPromptData } from "@/lib/default-prompt";
 
 // Registro público desde el botón "Solicitar prueba" en Login — pedido
 // explícito del usuario, 13/8/2026. A diferencia de POST /api/admin/users
@@ -100,12 +102,16 @@ export async function POST(request: NextRequest) {
       passwordHash,
       initialPasswordEncrypted,
       platformDomain,
+      ...(await newUserDefaultPromptData()),
       isTrialSignup: true,
       trialStartedAt: new Date(),
       trialUnlocked: false,
       ...DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS,
     },
   });
+
+  // La región ya se eligió en el formulario: queda confirmada (no se pregunta de nuevo).
+  await markPlatformDomainConfirmed(user.id);
 
   // Derechos por producto de la cuenta nueva (Artículos activo, como hoy).
   await ensureDefaultEntitlements(user.id);
