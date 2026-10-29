@@ -294,6 +294,21 @@ export class DuplicateTitleError extends Error {
   }
 }
 
+/**
+ * Pedido directo de Milton (29/10/2026): si el usuario pidió «No indexar» y el
+ * sitio no deja confirmar que quedó desactivado, el artículo NO se guarda
+ * (saldría visible en Google contra la orden del usuario). El mensaje es el
+ * que ve la persona en el Historial, en español llano.
+ */
+export class IndexingNotAppliedError extends Error {
+  constructor() {
+    super(
+      "No se pudo activar el «No indexar» que pediste, así que el artículo NO se publicó (habría salido visible en Google). " +
+        "Vuelve a intentarlo desde Oportunidades; si se repite, avísanos.",
+    );
+  }
+}
+
 export function resolveBaseUrl(platformDomain?: string | null): string {
   return platformBaseUrl(platformDomain);
 }
@@ -2552,20 +2567,62 @@ async function applyIndexingPreference(
   onStep: OnStep,
 ): Promise<boolean> {
   if (!disableIndexing) return true;
-  await page
-    .locator("#activate_indexing")
-    .setChecked(false, { force: true })
-    .catch(() => {});
-  const isChecked = await page
-    .locator("#activate_indexing")
-    .isChecked()
-    .catch(() => null);
+  const checkbox = page.locator("#activate_indexing");
+  const readChecked = () => checkbox.isChecked().catch(() => null);
+
+  // Intento 1: el de siempre (clic forzado sobre el checkbox invisible).
+  await checkbox.setChecked(false, { force: true }).catch(() => {});
+  let isChecked = await readChecked();
+
+  // Producción 29/10/2026 (cuenta de Inés García): el intento 1 deja el
+  // checkbox "activado" aun justo antes de guardar y el artículo sale
+  // indexable. Se encadenan alternativas y se vuelve a LEER el estado real
+  // después de cada una; ninguna se da por buena sin verificarla.
+  if (isChecked !== false) {
+    // Intento 2: clic sobre el control visible (el "lever" del switch o su
+    // etiqueta), que es lo que hace una persona.
+    await page
+      .locator("label:has(#activate_indexing) .lever, label:has(#activate_indexing)")
+      .first()
+      .click({ force: true, timeout: 3000 })
+      .catch(() => {});
+    isChecked = await readChecked();
+  }
+  if (isChecked !== false) {
+    // Intento 3: fijar el valor por script y avisar al formulario.
+    await page
+      .evaluate(() => {
+        const el = document.querySelector("#activate_indexing") as HTMLInputElement | null;
+        if (!el) return;
+        el.checked = false;
+        el.removeAttribute("checked");
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      })
+      .catch(() => {});
+    isChecked = await readChecked();
+  }
+
   const confirmed = isChecked === false;
   if (!confirmed) {
+    // Foto del control para poder diagnosticar sin ver el sitio: HTML del
+    // contenedor, si está deshabilitado y el valor del tipo de artículo.
+    const snapshot = await page
+      .evaluate(() => {
+        const el = document.querySelector("#activate_indexing") as HTMLInputElement | null;
+        const type = document.querySelector("#type") as HTMLSelectElement | null;
+        return {
+          existe: Boolean(el),
+          disabled: el?.disabled ?? null,
+          tipo: type?.value ?? null,
+          html: (el?.closest("label, div, .switch")?.outerHTML ?? "").slice(0, 400),
+        };
+      })
+      .catch(() => null);
     await onStep(
       `Aviso: no se pudo confirmar que la indexación quedó desactivada (estado real leído del formulario: ${
         isChecked === null ? "no se pudo leer el checkbox" : isChecked ? "sigue activada" : "desactivada"
-      }).`,
+      }). DIAGNÓSTICO [indexación]: ${snapshot ? JSON.stringify(snapshot) : "no se pudo leer"}`,
     );
   }
   return confirmed;
@@ -2723,6 +2780,21 @@ async function saveAndGetUrl(
       await onStep(
         "El botón de guardar no se habilitó a tiempo (probable chequeo de título duplicado todavía en curso).",
       );
+    }
+
+    // El sondeo de arriba vuelve a disparar `change` sobre `#type` mientras
+    // el botón sigue deshabilitado, y ese evento puede devolver
+    // `#activate_indexing` a su valor por defecto (marcado) DESPUÉS de la
+    // verificación anterior. Se reaplica y verifica una vez más, ya sin
+    // ningún evento por delante, inmediatamente antes del clic real.
+    if (disableIndexing) {
+      indexingConfirmed = await applyIndexingPreference(page, disableIndexing, onStep);
+      if (!indexingConfirmed) {
+        await onStep(
+          "No se pudo activar el «No indexar» solicitado por el usuario. Se detiene antes de guardar para no publicar el artículo visible en Google.",
+        );
+        throw new IndexingNotAppliedError();
+      }
     }
 
     // Diagnóstico agregado el 30/8/2026: el resultado real del clic se

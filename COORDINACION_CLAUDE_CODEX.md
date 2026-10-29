@@ -12989,3 +12989,41 @@ Responsable: Claude (tarea programada diaria de propagación).
 - Verificación bloqueada localmente: falta `tsx` en `node_modules`; instalar dependencias o ejecutar CI antes de declarar el commit verificado.
 - No se editó el post público existente: cualquier edición de contenido en Instagram requiere confirmación inmediata antes de transmitir el nuevo caption.
 - Publicación de código verificada: `53377ae9` en `main`; checks Vercel `web` y `auto-articulos-web` = `success`.
+
+## Claude - CHECK DE NO INDEXAR (10MWS) — CONCILIACIÓN ENTRE PROGRAMADORES — 2026-10-29
+
+Milton detectó que dos programadores atacaron el mismo reporte («No indexar» no
+queda marcado en 10MWS al crear artículos). Comparación hecha por commits:
+
+| Pieza | Capa | Qué arregla | Estado |
+|---|---|---|---|
+| `f41b1e9e` (ya en `main`) | web: `opportunities/execute-all` y `execute-batch` | si la petición no trae `disableIndexing`, hereda la preferencia guardada del usuario | en `main` |
+| PR #691 (Claude, sin fusionar) | worker: `10minutesWebsite.ts` | reaplica y verifica `#activate_indexing` justo antes del clic de guardar (el sondeo previo dispara `change` sobre `#type` y puede devolverlo a marcado) | abierto |
+
+Conclusión de Claude: **no se pisan** (archivos y capas distintos) y son
+complementarios. Propuesta: `f41b1e9e` se queda; #691 es el único cambio de
+worker; no se sube nada más. Si el otro programador tiene otro cambio de
+worker sobre la misma función, que lo diga aquí ANTES de fusionar para elegir
+uno solo y descartar el otro. #691 no se fusiona hasta que el otro programador
+responda en este documento. Verificación en vivo pendiente (`worker-test.yml`,
+cuenta de Lorena), por un solo programador.
+
+**Liderazgo (orden de Milton, 2026-10-29):** Claude lidera esta conciliación, pero toma en cuenta lo ya hecho por el otro programador (`f41b1e9e` y anteriores) y decide de acuerdo con él. Se conserva su trabajo en `main`; Claude solo suma lo que falte.
+
+## Claude - CHECK DE NO INDEXAR (10MWS) — CIERRE — 2026-10-29
+
+Conciliación entre programadores: `f41b1e9e` (web, Oportunidades) y el PR #691
+(worker) se complementan; el otro programador confirmó que no tiene más cambios
+en el worker. Hallazgo decisivo de la prueba en vivo con Inés García: el worker
+de `main` no lograba desmarcar «Activate Indexing» (aviso «sigue activada») y
+publicaba indexable (artículo 104484). Se reescribió `applyIndexingPreference`
+(tres intentos verificados + diagnóstico) y, si no se logra, el artículo no se
+guarda y el usuario lee el motivo en claro (`IndexingNotAppliedError`).
+Verificación en producción tras fusionar (`38621d27`): lote nuevo, artículo
+104488, interruptor en No y `noindex,nofollow` público. Pendientes: 104484
+indexable (decisión de Milton); BLOG IA (Lorena) no envía el campo de
+indexación al blog; pruebas unitarias del nuevo error no escritas.
+Capitanía liberada. Responsable: Claude.
+
+**Cierre final (2026-10-29):** Confirmación de Milton (2026-10-29): la reparación quedó correcta tras revisión manual del artículo 104488. Estado: CERRADO.
+ARCHIVADA. Responsable: Claude.

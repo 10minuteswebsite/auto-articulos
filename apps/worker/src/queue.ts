@@ -4,6 +4,7 @@ import {
   publishArticle,
   DailyLimitReachedError,
   DuplicateTitleError,
+  IndexingNotAppliedError,
 } from "./automation/10minutesWebsite";
 import {
   tryReserveUser,
@@ -492,6 +493,12 @@ async function processRunTitle(
     } else if (isPermanentWebsiteLoginIssue) {
       // Un correo inválido es un fallo permanente de configuración, no un
       // fallo transitorio del sitio: reintentarlo solo repite el mismo login.
+      await markTitleError(nextTitle.id, message);
+      await restoreUnfinishedTitlesToOpportunities(run.id, nextTitle.id);
+    } else if (err instanceof IndexingNotAppliedError) {
+      // «No indexar» no se pudo aplicar: reintentar repite el mismo fallo (y
+      // gasta imagen y redacción otra vez). Queda como error visible con el
+      // motivo en claro y se devuelve a Oportunidades para reintentarlo luego.
       await markTitleError(nextTitle.id, message);
       await restoreUnfinishedTitlesToOpportunities(run.id, nextTitle.id);
     } else if (err instanceof DailyLimitReachedError) {
