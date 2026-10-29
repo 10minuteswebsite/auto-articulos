@@ -37,3 +37,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
   ALTER TABLE "SiteTitleSeed" ADD CONSTRAINT "SiteTitleSeed_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Mismo criterio que el resto del proyecto: tablas nuevas con RLS activo.
+ALTER TABLE "SiteArticleTitle" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "SiteTitleSeed" ENABLE ROW LEVEL SECURITY;
