@@ -575,7 +575,7 @@ Comprueba que tienes categorías sincronizadas, un idioma elegido y que no hay o
 
 ### Aviso de falta de créditos de imagen
 
-Si tu cuenta se queda sin créditos de imagen, el aviso rojo **Sin créditos de imagen** aparece también en el **Inicio**, arriba de las tarjetas, con el botón **Solicitar créditos**. Dentro de Publicar y Oportunidades puedes pulsar **Ya recibí mis créditos**. Si aparece el aviso de créditos de imagen, significa que la pantalla todavía no reconoce saldo para ilustrar artículos. Si ya te los asignaron, pulsa **Ya recibí mis créditos** y vuelve a intentar. Si la operación sigue detenida, solicita créditos o consulta a soporte.
+Si tu cuenta se queda sin créditos de imagen, el aviso rojo **Sin créditos de imagen** aparece también en el **Inicio**, arriba de las tarjetas, con los botones **Servicio al cliente** (abre la página de ayuda de tu proveedor para pedir los créditos) y **Ya recibí mis créditos** (confirma que ya los tienes y quita el aviso). Esa confirmación también está en Publicar y Oportunidades. Si aparece el aviso de créditos de imagen, significa que la pantalla todavía no reconoce saldo para ilustrar artículos. Si ya te los asignaron, pulsa **Ya recibí mis créditos** y vuelve a intentar. Si la operación sigue detenida, solicita créditos o consulta a soporte.
 
 ### Un título falla porque la categoría ya no existe
 

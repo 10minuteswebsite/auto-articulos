@@ -2,7 +2,7 @@
 
 import { MENU_NAMES, PRODUCT_NAMES } from "@/lib/menu-names";
 import { isProductViewEnabled, isVisibleInProduct, productOfHost, productOfPath, type HostProductScope } from "@/lib/product-routes";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, type CSSProperties } from "react";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import Link from "next/link";
 import OnboardingWizard from "@/components/OnboardingWizard";
@@ -51,6 +51,21 @@ interface ConfigurationAlert {
 }
 
 const showReconnectAlert = true;
+
+function alertButtonStyle(background: string): CSSProperties {
+  return {
+    display: "inline-block",
+    padding: "11px 20px",
+    borderRadius: 8,
+    background,
+    color: "#ffffff",
+    fontSize: 15,
+    fontWeight: 700,
+    textDecoration: "none",
+    whiteSpace: "nowrap",
+    border: "none",
+  };
+}
 
 // Cuenta que ya completó el asistente en este navegador: el Inicio pinta las
 // tarjetas al instante y las APIs solo las afinan (antes esperaban cinco
@@ -103,6 +118,21 @@ export default function InicioPage() {
   const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
   const [productView, setProductView] = useState(false);
+
+  // Mismo criterio que el botón de Publicar: persistir en la base (solo
+  // `true`, el `false` es exclusivo del worker) y quitar el aviso al instante.
+  const confirmImageCredits = useCallback(async () => {
+    setConfigurationAlerts((alerts) => alerts.filter((a) => a.id !== "image-credits"));
+    try {
+      await fetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hasImageCredits: true }),
+      });
+    } catch {
+      // Si falla, la próxima carga revalida contra el servidor.
+    }
+  }, []);
 
   const checkWizardStatus = useCallback(async () => {
     try {
@@ -289,22 +319,33 @@ export default function InicioPage() {
                   : `${isLocation || isBing ? "" : "SOLICITUD DE ACTUALIZACIÓN: "}${(alert.description ?? alert.label).trim()}`}
               </p>
             </div>
-            <Link
-              href={alert.actionUrl}
-              style={{
-                display: "inline-block",
-                padding: "11px 20px",
-                borderRadius: 8,
-                background: tone.button,
-                color: "#ffffff",
-                fontSize: 15,
-                fontWeight: 700,
-                textDecoration: "none",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {isLocation ? "Indicar mi ubicación" : isImageCredits ? "Solicitar créditos" : "Reconectar ahora"}
-            </Link>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {isImageCredits ? (
+                <>
+                  {alert.actionUrl !== "#" && (
+                    <a
+                      href={alert.actionUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={alertButtonStyle(tone.button)}
+                    >
+                      Servicio al cliente
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={confirmImageCredits}
+                    style={{ ...alertButtonStyle("#ffffff"), color: tone.button, border: `2px solid ${tone.button}`, cursor: "pointer" }}
+                  >
+                    Ya recibí mis créditos
+                  </button>
+                </>
+              ) : (
+                <Link href={alert.actionUrl} style={alertButtonStyle(tone.button)}>
+                  {isLocation ? "Indicar mi ubicación" : "Reconectar ahora"}
+                </Link>
+              )}
+            </div>
           </div>
         );
       })}
