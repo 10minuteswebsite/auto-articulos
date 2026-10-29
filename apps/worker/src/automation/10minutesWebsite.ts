@@ -294,6 +294,21 @@ export class DuplicateTitleError extends Error {
   }
 }
 
+/**
+ * Pedido directo de Milton (29/10/2026): si el usuario pidió «No indexar» y el
+ * sitio no deja confirmar que quedó desactivado, el artículo NO se guarda
+ * (saldría visible en Google contra la orden del usuario). El mensaje es el
+ * que ve la persona en el Historial, en español llano.
+ */
+export class IndexingNotAppliedError extends Error {
+  constructor() {
+    super(
+      "No se pudo activar el «No indexar» que pediste, así que el artículo NO se publicó (habría salido visible en Google). " +
+        "Vuelve a intentarlo desde Oportunidades; si se repite, avísanos.",
+    );
+  }
+}
+
 export function resolveBaseUrl(platformDomain?: string | null): string {
   return platformBaseUrl(platformDomain);
 }
@@ -2774,6 +2789,12 @@ async function saveAndGetUrl(
     // ningún evento por delante, inmediatamente antes del clic real.
     if (disableIndexing) {
       indexingConfirmed = await applyIndexingPreference(page, disableIndexing, onStep);
+      if (!indexingConfirmed) {
+        await onStep(
+          "No se pudo activar el «No indexar» solicitado por el usuario. Se detiene antes de guardar para no publicar el artículo visible en Google.",
+        );
+        throw new IndexingNotAppliedError();
+      }
     }
 
     // Diagnóstico agregado el 30/8/2026: el resultado real del clic se
