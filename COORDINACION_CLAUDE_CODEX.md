@@ -13055,4 +13055,5 @@ ARCHIVADA. Responsable: Claude.
 
 **Cierre (2026-10-29):** indexación simple del Historial en producción (`22cb96b9`). Capitanía liberada. Pendiente: confirmar visualmente con Lorena y probar «Enviar ahora». Responsable: Claude.
 
+- **Capitán de migración:** Claude — 2026-10-29: Redes, verificación de URL y mensajes de "sin artículos" (sin migración). Liberación al verificar en producción.
 **Cierre final (2026-10-29):** Milton confirmó que el resultado quedó como esperaba («espectacular»). Estado: CERRADO. ARCHIVADA. Pendiente menor sin bloquear: prueba de «Enviar ahora» con Lorena. Responsable: Claude.

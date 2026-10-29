@@ -710,3 +710,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Corrección preparada: Redes verifica la URL con GET, sigue redirecciones y solo acepta HTTP 2xx antes de crear propuestas; las URLs 4xx/5xx o inaccesibles quedan fuera.
 - Pendiente: pruebas con dependencias instaladas, deployment y verificación productiva de una generación nueva.
 
+
+# Incidente Redes — «No hay artículos nuevos disponibles» falso — 2026-10-29
+
+- Síntoma: Redes respondía «Todos los artículos publicados ya tienen una propuesta generada» a cuentas con artículos publicables.
+- Causa probable (por código; sin datos de producción todavía): `isPublicArticleUrl()` (commit 5756cb14, 28/10) exigía que `User.selectedSiteDomain` coincidiera con el dominio del artículo. Ese campo puede estar vacío o guardar el nombre del panel, y entonces TODOS los artículos se descartaban. Además un 403 anti-bot, un timeout o un 5xx también los descartaba.
+- Corrección: `lib/social-article-url.ts` — solo un 404/410 descarta un artículo; ya no depende del dominio guardado de la cuenta; no consulta direcciones internas. El mensaje vacío se separa en: sin artículos / URL caída / ya usados en todas las redes. Se registra un `console.warn` con los conteos.
+- Prueba: `src/lib/social-article-url.test.ts` (5 pruebas, pasan). `social-generate-lock.test.ts` ya fallaba en main antes de este cambio (regex demasiado amplia sobre `status: { not: "skipped" }` de la selección diaria); no se tocó.
+- Pendiente: deployment, diagnóstico de lectura con realestatemov/Lorena en producción y verificación de una generación real.
