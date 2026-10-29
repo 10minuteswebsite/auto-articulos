@@ -13,6 +13,7 @@ Verificado en producción: el bundle servido en articulos.lasolucionweb.net trae
 el texto nuevo y ya no el viejo. NO verificado: vista con artículos reales
 (cuenta de prueba sin ejecuciones; falta ver con Lorena) ni el clic de «Enviar
 ahora». Capitanía liberada. Responsable: Claude.
+Confirmación de Milton (2026-10-29): «Quedó espectacular». Estado: CERRADO.
 
 ## NO-INDEX-10MWS-20261029 — publicado y verificado en producción
 
