@@ -1759,7 +1759,7 @@ export async function processNextSocialPublish(filterUserId?: string, filterArti
       where: { id: job.id },
       data: {
         status: "error",
-        errorLog: friendlyPublishError(errorMsg, job.platform),
+        errorLog: friendlyPublishError(errorMsg, job.platform, { articleTitle: job.articleTitle, articleUrl: job.articleUrl }),
         progressStage: "La publicación terminó con error",
         finishedAt: new Date(),
       },
