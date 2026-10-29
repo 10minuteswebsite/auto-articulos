@@ -215,7 +215,7 @@ Con eso se arman títulos de cola larga. Es más sencillo de lo que suena: en ve
 
 La pantalla está separada en tres pasos.
 
-Paso 1, pide el análisis. Si tienes más de un sitio, eliges para cuál generar contenido y pulsas Analizar. Tarda unos minutos y no debes cerrar la página. Si te falta conectar Google Search Console, elegir la propiedad, sincronizar categorías o configurar el idioma, la propia pantalla te lo dice con un enlace directo a donde se arregla.
+Paso 1, pide el análisis. Si tienes más de un sitio, eliges para cuál generar contenido y pulsas Analizar. Tarda unos minutos y no debes cerrar la página. Si te falta conectar Google Search Console, elegir la propiedad, sincronizar categorías o configurar el idioma, la propia pantalla te lo dice con un enlace directo a donde se arregla. Si Search Console está conectado por Composio, el análisis lo usa aunque antes hubiera una conexión propia con error. Si el análisis no encuentra datos, el mensaje te dice qué pasó: nada conectado, Search Console conectado pero sin datos en los últimos 45 días (revisa en Conexiones que la propiedad elegida sea la correcta: con https://, con www o el dominio completo), o un error de Google. Los datos de la última consulta buena se reutilizan hasta 20 días y, si una consulta nueva falla, se usa esa última copia.
 
 Paso 2, elige cómo se escribirán. Seleccionas el idioma de los artículos y el estilo de escritura. También puedes desactivar la indexación en buscadores, aunque por defecto queda activada, que es lo normal si quieres que Google los encuentre. Estas opciones solo afectan a lo que publiques desde esta pantalla; no cambian tu configuración general.
 

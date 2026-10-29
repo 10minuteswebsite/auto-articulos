@@ -1,3 +1,19 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — Claude — RECLAMO
+
+- **Capitán de migración:** Claude — reclamado el 2026-10-29 (sin migración) para
+  «Oportunidades: usar Composio cuando es la única conexión válida». Punto cero:
+  `main` = `9fcfd08f`. Se libera al verificar producción.
+- Causa medida en producción (diagnóstico y censo de solo lectura, PR #685/#689/#699):
+  `COMPOSIO_CONSUMER_READY.google_search_console = false` hace que el resolvedor
+  elija siempre la conexión propia. De 122 usuarios: 23 solo Composio (fuente
+  NONE → «No hay evidencia»), 54 con ambas (51 ganan la propia), 2 con propia
+  rota. Nadie resuelve a Composio hoy.
+- Regla elegida (conservadora, sin mover a los 51 que funcionan): la propia sigue
+  ganando mientras funciona; Composio toma el relevo si no hay propia o la propia
+  guardó error. Más: mensajes de «sin evidencia» por caso, caché de 20 días con
+  copia de respaldo, y el aviso rojo viejo se oculta si hay Composio activo.
+- No se tocan sitemaps ni indexación (comparten el resolvedor). Sin migraciones.
+
 ## MCP-AUTH-FIX-20261027 — Codex — CIERRE
 
 Capitán de migración liberó el lote: Codex. Código620e0cc9 publicado,
