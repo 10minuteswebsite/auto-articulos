@@ -1,4 +1,6 @@
-## ENTRADA-SIN-ESPERA-20261029 — publicado y verificado
+## ENTRADA-SIN-ESPERA-20261029 — CERRADO Y ARCHIVADO
+
+Cerrado por orden de Milton (2026-10-29). No reabrir sin un caso nuevo; el resto de ~3 s en frío es conocido y aceptado.
 
 Código `9c136189` (PR #712), Vercel web y auto-articulos-web success. Sin migración. Rollback: revertir #712.
 Punto cero medido (carga nueva desde el HUB): documento 11,8 s, 12 llamadas simultáneas (`/api/me` ×5) de hasta 13 s, tarjetas a los 27 s. Causa: la revalidación con el Hub (sin timeout) repetía consulta, transacción y UPDATE en cada petición. (Los 500 vistos antes eran de #708 sin su migración; ya revertido en #709.)

@@ -13121,3 +13121,10 @@ ARCHIVADA. Responsable: Claude.
 - Se libera la capitanía. No quedan acciones funcionales ni reservas abiertas.
 - No reabrir salvo nueva evidencia del mismo flujo.
 
+
+## ENTRADA-SIN-ESPERA-20261029 — CERRADO
+
+- Hecho: PR #712 (`9c136189`) y docs #714. Revalidación Hub acotada (caché 60 s, compartida, timeout 3 s, fallo 30 s) + Inicio pinta tarjetas al instante.
+- Evidencia: producción, cuenta real; tarjetas de 27 s a 0,3 s tras el documento; documento 0,58 s en caliente, 2,7–4,3 s en frío.
+- Decisiones: sin migración; PR en vez de push directo (clasificador). Siguiente paso posible (no pedido): servir decisión vencida y revalidar en segundo plano.
+- Responsable: Claude. Capitanía liberada.
