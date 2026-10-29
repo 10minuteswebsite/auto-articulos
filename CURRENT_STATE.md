@@ -6,6 +6,11 @@
   `social-generate-lock.test.ts` contra una forma antigua de la ruta.
 - Falta push, deployment READY y smoke autenticado de las nuevas tools antes de
   cerrar el checkpoint.
+- Publicado en `main` con commit `3e6c9602`. Smoke productivo posterior: ambos
+  `/login` y ambos `/.well-known/oauth-protected-resource` responden 200; ambos
+  `/api/mcp/capabilities` responden 401 sin credencial. La comprobación
+  autenticada de `tools/list`/`tools/call` queda pendiente por no disponer aquí
+  de una credencial personal autorizada.
 
 ## HISTORIAL-INDEXACION-SIMPLE-20261029 — publicado y verificado en producción
 

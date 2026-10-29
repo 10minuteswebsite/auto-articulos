@@ -11,6 +11,11 @@
 - Typecheck OK; suite bloqueada por aserción heredada de
   `social-generate-lock.test.ts`. No cerrar hasta resolver/registrar y verificar
   las nuevas tools autenticadas en producción.
+- Suite final: 288/288 pruebas pasan; typecheck y `git diff --check` pasan.
+  Commit publicado: `3e6c9602`. Smoke postdeploy: login/.well-known 200 en
+  Artículos y Redes; MCP capabilities 401 sin credencial. E2E autenticado de
+  las dos tools no se declara ejecutado porque no hay token autorizado en este
+  entorno.
 
 ## HISTORIAL-INDEXACION-SIMPLE-20261029 — publicado y verificado en producción
 

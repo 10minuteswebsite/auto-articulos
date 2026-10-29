@@ -4,6 +4,9 @@
   migraciones ni cambios de auth.
 - Typecheck OK; suite completa pendiente por aserción heredada de
   `social-generate-lock.test.ts`. Publicación y verificación quedan abiertas.
+- Commit `3e6c9602` publicado en `main`. Verificación pública posterior OK
+  (200 en login/.well-known, 401 en capabilities sin credencial). Falta solo
+  prueba autenticada real de las nuevas tools con un token autorizado.
 
 ## HISTORIAL-INDEXACION-SIMPLE-20261029
 
