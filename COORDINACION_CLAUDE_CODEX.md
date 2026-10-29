@@ -1,3 +1,8 @@
+## Coordinación — BLOG IA: longitud mínima de 1,000 palabras (Claude) — 2026-10-27
+
+- Task `BLOG-IA-LONGITUD-20261027`. Pedido de Milton: artículos de BLOG IA con mínimo 1,000 palabras. **Capitán de migración:** Claude, sin migración (no hay tablas ni columnas nuevas).
+- Cambio: `generateCustomArticle` acepta un 5.º parámetro OPCIONAL `length`; sin él conserva el tope de 1,200 palabras (10MWS y MCP no cambian). Solo `blogIaPublisher` lo usa (1,000–1,400); si el borrador sale con menos del 90 % del mínimo, un 2.º intento pide ampliar, y si sigue corto se publica el más largo en vez de fallar. Modelo sin cambios (gpt-4o-mini).
+- Pruebas: `generateCustomArticleLength.test.ts` (4). Manual sin cambios: BLOG IA sigue oculto a los clientes.
 ## CREDITOS-IMAGEN-ANTONIO-20261029 — Claude — PRUEBA REAL CERRADA
 
 - Milton pulsó «Ya recibí mis créditos» en la cuenta del cliente 13 (`hasImageCredits` pasó a `true`: confirma que el botón del Inicio persiste y quita el aviso). Con su autorización se publicó UN artículo real con un título propio del cliente («Cómo invertir en propiedades en Fort Lauderdale si vivo en Argentina», categoría Fort Lauderdale Real Estate).

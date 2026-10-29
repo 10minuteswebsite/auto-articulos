@@ -94,11 +94,28 @@ export function sanitizeGeneratedArticleResult(
   };
 }
 
+/** Política de longitud opcional. Sin ella el generador conserva su tope histórico de 1,200 palabras. */
+export interface ArticleLengthPolicy {
+  minWords: number;
+  maxWords: number;
+}
+
+const DEFAULT_MAX_WORDS = 1200;
+/** Por debajo de este porcentaje del mínimo pedido se hace un segundo intento pidiendo ampliar. */
+const MIN_ACCEPT_RATIO = 0.9;
+
+/** Palabras visibles del HTML (sin etiquetas). */
+export function countArticleWords(html: string): number {
+  const text = html.replace(/<[^>]*>/g, " ").replace(/&[a-z#0-9]+;/gi, " ");
+  return text.split(/\s+/).filter(Boolean).length;
+}
+
 export async function generateCustomArticle(
   titleText: string,
   promptTemplate: string,
   contentLanguage: string,
   authorName?: string | null,
+  length?: ArticleLengthPolicy,
 ): Promise<CustomArticleResult> {
   if (!OPENAI_API_KEY) {
     throw new Error(
@@ -133,7 +150,11 @@ Make sure the generated HTML is valid and clean.` + FACTUAL_ACCURACY_RULE;
   const safetyRules = `
 
 Mandatory limits so the result can be saved safely:
-- Write no more than 1,200 words in contentHtml.
+- ${
+    length
+      ? `Write between ${length.minWords.toLocaleString("en-US")} and ${length.maxWords.toLocaleString("en-US")} words in contentHtml; never fewer than ${length.minWords.toLocaleString("en-US")}.`
+      : `Write no more than ${DEFAULT_MAX_WORDS.toLocaleString("en-US")} words in contentHtml.`
+  }
 - Do not include <script>, JSON-LD, CSS, QR codes, contact buttons, or tel:/wa.me links; SEO TOTAL adds real contact data safely.
 - Do not use HTML tables. If you need to highlight data, write a short, clear list with the datum in <strong> followed by its explanation.
 - Do not use personal-data markers; SEO TOTAL resolves them safely if they appear.
@@ -141,6 +162,8 @@ Mandatory limits so the result can be saved safely:
 - Keep every user-visible word in title, summary, and contentHtml in ${targetLanguage}, except unavoidable proper names or official brand names.`;
 
   let lastError = "";
+  // Si ningún intento llega al mínimo, se publica el más largo en vez de fallar la tarea.
+  let shortest: CustomArticleResult | null = null;
   for (let attempt = 0; attempt < 2; attempt++) {
     const response = await fetch(OPENAI_CHAT_URL, {
       method: "POST",
@@ -158,7 +181,9 @@ Mandatory limits so the result can be saved safely:
             content:
               attempt === 0
                 ? userPrompt
-                : `${userPrompt}\n\nRetry: return a more concise article as complete JSON, without markers or structured code.`,
+                : shortest && length
+                  ? `${userPrompt}\n\nRetry: the previous draft was too short (${countArticleWords(shortest.contentHtml)} words). Return a fuller, deeper article of at least ${length.minWords} words as complete JSON, adding useful sections, examples and answers to common questions, without markers or structured code.`
+                  : `${userPrompt}\n\nRetry: return a more concise article as complete JSON, without markers or structured code.`,
           },
         ],
         temperature: 0.5,
@@ -192,12 +217,19 @@ Mandatory limits so the result can be saved safely:
         lastError = "El JSON retornado por OpenAI no contiene título y contenido completos.";
         continue;
       }
-      return sanitizeGeneratedArticleResult(parsed, authorName);
+      const result = sanitizeGeneratedArticleResult(parsed, authorName);
+      if (length && countArticleWords(result.contentHtml) < length.minWords * MIN_ACCEPT_RATIO) {
+        if (!shortest || countArticleWords(result.contentHtml) > countArticleWords(shortest.contentHtml)) shortest = result;
+        lastError = `El artículo quedó corto (${countArticleWords(result.contentHtml)} palabras).`;
+        continue;
+      }
+      return result;
     } catch (error) {
       lastError = `OpenAI devolvió JSON inválido: ${error instanceof Error ? error.message : String(error)}`;
     }
   }
 
+  if (shortest) return shortest;
   throw new Error(`OpenAI no pudo generar un artículo válido tras dos intentos: ${lastError}`);
 }
 
