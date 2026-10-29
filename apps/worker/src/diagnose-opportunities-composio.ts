@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { createHash } from "node:crypto";
 import { prisma } from "@auto-articulos/db";
+import { runCensus } from "./census-gsc-connections";
 import {
   buildConnectionState,
   composioListSearchConsoleSites,
@@ -58,6 +59,11 @@ function safeError(err: unknown, hide: string[]) {
 }
 
 async function main() {
+  // account_numbers="censo" ejecuta el censo global de conexiones (solo conteos).
+  if ((process.env.ACCOUNT_NUMBERS ?? "").trim().toLowerCase() === "censo") {
+    await runCensus();
+    return;
+  }
   if (NUMBERS.length === 0 && HASHES.length === 0) throw new Error("Falta ACCOUNT_NUMBERS o ACCOUNT_HASHES.");
 
   // Misma regla que /api/admin/users: numeroCuenta = puesto por antigüedad.
