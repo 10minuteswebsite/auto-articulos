@@ -665,3 +665,7 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - PR #708 tumbó el panel (500, P2022) y se revirtió con #709. Rehecho a prueba de caídas en #711 (`06e7564a`); notas en #718 (`b46c0f1c`).
 - Migración `20261029190000` aplicada por Milton en Supabase `uqqclaezxagukoyiiiol` (~17:30). Tras aplicarla, `/api/me` ya no registra «column does not exist».
 - Pendiente: primera alta real del Hub viendo «¿Dónde estás?». Capitanía liberada.
+## Checkpoint — Títulos del sitio en Supabase — 2026-10-29
+
+- Punto cero: `main` con PR #706 (`90aaf0a6`). Tablas `SiteArticleTitle` y `SiteTitleSeed` creadas por Milton en Supabase; despliegue web y worker en success.
+- Siguiente punto de partida: probar con una cuenta con sitemap (Oportunidades → `SiteTitleSeed` «done») y medir cargas del listado por publicación.

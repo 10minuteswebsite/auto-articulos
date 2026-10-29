@@ -5785,3 +5785,8 @@ valores — 2026-10-19").
 
 - `06e7564a` (#711): ubicación como primer paso del asistente para cuentas nuevas del Hub; el país asigna `.site`/`.net`; las cuatro altas guardan el prompt «GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION».
 - Incidente: `9b3c63f7` (#708) → 500; revertido por #709. Migración `20261029190000` aplicada a mano (el flujo `migrate.yml` no pudo editarse: falta el permiso `workflow`). Rollback: revertir #711; la columna sobrante es inocua.
+## TITULOS-DEL-SITIO-EN-SUPABASE-20261029
+
+PR #706, merge `90aaf0a6` en `main`, Vercel READY. Migración
+`20261029180000_site_article_titles` aplicada a mano antes del merge. Rollback:
+revertir #706; las tablas nuevas pueden quedarse.

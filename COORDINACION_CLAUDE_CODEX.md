@@ -13143,3 +13143,11 @@ ARCHIVADA. Responsable: Claude.
 - Evidencia: producción, cuenta real; tarjetas de 27 s a 0,3 s tras el documento; documento 0,58 s en caliente, 2,7–4,3 s en frío.
 - Decisiones: sin migración; PR en vez de push directo (clasificador). Siguiente paso posible (no pedido): servir decisión vencida y revalidar en segundo plano.
 - Responsable: Claude. Capitanía liberada.
+
+## TITULOS-DEL-SITIO-EN-SUPABASE-20261029 — CERRADO Y ARCHIVADO
+
+- Hecho: PR #706 (`90aaf0a6`). Tablas de títulos por sitio con llenado único por sitemap, anticanibalización sobre ellas y espera progresiva en la verificación del listado de 10MWS.
+- Evidencia: tipos limpios, 306 + 6 pruebas PASS, despliegue web y worker en success. Migración aplicada por Milton. Falta E2E con cuenta real y medición de lecturas.
+- Decisiones: sin sitemap no se llena y no estorba; PR en vez de push directo; `migrate.yml` no usado (deriva `allowDevToPublishing`, sin aceptar pérdida de datos).
+- Siguiente paso posible (no pedido): tope de sesiones simultáneas contra 10MWS.
+- Responsable: Claude. Capitanía liberada.

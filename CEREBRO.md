@@ -406,3 +406,13 @@ El Hub no manda continente ni país. Las cuentas nuevas del Hub (sin región con
 ## Causa raíz — «No hay artículos disponibles» falso (2026-10-29)
 
 Probable (por código): el filtro de URL del 28/10 exigía que `selectedSiteDomain` coincidiera y descartaba ante 403/timeout. Confirmado aparte en realestatemov: 3 artículos de otro servidor sin `og:image`, y las propuestas con estado `error` cuentan como «usadas» (decisión pendiente de Milton).
+
+## Títulos del sitio en la base propia (2026-10-29)
+
+Decisión: saber qué artículos ya existe en el sitio de un usuario es un dato
+propio (`SiteArticleTitle`: solo título y enlace), no una consulta a
+10minutesWebsite. Se llena una vez desde el sitemap y crece con cada
+publicación; si no hay sitemap, no se llena y nada se bloquea (peor caso:
+algún título repetido). Causa raíz de la carga hacia 10MWS: no era el análisis
+sino la verificación posterior al guardado (listado cada 1,5 s). Regla: toda
+lectura nueva de estas tablas debe tolerar fallo y no bloquear publicaciones.
