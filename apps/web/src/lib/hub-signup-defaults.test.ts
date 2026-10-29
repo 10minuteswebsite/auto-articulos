@@ -18,23 +18,30 @@ test("las cuatro altas de usuario guardan el prompt problema-solución por defec
   assert.match(read("src/lib/default-prompt.ts"), /GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION/);
 });
 
-test("registro de prueba y alta de administrador ya traen la región confirmada; el Hub no", () => {
-  assert.match(read("src/app/api/auth/trial-signup/route.ts"), /platformDomainConfirmedAt: new Date\(\)/);
-  assert.match(read("src/app/api/admin/users/route.ts"), /platformDomainConfirmedAt: new Date\(\)/);
-  assert.doesNotMatch(read("src/app/auth/hub/route.ts"), /platformDomainConfirmedAt/);
-  assert.doesNotMatch(read("src/app/api/integrations/hub/access-sync/route.ts"), /platformDomainConfirmedAt/);
+test("la región confirmada NO está en schema.prisma: leerla o escribirla nunca puede tumbar el panel", () => {
+  assert.doesNotMatch(read("../../packages/db/prisma/schema.prisma"), /platformDomainConfirmedAt/);
+  const helper = read("src/lib/platform-domain-confirmation.ts");
+  assert.match(helper, /catch \(error\)[\s\S]*return true/);
+  assert.match(helper, /catch \(error\)[\s\S]*No se pudo marcar/);
+  assert.doesNotMatch(read("src/lib/current-user.ts"), /platformDomainConfirmedAt/);
 });
 
-test("la ubicación del cartel «Tu ubicación» decide el servidor, solo mientras no esté confirmado", () => {
+test("registro de prueba y alta de administrador marcan la región como confirmada; el Hub no", () => {
+  assert.match(read("src/app/api/auth/trial-signup/route.ts"), /await markPlatformDomainConfirmed\(user\.id\)/);
+  assert.match(read("src/app/api/admin/users/route.ts"), /await markPlatformDomainConfirmed\(user\.id\)/);
+  assert.doesNotMatch(read("src/app/auth/hub/route.ts"), /platformDomainConfirmed/);
+  assert.doesNotMatch(read("src/app/api/integrations/hub/access-sync/route.ts"), /platformDomainConfirmed/);
+});
+
+test("la ubicación guardada decide el servidor solo mientras la región no esté confirmada", () => {
   const route = read("src/app/api/me/route.ts");
-  assert.match(route, /if \(current && !current\.platformDomainConfirmedAt\)/);
+  assert.match(route, /if \(!\(await isPlatformDomainConfirmed\(userId\)\)\)/);
   assert.match(route, /data\.platformDomain = platformDomainForCountry\(country\)/);
-  assert.match(route, /data\.platformDomainConfirmedAt = new Date\(\)/);
+  assert.match(route, /if \(confirmRegionAfterSave\) await markPlatformDomainConfirmed\(userId\)/);
 });
 
 test("la ubicación es un paso obligatorio solo para cuentas nuevas sin región confirmada", () => {
-  const route = read("src/app/api/configuration-status/route.ts");
-  assert.match(route, /required: !user\?\.platformDomainConfirmedAt/);
+  assert.match(read("src/app/api/configuration-status/route.ts"), /required: !regionConfirmed/);
 });
 
 test("no hay pantalla bloqueante nueva en el panel", () => {
@@ -53,7 +60,7 @@ test("el asistente inicial pide la ubicación primero a las cuentas nuevas del H
   assert.match(wizard, /setLocationRequired\(data\.locationRequired === true\)/);
   assert.match(wizard, /if \(locationRequired\) return <LocationStep initial=\{savedLocation\} \/>/);
   const me = read("src/app/api/me/route.ts");
-  assert.match(me, /locationRequired: user\.role !== "admin" && !user\.platformDomainConfirmedAt/);
+  assert.match(me, /locationRequired: user\.role !== "admin" && !\(await isPlatformDomainConfirmed\(user\.id\)\)/);
   const step = read("src/components/LocationStep.tsx");
   assert.match(step, /method: "PATCH"/);
   assert.match(step, /country, city: city\.trim\(\), timeZone/);

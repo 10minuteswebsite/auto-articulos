@@ -1,3 +1,4 @@
+import { isPlatformDomainConfirmed } from "@/lib/platform-domain-confirmation";
 import { NextResponse } from "next/server";
 import { BING_RECONNECT_MESSAGE, integrationNeedsBingReconnect } from "@/lib/bing-client-change";
 import { prisma } from "@auto-articulos/db";
@@ -21,6 +22,7 @@ export const revalidate = 0;
 
 export async function GET() {
   const userId = await getCurrentUserId();
+  const regionConfirmed = await isPlatformDomainConfirmed(userId);
   const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, platformDomain: true } });
   const productName = account.platformDomain === "tagcrush" ? "tu plataforma" : "10minutesWebsite";
 
@@ -59,7 +61,6 @@ export async function GET() {
       select: {
         contentLanguage: true,
         country: true,
-        platformDomainConfirmedAt: true,
         city: true,
         timeZone: true,
         articleSignature: true,
@@ -195,7 +196,7 @@ export async function GET() {
       configured: Boolean(user?.country && user?.city && user?.timeZone),
       // Cuentas nuevas del Hub (sin región confirmada): la ubicación es un paso obligatorio, porque de
       // ella salen el servidor (.site/.net) y el país de los artículos. Las cuentas anteriores no cambian.
-      required: !user?.platformDomainConfirmedAt,
+      required: !regionConfirmed,
       section: "platform",
       description: "Tu ciudad, país y zona horaria: con ellos tu día de publicación empieza y termina a medianoche en tu hora, y tu cupo diario se renueva cuando corresponde.",
       actionUrl: "/dashboard/configuracion/cuenta?ubicacion=1#ubicacion",

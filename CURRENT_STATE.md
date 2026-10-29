@@ -798,3 +798,10 @@ Migración `20261029180000_site_article_titles` (solo tablas nuevas): aplicar
 ANTES o junto con el merge. Pruebas: 5 nuevas PASS, tipos limpios. Falla ajena
 y previa: `paidApiGuard` por `blogCoverImage.ts`. NO verificado en producción.
 Rollback: revertir el PR (las tablas nuevas pueden quedarse).
+
+# INCIDENTE 29/10/2026 — PR #708 tumbó el panel (500) — revertido con #709
+
+- Síntoma: tras fusionar #708, `/dashboard`, `/api/me` y `configuration-status` dieron 500 durante varios minutos. Rollback: PR #709; servicio recuperado.
+- Causa (registros de Vercel, 11:04): `PrismaClientKnownRequestError P2022 — The column User.platformDomainConfirmedAt does not exist in the current database`. La columna estaba declarada en `schema.prisma`, así que entraba en TODA consulta de `User`; la base que usa la app no la tenía al desplegar, aunque Milton dice haber ejecutado el SQL (ahora Supabase sí la muestra: se aplicó después o en otro proyecto/esquema; sin confirmar).
+- Corrección (v2): `platformDomainConfirmedAt` YA NO está en `schema.prisma`; se lee/escribe solo con SQL directo y a prueba de fallos (`lib/platform-domain-confirmation.ts`, mismo patrón que `disableIndexing`). Si la columna falta, la app sigue funcionando y simplemente no pregunta la ubicación. La migración `20261029190000` sigue siendo necesaria para que la pregunta funcione.
+- Regla aprendida: NUNCA declarar en `schema.prisma` una columna que la base de producción aún no tiene; y verificar con una consulta a `information_schema` ANTES de fusionar, no solo confiar en «ya la apliqué».

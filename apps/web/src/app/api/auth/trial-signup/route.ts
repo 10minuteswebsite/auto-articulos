@@ -1,3 +1,4 @@
+import { markPlatformDomainConfirmed } from "@/lib/platform-domain-confirmation";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
@@ -101,7 +102,6 @@ export async function POST(request: NextRequest) {
       passwordHash,
       initialPasswordEncrypted,
       platformDomain,
-      platformDomainConfirmedAt: new Date(),
       ...(await newUserDefaultPromptData()),
       isTrialSignup: true,
       trialStartedAt: new Date(),
@@ -109,6 +109,9 @@ export async function POST(request: NextRequest) {
       ...DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS,
     },
   });
+
+  // La región ya se eligió en el formulario: queda confirmada (no se pregunta de nuevo).
+  await markPlatformDomainConfirmed(user.id);
 
   // Derechos por producto de la cuenta nueva (Artículos activo, como hoy).
   await ensureDefaultEntitlements(user.id);
