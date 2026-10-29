@@ -19,7 +19,7 @@ import { getBingSignals } from "@/lib/bing-signals";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 import { describeSocialContentLanguage } from "@/lib/social-language";
-import { isArticleUrlGone } from "@/lib/social-article-url";
+import { inspectArticlePage } from "@/lib/social-article-url";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
@@ -214,7 +214,7 @@ function pathnameOf(url: string): string {
  * descubre temas sin artículo — decisión explícita de Milton: solo prioriza
  * entre lo que ya existe.
  */
-async function selectTrendingArticles(userId: string): Promise<{ candidates: ArticleCandidate[]; totalArticles: number; goneArticles: number }> {
+async function selectTrendingArticles(userId: string): Promise<{ candidates: ArticleCandidate[]; totalArticles: number; goneArticles: number; noImageArticles: number; noImageTitles: string[] }> {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const gsc = await prisma.searchIntegration.findFirst({ where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) } });
   const resolvedGsc = await resolveSearchConsoleForUser(userId, user.selectedSiteDomain ?? "");
@@ -425,15 +425,23 @@ async function selectTrendingArticles(userId: string): Promise<{ candidates: Art
     });
 
   const verified: typeof ranked = [];
-  // Verificar por lotes evita que una URL rota o eliminada llegue a Redes y
-  // limita la concurrencia contra el sitio público de la cuenta. Solo un
-  // 404/410 descarta el artículo; un bloqueo, timeout o error no prueba que
-  // no exista (ver lib/social-article-url.ts).
+  let goneArticles = 0;
+  const noImageTitles: string[] = [];
+  let noImageArticles = 0;
+  // Verificar por lotes evita que una URL rota, eliminada o sin foto llegue a
+  // Redes y limita la concurrencia contra el sitio público de la cuenta. Solo
+  // un 404/410 o una página completa sin og:image descartan el artículo; un
+  // bloqueo, timeout o error no prueba nada (ver lib/social-article-url.ts).
   for (let index = 0; index < ranked.length; index += 8) {
     const batch = ranked.slice(index, index + 8);
-    const gone = await Promise.all(batch.map(({ article }) => isArticleUrlGone(article.articleUrl!)));
+    const states = await Promise.all(batch.map(({ article }) => inspectArticlePage(article.articleUrl!)));
     batch.forEach((candidate, batchIndex) => {
-      if (!gone[batchIndex]) verified.push(candidate);
+      const state = states[batchIndex];
+      if (state === "gone") goneArticles += 1;
+      else if (state === "no-image") {
+        noImageArticles += 1;
+        if (noImageTitles.length < 3) noImageTitles.push(candidate.article.finalTitle || candidate.article.articleUrl || "Sin título");
+      } else verified.push(candidate);
     });
   }
 
@@ -445,7 +453,7 @@ async function selectTrendingArticles(userId: string): Promise<{ candidates: Art
     articleUrl: article.articleUrl,
     searchQueries: queriesByPath.get(pathnameOf(article.articleUrl!)) ?? [],
   }));
-  return { candidates, totalArticles: ranked.length, goneArticles: ranked.length - verified.length };
+  return { candidates, totalArticles: ranked.length, goneArticles, noImageArticles, noImageTitles };
 }
 
 /**
@@ -622,7 +630,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { candidates: trendingCandidates, totalArticles, goneArticles } = await selectTrendingArticles(userId);
+    const { candidates: trendingCandidates, totalArticles, goneArticles, noImageArticles, noImageTitles } = await selectTrendingArticles(userId);
     const candidateMap = new Map<string, ArticleCandidate>();
     for (const article of trendingCandidates) {
       candidateMap.set(article.id, article);
@@ -716,13 +724,19 @@ export async function POST(request: Request) {
       // Tres causas distintas que antes compartían el mismo texto (incidente
       // 29/10/2026): sin artículos, artículos con URL caída (404/410) y
       // artículos ya usados en todas las redes conectadas.
-      console.warn("[social-opportunities/generate] sin candidatos", { userId, totalArticles, goneArticles, pendingCount, requestedNetworks });
+      console.warn("[social-opportunities/generate] sin candidatos", { userId, totalArticles, goneArticles, noImageArticles, pendingCount, requestedNetworks });
+      const noImageNote = noImageArticles > 0
+        ? `${noImageArticles === 1 ? "Un artículo no tiene" : `${noImageArticles} artículos no tienen`} foto de portada (og:image) en su página: ${noImageTitles.map((title) => `«${title}»`).join(", ")}${noImageArticles > noImageTitles.length ? " y otros" : ""}. Las redes no publican sin foto. Agrega la imagen destacada en tu sitio; si está en otro servidor, revisa que ese servidor la publique.`
+        : "";
       const emptyReason =
         totalArticles === 0
           ? "Todavía no tienes artículos publicados con enlace. Publica un artículo y vuelve a intentarlo."
-          : goneArticles === totalArticles
-            ? "Tus artículos publicados no están disponibles en tu sitio ahora mismo (la página responde «no encontrada»). Revisa que sigan publicados."
-            : "Ya generaste propuestas para todos tus artículos disponibles en las redes conectadas. Publica un artículo nuevo para seguir.";
+          : goneArticles + noImageArticles === totalArticles
+            ? [
+                noImageNote,
+                goneArticles > 0 ? "Hay artículos que ya no están disponibles en tu sitio (la página responde «no encontrada»). Revisa que sigan publicados." : "",
+              ].filter(Boolean).join(" ")
+            : `Ya generaste propuestas para todos tus artículos disponibles en las redes conectadas. Publica un artículo nuevo para seguir.${noImageNote ? ` ${noImageNote}` : ""}`;
       return NextResponse.json(
         {
           error:

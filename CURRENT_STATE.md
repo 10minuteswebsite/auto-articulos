@@ -738,3 +738,11 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Corrección: `lib/social-article-url.ts` — solo un 404/410 descarta un artículo; ya no depende del dominio guardado de la cuenta; no consulta direcciones internas. El mensaje vacío se separa en: sin artículos / URL caída / ya usados en todas las redes. Se registra un `console.warn` con los conteos.
 - Prueba: `src/lib/social-article-url.test.ts` (5 pruebas, pasan). `social-generate-lock.test.ts` ya fallaba en main antes de este cambio (regex demasiado amplia sobre `status: { not: "skipped" }` de la selección diaria); no se tocó.
 - Pendiente: deployment, diagnóstico de lectura con realestatemov/Lorena en producción y verificación de una generación real.
+
+# Redes — error de foto explicado y revisión previa — 2026-10-29
+
+- Causa (realestatemov, 9 publicaciones sin publicar): 3 artículos de movrealestate.com (servidor distinto) no declaran `og:image` en su página; el worker no publica sin foto. El mensaje de error no nombraba el artículo ni qué arreglar.
+- Corrección: `friendlyPublishError(raw, platform, { articleTitle, articleUrl })` — para falta de foto nombra el artículo y el sitio y dice qué hacer (imagen destacada, revisar el servidor, Reintentar). Contexto pasado desde el worker (`socialPublish.ts`) y desde Historial.
+- Revisión previa: `inspectArticlePage()` (`lib/social-article-url.ts`) descarta del listado los artículos con 404/410 o con página completa sin `og:image`; 403/5xx/timeout/página a medias no descartan. El aviso de lista vacía distingue: sin artículos / URL caída / sin foto / ya usados.
+- No cambiado a propósito: el mensaje «proceso interrumpido» de `cleanup.ts` (la causa real de un proceso muerto es desconocida) y el hecho de que una propuesta con error cuenta como «usada» (decisión de Milton pendiente).
+- Pruebas: 26 pasan (`social-article-url`, `friendly-publish-error`, `social-language`). Pendiente: CI de Vercel, deployment y verificación en producción con realestatemov.
