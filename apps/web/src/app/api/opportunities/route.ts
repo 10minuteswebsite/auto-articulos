@@ -20,7 +20,7 @@ import {
   writeOpportunityEvidenceCache,
 } from "@/lib/opportunity-evidence-cache";
 import { findPublishedTitleMatch, platformProductNameOrNeutral } from "@auto-articulos/shared";
-import { loadPublishedTitles } from "@/lib/published-titles";
+import { ensureSiteTitlesSeeded, loadPublishedTitles } from "@/lib/published-titles";
 
 // El análisis puede consultar varias fuentes y procesar hasta 20 lotes de
 // evidencia contra el modelo. Sin este límite explícito Vercel aplica el
@@ -332,6 +332,15 @@ export async function POST(request: Request) {
       }
     }
     const existing = await existingPromise;
+    // Títulos que el sitio ya tiene (sitemap + publicados), guardados en
+    // Supabase: el llenado desde el sitemap ocurre una sola vez por sitio y
+    // después esta lectura es solo base de datos, sin salir a 10minutesWebsite.
+    await ensureSiteTitlesSeeded(userId, selectedSiteDomain);
+    const siteTitleRows = await prisma.siteArticleTitle.findMany({
+      where: { userId, ...(selectedSiteDomain ? { siteDomain: selectedSiteDomain } : {}) },
+      select: { title: true },
+      take: 3000,
+    }).catch(() => [] as Array<{ title: string }>);
     // Ejemplos reales de lo que YA se publicó en cada categoría (pedido de
     // Milton, 2/9/2026, caso Guillermo Martínez): el nombre de la categoría
     // sola no basta para que la IA sepa qué tema cubre de verdad. Con hasta
@@ -410,9 +419,12 @@ export async function POST(request: Request) {
       currentRows,
       previousRows,
       countryRows,
-      existingTitles: existing.flatMap((title) =>
-        title.finalTitle ? [title.text, title.finalTitle] : [title.text],
-      ),
+      existingTitles: [
+        ...existing.flatMap((title) =>
+          title.finalTitle ? [title.text, title.finalTitle] : [title.text],
+        ),
+        ...siteTitleRows.map((row) => row.title),
+      ],
       googleAnalyticsSummary: summarizeGoogleAnalyticsSignals(googleAnalyticsSignals),
       bingSummary: summarizeBingSignals(bingSignals),
       clientLocations,

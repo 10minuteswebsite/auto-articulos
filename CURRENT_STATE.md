@@ -765,3 +765,19 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Decisión de Milton pendiente (no corregido): una propuesta con estado `error` cuenta como «usada» para ese artículo y esa red y no se vuelve a ofrecer.
 - Fuera de alcance: el texto generado a veces inventa anécdotas (fórmula «Historia personal»).
 - Lorena no se diagnosticó.
+
+## TITULOS-DEL-SITIO-EN-SUPABASE-20261029 — preparado, pendiente de migración y publicación
+
+Pedido de Milton tras aviso de 10minutesWebsite (lecturas excesivas del listado).
+Hallazgo: el análisis de Oportunidades NO toca 10MWS; la carga venía del worker
+de publicación (login por artículo, listado cada 1,5 s hasta 90 s, hasta 3
+intentos, hasta 40 lanes). Cambios: (1) tablas `SiteArticleTitle` y
+`SiteTitleSeed` (solo título y enlace; llenado ÚNICO desde el sitemap de
+SearchIntegration/Composio, sin sitemap no se llena; aditivo con cada
+publicación); (2) la guardia anti-canibalización (web, Publicar y worker) y el
+análisis de Oportunidades usan esa tabla además de `Title`; (3) espera
+progresiva en la verificación posterior al guardado (~8 cargas en vez de ~60).
+Migración `20261029180000_site_article_titles` (solo tablas nuevas): aplicar
+ANTES o junto con el merge. Pruebas: 5 nuevas PASS, tipos limpios. Falla ajena
+y previa: `paidApiGuard` por `blogCoverImage.ts`. NO verificado en producción.
+Rollback: revertir el PR (las tablas nuevas pueden quedarse).

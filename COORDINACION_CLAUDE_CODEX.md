@@ -13081,3 +13081,6 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-10-29: Redes, mensajes de foto claros y revisión previa de foto (sin migración). Liberación al verificar en producción.
 
 - **Capitán de migración:** liberado por Claude — 2026-10-29: Redes (PR #698 y #703), sin migración.
+
+
+- **Capitán de migración:** Claude — reclamo 2026-10-29: títulos del sitio en Supabase (sitemap, una vez, aditivo) + menos lecturas del listado de 10MWS. Migración `20261029180000_site_article_titles`. PR abierto, sin fusionar hasta aplicar la migración.
