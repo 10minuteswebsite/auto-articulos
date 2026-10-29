@@ -853,3 +853,11 @@ Rollback: revertir el PR (las tablas nuevas pueden quedarse).
 - Sin migración ni cambios de datos. Task archivado; reabrir solo con un caso
   nuevo.
 
+
+# Cierre — altas del Hub: ubicación, servidor y prompt por defecto — 2026-10-29
+
+- En producción: PR #711 (06e7564a) tras el incidente de #708/#709. La región confirmada se lee con SQL directo y a prueba de fallos; el prompt «GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION» se guarda en las cuatro altas.
+- Migración `20261029190000` aplicada por Milton en el proyecto Supabase `uqqclaezxagukoyiiiol` (base nativa de producción, según HANDOFF.md) a las ~17:30. Antes de eso la consulta a `information_schema` devolvía 0 filas (la primera respuesta «sí existen» no coincidía). Tras aplicarla, 3 llamadas a `/api/me` (17:31) no generaron el aviso «column does not exist» en los registros de Vercel.
+- NO probado: una cuenta nueva real del Hub viendo «¿Dónde estás?» y quedando en `.site`/`.net` según su país. Pendiente de la primera alta real.
+- Las cuentas del Hub ya existentes en Europa siguen en `.net` (no hay forma de saberlo).
+- El traspaso «prompts con país destino» (regla sin aprobar) sigue sin implementar; ahora cuenta con el país obligatorio de las cuentas nuevas.
