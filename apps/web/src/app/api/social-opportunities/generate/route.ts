@@ -704,7 +704,9 @@ export async function POST(request: Request) {
     // recogiendo el mismo artículo top-1 para ambas — nada lo impedía antes.
     const todayStart = startOfSocialDay();
     const todaysOpportunities = await prisma.socialOpportunity.findMany({
-      where: { userId, status: { not: "skipped" }, createdAt: { gte: todayStart } },
+      // Los descartes también cuentan como memoria editorial del día: no se
+      // debe volver a ofrecer automáticamente el mismo artículo/plataforma.
+      where: { userId, createdAt: { gte: todayStart } },
       select: { titleId: true, articleUrl: true },
     });
     const usedTodayIds = new Set(todaysOpportunities.map((o) => o.titleId).filter((id): id is string => Boolean(id)));

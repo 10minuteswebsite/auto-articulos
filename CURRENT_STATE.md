@@ -1,3 +1,12 @@
+## MCP-USE-CASES-20261029 — preparado, pendiente de publicación
+
+- Añadidas `editar_propuesta_social` y `cambiar_preferencias_contenido`; no se
+  modificaron auth, entitlement HUB, OAuth ni publicación existente.
+- Typecheck de `apps/web` pasa. La suite completa conserva un fallo heredado en
+  `social-generate-lock.test.ts` contra una forma antigua de la ruta.
+- Falta push, deployment READY y smoke autenticado de las nuevas tools antes de
+  cerrar el checkpoint.
+
 ## HISTORIAL-INDEXACION-SIMPLE-20261029 — publicado y verificado en producción
 
 Código `22cb96b9` (PR #694) en `main`, Vercel web y auto-articulos-web success.

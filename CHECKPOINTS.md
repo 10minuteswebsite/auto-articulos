@@ -2,6 +2,16 @@
 
 - Task `MCP-ORIGIN-403-20261027`; el 403 de MUSE (Cloudflare 1010) quedó resuelto por otra instancia, verificado en producción. Sin commits pendientes de esta sesión.
 
+## MCP-USE-CASES-20261029 — antes de publicación
+
+- Punto cero: `origin/main` `9a685bb9`; smoke público OK en ambos hosts y MCP
+  devuelve 401 sin credencial.
+- Cambio: dos tools nuevas, sin migración, reutilizando `PATCH /api/me` y
+  `PUT /api/social-opportunities`.
+- Typecheck OK; suite bloqueada por aserción heredada de
+  `social-generate-lock.test.ts`. No cerrar hasta resolver/registrar y verificar
+  las nuevas tools autenticadas en producción.
+
 ## HISTORIAL-INDEXACION-SIMPLE-20261029 — publicado y verificado en producción
 
 Código `22cb96b9` (PR #694) en `main`, Vercel web y auto-articulos-web success.

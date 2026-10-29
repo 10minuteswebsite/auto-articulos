@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { startOfSocialDay } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
-import { GET as socialHistoryRoute, DELETE as borrarSocialRoute } from "@/app/api/social-opportunities/route";
+import { GET as socialHistoryRoute, DELETE as borrarSocialRoute, PUT as editarSocialRoute } from "@/app/api/social-opportunities/route";
 import { GET as redesConectadasRoute, POST as generarSocialRoute } from "@/app/api/social-opportunities/generate/route";
 import { POST as cancelarSocialRoute } from "@/app/api/social-opportunities/cancel/route";
 import { POST as publicarSocialRoute } from "@/app/api/social-opportunities/publish/route";
@@ -39,6 +39,43 @@ function snippet(text: string | undefined, max = 140) {
 }
 
 export const SOCIAL_ACTION_TOOLS: ToolDef[] = [
+  {
+    name: "editar_propuesta_social",
+    title: "Editar una propuesta social",
+    description:
+      "Cambia el texto de una propuesta social PENDIENTE sin publicarla. Requiere vista previa y confirmación; no permite modificar propuestas publicadas, en error o ya canceladas.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "ID devuelto por listar_propuestas_sociales." },
+        texto: { type: "string", description: "Nuevo texto de la propuesta." },
+        confirmar: { type: "boolean", description: "false para previsualizar; true con el comprobante." },
+        confirmacion: { type: "string", description: "Comprobante de la vista previa." },
+      },
+      required: ["id", "texto"],
+      additionalProperties: false,
+    },
+    requiredScope: "oportunidades:publicar",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    handler: async (args) => {
+      const userId = await getCurrentUserId();
+      const id = typeof args.id === "string" ? args.id.trim() : "";
+      const texto = typeof args.texto === "string" ? args.texto.trim() : "";
+      if (!id || !texto) return toolText("Debes indicar el id y un texto no vacío.", true);
+      const proposals = await loadProposals();
+      if (!proposals.ok) return toolText(proposals.error, true);
+      const item = proposals.items.find((candidate) => candidate.id === id);
+      if (!item) return toolText("No encontré esa propuesta dentro de tu cuenta.", true);
+      if (item.status !== "pending") return toolText(`Solo se pueden editar propuestas pendientes; esta está en estado «${item.status}».`, true);
+      const operation = { id, texto };
+      const confirmation = await confirmOrPreview({ userId, toolName: "editar_propuesta_social", operation, confirmar: args.confirmar, confirmacion: args.confirmacion, preview: `Sin guardar todavía: cambiaría el texto de ${networkLabel(String(item.platform))} · “${item.articleTitle ?? "sin título"}" a:\n${texto}` });
+      if (!confirmation.confirmed) return toolText(confirmation.text, args.confirmar === true);
+      const response = await editarSocialRoute(jsonRequest("/api/social-opportunities", { id, suggestedText: texto }) as unknown as NextRequest);
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      return response.ok ? toolText("La propuesta social fue actualizada. Sigue pendiente y no se ha publicado.") : toolText(String(data.error ?? "No se pudo actualizar la propuesta."), true);
+    },
+  },
+
   {
     name: "ver_redes_sociales",
     title: "Ver redes y blogs",

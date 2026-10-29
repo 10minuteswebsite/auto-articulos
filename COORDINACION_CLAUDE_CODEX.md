@@ -1,3 +1,10 @@
+## MCP-USE-CASES-20261029 — Codex — preparación
+
+Trabajo en `main`, sobre `origin/main` `9a685bb9`. Cambio preparado en catálogo
+MCP y documentación; no se toca OAuth, auth, HUB ni conexiones. Falta cerrar la
+aserción heredada de `social-generate-lock` y ejecutar smoke autenticado antes
+de publicar.
+
 ## MCP-AUTH-FIX-20261027 — Codex — CIERRE
 
 Capitán de migración liberó el lote: Codex. Código620e0cc9 publicado,

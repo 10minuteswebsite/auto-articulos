@@ -1,5 +1,12 @@
 # Inventario de conversaciones
 
+## MCP-USE-CASES-20261029
+
+- Estado: implementación local preparada; no publicada.
+- Alcance: edición social pendiente y preferencias no secretas, sin variables
+  nuevas ni cambios de permisos.
+- Pendiente: contrato de prueba heredado y smoke autenticado postdeploy.
+
 ## MCP-ORIGIN-403-20261027 — cerrado — Claude
 
 Diagnóstico del 403 de Meta MUSE (Patricia Remuzgo) en `/api/mcp`. Causa real: Cloudflare 1010 (Browser Integrity Check), resuelta por otra instancia y verificada en producción el 29/10 (403/1010 → 401). Aporte de esta sesión: PR #686 (Origin ajeno solo con Bearer; conservado, no necesario para este caso) y documentación #687/#688/#697. Capitanía liberada, rama remota eliminada, sin reservas activas. Falta solo que Patricia confirme con MUSE.
