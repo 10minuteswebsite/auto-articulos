@@ -1,3 +1,7 @@
+## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — CERRADO
+
+PR #710 en producción y verificado a la vista con la cuenta del cliente 13. Abierto sin resolver: si de verdad le faltan créditos de imagen (el dato `false` lo puso el worker el 27/10) y la carga lenta (~10 s) del Inicio. Capitanía liberada.
+
 ## INICIO-AVISO-CREDITOS-IMAGEN-20261029 — PR #710 abierto, sin fusionar
 
 El Inicio mostrará en rojo «Sin créditos de imagen» cuando `hasImageCredits=false`. Sin migración. Verificación en producción PENDIENTE (requiere fusionar el PR y mirar el Inicio con la cuenta afectada). Rollback: revertir #710. Capitanía reclamada por Claude hasta verificar.
