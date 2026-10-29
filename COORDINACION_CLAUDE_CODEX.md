@@ -13027,3 +13027,5 @@ Capitanía liberada. Responsable: Claude.
 
 **Cierre final (2026-10-29):** Confirmación de Milton (2026-10-29): la reparación quedó correcta tras revisión manual del artículo 104488. Estado: CERRADO.
 ARCHIVADA. Responsable: Claude.
+
+- **Capitán de migración:** Claude — indexación simple en Historial (solo UI, sin migración), 2026-10-29. Liberado al fusionar.

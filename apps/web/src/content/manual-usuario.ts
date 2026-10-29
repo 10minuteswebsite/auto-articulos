@@ -243,7 +243,7 @@ Consejo: edita el texto si necesitas adaptar el tono a tu marca antes de aprobar
 
 Ruta: /dashboard/historial
 
-Historial conserva las ejecuciones anteriores y el estado de los títulos. Puedes revisar cuáles se publicaron, cuáles tuvieron error y los mensajes asociados. También muestra información disponible sobre publicaciones en redes e intentos de indexación. Bajo cada artículo ves el estado del sitemap: «se enviará a Google en el próximo envío diario» mientras espera, y «✓ Sitemap enviado a Google» con la fecha cuando ya salió; esa línea se actualiza sola, sin recargar la página.
+Historial conserva las ejecuciones anteriores y el estado de los títulos. Puedes revisar cuáles se publicaron, cuáles tuvieron error y los mensajes asociados. También muestra información disponible sobre publicaciones en redes e intentos de indexación. Bajo cada artículo ves dos líneas. Google: «Sitemap enviado a Google» en verde, o «Sitemap por enviar a Google» en gris. Google permite un solo envío al día; la plataforma lo hace automáticamente cuando corresponde, y si pulsas «Enviar ahora» cuenta como el envío de hoy y todos los artículos de todos tus historiales pasan a verde. Bing: «Artículo enviado a Bing» en verde, o «Artículo por enviar a Bing» en gris con su botón «Enviar ahora».
 
 En articulos.lasolucionweb.com (.com o .net) el Historial muestra solo artículos y en redes.lasolucionweb.com (.com o .net) solo publicaciones en redes; en seototal muestra ambos.
 
