@@ -13073,3 +13073,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-10-29: Redes, mensajes de foto claros y revisión previa de foto (sin migración). Liberación al verificar en producción.
 
 - **Capitán de migración:** liberado por Claude — 2026-10-29: Redes (PR #698 y #703), sin migración.
+
+- **Capitán de migración:** liberado — Claude, 2026-10-29 (Redes #698 y #703 en producción; sin migración).
