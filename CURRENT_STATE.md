@@ -1,3 +1,10 @@
+## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — CERRADO
+
+Resuelto y confirmado por Milton con la cuenta afectada (2026-10-29). Código
+`2f2b862d` (PR #701) en `main`. Hueco abierto y sin prioridad: la tarjeta de
+Search Console en Conexiones solo refleja Composio, no la conexión propia de
+Google guardada. Archivado; no reabrir sin un caso nuevo.
+
 ## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — publicado; verificación funcional pendiente
 
 Código `2f2b862d` (PR #701) en `main`, Vercel web y auto-articulos-web success.

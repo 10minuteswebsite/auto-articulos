@@ -1,3 +1,7 @@
+## Checkpoint — Oportunidades sin evidencia — CERRADO 2026-10-29
+
+- Task `OPORTUNIDADES-SIN-EVIDENCIA-20261029`: resuelto y confirmado por Milton en la cuenta afectada. Código `2f2b862d` en `main`. Archivado; capitanía liberada.
+
 ## Checkpoint — Oportunidades sin evidencia — 2026-10-29
 
 - Task `OPORTUNIDADES-SIN-EVIDENCIA-20261029`; código `2f2b862d` en `main`, desplegado. Pendiente: probar «Analizar» con una cuenta solo-Composio. Capitanía liberada.
