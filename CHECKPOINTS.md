@@ -653,3 +653,8 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Punto cero final: `main` en `3391990b`; sin migración ni cambios de datos.
 - Capitanía liberada. Reabrir únicamente con un caso nuevo.
 
+
+## Checkpoint — Títulos del sitio en Supabase — 2026-10-29
+
+- Punto cero: `main` con PR #706 (`90aaf0a6`). Tablas `SiteArticleTitle` y `SiteTitleSeed` creadas por Milton en Supabase; despliegue web y worker en success.
+- Siguiente punto de partida: probar con una cuenta con sitemap (Oportunidades → `SiteTitleSeed` «done») y medir cargas del listado por publicación.

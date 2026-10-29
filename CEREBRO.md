@@ -394,3 +394,14 @@ encontrar un candidato válido; así la protección no bloquea la generación.
 ## Entrada lenta tras el HUB — causa raíz (2026-10-29)
 
 `getCurrentUserId` revalidaba el acceso con el Hub en cada petición protegida; la caché de 60 s no evitaba consulta, transacción ni UPDATE, y el `fetch` no tenía timeout. El dashboard dispara ~12 APIs a la vez (`/api/me` ×5), con `connection_limit=1`, así que se encolaban hasta 13 s. Regla: una decisión del Hub vigente no toca la base; las revalidaciones concurrentes se comparten; todo `fetch` externo en la ruta caliente lleva timeout.
+
+
+## Títulos del sitio en la base propia (2026-10-29)
+
+Decisión: saber qué artículos ya existe en el sitio de un usuario es un dato
+propio (`SiteArticleTitle`: solo título y enlace), no una consulta a
+10minutesWebsite. Se llena una vez desde el sitemap y crece con cada
+publicación; si no hay sitemap, no se llena y nada se bloquea (peor caso:
+algún título repetido). Causa raíz de la carga hacia 10MWS: no era el análisis
+sino la verificación posterior al guardado (listado cada 1,5 s). Regla: toda
+lectura nueva de estas tablas debe tolerar fallo y no bloquear publicaciones.
