@@ -5723,3 +5723,9 @@ valores — 2026-10-19").
 - Commits: `5a3a4556` y `f9b5e529`, publicados en `main`.
 - Migración: run GitHub Actions `40423874512`, `Success`, `safe_all_social_publishing_defaults=true`.
 - Verificación pública: `articulos.lasolucionweb.net/login` y `redes.lasolucionweb.net/login` respondieron 200.
+
+## Versión — No indexar en 10MWS — 2026-10-29
+
+- Commits: `4dffbef5`, `2bb897e1`, `04b7ce27`; fusionados en `main` como `38621d27` (PR #691). Convive con `f41b1e9e` (Oportunidades hereda la preferencia guardada).
+- Despliegue: worker toma `main` en cada corrida; verificado con `worker-test.yml` (run `40871774772`) y lote real de Inés García.
+- Rollback: revertir `38621d27`. Sin migraciones.

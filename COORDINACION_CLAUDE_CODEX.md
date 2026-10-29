@@ -13009,3 +13009,18 @@ responda en este documento. Verificación en vivo pendiente (`worker-test.yml`,
 cuenta de Lorena), por un solo programador.
 
 **Liderazgo (orden de Milton, 2026-10-29):** Claude lidera esta conciliación, pero toma en cuenta lo ya hecho por el otro programador (`f41b1e9e` y anteriores) y decide de acuerdo con él. Se conserva su trabajo en `main`; Claude solo suma lo que falte.
+
+## Claude - CHECK DE NO INDEXAR (10MWS) — CIERRE — 2026-10-29
+
+Conciliación entre programadores: `f41b1e9e` (web, Oportunidades) y el PR #691
+(worker) se complementan; el otro programador confirmó que no tiene más cambios
+en el worker. Hallazgo decisivo de la prueba en vivo con Inés García: el worker
+de `main` no lograba desmarcar «Activate Indexing» (aviso «sigue activada») y
+publicaba indexable (artículo 104484). Se reescribió `applyIndexingPreference`
+(tres intentos verificados + diagnóstico) y, si no se logra, el artículo no se
+guarda y el usuario lee el motivo en claro (`IndexingNotAppliedError`).
+Verificación en producción tras fusionar (`38621d27`): lote nuevo, artículo
+104488, interruptor en No y `noindex,nofollow` público. Pendientes: 104484
+indexable (decisión de Milton); BLOG IA (Lorena) no envía el campo de
+indexación al blog; pruebas unitarias del nuevo error no escritas.
+Capitanía liberada. Responsable: Claude.
