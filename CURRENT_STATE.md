@@ -766,3 +766,9 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Migración `20261029190000_platform_domain_confirmed_default_prompt`: agrega la columna, marca TODAS las cuentas existentes como confirmadas (no se les pregunta nada) y asigna el prompt a las cuentas creadas desde el 19/10/2026 19:00 UTC con estándar. Limitación: no distingue a quien eligió el estándar a propósito después de esa fecha.
 - ORDEN OBLIGATORIO: aplicar la migración en producción ANTES de fusionar (incidente del 16/9: el build no corre `migrate deploy`; sin la columna `/dashboard` da 500).
 - Pendiente: PR, migración, CI, fusión y verificación con una cuenta nueva del Hub. Las cuentas del Hub ya existentes en Europa siguen en `.net`.
+
+# Prompts de artículos sin país destino — traspaso asumido — 2026-10-29
+
+- Origen: traspaso de otro programador (archivado por Milton); solo diagnóstico, sin código. Responsable ahora: Claude (esta sesión).
+- Verificado en código: el prompt del worker usa solo `targetLanguage` (`generateCustomArticle.ts:113`); `describeContentLanguage` descarta la región; `User.country` no llega al prompt.
+- Pendiente de Milton: aprobar la regla y la fuente de país antes de implementar. Sin implementar. Las cuentas del Hub no traen país.
