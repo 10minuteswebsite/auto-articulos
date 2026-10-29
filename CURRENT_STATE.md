@@ -770,6 +770,19 @@ El primer comando de Vercel se ejecutó desde un checkout sin vínculo local y c
 - Fuera de alcance: el texto generado a veces inventa anécdotas (fórmula «Historia personal»).
 - Lorena no se diagnosticó.
 
+# Altas desde el Hub: servidor y prompt por defecto — 2026-10-29
+
+- Hallazgo: el Hub (`auth/hub` y `integrations/hub/access-sync`) no manda continente; esas cuentas quedaban siempre en `.net`. Ninguna alta (Hub, registro de prueba, administración) guardaba `defaultPromptId`: el lote del 19/10 solo cubrió cuentas existentes ese día.
+- Cambio (código local, sin fusionar): campo `User.platformDomainConfirmedAt`. La ubicación es el PRIMER paso del asistente inicial (`LocationStep`, antes del Paso 1) y reutiliza el mismo guardado del cartel existente «Una sola vez · Tu ubicación» (país, ciudad y zona horaria, `PATCH /api/me`): para cuentas SIN región confirmada (altas nuevas del Hub) pasa a ser paso obligatorio (`configuration-status`, `required`), y al guardarlo el país decide el servidor (Europa -> `site`, resto -> `net`, `platformDomainForCountry`) y marca la región como confirmada. No cambia el servidor de cuentas ya confirmadas. Las cuatro altas guardan «GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION» (`lib/default-prompt.ts`). El país guardado es además la fuente para el prompt de artículos por país (traspaso aparte).
+- Migración `20261029190000_platform_domain_confirmed_default_prompt`: agrega la columna, marca TODAS las cuentas existentes como confirmadas (no se les pregunta nada) y asigna el prompt a las cuentas creadas desde el 19/10/2026 19:00 UTC con estándar. Limitación: no distingue a quien eligió el estándar a propósito después de esa fecha.
+- ORDEN OBLIGATORIO: aplicar la migración en producción ANTES de fusionar (incidente del 16/9: el build no corre `migrate deploy`; sin la columna `/dashboard` da 500).
+- Pendiente: PR, migración, CI, fusión y verificación con una cuenta nueva del Hub. Las cuentas del Hub ya existentes en Europa siguen en `.net`.
+
+# Prompts de artículos sin país destino — traspaso asumido — 2026-10-29
+
+- Origen: traspaso de otro programador (archivado por Milton); solo diagnóstico, sin código. Responsable ahora: Claude (esta sesión).
+- Verificado en código: el prompt del worker usa solo `targetLanguage` (`generateCustomArticle.ts:113`); `describeContentLanguage` descarta la región; `User.country` no llega al prompt.
+- Pendiente de Milton: aprobar la regla y la fuente de país antes de implementar. Sin implementar. Las cuentas del Hub no traen país.
 ## TITULOS-DEL-SITIO-EN-SUPABASE-20261029 — preparado, pendiente de migración y publicación
 
 Pedido de Milton tras aviso de 10minutesWebsite (lecturas excesivas del listado).

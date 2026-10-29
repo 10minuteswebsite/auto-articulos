@@ -6,6 +6,7 @@ import { createHubSessionContextToken, createSessionToken, HUB_SESSION_CONTEXT_C
 import { applyCookie, cookieEnvForHost } from "@/lib/shared-cookies";
 import { syncLocalProductEntitlement } from "@/lib/hub-sync";
 import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
+import { newUserDefaultPromptData } from "@/lib/default-prompt";
 
 export const runtime = "nodejs";
 
@@ -73,6 +74,7 @@ export async function GET(request: NextRequest) {
         hubSyncedAt: new Date(),
         role: launch.platform_role === "admin" ? "admin" : "user",
         trialUnlocked: true,
+        ...(await newUserDefaultPromptData()),
         ...DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS,
       },
     });
