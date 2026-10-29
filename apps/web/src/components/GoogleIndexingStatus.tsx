@@ -12,15 +12,6 @@ import type { TitleRow } from "@/types/dashboard";
 // muestran los estados POSITIVOS confirmados (✓ enviado / ✓ indexado / ✓
 // enviado a Bing) y errores reales; el silencio es el estado normal de
 // "todavía no, pero va a pasar".
-function fechaCorta(valor: string | Date) {
-  return new Date(valor).toLocaleString("es-US", {
-    day: "numeric",
-    month: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
 export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
   // Leer siempre las props actuales. El estado se actualiza después de
   // "Comprobar indexación" y una copia inicial con useState dejaba visible
