@@ -5775,6 +5775,16 @@ valores — 2026-10-19").
   aparece una regresión nueva y reproducible.
 
 
+## Versión — REDES-NO-ARTICULOS-FALSO-20261029
+
+- `1bbf65e5` (#698): solo un 404/410 descarta un artículo; sin dependencia de `selectedSiteDomain`; mensaje de lista vacía separado.
+- `0d2ffc45` (#703): revisión previa de `og:image` y errores de foto que nombran el artículo (web + worker).
+- `e26a3e32` (#704) y `b46c0f1c` (#718): documentación. Sin migración. Rollback: revertir #698/#703.
+
+## Versión — ALTAS-HUB-UBICACION-20261029
+
+- `06e7564a` (#711): ubicación como primer paso del asistente para cuentas nuevas del Hub; el país asigna `.site`/`.net`; las cuatro altas guardan el prompt «GENERADOR DE ARTÍCULOS PROBLEMA SOLUCION».
+- Incidente: `9b3c63f7` (#708) → 500; revertido por #709. Migración `20261029190000` aplicada a mano (el flujo `migrate.yml` no pudo editarse: falta el permiso `workflow`). Rollback: revertir #711; la columna sobrante es inocua.
 ## TITULOS-DEL-SITIO-EN-SUPABASE-20261029
 
 PR #706, merge `90aaf0a6` en `main`, Vercel READY. Migración
