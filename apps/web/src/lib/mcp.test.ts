@@ -19,6 +19,7 @@ test("MCP prompts are named, unique and expose the expected workflows", () => {
   const prompts = listPromptsPayload();
   assert.equal(new Set(prompts.map((prompt) => prompt.name)).size, PROMPTS.length);
   assert.deepEqual(prompts.map((prompt) => prompt.name), [
+    "menu",
     "empezar",
     "publicar_contenido",
     "programar_publicaciones",

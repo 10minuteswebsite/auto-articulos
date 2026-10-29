@@ -1,12 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 import { describeSocialContentLanguage } from "./social-language";
 
 describe("social content language", () => {
-  it.each(["en", "en_VI", "en-US", " EN_vi "])("recognizes English code %s", (code) => {
-    expect(describeSocialContentLanguage(code)).toBe("inglés");
-  });
+  for (const code of ["en", "en_VI", "en-US", " EN_vi "]) {
+    it(`recognizes English code ${code}`, () => {
+      assert.equal(describeSocialContentLanguage(code), "inglés");
+    });
+  }
 
-  it.each(["es", "es_ES", "fr_FR", ""])("keeps non-English code %s in the default language", (code) => {
-    expect(describeSocialContentLanguage(code)).toBe("español");
-  });
+  for (const code of ["es", "es_ES", "fr_FR", ""]) {
+    it(`keeps non-English code ${code} in the default language`, () => {
+      assert.equal(describeSocialContentLanguage(code), "español");
+    });
+  }
 });

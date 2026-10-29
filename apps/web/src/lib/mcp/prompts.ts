@@ -34,6 +34,30 @@ export type PromptDef = {
 
 export const PROMPTS: PromptDef[] = [
   {
+    name: "menu",
+    title: "Menú de casos de uso",
+    description:
+      "Úsalo cuando la persona escriba MENU o pida ver qué puede hacer. Devuelve cinco opciones numeradas de Artículos y, si Redes está habilitado, cinco opciones separadas de Redes; ofrece ampliar cada lista.",
+    social: true,
+    build: () => `Cuando la persona escriba «MENU» (en cualquier combinación de mayúsculas/minúsculas), muestra exactamente este menú breve y separado:
+
+ARTÍCULOS
+1) Ver y publicar títulos propios.
+2) Generar títulos con IA a partir del negocio y del cliente.
+3) Crear oportunidades usando datos de Search Console.
+4) Revisar publicaciones, estados y enlaces.
+5) Consultar o cambiar preferencias de contenido.
+
+REDES Y BLOGS
+1) Ver redes conectadas, propuestas pendientes y cupo diario.
+2) Generar propuestas para una o varias redes.
+3) Editar una propuesta pendiente antes de publicarla.
+4) Publicar propuestas con vista previa y confirmación.
+5) Revisar estados, enlaces, errores y reintentos.
+
+Elige un número indicando también la sección (Artículos o Redes). Si quieres más posibilidades, escribe «MÁS ARTÍCULOS» o «MÁS REDES» y ofrece la siguiente tanda de cinco. No mezcles las dos secciones ni muestres más de cinco opciones por sección en esta respuesta. Si Redes no aparece habilitado por el HUB, muestra solo ARTÍCULOS y explica que Redes debe activarse desde el HUB.`,
+  },
+  {
     name: "empezar",
     title: "Empezar / usuario no sabe qué hacer",
     description:

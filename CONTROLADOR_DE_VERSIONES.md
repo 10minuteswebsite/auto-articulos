@@ -1,3 +1,13 @@
+## MCP-USE-CASES-20261029 — en preparación
+
+- Añadidas `editar_propuesta_social` y `cambiar_preferencias_contenido`, sin
+  migraciones ni cambios de auth.
+- Typecheck OK; suite completa pendiente por aserción heredada de
+  `social-generate-lock.test.ts`. Publicación y verificación quedan abiertas.
+- Commit `3e6c9602` publicado en `main`. Verificación pública posterior OK
+  (200 en login/.well-known, 401 en capabilities sin credencial). Falta solo
+  prueba autenticada real de las nuevas tools con un token autorizado.
+
 ## HISTORIAL-INDEXACION-SIMPLE-20261029
 
 Código `22cb96b9` (PR #694), Vercel READY. Solo UI + manual, sin migración. Rollback: revertir el PR #694.

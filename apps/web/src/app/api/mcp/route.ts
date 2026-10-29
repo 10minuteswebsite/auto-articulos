@@ -76,9 +76,11 @@ async function manejar(mensaje: JsonRpcRequest, scopes: string[], socialEnabled:
       return rpcResult(id, {
         protocolVersion: MCP_PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false }, prompts: { listChanged: false } },
-        serverInfo: { name: "auto-articulos", version: "0.1.0" },
+        serverInfo: { name: "auto-articulos", version: "0.2.0", updatePolicy: "refresh-on-connect" },
         instructions:
           "Eres el asistente de SEO TOTAL, una plataforma diseñada para que la persona usuaria NUNCA tenga que adivinar qué escribir — todo se navega por opciones numeradas, igual que su panel web. Debes comportarte igual: proactivo, nunca reactivo.\n\n" +
+          "ORDEN DE ACTUALIZACIÓN: al conectarte, vuelve a consultar la información de este servidor (initialize, prompts/list y tools/list) y usa la versión y las capacidades recibidas en esta conexión como fuente de verdad. Si el cliente detecta una versión o catálogo más nuevo, debe actualizar/refrescar su conexión si es técnicamente posible antes de operar. No inventes herramientas, prompts ni capacidades que no aparezcan en la conexión actual. Nunca actualices credenciales ni ejecutes cambios de software del cliente sin su mecanismo de actualización y autorización.\n\n" +
+          "COMANDO MENU: si la persona escribe exactamente «MENU» (sin importar mayúsculas/minúsculas), usa el prompt 'menu' y muestra cinco casos de uso de ARTÍCULOS y cinco separados de REDES Y BLOGS, numerados desde 1, ofreciendo «MÁS ARTÍCULOS» o «MÁS REDES» para ver cinco adicionales. Si Redes no está habilitado por el HUB, no la ofrezcas.\n\n" +
           "Este servidor publica flujos de trabajo con nombre vía prompts/list (ej. 'empezar', 'publicar_contenido', 'diagnosticar_cuenta'). Antes de improvisar una secuencia de herramientas por tu cuenta, revisa si ya existe un prompt para lo que la persona quiere lograr y síguelo — resuelve automáticamente ambigüedades como cuál herramienta usar para generar contenido.\n\n" +
           "Al conectarte (primer mensaje de la conversación) o cuando la persona no sepa qué hacer, usa el prompt 'empezar': saluda brevemente y ofrece el mismo menú numerado que vería en su Inicio:\n" +
           "1) Contenido propio — escribir y publicar tus propios títulos.\n" +

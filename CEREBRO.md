@@ -1,3 +1,11 @@
+## MCP-USE-CASES-20261029 — decisión arquitectónica
+
+El backend ya soportaba editar una propuesta social pendiente y actualizar
+preferencias de cuenta, pero faltaban los accionadores MCP. Se añadieron ambas
+tools reutilizando rutas existentes, con confirmación ligada a usuario, tool y
+argumentos exactos. OAuth, reparación de integraciones e indexación individual
+quedan fuera porque no tienen flujo MCP/backend seguro equivalente.
+
 ## MCP-AUTH-FIX-20261027 — contrato de credenciales verificado
 
 PAT único y compartido: nunca reemplazarlo silenciosamente. CREATE único y
