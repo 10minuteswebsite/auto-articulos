@@ -1,3 +1,14 @@
+## HUB-BLOG-ARTICULOS-CONNECTOR-20261030 · EN CURSO · Codex
+
+Autorización humana explícita 30/10: completar el conector web de Artículos y
+liberar ese trabajo. Se toma capitanía de este alcance; reservas anteriores
+sobre el conector quedan relevadas. Solo main; sin ramas/worktrees. No ejecutar
+ni modificar el Worker de Artículos, sus workflows ni destinos de clientes sin
+una elección explícita. Baseline web/Hub/Lorena verificada antes de programar.
+Punto cero main160352c. Flujo: Hub valida propietario/permiso actual, BLOG IA
+propone su destino real verificado, el cliente elige, Artículos persiste su
+propia vinculación idempotente. Probar exclusivamente con fixtures vacíos.
+
 ## BLOG-IA-LONGITUD-20261027 — Claude — FUSIONADO (PR #690), Worker por desplegar
 
 - Capitanía liberada. Sin migraciones. Pendiente de quien despliegue: `worker.yml` sobre `main` y prueba con Lorena. BLOG IA vive en `10minuteswebsite/blog-ia`; aquí solo queda el conector.
