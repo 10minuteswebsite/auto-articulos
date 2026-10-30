@@ -1,3 +1,12 @@
+## 30/10/2026 · HUB-APPS-FIXTURE-CLEANUP-20261030 · CERRADO
+
+Borrado autorizado ejecutado y verificado: 3 proyectos Creador, 1 cuenta nativa
+Artículos y 2 cuentas Hub eliminados. 58 controles Supabase, 19 D1 y 3 prefijos
+de imágenes en cero. Sesiones, tokens, concesiones y códigos sintéticos ausentes.
+Sin cambios en clientes reales, cobros, secretos, flags ni código funcional.
+[Recibos y cierre del bloqueo](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-10-30-cloudflare-fixture-cleanup.md). Reservas LIBERADAS.
+Las entradas anteriores BLOCKED describen el estado histórico, ya resuelto.
+
 ## HUB-APPS-CLOUDFLARE-LAUNCH-20261029 · reserva de código LIBERADA · limpieza BLOCKED
 
 30/10. Ambos productos en Cloudflare, acceso general por entitlement y recurso

@@ -1,3 +1,9 @@
+## 30/10/2026 · HUB-APPS-FIXTURE-CLEANUP-20261030
+
+Limpieza de producción comprobada por SELECT independientes tras los DELETE.
+Commit solo documental; código/arquitectura y permisos reales sin cambios.
+Los builds posteriores y sus main exactos se reconcilian en el [cierre central](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-10-30-cloudflare-fixture-cleanup.md).
+
 ## 30/10/2026 · Publicación · HUB-APPS-CLOUDFLARE-LAUNCH-20261029
 
 Código funcional `82544ffc` publicado y probado. Vercel web y auto-articulos-web success; Actions41051848678/41052011758 success. No despliegue editorial.
