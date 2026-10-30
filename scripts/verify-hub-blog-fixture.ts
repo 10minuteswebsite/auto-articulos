@@ -14,4 +14,4 @@ async function main(){
  const url=`https://${blog.hostname}/${slug}`;const page=await fetch(url,{redirect:'manual'}),html=await page.text();if(page.status!==200||!html.includes('Ensayo técnico de integración del Hub'))throw Error('public_effect_missing');
  console.log(JSON.stringify({test:'hub_blog_fixture',delivery:first.result,replay:replay.result,public_status:page.status,url}));
 }
-main().catch(()=>{console.error('El ensayo aislado no pasó. No se imprimen detalles privados.');process.exitCode=1}).finally(()=>prisma.$disconnect());
+main().catch((e)=>{const allowed=['synthetic_tenant_required','synthetic_owned_blog_required','existing_blog_provider_configuration_required','expected_denial_missing','replay_not_idempotent','public_effect_missing'];console.error(JSON.stringify({test:'hub_blog_fixture',failure:e instanceof BlogIaError?'provider_rejected':allowed.includes(e?.message)?e.message:'dependency_unavailable',status:e instanceof BlogIaError?e.status:null}));process.exitCode=1}).finally(()=>prisma.$disconnect());
