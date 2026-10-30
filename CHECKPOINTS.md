@@ -1,3 +1,12 @@
+## 30/10/2026 · HUB-APPS-CLOUDFLARE-LAUNCH-20261029
+
+Código `82544ffc` publicado; acceso Hub/Dominios habilitado tras el ensayo.
+Paneles y sitios públicos operan en Cloudflare; bases propias conservadas.
+Pruebas productivas y límites: [informe](docs/audits/cloudflare-launch-20261030.md).
+Reserva de código LIBERADA. Limpieza definitiva de registros sintéticos BLOCKED:
+confirmación interna Supabase caducada; accesos revocados. No afirmar cero registros.
+Las entradas anteriores son históricas; este es el estado vigente.
+
 ## Checkpoint — BLOG-IA-LONGITUD-20261027 — fusionado, Worker pendiente — 2026-10-29
 
 - PR #690 en `main` (`27525996`). Falta desplegar `worker.yml` y probar un artículo real de BLOG IA (≥1,000 palabras). Ver CURRENT_STATE.

@@ -1,3 +1,8 @@
+## 30/10/2026 · Arquitectura · HUB-APPS-CLOUDFLARE-LAUNCH-20261029
+
+Paneles y sitios públicos en Cloudflare; Supabase propio y D1/R2 separados, sin depender de Vercel. El Hub autoriza, Dominios controla TLS/rutas, cada producto conserva sus datos.
+[Registro](docs/audits/cloudflare-launch-20261030.md).
+
 ## OPORTUNIDADES-SIN-EVIDENCIA-20261029 — decisión
 
 Medir antes de arreglar: las hipótesis iniciales (consulta única de Composio,

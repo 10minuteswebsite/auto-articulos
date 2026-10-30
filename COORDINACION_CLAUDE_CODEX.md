@@ -1,4 +1,13 @@
-## HUB-BLOG-ARTICULOS-CONNECTOR-20261030 · EN CURSO · Codex
+## HUB-APPS-CLOUDFLARE-LAUNCH-20261029 · reserva de código LIBERADA · limpieza BLOCKED
+
+30/10. Ambos productos en Cloudflare, acceso general por entitlement y recurso
+Dominios verificados. Código `82544ffc`. La limpieza definitiva de ensayos está bloqueada por caducidad de la confirmación del conector. No hay accesos de ensayo activos.
+[Registro](docs/audits/cloudflare-launch-20261030.md). main solamente.
+La reserva de código queda liberada; al publicar este cierre no hay cambios sin subir.
+Solo queda retirar registros sintéticos por sus IDs tras confirmación efectiva.
+Las entradas anteriores son historia; el estado vigente es este cierre.
+
+## HUB-BLOG-ARTICULOS-CONNECTOR-20261030 · LIBERADA · Codex
 
 Autorización humana explícita 30/10: completar el conector web de Artículos y
 liberar ese trabajo. Se toma capitanía de este alcance; reservas anteriores

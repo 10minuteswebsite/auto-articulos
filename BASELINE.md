@@ -1,3 +1,10 @@
+## 30/10/2026 · Contrato Cloudflare comprobado
+
+Acceso por Hub, sesiones nativas aisladas y publicación real HTTPS. La selección
+del destino Artículos exige consentimiento; las imágenes aprobadas sobreviven
+al proceso y se publican desde almacenamiento privado. PP conserva su ocultación.
+No cambia el diseño de productos existentes. [Evidencia](docs/audits/cloudflare-launch-20261030.md).
+
 # BASELINE — Contrato previo HUB/OAuth
 
 ## MCP-AUTH-FIX-20261027 — contrato añadido y verificado

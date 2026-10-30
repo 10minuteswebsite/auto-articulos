@@ -1,3 +1,11 @@
+## 30/10/2026 · Publicación · HUB-APPS-CLOUDFLARE-LAUNCH-20261029
+
+Código funcional `82544ffc` publicado y probado. Vercel web y auto-articulos-web success; Actions41051848678/41052011758 success. No despliegue editorial.
+Este cierre solo modifica memoria durable; la verificación posterior del build
+documental y los SHA finales se registran en el mapa central del Harness.
+No sustituye la evidencia del artefacto funcional ni afirma limpieza completa.
+[Registro](docs/audits/cloudflare-launch-20261030.md).
+
 ## OPORTUNIDADES-SIN-EVIDENCIA-20261029
 
 Código `2f2b862d` (PR #701), Vercel READY. Sin migración. Rollback: revertir #701.

@@ -1,3 +1,12 @@
+## 30/10/2026 · HUB-APPS-CLOUDFLARE-LAUNCH-20261029
+
+Código `82544ffc` publicado; acceso Hub/Dominios habilitado tras el ensayo.
+Paneles y sitios públicos operan en Cloudflare; bases propias conservadas.
+Pruebas productivas y límites: [informe](docs/audits/cloudflare-launch-20261030.md).
+Reserva de código LIBERADA. Limpieza definitiva de registros sintéticos BLOCKED:
+confirmación interna Supabase caducada; accesos revocados. No afirmar cero registros.
+Las entradas anteriores son históricas; este es el estado vigente.
+
 ## BLOG-IA-LONGITUD-20261027 — fusionado; Worker SIN desplegar
 
 PR #690 fusionado en `main` (`27525996`). BLOG IA genera 1,000–1,400 palabras

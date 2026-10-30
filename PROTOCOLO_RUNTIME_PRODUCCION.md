@@ -1,3 +1,8 @@
+## 30/10/2026 · Runtime · HUB-APPS-CLOUDFLARE-LAUNCH-20261029
+
+Desplegar Hub con su publicador protegido y Dominios con npm run deploy:production; nunca reconciliar rutas dinámicas con wrangler deploy. No exportar secretos ni reemplazar referencias heredadas.
+[Registro](docs/audits/cloudflare-launch-20261030.md).
+
 # Runtime productivo — Artículos y Redes
 
 `MCP-AUTH-FIX-20261027`: código620e0cc9, Vercel
