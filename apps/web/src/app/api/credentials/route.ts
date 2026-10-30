@@ -1,3 +1,4 @@
+import {publishingReadiness} from '@/lib/publishing-readiness';
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { encryptSecret } from "@auto-articulos/shared";
@@ -12,7 +13,8 @@ export async function GET() {
     where: { userId_platform: { userId, platform: PLATFORM } },
     select: { updatedAt: true },
   });
-  return NextResponse.json({ configured: Boolean(credential), updatedAt: credential?.updatedAt ?? null });
+  const publishing=await publishingReadiness(prisma,userId,Boolean(credential));
+  return NextResponse.json({ configured: Boolean(credential), publishingReady:publishing.ready, publishingDestination:publishing.destination, blogHostname:publishing.hostname, updatedAt: credential?.updatedAt ?? null });
 }
 
 export async function POST(request: NextRequest) {

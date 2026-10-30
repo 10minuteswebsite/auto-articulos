@@ -35,7 +35,7 @@ export default function ConfiguracionInicialPage() {
         const credData = credRes.ok ? await credRes.json() : {};
         const meData = meRes.ok ? await meRes.json() : {};
         const googleData = googleRes.ok ? await googleRes.json() : {};
-        const step1 = Boolean(credData.configured);
+        const step1 = Boolean(credData.publishingReady ?? credData.configured);
         const step3 = typeof meData.contentLanguage === "string" && meData.contentLanguage.trim().length > 0;
         // Mismo criterio que el Inicio y el asistente: Search Console cuenta si
         // está conectado por Google directo O por Composio con propiedad elegida.

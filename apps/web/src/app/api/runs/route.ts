@@ -1,3 +1,4 @@
+import {publishingReadiness} from '@/lib/publishing-readiness';
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { countPublishedArticles } from "@/lib/article-quota";
@@ -165,9 +166,10 @@ export async function POST(request: NextRequest) {
   const credential = await prisma.credential.findUnique({
     where: { userId_platform: { userId, platform: "10minutesWebsite" } },
   });
-  if (!credential) {
+  const publishing=await publishingReadiness(prisma,userId,Boolean(credential));
+  if (!publishing.ready) {
     return NextResponse.json(
-      { error: `Primero debes guardar tus credenciales de ${account.platformDomain === "tagcrush" ? "tu plataforma" : "10minutesWebsite"}` },
+      { error: publishing.destination==='blog-ia'?'Tu BLOG IA está pendiente o suspendido. Revísalo desde el Hub.':`Primero debes guardar tus credenciales de ${account.platformDomain === "tagcrush" ? "tu plataforma" : "10minutesWebsite"}` },
       { status: 400 },
     );
   }

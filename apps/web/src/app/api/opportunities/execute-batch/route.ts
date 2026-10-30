@@ -1,3 +1,4 @@
+import {publishingReadiness} from '@/lib/publishing-readiness';
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
@@ -76,10 +77,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!credential) {
+  const publishing=await publishingReadiness(prisma,userId,Boolean(credential));
+  if (!publishing.ready) {
     return NextResponse.json(
       {
-        error: `Primero guarda tus credenciales de ${platformProductNameOrNeutral(
+        error: publishing.destination==='blog-ia'?'Tu BLOG IA está pendiente o suspendido. Revísalo desde el Hub.':`Primero guarda tus credenciales de ${platformProductNameOrNeutral(
           user.platformDomain,
         )}.`,
       },

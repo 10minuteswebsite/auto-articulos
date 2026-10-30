@@ -154,7 +154,7 @@ export default function InicioPage() {
         ? composioData.connections.find((connection: { app: string }) => connection.app === "google_search_console")
         : null;
 
-      const step1 = Boolean(credData.configured);
+      const step1 = Boolean(credData.publishingReady ?? credData.configured);
       // Las categorías son opcionales en el onboarding (mismo criterio que
       // OnboardingWizard desde el 7/10/2026): una web nueva puede no tener
       // ninguna. Exigirlas aquí dejaba el wizard en pantalla para siempre

@@ -143,7 +143,7 @@ export default function PublicarPage() {
     const res = await fetch("/api/credentials");
     if (res.ok) {
       const data = await res.json();
-      setCredentialsConfigured(Boolean(data.configured));
+      setCredentialsConfigured(Boolean(data.publishingReady ?? data.configured));
     }
   }, []);
 

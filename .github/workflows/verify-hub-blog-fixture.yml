@@ -1,0 +1,32 @@
+name: Verify Hub BLOG IA synthetic fixture
+on:
+  workflow_dispatch:
+    inputs:
+      hub_user_id:
+        description: Hub UUID whose email is exactly cf-launch-UUID@example.invalid
+        required: true
+      expect_denied:
+        description: Expect 403 for the synthetic tenant after revocation
+        default: 'false'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DATABASE_URL }}
+      BLOG_IA_API_URL: ${{ vars.BLOG_IA_API_URL }}
+      BLOG_IA_SECRET: ${{ secrets.BLOG_IA_SECRET }}
+      TRIAL_HUB_USER_ID: ${{ inputs.hub_user_id }}
+      TRIAL_EXPECT_DENIED: ${{ inputs.expect_denied }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate --schema packages/db/prisma/schema.prisma
+      - run: node --import tsx scripts/verify-hub-blog-fixture.ts
