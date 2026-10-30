@@ -41,6 +41,8 @@ const PUBLIC_PATHS = [
   // Hub projects access server-to-server with signed platform credentials;
   // it does not carry a browser session cookie.
   "/api/integrations/hub/access-sync",
+  // This exact route validates Hub backend credentials itself; never a browser cookie.
+  "/api/integrations/hub/blog-destination",
 ];
 
 /** Endpoint del servidor MCP; se autentica con Bearer, no con cookie. */
