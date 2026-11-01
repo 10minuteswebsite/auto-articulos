@@ -1,7 +1,7 @@
 import { prisma } from "@auto-articulos/db";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { getTitleGuardModeInfo, getTitleGuardPercent, shouldApplyGuard } from "@/lib/title-guard-mode";
-import { evaluateGuard, guardSafeToApply, writeGuardReport, type ShadowInfo } from "@/lib/title-guard-shadow";
+import { accountHasHistory, evaluateGuard, guardSafeToApply, writeGuardReport, type ShadowInfo } from "@/lib/title-guard-shadow";
 import { GUARD } from "@/lib/angle-guard-core";
 import { getTitleGenerationPrompt } from "@/lib/title-generation-prompt";
 import {
@@ -331,7 +331,7 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
   try {
     const [info, percent] = await Promise.all([getTitleGuardModeInfo(), getTitleGuardPercent()]);
     guardMode = info.mode;
-    guardActive = info.mode === "activo" && shouldApplyGuard(requestId, percent) && (await guardSafeToApply(userId));
+    guardActive = info.mode === "activo" && shouldApplyGuard(requestId, percent) && (await accountHasHistory(userId, category.id)) && (await guardSafeToApply(userId));
   } catch {
     guardActive = false;
   }

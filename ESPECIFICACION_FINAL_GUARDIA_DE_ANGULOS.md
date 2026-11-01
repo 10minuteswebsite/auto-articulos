@@ -154,3 +154,9 @@ Simulador y pruebas: `docs/guardia-de-angulos/` (`guard-sim.mjs`, `guard-props.m
 - **Decisión de Milton (cuidar el gasto):** dejar el sistema como está. La guardia sigue en **sombra** (≈ 4 centavos al día al ritmo de hoy; tope 60 al día) y **no está activada**. Gasto acumulado de las pruebas de hoy ≈ 1,3–1,4 dólares.
 - **Ideas de ahorro pendientes, sin ejecutar:** lista compartida entre los 9 títulos (≈ 5× menos texto), aplicar solo en cuentas con muchos títulos, y búsqueda por significado (embeddings). El modelo pequeño ya no es una opción para la lista.
 - **Medición retrospectiva sin sesgo (24 solicitudes):** 57,4 % marcado, ~1/3 excesivo con el prompt anterior; NO se repitió con la corrección para no gastar (≈ 14 centavos con 8 solicitudes si se quiere medir más adelante).
+
+## 20. Tráfico real, costo y filtro de historial (2026-11-01)
+- **Tráfico real (lectura de la base):** 280 solicitudes de ideas con IA desde el 20/09, en 54 cuentas; últimos 7 días ≈ 16 al día (15, 15, 22, 19, 18, 17, 8); a mediados de octubre eran 4–5 al día. Mis estimaciones anteriores (2 y 6 al día) estaban mal.
+- **Hallazgo de costo:** la SOMBRA observa todas las solicitudes (≈ 16/día × 1,7 centavos ≈ 8 USD al mes) y no beneficia a nadie; en modo ACTIVO al 10 % solo se revisa 1 de cada 10 clics y las demás NO se observan (≈ 0,8 USD al mes).
+- **Filtro de historial (hecho):** la guardia no se aplica a cuentas con menos de 20 títulos (publicados u ofrecidos) en la categoría (`GUARD.MIN_HISTORY`, `hasEnoughHistory`, `accountHasHistory`); sin IA. Estimación: ahorra cerca de la mitad. Con el filtro: 10 % ≈ 0,4 USD/mes; 50 % ≈ 2; 100 % ≈ 4.
+- **Plan acordado con Milton:** (1) pasar de sombra a ACTIVA al 10 % (baja el gasto y empieza a ayudar); (2) filtro de historial (hecho); (3) lista compartida entre los 9 títulos solo si hace falta (≈ 2 centavos de prueba; ~5× menos texto).

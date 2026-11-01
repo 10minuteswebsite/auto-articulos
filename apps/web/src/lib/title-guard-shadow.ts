@@ -1,5 +1,5 @@
 import { prisma } from "@auto-articulos/db";
-import { GUARD, breakerOpen, buildNeighborLists, decide, titleKey, type GuardResult, type ListJudgeFn, type MemoryEntry } from "@/lib/angle-guard-core";
+import { GUARD, breakerOpen, hasEnoughHistory, buildNeighborLists, decide, titleKey, type GuardResult, type ListJudgeFn, type MemoryEntry } from "@/lib/angle-guard-core";
 import { JUDGE_MODEL, callListJudge, type ListJudgeItem } from "@/lib/angle-guard-judge";
 import type { TitleGuardMode } from "@/lib/title-guard-mode";
 import { ensureSiteTitlesSeeded } from "@/lib/published-titles";
@@ -149,6 +149,18 @@ export async function writeGuardReport(
       },
     },
   });
+}
+
+/** Filtro de ahorro: las cuentas con poco historial en la categoría no se revisan (casi no hay qué repetir). Nunca lanza: ante un fallo, no se aplica. */
+export async function accountHasHistory(userId: string, categoryId: string): Promise<boolean> {
+  try {
+    const published = await prisma.title.count({ where: { status: "success", run: { userId, categoryId } } });
+    if (published >= GUARD.MIN_HISTORY) return true;
+    const requests = await prisma.titleGenerationRequest.findMany({ where: { userId, categoryId }, select: { offeredTitles: true }, take: 10 });
+    return hasEnoughHistory(published, requests.map((r) => r.offeredTitles.length));
+  } catch {
+    return false;
+  }
 }
 
 /**

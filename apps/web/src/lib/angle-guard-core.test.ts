@@ -8,6 +8,7 @@ import {
   legacySelect,
   needsJudge,
   buildNeighborLists,
+  hasEnoughHistory,
   NEIGHBORS,
   stem,
   titleKey,
@@ -238,4 +239,13 @@ test("si el juez por lista falla o no responde para un título, se usa el camino
     assert.equal(r.delivered.find((d) => d.title.startsWith("Hurricane"))?.verdict, "limpio");
     assert.equal(r.nSimilar, 1, "lo casi idéntico sigue marcado por el código");
   }
+});
+
+test("las cuentas con poco historial en la categoría no se revisan (ahorro) y las llenas sí", () => {
+  assert.equal(hasEnoughHistory(0, []), false);
+  assert.equal(hasEnoughHistory(5, [9]), false);
+  assert.equal(hasEnoughHistory(5, [9, 9]), true);
+  assert.equal(hasEnoughHistory(20, []), true);
+  assert.equal(hasEnoughHistory(3, [9], 12), true);
+  assert.equal(GUARD.MIN_HISTORY, 20);
 });

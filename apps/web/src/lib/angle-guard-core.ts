@@ -19,6 +19,8 @@ export const GUARD = {
   PLAIN_BLEND: 0.3,
   MIN_OUT: 5,
   MAX_OUT: 9,
+  /** Con menos títulos que esto en la categoría de la cuenta, no hay casi nada que repetir: la guardia no se aplica (ahorra IA). */
+  MIN_HISTORY: 20,
   /** Candidatos que se piden a la IA para 9 cupos. */
   CANDIDATES_ASKED: 14,
   OFFERED_EXPIRES_DAYS: 60,
@@ -343,6 +345,11 @@ export function needsJudge(candidates: string[], memory: MemoryEntry[]): Array<{
     out.push({ candidate: title, neighbor: near });
   }
   return out;
+}
+
+/** ¿La cuenta tiene historial suficiente en esta categoría para que valga la pena revisar repetidos? Pura. */
+export function hasEnoughHistory(publishedCount: number, offeredCounts: number[], min: number = GUARD.MIN_HISTORY): boolean {
+  return publishedCount + offeredCounts.reduce((n, c) => n + c, 0) >= min;
 }
 
 /** Cuántos vecinos recibe el juez por título nuevo: los más cercanos por código y los más recientes de la categoría. */
