@@ -13189,3 +13189,5 @@ ARCHIVADA. Responsable: Claude.
 - Decisiones: sin sitemap no se llena y no estorba; PR en vez de push directo; `migrate.yml` no usado (deriva `allowDevToPublishing`, sin aceptar pérdida de datos).
 - Siguiente paso posible (no pedido): tope de sesiones simultáneas contra 10MWS.
 - Responsable: Claude. Capitanía liberada.
+
+- **Capitán de migración:** Claude — LIBERADO 2026-11-01. Historial forense Fase 1 (PR #722, solo lectura, sin migración) en producción y verificado.

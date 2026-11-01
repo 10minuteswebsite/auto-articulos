@@ -895,3 +895,9 @@ Responsable: Claude. Capitanía liberada.
 - NO probado: una cuenta nueva real del Hub viendo «¿Dónde estás?» y quedando en `.site`/`.net` según su país. Pendiente de la primera alta real.
 - Las cuentas del Hub ya existentes en Europa siguen en `.net` (no hay forma de saberlo).
 - El traspaso «prompts con país destino» (regla sin aprobar) sigue sin implementar; ahora cuenta con el país obligatorio de las cuentas nuevas.
+
+## Historial forense de Artículos — Fase 1 (2026-11-01)
+- Caso INES (info@inesgarcia-arcaya.com): dice que se repiten temas aunque los borra. Plan en `MASTER_BLUEPRINT_HISTORIAL_FORENSE_ARTICULOS.md`.
+- Fase 1 EN PRODUCCIÓN (PR #722): `GET /api/historial/forense` (solo lectura, sin tablas nuevas) y zona «Historiales completos» debajo de los históricos: no se pudieron publicar, cancelados, en curso, temas propuestos, línea de tiempo. CSV solo admin. Verificado en producción: 401 sin sesión; con la sesión de Inés cargan 0/0/0/7/759 y las filas de «Temas que te propusimos».
+- Primer hallazgo con datos reales (Inés, 7 propuestas del 23/9 al 1/11): los lotes repiten ángulos entre días (p. ej. «Post-Closing Occupancy Agreements» el 31/10 y el 1/11; «transición a la siguiente casa» el 30/10, 31/10 y 1/11). La repetición percibida es real al menos en ese nivel temático.
+- PENDIENTE: Fase 2 (tabla de descartados + captura del razonamiento al convertir, migración aditiva con interruptor propio en `migrate.yml`), Fase 3 (explicación bajo demanda), Fase 4 (análisis forense del algoritmo).
