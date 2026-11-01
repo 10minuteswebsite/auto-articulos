@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { getCurrentUserId } from "@/lib/current-user";
+import { runGuardShadow } from "@/lib/title-guard-shadow";
 import { requireProductAccess } from "@/lib/require-product-access";
 import {
   TitleGenerationError,
@@ -47,6 +48,8 @@ export async function POST(request: NextRequest) {
       categoryId: body.categoryId,
       languageValue: typeof body.contentLanguage === "string" ? body.contentLanguage : "",
       inputs: inputs.value,
+      // Guardia de ángulos en modo sombra: corre DESPUÉS de responder y nunca cambia lo que se entrega.
+      afterGenerated: (info) => after(() => runGuardShadow(info)),
     });
     return NextResponse.json(result);
   } catch (error) {

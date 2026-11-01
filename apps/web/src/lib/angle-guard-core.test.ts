@@ -6,6 +6,7 @@ import {
   buildSimilarity,
   decide,
   legacySelect,
+  needsJudge,
   stem,
   titleKey,
   tokens,
@@ -168,4 +169,22 @@ test("el freno se abre tras 2 solicitudes seguidas con notas y se cierra pasadas
   assert.equal(breakerOpen([{ neededNotes: true, at: hace(1) }, { neededNotes: false, at: hace(5) }], now), false);
   assert.equal(breakerOpen([{ neededNotes: true, at: hace(1) }], now), false);
   assert.equal(breakerOpen([{ neededNotes: true, at: hace(30) }, { neededNotes: true, at: hace(40) }], now), false);
+});
+
+test("needsJudge manda al juez solo lo que el código no puede decidir y coincide con lo que decide pregunta", () => {
+  const memory: MemoryEntry[] = [
+    M("Best Home Price in Coral Gables"), // casi idéntico → el código lo decide solo (no va al juez)
+    M("Understanding Post-Closing Occupancy Agreements When Are They Beneficial"),
+    ...Array.from({ length: 30 }, (_, i) => M(`Relleno ${i} sobre jardinería tema ${i}`)),
+  ];
+  const candidates = ["Best Home Prices in Coral Gables", "Post-Closing Occupancy Agreements: What Sellers Need to Know", "Hurricane insurance checklist for new owners"];
+  const pairs = needsJudge(candidates, memory);
+  const titles = pairs.map((p) => p.candidate);
+  assert.ok(!titles.includes("Best Home Prices in Coral Gables"), "lo casi idéntico no se manda al juez");
+  assert.ok(titles.includes("Post-Closing Occupancy Agreements: What Sellers Need to Know"), "la zona del juez sí");
+  assert.ok(!titles.includes("Hurricane insurance checklist for new owners"), "lo distinto tampoco");
+  // El juez consultado en decide() es exactamente el de estos pares.
+  const asked: string[] = [];
+  decide(candidates, memory, { judge: (c) => { asked.push(c); return "different"; } });
+  assert.deepEqual(asked.sort(), titles.sort());
 });

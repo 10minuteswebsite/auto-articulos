@@ -274,6 +274,50 @@ export function decide(candidates: string[], memory: MemoryEntry[], options: Dec
 }
 
 /**
+ * Pares (candidato, vecino más cercano) que el código no puede decidir solo y
+ * hay que mandar al juez: parecido en la zona del juez, o muy alto pero con un
+ * vecino que solo es un título del sitio. Se calcula igual que en `decide`, de
+ * modo que el juez se consulta una sola vez, en lote, antes de decidir.
+ */
+export function needsJudge(candidates: string[], memory: MemoryEntry[]): Array<{ candidate: string; neighbor: MemoryEntry }> {
+  const seen = new Set<string>();
+  const cleaned: string[] = [];
+  for (const candidate of candidates) {
+    const title = candidate.trim();
+    const key = titleKey(title);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    cleaned.push(title);
+  }
+  const hardKeys = new Set(memory.filter((m) => m.source !== "descartado").map((m) => titleKey(m.title)));
+  const alive = cleaned.filter((c) => !hardKeys.has(titleKey(c)));
+  const active = memory.filter(
+    (m) =>
+      !(m.source === "ofrecido" && m.ageDays > GUARD.OFFERED_EXPIRES_DAYS) &&
+      !(m.source === "descartado" && m.ageDays > GUARD.DISCARDED_EXPIRES_DAYS),
+  );
+  const similarity = buildSimilarity([...active.map((m) => m.title), ...alive]);
+  const out: Array<{ candidate: string; neighbor: MemoryEntry }> = [];
+  for (const title of alive) {
+    const years = yearsOf(title);
+    let best = 0;
+    let near: MemoryEntry | null = null;
+    for (const m of active) {
+      if (years.length && m.ageDays > 365 && !yearsOf(m.title).some((y) => years.includes(y))) continue;
+      const s = similarity(title, m.title);
+      if (s > best) {
+        best = s;
+        near = m;
+      }
+    }
+    if (!near || best < GUARD.BAND) continue;
+    if (best >= GUARD.AUTO && near.source !== "sitio") continue; // el código ya lo marca solo
+    out.push({ candidate: title, neighbor: near });
+  }
+  return out;
+}
+
+/**
  * Comportamiento ACTUAL (modos apagado y sombra): solo se descartan repetidos
  * exactos y se corta en 9, en el orden en que llegan. Sirve para comprobar que
  * la guardia, apagada, no cambia nada.

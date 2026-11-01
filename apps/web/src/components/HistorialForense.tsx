@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { h2Style, secondaryButtonStyle, thStyle, tdStyle } from "@/components/dashboard-ui";
 import HistorialExplicaciones from "@/components/HistorialExplicaciones";
+import GuardiaAdmin from "@/components/GuardiaAdmin";
 
 // Historiales forenses de Artículos: debajo de los históricos de siempre.
 // Cada sección carga SOLO cuando se abre (no recarga el Historial entero) y
@@ -352,6 +353,7 @@ export default function HistorialForense() {
             </label>
           </div>
           {soloAdministrador.map(verSeccion)}
+          <GuardiaAdmin />
         </details>
       )}
     </details>
