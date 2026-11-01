@@ -1,6 +1,6 @@
 # Guardia de ángulos — manual de una página (para Milton)
 
-**Qué es:** evita que las ideas de títulos con IA (CONTENIDO PROPIO → "Crear con la IA del sistema") se repitan. Mira lo que la persona ya tiene (publicado, sitio, ofrecido antes) y deja fuera lo que repite la misma pregunta. **Siempre entrega al menos 5 títulos.** No repara nada y no toca datos: solo decide qué títulos mostrar.
+**Qué es:** evita que se repitan los títulos de los DOS módulos: las ideas con IA de CONTENIDO PROPIO ("Crear con la IA del sistema") y las oportunidades de CONTENIDO GENERADO POR IA. En el módulo 2 solo quita títulos repetidos DESPUÉS de que el razonamiento con Search Console y Bing hizo su trabajo: no cambia ninguna señal ni justificación y nunca deja un grupo vacío. Mira lo que la persona ya tiene (publicado, sitio, ofrecido antes) y deja fuera lo que repite la misma pregunta. **Siempre entrega al menos 5 títulos.** No repara nada y no toca datos: solo decide qué títulos mostrar.
 
 **Dónde se maneja:** Historial → "Historiales completos" → "Detalle para el administrador" → **Guardia de ángulos**.
 

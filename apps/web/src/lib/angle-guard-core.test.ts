@@ -9,6 +9,8 @@ import {
   needsJudge,
   buildNeighborLists,
   hasEnoughHistory,
+  dropSimilarKeepOne,
+  scoreCandidates,
   NEIGHBORS,
   stem,
   titleKey,
@@ -248,4 +250,22 @@ test("las cuentas con poco historial en la categoría no se revisan (ahorro) y l
   assert.equal(hasEnoughHistory(20, []), true);
   assert.equal(hasEnoughHistory(3, [9], 12), true);
   assert.equal(GUARD.MIN_HISTORY, 20);
+});
+
+test("módulo 2: se quitan los repetidos, se conserva el orden y los datos del título y nunca se vacía un grupo", () => {
+  const memory = [M("Best Home Price in Coral Gables"), ...Array.from({ length: 25 }, (_, i) => M(`Relleno ${i} sobre jardinería tema ${i}`))];
+  const items = [
+    { text: "Best Home Prices in Coral Gables", rationale: "señal GSC A" },
+    { text: "Hurricane insurance checklist for new owners", rationale: "señal GSC B" },
+    { text: "Moving tips for first time sellers in Florida", rationale: "señal Bing C" },
+  ];
+  const { scored, hardDropped } = scoreCandidates(items.map((i) => i.text), memory, {});
+  const kept = dropSimilarKeepOne(items, scored, hardDropped);
+  assert.deepEqual(kept.map((k) => k.rationale), ["señal GSC B", "señal Bing C"], "lo casi idéntico sale; la justificación de los demás queda intacta");
+  // Si TODO se parece, se conserva uno (el menos parecido) para no perder la señal del grupo.
+  const allSimilar = [{ text: "Best Home Prices in Coral Gables", rationale: "x" }, { text: "best home price coral gables", rationale: "y" }];
+  const s2 = scoreCandidates(allSimilar.map((i) => i.text), memory, {});
+  const keptOne = dropSimilarKeepOne(allSimilar, s2.scored, s2.hardDropped);
+  assert.equal(keptOne.length, 1);
+  assert.deepEqual(dropSimilarKeepOne([], [], []), []);
 });

@@ -194,11 +194,14 @@ export interface DecideOptions {
   listJudge?: ListJudgeFn | null;
 }
 
+/** Resultado de comparar un título nuevo con la memoria. */
+export type ScoredCandidate = { title: string; sim: number; near: MemoryEntry | null; verdict: Verdict };
+
 /**
- * Decide qué candidatos de la IA se entregan y en qué orden. Sin efectos
- * secundarios. El orden y las reglas son los de la especificación, apartado 4.
+ * Compara CADA candidato con la memoria y dice si es «limpio» o «parecido». Sin límite de 9 ni mínimo de 5: sirve para
+ * quien necesita el veredicto de todos los títulos (por ejemplo, el módulo 2). `decide` se apoya en esta función.
  */
-export function decide(candidates: string[], memory: MemoryEntry[], options: DecideOptions = {}): GuardResult {
+export function scoreCandidates(candidates: string[], memory: MemoryEntry[], options: DecideOptions = {}): { scored: ScoredCandidate[]; hardDropped: string[] } {
   // 1. Limpiar vacíos y repetidos entre los propios candidatos.
   const seen = new Set<string>();
   const cleaned: string[] = [];
@@ -223,8 +226,7 @@ export function decide(candidates: string[], memory: MemoryEntry[], options: Dec
   );
   const similarity = buildSimilarity([...active.map((m) => m.title), ...alive]);
 
-  type Scored = { title: string; sim: number; near: MemoryEntry | null; verdict: Verdict };
-  const scored: Scored[] = alive.map((title) => {
+  const scored: ScoredCandidate[] = alive.map((title) => {
     const years = yearsOf(title);
     let best = 0;
     let near: MemoryEntry | null = null as MemoryEntry | null;
@@ -274,8 +276,17 @@ export function decide(candidates: string[], memory: MemoryEntry[], options: Dec
     }
     return { title, sim: best, near, verdict };
   });
+  return { scored, hardDropped };
+}
 
-  const toDelivered = (x: Scored): Delivered => ({
+/**
+ * Decide qué candidatos de la IA se entregan y en qué orden. Sin efectos secundarios.
+ * El orden y las reglas son los de la especificación, apartado 4.
+ */
+export function decide(candidates: string[], memory: MemoryEntry[], options: DecideOptions = {}): GuardResult {
+  const { scored, hardDropped } = scoreCandidates(candidates, memory, options);
+  const alive = scored;
+  const toDelivered = (x: ScoredCandidate): Delivered => ({
     title: x.title,
     verdict: x.verdict,
     sim: x.sim,
@@ -443,4 +454,19 @@ export function breakerOpen(recent: Array<{ neededNotes: boolean; at: Date }>, n
   if (last.length < GUARD.BREAKER_STREAK) return false;
   if (!last.every((r) => r.neededNotes)) return false;
   return now.getTime() - last[0].at.getTime() < GUARD.BREAKER_HOURS * 3600_000;
+}
+
+/**
+ * Módulo 2 (CONTENIDO GENERADO POR IA): quita de un grupo los títulos que repiten algo ya cubierto, sin tocar nada más del
+ * grupo (justificación, impresiones, clics, señales). Conserva el orden y NUNCA deja un grupo vacío: si todo se parece,
+ * se conserva el menos parecido, porque el grupo nació de una señal real de Search Console o Bing.
+ */
+export function dropSimilarKeepOne<T extends { text: string }>(items: T[], scored: ScoredCandidate[], hardDropped: string[]): T[] {
+  const similar = new Set(scored.filter((s) => s.verdict === "parecido").map((s) => titleKey(s.title)));
+  const hard = new Set(hardDropped.map(titleKey));
+  const kept = items.filter((i) => !similar.has(titleKey(i.text)) && !hard.has(titleKey(i.text)));
+  if (kept.length > 0 || items.length === 0) return kept;
+  const bySim = new Map(scored.map((s) => [titleKey(s.title), s.sim] as const));
+  const best = [...items].sort((a, b) => (bySim.get(titleKey(a.text)) ?? 1) - (bySim.get(titleKey(b.text)) ?? 1))[0];
+  return [best];
 }
