@@ -81,3 +81,50 @@ Regla de Milton: si una pasada encuentra un error, se corrige y se **reinician l
 - **Pedido repetido:** compara el `tema` con los pedidos de 7 días de la misma categoría; ≥ 60 % → aviso de una frase (web) y texto en la respuesta del MCP; nunca bloquea.
 - **Visibilidad de administrador:** sección «Guardia de ángulos» en el detalle de administrador y endpoint de línea base (solo conteos).
 - **Fases:** 1) módulo + pruebas + validación del juez con los pares etiquetados · 2) tabla, endpoints de administrador y modo sombra · 3) activo + aviso de pedido repetido + explicación enriquecida · 4) CONTENIDO GENERADO POR IA (con mini-auditoría previa) · 5) evaluación de 7 días y ajuste · 6) vectores solo si hace falta.
+
+---
+
+# AUDITORÍA DE RIGIDEZ — ¿puede la guardia frenar o empobrecer la creación y selección de artículos? (2026-11-01)
+
+Pregunta de Milton: que la reparación NO afecte la selección ni la creación de artículos «por rigidez del programa». Método: tres pasadas con datos reales y código, y si una pasada halla un hueco, se corrige y se reinicia.
+
+## Ronda 1 — huecos encontrados
+| Pasada | Hallazgo | Hueco |
+|---|---|---|
+| 1 · Rendimiento (replay en orden temporal de las 7 solicitudes reales, memoria de 1 a 89 títulos, suponiendo que el juez vetara TODA la banda dudosa) | Sobran **9, 9, 9, 8, 9, 6 y 7** títulos de 9; mínimo 6; 0 rechazos automáticos. (Mi primer intento estaba mal: la memoria incluía artículos publicados DESPUÉS del lote y daba 4–5 «repetidos» falsos. Se descartó y se rehízo sin fuga de futuro.) | Pero la banda crece con la memoria (de 1/9 a 3/9 por lote entre 60 y 80 títulos): en un nicho muy estrecho y con cientos de títulos podría quedar por debajo de 5. **G1, G2, G3.** |
+| 2 · Rutas que NO deben tocarse (verificado en el código) | La lógica de ideas con IA (`generateTitlesForUser`, `selectValidTitles`, `buildAvoidSet`) solo la usa `/api/title-generation` (y el MCP a través de esa ruta). Los títulos que la persona escribe o pega (`/api/runs`), los reintentos, la ejecución de oportunidades, el worker y la guardia exacta existente NO pasan por la guardia nueva. | Estructuralmente, **la guardia no puede bloquear títulos escritos a mano ni la publicación.** Hueco menor: **G4** (títulos del sitio deducidos de URLs pueden ser páginas de categoría). |
+| 3 · Matriz de escenarios | Cuenta nueva, nicho saturado, temporada/anual, pedido repetido por un asistente, juez caído, tabla ausente, modo apagado, corpus enorme, URLs que no son artículos, títulos escritos a mano, reintentos, español/inglés. | **G5** (títulos anuales), **G6** (qué pasa si el juez es demasiado estricto), **G7** (salida para quien igual quiere ese tema). |
+
+## Los 7 huecos y su corrección (pasan a la especificación final)
+| # | Corrección |
+|---|---|
+| G1 | **Sobre-generación:** se piden 14 candidatos para 9 cupos (ya cabe en el mismo prompt; unas decenas de tokens más). |
+| G2 | **Caducidad de lo no usado:** los títulos que solo se OFRECIERON y nunca se publicaron dejan de contar como «cubiertos» a los 60 días. Publicados y del sitio no caducan; los descartados, a los 90 días. Evita que lo que nadie usó cierre un tema para siempre. |
+| G3 | **Freno de seguridad por cuenta:** si 3 solicitudes seguidas quedan con menos de 5 títulos por culpa de la guardia, se desactiva para esa cuenta durante 24 horas (entrega como hoy) y se avisa al administrador. Simulado: el daño máximo es de 3 solicitudes seguidas. |
+| G4 | Los títulos deducidos del sitio **nunca se rechazan automáticamente**; solo pueden mandar el título al juez, que recibe la nota «puede ser una página de categoría». |
+| G5 | **Regla de año/temporada:** un candidato que trae un año se compara solo con títulos del mismo año o de los últimos 12 meses; un evento anual puede repetirse al año siguiente. |
+| G6 | **Criterio de activación:** no se pasa de «sombra» a «activo» salvo que, con al menos 20 solicitudes observadas, el veto promedio sea ≤ 30 % de los candidatos y ningún lote quede con menos de 5 títulos. Interruptor de apagado inmediato siempre disponible. |
+| G7 | **Salida siempre abierta:** si un tema está de verdad cubierto, el mensaje dice «Este tema ya está muy cubierto en tu sitio. Si igual quieres un artículo sobre él, escribe tú el título en CONTENIDO PROPIO; ahí nadie te lo frena.» |
+
+## Ronda 2 (tras corregir) — tres pasadas
+- **Pasada 1 · Rendimiento (matemática con las fracciones reales):** con 14 candidatos y el 33 % de banda real del peor lote, sobreviven **12,6** títulos con un juez realista (veta 30 % de la banda) y **9,3** aun si vetara toda la banda (con 9 candidatos serían 6). Estrés ×2 (67 % de banda): 11,2 realista, 4,7 en el peor caso extremo. Estrés ×3 (todo en banda y veto total): 0 — en ese caso extremo actúa el freno G3, simulado: tras 3 solicitudes escasas entrega normal 3 solicitudes más y vuelve a vigilar.
+- **Pasada 2 · Rutas:** sin cambios; los hallazgos de la Ronda 1 se confirman. La guardia solo vive en `generateTitlesForUser`.
+- **Pasada 3 · Escenarios con las correcciones:** ver tabla. **Sin huecos nuevos.**
+
+| Escenario | Qué pasa con la guardia corregida |
+|---|---|
+| Cuenta nueva sin historial | No hace nada: no hay con qué comparar. |
+| Nicho estrecho y muy lleno | Over-generación + mapa de ángulos; si de verdad no quedan ángulos, mensaje honesto con salida a CONTENIDO PROPIO; freno tras 3 escasos. |
+| Evento anual (Halloween 2026 vs 2027) | Regla G5: se permite. |
+| Asistente que repite el mismo pedido cada día | Aviso de una frase, ángulos nuevos o tema cubierto; nunca bloquea el pedido. |
+| Juez caído, lento o sin tabla | Falla hacia lo seguro: decide el código (≥ 60 % rechaza) o entrega como hoy; nunca detiene la solicitud. |
+| Modo apagado (defecto) | Comportamiento idéntico al actual. |
+| Titular escrito a mano / pegado | No pasa por la guardia: nunca se bloquea. |
+| Reintentos, publicación, worker | No pasan por la guardia. |
+| Corpus de miles de títulos | Tope de 5.000 por fuente, pre-tokenizado, medido en fracción de segundo. |
+| Sitio con URLs que no son artículos | Solo pueden mandar al juez, nunca rechazar solos (G4). |
+| Español e inglés | Palabras vacías y cortador de ambos; calibración con la línea base antes de activar. |
+| Varias solicitudes simultáneas | Comportamiento actual (no se ven entre sí); sin riesgo nuevo. |
+
+## Veredicto de rigidez
+**La guardia no puede, por diseño, bloquear la creación ni la selección de artículos:** (1) vive solo en la sugerencia de ideas con IA; (2) lo que la persona escribe o elige siempre pasa; (3) ante cualquier falla del juez, la tabla o el tiempo, entrega como hoy; (4) tiene freno automático por cuenta, interruptor de apagado inmediato y modo sombra obligatorio antes de activar. **Riesgo residual honesto:** un juez demasiado estricto podría empobrecer el resultado hasta que el freno actúe; por eso el criterio G6 mide el veto real en modo sombra antes de activar, y el juez no se enciende sin pasar su prueba con los pares etiquetados.
