@@ -51,3 +51,5 @@ Detalle técnico completo: `ESPECIFICACION_FINAL_GUARDIA_DE_ANGULOS.md`. Histori
 - **Juez medido de nuevo:** 8 solicitudes pasadas, marcó 36,1 % (antes 57 %), solo 1 de 8 necesitó completar con notas. Costo de la prueba ≈ 0,14 dólares.
 
 - **Botón 2, títulos del sitio (2026-11-01):** sin juez, un título que se parece 75 % o más a uno que ya está en el sitio también se quita (antes nunca). Los parecidos a lo publicado u ofrecido ya se quitaban desde 60 %. El mínimo de 3 por grupo protege la entrega.
+
+- **Reporte por cuenta (2026-11-01):** en Guardia de ángulos hay un selector «Ver una cuenta»; muestra los últimos 60 reportes de esa cuenta, con el modo y, en «Ver títulos afectados», qué títulos se quitaron o salieron con nota y contra qué se parecían. Solo administrador, solo lectura, sin costo.
