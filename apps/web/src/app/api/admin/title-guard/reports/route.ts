@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { requireAdmin } from "@/lib/current-user";
 
@@ -30,23 +30,33 @@ async function tablasExistentes() {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await requireAdmin();
   } catch {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
   try {
-    const rows = await prisma.titleGuardReport.findMany({ orderBy: { createdAt: "desc" }, take: 30 });
-    const total = await prisma.titleGuardReport.count();
+    // Filtro por cuenta: ?userId=... (solo lectura). Sin filtro, los 30 más recientes de todas las cuentas.
+    const userId = request.nextUrl.searchParams.get("userId")?.trim() || undefined;
+    const where = userId ? { userId } : undefined;
+    const rows = await prisma.titleGuardReport.findMany({ where, orderBy: { createdAt: "desc" }, take: userId ? 60 : 30 });
+    const total = await prisma.titleGuardReport.count({ where });
+    // Cuentas con reportes (para el selector del panel): correo y cuántos reportes tiene cada una.
+    const grouped = await prisma.titleGuardReport.groupBy({ by: ["userId"], _count: { _all: true }, orderBy: { _count: { userId: "desc" } }, take: 100 }).catch(() => []);
+    const owners = grouped.length ? await prisma.user.findMany({ where: { id: { in: grouped.map((g) => g.userId) } }, select: { id: true, email: true } }) : [];
+    const emailOf = new Map(owners.map((u) => [u.id, u.email] as const));
+    const cuentas = grouped.map((g) => ({ userId: g.userId, correo: emailOf.get(g.userId) ?? g.userId, reportes: g._count._all }));
     return NextResponse.json({
       disponible: true,
       baseDeDatosDeLaApp: databaseIdentity(),
       total,
+      cuentas,
       reportes: rows.map((r) => ({
         id: r.id,
         fecha: r.createdAt,
         categoria: r.categoryName,
+        userId: r.userId,
         modo: r.mode,
         candidatos: r.candidates,
         entregadosHoy: r.legacyTitles.length,

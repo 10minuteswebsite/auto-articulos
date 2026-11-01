@@ -18,7 +18,9 @@ type Reporte = {
   completadosConNota: number;
   juez: string;
   error: string | null;
+  detalle?: { entregados?: Array<{ title: string; verdict?: string; note?: string | null; neighbor?: string | null }>; quitados?: Array<{ title: string; neighbor: string | null }> } | null;
 };
+type Cuenta = { userId: string; correo: string; reportes: number };
 
 const MODOS: Record<string, string> = {
   apagado: "Apagada: no hace nada (como hoy)",
@@ -32,13 +34,15 @@ export default function GuardiaAdmin() {
   const [porcentaje, setPorcentaje] = useState<number>(10);
   const [reportes, setReportes] = useState<Reporte[] | null>(null);
   const [total, setTotal] = useState(0);
+  const [cuentas, setCuentas] = useState<Cuenta[]>([]);
+  const [cuenta, setCuenta] = useState<string>("");
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [linea, setLinea] = useState<string | null>(null);
   const [cargandoLinea, setCargandoLinea] = useState(false);
 
   const cargar = useCallback(async () => {
     try {
-      const [m, r] = await Promise.all([fetch("/api/admin/title-guard/mode"), fetch("/api/admin/title-guard/reports")]);
+      const [m, r] = await Promise.all([fetch("/api/admin/title-guard/mode"), fetch(`/api/admin/title-guard/reports${cuenta ? `?userId=${encodeURIComponent(cuenta)}` : ""}`)]);
       if (m.ok) {
         const dm = await m.json();
         setModo(dm.modo);
@@ -50,6 +54,7 @@ export default function GuardiaAdmin() {
         if (d.disponible) {
           setReportes(d.reportes);
           setTotal(d.total);
+          if (Array.isArray(d.cuentas)) setCuentas(d.cuentas);
         } else {
           setReportes(null);
           setMensaje(d.causa ? `${d.mensaje} Causa: ${d.causa}` : d.mensaje);
@@ -58,7 +63,7 @@ export default function GuardiaAdmin() {
     } catch {
       setMensaje("No se pudo cargar la guardia.");
     }
-  }, []);
+  }, [cuenta]);
 
   useEffect(() => {
     void cargar();
@@ -95,7 +100,7 @@ export default function GuardiaAdmin() {
       </summary>
       <div style={{ marginTop: 12 }}>
         <p className="muted" style={{ fontSize: 13 }}>
-          Evita que las ideas de títulos con IA se repitan. Hoy solo puede estar apagada o en sombra: en sombra calcula lo que haría y lo registra, pero lo que recibe cada persona es exactamente lo de siempre.
+          Evita que las ideas de títulos con IA se repitan. Apagada no hace nada; en sombra mide y registra sin cambiar lo que recibe la gente; activa evita repetidos en el porcentaje que elijas. Abajo puedes ver los reportes de una cuenta concreta.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", margin: "10px 0" }}>
           <select value={modo} onChange={(e) => void cambiar(e.target.value)} style={{ padding: "6px 8px", fontSize: 13, maxWidth: "100%" }}>
@@ -120,7 +125,16 @@ export default function GuardiaAdmin() {
         {linea && <p style={{ fontSize: 13 }}>{linea}</p>}
         {reportes && (
           <>
-            <p className="muted" style={{ fontSize: 12, margin: "10px 0 6px" }}>Últimas solicitudes observadas ({total} en total).</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", margin: "10px 0 6px" }}>
+              <label className="muted" style={{ fontSize: 12 }}>Ver una cuenta:</label>
+              <select value={cuenta} onChange={(e) => setCuenta(e.target.value)} style={{ padding: "6px 8px", fontSize: 13, maxWidth: "100%" }}>
+                <option value="">Todas las cuentas (últimos 30)</option>
+                {cuentas.map((c) => (
+                  <option key={c.userId} value={c.userId}>{c.correo} ({c.reportes})</option>
+                ))}
+              </select>
+              <span className="muted" style={{ fontSize: 12 }}>{total} reportes {cuenta ? "de esta cuenta" : "en total"}.</span>
+            </div>
             {reportes.length === 0 ? (
               <p className="muted" style={{ fontSize: 13 }}>Todavía no hay solicitudes observadas. Aparecen cuando alguien pide ideas con la guardia en modo sombra.</p>
             ) : (
@@ -128,7 +142,7 @@ export default function GuardiaAdmin() {
                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                   <thead>
                     <tr>
-                      {["Fecha", "Categoría", "Candidatos", "Recibió hoy", "Limpios", "Parecidos", "Con nota", "Juez"].map((h) => (
+                      {["Fecha", "Categoría", "Modo", "Candidatos", "Recibió hoy", "Limpios", "Parecidos", "Con nota", "Juez"].map((h) => (
                         <th key={h} style={thStyle}>{h}</th>
                       ))}
                     </tr>
@@ -138,12 +152,28 @@ export default function GuardiaAdmin() {
                       <tr key={r.id} style={{ borderTop: "1px solid #e5e5ea" }}>
                         <td style={{ ...tdStyle, fontSize: 13 }}>{new Date(r.fecha).toLocaleString()}</td>
                         <td style={{ ...tdStyle, fontSize: 13 }}>{r.categoria}</td>
+                        <td style={{ ...tdStyle, fontSize: 13 }}>{r.modo}</td>
                         <td style={{ ...tdStyle, fontSize: 13 }}>{r.candidatos}</td>
                         <td style={{ ...tdStyle, fontSize: 13 }}>{r.entregadosHoy}</td>
                         <td style={{ ...tdStyle, fontSize: 13 }}>{r.limpios}</td>
                         <td style={{ ...tdStyle, fontSize: 13 }}>{r.parecidos}</td>
                         <td style={{ ...tdStyle, fontSize: 13 }}>{r.completadosConNota}</td>
-                        <td style={{ ...tdStyle, fontSize: 13 }}>{r.error ? `Falló: ${r.error}` : r.juez}</td>
+                        <td style={{ ...tdStyle, fontSize: 13 }}>
+                          {r.error ? `Falló: ${r.error}` : r.juez}
+                          {(r.detalle?.quitados?.length || r.detalle?.entregados?.some((e) => e.note)) ? (
+                            <details style={{ marginTop: 4 }}>
+                              <summary style={{ cursor: "pointer", fontSize: 12 }}>Ver títulos afectados</summary>
+                              <ul style={{ margin: "4px 0 0", paddingLeft: 16, fontSize: 12 }}>
+                                {(r.detalle?.quitados ?? []).map((q, i) => (
+                                  <li key={`q${i}`}>Quitado: {q.title}{q.neighbor ? ` — se parecía a: ${q.neighbor}` : ""}</li>
+                                ))}
+                                {(r.detalle?.entregados ?? []).filter((e) => e.note).map((e, i) => (
+                                  <li key={`e${i}`}>Entregado con nota: {e.title}{e.neighbor ? ` — se parece a: ${e.neighbor}` : ""}</li>
+                                ))}
+                              </ul>
+                            </details>
+                          ) : null}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
