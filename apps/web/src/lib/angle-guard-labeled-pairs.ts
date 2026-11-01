@@ -41,3 +41,20 @@ export const LABELED_PAIRS: LabeledPair[] = [
   { a: "Current Condo Market Trends", b: "What Are the Current Condo Market Trends?", same: true, why: "afirmación vs pregunta" },
   { a: "¿Cuánto cuesta un seguro de salud para familias en Florida?", b: "¿Cuál es el precio de un seguro de salud familiar en Florida?", same: true, why: "sinónimos (precio/costo)" },
 ];
+
+/**
+ * Pares INDEPENDIENTES: no aparecen en el prompt del juez ni se usaron para
+ * ajustarlo. Miden si el juez generaliza o solo aprendió los 27 anteriores.
+ */
+export const HELDOUT_PAIRS: LabeledPair[] = [
+  { a: "How to Hire a Contractor for a Kitchen Remodel", b: "How to Become a Contractor for Kitchen Remodels", same: false, why: "cliente vs profesional" },
+  { a: "Cuánto cuesta una boda en Cancún", b: "Cuánto cuesta una boda en Tulum", same: false, why: "otro lugar" },
+  { a: "Best Time to Plant Tomatoes in Florida", b: "Best Time to Harvest Tomatoes in Florida", same: false, why: "sembrar vs cosechar" },
+  { a: "Pros and Cons of Solar Panels", b: "Cost of Solar Panels", same: false, why: "otro ángulo" },
+  { a: "Requisitos para abrir una cuenta bancaria como extranjero", b: "Requisitos para abrir una cuenta bancaria como ciudadano", same: false, why: "otro público" },
+  { a: "How to Choose a Family Dentist", b: "How to Choose the Best Family Dentist in Miami", same: true, why: "adjetivo y lugar de contexto" },
+  { a: "7 Signs Your Roof Needs Replacing", b: "5 Signs Your Roof Needs to Be Replaced", same: true, why: "número y redacción" },
+  { a: "Qué documentos necesito para rentar un apartamento", b: "Documentos necesarios para alquilar un apartamento", same: true, why: "sinónimos y formato" },
+  { a: "Is Solar Worth It in Florida?", b: "Solar Panels in Florida: Are They Worth It?", same: true, why: "formato distinto" },
+  { a: "Tax Deductions for Freelancers", b: "Tax Deduction for Freelancer", same: true, why: "singular y plural" },
+];

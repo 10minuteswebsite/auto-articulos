@@ -13213,3 +13213,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: Guardia de ángulos Fase 1 (módulo puro, juez, endpoint admin de validación; sin migración, sin cambios visibles). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — 2026-11-01: Guardia de ángulos, prompt del juez v2 (sin migración, sin cambios visibles). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: Guardia de ángulos, juez v3 (cinco preguntas) y pares independientes (sin migración, sin cambios visibles). Se libera al fusionar.

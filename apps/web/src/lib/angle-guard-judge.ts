@@ -19,40 +19,36 @@ export interface JudgePair {
   existingMayBeCategoryPage?: boolean;
 }
 
+/** Las cinco preguntas que contesta la IA; true = igual. */
+export const JUDGE_DIMENSIONS = ["accion_igual", "publico_igual", "lugar_igual", "producto_igual", "enfoque_igual"] as const;
+
 export interface JudgeVerdict {
   same: boolean;
   reason: string;
 }
 
 export const JUDGE_SYSTEM_PROMPT = [
-  "Eres un editor que decide si dos títulos de artículos hacen la MISMA pregunta a un lector.",
-  "Regla: son «misma pregunta» (same=true) si un lector con la misma necesidad quedaría satisfecho con cualquiera de los dos artículos.",
+  "Eres un editor. Para cada par (CANDIDATO y EXISTENTE) respondes CINCO preguntas con true o false. true significa «igual». No decides tú si son repetidos: solo contestas las cinco preguntas con honestidad; el programa saca la conclusión.",
   "",
-  "NO cambian la pregunta (si solo cambia esto, responde same=true):",
-  "- el orden de las palabras, el singular y el plural (price/prices), y los adjetivos o palabras de relleno (best, top, essential, rápido, mejor);",
-  "- el número de una lista: 5 consejos y 7 consejos es la MISMA pregunta (el número de una lista nunca cambia la pregunta);",
-  "- agregar o quitar un sufijo con el lugar o el negocio de contexto general («… en Coral Gables» frente a la versión sin ciudad) cuando el resto del título es igual;",
-  "- agregar un año a uno de los títulos cuando el otro no trae año;",
-  "- el formato (pregunta o afirmación) y los sinónimos (precio/costo).",
+  "1. accion_igual: ¿hacen lo mismo con el tema? false si cambia la acción: comprar/vender, alquilar/rentar, abrir/cerrar, antes/después, ganar/perder.",
+  "2. publico_igual: ¿es para el mismo tipo de persona o rol? false si cambia el público: familias/jubilados, principiantes/avanzados, primerizos/inversionistas, el dueño que alquila su propiedad («rent out your…») frente a la persona que busca alquilar («rent a…»).",
+  "3. lugar_igual: true, salvo que AMBOS títulos nombren lugares DISTINTOS (Miami frente a Orlando). Agregar o quitar el lugar de contexto general (« en Coral Gables») NO lo cambia.",
+  "4. producto_igual: ¿hablan del mismo producto, servicio o trámite concreto? false si cambia el producto concreto: visa EB-5 frente a H-1B, cuenta 401k frente a 403b, implante frente a blanqueamiento dental, desayuno frente a cena.",
+  "5. enfoque_igual: ¿responden la misma pregunta del lector? false si cambia el ángulo: precio frente a impuestos, ventajas frente a desventajas, requisitos frente a costos; y false si AMBOS títulos traen un año y es otro (otra edición).",
   "",
-  "SÍ cambian la pregunta (responde same=false):",
-  "- la acción: comprar/vender, alquilar/rentar, abrir/cerrar, antes/después;",
-  "- el público: familias/jubilados, principiantes/avanzados, primerizos/inversionistas;",
-  "- un lugar DISTINTO (Miami frente a Orlando);",
-  "- el producto o servicio concreto (visa EB-5 frente a H-1B), la comparación (ventajas/desventajas) o la pregunta que se responde;",
-  "- el año cuando AMBOS títulos traen un año y es otro (evento de 2025 frente a 2026 = otra edición).",
+  "Estas diferencias NUNCA cambian nada, las cinco respuestas siguen siendo true: el orden de las palabras, singular y plural (price/prices), adjetivos o palabras de relleno (best, top, essential, rápido), el número de una lista (5 consejos frente a 7 consejos), el formato (pregunta o afirmación), los sinónimos (precio/costo) y agregar un año a solo uno de los títulos.",
   "",
-  "Ejemplos (distintos a los que te voy a pedir):",
-  "- «Cómo ahorrar para el enganche de una casa» / «Cómo ahorrar para el enganche de tu casa en Florida» → same=true (solo se añade el lugar de contexto).",
-  "- «3 Tips to Lower Your Energy Bill» / «5 Tips to Lower Your Energy Bill» → same=true (solo cambia el número de la lista).",
-  "- «Best Pizza in Brickell» / «Top Pizza Places in Brickell for 2026» → same=true (relleno y un año añadido).",
-  "- «Best Pizza in Brickell» / «Best Pizza in Wynwood» → same=false (otro lugar).",
-  "- «How to Open a Cafe» / «How to Close a Cafe» → same=false (otra acción).",
-  "- «Marathon Training Plan for Beginners» / «Marathon Training Plan for Advanced Runners» → same=false (otro público).",
+  "Ejemplos (distintos a los pares que vas a evaluar):",
+  '- «Cómo ahorrar para el enganche de una casa» / «Cómo ahorrar para el enganche de tu casa en Florida» → todo true (solo se añade el lugar de contexto).',
+  '- «3 Tips to Lower Your Energy Bill» / «5 Tips to Lower Your Energy Bill» → todo true (solo cambia el número).',
+  '- «Best Pizza in Brickell» / «Top Pizza Places in Brickell for 2026» → todo true (relleno y un año añadido a uno).',
+  '- «Best Pizza in Brickell» / «Best Pizza in Wynwood» → lugar_igual false.',
+  '- «How to Open a Cafe» / «How to Close a Cafe» → accion_igual false.',
+  '- «Marathon Training Plan for Beginners» / «Marathon Training Plan for Advanced Runners» → publico_igual false.',
+  '- «How to Rent Out Your Garage» / «How to Rent a Garage» → publico_igual false (dueño frente a inquilino).',
   "",
-  "Si el título existente está marcado como posible página de categoría, di same=true SOLO si es claramente un artículo sobre la misma pregunta.",
-  "Ante una duda genuina entre dos preguntas distintas, responde same=false: es preferible dejar pasar un título parecido que bloquear uno distinto.",
-  'Responde ÚNICAMENTE con JSON válido, sin texto extra: {"results":[{"id":1,"same":false,"reason":"frase corta en español"}]}. Incluye un resultado por cada par, con su mismo id.',
+  "Si el título existente está marcado como posible página de categoría, pon enfoque_igual false salvo que sea claramente un artículo sobre la misma pregunta.",
+  'Responde ÚNICAMENTE con JSON válido, sin texto extra: {"results":[{"id":1,"accion_igual":true,"publico_igual":true,"lugar_igual":true,"producto_igual":true,"enfoque_igual":true,"reason":"frase corta en español"}]}. Incluye un resultado por cada par, con su mismo id.',
 ].join("\n");
 
 export function buildJudgeMessages(pairs: JudgePair[]): { system: string; user: string } {
@@ -80,10 +76,12 @@ export function parseJudgeOutput(raw: string, expectedIds: number[]): Map<number
   if (!Array.isArray(results)) return null;
   const out = new Map<number, JudgeVerdict>();
   for (const item of results) {
-    const row = item as { id?: unknown; same?: unknown; reason?: unknown };
-    if (typeof row.id !== "number" || typeof row.same !== "boolean") continue;
-    if (!expectedIds.includes(row.id)) continue;
-    out.set(row.id, { same: row.same, reason: typeof row.reason === "string" ? row.reason.slice(0, 200) : "" });
+    const row = item as Record<string, unknown>;
+    if (typeof row.id !== "number" || !expectedIds.includes(row.id)) continue;
+    const answers = JUDGE_DIMENSIONS.map((dimension) => row[dimension]);
+    if (!answers.every((value) => typeof value === "boolean")) continue;
+    // La conclusión la saca el código: «misma pregunta» solo si las cinco son iguales.
+    out.set(row.id, { same: answers.every((value) => value === true), reason: typeof row.reason === "string" ? row.reason.slice(0, 200) : "" });
   }
   // Una respuesta que no cubre TODOS los pares no es confiable.
   if (!expectedIds.every((id) => out.has(id))) return null;
@@ -111,6 +109,7 @@ export async function callJudge(
       body: JSON.stringify({
         model: JUDGE_MODEL,
         temperature: 0,
+        seed: 7,
         max_tokens: 1200,
         response_format: { type: "json_object" },
         messages: [
