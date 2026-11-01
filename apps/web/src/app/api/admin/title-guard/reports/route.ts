@@ -53,6 +53,7 @@ export async function GET() {
         limpios: r.nClean,
         parecidos: r.nSimilar,
         completadosConNota: r.completedWithNotes,
+        memoriaUsada: (r.details as { memoria?: unknown } | null)?.memoria ?? null,
         juez: r.judgeUsed ? `${r.judgeModel} (${r.judgePairs} pares, ${r.judgeMs ?? "?"} ms)` : r.judgePairs > 0 ? "no respondió" : "no hizo falta",
         error: r.errorMessage,
         detalle: r.details,
