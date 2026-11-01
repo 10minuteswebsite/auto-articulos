@@ -1,6 +1,7 @@
 import {publishingReadiness} from '@/lib/publishing-readiness';
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { recordTitleOrigins } from "@/lib/title-origin-log";
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { platformProductNameOrNeutral } from "@auto-articulos/shared";
@@ -170,6 +171,7 @@ export async function POST(request: NextRequest) {
     }
     return createdRuns;
   });
+  await recordTitleOrigins(userId, runs.map((run, index) => ({ runId: run.id, group, titles: chunks[index] })));
   const worker = await triggerWorkerNow();
   return NextResponse.json({
     ok: true,

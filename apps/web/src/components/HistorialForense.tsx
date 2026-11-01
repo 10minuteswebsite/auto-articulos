@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { h2Style, secondaryButtonStyle, thStyle, tdStyle } from "@/components/dashboard-ui";
+import HistorialExplicaciones from "@/components/HistorialExplicaciones";
 
 // Historiales forenses de Artículos: debajo de los históricos de siempre.
 // Cada sección carga SOLO cuando se abre (no recarga el Historial entero) y
@@ -275,6 +276,7 @@ export default function HistorialForense() {
       {SECCIONES.map((def) => (
         <Seccion key={def.id} def={def} total={resumen ? (resumen[def.id] ?? 0) : null} esAdmin={esAdmin} todos={todos} />
       ))}
+      <HistorialExplicaciones />
     </>
   );
 }
