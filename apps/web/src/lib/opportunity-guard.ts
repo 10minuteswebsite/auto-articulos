@@ -10,6 +10,8 @@ import { guardSafeToApply, loadGuardMemory } from "@/lib/title-guard-shadow";
 // fallo devuelve los grupos tal cual. Mismo interruptor, mismo porcentaje y mismos frenos que el módulo 1.
 // PLAN B (decisión de Milton 2026-11-01): el módulo 2 trabaja SOLO con código, sin IA y sin costo. Para volver a usar el juez, poner 1.
 const JUDGE_MAX_CALLS = 0;
+/** Sin juez, un título que se parece 75 % o más a uno que ya está en el sitio también se quita (el mínimo de 3 por grupo protege la entrega). */
+const SITE_NO_JUDGE = 0.75;
 /// Tope propio del módulo 2 (con el juez apagado no cuesta nada; si se reactiva el juez, bajarlo a 12 ≈ 0,60 dólares al día).
 export const OPPORTUNITY_DAILY_CAP = 200; // sin juez no hay gasto: el tope solo evita abusos
 const JUDGE_ITEMS_PER_CALL = 40;
@@ -75,7 +77,7 @@ export async function applyGuardToOpportunities<T extends OpportunityGroupLike>(
       if (!toReview.includes(group)) return group;
       // Sin veredicto del juez para un título (tope de gasto o falla), solo se quita lo casi idéntico (el código decide ≥ 85 %).
       const listJudge: ListJudgeFn = (candidate) => verdictFor.get(`${group.categoryId}|${titleKey(candidate)}`) ?? { same: false, neighbor: null };
-      const { scored, hardDropped } = scoreCandidates(group.titles.map((t) => t.text), memory, { listJudge });
+      const { scored, hardDropped } = scoreCandidates(group.titles.map((t) => t.text), memory, { listJudge, siteNoJudge: SITE_NO_JUDGE });
       const kept = dropSimilarKeepOne(group.titles, scored, hardDropped);
       for (const dropped of group.titles.filter((t) => !kept.includes(t))) {
         removed += 1;

@@ -285,3 +285,11 @@ test("módulo 2: si quedan pocos títulos se rellena hasta 3 con los menos parec
   assert.ok(kept.some((k) => k.rationale === "limpio"));
   assert.deepEqual(dropSimilarKeepOne(items, scored, hardDropped, 1).length >= 1, true);
 });
+
+test("sin juez, un parecido de 75 % o más con un título del sitio se marca solo si se pide (módulo 2)", () => {
+  const memory = ["Errores comunes al mostrar tu piso en Navarra", "Impuestos al vender una vivienda en Navarra", "Cómo elegir una agencia inmobiliaria en Pamplona", "Documentos para vender tu casa", "Hipoteca y venta de vivienda"].map((t) => M(t, "sitio"));
+  const cand = ["Errores comunes al mostrar tu piso en Navarra hoy"];
+  assert.equal(scoreCandidates(cand, memory, {}).scored[0].verdict, "limpio", "por defecto el vecino del sitio nunca se marca solo");
+  assert.equal(scoreCandidates(cand, memory, { siteNoJudge: 0.75 }).scored[0].verdict, "parecido");
+  assert.equal(scoreCandidates(["Documentos para comprar una casa en Orlando"], memory, { siteNoJudge: 0.75 }).scored[0].verdict, "limpio", "un tema distinto no se toca");
+});

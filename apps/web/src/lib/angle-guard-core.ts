@@ -196,6 +196,8 @@ export interface DecideOptions {
   judge?: JudgeFn | null;
   /** Si se da, decide por la lista de vecinos (aunque el código no vea parecido); si falla para un título, se usa el camino por pares. */
   listJudge?: ListJudgeFn | null;
+  /** Sin juez, parecido mínimo para marcar un título que solo se parece a un título del SITIO (por defecto nunca). Módulo 2 usa 0,75. */
+  siteNoJudge?: number;
 }
 
 /** Resultado de comparar un título nuevo con la memoria. */
@@ -275,7 +277,7 @@ export function scoreCandidates(candidates: string[], memory: MemoryEntry[], opt
         }
       }
       // Juez no disponible: decide el código; un vecino solo-del-sitio nunca se marca solo.
-      if (same === null) same = !siteOnly && best >= GUARD.NO_JUDGE;
+      if (same === null) same = siteOnly ? best >= (options.siteNoJudge ?? Infinity) : best >= GUARD.NO_JUDGE;
       if (same) verdict = "parecido";
     }
     return { title, sim: best, near, verdict };
