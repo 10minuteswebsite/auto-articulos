@@ -13221,3 +13221,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: validación del juez con modelo opcional (solo administrador, sin migración, sin cambios visibles). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — 2026-11-01: Guardia de ángulos Fase 2 (tabla aditiva TitleGuardReport, migración 20261101200000_title_guard_report que aplica Milton; nace apagada). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: guardia llena la memoria del sitio desde el sitemap (sin migración, sin cambios visibles). Se libera al fusionar.
