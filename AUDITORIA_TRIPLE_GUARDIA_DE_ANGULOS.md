@@ -1,5 +1,8 @@
 # Triple auditoría — Guardia de ángulos
 
+> ## PRINCIPIO RECTOR (Milton, 2026-11-01)
+> **Primero, que la persona reciba propuestas para publicar. La guardia solo ordena y prefiere lo más nuevo; es una preferencia, nunca una barrera.** Si hay conflicto entre «no repetir» y «entregar contenido», gana entregar contenido. Una solicitud con candidatos de la IA **nunca termina sin títulos**.
+
 Fecha: 2026-11-01. Auditor: Claude, sobre su propio plan (`PLAN_GUARDIA_DE_ANGULOS.md`). Método: medir con datos reales de producción (88 títulos únicos: 63 ofrecidos + 36 publicados de una cuenta, solo lectura) y leer el código vigente (`title-generation.ts`, `title-generation-core.ts`). Veredicto: **el enfoque híbrido es el mejor disponible, pero el plan original tenía 3 errores que esta auditoría corrige.**
 
 ## Auditoría 1 — ¿Funciona el detector? (medición real)
@@ -128,3 +131,17 @@ Pregunta de Milton: que la reparación NO afecte la selección ni la creación d
 
 ## Veredicto de rigidez
 **La guardia no puede, por diseño, bloquear la creación ni la selección de artículos:** (1) vive solo en la sugerencia de ideas con IA; (2) lo que la persona escribe o elige siempre pasa; (3) ante cualquier falla del juez, la tabla o el tiempo, entrega como hoy; (4) tiene freno automático por cuenta, interruptor de apagado inmediato y modo sombra obligatorio antes de activar. **Riesgo residual honesto:** un juez demasiado estricto podría empobrecer el resultado hasta que el freno actúe; por eso el criterio G6 mide el veto real en modo sombra antes de activar, y el juez no se enciende sin pasar su prueba con los pares etiquetados.
+
+
+---
+
+# CORRECCIÓN POR EL PRINCIPIO RECTOR (2026-11-01)
+Contradicción hallada: la especificación decía que, si más de la mitad se rechazaba, se devolvía el error `NO_VALID_TITLES` («tema muy cubierto») **sin títulos**. Eso contradice el principio. Queda así, y manda sobre lo anterior:
+
+1. **Siempre se entregan títulos.** Después de la guardia, los candidatos se ordenan de **más nuevo a menos nuevo** (parecido más bajo contra lo existente). Se entregan los mejores hasta 9.
+2. **Si no alcanzan 9 sin repetidos claros**, se completan con los **menos parecidos** del resto, hasta un mínimo de 5, y cada uno lleva al lado una nota de una frase en español sencillo: «Se parece a tu artículo “…”; úsalo si quieres cubrirlo con otro enfoque.» La persona decide; nada se oculta ni se bloquea.
+3. **Solo los casi idénticos (≥ 85 %) o los que el juez marca «misma pregunta» con claridad** se descartan primero; aun así, si con eso quedaran menos de 5, vuelven a entrar en orden de menor parecido con su nota. La única razón para entregar menos de 5 es que la IA no haya devuelto candidatos.
+4. **El mensaje «tema muy cubierto»** pasa a ser un **aviso que acompaña a los títulos**, no un error: «Este tema ya está muy cubierto en tu sitio; abajo van las mejores opciones. Para otros ángulos, prueba otro tema o escribe tus propios títulos en CONTENIDO PROPIO.»
+5. **El freno por cuenta (G3) se refuerza:** si 2 solicitudes seguidas necesitaron completar con notas por culpa de la guardia, la tercera se entrega como hoy (sin guardia) y se avisa al administrador.
+6. **Modo sombra y activación:** además de los criterios anteriores, no se activa si en la sombra algún lote habría tenido que ser completado con notas más del 20 % de las veces.
+7. **Explicación:** «¿Por qué estos títulos?» dirá con sinceridad cuáles llevan nota de parecido y por qué se incluyeron igual.
