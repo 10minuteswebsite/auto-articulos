@@ -43,6 +43,7 @@ import type {
   TitleRow,
 } from "@/types/dashboard";
 import GoogleIndexingStatus from "@/components/GoogleIndexingStatus";
+import HistorialForense from "@/components/HistorialForense";
 import { productOfHost, type HostProductScope } from "@/lib/product-routes";
 
 const flatSectionStyle: CSSProperties = {
@@ -401,6 +402,7 @@ function HistorialEjecuciones() {
           </div>
         </details>
       )}
+      <HistorialForense />
     </>
   );
 }

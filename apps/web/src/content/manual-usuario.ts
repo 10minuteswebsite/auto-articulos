@@ -415,6 +415,8 @@ Ruta: /dashboard/historial
 
 Historial agrupa las ejecuciones por categoría y conserva los resultados de publicación, errores, reintentos, indexación y redes cuando están disponibles. Puedes borrar el historial terminado si ya no lo necesitas; esa acción no se puede deshacer y no cancela un lote que esté en curso.
 
+En Artículos, debajo de los históricos principales, Historial tiene la zona **Historiales completos** con más detalle, sin cambiar lo anterior: **No se pudieron publicar** (cada título con error y su motivo), **Títulos cancelados**, **En curso o en cola**, **Temas que te propusimos** (los títulos que el sistema te ofreció cada día y lo que escribiste en el formulario) y la **Línea de tiempo de eventos**. Cada una se abre al pulsarla, muestra el total aunque sea 0, carga de 50 en 50 con **Ver más** y puede incluir **Todos mis sitios**. La exportación a CSV es solo del administrador.
+
 Sobre publicaciones en redes sociales, Historial tiene además dos botones separados, ambos con confirmación previa y sin poder deshacerse: **Borrar descartadas** elimina solo las publicaciones sociales que marcaste como descartadas, y **Borrar sin confirmar** elimina solo las que quedaron sin confirmar (no toca las pendientes, publicadas ni descartadas).
 
 ## ${MENU_NAMES.redes}
