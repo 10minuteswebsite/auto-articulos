@@ -31,10 +31,10 @@ export function nextExplanationAt(requestedAt: Date[], max: number, now: Date = 
   return new Date(recent[recent.length - max].getTime() + EXPLANATION_WINDOW_MS);
 }
 
-/** El resumen nunca pasa de dos párrafos, aunque el modelo escriba más. */
-export function limitToTwoParagraphs(text: string): string {
+/** El resumen nunca pasa de tres párrafos (razón, cuidado con repetidos y tranquilidad), aunque el modelo escriba más. */
+export function limitToThreeParagraphs(text: string): string {
   const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-  return paragraphs.slice(0, 2).join("\n\n");
+  return paragraphs.slice(0, 3).join("\n\n");
 }
 
 const ETIQUETAS_PEDIDO: Array<[string, string]> = [

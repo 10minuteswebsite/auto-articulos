@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { humanizeRequestInputs, limitToTwoParagraphs, nextExplanationAt, similarityPct } from "./title-explanation-core";
+import { humanizeRequestInputs, limitToThreeParagraphs, nextExplanationAt, similarityPct } from "./title-explanation-core";
 
 test("títulos iguales se parecen 100% y distintos casi nada", () => {
   assert.equal(similarityPct("How to Price Your Coral Gables Home", "how to price your coral gables home!"), 100);
@@ -8,10 +8,10 @@ test("títulos iguales se parecen 100% y distintos casi nada", () => {
   assert.ok(similarityPct("Halloween events in Coral Gables", "Closing costs for sellers") < 20);
 });
 
-test("el resumen nunca pasa de dos párrafos", () => {
-  assert.equal(limitToTwoParagraphs("Uno.\n\nDos.\n\nTres.\n\nCuatro."), "Uno.\n\nDos.");
-  assert.equal(limitToTwoParagraphs("  Solo uno.  "), "Solo uno.");
-  assert.equal(limitToTwoParagraphs("   "), "");
+test("el resumen nunca pasa de tres párrafos", () => {
+  assert.equal(limitToThreeParagraphs("Uno.\n\nDos.\n\nTres.\n\nCuatro."), "Uno.\n\nDos.\n\nTres.");
+  assert.equal(limitToThreeParagraphs("  Solo uno.  "), "Solo uno.");
+  assert.equal(limitToThreeParagraphs("   "), "");
 });
 
 test("el cupo diario dice cuándo se libera la siguiente explicación", () => {

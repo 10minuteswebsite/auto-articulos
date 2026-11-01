@@ -912,3 +912,4 @@ Responsable: Claude. Capitanía liberada.
 - «Historiales completos» nace colapsado y no consulta nada hasta abrirse (pedido de Milton 2026-11-01: a los clientes, más explicaciones visibles = más preguntas).
 - Temas propuestos legibles (etiquetas en español, sin JSON), IDs solo para admin, y explicación reescrita en lenguaje llano a partir de lo que la persona pidió (2026-11-01, tras queja de Milton).
 - Línea de tiempo cruda sustituida por «Seguimiento de cada artículo» (✓/✗, enlace al artículo, hitos en español sacados de los eventos); los pasos técnicos quedan solo para admin (2026-11-01).
+- Explicación «¿Por qué estos títulos?» ahora de TRES párrafos (decisión de Milton 2026-11-01 tras probarla): cómo se encontraron los temas y por qué se eligieron; cómo se cuidó que no se repitan; y un mensaje de tranquilidad con la sugerencia de usar CONTENIDO PROPIO para títulos más diferentes. Sustituye al «máximo dos párrafos» del blueprint.

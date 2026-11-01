@@ -1,6 +1,7 @@
 import { prisma, type Prisma } from "@auto-articulos/db";
+import { MENU_NAMES } from "@/lib/menu-names";
 import { normalizeTitleKey } from "@auto-articulos/shared/src/published-title";
-import { EXPLANATION_WINDOW_MS, MAX_EXPLANATIONS_PER_DAY, humanizeRequestInputs, limitToTwoParagraphs, nextExplanationAt, similarityPct } from "@/lib/title-explanation-core";
+import { EXPLANATION_WINDOW_MS, MAX_EXPLANATIONS_PER_DAY, humanizeRequestInputs, limitToThreeParagraphs, nextExplanationAt, similarityPct } from "@/lib/title-explanation-core";
 
 export { MAX_EXPLANATIONS_PER_DAY };
 
@@ -101,9 +102,10 @@ export async function buildExplanationEvidence(userId: string, runId: string) {
 }
 
 const SYSTEM_PROMPT = `Le explicas a una persona normal, dueña de un negocio y SIN conocimientos técnicos, por qué se escribieron unos artículos para su sitio. Háblale de tú, con calidez y claridad, en español sencillo.
-FORMA: MÁXIMO DOS PÁRRAFOS cortos separados por una línea en blanco. Sin viñetas, sin títulos, sin listas, sin comillas de código.
-PÁRRAFO 1 — «Por qué se eligieron»: empieza directo con la respuesta. Di qué pediste tú (usa «comoSePidieron» con tus palabras) o de dónde salió la idea (por ejemplo, de los datos de búsqueda de Google guardados), y por qué esos temas ayudan a que tus clientes te encuentren. Si el razonamiento original dice «NO REGISTRADO», dilo con honestidad en una frase corta («de esta ejecución no se guardó el motivo exacto»), sin inventar.
-PÁRRAFO 2 — «Cómo se cuidó que no se repitan»: explica que se revisó que ninguno de estos artículos compita con otro tuyo por la misma búsqueda de los clientes. Di contra cuántos artículos tuyos se comparó, si alguno se parecía mucho (por ejemplo «se parece en un 60 % a…» con el título), y reconoce con sinceridad el límite: la revisión detecta títulos iguales o muy parecidos, pero dos artículos pueden tratar el mismo tema con palabras distintas.
+FORMA: EXACTAMENTE TRES PÁRRAFOS cortos separados por una línea en blanco. Sin viñetas, sin títulos, sin listas, sin comillas de código.
+PÁRRAFO 1 — «Cómo se encontraron estos temas y por qué se eligieron»: empieza directo con la respuesta y cuenta el camino en orden, como una historia corta: (1) de dónde nació la idea (si viene de «comoSePidieron», cuenta con tus palabras qué pediste: el tema, a quién le escribes y dónde están tus clientes; si la ejecución viene de Oportunidades y «fuentesDeEvidenciaGuardadas» trae datos correctos, di que se miraron los datos de búsqueda de Google de tu sitio); (2) que la inteligencia artificial propuso títulos pensando en lo que tus clientes buscan; (3) por qué esos temas ayudan a que te encuentren. Menciona los datos de búsqueda de Google SOLO si de verdad aparecen en la evidencia. Si el razonamiento original dice «NO REGISTRADO», dilo con honestidad en una frase corta, sin inventar.
+PÁRRAFO 2 — «Cómo se cuidó que no se repitan»: explica que se revisó que ninguno de estos artículos compita con otro tuyo por la misma búsqueda de los clientes. Di contra cuántos artículos tuyos se comparó, si alguno se parecía mucho (por ejemplo «se parece en un 60 % a…» con el título) y reconoce con sinceridad el límite: la revisión detecta títulos iguales o muy parecidos, pero dos artículos pueden tratar un tema cercano con palabras distintas.
+PÁRRAFO 3 — «Tranquilidad»: pídele con calidez que confíe en el proceso. Dile que es normal y bueno ver títulos o temas parecidos entre sí, porque tratar un mismo tema desde varios ángulos suele ayudar a que tus clientes te encuentren, siempre que cada artículo responda una pregunta distinta, y que lo que se evita es publicar el mismo artículo dos veces. Cierra diciéndole que, si prefiere artículos mucho más diferentes entre sí, puede usar el módulo ${MENU_NAMES.propios} para crear sus propios títulos nuevos.
 PROHIBIDO: siglas o jerga (SEO, GSC, GA4, API, ID, JSON, sitemap, canibalización, modelo), códigos, nombres de campos, llaves o corchetes, y repetir textos en inglés completos: si necesitas citar un título en inglés, cítalo breve entre comillas.
 USA ÚNICAMENTE los datos de EVIDENCIA. No inventes cifras, fuentes ni motivos.`;
 
@@ -129,7 +131,7 @@ export async function writeExplanation(evidence: unknown): Promise<{ summary: st
     if (!response.ok) throw new Error(`La IA respondió con error ${response.status}.`);
     const data = await response.json();
     const content = String(data?.choices?.[0]?.message?.content ?? "").trim();
-    const summary = limitToTwoParagraphs(content);
+    const summary = limitToThreeParagraphs(content);
     if (!summary) throw new Error("La IA no devolvió texto.");
     return { summary, model: OPENAI_MODEL };
   } finally {
