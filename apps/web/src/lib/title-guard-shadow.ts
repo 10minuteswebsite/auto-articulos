@@ -62,6 +62,10 @@ export async function loadGuardMemory(userId: string, siteDomain: string, exclud
   return memory;
 }
 
+/// Frenos de costo y de tamaño de la sombra: tope diario de solicitudes observadas y limpieza de lo viejo.
+export const SHADOW_DAILY_CAP = 60;
+export const REPORT_RETENTION_DAYS = 60;
+
 export async function runGuardShadow(info: ShadowInfo): Promise<void> {
   const base = {
     userId: info.userId,
@@ -74,6 +78,13 @@ export async function runGuardShadow(info: ShadowInfo): Promise<void> {
     legacyTitles: info.legacyTitles,
   };
   try {
+    // Freno de costo: pasado el tope diario no se observa más hasta mañana (cada solicitud observada cuesta ~2 centavos de IA).
+    const today = await prisma.titleGuardReport.count({ where: { createdAt: { gte: new Date(Date.now() - 24 * 3600_000) } } });
+    if (today >= SHADOW_DAILY_CAP) return;
+    // Limpieza perezosa: de vez en cuando se borran los registros de más de 60 días para que la tabla no crezca sin fin.
+    if (Math.random() < 0.05) {
+      await prisma.titleGuardReport.deleteMany({ where: { createdAt: { lt: new Date(Date.now() - REPORT_RETENTION_DAYS * 86_400_000) } } }).catch(() => {});
+    }
     // La memoria del sitio sale del sitemap, que hasta ahora solo se leía al usar Oportunidades: una cuenta que solo usa
     // CONTENIDO PROPIO podía tener esa memoria vacía. Se llena (una sola vez por cuenta y sitio) y nunca lanza.
     await ensureSiteTitlesSeeded(info.userId, info.siteDomain);

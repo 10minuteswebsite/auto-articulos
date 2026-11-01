@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/current-user";
-import { SELECTABLE_MODES, getTitleGuardMode, setTitleGuardMode, type TitleGuardMode } from "@/lib/title-guard-mode";
+import { SELECTABLE_MODES, SHADOW_MAX_DAYS, getTitleGuardModeInfo, setTitleGuardMode, type TitleGuardMode } from "@/lib/title-guard-mode";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -13,7 +13,14 @@ export async function GET() {
   } catch {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
-  return NextResponse.json({ modo: await getTitleGuardMode(), seleccionables: SELECTABLE_MODES });
+  const info = await getTitleGuardModeInfo();
+  return NextResponse.json({
+    modo: info.mode,
+    configurado: info.configured,
+    seApagaSolaEl: info.expiresAt,
+    aviso: info.configured === "sombra" && info.mode === "apagado" ? `La sombra venció (se apaga sola a los ${SHADOW_MAX_DAYS} días). Vuelve a elegir «sombra» para renovarla.` : null,
+    seleccionables: SELECTABLE_MODES,
+  });
 }
 
 export async function POST(request: NextRequest) {

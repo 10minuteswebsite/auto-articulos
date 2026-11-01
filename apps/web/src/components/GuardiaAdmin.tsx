@@ -27,6 +27,7 @@ const MODOS: Record<string, string> = {
 
 export default function GuardiaAdmin() {
   const [modo, setModo] = useState<string>("");
+  const [vence, setVence] = useState<string | null>(null);
   const [reportes, setReportes] = useState<Reporte[] | null>(null);
   const [total, setTotal] = useState(0);
   const [mensaje, setMensaje] = useState<string | null>(null);
@@ -36,7 +37,11 @@ export default function GuardiaAdmin() {
   const cargar = useCallback(async () => {
     try {
       const [m, r] = await Promise.all([fetch("/api/admin/title-guard/mode"), fetch("/api/admin/title-guard/reports")]);
-      if (m.ok) setModo((await m.json()).modo);
+      if (m.ok) {
+        const dm = await m.json();
+        setModo(dm.modo);
+        setVence(dm.aviso ?? (dm.seApagaSolaEl ? `La sombra se apaga sola el ${new Date(dm.seApagaSolaEl).toLocaleDateString()} si no la renuevas (elige «apagada» y luego «sombra»).` : null));
+      }
       if (r.ok) {
         const d = await r.json();
         if (d.disponible) {
@@ -100,6 +105,7 @@ export default function GuardiaAdmin() {
           </button>
           <button type="button" onClick={() => void cargar()} style={{ ...secondaryButtonStyle, padding: "6px 12px", fontSize: 13 }}>Actualizar</button>
         </div>
+        {vence && <p className="muted" style={{ fontSize: 12 }}>{vence}</p>}
         {mensaje && <p style={{ fontSize: 13, color: "#8a4b08" }}>{mensaje}</p>}
         {linea && <p style={{ fontSize: 13 }}>{linea}</p>}
         {reportes && (
