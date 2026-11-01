@@ -13217,3 +13217,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: Guardia de ángulos, juez v3 (cinco preguntas) y pares independientes (sin migración, sin cambios visibles). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — 2026-11-01: juez v3b (limite de tokens de la validacion; sin migración). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: validación del juez con modelo opcional (solo administrador, sin migración, sin cambios visibles). Se libera al fusionar.

@@ -94,7 +94,7 @@ type FetchLike = (url: string, init: { method: string; headers: Record<string, s
 export async function callJudge(
   pairs: JudgePair[],
   apiKey: string | undefined,
-  options: { fetchImpl?: FetchLike; timeoutMs?: number } = {},
+  options: { fetchImpl?: FetchLike; timeoutMs?: number; model?: string } = {},
 ): Promise<Map<number, JudgeVerdict> | null> {
   if (!apiKey || pairs.length === 0) return null;
   const limited = pairs.slice(0, JUDGE_MAX_PAIRS);
@@ -107,7 +107,7 @@ export async function callJudge(
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: JUDGE_MODEL,
+        model: options.model ?? JUDGE_MODEL,
         temperature: 0,
         seed: 7,
         // Cada par ocupa unos 50 tokens (cinco respuestas y un motivo corto): se deja margen para que la respuesta nunca se corte.
