@@ -25,11 +25,13 @@
 - Si una cuenta necesitó notas 2 veces seguidas, la guardia se salta en esa cuenta por 24 h.
 - Si 3 de las últimas 10 solicitudes activas fallaron en toda la plataforma, se salta sola.
 - En sombra: tope de 60 solicitudes observadas al día (≈ 1 dólar al día) y limpieza de registros de más de 60 días.
-- Costo: unos **2 centavos por solicitud** a la que se aplica (modelo gpt-4.1).
+- Costo: unos **2 centavos por solicitud** a la que se aplica (modelo gpt-4.1). **Tope duro: 40 solicitudes aplicadas por día ≈ 0,70 dólares al día como máximo**; pasado el tope todo sigue como siempre.
+- **Cada persona tiene máximo 3 solicitudes de ideas al día**, así que el gasto no puede dispararse.
 
 ## Herramientas de administrador (todas en tu sesión)
 - `/api/admin/title-guard/reports` → lo que decidió la guardia en cada solicitud.
 - `/api/admin/title-guard/replay?id=…` → repite una decisión con el juez de hoy.
+- `/api/admin/title-guard/backtest?limite=20` → repite solicitudes PASADAS de todas las cuentas con el juez de hoy y te dice cuántos títulos habría marcado y cuánto cuesta la prueba (≈ 2 centavos por solicitud). No afecta a nadie.
 - `/api/admin/title-guard/baseline` → mide repeticiones en todas las cuentas.
 - `/api/admin/title-guard/judge-validation?formato=lista` → comprueba que el juez sigue acertando (debe decir "cumple").
 

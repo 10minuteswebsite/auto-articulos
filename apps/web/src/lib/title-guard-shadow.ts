@@ -28,26 +28,29 @@ const DAY_MS = 86_400_000;
 /// El juez solo se llama si la solicitud lleva menos de esto: la ruta admite 60 s.
 const JUDGE_ONLY_BEFORE_MS = 30_000;
 const MAX_ROWS = 5000;
-const ageDays = (from: Date | null | undefined, fallback: number) => (from ? Math.max(0, Math.floor((Date.now() - from.getTime()) / DAY_MS)) : fallback);
 
 /** Memoria de lo ya cubierto en el sitio de la categoría (publicado, del sitio, ofrecido, descartado). */
-export async function loadGuardMemory(userId: string, siteDomain: string, excludeRequestId: string): Promise<MemoryEntry[]> {
+export async function loadGuardMemory(userId: string, siteDomain: string, excludeRequestId: string, asOf?: Date): Promise<MemoryEntry[]> {
+  // asOf: reconstruye lo que existía EN ESE MOMENTO (para repetir solicitudes pasadas sin mirar el futuro).
   const siteFilter = siteDomain ? { siteDomain } : {};
+  const before = asOf ? { lt: asOf } : undefined;
+  const ref = asOf ?? new Date();
+  const ageDays = (from: Date | null | undefined, fallback: number) => (from ? Math.max(0, Math.floor((ref.getTime() - from.getTime()) / DAY_MS)) : fallback);
   const [published, site, requests, discarded] = await Promise.all([
     prisma.title.findMany({
-      where: { status: "success", run: { userId, ...(siteDomain ? { category: { siteDomain } } : {}) } },
+      where: { status: "success", ...(before ? { processedAt: before } : {}), run: { userId, ...(siteDomain ? { category: { siteDomain } } : {}) } },
       select: { text: true, finalTitle: true, publishedAt: true, processedAt: true, run: { select: { categoryId: true } } },
       orderBy: { processedAt: "desc" },
       take: MAX_ROWS,
     }),
     prisma.siteArticleTitle.findMany({ where: { userId, ...siteFilter }, select: { title: true, createdAt: true }, take: MAX_ROWS }).catch(() => []),
     prisma.titleGenerationRequest.findMany({
-      where: { userId, id: { not: excludeRequestId } },
+      where: { userId, id: { not: excludeRequestId }, ...(before ? { createdAt: before } : {}) },
       select: { offeredTitles: true, createdAt: true, categoryId: true },
       orderBy: { createdAt: "desc" },
       take: 1000,
     }),
-    prisma.articleTitleDiscard.findMany({ where: { userId, ...siteFilter }, select: { titleText: true, discardedAt: true }, take: MAX_ROWS }).catch(() => []),
+    prisma.articleTitleDiscard.findMany({ where: { userId, ...siteFilter, ...(before ? { discardedAt: before } : {}) }, select: { titleText: true, discardedAt: true }, take: MAX_ROWS }).catch(() => []),
   ]);
   const memory: MemoryEntry[] = [];
   for (const t of published) {
@@ -65,6 +68,8 @@ export async function loadGuardMemory(userId: string, siteDomain: string, exclud
 /// Frenos de costo y de tamaño de la sombra: tope diario de solicitudes observadas y limpieza de lo viejo.
 export const SHADOW_DAILY_CAP = 60;
 export const REPORT_RETENTION_DAYS = 60;
+/// Tope DURO de gasto del modo activo: pasadas estas solicitudes aplicadas en 24 h, la guardia se salta y todo sigue como siempre (≈ 0,70 dólares al día como máximo).
+export const ACTIVE_DAILY_CAP = 40;
 
 export interface GuardEvaluation {
   result: GuardResult;
@@ -158,6 +163,9 @@ export async function guardSafeToApply(userId: string): Promise<boolean> {
       prisma.titleGuardReport.findMany({ where: { mode: "activo" }, orderBy: { createdAt: "desc" }, take: 10, select: { errorMessage: true } }),
     ]);
     if (breakerOpen(mine.map((r) => ({ neededNotes: r.completedWithNotes > 0, at: r.createdAt })))) return false;
+    // Tope duro diario de gasto: si ya se aplicó ACTIVE_DAILY_CAP veces en 24 h, se entrega como siempre.
+    const appliedToday = await prisma.titleGuardReport.count({ where: { mode: "activo", createdAt: { gte: new Date(Date.now() - 24 * 3600_000) } } });
+    if (appliedToday >= ACTIVE_DAILY_CAP) return false;
     if (recent.filter((r) => r.errorMessage).length >= 3) return false;
     return true;
   } catch {
