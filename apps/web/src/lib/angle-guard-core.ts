@@ -18,6 +18,10 @@ export const GUARD = {
   /** Parte del parecido que cuenta todas las palabras por igual (evita que una sola palabra rara decida). */
   PLAIN_BLEND: 0.3,
   MIN_OUT: 5,
+  /** Módulo 2: mínimo de títulos que se conservan por grupo cuando hay de dónde rellenar sin usar casi idénticos. */
+  MODULE2_MIN_PER_GROUP: 3,
+  /** Títulos previos que se muestran a la IA con la guardia activa (sin ella: 60). */
+  PROMPT_AVOID_ACTIVE: 100,
   MAX_OUT: 9,
   /** Con menos títulos que esto en la categoría de la cuenta, no hay casi nada que repetir: la guardia no se aplica (ahorra IA). */
   MIN_HISTORY: 20,
@@ -461,12 +465,23 @@ export function breakerOpen(recent: Array<{ neededNotes: boolean; at: Date }>, n
  * grupo (justificación, impresiones, clics, señales). Conserva el orden y NUNCA deja un grupo vacío: si todo se parece,
  * se conserva el menos parecido, porque el grupo nació de una señal real de Search Console o Bing.
  */
-export function dropSimilarKeepOne<T extends { text: string }>(items: T[], scored: ScoredCandidate[], hardDropped: string[]): T[] {
+export function dropSimilarKeepOne<T extends { text: string }>(items: T[], scored: ScoredCandidate[], hardDropped: string[], minKeep: number = GUARD.MODULE2_MIN_PER_GROUP): T[] {
+  const bySim = new Map(scored.map((s) => [titleKey(s.title), s] as const));
   const similar = new Set(scored.filter((s) => s.verdict === "parecido").map((s) => titleKey(s.title)));
   const hard = new Set(hardDropped.map(titleKey));
   const kept = items.filter((i) => !similar.has(titleKey(i.text)) && !hard.has(titleKey(i.text)));
-  if (kept.length > 0 || items.length === 0) return kept;
-  const bySim = new Map(scored.map((s) => [titleKey(s.title), s.sim] as const));
-  const best = [...items].sort((a, b) => (bySim.get(titleKey(a.text)) ?? 1) - (bySim.get(titleKey(b.text)) ?? 1))[0];
-  return [best];
+  if (items.length === 0) return kept;
+  if (kept.length === 0) {
+    const best = [...items].filter((i) => !hard.has(titleKey(i.text))).sort((a, b) => (bySim.get(titleKey(a.text))?.sim ?? 1) - (bySim.get(titleKey(b.text))?.sim ?? 1))[0];
+    return best ? [best] : [items[0]];
+  }
+  // Mejor de dos mundos: si quedan muy pocos, se devuelven los «parecidos» menos parecidos (nunca los casi idénticos ni los duplicados exactos).
+  const target = Math.min(minKeep, items.length);
+  if (kept.length >= target) return kept;
+  const refill = items
+    .filter((i) => similar.has(titleKey(i.text)) && !hard.has(titleKey(i.text)) && (bySim.get(titleKey(i.text))?.sim ?? 1) < GUARD.AUTO)
+    .sort((a, b) => (bySim.get(titleKey(a.text))?.sim ?? 1) - (bySim.get(titleKey(b.text))?.sim ?? 1))
+    .slice(0, target - kept.length);
+  const back = new Set(refill);
+  return items.filter((i) => kept.includes(i) || back.has(i));
 }
