@@ -1,3 +1,12 @@
+## 1/11 · WAITLIST-REAUDIT-20261101 · pendientes confirmados
+
+La cola NO está vacía: sincronizador GitHubActionsArtículos omitido en el corte
+(0/124, Invalid product client), paqueteQuiz sin publicar, OAuthUIHub sin
+implementar y triggers automáticosHub en fallo. El acceso web compartido sigue
+verificado; se corrige la afirmación de cobertura completa. BancoArtículos drifted,
+operación blocked hasta cubrir los consumidoresActions. Sin mutaciones productivas.
+[Cola y evidencia](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/coordination/PUBLICATION_QUEUE_20261101.md).
+
 ## 1/11 · SHARED-SECRETS-EXTERNAL-20261101 · CERRADO / LIBERADA
 
 Artículos/Redes integrados mediante OIDC de Vercel y adaptador Cloudflare de
