@@ -925,3 +925,4 @@ Responsable: Claude. Capitanía liberada.
 - Guardia de ángulos, validación del juez intento 1 (2026-11-01): 85 % (23/27), 0 falsos «misma pregunta»; no cumple el 90 %. Prompt reescrito (v2); se repite la validación. Fase 2 no inicia hasta que pase.
 - Guardia de ángulos: validación del juez intento 2 = 89 % con 1 falso grave; rediseño v3 (cinco preguntas, el código concluye) + 10 pares independientes. Fase 2 sigue esperando que el juez pase.
 - Guardia de ángulos: intento 3 del juez falló por límite de tokens de MI endpoint (no del juez); corregido. Validación pendiente.
+- Guardia de ángulos: juez v1 85 %, v2 89 % (1 falso), v3 70 % (0 falsos) con gpt-4o-mini: límite del modelo, no del prompt. Se agrega ?modelo= en la validación de administrador para medir un modelo más fuerte; producción sigue en gpt-4o-mini hasta decisión de Milton.

@@ -55,6 +55,17 @@ test("callJudge devuelve los veredictos y envía el modelo y la temperatura corr
   assert.equal(sent.messages?.length, 2);
 });
 
+test("callJudge usa el modelo pedido solo cuando se indica (la prueba de administrador)", async () => {
+  const sent: string[] = [];
+  const fetchImpl = async (_u: string, init: { body: string }) => {
+    sent.push(JSON.parse(init.body).model);
+    return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: JSON.stringify({ results: [row(1), row(2)] }) } }] }) };
+  };
+  await callJudge(pairs, "k", { fetchImpl });
+  await callJudge(pairs, "k", { fetchImpl, model: "gpt-4o" });
+  assert.deepEqual(sent, ["gpt-4o-mini", "gpt-4o"]);
+});
+
 test("callJudge nunca lanza: sin clave, con error HTTP, con red caída, con respuesta rara o con tiempo agotado devuelve null", async () => {
   assert.equal(await callJudge(pairs, undefined), null);
   assert.equal(await callJudge([], "k"), null);
