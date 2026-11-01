@@ -129,12 +129,27 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
 ];
 
 const cardStyle: CSSProperties = {
+  background: "transparent",
+  color: "#1d1d1f",
+  border: "none",
+  borderTop: "1px solid #e5e5ea",
+  borderRadius: 0,
+  padding: "14px 0 4px",
+  marginTop: 12,
+  boxSizing: "border-box",
+  width: "100%",
+};
+
+// Mismo recuadro que usan las demás secciones del Historial (cardSectionStyle
+// de historial/page.tsx): tarjeta blanca con borde y esquinas suaves.
+const marcoStyle: CSSProperties = {
   background: "#ffffff",
   color: "#1d1d1f",
   border: "1px solid #d2d2d7",
   borderRadius: 6,
-  padding: 18,
+  padding: "18px",
   marginTop: 12,
+  boxShadow: "none",
   boxSizing: "border-box",
   width: "100%",
 };
@@ -317,13 +332,13 @@ export default function HistorialForense() {
   );
 
   return (
-    <details style={{ marginTop: 24 }} onToggle={(e) => setAbierto((e.currentTarget as HTMLDetailsElement).open)}>
-      <summary style={{ cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, userSelect: "none" }}>
+    <details style={marcoStyle} onToggle={(e) => setAbierto((e.currentTarget as HTMLDetailsElement).open)}>
+      <summary style={{ cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, userSelect: "none" }}>
         <div>
-          <p className="eyebrow" style={{ margin: "0 0 2px" }}>Más detalle</p>
+          <p className="eyebrow" style={{ margin: "0 0 2px" }}>Registro</p>
           <h2 style={{ ...h2Style, margin: 0 }}>Historiales completos</h2>
         </div>
-        <span className="muted" aria-hidden="true">⌄</span>
+        <span className="muted" style={{ fontSize: 13 }}>Ver detalle</span>
       </summary>
       <HistorialExplicaciones />
       {principales.map(verSeccion)}
