@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma, type Prisma } from "@auto-articulos/db";
+import { prisma, Prisma } from "@auto-articulos/db";
 import { getCurrentUser, getCurrentUserId, getActingAdmin } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { friendlyPublishError } from "@auto-articulos/shared/src/friendly-error";
 import { humanizeRequestInputs } from "@/lib/title-explanation-core";
+import { hitosDesdeEventos, iconoDeEstado } from "@/lib/title-timeline-core";
 
 // Todo lo que ve una persona va en español claro. Los códigos del sistema se
 // conservan APARTE (columnas «Código…») por si hay que investigar o escribir a soporte.
@@ -38,7 +39,7 @@ const recorte = (raw: string | null) => (raw ? raw.slice(0, 300) : null);
 // tiempo de eventos. No toca el contrato de GET /api/runs (que sigue limitado
 // a 20 ejecuciones): esta ruta pagina y no trae capturas de diagnóstico.
 
-const SECCIONES = ["errores", "cancelados", "en-curso", "descartados", "propuestos", "eventos"] as const;
+const SECCIONES = ["errores", "cancelados", "en-curso", "descartados", "propuestos", "seguimiento", "pasos-tecnicos"] as const;
 type Seccion = (typeof SECCIONES)[number];
 
 const PAGE_SIZE = 50;
@@ -94,6 +95,7 @@ export async function GET(request: NextRequest) {
       // La tabla de descartados es nueva: si todavía no existe, esta sección vale 0 y nada más se afecta.
       prisma.articleTitleDiscard.count({ where: { userId } }).catch(() => 0),
       prisma.titleGenerationRequest.count({ where: { userId } }),
+      prisma.title.count({ where: { run: runScope } }),
       prisma.titleEvent.count({ where: { title: { run: runScope } } }),
     ]);
     return NextResponse.json({
@@ -105,7 +107,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Sección no válida." }, { status: 400 });
   }
 
-  if (csv) {
+  if (csv || seccion === "pasos-tecnicos") {
     const user = await getCurrentUser();
     const acting = user.role === "admin" ? null : await getActingAdmin();
     if (user.role !== "admin" && !acting) {
@@ -150,7 +152,36 @@ export async function GET(request: NextRequest) {
       loQuePediste: humanizeRequestInputs(r.inputs).map((l) => `${l.etiqueta}: ${l.texto}`).join("\n") || "Ya no se conserva (se borra a los 90 días)",
       titulosOfrecidos: r.offeredTitles.map((t, i) => `${i + 1}. ${t}`).join("\n"),
     }));
-  } else if (seccion === "eventos") {
+  } else if (seccion === "seguimiento") {
+    const found = await prisma.title.findMany({
+      where: { run: runScope },
+      orderBy: [{ run: { createdAt: "desc" } }, { id: "desc" }],
+      take,
+      ...cursorArgs,
+      include: { run: { select: { createdAt: true, category: { select: { name: true } } } } },
+    });
+    // Solo el principio de cada mensaje, recortado en la base: algunos pasos
+    // internos llevan capturas enormes que no deben viajar.
+    const eventos = found.length
+      ? await prisma.$queryRaw<Array<{ titleId: string; m: string }>>`SELECT "titleId", left("message", 200) AS m FROM "TitleEvent" WHERE "titleId" IN (${Prisma.join(found.map((t) => t.id))})`
+      : [];
+    const porTitulo = new Map<string, string[]>();
+    for (const e of eventos) porTitulo.set(e.titleId, [...(porTitulo.get(e.titleId) ?? []), e.m]);
+    rows = found.map((t) => {
+      const hitos = hitosDesdeEventos(porTitulo.get(t.id) ?? []).map((h) => `✓ ${h}`);
+      const lineas = t.status === "error" ? [...hitos, `✗ ${motivoClaro(t.errorMessage) ?? "No se pudo publicar."}`] : hitos;
+      return {
+        id: t.id,
+        icono: iconoDeEstado(t.status),
+        titulo: t.finalTitle || t.text,
+        categoria: t.run.category.name,
+        pedido: t.run.createdAt,
+        publicado: t.publishedAt ?? (t.status === "success" ? t.processedAt : null),
+        enlace: t.status === "success" ? t.articleUrl : null,
+        quePaso: lineas.length > 0 ? lineas.join("\n") : "Todavía no hay pasos registrados.",
+      };
+    });
+  } else if (seccion === "pasos-tecnicos") {
     const found = await prisma.titleEvent.findMany({
       where: { title: { run: runScope } },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -184,6 +215,7 @@ export async function GET(request: NextRequest) {
     });
     rows = found.map((t) => ({
       id: t.id,
+      icono: iconoDeEstado(t.status),
       titulo: t.text,
       tituloFinal: t.finalTitle,
       estado: texto(ESTADO_TITULO, t.status),

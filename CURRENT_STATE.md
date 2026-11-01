@@ -911,3 +911,4 @@ Responsable: Claude. Capitanía liberada.
 - Textos de Historiales completos en español claro (estados y orígenes traducidos, errores por friendlyPublishError, código técnico en columna aparte); la IA de «¿Por qué estos títulos?» escribe sin jerga (2026-11-01).
 - «Historiales completos» nace colapsado y no consulta nada hasta abrirse (pedido de Milton 2026-11-01: a los clientes, más explicaciones visibles = más preguntas).
 - Temas propuestos legibles (etiquetas en español, sin JSON), IDs solo para admin, y explicación reescrita en lenguaje llano a partir de lo que la persona pidió (2026-11-01, tras queja de Milton).
+- Línea de tiempo cruda sustituida por «Seguimiento de cada artículo» (✓/✗, enlace al artículo, hitos en español sacados de los eventos); los pasos técnicos quedan solo para admin (2026-11-01).

@@ -9,11 +9,11 @@ import HistorialExplicaciones from "@/components/HistorialExplicaciones";
 // Cada sección carga SOLO cuando se abre (no recarga el Historial entero) y
 // pagina de 50 en 50. Solo lectura.
 
-type SeccionId = "errores" | "cancelados" | "en-curso" | "descartados" | "propuestos" | "eventos";
+type SeccionId = "errores" | "cancelados" | "en-curso" | "descartados" | "propuestos" | "seguimiento" | "pasos-tecnicos";
 type Row = Record<string, unknown> & { id: string };
-type Columna = { clave: string; titulo: string; fecha?: boolean; soloAdmin?: boolean };
+type Columna = { clave: string; titulo: string; fecha?: boolean; soloAdmin?: boolean; tipo?: "icono" | "enlace" };
 
-const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: string; columnas: Columna[] }> = [
+const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: string; columnas: Columna[]; soloAdmin?: boolean }> = [
   {
     id: "errores",
     eyebrow: "Sin publicar",
@@ -54,7 +54,7 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
     columnas: [
       { clave: "titulo", titulo: "Título" },
       { clave: "categoria", titulo: "Categoría" },
-      { clave: "estado", titulo: "Estado" },
+      { clave: "icono", titulo: "Estado", tipo: "icono" },
       { clave: "intentos", titulo: "Intentos" },
       { clave: "ejecucionCreada", titulo: "Desde", fecha: true },
       { clave: "ultimoEvento", titulo: "Último paso registrado" },
@@ -92,15 +92,31 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
     ],
   },
   {
-    id: "eventos",
+    id: "seguimiento",
     eyebrow: "Registro",
-    titulo: "Línea de tiempo de eventos",
-    ayuda: "Todos los pasos que el sistema registró por cada título, del más reciente al más antiguo.",
+    titulo: "Seguimiento de cada artículo",
+    ayuda: "Todos tus artículos, del más reciente al más antiguo: si se publicaron (✓) o no (✗), cuándo, el enlace para verlos y lo que pasó con cada uno.",
+    columnas: [
+      { clave: "icono", titulo: "Estado", tipo: "icono" },
+      { clave: "titulo", titulo: "Artículo" },
+      { clave: "categoria", titulo: "Categoría" },
+      { clave: "pedido", titulo: "Lo pediste", fecha: true },
+      { clave: "publicado", titulo: "Se publicó", fecha: true },
+      { clave: "enlace", titulo: "Enlace", tipo: "enlace" },
+      { clave: "quePaso", titulo: "Qué pasó" },
+    ],
+  },
+  {
+    id: "pasos-tecnicos",
+    eyebrow: "Solo administrador",
+    titulo: "Pasos técnicos del sistema",
+    ayuda: "El registro interno completo, paso a paso, para investigar problemas. No es para clientes.",
+    soloAdmin: true,
     columnas: [
       { clave: "fecha", titulo: "Fecha", fecha: true },
       { clave: "titulo", titulo: "Título" },
       { clave: "estadoDelTitulo", titulo: "Estado del título" },
-      { clave: "evento", titulo: "Evento" },
+      { clave: "evento", titulo: "Paso registrado" },
       { clave: "categoria", titulo: "Categoría" },
       { clave: "codigoTitulo", titulo: "Código del título", soloAdmin: true },
     ],
@@ -127,6 +143,29 @@ function formatCell(value: unknown, fecha?: boolean): string {
   if (Array.isArray(value)) return value.length === 0 ? "—" : value.map(String).join("\n");
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
+}
+
+const ICONOS: Record<string, { simbolo: string; color: string; texto: string }> = {
+  ok: { simbolo: "✓", color: "#34c759", texto: "Publicado" },
+  error: { simbolo: "✗", color: "#ff3b30", texto: "No se pudo publicar" },
+  cancelado: { simbolo: "✗", color: "#8e8e93", texto: "Cancelado" },
+  espera: { simbolo: "⏳", color: "#8a4b08", texto: "En proceso" },
+};
+
+function renderCelda(c: Columna, row: Row) {
+  const valor = row[c.clave];
+  if (c.tipo === "icono") {
+    const icono = ICONOS[String(valor)] ?? ICONOS.espera;
+    return <span title={icono.texto} aria-label={icono.texto} style={{ color: icono.color, fontSize: 18, fontWeight: 700 }}>{icono.simbolo}</span>;
+  }
+  if (c.tipo === "enlace") {
+    return typeof valor === "string" && valor ? (
+      <a href={valor} target="_blank" rel="noopener noreferrer" style={{ color: "#0071e3", fontWeight: 600, textDecoration: "none" }}>Ver artículo ↗</a>
+    ) : (
+      "—"
+    );
+  }
+  return formatCell(valor, c.fecha);
 }
 
 function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[number]; total: number | null; esAdmin: boolean; todos: boolean }) {
@@ -212,7 +251,7 @@ function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[numbe
                   {rows.map((row) => (
                     <tr key={row.id} style={{ borderTop: "1px solid #e5e5ea" }}>
                       {columnas.map((c) => (
-                        <td key={c.clave} style={{ ...tdStyle, whiteSpace: "pre-line", fontSize: 13 }}>{formatCell(row[c.clave], c.fecha)}</td>
+                        <td key={c.clave} style={{ ...tdStyle, whiteSpace: "pre-line", fontSize: 13 }}>{renderCelda(c, row)}</td>
                       ))}
                     </tr>
                   ))}
@@ -281,7 +320,7 @@ export default function HistorialForense() {
           Todos mis sitios
         </label>
       </div>
-      {SECCIONES.map((def) => (
+      {SECCIONES.filter((def) => !def.soloAdmin || esAdmin).map((def) => (
         <Seccion key={def.id} def={def} total={resumen ? (resumen[def.id] ?? 0) : null} esAdmin={esAdmin} todos={todos} />
       ))}
       <HistorialExplicaciones />
