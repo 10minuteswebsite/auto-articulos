@@ -142,3 +142,8 @@ Simulador y pruebas: `docs/guardia-de-angulos/` (`guard-sim.mjs`, `guard-props.m
 - **Frenos automáticos:** freno por cuenta (2 solicitudes seguidas con notas → 24 h sin guardia) y freno global (3 fallos en las últimas 10 solicitudes activas → se salta).
 - **Control de administrador:** modo y porcentaje (10/25/50/100) desde «Guardia de ángulos»; nace APAGADO/en sombra, sin cambios hasta que Milton elija «activo».
 - **Pendiente:** subida automática del porcentaje, aviso por correo, y probar el modo activo con tráfico real (se empieza en 10 %).
+
+## 18. Medición retrospectiva y la ÚNICA corrección del juez por lista (2026-11-01)
+- **Medición sin mirar el futuro (24 solicitudes pasadas, 216 títulos, sin títulos del sitio de hoy):** el juez marcó 124 títulos (57,4 %); 23 de 24 solicitudes entregarían menos de 9; 17 de 24 tendrían menos de 5 limpios. Costo de la prueba: US$ 0,41. (Con los títulos del sitio de hoy daba 63,9 %: sesgado por incluir artículos posteriores.)
+- **Lectura de los ejemplos:** unos dos tercios de las marcas parecen correctas (misma pregunta concreta); cerca de un tercio son excesivas: el juez agrupa por TEMA y no por la pregunta exacta («evitar» frente a «comparar» frente a «entender» costos; «fijar el precio» frente a «coordinar la mudanza»).
+- **Corrección única (acordada con Milton):** regla clave en el prompt («compartir el tema general NO basta; misma pregunta CONCRETA»), contraejemplos neutros de ese tipo y 4 casos de validación nuevos sin aguja (16 en total: 6 con aguja y 10 sin ella). Se repiten la validación por lista y la medición retrospectiva. Si la medición no mejora claramente, se detiene y se presentan alternativas; la guardia sigue en sombra y no se activa.

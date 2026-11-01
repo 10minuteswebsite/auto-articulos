@@ -126,7 +126,7 @@ const item = (id: number, candidate: string, titles: string[]): ListJudgeItem =>
 const items = [item(1, "Errores al elegir un plan", ["Cómo cancelar un plan", "Fallas que debes evitar al seleccionar un plan"]), item(2, "Cómo abrir un café", ["Cómo cerrar un café"])];
 
 test("el prompt del juez por lista explica los sinónimos y pide ante la duda no marcar", () => {
-  for (const regla of ["sinónimos", "same_as", "lista vacía", "preferible dejar pasar", "SÍ cambian la pregunta", "posible página de categoría", "JSON"]) {
+  for (const regla of ["sinónimos", "same_as", "lista vacía", "preferible dejar pasar", "SÍ cambian la pregunta", "posible página de categoría", "JSON", "compartir el TEMA general NO basta", "pregunta CONCRETA"]) {
     assert.ok(LIST_JUDGE_SYSTEM_PROMPT.includes(regla), regla);
   }
   const { user } = buildListJudgeMessages(items);
@@ -157,8 +157,8 @@ test("callListJudge nunca lanza y proporciona margen de tokens según el número
   assert.equal(await callListJudge(items, "k", { fetchImpl: async () => ({ ok: false, status: 500, json: async () => ({}) }) }), null);
 });
 
-test("los casos de validación por lista: 12 casos de 25 existentes, 6 con aguja y 6 sin ella", () => {
-  assert.equal(LIST_CASES.length, 12);
+test("los casos de validación por lista: 16 casos de 25 existentes, 6 con aguja y 10 sin ella", () => {
+  assert.equal(LIST_CASES.length, 16);
   for (const c of LIST_CASES) assert.equal(c.neighbors.length, 25, c.candidate);
   assert.equal(LIST_CASES.filter((c) => c.expected !== null).length, 6);
   for (const c of LIST_CASES.filter((c) => c.expected !== null)) assert.ok(c.neighbors[c.expected as number], c.candidate);

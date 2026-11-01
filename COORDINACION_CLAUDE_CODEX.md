@@ -13237,3 +13237,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: tope de gasto del modo activo y backtest (sin migración, sin activar). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — 2026-11-01: backtest sin sesgo del futuro (sin migración, sin activar). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: juez por lista más preciso (única corrección; sin migración, sin activar). Se libera al fusionar.
