@@ -269,3 +269,19 @@ test("módulo 2: se quitan los repetidos, se conserva el orden y los datos del t
   assert.equal(keptOne.length, 1);
   assert.deepEqual(dropSimilarKeepOne([], [], []), []);
 });
+
+test("módulo 2: si quedan pocos títulos se rellena hasta 3 con los menos parecidos, sin casi idénticos ni exactos", () => {
+  const memory = [M("Tips for selling your Coral Gables home fast"), M("How to price your Coral Gables home for sale"), M("Closing costs when selling a home in Miami")];
+  const items = [
+    { text: "Tips for selling your Coral Gables home fast", rationale: "exacto" },
+    { text: "Ways to price your Coral Gables house for a sale", rationale: "parecido" },
+    { text: "Closing costs for selling your Miami home", rationale: "parecido 2" },
+    { text: "Staging a condo for photos", rationale: "limpio" },
+  ];
+  const { scored, hardDropped } = scoreCandidates(items.map((i) => i.text), memory, {});
+  const kept = dropSimilarKeepOne(items, scored, hardDropped);
+  assert.deepEqual(kept.map((k) => k.rationale), ["parecido", "limpio"], "vuelve el parecido de 65 %; el casi idéntico (100 %) y el exacto no");
+  assert.ok(!kept.some((k) => k.rationale === "exacto"), "el duplicado exacto nunca vuelve");
+  assert.ok(kept.some((k) => k.rationale === "limpio"));
+  assert.deepEqual(dropSimilarKeepOne(items, scored, hardDropped, 1).length >= 1, true);
+});

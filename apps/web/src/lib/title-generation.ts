@@ -342,7 +342,8 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
   try {
     const avoid = await loadAvoid(userId, category.id);
     const avoidSet = buildAvoidSet(avoid.all);
-    const promptAvoid = pickAvoidForPrompt(avoid.items);
+    // Con la guardia activa se le muestran a la IA más títulos ya cubiertos (hasta 100): así propone otros ángulos y llegan menos repetidos.
+    const promptAvoid = pickAvoidForPrompt(avoid.items, guardActive ? GUARD.PROMPT_AVOID_ACTIVE : undefined);
 
     const accepted: string[] = [];
     // Todo lo que devolvió la IA, para que la guardia (modo sombra) lo evalúe después de responder.

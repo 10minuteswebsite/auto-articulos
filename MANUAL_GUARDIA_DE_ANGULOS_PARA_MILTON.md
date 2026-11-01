@@ -43,3 +43,9 @@
 - El modo "activo" se probó con casos de prueba y con un caso real repetido (cuenta de Lorena), pero **aún no con tráfico real aplicado**: por eso se empieza al 10 %.
 
 Detalle técnico completo: `ESPECIFICACION_FINAL_GUARDIA_DE_ANGULOS.md`. Historial de decisiones: `CURRENT_STATE.md`.
+
+
+## Mejor de dos mundos (2026-11-01)
+- **Siempre salen títulos:** módulo 1 entrega 5 o más; módulo 2 conserva al menos 3 por grupo cuando hay de dónde rellenar con los menos parecidos (nunca con casi idénticos ni duplicados exactos) y nunca deja un grupo vacío.
+- **Prevenir antes de filtrar:** con la guardia activa, a la IA se le muestran hasta 100 títulos ya cubiertos (antes 60) para que proponga otros ángulos.
+- **Juez medido de nuevo:** 8 solicitudes pasadas, marcó 36,1 % (antes 57 %), solo 1 de 8 necesitó completar con notas. Costo de la prueba ≈ 0,14 dólares.

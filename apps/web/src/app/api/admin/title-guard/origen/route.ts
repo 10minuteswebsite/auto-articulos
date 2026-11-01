@@ -50,6 +50,9 @@ export async function GET() {
     modulo2: { comparados: 0, casiIdenticos: 0, zonaJuez: 0 },
     modulo1: { comparados: 0, casiIdenticos: 0, zonaJuez: 0 },
   };
+  // Para afinar el umbral del módulo 2 (sin IA): cuántos caen en cada franja de parecido y ejemplos reales de la franja 65–84 %.
+  const bandas = { "85+": 0, "75-84": 0, "65-74": 0, "55-64": 0, "menos55": 0 };
+  const ejemplos: Array<{ parecido: number; titulo: string; contra: string }> = [];
   let accounts = 0;
   let truncated = false;
   for (const list of byUser.values()) {
@@ -62,9 +65,18 @@ export async function GET() {
     const sim = buildSimilarity(list.map((x) => x.text));
     for (let i = 1; i < list.length; i++) {
       let best = 0;
+      let bestJ = -1;
       for (let j = Math.max(0, i - MAX_PREVIOUS); j < i; j++) {
         const s = sim(list[i].text, list[j].text);
-        if (s > best) best = s;
+        if (s > best) {
+          best = s;
+          bestJ = j;
+        }
+      }
+      if (list[i].origin === "modulo2") {
+        const key = best >= 0.85 ? "85+" : best >= 0.75 ? "75-84" : best >= 0.65 ? "65-74" : best >= 0.55 ? "55-64" : "menos55";
+        bandas[key] += 1;
+        if (best >= 0.65 && best < 0.85 && ejemplos.length < 14 && accounts % 3 === 0) ejemplos.push({ parecido: Math.round(best * 100), titulo: list[i].text, contra: list[bestJ].text });
       }
       const bucket = stats[list[i].origin];
       bucket.comparados += 1;
@@ -79,6 +91,8 @@ export async function GET() {
     resumen: `Artículos publicados en 120 días: ${total}. Del módulo 2 (CONTENIDO GENERADO POR IA): ${count.modulo2.total} (${pct(count.modulo2.total, total)} %). Del módulo 1 (CONTENIDO PROPIO): ${count.modulo1.total} (${pct(count.modulo1.total, total)} %). Repetición medida solo con el código (sin IA): módulo 2 → ${stats.modulo2.casiIdenticos} casi idénticos (${pct(stats.modulo2.casiIdenticos, stats.modulo2.comparados)} %) y ${stats.modulo2.zonaJuez} en la zona del juez (${pct(stats.modulo2.zonaJuez, stats.modulo2.comparados)} %); módulo 1 → ${stats.modulo1.casiIdenticos} casi idénticos (${pct(stats.modulo1.casiIdenticos, stats.modulo1.comparados)} %) y ${stats.modulo1.zonaJuez} en la zona del juez (${pct(stats.modulo1.zonaJuez, stats.modulo1.comparados)} %).`,
     articulosPublicados: { total, modulo2: count.modulo2, modulo1: count.modulo1 },
     repeticionPorCodigo: stats,
+    modulo2PorFranja: bandas,
+    modulo2EjemplosZona65a84: ejemplos,
     cuentasMedidas: accounts,
     cortadoPorTiempo: truncated,
     nota: "La zona del juez es parecido de palabras de 38 a 84 %: ahí hay repetidos reales y también títulos distintos del mismo tema; solo el juez de IA los separa. 'Casi idéntico' (≥ 85 %) es repetición casi segura.",
