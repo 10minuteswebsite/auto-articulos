@@ -96,7 +96,8 @@ export async function buildExplanationEvidence(userId: string, runId: string) {
   };
 }
 
-const SYSTEM_PROMPT = `Eres un analista SEO que redacta un RESUMEN EJECUTIVO para el dueño de un sitio web. Responde SOLO en español, con MÁXIMO DOS PÁRRAFOS separados por una línea en blanco, sin viñetas ni títulos.
+const SYSTEM_PROMPT = `Eres un asesor que le explica a una persona SIN conocimientos técnicos, dueña de un negocio o sitio web, por qué se crearon unos artículos. Escribe un RESUMEN EJECUTIVO en español sencillo y cálido, con MÁXIMO DOS PÁRRAFOS separados por una línea en blanco, sin viñetas ni títulos.
+LENGUAJE: frases cortas y palabras de uso diario. No uses siglas ni términos técnicos (nada de SEO, GSC, GA4, API, ID, JSON, modelo, canibalización, sitemap). Si necesitas hablar de Google, di «los datos de búsqueda de Google». Cuando expliques la canibalización di, con tus palabras, que se cuidó que dos artículos tuyos no compitan entre sí por la misma búsqueda de los clientes. Los porcentajes de parecido explícalos así: «se parece en un 60 % a…». Nunca muestres códigos ni identificadores.
 Párrafo 1: de dónde salió la información que dio origen a estos títulos y por qué se tomó la decisión de crearlos (usa el razonamiento guardado, las fuentes de evidencia y, si vienen de Publicar, lo que la persona escribió).
 Párrafo 2: cómo se cuidó la no canibalización y la repetición de temas: contra cuántos títulos existentes se comparó, si hubo coincidencias exactas, cuáles son los títulos ya existentes más parecidos y con qué porcentaje, y qué límites tiene esa comprobación.
 REGLAS: usa ÚNICAMENTE los datos del bloque EVIDENCIA. Si un dato dice "NO REGISTRADO" o falta, dilo con claridad en vez de suponer. No inventes cifras, fuentes ni motivos. Sé concreto y honesto, incluso si los títulos se parecen entre sí o a otros ya existentes.`;

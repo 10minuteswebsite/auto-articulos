@@ -2,6 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma, type Prisma } from "@auto-articulos/db";
 import { getCurrentUser, getCurrentUserId, getActingAdmin } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
+import { friendlyPublishError } from "@auto-articulos/shared/src/friendly-error";
+
+// Todo lo que ve una persona va en español claro. Los códigos del sistema se
+// conservan APARTE (columnas «Código…») por si hay que investigar o escribir a soporte.
+const ESTADO_TITULO: Record<string, string> = {
+  pending: "En espera",
+  processing: "Publicándose",
+  success: "Publicado",
+  error: "No se pudo publicar",
+  cancelled: "Cancelado",
+};
+const ESTADO_EJECUCION: Record<string, string> = {
+  pending: "En espera",
+  running: "En marcha",
+  success: "Terminada",
+  halted: "Detenida",
+  cancelled: "Cancelada",
+};
+const ORIGEN_DESCARTE: Record<string, string> = {
+  opportunity_title: "Descartaste este título",
+  opportunity_group: "Descartaste toda la categoría",
+  opportunity_all: "Descartaste todas las oportunidades",
+  opportunity_replaced: "Se reemplazó al analizar de nuevo",
+  run_deleted: "Se borró con «Borrar historial»",
+};
+const texto = (map: Record<string, string>, valor: string) => map[valor] ?? valor;
+const motivoClaro = (raw: string | null) => (raw ? friendlyPublishError(raw, "tu sitio") : null);
+const recorte = (raw: string | null) => (raw ? raw.slice(0, 300) : null);
 
 // Historial forense de Artículos (Fase 1, solo lectura, sin tablas nuevas).
 // Devuelve cada título con TODOS sus datos para poder investigar qué pasó:
@@ -98,9 +126,9 @@ export async function GET(request: NextRequest) {
       titulo: d.titleText,
       categoria: d.categoryName,
       sitio: d.siteDomain,
-      origen: d.source,
-      quien: d.actor,
-      razonDelTitulo: d.titleRationale,
+      origen: texto(ORIGEN_DESCARTE, d.source),
+      quien: d.actor === "user" ? "Tú" : d.actor,
+      razonDelTitulo: d.source === "run_deleted" && d.titleRationale ? motivoClaro(d.titleRationale.replace(/^(Error|Cancelado):?\s*/i, "")) ?? d.titleRationale : d.titleRationale,
       razonDeLaOportunidad: d.groupRationale,
       impresiones: d.impressions,
       clics: d.clicks,
@@ -138,10 +166,10 @@ export async function GET(request: NextRequest) {
       id: e.id,
       fecha: e.createdAt,
       titulo: e.title.text,
-      estadoDelTitulo: e.title.status,
+      estadoDelTitulo: texto(ESTADO_TITULO, e.title.status),
       categoria: e.title.run.category.name,
-      tituloId: e.titleId,
-      ejecucionId: e.title.runId,
+      codigoTitulo: e.titleId,
+      codigoEjecucion: e.title.runId,
       // Las capturas de diagnóstico pueden pesar cientos de KB (ver GET /api/runs).
       evento: e.message.length > EVENT_MESSAGE_MAX ? `${e.message.slice(0, EVENT_MESSAGE_MAX)}…` : e.message,
     }));
@@ -160,17 +188,18 @@ export async function GET(request: NextRequest) {
       id: t.id,
       titulo: t.text,
       tituloFinal: t.finalTitle,
-      estado: t.status,
+      estado: texto(ESTADO_TITULO, t.status),
       intentos: t.attempts,
-      motivo: t.errorMessage,
+      motivo: motivoClaro(t.errorMessage),
+      codigoTecnico: recorte(t.errorMessage),
       categoria: t.run.category.name,
       sitio: t.run.category.siteDomain,
-      ejecucionId: t.run.id,
-      estadoEjecucion: t.run.status,
+      codigoEjecucion: t.run.id,
+      estadoEjecucion: texto(ESTADO_EJECUCION, t.run.status),
       ejecucionCreada: t.run.createdAt,
       ejecucionTerminada: t.run.finishedAt,
       idioma: t.run.contentLanguage,
-      sinIndexar: t.run.disableIndexing,
+      noEnviadoAGoogle: t.run.disableIndexing ? "Sí" : "No",
       origenOportunidad: t.opportunityCreatedAt,
       procesado: t.processedAt,
       publicado: t.publishedAt,

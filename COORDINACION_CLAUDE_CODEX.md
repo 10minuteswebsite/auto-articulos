@@ -13197,3 +13197,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — LIBERADO 2026-11-01. Historial forense Fases 2 y 3 (tablas ya aplicadas por Milton; PR #723 en producción; Fase 3 sin migración adicional).
 
 - **Capitán de migración:** Claude — 2026-11-01: cupo de explicaciones 1 por día con aviso al usuario (sin migración). Liberado al cerrar el PR.
+
+- **Capitán de migración:** Claude — 2026-11-01: textos del historial forense en español claro, códigos aparte (sin migración). Se libera al fusionar.

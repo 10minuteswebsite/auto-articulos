@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
   try {
     quota = await explanationQuota(userId, unlimited);
   } catch {
-    return NextResponse.json({ error: "Esta función todavía no está disponible. Inténtalo más tarde." }, { status: 503 });
+    return NextResponse.json({ error: "Esta función todavía no está disponible para tu cuenta. Inténtalo más tarde o escríbenos si el problema sigue." }, { status: 503 });
   }
   if (quota.exhausted) {
     return NextResponse.json(
