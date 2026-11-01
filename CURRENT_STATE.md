@@ -909,3 +909,4 @@ Responsable: Claude. Capitanía liberada.
 - Límite honesto: para ejecuciones anteriores al 1/11/2026 el razonamiento original ya no existe; el resumen lo dice.
 - Pendiente: Fase 4 (análisis del algoritmo con los datos de Inés); `migrate.yml` no tiene interruptor `safe_forensic_history` porque el token local no tiene scope `workflow`.
 - Textos de Historiales completos en español claro (estados y orígenes traducidos, errores por friendlyPublishError, código técnico en columna aparte); la IA de «¿Por qué estos títulos?» escribe sin jerga (2026-11-01).
+- «Historiales completos» nace colapsado y no consulta nada hasta abrirse (pedido de Milton 2026-11-01: a los clientes, más explicaciones visibles = más preguntas).
