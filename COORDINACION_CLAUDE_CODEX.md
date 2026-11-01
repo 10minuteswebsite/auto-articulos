@@ -13249,3 +13249,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: medición de módulos (solo lectura; sin migración). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — 2026-11-01: guardia en el módulo 2 (solo con modo activo; sin migración; no activada). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: tope propio del módulo 2 (sin migración; no activada). Se libera al fusionar.
