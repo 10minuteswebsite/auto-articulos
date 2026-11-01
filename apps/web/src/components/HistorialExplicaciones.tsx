@@ -13,11 +13,12 @@ type Cupo = { used: number; max: number; unlimited: boolean; nextAt: string | nu
 type Saved = { id: string; runId: string; requestedAt: string; summary: string; status: string; errorMessage: string | null };
 
 const cardStyle: CSSProperties = {
-  background: "#ffffff",
+  background: "transparent",
   color: "#1d1d1f",
-  border: "1px solid #d2d2d7",
-  borderRadius: 6,
-  padding: 18,
+  border: "none",
+  borderTop: "1px solid #e5e5ea",
+  borderRadius: 0,
+  padding: "14px 0 4px",
   marginTop: 12,
   boxSizing: "border-box",
   width: "100%",
