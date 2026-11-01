@@ -182,3 +182,12 @@ test("la validación por lista exige 5 de 6 agujas y cero falsos", () => {
   missedTwo.set(needles[1], { sameAs: [LIST_CASES[needles[1] - 1].expected! + 1], reason: "" });
   assert.equal(scoreListJudge(LIST_CASES, missedTwo).passes, true);
 });
+
+test("ningún título de relleno de la validación por lista hace la misma pregunta que un candidato sin aguja (los casos deben ser correctos)", () => {
+  // Hallazgo del 2026-11-01: el relleno «Seguro para trabajadores por cuenta propia» era sinónimo exacto del candidato
+  // «Seguro de salud para trabajadores independientes»; el juez tenía razón y el caso estaba mal. Se vigila que no vuelva a pasar.
+  const sinAguja = LIST_CASES.filter((c) => c.expected === null);
+  const independientes = sinAguja.find((c) => c.candidate.includes("trabajadores independientes"));
+  assert.ok(independientes);
+  assert.ok(!independientes.neighbors.some((n) => /por cuenta propia|autónomos|autonomos/i.test(n)));
+});

@@ -74,7 +74,7 @@ const DISTRACTORS: string[] = [
   "Cuándo conviene contratar un seguro de vida a término", "Seguro de auto: qué cubre la responsabilidad civil", "Cómo proteger tu casa contra huracanes",
   "Qué es el copago y cuándo se paga", "Beneficios de un plan para jubilados", "Cómo renovar tu plan cada año sin sorpresas",
   "Qué hacer en una emergencia médica fuera de tu ciudad", "Recetas y medicamentos genéricos: cómo ahorrar en la farmacia", "Cómo funcionan las cuentas de ahorro para gastos médicos",
-  "Seguro para trabajadores por cuenta propia: opciones", "Cobertura para embarazo y parto explicada", "Qué es una preautorización y por qué la piden",
+  "Cómo funcionan los períodos de gracia en los pagos del plan", "Cobertura para embarazo y parto explicada", "Qué es una preautorización y por qué la piden",
   "Cómo comparar redes de hospitales en tu zona", "Planes para pequeñas empresas: lo básico", "Vacunas y chequeos preventivos cubiertos",
   "Cómo leer tu explicación de beneficios", "Seguro de viaje: cuándo es necesario", "Telemedicina: qué cubre tu plan",
   "Home Insurance Basics for First-Time Owners", "How Flood Insurance Differs from Standard Coverage", "Understanding Your Auto Policy Declarations Page",
