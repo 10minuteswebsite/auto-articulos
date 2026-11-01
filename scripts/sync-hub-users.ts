@@ -5,7 +5,7 @@ import { syncUserToHub } from "../apps/web/src/lib/hub-sync";
 async function main() {
   if(process.env.HUB_SYNC_VERIFY_ONLY==='true'){
     const r=await hubBackendFetch('/api/integrations/auto-articulos/user-sync',{local_user_id:'auth-verification-only',email:'invalid'});
-    const d=await r.json();if(r.status!==400||d.error!=='local_user_id and a valid email are required')throw Error('Hub authentication verification failed');
+    const d=await r.json();if(r.status!==400||d.error!=='local_user_id and a valid email are required')throw Error('Hub authentication verification failed: HTTP '+r.status+' '+(typeof d.error==='string'&&/^[A-Za-z_ ]{1,100}$/.test(d.error)?d.error:'unclassified'));
     console.log('[HUB SYNC] authenticated; invalid payload rejected before data writes');return;
   }
   const emailFilter = process.env.HUB_SYNC_EMAIL?.trim().toLowerCase();
