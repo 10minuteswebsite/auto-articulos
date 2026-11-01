@@ -33,7 +33,9 @@ export async function GET() {
         detalle: r.details,
       })),
     });
-  } catch {
-    return NextResponse.json({ disponible: false, mensaje: "La tabla del registro todavía no existe. Aplica la migración antes de pasar a modo sombra." });
+  } catch (error) {
+    // Solo lo ve un administrador: se muestra la causa real para no adivinar (tabla ausente, columna distinta, conexión…).
+    const causa = error instanceof Error ? error.message.replace(/\s+/g, " ").slice(0, 400) : String(error);
+    return NextResponse.json({ disponible: false, mensaje: "No se pudo leer el registro de la guardia. Si la tabla TitleGuardReport no existe, aplica la migración antes de pasar a modo sombra.", causa });
   }
 }

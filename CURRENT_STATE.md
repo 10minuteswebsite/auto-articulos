@@ -927,3 +927,4 @@ Responsable: Claude. Capitanía liberada.
 - Guardia de ángulos: intento 3 del juez falló por límite de tokens de MI endpoint (no del juez); corregido. Validación pendiente.
 - Guardia de ángulos: juez v1 85 %, v2 89 % (1 falso), v3 70 % (0 falsos) con gpt-4o-mini: límite del modelo, no del prompt. Se agrega ?modelo= en la validación de administrador para medir un modelo más fuerte; producción sigue en gpt-4o-mini hasta decisión de Milton.
 - Guardia de ángulos FASE 2 (2026-11-01): modelo del juez gpt-4.1; tabla TitleGuardReport (migración 20261101200000_title_guard_report, la aplica Milton antes de pasar a sombra); modo apagado/sombra en SystemSetting; la sombra corre con after() y NO cambia lo que se entrega; endpoints admin mode/reports/baseline y sección «Guardia de ángulos» en el detalle de administrador. Nace APAGADA.
+- Guardia de ángulos: el endpoint reports ahora muestra la causa real del error al administrador (antes decía siempre «la tabla no existe»).
