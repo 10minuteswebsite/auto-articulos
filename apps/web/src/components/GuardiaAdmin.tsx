@@ -44,7 +44,7 @@ export default function GuardiaAdmin() {
           setTotal(d.total);
         } else {
           setReportes(null);
-          setMensaje(d.mensaje);
+          setMensaje(d.causa ? `${d.mensaje} Causa: ${d.causa}` : d.mensaje);
         }
       }
     } catch {
