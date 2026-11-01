@@ -8,9 +8,10 @@ import { guardSafeToApply, loadGuardMemory } from "@/lib/title-guard-shadow";
 // Bing y GA4 produce los títulos y ANTES de guardarlos. Solo QUITA títulos repetidos: no cambia la justificación, las
 // impresiones, los clics ni ninguna señal; nunca vacía un grupo (si todo se parece, queda el menos parecido); y ante cualquier
 // fallo devuelve los grupos tal cual. Mismo interruptor, mismo porcentaje y mismos frenos que el módulo 1.
-const JUDGE_MAX_CALLS = 1; // tope de gasto por análisis (≈ 40 títulos evaluados por el juez, unos 5 centavos como máximo)
-/// Tope propio del módulo 2: un análisis cuesta mucho más que un clic del módulo 1, así que se limita por separado (≈ 0,60 dólares al día como máximo).
-export const OPPORTUNITY_DAILY_CAP = 12;
+// PLAN B (decisión de Milton 2026-11-01): el módulo 2 trabaja SOLO con código, sin IA y sin costo. Para volver a usar el juez, poner 1.
+const JUDGE_MAX_CALLS = 0;
+/// Tope propio del módulo 2 (con el juez apagado no cuesta nada; si se reactiva el juez, bajarlo a 12 ≈ 0,60 dólares al día).
+export const OPPORTUNITY_DAILY_CAP = 200; // sin juez no hay gasto: el tope solo evita abusos
 const JUDGE_ITEMS_PER_CALL = 40;
 
 interface OpportunityGroupLike {
@@ -28,8 +29,8 @@ export async function applyGuardToOpportunities<T extends OpportunityGroupLike>(
     const info = await getTitleGuardModeInfo();
     if (info.mode !== "activo") return untouched;
     const percent = await getTitleGuardPercent();
-    const today = new Date().toISOString().slice(0, 10);
-    if (!shouldApplyGuard(`${userId}:${today}`, percent)) return untouched;
+    // Sorteo por ejecución (no por día): con 50 % se protege cerca de la mitad de las veces de CADA usuario.
+    if (!shouldApplyGuard(`${userId}:${Date.now()}:${Math.random()}`, percent)) return untouched;
     if (!(await guardSafeToApply(userId))) return untouched;
     const appliedToday = await prisma.titleGuardReport.count({ where: { mode: "activo", categoryName: { startsWith: "Módulo 2" }, createdAt: { gte: new Date(Date.now() - 24 * 3600_000) } } });
     if (appliedToday >= OPPORTUNITY_DAILY_CAP) return untouched;
