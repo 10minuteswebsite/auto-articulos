@@ -13195,3 +13195,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — reclamo 2026-11-01 (Fase 2). Motivo: historial forense, tablas aditivas ArticleTitleDiscard/TitleOrigin/TitleExplanation (migración 20261101120000_forensic_history, interruptor safe_forensic_history). La migración se aplica ANTES de fusionar.
 
 - **Capitán de migración:** Claude — LIBERADO 2026-11-01. Historial forense Fases 2 y 3 (tablas ya aplicadas por Milton; PR #723 en producción; Fase 3 sin migración adicional).
+
+- **Capitán de migración:** Claude — 2026-11-01: cupo de explicaciones 1 por día con aviso al usuario (sin migración). Liberado al cerrar el PR.

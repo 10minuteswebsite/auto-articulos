@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
-import { getCurrentUserId } from "@/lib/current-user";
+import { getActingAdmin, getCurrentUser } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
-import {
-  MAX_EXPLANATIONS_PER_DAY,
-  buildExplanationEvidence,
-  explanationsToday,
-  writeExplanation,
-} from "@/lib/title-explanation";
+import { buildExplanationEvidence, explanationQuota, writeExplanation } from "@/lib/title-explanation";
+
+async function currentUserWithQuotaRule() {
+  const user = await getCurrentUser();
+  const unlimited = user.role === "admin" || Boolean(await getActingAdmin());
+  return { userId: user.id, unlimited };
+}
 
 // «¿Por qué estos títulos?» — SOLO bajo demanda, nunca automático.
 // GET  ?runs=1  → las ejecuciones recientes que se pueden explicar.
@@ -15,7 +16,7 @@ import {
 // POST {runId}  → genera y guarda una explicación nueva (máximo 2 párrafos).
 
 export async function GET(request: NextRequest) {
-  const userId = await getCurrentUserId();
+  const { userId, unlimited } = await currentUserWithQuotaRule();
   const denied = await requireProductAccess(userId, "ARTICULOS", "/api/historial/explicacion");
   if (denied) return denied;
 
@@ -29,8 +30,7 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.json({
       runs: runs.map((r) => ({ id: r.id, createdAt: r.createdAt, categoria: r.category.name, titulos: r._count.titles })),
-      usadasHoy: await explanationsToday(userId).catch(() => 0),
-      maximoPorDia: MAX_EXPLANATIONS_PER_DAY,
+      cupo: await explanationQuota(userId, unlimited).catch(() => null),
     });
   }
 
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const userId = await getCurrentUserId();
+  const { userId, unlimited } = await currentUserWithQuotaRule();
   const denied = await requireProductAccess(userId, "ARTICULOS", "/api/historial/explicacion");
   if (denied) return denied;
 
@@ -58,14 +58,17 @@ export async function POST(request: NextRequest) {
   const runId = typeof body?.runId === "string" ? body.runId : "";
   if (!runId) return NextResponse.json({ error: "Elige una ejecución." }, { status: 400 });
 
-  let used = 0;
+  let quota;
   try {
-    used = await explanationsToday(userId);
+    quota = await explanationQuota(userId, unlimited);
   } catch {
     return NextResponse.json({ error: "Esta función todavía no está disponible. Inténtalo más tarde." }, { status: 503 });
   }
-  if (used >= MAX_EXPLANATIONS_PER_DAY) {
-    return NextResponse.json({ error: `Ya pediste ${MAX_EXPLANATIONS_PER_DAY} explicaciones en las últimas 24 horas. Podrás pedir otra más tarde.` }, { status: 429 });
+  if (quota.exhausted) {
+    return NextResponse.json(
+      { error: `Ya usaste tu explicación de hoy: solo se permite ${quota.max} cada 24 horas para controlar el uso de la IA.`, disponibleDesde: quota.nextAt },
+      { status: 429 },
+    );
   }
 
   const evidence = await buildExplanationEvidence(userId, runId);

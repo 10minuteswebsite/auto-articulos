@@ -1,13 +1,14 @@
 import { prisma, type Prisma } from "@auto-articulos/db";
 import { normalizeTitleKey } from "@auto-articulos/shared/src/published-title";
-import { limitToTwoParagraphs, similarityPct } from "@/lib/title-explanation-core";
+import { EXPLANATION_WINDOW_MS, MAX_EXPLANATIONS_PER_DAY, limitToTwoParagraphs, nextExplanationAt, similarityPct } from "@/lib/title-explanation-core";
+
+export { MAX_EXPLANATIONS_PER_DAY };
 
 // EXPLICACIÓN BAJO DEMANDA de por qué se crearon los títulos de una ejecución.
 // Solo corre cuando la persona la pide. El código reúne los datos reales y la
 // IA únicamente los redacta en un resumen de máximo dos párrafos; el resumen se
 // guarda con su fecha de solicitud (tabla TitleExplanation) y no se reescribe.
 
-export const MAX_EXPLANATIONS_PER_DAY = 5;
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 // Mismo modelo que el resto del sistema; no se cambia sin aprobación de Milton.
 const OPENAI_MODEL = "gpt-4o-mini";
@@ -130,10 +131,19 @@ export async function writeExplanation(evidence: unknown): Promise<{ summary: st
   }
 }
 
-export async function explanationsToday(userId: string): Promise<number> {
-  return prisma.titleExplanation.count({
-    where: { userId, status: "ok", requestedAt: { gte: new Date(Date.now() - 24 * 3600_000) } },
+/**
+ * Cupo de explicaciones: 1 por cada 24 horas (decisión de Milton, 2026-11-01,
+ * para no multiplicar el costo de IA). El administrador, también cuando actúa
+ * como otro usuario, no tiene tope para poder investigar. Los intentos con
+ * error no consumen cupo.
+ */
+export async function explanationQuota(userId: string, unlimited: boolean) {
+  const recent = await prisma.titleExplanation.findMany({
+    where: { userId, status: "ok", requestedAt: { gte: new Date(Date.now() - EXPLANATION_WINDOW_MS) } },
+    select: { requestedAt: true },
   });
+  const nextAt = unlimited ? null : nextExplanationAt(recent.map((r) => r.requestedAt), MAX_EXPLANATIONS_PER_DAY);
+  return { used: recent.length, max: MAX_EXPLANATIONS_PER_DAY, unlimited, nextAt, exhausted: nextAt !== null };
 }
 
 export type SavedExplanationInput = Prisma.TitleExplanationUncheckedCreateInput;
