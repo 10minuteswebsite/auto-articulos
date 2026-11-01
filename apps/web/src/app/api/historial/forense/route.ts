@@ -73,14 +73,17 @@ export async function GET(request: NextRequest) {
 
   const params = request.nextUrl.searchParams;
   const seccion = params.get("seccion") ?? "resumen";
-  const todos = params.get("todos") === "1";
+  const quiereTodos = params.get("todos") === "1";
   const cursor = params.get("cursor") || undefined;
   const csv = params.get("formato") === "csv";
 
+  const viewer = await getCurrentUser();
+  const esAdmin = viewer.role === "admin" || Boolean(await getActingAdmin());
   const account = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: { selectedSiteDomain: true },
   });
+  const todos = quiereTodos && esAdmin;
   const siteFilter = !todos && account.selectedSiteDomain ? { siteDomain: account.selectedSiteDomain } : {};
   const runScope: Prisma.RunWhereInput = {
     userId,
@@ -108,9 +111,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (csv || seccion === "pasos-tecnicos") {
-    const user = await getCurrentUser();
-    const acting = user.role === "admin" ? null : await getActingAdmin();
-    if (user.role !== "admin" && !acting) {
+    if (!esAdmin) {
       return NextResponse.json({ error: "La exportación está reservada al administrador." }, { status: 403 });
     }
   }
@@ -168,7 +169,8 @@ export async function GET(request: NextRequest) {
     const porTitulo = new Map<string, string[]>();
     for (const e of eventos) porTitulo.set(e.titleId, [...(porTitulo.get(e.titleId) ?? []), e.m]);
     rows = found.map((t) => {
-      const hitos = hitosDesdeEventos(porTitulo.get(t.id) ?? []).map((h) => `✓ ${h}`);
+      // Un cliente solo necesita saber por qué falló; el detalle paso a paso es para el administrador.
+      const hitos = esAdmin ? hitosDesdeEventos(porTitulo.get(t.id) ?? []).map((h) => `✓ ${h}`) : [];
       const lineas = t.status === "error" ? [...hitos, `✗ ${motivoClaro(t.errorMessage) ?? "No se pudo publicar."}`] : hitos;
       return {
         id: t.id,
@@ -178,7 +180,7 @@ export async function GET(request: NextRequest) {
         pedido: t.run.createdAt,
         publicado: t.publishedAt ?? (t.status === "success" ? t.processedAt : null),
         enlace: t.status === "success" ? t.articleUrl : null,
-        quePaso: lineas.length > 0 ? lineas.join("\n") : "Todavía no hay pasos registrados.",
+        quePaso: lineas.length > 0 ? lineas.join("\n") : esAdmin ? "Todavía no hay pasos registrados." : null,
       };
     });
   } else if (seccion === "pasos-tecnicos") {

@@ -16,6 +16,7 @@ type Columna = { clave: string; titulo: string; fecha?: boolean; soloAdmin?: boo
 const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: string; columnas: Columna[]; soloAdmin?: boolean }> = [
   {
     id: "errores",
+    soloAdmin: true,
     eyebrow: "Sin publicar",
     titulo: "No se pudieron publicar",
     ayuda: "Cada título que terminó en error, con el motivo que registró el sistema. Incluye los de ejecuciones que sí publicaron otros títulos.",
@@ -33,6 +34,7 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
   },
   {
     id: "cancelados",
+    soloAdmin: true,
     eyebrow: "Sin publicar",
     titulo: "Títulos cancelados",
     ayuda: "Títulos que se cancelaron antes de publicarse.",
@@ -48,6 +50,7 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
   },
   {
     id: "en-curso",
+    soloAdmin: true,
     eyebrow: "En marcha",
     titulo: "En curso o en cola",
     ayuda: "Títulos que todavía esperan o se están procesando. Si llevan mucho tiempo aquí, algo se atascó.",
@@ -63,6 +66,7 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
   },
   {
     id: "descartados",
+    soloAdmin: true,
     eyebrow: "Descartados",
     titulo: "Descartados y borrados",
     ayuda: "Oportunidades que descartaste, que se reemplazaron al analizar de nuevo, y errores o cancelados que se borraron con «Borrar historial». Solo se registran desde el 1 de noviembre de 2026: lo anterior no se puede recuperar.",
@@ -81,6 +85,7 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
   },
   {
     id: "propuestos",
+    soloAdmin: true,
     eyebrow: "Temas",
     titulo: "Temas que te propusimos",
     ayuda: "Cada vez que le pediste ideas de títulos a la inteligencia artificial: qué le pediste y qué títulos te ofreció.",
@@ -94,13 +99,13 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
   {
     id: "seguimiento",
     eyebrow: "Registro",
-    titulo: "Seguimiento de cada artículo",
-    ayuda: "Todos tus artículos, del más reciente al más antiguo: si se publicaron (✓) o no (✗), cuándo, el enlace para verlos y lo que pasó con cada uno.",
+    titulo: "Tus artículos",
+    ayuda: "Del más reciente al más antiguo. ✓ se publicó, ✗ no se pudo.",
     columnas: [
       { clave: "icono", titulo: "Estado", tipo: "icono" },
       { clave: "titulo", titulo: "Artículo" },
-      { clave: "categoria", titulo: "Categoría" },
-      { clave: "pedido", titulo: "Lo pediste", fecha: true },
+      { clave: "categoria", titulo: "Categoría", soloAdmin: true },
+      { clave: "pedido", titulo: "Lo pediste", fecha: true, soloAdmin: true },
       { clave: "publicado", titulo: "Se publicó", fecha: true },
       { clave: "enlace", titulo: "Enlace", tipo: "enlace" },
       { clave: "quePaso", titulo: "Qué pasó" },
@@ -305,6 +310,12 @@ export default function HistorialForense() {
     };
   }, [todos, abierto]);
 
+  const principales = SECCIONES.filter((def) => !def.soloAdmin);
+  const soloAdministrador = SECCIONES.filter((def) => def.soloAdmin);
+  const verSeccion = (def: (typeof SECCIONES)[number]) => (
+    <Seccion key={def.id} def={def} total={resumen ? (resumen[def.id] ?? 0) : null} esAdmin={esAdmin} todos={todos} />
+  );
+
   return (
     <details style={{ marginTop: 24 }} onToggle={(e) => setAbierto((e.currentTarget as HTMLDetailsElement).open)}>
       <summary style={{ cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, userSelect: "none" }}>
@@ -314,16 +325,20 @@ export default function HistorialForense() {
         </div>
         <span className="muted" aria-hidden="true">⌄</span>
       </summary>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
-        <label style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
-          <input type="checkbox" checked={todos} onChange={(e) => setTodos(e.target.checked)} />
-          Todos mis sitios
-        </label>
-      </div>
-      {SECCIONES.filter((def) => !def.soloAdmin || esAdmin).map((def) => (
-        <Seccion key={def.id} def={def} total={resumen ? (resumen[def.id] ?? 0) : null} esAdmin={esAdmin} todos={todos} />
-      ))}
       <HistorialExplicaciones />
+      {principales.map(verSeccion)}
+      {esAdmin && (
+        <details style={{ marginTop: 16 }}>
+          <summary style={{ cursor: "pointer", fontSize: 13, color: "#6e6e73", userSelect: "none" }}>Detalle para el administrador</summary>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+            <label style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+              <input type="checkbox" checked={todos} onChange={(e) => setTodos(e.target.checked)} />
+              Todos mis sitios
+            </label>
+          </div>
+          {soloAdministrador.map(verSeccion)}
+        </details>
+      )}
     </details>
   );
 }
