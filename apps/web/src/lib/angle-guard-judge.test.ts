@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LABELED_PAIRS } from "./angle-guard-labeled-pairs";
+import { HELDOUT_PAIRS, LABELED_PAIRS } from "./angle-guard-labeled-pairs";
 import { JUDGE_SYSTEM_PROMPT, buildJudgeMessages, callJudge, parseJudgeOutput, scoreJudge, type JudgeVerdict } from "./angle-guard-judge";
 
 const pairs = [
@@ -9,7 +9,7 @@ const pairs = [
 ];
 
 test("el prompt del juez contiene las reglas que evitan bloquear títulos distintos", () => {
-  for (const regla of ["misma pregunta", "comprar/vender", "número de una lista nunca cambia", "sufijo con el lugar", "año cuando AMBOS", "singular y el plural", "posible página de categoría", "same=false", "JSON"]) {
+  for (const regla of ["accion_igual", "publico_igual", "lugar_igual", "producto_igual", "enfoque_igual", "comprar/vender", "número de una lista", "singular y plural", "dueño que alquila", "lugar de contexto general", "posible página de categoría", "JSON", "el programa saca la conclusión"]) {
     assert.ok(JUDGE_SYSTEM_PROMPT.toLowerCase().includes(regla.toLowerCase()), regla);
   }
   const { user } = buildJudgeMessages(pairs);
@@ -17,13 +17,23 @@ test("el prompt del juez contiene las reglas que evitan bloquear títulos distin
   assert.ok(user.includes("(posible página de categoría)"));
 });
 
-test("interpreta una respuesta correcta y rechaza las incompletas o inservibles", () => {
-  const ok = parseJudgeOutput('{"results":[{"id":1,"same":false,"reason":"comprar vs vender"},{"id":2,"same":true,"reason":"solo cambia el número"}]}', [1, 2]);
+const row = (id: number, overrides: Record<string, unknown> = {}) => ({ id, accion_igual: true, publico_igual: true, lugar_igual: true, producto_igual: true, enfoque_igual: true, reason: "x", ...overrides });
+
+test("interpreta las cinco respuestas: solo es «misma pregunta» si las cinco son iguales", () => {
+  const ok = parseJudgeOutput(JSON.stringify({ results: [row(1, { accion_igual: false }), row(2)] }), [1, 2]);
   assert.equal(ok?.get(1)?.same, false);
   assert.equal(ok?.get(2)?.same, true);
-  assert.equal(parseJudgeOutput('texto antes {"results":[{"id":1,"same":false,"reason":"x"},{"id":2,"same":true,"reason":"y"}]} texto después', [1, 2])?.size, 2);
-  assert.equal(parseJudgeOutput('{"results":[{"id":1,"same":false,"reason":"x"}]}', [1, 2]), null, "falta un par");
-  assert.equal(parseJudgeOutput('{"results":[{"id":1,"same":"no"},{"id":2,"same":true}]}', [1, 2]), null, "tipo inválido");
+  for (const dimension of ["accion_igual", "publico_igual", "lugar_igual", "producto_igual", "enfoque_igual"]) {
+    const one = parseJudgeOutput(JSON.stringify({ results: [row(1, { [dimension]: false })] }), [1]);
+    assert.equal(one?.get(1)?.same, false, dimension);
+  }
+});
+
+test("rechaza las respuestas incompletas o inservibles", () => {
+  assert.equal(parseJudgeOutput('texto antes ' + JSON.stringify({ results: [row(1), row(2)] }) + ' texto después', [1, 2])?.size, 2);
+  assert.equal(parseJudgeOutput(JSON.stringify({ results: [row(1)] }), [1, 2]), null, "falta un par");
+  assert.equal(parseJudgeOutput(JSON.stringify({ results: [row(1, { lugar_igual: "no" }), row(2)] }), [1, 2]), null, "tipo inválido");
+  assert.equal(parseJudgeOutput(JSON.stringify({ results: [{ id: 1, same: true }] }), [1]), null, "formato viejo");
   assert.equal(parseJudgeOutput("no es json", [1]), null);
   assert.equal(parseJudgeOutput('{"otra":1}', [1]), null);
 });
@@ -34,12 +44,13 @@ test("callJudge devuelve los veredictos y envía el modelo y la temperatura corr
   let sent: { model?: string; temperature?: number; messages?: unknown[] } = {};
   const fetchImpl = async (_url: string, init: { body: string }) => {
     sent = JSON.parse(init.body);
-    return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: '{"results":[{"id":1,"same":false,"reason":"a"},{"id":2,"same":true,"reason":"b"}]}' } }] }) };
+    return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: JSON.stringify({ results: [row(1, { accion_igual: false }), row(2)] }) } }] }) };
   };
   const out = await callJudge(pairs, "clave", { fetchImpl });
   assert.equal(out?.get(2)?.same, true);
   assert.equal(sent.model, "gpt-4o-mini");
   assert.equal(sent.temperature, 0);
+  assert.equal((sent as { seed?: number }).seed, 7);
   assert.equal(sent.messages?.length, 2);
 });
 
@@ -74,4 +85,12 @@ test("la validación exige ≥ 90 % de aciertos y cero pares distintos marcados 
   assert.equal(lenient.passes, true);
   assert.equal(LABELED_PAIRS.length, 27);
   assert.equal(LABELED_PAIRS.filter((p) => !p.same).length, 18);
+});
+
+test("los pares independientes no aparecen en el prompt del juez (no se le enseña la prueba)", () => {
+  assert.equal(HELDOUT_PAIRS.length, 10);
+  for (const p of [...LABELED_PAIRS, ...HELDOUT_PAIRS]) {
+    assert.ok(!JUDGE_SYSTEM_PROMPT.includes(p.a) || !JUDGE_SYSTEM_PROMPT.includes(p.b), `${p.a} / ${p.b}`);
+  }
+  assert.ok(LABELED_PAIRS.length + HELDOUT_PAIRS.length <= 40, "caben en una sola llamada");
 });

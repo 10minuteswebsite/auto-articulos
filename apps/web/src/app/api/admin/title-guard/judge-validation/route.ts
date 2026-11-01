@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/current-user";
-import { LABELED_PAIRS } from "@/lib/angle-guard-labeled-pairs";
+import { HELDOUT_PAIRS, LABELED_PAIRS } from "@/lib/angle-guard-labeled-pairs";
 import { callJudge, scoreJudge } from "@/lib/angle-guard-judge";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,9 @@ export async function GET() {
   } catch {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
-  const pairs = LABELED_PAIRS.map((p, index) => ({ id: index + 1, candidate: p.a, existing: p.b }));
+  // Una sola llamada con los 27 pares de la condición (ids 1–27) y los 10 independientes (ids 28–37).
+  const all = [...LABELED_PAIRS, ...HELDOUT_PAIRS];
+  const pairs = all.map((p, index) => ({ id: index + 1, candidate: p.a, existing: p.b }));
   const verdicts = await callJudge(pairs, process.env.OPENAI_API_KEY);
   if (!verdicts) {
     return NextResponse.json(
@@ -27,11 +29,20 @@ export async function GET() {
     );
   }
   const result = scoreJudge(LABELED_PAIRS, verdicts);
+  const independent = scoreJudge(
+    HELDOUT_PAIRS,
+    new Map(HELDOUT_PAIRS.map((_, i) => [i + 1, verdicts.get(LABELED_PAIRS.length + i + 1)!] as const)),
+  );
   return NextResponse.json({
     ok: true,
     cumple: result.passes,
     resumen: `${result.correct} de ${result.total} aciertos (${result.accuracyPct} %). Falsos «misma pregunta»: ${result.falseSame.length}. Repetidos no detectados: ${result.missedSame.length}.`,
     condicion: "Cumple si hay al menos 90 % de aciertos y cero pares distintos marcados como «misma pregunta».",
     ...result,
+    independientes: {
+      explicacion: "10 pares que no aparecen en el prompt del juez: miden si generaliza. No son parte de la condición, pero no debe haber falsos «misma pregunta».",
+      resumen: `${independent.correct} de ${independent.total} aciertos. Falsos «misma pregunta»: ${independent.falseSame.length}.`,
+      ...independent,
+    },
   });
 }
