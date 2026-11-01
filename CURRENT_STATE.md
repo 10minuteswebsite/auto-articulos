@@ -924,3 +924,4 @@ Responsable: Claude. Capitanía liberada.
 - Guardia de ángulos FASE 1 (2026-11-01): módulo puro, juez de IA y pares etiquetados implementados SIN conectar a ningún flujo; endpoint de administrador GET /api/admin/title-guard/judge-validation para validar el juez. Sin cambios visibles para usuarios; sin migración.
 - Guardia de ángulos, validación del juez intento 1 (2026-11-01): 85 % (23/27), 0 falsos «misma pregunta»; no cumple el 90 %. Prompt reescrito (v2); se repite la validación. Fase 2 no inicia hasta que pase.
 - Guardia de ángulos: validación del juez intento 2 = 89 % con 1 falso grave; rediseño v3 (cinco preguntas, el código concluye) + 10 pares independientes. Fase 2 sigue esperando que el juez pase.
+- Guardia de ángulos: intento 3 del juez falló por límite de tokens de MI endpoint (no del juez); corregido. Validación pendiente.

@@ -21,12 +21,11 @@ export async function GET() {
   // Una sola llamada con los 27 pares de la condición (ids 1–27) y los 10 independientes (ids 28–37).
   const all = [...LABELED_PAIRS, ...HELDOUT_PAIRS];
   const pairs = all.map((p, index) => ({ id: index + 1, candidate: p.a, existing: p.b }));
-  const verdicts = await callJudge(pairs, process.env.OPENAI_API_KEY);
+  // 37 pares tardan más que los ~14 de un uso normal: aquí se concede más tiempo (la ruta admite 30 s).
+  const verdicts = await callJudge(pairs, process.env.OPENAI_API_KEY, { timeoutMs: 25_000 });
   if (!verdicts) {
-    return NextResponse.json(
-      { ok: false, mensaje: "El juez no respondió de forma confiable (sin clave de IA, tiempo agotado o respuesta incompleta). No se validó nada." },
-      { status: 502 },
-    );
+    // Se responde 200 con ok:false a propósito: Cloudflare tapa los 5xx con su propia página y no se vería el motivo.
+    return NextResponse.json({ ok: false, mensaje: "El juez no respondió de forma confiable (sin clave de IA, tiempo agotado o respuesta incompleta). No se validó nada." });
   }
   const result = scoreJudge(LABELED_PAIRS, verdicts);
   const independent = scoreJudge(
