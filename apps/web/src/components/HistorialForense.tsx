@@ -11,7 +11,7 @@ import HistorialExplicaciones from "@/components/HistorialExplicaciones";
 
 type SeccionId = "errores" | "cancelados" | "en-curso" | "descartados" | "propuestos" | "eventos";
 type Row = Record<string, unknown> & { id: string };
-type Columna = { clave: string; titulo: string; fecha?: boolean };
+type Columna = { clave: string; titulo: string; fecha?: boolean; soloAdmin?: boolean };
 
 const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: string; columnas: Columna[] }> = [
   {
@@ -27,8 +27,8 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
       { clave: "ejecucionCreada", titulo: "Se creó", fecha: true },
       { clave: "procesado", titulo: "Último intento", fecha: true },
       { clave: "ultimoEvento", titulo: "Último paso registrado" },
-      { clave: "codigoTecnico", titulo: "Código técnico (para soporte)" },
-      { clave: "id", titulo: "Código del título" },
+      { clave: "codigoTecnico", titulo: "Código del error (para soporte)" },
+      { clave: "id", titulo: "Código del título", soloAdmin: true },
     ],
   },
   {
@@ -43,7 +43,7 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
       { clave: "ejecucionCreada", titulo: "Se creó", fecha: true },
       { clave: "procesado", titulo: "Procesado", fecha: true },
       { clave: "motivo", titulo: "Motivo" },
-      { clave: "id", titulo: "Código del título" },
+      { clave: "id", titulo: "Código del título", soloAdmin: true },
     ],
   },
   {
@@ -58,7 +58,7 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
       { clave: "intentos", titulo: "Intentos" },
       { clave: "ejecucionCreada", titulo: "Desde", fecha: true },
       { clave: "ultimoEvento", titulo: "Último paso registrado" },
-      { clave: "id", titulo: "Código del título" },
+      { clave: "id", titulo: "Código del título", soloAdmin: true },
     ],
   },
   {
@@ -76,21 +76,19 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
       { clave: "impresiones", titulo: "Veces que se mostró en Google" },
       { clave: "clics", titulo: "Visitas desde Google" },
       { clave: "oportunidadCreada", titulo: "Oportunidad creada", fecha: true },
-      { clave: "id", titulo: "Código" },
+      { clave: "id", titulo: "Código", soloAdmin: true },
     ],
   },
   {
     id: "propuestos",
     eyebrow: "Temas",
     titulo: "Temas que te propusimos",
-    ayuda: "Los títulos que el sistema te ofreció cada día y lo que escribiste en el formulario. Sirve para ver si los temas se repiten.",
+    ayuda: "Cada vez que le pediste ideas de títulos a la inteligencia artificial: qué le pediste y qué títulos te ofreció.",
     columnas: [
       { clave: "fecha", titulo: "Fecha", fecha: true },
       { clave: "categoria", titulo: "Categoría" },
-      { clave: "titulosOfrecidos", titulo: "Títulos ofrecidos" },
-      { clave: "entradasDelUsuario", titulo: "Lo que escribiste" },
-      { clave: "espacio", titulo: "Espacio" },
-      { clave: "id", titulo: "Código" },
+      { clave: "loQuePediste", titulo: "Lo que pediste" },
+      { clave: "titulosOfrecidos", titulo: "Títulos que te ofrecimos" },
     ],
   },
   {
@@ -104,7 +102,7 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
       { clave: "estadoDelTitulo", titulo: "Estado del título" },
       { clave: "evento", titulo: "Evento" },
       { clave: "categoria", titulo: "Categoría" },
-      { clave: "codigoTitulo", titulo: "Código del título" },
+      { clave: "codigoTitulo", titulo: "Código del título", soloAdmin: true },
     ],
   },
 ];
@@ -138,6 +136,7 @@ function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[numbe
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cargada, setCargada] = useState(false);
+  const columnas = def.columnas.filter((c) => !c.soloAdmin || esAdmin);
 
   const query = useCallback(
     (extra: string) => `/api/historial/forense?seccion=${def.id}${todos ? "&todos=1" : ""}${extra}`,
@@ -204,7 +203,7 @@ function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[numbe
               <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                 <thead>
                   <tr>
-                    {def.columnas.map((c) => (
+                    {columnas.map((c) => (
                       <th key={c.clave} style={thStyle}>{c.titulo}</th>
                     ))}
                   </tr>
@@ -212,7 +211,7 @@ function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[numbe
                 <tbody>
                   {rows.map((row) => (
                     <tr key={row.id} style={{ borderTop: "1px solid #e5e5ea" }}>
-                      {def.columnas.map((c) => (
+                      {columnas.map((c) => (
                         <td key={c.clave} style={{ ...tdStyle, whiteSpace: "pre-line", fontSize: 13 }}>{formatCell(row[c.clave], c.fecha)}</td>
                       ))}
                     </tr>

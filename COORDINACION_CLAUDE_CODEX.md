@@ -13201,3 +13201,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: textos del historial forense en español claro, códigos aparte (sin migración). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — 2026-11-01: Historiales completos colapsado (sin migración). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: temas propuestos legibles, códigos solo admin, explicación en lenguaje llano (sin migración). Se libera al fusionar.

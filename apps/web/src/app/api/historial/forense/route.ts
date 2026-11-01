@@ -3,6 +3,7 @@ import { prisma, type Prisma } from "@auto-articulos/db";
 import { getCurrentUser, getCurrentUserId, getActingAdmin } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { friendlyPublishError } from "@auto-articulos/shared/src/friendly-error";
+import { humanizeRequestInputs } from "@/lib/title-explanation-core";
 
 // Todo lo que ve una persona va en español claro. Los códigos del sistema se
 // conservan APARTE (columnas «Código…») por si hay que investigar o escribir a soporte.
@@ -145,12 +146,9 @@ export async function GET(request: NextRequest) {
     rows = found.map((r) => ({
       id: r.id,
       fecha: r.createdAt,
-      dia: r.dayKey,
-      espacio: r.slot,
       categoria: r.categoryName,
-      categoriaId: r.categoryId,
-      titulosOfrecidos: r.offeredTitles,
-      entradasDelUsuario: r.inputs,
+      loQuePediste: humanizeRequestInputs(r.inputs).map((l) => `${l.etiqueta}: ${l.texto}`).join("\n") || "Ya no se conserva (se borra a los 90 días)",
+      titulosOfrecidos: r.offeredTitles.map((t, i) => `${i + 1}. ${t}`).join("\n"),
     }));
   } else if (seccion === "eventos") {
     const found = await prisma.titleEvent.findMany({
