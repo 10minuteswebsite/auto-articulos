@@ -1,7 +1,21 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { HELDOUT_PAIRS, LABELED_PAIRS } from "./angle-guard-labeled-pairs";
-import { JUDGE_SYSTEM_PROMPT, buildJudgeMessages, callJudge, parseJudgeOutput, scoreJudge, type JudgeVerdict } from "./angle-guard-judge";
+import { HELDOUT_PAIRS, LABELED_PAIRS, LIST_CASES } from "./angle-guard-labeled-pairs";
+import {
+  JUDGE_SYSTEM_PROMPT,
+  LIST_JUDGE_SYSTEM_PROMPT,
+  buildJudgeMessages,
+  buildListJudgeMessages,
+  callJudge,
+  callListJudge,
+  parseJudgeOutput,
+  parseListJudgeOutput,
+  scoreJudge,
+  scoreListJudge,
+  type JudgeVerdict,
+  type ListJudgeItem,
+  type ListJudgeVerdict,
+} from "./angle-guard-judge";
 
 const pairs = [
   { id: 1, candidate: "How to Buy a Condo", existing: "How to Sell a Condo" },
@@ -105,4 +119,66 @@ test("los pares independientes no aparecen en el prompt del juez (no se le ense�
     assert.ok(!JUDGE_SYSTEM_PROMPT.includes(p.a) || !JUDGE_SYSTEM_PROMPT.includes(p.b), `${p.a} / ${p.b}`);
   }
   assert.ok(LABELED_PAIRS.length + HELDOUT_PAIRS.length <= 40, "caben en una sola llamada");
+});
+
+// ---------- juez por lista ----------
+const item = (id: number, candidate: string, titles: string[]): ListJudgeItem => ({ id, candidate, neighbors: titles.map((title, i) => ({ id: i + 1, title })) });
+const items = [item(1, "Errores al elegir un plan", ["Cómo cancelar un plan", "Fallas que debes evitar al seleccionar un plan"]), item(2, "Cómo abrir un café", ["Cómo cerrar un café"])];
+
+test("el prompt del juez por lista explica los sinónimos y pide ante la duda no marcar", () => {
+  for (const regla of ["sinónimos", "same_as", "lista vacía", "preferible dejar pasar", "SÍ cambian la pregunta", "posible página de categoría", "JSON"]) {
+    assert.ok(LIST_JUDGE_SYSTEM_PROMPT.includes(regla), regla);
+  }
+  const { user } = buildListJudgeMessages(items);
+  assert.ok(user.includes("CANDIDATO 1") && user.includes("  2. Fallas que debes evitar"));
+});
+
+test("lee la respuesta por lista y no se fía de números inventados ni de respuestas incompletas", () => {
+  const ok = parseListJudgeOutput(JSON.stringify({ results: [{ id: 1, same_as: [2], reason: "sinónimos" }, { id: 2, same_as: [], reason: "" }] }), items);
+  assert.deepEqual(ok?.get(1)?.sameAs, [2]);
+  assert.deepEqual(ok?.get(2)?.sameAs, []);
+  assert.equal(parseListJudgeOutput(JSON.stringify({ results: [{ id: 1, same_as: [9] }, { id: 2, same_as: [] }] }), items), null, "número que no existe");
+  assert.equal(parseListJudgeOutput(JSON.stringify({ results: [{ id: 1, same_as: [2] }] }), items), null, "falta un candidato");
+  assert.equal(parseListJudgeOutput("basura", items), null);
+});
+
+test("callListJudge nunca lanza y proporciona margen de tokens según el número de candidatos", async () => {
+  let sent: { max_tokens?: number; model?: string } = {};
+  const fetchImpl = async (_u: string, init: { body: string }) => {
+    sent = JSON.parse(init.body);
+    return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: JSON.stringify({ results: [{ id: 1, same_as: [2], reason: "x" }, { id: 2, same_as: [], reason: "" }] }) } }] }) };
+  };
+  const out = await callListJudge(items, "k", { fetchImpl, model: "gpt-4o" });
+  assert.deepEqual(out?.get(1)?.sameAs, [2]);
+  assert.equal(sent.model, "gpt-4o");
+  assert.equal(sent.max_tokens, 300 + 70 * 2);
+  assert.equal(await callListJudge(items, undefined), null);
+  assert.equal(await callListJudge(items, "k", { fetchImpl: async () => { throw new Error("red"); } }), null);
+  assert.equal(await callListJudge(items, "k", { fetchImpl: async () => ({ ok: false, status: 500, json: async () => ({}) }) }), null);
+});
+
+test("los casos de validación por lista: 12 casos de 25 existentes, 6 con aguja y 6 sin ella", () => {
+  assert.equal(LIST_CASES.length, 12);
+  for (const c of LIST_CASES) assert.equal(c.neighbors.length, 25, c.candidate);
+  assert.equal(LIST_CASES.filter((c) => c.expected !== null).length, 6);
+  for (const c of LIST_CASES.filter((c) => c.expected !== null)) assert.ok(c.neighbors[c.expected as number], c.candidate);
+  for (const c of LIST_CASES) assert.equal(new Set(c.neighbors).size, 25, `sin repetidos: ${c.candidate}`);
+});
+
+test("la validación por lista exige 5 de 6 agujas y cero falsos", () => {
+  const perfect = new Map<number, ListJudgeVerdict>(LIST_CASES.map((c, i) => [i + 1, { sameAs: c.expected === null ? [] : [c.expected + 1], reason: "" }] as [number, ListJudgeVerdict]));
+  assert.equal(scoreListJudge(LIST_CASES, perfect).passes, true);
+  const oneFalse = new Map(perfect);
+  const noNeedle = LIST_CASES.findIndex((c) => c.expected === null);
+  oneFalse.set(noNeedle + 1, { sameAs: [1], reason: "se equivocó" });
+  const bad = scoreListJudge(LIST_CASES, oneFalse);
+  assert.equal(bad.falseMatches.length, 1);
+  assert.equal(bad.passes, false);
+  const missedTwo = new Map(perfect);
+  const needles = LIST_CASES.map((c, i) => (c.expected !== null ? i + 1 : 0)).filter(Boolean);
+  missedTwo.set(needles[0], { sameAs: [], reason: "" });
+  missedTwo.set(needles[1], { sameAs: [], reason: "" });
+  assert.equal(scoreListJudge(LIST_CASES, missedTwo).passes, false);
+  missedTwo.set(needles[1], { sameAs: [LIST_CASES[needles[1] - 1].expected! + 1], reason: "" });
+  assert.equal(scoreListJudge(LIST_CASES, missedTwo).passes, true);
 });

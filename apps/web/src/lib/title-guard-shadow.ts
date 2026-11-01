@@ -1,6 +1,6 @@
 import { prisma } from "@auto-articulos/db";
-import { GUARD, decide, needsJudge, titleKey, type JudgeFn, type MemoryEntry } from "@/lib/angle-guard-core";
-import { JUDGE_MODEL, callJudge } from "@/lib/angle-guard-judge";
+import { GUARD, buildNeighborLists, decide, titleKey, type ListJudgeFn, type MemoryEntry } from "@/lib/angle-guard-core";
+import { JUDGE_MODEL, callListJudge, type ListJudgeItem } from "@/lib/angle-guard-judge";
 import type { TitleGuardMode } from "@/lib/title-guard-mode";
 import { ensureSiteTitlesSeeded } from "@/lib/published-titles";
 
@@ -36,14 +36,14 @@ export async function loadGuardMemory(userId: string, siteDomain: string, exclud
   const [published, site, requests, discarded] = await Promise.all([
     prisma.title.findMany({
       where: { status: "success", run: { userId, ...(siteDomain ? { category: { siteDomain } } : {}) } },
-      select: { text: true, finalTitle: true, publishedAt: true, processedAt: true },
+      select: { text: true, finalTitle: true, publishedAt: true, processedAt: true, run: { select: { categoryId: true } } },
       orderBy: { processedAt: "desc" },
       take: MAX_ROWS,
     }),
     prisma.siteArticleTitle.findMany({ where: { userId, ...siteFilter }, select: { title: true, createdAt: true }, take: MAX_ROWS }).catch(() => []),
     prisma.titleGenerationRequest.findMany({
       where: { userId, id: { not: excludeRequestId } },
-      select: { offeredTitles: true, createdAt: true },
+      select: { offeredTitles: true, createdAt: true, categoryId: true },
       orderBy: { createdAt: "desc" },
       take: 1000,
     }),
@@ -52,12 +52,12 @@ export async function loadGuardMemory(userId: string, siteDomain: string, exclud
   const memory: MemoryEntry[] = [];
   for (const t of published) {
     const age = ageDays(t.publishedAt ?? t.processedAt, 30);
-    memory.push({ title: t.text, source: "publicado", ageDays: age });
-    if (t.finalTitle && t.finalTitle !== t.text) memory.push({ title: t.finalTitle, source: "publicado", ageDays: age });
+    memory.push({ title: t.text, source: "publicado", ageDays: age, categoryId: t.run.categoryId });
+    if (t.finalTitle && t.finalTitle !== t.text) memory.push({ title: t.finalTitle, source: "publicado", ageDays: age, categoryId: t.run.categoryId });
   }
   // Los títulos del sitio salen de la URL y no traen fecha útil: se tratan como antiguos para la regla de años.
   for (const s of site) memory.push({ title: s.title, source: "sitio", ageDays: ageDays(s.createdAt, 400) });
-  for (const r of requests) for (const title of r.offeredTitles) memory.push({ title, source: "ofrecido", ageDays: ageDays(r.createdAt, 0) });
+  for (const r of requests) for (const title of r.offeredTitles) memory.push({ title, source: "ofrecido", ageDays: ageDays(r.createdAt, 0), categoryId: r.categoryId });
   for (const d of discarded) memory.push({ title: d.titleText, source: "descartado", ageDays: ageDays(d.discardedAt, 0) });
   return memory;
 }
@@ -79,29 +79,36 @@ export async function runGuardShadow(info: ShadowInfo): Promise<void> {
     await ensureSiteTitlesSeeded(info.userId, info.siteDomain);
     const memory = await loadGuardMemory(info.userId, info.siteDomain, info.requestId);
     const memoryCounts = memory.reduce<Record<string, number>>((acc, m) => ({ ...acc, [m.source]: (acc[m.source] ?? 0) + 1 }), {});
-    const pairs = needsJudge(info.candidates, memory);
+    // El juez recibe, por cada título nuevo, sus vecinos más cercanos y los más recientes de la categoría.
+    const lists = buildNeighborLists(info.candidates, memory, info.categoryId);
+    const items: ListJudgeItem[] = lists.map((l, index) => ({
+      id: index + 1,
+      candidate: l.candidate,
+      neighbors: l.neighbors.map((n, j) => ({ id: j + 1, title: n.title, mayBeCategoryPage: n.source === "sitio" })),
+    }));
 
-    let judge: JudgeFn | null = null;
+    let listJudge: ListJudgeFn | null = null;
     let judgeUsed = false;
     let judgeMs: number | null = null;
-    if (pairs.length > 0 && Date.now() - info.startedAtMs < JUDGE_ONLY_BEFORE_MS) {
+    if (items.length > 0 && Date.now() - info.startedAtMs < JUDGE_ONLY_BEFORE_MS) {
       const started = Date.now();
-      const verdicts = await callJudge(
-        pairs.map((p, index) => ({ id: index + 1, candidate: p.candidate, existing: p.neighbor.title, existingMayBeCategoryPage: p.neighbor.source === "sitio" })),
-        process.env.OPENAI_API_KEY,
-      );
+      const verdicts = await callListJudge(items, process.env.OPENAI_API_KEY);
       judgeMs = Date.now() - started;
       if (verdicts) {
         judgeUsed = true;
-        const byCandidate = new Map(pairs.map((p, index) => [titleKey(p.candidate), verdicts.get(index + 1)] as const));
-        judge = (candidate) => {
-          const verdict = byCandidate.get(titleKey(candidate));
-          return verdict ? (verdict.same ? "same" : "different") : null;
-        };
+        const byCandidate = new Map<string, { same: boolean; neighbor: MemoryEntry | null }>();
+        lists.forEach((l, index) => {
+          const verdict = verdicts.get(index + 1);
+          if (!verdict) return;
+          const first = verdict.sameAs[0];
+          byCandidate.set(titleKey(l.candidate), { same: verdict.sameAs.length > 0, neighbor: first ? (l.neighbors[first - 1] ?? null) : null });
+        });
+        listJudge = (candidate) => byCandidate.get(titleKey(candidate)) ?? null;
       }
     }
+    const pairs = items; // para el registro: cuántos títulos se le pidió juzgar
 
-    const result = decide(info.candidates, memory, { judge });
+    const result = decide(info.candidates, memory, { listJudge });
     await prisma.titleGuardReport.create({
       data: {
         ...base,

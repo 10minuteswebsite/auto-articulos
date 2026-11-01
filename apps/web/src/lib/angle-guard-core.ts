@@ -35,6 +35,8 @@ export interface MemoryEntry {
   source: MemorySource;
   /** Antigüedad en días (0 = hoy). */
   ageDays: number;
+  /** Categoría a la que pertenece (publicados y ofrecidos); los títulos del sitio no la tienen. */
+  categoryId?: string | null;
 }
 
 export type Verdict = "limpio" | "parecido";
@@ -42,6 +44,13 @@ export type JudgeAnswer = "same" | "different";
 
 /** Función del juez: recibe un candidato y su vecino más cercano. Puede lanzar o devolver null (= no disponible). */
 export type JudgeFn = (candidate: string, neighbor: MemoryEntry) => JudgeAnswer | null;
+
+/**
+ * Juez que ve la LISTA de vecinos de cada título nuevo (los más cercanos por código y
+ * los más recientes de la misma categoría) y dice si alguno hace la misma pregunta,
+ * aunque no comparta palabras (sinónimos). Devuelve null si no está disponible.
+ */
+export type ListJudgeFn = (candidate: string) => { same: boolean; neighbor: MemoryEntry | null } | null;
 
 export interface Delivered {
   title: string;
@@ -179,6 +188,8 @@ export const similarNote = (neighborTitle: string) =>
 
 export interface DecideOptions {
   judge?: JudgeFn | null;
+  /** Si se da, decide por la lista de vecinos (aunque el código no vea parecido); si falla para un título, se usa el camino por pares. */
+  listJudge?: ListJudgeFn | null;
 }
 
 /**
@@ -214,7 +225,7 @@ export function decide(candidates: string[], memory: MemoryEntry[], options: Dec
   const scored: Scored[] = alive.map((title) => {
     const years = yearsOf(title);
     let best = 0;
-    let near: MemoryEntry | null = null;
+    let near: MemoryEntry | null = null as MemoryEntry | null;
     for (const m of active) {
       // Un evento anual puede repetirse al año siguiente.
       if (years.length && m.ageDays > 365 && !yearsOf(m.title).some((y) => years.includes(y))) continue;
@@ -225,8 +236,25 @@ export function decide(candidates: string[], memory: MemoryEntry[], options: Dec
       }
     }
     let verdict: Verdict = "limpio";
-    if (near && best >= GUARD.BAND) {
-      const siteOnly = near.source === "sitio";
+    const siteOnly = near?.source === "sitio";
+    let listDecided = false;
+    if (options.listJudge && !(near && best >= GUARD.AUTO && !siteOnly)) {
+      // El juez por lista decide aunque el código no vea parecido: así se atrapan los sinónimos.
+      let answer: ReturnType<ListJudgeFn> = null;
+      try {
+        answer = options.listJudge(title);
+      } catch {
+        answer = null;
+      }
+      if (answer) {
+        listDecided = true;
+        if (answer.same) {
+          verdict = "parecido";
+          if (answer.neighbor) near = answer.neighbor;
+        }
+      }
+    }
+    if (!listDecided && near && best >= GUARD.BAND) {
       let same: boolean | null = null;
       if (best >= GUARD.AUTO && !siteOnly) {
         same = true;
@@ -313,6 +341,65 @@ export function needsJudge(candidates: string[], memory: MemoryEntry[]): Array<{
     if (!near || best < GUARD.BAND) continue;
     if (best >= GUARD.AUTO && near.source !== "sitio") continue; // el código ya lo marca solo
     out.push({ candidate: title, neighbor: near });
+  }
+  return out;
+}
+
+/** Cuántos vecinos recibe el juez por título nuevo: los más cercanos por código y los más recientes de la categoría. */
+export const NEIGHBORS = { NEAREST: 5, RECENT: 20, MAX: 25 } as const;
+
+/**
+ * Para cada título nuevo que el código NO decide solo, la lista de vecinos que verá el
+ * juez: los 5 más cercanos por código (tengan o no palabras en común) y los 20 más
+ * recientes publicados u ofrecidos de la MISMA categoría. Sin repetidos y como máximo 25.
+ * Es lo que permite detectar el mismo ángulo dicho con sinónimos entre una tanda y la siguiente.
+ */
+export function buildNeighborLists(
+  candidates: string[],
+  memory: MemoryEntry[],
+  categoryId: string | null,
+): Array<{ candidate: string; neighbors: MemoryEntry[] }> {
+  const seen = new Set<string>();
+  const cleaned: string[] = [];
+  for (const candidate of candidates) {
+    const title = candidate.trim();
+    const key = titleKey(title);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    cleaned.push(title);
+  }
+  const hardKeys = new Set(memory.filter((m) => m.source !== "descartado").map((m) => titleKey(m.title)));
+  const alive = cleaned.filter((c) => !hardKeys.has(titleKey(c)));
+  const active = memory.filter(
+    (m) =>
+      !(m.source === "ofrecido" && m.ageDays > GUARD.OFFERED_EXPIRES_DAYS) &&
+      !(m.source === "descartado" && m.ageDays > GUARD.DISCARDED_EXPIRES_DAYS),
+  );
+  const similarity = buildSimilarity([...active.map((m) => m.title), ...alive]);
+  const recent = categoryId
+    ? active
+        .filter((m) => (m.source === "publicado" || m.source === "ofrecido") && m.categoryId === categoryId)
+        .sort((a, b) => a.ageDays - b.ageDays)
+        .slice(0, NEIGHBORS.RECENT)
+    : [];
+  const out: Array<{ candidate: string; neighbors: MemoryEntry[] }> = [];
+  for (const title of alive) {
+    const years = yearsOf(title);
+    const scored: Array<{ m: MemoryEntry; s: number }> = [];
+    for (const m of active) {
+      if (years.length && m.ageDays > 365 && !yearsOf(m.title).some((y) => years.includes(y))) continue;
+      scored.push({ m, s: similarity(title, m.title) });
+    }
+    scored.sort((a, b) => b.s - a.s);
+    const top = scored[0];
+    if (top && top.s >= GUARD.AUTO && top.m.source !== "sitio") continue; // el código ya lo marca solo
+    const picked = new Map<string, MemoryEntry>();
+    for (const x of scored.slice(0, NEIGHBORS.NEAREST)) picked.set(titleKey(x.m.title), x.m);
+    for (const m of recent) {
+      if (picked.size >= NEIGHBORS.MAX) break;
+      if (titleKey(m.title) !== titleKey(title)) picked.set(titleKey(m.title), m);
+    }
+    out.push({ candidate: title, neighbors: [...picked.values()].slice(0, NEIGHBORS.MAX) });
   }
   return out;
 }

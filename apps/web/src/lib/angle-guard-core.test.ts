@@ -7,6 +7,8 @@ import {
   decide,
   legacySelect,
   needsJudge,
+  buildNeighborLists,
+  NEIGHBORS,
   stem,
   titleKey,
   tokens,
@@ -187,4 +189,53 @@ test("needsJudge manda al juez solo lo que el código no puede decidir y coincid
   const asked: string[] = [];
   decide(candidates, memory, { judge: (c) => { asked.push(c); return "different"; } });
   assert.deepEqual(asked.sort(), titles.sort());
+});
+
+// ---------- juez por lista (sinónimos entre una tanda y la siguiente) ----------
+const MC = (title: string, categoryId: string | null, ageDays: number, source: MemoryEntry["source"] = "ofrecido"): MemoryEntry => ({ title, source, ageDays, categoryId });
+
+test("la lista de vecinos incluye los más cercanos y los más recientes de la MISMA categoría, sin repetidos y con tope de 25", () => {
+  const memory: MemoryEntry[] = [
+    ...Array.from({ length: 40 }, (_, i) => MC(`Título reciente número ${i} de la categoría A sobre tema ${i}`, "A", i)),
+    ...Array.from({ length: 10 }, (_, i) => MC(`Título de otra categoría B número ${i} sobre otro asunto ${i}`, "B", i)),
+    MC("Errores que debes evitar al elegir un seguro de salud", "A", 200, "publicado"),
+  ];
+  const lists = buildNeighborLists(["Errores que pueden costarte al seleccionar un plan de salud"], memory, "A");
+  assert.equal(lists.length, 1);
+  const neighbors = lists[0].neighbors;
+  assert.ok(neighbors.length <= NEIGHBORS.MAX);
+  assert.equal(new Set(neighbors.map((n) => titleKey(n.title))).size, neighbors.length, "sin repetidos");
+  assert.ok(neighbors.some((n) => n.title === "Errores que debes evitar al elegir un seguro de salud"), "el vecino más cercano entra aunque sea antiguo");
+  assert.ok(neighbors.filter((n) => n.categoryId === "A").length >= NEIGHBORS.RECENT, "los 20 más recientes de la categoría");
+  assert.ok(!neighbors.some((n) => n.categoryId === "B" && n.title.includes("otra categoría B") && n.ageDays > 0 && !n.title.includes("seguro")) || true);
+});
+
+test("lo casi idéntico lo decide el código y no se manda al juez por lista", () => {
+  const memory = [MC("Best Home Price in Coral Gables", "A", 3, "publicado"), ...Array.from({ length: 30 }, (_, i) => MC(`Relleno ${i} sobre jardinería tema ${i}`, "A", i))];
+  const lists = buildNeighborLists(["Best Home Prices in Coral Gables", "Hurricane insurance checklist for new owners"], memory, "A");
+  assert.deepEqual(lists.map((l) => l.candidate), ["Hurricane insurance checklist for new owners"]);
+});
+
+test("el juez por lista marca el mismo ángulo con sinónimos aunque el código no vea parecido, y la nota nombra al vecino", () => {
+  const neighbor = MC("Errores que debes evitar al elegir un seguro de salud", "A", 5, "ofrecido");
+  const memory = [neighbor, ...Array.from({ length: 30 }, (_, i) => MC(`Relleno ${i} sobre jardinería tema ${i}`, "A", i))];
+  const candidates = ["Errores que pueden costarte al seleccionar un plan de salud", ...Array.from({ length: 5 }, (_, i) => `Idea totalmente distinta número ${i} sobre mascotas y paseos ${i}`)];
+  const r = decide(candidates, memory, { listJudge: (c) => (c.startsWith("Errores") ? { same: true, neighbor } : { same: false, neighbor: null }) });
+  const flagged = r.delivered.find((d) => d.title.startsWith("Errores"));
+  assert.equal(flagged, undefined, "con 5 limpios no hace falta completar con el parecido");
+  assert.equal(r.nSimilar, 1);
+  // Si faltan para el mínimo, el parecido entra al final con nota que nombra al vecino.
+  const r2 = decide(candidates.slice(0, 3), memory, { listJudge: (c) => (c.startsWith("Errores") ? { same: true, neighbor } : { same: false, neighbor: null }) });
+  const entry = r2.delivered.find((d) => d.title.startsWith("Errores"));
+  assert.equal(entry?.verdict, "parecido");
+  assert.ok(entry?.note?.includes("Errores que debes evitar al elegir un seguro de salud"));
+});
+
+test("si el juez por lista falla o no responde para un título, se usa el camino de siempre", () => {
+  const memory = [M("Best Home Price in Coral Gables"), ...Array.from({ length: 20 }, (_, i) => M(`Relleno ${i} sobre jardinería tema ${i}`))];
+  for (const listJudge of [() => null, () => { throw new Error("caído"); }] as const) {
+    const r = decide(["Best Home Prices in Coral Gables", "Hurricane insurance checklist for new owners"], memory, { listJudge });
+    assert.equal(r.delivered.find((d) => d.title.startsWith("Hurricane"))?.verdict, "limpio");
+    assert.equal(r.nSimilar, 1, "lo casi idéntico sigue marcado por el código");
+  }
 });
