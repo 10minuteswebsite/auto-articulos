@@ -7,6 +7,7 @@ import { requireProductAccess } from "@/lib/require-product-access";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { loadPublishedTitles, splitAlreadyPublished } from "@/lib/published-titles";
+import { logDeletedRunTitles } from "@/lib/title-discard-log";
 import { isIndexingNotApplicable, starterHostOf } from "@/lib/blog-ia-indexing";
 
 // Bug de consumo de datos encontrado el 30/7/2026: este endpoint se
@@ -306,6 +307,7 @@ export async function DELETE() {
   const denied = await requireProductAccess(userId, "ARTICULOS", "/api/runs");
   if (denied) return denied;
 
+  await logDeletedRunTitles({ userId });
   const { count } = await prisma.run.deleteMany({
     where: { userId, status: { notIn: ["pending", "running"] } },
   });

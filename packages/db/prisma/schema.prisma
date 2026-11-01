@@ -1277,3 +1277,62 @@ model ProductEntitlementEvent {
 
   @@index([userId, createdAt])
 }
+
+// Historial forense de Artículos (ver MASTER_BLUEPRINT_HISTORIAL_FORENSE_ARTICULOS.md).
+// Tablas ADITIVAS: ningún flujo existente depende de ellas. Sin @relation a User a
+// propósito (la clave foránea vive solo en el SQL) para no tocar el modelo User.
+
+// Títulos descartados o borrados. Solo se insertan, nunca se editan.
+// source: opportunity_title | opportunity_group | opportunity_all | opportunity_replaced | run_deleted
+model ArticleTitleDiscard {
+  id              String    @id @default(cuid())
+  userId          String
+  siteDomain      String    @default("")
+  categoryId      String?
+  categoryName    String    @default("")
+  titleText       String
+  titleKey        String    @default("")
+  source          String
+  titleRationale  String?
+  groupRationale  String?
+  impressions     Float?
+  clicks          Float?
+  originCreatedAt DateTime?
+  actor           String    @default("user")
+  discardedAt     DateTime  @default(now())
+
+  @@index([userId, discardedAt])
+  @@index([userId, titleKey])
+}
+
+// Razonamiento de origen de un título, guardado al convertir la oportunidad.
+model TitleOrigin {
+  id               String   @id @default(cuid())
+  userId           String
+  titleId          String   @unique
+  groupRationale   String?
+  titleRationale   String?
+  impressions      Float?
+  clicks           Float?
+  evidenceSnapshot Json?
+  guardResult      Json?
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Explicación ejecutiva pedida por el usuario; una fila por solicitud, con su fecha.
+model TitleExplanation {
+  id           String   @id @default(cuid())
+  userId       String
+  runId        String
+  titleIds     String[] @default([])
+  requestedAt  DateTime @default(now())
+  summary      String   @default("")
+  evidenceUsed Json?
+  model        String?
+  status       String   @default("ok")
+  errorMessage String?
+
+  @@index([userId, runId, requestedAt])
+}

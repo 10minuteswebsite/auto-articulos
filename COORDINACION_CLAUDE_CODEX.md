@@ -13191,3 +13191,5 @@ ARCHIVADA. Responsable: Claude.
 - Responsable: Claude. Capitanía liberada.
 
 - **Capitán de migración:** Claude — LIBERADO 2026-11-01. Historial forense Fase 1 (PR #722, solo lectura, sin migración) en producción y verificado.
+
+- **Capitán de migración:** Claude — reclamo 2026-11-01 (Fase 2). Motivo: historial forense, tablas aditivas ArticleTitleDiscard/TitleOrigin/TitleExplanation (migración 20261101120000_forensic_history, interruptor safe_forensic_history). La migración se aplica ANTES de fusionar.

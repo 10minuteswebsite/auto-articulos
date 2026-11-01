@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
+import { logDiscardedOpportunities } from "@/lib/title-discard-log";
 
 export async function DELETE(
   _request: NextRequest,
@@ -20,6 +21,7 @@ export async function DELETE(
       { error: "Título no encontrado." },
       { status: 404 },
     );
+  await logDiscardedOpportunities({ userId, where: { id: title.id }, source: "opportunity_title" });
   await prisma.$transaction(async (tx) => {
     await tx.opportunityTitle.delete({ where: { id: title.id } });
     const remaining = await tx.opportunityTitle.count({

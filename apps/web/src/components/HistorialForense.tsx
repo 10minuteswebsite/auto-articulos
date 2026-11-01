@@ -8,7 +8,7 @@ import { h2Style, secondaryButtonStyle, thStyle, tdStyle } from "@/components/da
 // Cada sección carga SOLO cuando se abre (no recarga el Historial entero) y
 // pagina de 50 en 50. Solo lectura.
 
-type SeccionId = "errores" | "cancelados" | "en-curso" | "propuestos" | "eventos";
+type SeccionId = "errores" | "cancelados" | "en-curso" | "descartados" | "propuestos" | "eventos";
 type Row = Record<string, unknown> & { id: string };
 type Columna = { clave: string; titulo: string; fecha?: boolean };
 
@@ -58,6 +58,24 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
       { clave: "ejecucionCreada", titulo: "Desde", fecha: true },
       { clave: "ultimoEvento", titulo: "Último paso" },
       { clave: "id", titulo: "ID título" },
+    ],
+  },
+  {
+    id: "descartados",
+    eyebrow: "Descartados",
+    titulo: "Descartados y borrados",
+    ayuda: "Oportunidades que descartaste, que se reemplazaron al analizar de nuevo, y errores o cancelados que se borraron con «Borrar historial». Solo se registran desde el 1 de noviembre de 2026: lo anterior no se puede recuperar.",
+    columnas: [
+      { clave: "fecha", titulo: "Fecha", fecha: true },
+      { clave: "titulo", titulo: "Título" },
+      { clave: "categoria", titulo: "Categoría" },
+      { clave: "origen", titulo: "Cómo salió" },
+      { clave: "razonDelTitulo", titulo: "Razón del título" },
+      { clave: "razonDeLaOportunidad", titulo: "Razón de la oportunidad" },
+      { clave: "impresiones", titulo: "Impresiones" },
+      { clave: "clics", titulo: "Clics" },
+      { clave: "oportunidadCreada", titulo: "Oportunidad creada", fecha: true },
+      { clave: "id", titulo: "ID" },
     ],
   },
   {
