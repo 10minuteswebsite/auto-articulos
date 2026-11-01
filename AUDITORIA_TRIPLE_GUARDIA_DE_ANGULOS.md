@@ -38,3 +38,46 @@ Fecha: 2026-11-01. Auditor: Claude, sobre su propio plan (`PLAN_GUARDIA_DE_ANGUL
 3. La guardia incluye **sitio + descartados (90 días) filtrado por sitio**, corrigiendo el hueco actual.
 4. El orden de fases no cambia; la Fase 1 incluye estas mediciones como pruebas automáticas (los 88 títulos reales como prueba de oro) y la línea base multi-cuenta antes de activar.
 5. Decisiones propuestas finales: 1) umbrales anteriores; 2) descartados 90 días; 3) sombra mínimo 48 h y al menos 20 solicitudes observadas; 4) el aviso de pedido repetido solo informa; 5) tabla `TitleGuardReport` aplicada por Milton antes de fusionar; 6) línea base en todas las cuentas, solo conteos.
+
+---
+
+# RONDAS 2 a 8 — auditorías repetidas hasta cero errores (2026-11-01)
+Regla de Milton: si una pasada encuentra un error, se corrige y se **reinician las tres pasadas**. Cada pasada se hizo con ejecución real (prototipo del detector probado en producción en solo lectura) o lectura del código vigente.
+
+## Bitácora de errores encontrados y corregidos
+| Ronda · Pasada | Error encontrado | Corrección |
+|---|---|---|
+| 2 · A | Con palabras de 4+ letras, «Buy a Condo» vs «Sell a Condo» daba 63 % → se rechazaría (falso positivo). «buy» se descartaba por corta. | Se aceptan palabras de 3+ letras; las siglas de 2–5 mayúsculas se conservan. |
+| 2 · B | La ruta `/api/title-generation` tiene `maxDuration = 60 s` y ya permite 2 llamadas de hasta 40 s; una llamada más de IA sin límite de tiempo empeoraría el riesgo de corte. | Presupuesto de tiempo: el juez solo corre si ya pasaron menos de 30 s, con tope de 10 s y sin bloquear si falla. |
+| 2 · B | Los títulos del sitio (`SiteArticleTitle`) se deducen del slug de la URL y traen restos como «buyers39». | Se quitan 1–3 dígitos pegados al final de una palabra en minúscula y sin guion (restos de entidades), y se conservan códigos reales (EB-5, H-1B, 401k, FHA203k). |
+| 4 · A | «EB-5» vs «H-1B» daba 71 % porque los códigos cortos se perdían. | Regla de códigos: palabras con letras+dígitos con guion, mayúscula o que empiezan por dígito se conservan enteras. |
+| 5 · A | «10 errores al comprar un bote» vs «…vender…» daba 64 %: un solo verbo decisivo no basta con umbral de 60 %. | **Dos umbrales**: el código rechaza solo sin juez ≥ **85 %** (casi idéntico); de **38 % a 84 %** decide el juez de IA. Con 60 % se habrían rechazado 5 de 12 contrastes legítimos. |
+| 5 · B | Las pruebas de integración existentes cuentan las llamadas a la IA (`calls.length`); una llamada extra siempre activa las rompería. | El juez es un contador aparte (`MAX_JUDGE_CALLS = 1`), apagado por defecto: con el interruptor en «apagado» el comportamiento y las pruebas actuales no cambian. |
+| 5 · B | La categoría de la generación no trae `siteDomain`, que la guardia necesita. | Se agrega `siteDomain` al `select` (con valor vacío si falta). |
+| 6 · C | Faltaban 3 piezas operativas: cómo cambiar el modo (apagado/sombra/activo), cómo ver lo que la sombra habría rechazado, y cómo medir la línea base multi-cuenta (el token local no puede subir workflows). | Se agregan: endpoint de administrador para el modo, sección «Guardia de ángulos» en el detalle de administrador, y endpoint de administrador de línea base (solo conteos, sin datos personales). |
+| 7 · A | El cortador de palabras fallaba: «home» y «homes» no coincidían; «selling» daba «sel». | Cortador conservador (plurales, -ing, -ed, doble consonante salvo l/s/z/f, -e final): 30 de 30 pares de prueba coinciden. |
+
+## Ronda 8 (final) — tres pasadas sin errores
+**Pasada A — algoritmo (ejecutada):** 18 pares de contraste legítimos (comprar/vender, alquilar/alquilar en otra ciudad, EB-5/H-1B, 401k/403b, antes/después, pros/contras, otros rubros y español): máximo 69 %, **0 rechazos automáticos**. 7 de 7 pares repetidos entran a rechazo automático o a revisión del juez. Con los 88 títulos reales: 1 par a rechazo automático y 17 a juez; por lote de Inés, 0–3 candidatos van al juez (costo mínimo). Rendimiento medido sin pre-tokenizar: 0,77 s para 14 candidatos × 6.000 títulos; con pre-tokenización es una fracción de eso.
+**Pasada B — integración (verificada en el código):** punto único `generateTitlesForUser` (web y MCP); `loadAvoid` corregida; pruebas existentes intactas con el modo apagado; las de integración usan base real `*_test` y se omiten por defecto; contrato web/MCP solo con campos opcionales nuevos; si la tabla falta o la IA falla, todo sigue como hoy; el cupo diario se libera si no hay títulos útiles (comportamiento actual).
+**Pasada C — producto y operación (verificada):** mensajes de una frase en español sencillo; el detalle vive solo en «¿Por qué estos títulos?» y en el detalle de administrador; sin datos nuevos hacia OpenAI (ya se envían títulos previos hoy); tabla nueva con RLS, aislada por usuario; worker intacto; interruptor, visibilidad y línea base incluidos; documentación y manual en cada fase.
+
+## Límites honestos (no son errores, pero Milton debe saberlos)
+1. **El juez de IA no está probado todavía**: esta auditoría validó el detector y el diseño, no el prompt del juez. Condición de la Fase 1: el juez debe acertar ≥ 90 % de los 25 pares etiquetados de esta auditoría y **0 de los 18 contrastes** deben salir como repetidos, antes de pasar a modo sombra.
+2. Sinónimos con casi ninguna palabra en común contra títulos antiguos fuera de los 20 más recientes pueden escaparse; se mitiga con el mapa de ángulos en el prompt y se mide en la sombra.
+3. Español e inglés calibrados con pares sintéticos; la línea base en todas las cuentas es obligatoria antes de activar.
+4. La Fase 4 (CONTENIDO GENERADO POR IA) no se auditó a nivel de código (1.425 líneas); tendrá su propia mini-auditoría antes de programarse.
+5. Dos solicitudes simultáneas de la misma cuenta no se ven entre sí (comportamiento ya existente).
+
+## Especificación final (manda sobre el plan anterior)
+- **Detector** (`lib/angle-guard-core.ts`, puro, con pruebas): normaliza sin tildes; palabras de 3+ letras sin palabras vacías (inglés y español); siglas y códigos conservados; números sueltos ignorados; cortador conservador; peso por rareza calculado con el corpus del propio sitio (mínimo 0,05); parecido = peso compartido / peso total.
+- **Decisión:** ≥ 85 % rechazo automático · 38–84 % al juez · < 38 % pasa. Si el juez no está disponible (falla, tiempo, tabla, modo): se decide solo con el código y se rechaza ≥ 60 %, los demás pasan marcados «sin verificar».
+- **Juez:** una sola llamada agrupada, `gpt-4o-mini`, solo si pasaron < 30 s, tope de 10 s. Compara cada candidato contra sus 5 vecinos más cercanos por código + los 20 títulos más recientes de la misma categoría + todo lo que cayó en la banda. Regla del juez: dos títulos son repetidos solo si un lector con la misma necesidad quedaría satisfecho con cualquiera; si cambian la acción (comprar/vender, alquilar/rentar), el público, el lugar o el tipo de producto, son distintos. Devuelve sí/no + una frase de razón por pareja.
+- **Memoria:** publicados + ofrecidos + `SiteArticleTitle` + descartados (90 días) del sitio de la categoría (corrige `loadAvoid`). Pre-tokenizada una vez por solicitud.
+- **Mapa de ángulos** (grupos formados en código con el mismo parecido) en el prompt en lugar de 60 títulos sueltos.
+- **Generar → verificar → reponer** dentro del límite actual de 2 generaciones; si quedan < 5 se completan con los mejores «dudosos» con su razón; si más de la mitad se rechaza: error `NO_VALID_TITLES` con mensaje «Este tema ya está muy cubierto en tu sitio…», sin gastar cupo.
+- **Tabla** `TitleGuardReport` (aditiva, `IF NOT EXISTS`, RLS) con la razón de cada rechazo y de cada parecido aceptado, clave `requestId`; alimenta «¿Por qué estos títulos?».
+- **Modo** `apagado` (defecto) / `sombra` / `activo` en `SystemSetting`, cambiado desde un endpoint de administrador; sombra: mínimo 48 h y 20 solicitudes observadas.
+- **Pedido repetido:** compara el `tema` con los pedidos de 7 días de la misma categoría; ≥ 60 % → aviso de una frase (web) y texto en la respuesta del MCP; nunca bloquea.
+- **Visibilidad de administrador:** sección «Guardia de ángulos» en el detalle de administrador y endpoint de línea base (solo conteos).
+- **Fases:** 1) módulo + pruebas + validación del juez con los pares etiquetados · 2) tabla, endpoints de administrador y modo sombra · 3) activo + aviso de pedido repetido + explicación enriquecida · 4) CONTENIDO GENERADO POR IA (con mini-auditoría previa) · 5) evaluación de 7 días y ajuste · 6) vectores solo si hace falta.
