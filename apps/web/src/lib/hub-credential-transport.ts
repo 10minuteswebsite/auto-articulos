@@ -5,7 +5,16 @@ export class HubTransportUnavailable extends Error{constructor(){super('hub_tran
 export function sharedHubTransport(){return process.env.HUB_CREDENTIAL_TRANSPORT==='shared'}
 export function hubTransportConfigured(){return !!process.env.AUTO_ARTICULOS_HUB_CLIENT_ID&&(sharedHubTransport()||!!process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET)}
 async function broker(path:string,body:object){
- const token=await getVercelOidcToken();
+ let token:string;
+ if(process.env.HUB_WORKLOAD_IDENTITY==='github-actions'){
+  if(path!=='/user-sync'||process.env.GITHUB_ACTIONS!=='true')throw new HubTransportUnavailable();
+  const raw=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,credential=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+  if(!raw||!credential)throw new HubTransportUnavailable();
+  const url=new URL(raw);if(url.protocol!=='https:'||!url.hostname.endsWith('.actions.githubusercontent.com')||url.username||url.password||url.port)throw new HubTransportUnavailable();
+  url.searchParams.set('audience',ORIGIN+'/github-user-sync');
+  const r=await fetch(url,{headers:{authorization:'Bearer '+credential},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(5000)});
+  if(!r.ok)throw new HubTransportUnavailable();const d=await r.json();if(typeof d.value!=='string'||d.value.length>16384||!/^[-A-Za-z0-9_.]{32,}$/.test(d.value))throw new HubTransportUnavailable();token=d.value;
+ }else{token=await getVercelOidcToken();}
  const response=await fetch(ORIGIN+path,{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??''},body:JSON.stringify(body),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(path==='/access'?3000:12000)});
  if(response.status>=500)throw new HubTransportUnavailable();return response;
 }

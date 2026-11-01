@@ -109,6 +109,9 @@ on:
 
 jobs:
   migrar:
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -116,7 +119,8 @@ jobs:
       DIRECT_URL: ${{ secrets.DATABASE_URL }}
       HUB_BASE_URL: ${{ inputs.hub_base_url || 'https://hub.lasolucionweb.net' }}
       AUTO_ARTICULOS_HUB_CLIENT_ID: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_ID }}
-      AUTO_ARTICULOS_HUB_CLIENT_SECRET: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_SECRET }}
+      HUB_CREDENTIAL_TRANSPORT: shared
+      HUB_WORKLOAD_IDENTITY: github-actions
       HUB_SYNC_EMAIL: ${{ inputs.sync_email }}
       HUB_OMIT_LEGACY_PHONES: ${{ inputs.omit_legacy_phones }}
     steps:

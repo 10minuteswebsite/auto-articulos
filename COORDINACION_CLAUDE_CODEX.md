@@ -1,3 +1,7 @@
+## WAITLIST-CLOSE-20261101 · EN CURSO
+
+CorrecionesHUB ejecuta por orden humana los cuatro pendientes: ActionsArtículos, Quiz, OAuthDominios y CIHub. Único escritor en main de Hub/Harness; reserva del conectorActionsArtículos y publicaciónQuiz al tomar su paquete. Sin ramas/worktrees. No rotar secretos; ActionsOIDC limitado a user-sync de dos workflows/main, sin canje de sesiones. Hub conserva autoridad de permisos y estados.
+
 ## 1/11 · WAITLIST-REAUDIT-20261101 · pendientes confirmados
 
 La cola NO está vacía: sincronizador GitHubActionsArtículos omitido en el corte

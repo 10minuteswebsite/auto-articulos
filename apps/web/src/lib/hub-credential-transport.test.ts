@@ -16,3 +16,10 @@ test('legacy bridge and shared mode use distinct authority without returning or 
   globalThis.fetch=async()=>Response.json({error:'unavailable'},{status:503});await assert.rejects(validHubBackend(request('legacy-fixture'))); // no legacy fallback
  }finally{globalThis.fetch=fetchOriginal;delete process.env.HUB_CREDENTIAL_TRANSPORT}
 });
+
+test('Actions obtains a short-lived identity only for user sync and never forwards legacy secrets',async()=>{
+ const{hubBackendFetch}=await import('./hub-credential-transport');const original=globalThis.fetch;const calls:string[]=[];
+ process.env.HUB_CREDENTIAL_TRANSPORT='shared';process.env.HUB_WORKLOAD_IDENTITY='github-actions';process.env.GITHUB_ACTIONS='true';process.env.ACTIONS_ID_TOKEN_REQUEST_URL='https://run.actions.githubusercontent.com/token';process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN='temporary-request-only';
+ globalThis.fetch=async(input:any,init:any)=>{calls.push(String(input));if(String(input).includes('actions.githubusercontent.com'))return Response.json({value:'x'.repeat(64)});assert.equal(new Headers(init.headers).get('authorization'),'Bearer '+'x'.repeat(64));return Response.json({ok:true})};
+ try{await hubBackendFetch('/api/integrations/auto-articulos/user-sync',{local_user_id:'native',email:'invalid'});assert.equal(calls.length,2);assert(calls[0].includes('audience='));assert(calls[1].endsWith('/user-sync'));await assert.rejects(hubBackendFetch('/api/product-launch',{app:'seo-total',code:'x'.repeat(48)}));assert.equal(calls.length,2);process.env.ACTIONS_ID_TOKEN_REQUEST_URL='https://evil.invalid/token';await assert.rejects(hubBackendFetch('/api/integrations/auto-articulos/user-sync',{}));assert.equal(calls.length,2)}finally{globalThis.fetch=original;for(const k of ['HUB_CREDENTIAL_TRANSPORT','HUB_WORKLOAD_IDENTITY','GITHUB_ACTIONS','ACTIONS_ID_TOKEN_REQUEST_URL','ACTIONS_ID_TOKEN_REQUEST_TOKEN'])delete process.env[k]}
+});

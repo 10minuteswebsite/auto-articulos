@@ -1,3 +1,7 @@
+## ARTICULOS-ACTIONS-AUTH-20261101 · preparado
+
+Workflows sync/migrate usan identidadOIDC efímera limitada a user-sync, sin leer/copiar secretoHub. Verificación sin escrituras disponible. Hub7311c5c8 ya conserva permisos/roles/estado canónico y adaptador3424a8d5 ya limitaActions. Pruebasweb7, build y tiposPASS; falta ejecutar workflow productivo.
+
 ## 1/11 · WAITLIST-REAUDIT-20261101 · pendientes confirmados
 
 La cola NO está vacía: sincronizador GitHubActionsArtículos omitido en el corte
