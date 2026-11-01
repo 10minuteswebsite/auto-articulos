@@ -1,6 +1,7 @@
 import {publishingReadiness} from '@/lib/publishing-readiness';
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { recordTitleOrigins, type OriginBatch } from "@/lib/title-origin-log";
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { platformProductNameOrNeutral } from "@auto-articulos/shared";
@@ -206,6 +207,7 @@ export async function POST(request: NextRequest) {
       ? contentLanguage.trim()
       : null;
 
+  const originBatches: OriginBatch[] = [];
   const runIds = await prisma.$transaction(async (tx) => {
     const ids: string[] = [];
 
@@ -235,6 +237,7 @@ export async function POST(request: NextRequest) {
         select: { id: true },
       });
       ids.push(created.id);
+      originBatches.push({ runId: created.id, group, titles });
 
       // Eliminar los títulos seleccionados del grupo de oportunidades
       await tx.opportunityTitle.deleteMany({
@@ -253,6 +256,7 @@ export async function POST(request: NextRequest) {
 
     return ids;
   });
+  await recordTitleOrigins(userId, originBatches);
 
   const worker = await triggerWorkerNow();
   return NextResponse.json({
