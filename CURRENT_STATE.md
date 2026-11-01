@@ -1,3 +1,12 @@
+## 1/11 · SHARED-SECRETS-EXTERNAL-20261101 · CERRADO / LIBERADA
+
+Artículos/Redes integrados mediante OIDC de Vercel y adaptador Cloudflare de
+rutas fijas; Hub56bindings, fuente única articulos-r2, sin copias productivas.
+RendererWebsite5bindings: copia antigua retirada. SSOYolyArtículos, consultaBLOG200,
+SSOMarioRedes y denegaciónYolyRedesPASS; rotación sin cambiar lectores comprobada.
+Sin grants, cobros, contenido, MCP ni OAuthsocial modificados. Reservas LIBERADAS.
+[Recibo, fuentes exactas y límites](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-11-01-shared-secrets-external.md).
+
 ## SHARED-SECRETS-EXTERNAL-20261101 · EN CURSO
 
 Reserva del conectorHub web por CorrecionesHUB. AdaptadorOIDC limitado autorizado

@@ -1,3 +1,12 @@
+## 1/11 · SHARED-SECRETS-EXTERNAL-20261101 · CERRADO / LIBERADA
+
+Artículos/Redes integrados mediante OIDC de Vercel y adaptador Cloudflare de
+rutas fijas; Hub56bindings, fuente única articulos-r2, sin copias productivas.
+RendererWebsite5bindings: copia antigua retirada. SSOYolyArtículos, consultaBLOG200,
+SSOMarioRedes y denegaciónYolyRedesPASS; rotación sin cambiar lectores comprobada.
+Sin grants, cobros, contenido, MCP ni OAuthsocial modificados. Reservas LIBERADAS.
+[Recibo, fuentes exactas y límites](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-11-01-shared-secrets-external.md).
+
 ## 30/10/2026 · HUB-APPS-FIXTURE-CLEANUP-20261030
 
 Limpieza de producción comprobada por SELECT independientes tras los DELETE.
