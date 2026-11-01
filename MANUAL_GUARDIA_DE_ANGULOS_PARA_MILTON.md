@@ -25,7 +25,7 @@
 - Si una cuenta necesitó notas 2 veces seguidas, la guardia se salta en esa cuenta por 24 h.
 - Si 3 de las últimas 10 solicitudes activas fallaron en toda la plataforma, se salta sola.
 - En sombra: tope de 60 solicitudes observadas al día (≈ 1 dólar al día) y limpieza de registros de más de 60 días.
-- Costo: unos **2 centavos por solicitud** a la que se aplica (modelo gpt-4.1). **Tope duro: 40 solicitudes aplicadas por día ≈ 0,70 dólares al día como máximo**; pasado el tope todo sigue como siempre.
+- Costo: unos **2 centavos por solicitud** a la que se aplica (modelo gpt-4.1). **Topes duros, por separado:** módulo 1 = 40 clics revisados al día (≈ 0,70 dólares al día como máximo); módulo 2 = 12 análisis revisados al día (≈ 0,60 dólares al día como máximo). **Techo total ≈ 1,30 dólares al día.** Pasado el tope todo sigue como siempre. El costo es de TODA la plataforma, no por usuario, y ningún usuario paga nada por esto.
 - **Filtro de ahorro:** la guardia no revisa las cuentas con menos de 20 títulos (publicados u ofrecidos) en esa categoría, porque casi no hay qué repetir. Baja el costo cerca de la mitad y no usa IA.
 - **Cada persona tiene máximo 3 solicitudes de ideas al día**, así que el gasto no puede dispararse.
 
