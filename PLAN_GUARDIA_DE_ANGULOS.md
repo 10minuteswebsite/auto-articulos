@@ -7,7 +7,7 @@ Estado: PLAN para aprobación. No hay código. Fecha: 2026-11-01.
 
 > **Corregido tras la triple auditoría** (`AUDITORIA_TRIPLE_GUARDIA_DE_ANGULOS.md`): los umbrales sobre palabras sueltas eran incorrectos; ahora se usa parecido ponderado por rareza con **≥ 60 % repetido / 38–59 % dudoso**, el juez de IA corre siempre una vez agrupado, y la memoria incluye el sitio y los descartados (90 días) filtrados por sitio. Donde este documento y la auditoría difieran, manda la auditoría. **Auditado en 8 rondas hasta cero errores; la especificación final está al final de `AUDITORIA_TRIPLE_GUARDIA_DE_ANGULOS.md` y reemplaza los umbrales de este plan (85 % rechazo automático, 38–84 % juez de IA).**
 
-**Alcance: el proceso, para TODOS los usuarios.** El caso de Inés (info@inesgarcia-arcaya.com) es solo la primera evidencia medida (`ANALISIS_TEMAS_REPETIDOS_INES.md`); lo que se repara es el algoritmo que genera y valida títulos, que hoy es el mismo para todas las cuentas. Nada de lo que sigue es específico de una persona.
+**Alcance: el proceso, para TODOS los usuarios.** El caso de Inés (cuenta de Inés) es solo la primera evidencia medida (`ANALISIS_TEMAS_REPETIDOS_INES.md`); lo que se repara es el algoritmo que genera y valida títulos, que hoy es el mismo para todas las cuentas. Nada de lo que sigue es específico de una persona.
 
 ## Objetivo
 Ningún título nuevo se parece a algo ya cubierto **salvo que exista una razón buena y guardada** de por qué sí. Y cuando un tema ya está agotado, el sistema lo dice con honestidad en vez de rellenar con reformulaciones.

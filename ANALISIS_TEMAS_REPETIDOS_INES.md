@@ -1,6 +1,6 @@
 # Análisis forense — ¿por qué se repiten los temas? (caso INES)
 
-Fecha: 2026-11-01. Cuenta: info@inesgarcia-arcaya.com. Fuente: el Historial forense de producción (solo lectura) y el código de `title-generation-core.ts` / `title-generation.ts`. Plan origen: `MASTER_BLUEPRINT_HISTORIAL_FORENSE_ARTICULOS.md`.
+Fecha: 2026-11-01. Cuenta: la de Inés. Fuente: el Historial forense de producción (solo lectura) y el código de `title-generation-core.ts` / `title-generation.ts`. Plan origen: `MASTER_BLUEPRINT_HISTORIAL_FORENSE_ARTICULOS.md`.
 
 ## Veredicto
 La percepción de Inés es **cierta** en el nivel de ángulos temáticos: los lotes recientes se parecen cada vez más a los anteriores. La causa principal NO es que el algoritmo «elija mal»; son dos cosas que se suman:

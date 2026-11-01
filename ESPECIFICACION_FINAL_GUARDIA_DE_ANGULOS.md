@@ -18,6 +18,7 @@ Fecha: 2026-11-01. Estado: auditada, sin código. **Reemplaza por completo** a `
 | Pasa limpio | < **38 %** |
 | Sin juez disponible: se considera «parecido» a partir de | **60 %** (salvo cuando el vecino más cercano es solo un título del sitio) |
 | Peso mínimo de una palabra común | **0,15** |
+| Mezcla de parecido simple | **30 %** del parecido cuenta todas las palabras por igual (el 70 % restante es el ponderado por rareza); evita que una sola palabra rara decida |
 | Palabras | 3+ letras; siglas de 2–5 mayúsculas; códigos con letras y dígitos (EB-5, H-1B, 401k) enteros; números sueltos ignorados; restos de URL («buyers39») limpios; cortador conservador (plurales, -ing, -ed, -e, doble consonante salvo l/s/z/f) |
 | Candidatos que se piden a la IA | **14** para **9** cupos |
 | Entrega | máximo **9**, mínimo **5** (si hay al menos 5 candidatos válidos) |
@@ -92,3 +93,8 @@ Fecha: 2026-11-01. Estado: auditada, sin código. **Reemplaza por completo** a `
 - *B:* 4.000 casos aleatorios con juez nulo, siempre «igual», siempre «distinto», mixto y caído: **0 fallas, 0 resultados vacíos**; escenarios fijos E1–E7 y extras (cuenta nueva, orden de limpios, modo sombra) correctos; E1 ahora entrega 5 con nota.
 - *C:* los 11 recorridos del apartado 8 verificados contra el simulador y contra el código (`NO_VALID_TITLES` existente, liberación de cupo en `finally`, `loadAvoid`, selección de la categoría, `maxDuration`).
 Simulador y pruebas: `docs/guardia-de-angulos/` (`guard-sim.mjs`, `guard-props.mjs`, `guard-extra.mjs`; se ejecutan con `node`).
+
+## 11. Bitácora de la Fase 1 (2026-11-01)
+- **Hecho (sin conectar a ningún flujo):** `lib/angle-guard-core.ts` (detector y decisión, puros), `lib/angle-guard-judge.ts` (prompt, lector de respuesta y llamada con falla segura), `lib/angle-guard-labeled-pairs.ts` (27 pares neutros: 18 distintos y 9 repetidos), pruebas (`angle-guard-core.test.ts`: 16; `angle-guard-judge.test.ts`: 5) y `GET /api/admin/title-guard/judge-validation` (solo administrador, sin escribir nada).
+- **Hallazgo de la implementación:** con un único candidato en el corpus, la serie homogénea daba 35 % (por debajo de la zona del juez). **Corrección:** mezcla del 30 % de parecido simple (serie con 1 candidato 51 %, con 9 candidatos 66 %). Verificado con la suite automática: contrastes máximo 75 % (0 rechazos automáticos), mismos 14/18 contrastes y 8/9 repetidos en la zona del juez.
+- **Pendiente de la Fase 1:** ejecutar la validación del juez en producción como administrador (necesita la clave de IA del servidor): debe dar ≥ 90 % de aciertos y 0 distintos marcados «misma pregunta».
