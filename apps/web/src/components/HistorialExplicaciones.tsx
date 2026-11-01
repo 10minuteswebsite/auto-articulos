@@ -9,6 +9,7 @@ import { h2Style, buttonStyle } from "@/components/dashboard-ui";
 // queda guardado con su fecha de solicitud.
 
 type RunOption = { id: string; createdAt: string; categoria: string; titulos: number };
+type Cupo = { used: number; max: number; unlimited: boolean; nextAt: string | null; exhausted: boolean };
 type Saved = { id: string; runId: string; requestedAt: string; summary: string; status: string; errorMessage: string | null };
 
 const cardStyle: CSSProperties = {
@@ -27,8 +28,7 @@ export default function HistorialExplicaciones() {
   const [runs, setRuns] = useState<RunOption[]>([]);
   const [saved, setSaved] = useState<Saved[]>([]);
   const [runId, setRunId] = useState("");
-  const [usadas, setUsadas] = useState(0);
-  const [maximo, setMaximo] = useState(5);
+  const [cupo, setCupo] = useState<Cupo | null>(null);
   const [pidiendo, setPidiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cargada, setCargada] = useState(false);
@@ -39,8 +39,7 @@ export default function HistorialExplicaciones() {
       if (a.ok) {
         const d = await a.json();
         setRuns(d.runs ?? []);
-        setUsadas(d.usadasHoy ?? 0);
-        setMaximo(d.maximoPorDia ?? 5);
+        setCupo(d.cupo ?? null);
         setRunId((prev) => prev || d.runs?.[0]?.id || "");
       }
       if (b.ok) setSaved((await b.json()).explanations ?? []);
@@ -64,6 +63,7 @@ export default function HistorialExplicaciones() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(typeof data.error === "string" ? data.error : "No se pudo generar la explicación.");
+        if (res.status === 429) await cargar();
         return;
       }
       await cargar();
@@ -94,11 +94,20 @@ export default function HistorialExplicaciones() {
               </option>
             ))}
           </select>
-          <button type="button" onClick={() => void pedir()} disabled={!runId || pidiendo || usadas >= maximo} style={{ ...buttonStyle, padding: "6px 12px", fontSize: 13 }}>
+          <button type="button" onClick={() => void pedir()} disabled={!runId || pidiendo || Boolean(cupo?.exhausted)} style={{ ...buttonStyle, padding: "6px 12px", fontSize: 13 }}>
             {pidiendo ? "Explicando..." : "Explicar por qué"}
           </button>
-          <span className="muted" style={{ fontSize: 12 }}>{usadas} de {maximo} hoy</span>
         </div>
+        <p className="muted" style={{ fontSize: 12, margin: "0 0 10px" }}>
+          {cupo?.unlimited
+            ? "Como administrador no tienes límite de explicaciones."
+            : `Puedes pedir ${cupo?.max ?? 1} explicación cada 24 horas, para cuidar el uso de la IA. Elige bien la ejecución: ${cupo ? `hoy llevas ${cupo.used} de ${cupo.max}.` : "cargando tu cupo..."}`}
+        </p>
+        {cupo?.exhausted && cupo.nextAt && (
+          <p style={{ fontSize: 13, color: "#8a4b08", margin: "0 0 10px" }}>
+            Ya usaste tu explicación de hoy. Podrás pedir otra a partir del {new Date(cupo.nextAt).toLocaleString()}. Mientras tanto, abajo puedes releer las que ya pediste.
+          </p>
+        )}
         {error && <p style={{ fontSize: 12, color: "#ff3b30" }}>{error}</p>}
         {cargada && saved.length === 0 && <p className="muted" style={{ fontSize: 13 }}>Todavía no has pedido ninguna explicación.</p>}
         {saved.filter((s) => s.status === "ok").map((s) => {

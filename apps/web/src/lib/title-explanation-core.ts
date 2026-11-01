@@ -16,6 +16,21 @@ export function similarityPct(a: string, b: string): number {
   return Math.round((shared / (left.size + right.size - shared)) * 100);
 }
 
+export const MAX_EXPLANATIONS_PER_DAY = 1;
+export const EXPLANATION_WINDOW_MS = 24 * 3600_000;
+
+/**
+ * Cuándo podrá pedir otra explicación quien ya agotó su cupo (null si todavía
+ * tiene). `requestedAt` son las solicitudes exitosas dentro de la ventana.
+ */
+export function nextExplanationAt(requestedAt: Date[], max: number, now: Date = new Date()): Date | null {
+  const recent = requestedAt
+    .filter((d) => now.getTime() - d.getTime() < EXPLANATION_WINDOW_MS)
+    .sort((a, b) => a.getTime() - b.getTime());
+  if (recent.length < max) return null;
+  return new Date(recent[recent.length - max].getTime() + EXPLANATION_WINDOW_MS);
+}
+
 /** El resumen nunca pasa de dos párrafos, aunque el modelo escriba más. */
 export function limitToTwoParagraphs(text: string): string {
   const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
