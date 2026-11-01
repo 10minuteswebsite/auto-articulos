@@ -1,3 +1,4 @@
+import {hubBackendFetch,hubTransportConfigured} from '@/lib/hub-credential-transport';
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "node:crypto";
@@ -10,7 +11,6 @@ import { newUserDefaultPromptData } from "@/lib/default-prompt";
 
 export const runtime = "nodejs";
 
-const HUB_BASE_URL = "https://hub.lasolucionweb.net";
 const LEGACY_APP_SLUG = "seo-total";
 const HUB_APP_SLUGS = new Set(["seo-total", "auto-redes"]);
 
@@ -28,22 +28,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=hub_code", request.url));
   }
 
-  const clientId = process.env.AUTO_ARTICULOS_HUB_CLIENT_ID;
-  const clientSecret = process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET;
-  if (!clientId || !clientSecret) {
+  if (!hubTransportConfigured()) {
     return NextResponse.json({ error: "La conexión con el Hub no está configurada." }, { status: 503 });
   }
 
-  const exchange = await fetch(`${process.env.HUB_BASE_URL || HUB_BASE_URL}/api/product-launch`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-platform-client-id": clientId,
-      Authorization: `Bearer ${clientSecret}`,
-    },
-    body: JSON.stringify({ code, app: appSlug }),
-    cache: "no-store",
-  });
+  const exchange = await hubBackendFetch('/api/product-launch',{code,app:appSlug});
   const launch = (await exchange.json().catch(() => ({}))) as {
     app?: string;
     platform_user_id?: string;

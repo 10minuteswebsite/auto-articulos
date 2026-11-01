@@ -1,6 +1,7 @@
+import {validHubBackend} from '@/lib/hub-credential-transport';
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { randomBytes, timingSafeEqual } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { prisma } from "@auto-articulos/db";
 import { syncLocalProductEntitlement } from "@/lib/hub-sync";
 import { DEFAULT_SOCIAL_PUBLISHING_PERMISSIONS } from "@/lib/social-access";
@@ -25,20 +26,6 @@ function text(value: unknown, max = 240) {
   return typeof value === "string" && value.trim().length > 0 ? value.trim().slice(0, max) : null;
 }
 
-function isValidHubClient(request: Request) {
-  const expectedId = process.env.AUTO_ARTICULOS_HUB_CLIENT_ID;
-  const expectedSecret = process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET;
-  const suppliedId = request.headers.get("x-platform-client-id") ?? "";
-  const authorization = request.headers.get("authorization") ?? "";
-  const suppliedSecret = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
-
-  if (!expectedId || !expectedSecret || suppliedId !== expectedId || !suppliedSecret) return false;
-
-  const expected = Buffer.from(expectedSecret);
-  const supplied = Buffer.from(suppliedSecret);
-  return expected.length === supplied.length && timingSafeEqual(expected, supplied);
-}
-
 /**
  * Hub -> Redes projection.
  *
@@ -48,7 +35,9 @@ function isValidHubClient(request: Request) {
  * projection is idempotent.
  */
 export async function POST(request: NextRequest) {
-  if (!isValidHubClient(request)) {
+  let authenticated=false;
+  try{authenticated=await validHubBackend(request)}catch{return NextResponse.json({error:'hub_unavailable'},{status:503})}
+  if (!authenticated) {
     return NextResponse.json({ error: "Invalid product client" }, { status: 401, headers: { "Cache-Control": "no-store" } });
   }
 

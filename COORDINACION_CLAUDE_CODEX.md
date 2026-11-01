@@ -1,3 +1,9 @@
+## SHARED-SECRETS-EXTERNAL-20261101 · EN CURSO
+
+Reserva del conectorHub web por CorrecionesHUB. AdaptadorOIDC limitado autorizado
+por Mario; origen unico preparado, todavia no activado. Sin cambios al Worker
+editorial, MCP, OAuth social, publicaciones ni permisos de clientes.
+
 ## 30/10/2026 · HUB-APPS-FIXTURE-CLEANUP-20261030 · CERRADO
 
 Borrado autorizado ejecutado y verificado: 3 proyectos Creador, 1 cuenta nativa
