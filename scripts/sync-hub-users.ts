@@ -1,7 +1,13 @@
+import {hubBackendFetch} from "../apps/web/src/lib/hub-credential-transport";
 import { prisma } from "../packages/db/src/index";
 import { syncUserToHub } from "../apps/web/src/lib/hub-sync";
 
 async function main() {
+  if(process.env.HUB_SYNC_VERIFY_ONLY==='true'){
+    const r=await hubBackendFetch('/api/integrations/auto-articulos/user-sync',{local_user_id:'auth-verification-only',email:'invalid'});
+    const d=await r.json();if(r.status!==400||d.error!=='local_user_id and a valid email are required')throw Error('Hub authentication verification failed: HTTP '+r.status+' '+(typeof d.error==='string'&&/^[A-Za-z_ ]{1,100}$/.test(d.error)?d.error:'unclassified'));
+    console.log('[HUB SYNC] authenticated; invalid payload rejected before data writes');return;
+  }
   const emailFilter = process.env.HUB_SYNC_EMAIL?.trim().toLowerCase();
   const users = await prisma.user.findMany({
     where: emailFilter ? { email: emailFilter } : undefined,
@@ -12,12 +18,13 @@ async function main() {
 
   for (const user of users) {
     try {
-      await syncUserToHub(user.id);
+      const result=await syncUserToHub(user.id);
+      if(!result)throw Error("Hub transport not configured");
       synced += 1;
-      console.log(`[HUB SYNC] OK ${user.email}`);
+      console.log(`[HUB SYNC] OK ${user.id}`);
     } catch (error) {
       failed += 1;
-      console.error(`[HUB SYNC] ERROR ${user.email}`, error instanceof Error ? error.message : String(error));
+      console.error(`[HUB SYNC] ERROR ${user.id}`, error instanceof Error ? error.message : String(error));
     }
   }
 

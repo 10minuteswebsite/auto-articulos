@@ -1,3 +1,29 @@
+## WAITLIST-CLOSE-20261101 · Actions CERRADO / reserva LIBERADA
+
+Código3e61b63; ambos workflows autentican por OIDC efímero enmain sin secretosbackend/ID legacy. Runs41347894875 y41349239059 prueban400 autenticado antes de escrituras; migratejob omitido/DB ficticia. Sync41348478173 y replay41348764593:124/0 cadauno. Hub conserva estados/permisos canónicos. WebVercel conserva transporteOIDC previo; no desplegarWorker. [Acta/mapa/límites](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-11-01-waitlist-close.md).
+
+## ARTICULOS-ACTIONS-AUTH-20261101 · preparado
+
+Workflows sync/migrate usan identidadOIDC efímera limitada a user-sync, sin leer/copiar secretoHub. Verificación sin escrituras disponible. Hub7311c5c8 ya conserva permisos/roles/estado canónico y adaptador3424a8d5 ya limitaActions. Pruebasweb7, build y tiposPASS; falta ejecutar workflow productivo.
+
+## 1/11 · WAITLIST-REAUDIT-20261101 · pendientes confirmados
+
+La cola NO está vacía: sincronizador GitHubActionsArtículos omitido en el corte
+(0/124, Invalid product client), paqueteQuiz sin publicar, OAuthUIHub sin
+implementar y triggers automáticosHub en fallo. El acceso web compartido sigue
+verificado; se corrige la afirmación de cobertura completa. BancoArtículos drifted,
+operación blocked hasta cubrir los consumidoresActions. Sin mutaciones productivas.
+[Cola y evidencia](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/coordination/PUBLICATION_QUEUE_20261101.md).
+
+## 1/11 · SHARED-SECRETS-EXTERNAL-20261101 · CERRADO / LIBERADA
+
+Artículos/Redes integrados mediante OIDC de Vercel y adaptador Cloudflare de
+rutas fijas; Hub56bindings, fuente única articulos-r2, sin copias productivas.
+RendererWebsite5bindings: copia antigua retirada. SSOYolyArtículos, consultaBLOG200,
+SSOMarioRedes y denegaciónYolyRedesPASS; rotación sin cambiar lectores comprobada.
+Sin grants, cobros, contenido, MCP ni OAuthsocial modificados. Reservas LIBERADAS.
+[Recibo, fuentes exactas y límites](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-11-01-shared-secrets-external.md).
+
 ## 30/10/2026 · HUB-APPS-FIXTURE-CLEANUP-20261030 · CERRADO
 
 Borrado autorizado ejecutado y verificado: 3 proyectos Creador, 1 cuenta nativa

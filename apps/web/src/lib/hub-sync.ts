@@ -1,10 +1,10 @@
+import {hubBackendFetch,hubTransportConfigured} from './hub-credential-transport';
 import { prisma } from "@auto-articulos/db";
 import { normalizeLegacyPhone } from "./phone";
 
 const DEFAULT_HUB_URL = "https://hub.lasolucionweb.net";
 const ACCESS_CACHE_MS = 60_000;
 const ACCESS_FAILURE_CACHE_MS = 30_000;
-const HUB_ACCESS_TIMEOUT_MS = 3_000;
 const accessCache = new Map<string, { allowed: boolean; expiresAt: number }>();
 // Un fallo del Hub se recuerda unos segundos: sin esto, cada petición del
 // dashboard (la página y sus APIs a la vez) espera el fallo por su cuenta.
@@ -95,7 +95,7 @@ function getHubConfig() {
   const baseUrl = (process.env.HUB_BASE_URL || DEFAULT_HUB_URL).replace(/\/$/, "");
   const clientId = process.env.AUTO_ARTICULOS_HUB_CLIENT_ID;
   const clientSecret = process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return null;
+  if (!hubTransportConfigured()) return null;
   return { baseUrl, clientId, clientSecret };
 }
 
@@ -135,17 +135,7 @@ async function revalidateHubAccess(userId: string, appSlug: HubProductSlug, cach
 
   let allowed: boolean;
   try {
-    const response = await fetch(`${config.baseUrl}/api/integrations/auto-articulos/access`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-platform-client-id": config.clientId,
-        Authorization: `Bearer ${config.clientSecret}`,
-      },
-      body: JSON.stringify({ hub_user_id: user.hubUserId, app: appSlug }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(HUB_ACCESS_TIMEOUT_MS),
-    });
+    const response = await hubBackendFetch('/api/integrations/auto-articulos/access',{hub_user_id:user.hubUserId,app:appSlug});
     const payload = (await response.json().catch(() => ({}))) as { allowed?: unknown; error?: string };
     if (!response.ok || typeof payload.allowed !== "boolean") {
       throw new Error(payload.error || `Hub respondió ${response.status} al verificar acceso.`);
@@ -194,14 +184,7 @@ export async function syncUserToHub(userId: string): Promise<HubSyncResult | nul
   });
 
   const legacyPhone = process.env.HUB_OMIT_LEGACY_PHONES === 'true' ? null : normalizeLegacyPhone(user.phone);
-  const response = await fetch(`${config.baseUrl}/api/integrations/auto-articulos/user-sync`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-platform-client-id": config.clientId,
-      Authorization: `Bearer ${config.clientSecret}`,
-    },
-    body: JSON.stringify({
+  const response = await hubBackendFetch('/api/integrations/auto-articulos/user-sync',{
       local_user_id: user.id,
       email: user.email,
       name: user.name,
@@ -212,9 +195,7 @@ export async function syncUserToHub(userId: string): Promise<HubSyncResult | nul
       ...(legacyPhone ? { phone: legacyPhone } : {}),
       role: user.role,
       product_access: user.trialUnlocked,
-    }),
-    cache: "no-store",
-  });
+    });
 
   const payload = (await response.json().catch(() => ({}))) as Partial<HubSyncResult> & { error?: string };
   if (!response.ok || typeof payload.hub_user_id !== "string") {
