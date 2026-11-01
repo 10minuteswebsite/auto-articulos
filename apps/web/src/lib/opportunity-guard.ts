@@ -8,7 +8,9 @@ import { guardSafeToApply, loadGuardMemory } from "@/lib/title-guard-shadow";
 // Bing y GA4 produce los títulos y ANTES de guardarlos. Solo QUITA títulos repetidos: no cambia la justificación, las
 // impresiones, los clics ni ninguna señal; nunca vacía un grupo (si todo se parece, queda el menos parecido); y ante cualquier
 // fallo devuelve los grupos tal cual. Mismo interruptor, mismo porcentaje y mismos frenos que el módulo 1.
-const JUDGE_MAX_CALLS = 2; // tope de gasto por análisis (≈ 80 títulos evaluados por el juez, unos 10 centavos como máximo)
+const JUDGE_MAX_CALLS = 1; // tope de gasto por análisis (≈ 40 títulos evaluados por el juez, unos 5 centavos como máximo)
+/// Tope propio del módulo 2: un análisis cuesta mucho más que un clic del módulo 1, así que se limita por separado (≈ 0,60 dólares al día como máximo).
+export const OPPORTUNITY_DAILY_CAP = 12;
 const JUDGE_ITEMS_PER_CALL = 40;
 
 interface OpportunityGroupLike {
@@ -29,6 +31,8 @@ export async function applyGuardToOpportunities<T extends OpportunityGroupLike>(
     const today = new Date().toISOString().slice(0, 10);
     if (!shouldApplyGuard(`${userId}:${today}`, percent)) return untouched;
     if (!(await guardSafeToApply(userId))) return untouched;
+    const appliedToday = await prisma.titleGuardReport.count({ where: { mode: "activo", categoryName: { startsWith: "Módulo 2" }, createdAt: { gte: new Date(Date.now() - 24 * 3600_000) } } });
+    if (appliedToday >= OPPORTUNITY_DAILY_CAP) return untouched;
 
     const memory = await loadGuardMemory(userId, siteDomain, "", undefined, true);
     // Filtro de ahorro: solo se revisan las categorías con historial suficiente.
