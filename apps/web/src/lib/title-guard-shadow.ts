@@ -2,6 +2,7 @@ import { prisma } from "@auto-articulos/db";
 import { GUARD, decide, needsJudge, titleKey, type JudgeFn, type MemoryEntry } from "@/lib/angle-guard-core";
 import { JUDGE_MODEL, callJudge } from "@/lib/angle-guard-judge";
 import type { TitleGuardMode } from "@/lib/title-guard-mode";
+import { ensureSiteTitlesSeeded } from "@/lib/published-titles";
 
 // GUARDIA DE ÁNGULOS — MODO SOMBRA (Fase 2). Corre DESPUÉS de responder a la
 // persona (con `after()` en la ruta) y solo registra lo que la guardia habría
@@ -73,7 +74,11 @@ export async function runGuardShadow(info: ShadowInfo): Promise<void> {
     legacyTitles: info.legacyTitles,
   };
   try {
+    // La memoria del sitio sale del sitemap, que hasta ahora solo se leía al usar Oportunidades: una cuenta que solo usa
+    // CONTENIDO PROPIO podía tener esa memoria vacía. Se llena (una sola vez por cuenta y sitio) y nunca lanza.
+    await ensureSiteTitlesSeeded(info.userId, info.siteDomain);
     const memory = await loadGuardMemory(info.userId, info.siteDomain, info.requestId);
+    const memoryCounts = memory.reduce<Record<string, number>>((acc, m) => ({ ...acc, [m.source]: (acc[m.source] ?? 0) + 1 }), {});
     const pairs = needsJudge(info.candidates, memory);
 
     let judge: JudgeFn | null = null;
@@ -109,7 +114,10 @@ export async function runGuardShadow(info: ShadowInfo): Promise<void> {
         judgeModel: judgeUsed ? JUDGE_MODEL : null,
         judgePairs: pairs.length,
         judgeMs,
-        details: result.delivered.map((d) => ({ title: d.title, verdict: d.verdict, sim: Math.round(d.sim * 100), note: d.note, neighbor: d.neighbor })),
+        details: {
+          memoria: memoryCounts,
+          entregados: result.delivered.map((d) => ({ title: d.title, verdict: d.verdict, sim: Math.round(d.sim * 100), note: d.note, neighbor: d.neighbor })),
+        },
       },
     });
   } catch (error) {
