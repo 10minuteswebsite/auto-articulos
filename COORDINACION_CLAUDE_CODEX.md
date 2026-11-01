@@ -13227,3 +13227,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: guardia, juez por lista (sin migración, sin cambios visibles; solo sombra). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — 2026-11-01: corrección de un caso de validación del juez por lista (sin migración, sin cambios visibles). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: herramienta de administrador replay (solo lectura; sin migración). Se libera al fusionar.
