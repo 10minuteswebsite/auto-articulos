@@ -1,5 +1,7 @@
 import { prisma } from "@auto-articulos/db";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
+import { getTitleGuardMode } from "@/lib/title-guard-mode";
+import type { ShadowInfo } from "@/lib/title-guard-shadow";
 import { getTitleGenerationPrompt } from "@/lib/title-generation-prompt";
 import {
   MAX_REQUESTS_PER_DAY,
@@ -221,6 +223,8 @@ export interface GenerateParams {
   userId: string;
   categoryId: string;
   languageValue: string;
+  /** La ruta la usa para correr la Guardia de ángulos (solo sombra) DESPUÉS de responder. Opcional: sin ella todo es como siempre. */
+  afterGenerated?: (info: ShadowInfo) => void;
   inputs: TitleGenerationInputs;
 }
 
@@ -233,6 +237,7 @@ export interface GenerateResult {
 }
 
 export async function generateTitlesForUser(params: GenerateParams): Promise<GenerateResult> {
+  const startedAtMs = Date.now();
   const { userId, inputs } = params;
 
   const user = await prisma.user.findUniqueOrThrow({
@@ -268,7 +273,7 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
 
   const category = await prisma.category.findFirst({
     where: { id: params.categoryId, userId, platform: PLATFORM, source: { not: "archived" } },
-    select: { id: true, name: true },
+    select: { id: true, name: true, siteDomain: true },
   });
   if (!category) {
     throw new TitleGenerationError(400, "NO_CATEGORY", "Elige una de tus categorías sincronizadas.");
@@ -321,6 +326,8 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
     const promptAvoid = pickAvoidForPrompt(avoid.items);
 
     const accepted: string[] = [];
+    // Todo lo que devolvió la IA, para que la guardia (modo sombra) lo evalúe después de responder.
+    const allCandidates: string[] = [];
     for (let call = 1; call <= MAX_AI_CALLS && accepted.length < MAX_TITLES; call++) {
       const missing = MAX_TITLES - accepted.length;
       const { system, user: userMessage } = buildMessages(adminPrompt, {
@@ -342,6 +349,7 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
 
       const candidates = parseModelOutput(raw);
       if (!candidates) continue;
+      allCandidates.push(...candidates);
       const { titles } = selectValidTitles(candidates, avoidSet, missing);
       for (const title of titles) {
         avoidSet.add(normalizeTitle(title));
@@ -366,6 +374,17 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
     const used = await prisma.titleGenerationRequest.count({
       where: { userId, dayKey: dayKeyFor(new Date()) },
     });
+    // Guardia de ángulos (solo sombra): se avisa a la ruta, que la corre DESPUÉS de responder. Nunca cambia lo entregado.
+    if (params.afterGenerated) {
+      try {
+        const mode = await getTitleGuardMode();
+        if (mode !== "apagado") {
+          params.afterGenerated({ mode, userId, requestId, categoryId: category.id, categoryName: category.name, siteDomain: category.siteDomain ?? "", candidates: allCandidates, legacyTitles: accepted, startedAtMs });
+        }
+      } catch (error) {
+        console.warn("[guardia-de-angulos] no se pudo preparar la sombra:", error instanceof Error ? error.message : error);
+      }
+    }
     return {
       requestId,
       titles: accepted,

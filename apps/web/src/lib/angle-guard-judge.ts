@@ -1,13 +1,14 @@
 // JUEZ DE IA de la Guardia de ángulos: decide si dos títulos hacen la MISMA
 // pregunta a un lector. Una sola llamada agrupada, con el mismo modelo que el
-// resto del sistema (gpt-4o-mini; no se cambia sin aprobación de Milton).
+// modelo de mayor nivel (gpt-4.1): en la validación del 2026-11-01 gpt-4o-mini
+// solo llegó a 70–89 %, mientras gpt-4.1 y gpt-4o sacaron 27/27 y 10/10 sin errores graves.
 //
 // FASE 1: no está conectado a ningún flujo de usuarios. Falla hacia lo seguro:
 // cualquier problema (red, tiempo, respuesta rara) devuelve null y la guardia
 // decide solo con el código. Nunca lanza.
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-export const JUDGE_MODEL = "gpt-4o-mini";
+export const JUDGE_MODEL = "gpt-4.1";
 export const JUDGE_TIMEOUT_MS = 10_000;
 export const JUDGE_MAX_PAIRS = 40;
 

@@ -1336,3 +1336,33 @@ model TitleExplanation {
 
   @@index([userId, runId, requestedAt])
 }
+
+// Guardia de ángulos (Fase 2): qué decidiría (modo sombra) o decidió la guardia en cada
+// solicitud de ideas con IA. Tabla ADITIVA; la guardia la ignora si no existe.
+// Sin @relation a User a propósito (la clave foránea vive solo en el SQL).
+model TitleGuardReport {
+  id                 String   @id @default(cuid())
+  userId             String
+  requestId          String?
+  categoryId         String?
+  categoryName       String   @default("")
+  siteDomain         String   @default("")
+  mode               String
+  candidates         Int      @default(0)
+  legacyTitles       String[] @default([])
+  deliveredTitles    String[] @default([])
+  hardDropped        String[] @default([])
+  nClean             Int      @default(0)
+  nSimilar           Int      @default(0)
+  completedWithNotes Int      @default(0)
+  judgeUsed          Boolean  @default(false)
+  judgeModel         String?
+  judgePairs         Int      @default(0)
+  judgeMs            Int?
+  details            Json?
+  errorMessage       String?
+  createdAt          DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}

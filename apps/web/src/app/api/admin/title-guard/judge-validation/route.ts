@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/current-user";
 import { HELDOUT_PAIRS, LABELED_PAIRS } from "@/lib/angle-guard-labeled-pairs";
-import { callJudge, scoreJudge } from "@/lib/angle-guard-judge";
+import { JUDGE_MODEL, callJudge, scoreJudge } from "@/lib/angle-guard-judge";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -12,7 +12,7 @@ export const maxDuration = 30;
 // si cumple la condición de la especificación (≥ 90 % de aciertos y ningún par
 // distinto marcado como «misma pregunta»). No escribe nada en la base de datos
 // y no toca ningún flujo de usuarios. Una sola llamada corta a la IA.
-// Modelos que se pueden PROBAR aquí. El de producción sigue siendo gpt-4o-mini; cambiarlo es decisión de Milton.
+// Modelos que se pueden PROBAR aquí. El del juez en producción es JUDGE_MODEL (gpt-4.1).
 const TESTABLE_MODELS = ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "gpt-4.1"];
 
 export async function GET(request: NextRequest) {
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   );
   return NextResponse.json({
     ok: true,
-    modelo: model ?? "gpt-4o-mini (el de producción)",
+    modelo: model ?? `${JUDGE_MODEL} (el del juez)`,
     cumple: result.passes,
     resumen: `${result.correct} de ${result.total} aciertos (${result.accuracyPct} %). Falsos «misma pregunta»: ${result.falseSame.length}. Repetidos no detectados: ${result.missedSame.length}.`,
     condicion: "Cumple si hay al menos 90 % de aciertos y cero pares distintos marcados como «misma pregunta».",
