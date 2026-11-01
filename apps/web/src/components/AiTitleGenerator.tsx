@@ -26,6 +26,9 @@ interface Status {
 interface GenerationResult {
   titles: string[];
   partial: boolean;
+  /** Notas amables para títulos que se parecen a algo que ya tienes (solo si la guardia está activa). */
+  notes?: Record<string, string>;
+  aviso?: string;
 }
 
 interface Props {
@@ -118,12 +121,14 @@ export default function AiTitleGenerator({
         error?: string;
         titles?: string[];
         partial?: boolean;
+        notes?: Record<string, string>;
+        aviso?: string;
       };
       if (!res.ok || !Array.isArray(data.titles)) {
         setError(data.error ?? "No se pudieron crear los títulos. Inténtalo de nuevo.");
         return;
       }
-      setResult({ titles: data.titles, partial: Boolean(data.partial) });
+      setResult({ titles: data.titles, partial: Boolean(data.partial), notes: data.notes, aviso: data.aviso });
     } catch {
       setError("No se pudo conectar con el servidor. No se descontó ninguna solicitud; inténtalo de nuevo.");
     } finally {
@@ -276,6 +281,9 @@ export default function AiTitleGenerator({
                 }. Los que no marques se descartan y no se volverán a proponer.`}
             {result.partial && ` La IA devolvió ${result.titles.length} títulos válidos esta vez.`}
           </p>
+          {result.aviso && (
+            <p style={{ fontSize: 13, color: "#6e6e73", margin: "0 0 10px" }}>{result.aviso}</p>
+          )}
           <div style={{ display: "grid", gap: 8 }}>
             {result.titles.map((title) => {
               const checked = selected.includes(title);
@@ -304,7 +312,12 @@ export default function AiTitleGenerator({
                     onChange={() => toggle(title)}
                     style={{ marginTop: 3, flexShrink: 0 }}
                   />
-                  <span>{title}</span>
+                  <span>
+                    {title}
+                    {result.notes?.[title] && (
+                      <span style={{ display: "block", fontSize: 12, color: "#6e6e73", marginTop: 2 }}>{result.notes[title]}</span>
+                    )}
+                  </span>
                 </label>
               );
             })}

@@ -77,12 +77,15 @@ export const CONTENT_GENERATION_TOOLS: ToolDef[] = [
         return toolText(String(data.error ?? "No se pudieron crear los títulos."), true);
       }
       const titulos = (data.titles ?? []) as string[];
+      const notas = (data.notes ?? {}) as Record<string, string>;
+      const aviso = typeof data.aviso === "string" ? data.aviso : "";
       if (titulos.length === 0) {
         return toolText("La IA no devolvió títulos nuevos esta vez (probablemente ya se sugirieron antes). Intenta con un tema o deseo del cliente más específico.", true);
       }
       const restantes = typeof data.requestsRemaining === "number" ? data.requestsRemaining : undefined;
       return toolText(
-        `Se generaron ${titulos.length} título(s) para "${categories[0].name}":\n${titulos.map((t) => `- ${t}`).join("\n")}\n\n` +
+        `Se generaron ${titulos.length} título(s) para "${categories[0].name}":\n${titulos.map((t) => (notas[t] ? `- ${t}\n    (${notas[t]})` : `- ${t}`)).join("\n")}\n\n` +
+          (aviso ? `${aviso}\n\n` : "") +
           `Estos títulos NO están publicados todavía. Muéstraselos al usuario; si quiere publicarlos, usa publicar_titulos_en_categoria con los textos exactos.` +
           (restantes !== undefined ? `\n\nSolicitudes de este tipo restantes hoy: ${restantes}.` : ""),
       );

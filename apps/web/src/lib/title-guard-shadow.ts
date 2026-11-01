@@ -1,5 +1,5 @@
 import { prisma } from "@auto-articulos/db";
-import { GUARD, buildNeighborLists, decide, titleKey, type ListJudgeFn, type MemoryEntry } from "@/lib/angle-guard-core";
+import { GUARD, breakerOpen, buildNeighborLists, decide, titleKey, type GuardResult, type ListJudgeFn, type MemoryEntry } from "@/lib/angle-guard-core";
 import { JUDGE_MODEL, callListJudge, type ListJudgeItem } from "@/lib/angle-guard-judge";
 import type { TitleGuardMode } from "@/lib/title-guard-mode";
 import { ensureSiteTitlesSeeded } from "@/lib/published-titles";
@@ -66,17 +66,107 @@ export async function loadGuardMemory(userId: string, siteDomain: string, exclud
 export const SHADOW_DAILY_CAP = 60;
 export const REPORT_RETENTION_DAYS = 60;
 
+export interface GuardEvaluation {
+  result: GuardResult;
+  memoryCounts: Record<string, number>;
+  judgeUsed: boolean;
+  judgeMs: number | null;
+  judgedCandidates: number;
+}
+
+/**
+ * Evaluación compartida por la sombra y por el modo activo: memoria del sitio, juez por lista y decisión.
+ * Puede lanzar (el que llama decide qué hacer: la sombra lo registra, el modo activo entrega como siempre).
+ */
+export async function evaluateGuard(info: Pick<ShadowInfo, "userId" | "requestId" | "categoryId" | "siteDomain" | "candidates" | "startedAtMs">): Promise<GuardEvaluation> {
+  // La memoria del sitio sale del sitemap; se llena una sola vez por cuenta y sitio y nunca lanza.
+  await ensureSiteTitlesSeeded(info.userId, info.siteDomain);
+  const memory = await loadGuardMemory(info.userId, info.siteDomain, info.requestId);
+  const memoryCounts = memory.reduce<Record<string, number>>((acc, m) => ({ ...acc, [m.source]: (acc[m.source] ?? 0) + 1 }), {});
+  // El juez recibe, por cada título nuevo, sus vecinos más cercanos y los más recientes de la categoría.
+  const lists = buildNeighborLists(info.candidates, memory, info.categoryId);
+  const items: ListJudgeItem[] = lists.map((l, index) => ({
+    id: index + 1,
+    candidate: l.candidate,
+    neighbors: l.neighbors.map((n, j) => ({ id: j + 1, title: n.title, mayBeCategoryPage: n.source === "sitio" })),
+  }));
+  let listJudge: ListJudgeFn | null = null;
+  let judgeUsed = false;
+  let judgeMs: number | null = null;
+  if (items.length > 0 && Date.now() - info.startedAtMs < JUDGE_ONLY_BEFORE_MS) {
+    const started = Date.now();
+    const verdicts = await callListJudge(items, process.env.OPENAI_API_KEY);
+    judgeMs = Date.now() - started;
+    if (verdicts) {
+      judgeUsed = true;
+      const byCandidate = new Map<string, { same: boolean; neighbor: MemoryEntry | null }>();
+      lists.forEach((l, index) => {
+        const verdict = verdicts.get(index + 1);
+        if (!verdict) return;
+        const first = verdict.sameAs[0];
+        byCandidate.set(titleKey(l.candidate), { same: verdict.sameAs.length > 0, neighbor: first ? (l.neighbors[first - 1] ?? null) : null });
+      });
+      listJudge = (candidate) => byCandidate.get(titleKey(candidate)) ?? null;
+    }
+  }
+  const result = decide(info.candidates, memory, { listJudge });
+  return { result, memoryCounts, judgeUsed, judgeMs, judgedCandidates: items.length };
+}
+
+export async function writeGuardReport(
+  info: Pick<ShadowInfo, "userId" | "requestId" | "categoryId" | "categoryName" | "siteDomain" | "candidates" | "legacyTitles">,
+  mode: "sombra" | "activo",
+  evaluation: GuardEvaluation,
+): Promise<void> {
+  const { result } = evaluation;
+  await prisma.titleGuardReport.create({
+    data: {
+      userId: info.userId,
+      requestId: info.requestId,
+      categoryId: info.categoryId,
+      categoryName: info.categoryName,
+      siteDomain: info.siteDomain,
+      mode,
+      candidates: info.candidates.length,
+      legacyTitles: info.legacyTitles,
+      deliveredTitles: result.delivered.map((d) => d.title),
+      hardDropped: result.hardDropped,
+      nClean: result.nClean,
+      nSimilar: result.nSimilar,
+      completedWithNotes: result.completedWithNotes,
+      judgeUsed: evaluation.judgeUsed,
+      judgeModel: evaluation.judgeUsed ? JUDGE_MODEL : null,
+      judgePairs: evaluation.judgedCandidates,
+      judgeMs: evaluation.judgeMs,
+      details: {
+        memoria: evaluation.memoryCounts,
+        entregados: result.delivered.map((d) => ({ title: d.title, verdict: d.verdict, sim: Math.round(d.sim * 100), note: d.note, neighbor: d.neighbor })),
+      },
+    },
+  });
+}
+
+/**
+ * ¿Es seguro aplicar la guardia a esta cuenta ahora? Freno automático: si las 2 últimas solicitudes de la
+ * cuenta en modo activo tuvieron que completarse con notas (dentro de 24 h), o si 3 de las últimas 10 de toda
+ * la plataforma fallaron, la guardia se salta y se entrega como siempre. Ante cualquier duda, no se aplica.
+ */
+export async function guardSafeToApply(userId: string): Promise<boolean> {
+  try {
+    const [mine, recent] = await Promise.all([
+      prisma.titleGuardReport.findMany({ where: { userId, mode: "activo" }, orderBy: { createdAt: "desc" }, take: 2, select: { completedWithNotes: true, createdAt: true } }),
+      prisma.titleGuardReport.findMany({ where: { mode: "activo" }, orderBy: { createdAt: "desc" }, take: 10, select: { errorMessage: true } }),
+    ]);
+    if (breakerOpen(mine.map((r) => ({ neededNotes: r.completedWithNotes > 0, at: r.createdAt })))) return false;
+    if (recent.filter((r) => r.errorMessage).length >= 3) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function runGuardShadow(info: ShadowInfo): Promise<void> {
-  const base = {
-    userId: info.userId,
-    requestId: info.requestId,
-    categoryId: info.categoryId,
-    categoryName: info.categoryName,
-    siteDomain: info.siteDomain,
-    mode: info.mode === "activo" ? "sombra" : info.mode,
-    candidates: info.candidates.length,
-    legacyTitles: info.legacyTitles,
-  };
+  const mode = info.mode === "activo" ? "sombra" : info.mode;
   try {
     // Freno de costo: pasado el tope diario no se observa más hasta mañana (cada solicitud observada cuesta ~2 centavos de IA).
     const today = await prisma.titleGuardReport.count({ where: { createdAt: { gte: new Date(Date.now() - 24 * 3600_000) } } });
@@ -85,64 +175,25 @@ export async function runGuardShadow(info: ShadowInfo): Promise<void> {
     if (Math.random() < 0.05) {
       await prisma.titleGuardReport.deleteMany({ where: { createdAt: { lt: new Date(Date.now() - REPORT_RETENTION_DAYS * 86_400_000) } } }).catch(() => {});
     }
-    // La memoria del sitio sale del sitemap, que hasta ahora solo se leía al usar Oportunidades: una cuenta que solo usa
-    // CONTENIDO PROPIO podía tener esa memoria vacía. Se llena (una sola vez por cuenta y sitio) y nunca lanza.
-    await ensureSiteTitlesSeeded(info.userId, info.siteDomain);
-    const memory = await loadGuardMemory(info.userId, info.siteDomain, info.requestId);
-    const memoryCounts = memory.reduce<Record<string, number>>((acc, m) => ({ ...acc, [m.source]: (acc[m.source] ?? 0) + 1 }), {});
-    // El juez recibe, por cada título nuevo, sus vecinos más cercanos y los más recientes de la categoría.
-    const lists = buildNeighborLists(info.candidates, memory, info.categoryId);
-    const items: ListJudgeItem[] = lists.map((l, index) => ({
-      id: index + 1,
-      candidate: l.candidate,
-      neighbors: l.neighbors.map((n, j) => ({ id: j + 1, title: n.title, mayBeCategoryPage: n.source === "sitio" })),
-    }));
-
-    let listJudge: ListJudgeFn | null = null;
-    let judgeUsed = false;
-    let judgeMs: number | null = null;
-    if (items.length > 0 && Date.now() - info.startedAtMs < JUDGE_ONLY_BEFORE_MS) {
-      const started = Date.now();
-      const verdicts = await callListJudge(items, process.env.OPENAI_API_KEY);
-      judgeMs = Date.now() - started;
-      if (verdicts) {
-        judgeUsed = true;
-        const byCandidate = new Map<string, { same: boolean; neighbor: MemoryEntry | null }>();
-        lists.forEach((l, index) => {
-          const verdict = verdicts.get(index + 1);
-          if (!verdict) return;
-          const first = verdict.sameAs[0];
-          byCandidate.set(titleKey(l.candidate), { same: verdict.sameAs.length > 0, neighbor: first ? (l.neighbors[first - 1] ?? null) : null });
-        });
-        listJudge = (candidate) => byCandidate.get(titleKey(candidate)) ?? null;
-      }
-    }
-    const pairs = items; // para el registro: cuántos títulos se le pidió juzgar
-
-    const result = decide(info.candidates, memory, { listJudge });
-    await prisma.titleGuardReport.create({
-      data: {
-        ...base,
-        deliveredTitles: result.delivered.map((d) => d.title),
-        hardDropped: result.hardDropped,
-        nClean: result.nClean,
-        nSimilar: result.nSimilar,
-        completedWithNotes: result.completedWithNotes,
-        judgeUsed,
-        judgeModel: judgeUsed ? JUDGE_MODEL : null,
-        judgePairs: pairs.length,
-        judgeMs,
-        details: {
-          memoria: memoryCounts,
-          entregados: result.delivered.map((d) => ({ title: d.title, verdict: d.verdict, sim: Math.round(d.sim * 100), note: d.note, neighbor: d.neighbor })),
-        },
-      },
-    });
+    const evaluation = await evaluateGuard(info);
+    await writeGuardReport(info, mode === "apagado" ? "sombra" : mode, evaluation);
   } catch (error) {
     console.warn("[guardia-de-angulos] sombra falló (no afecta la solicitud):", error instanceof Error ? error.message : error);
     // Se intenta dejar constancia del fallo; si la tabla no existe, simplemente se ignora.
     await prisma.titleGuardReport
-      .create({ data: { ...base, errorMessage: (error instanceof Error ? error.message : String(error)).slice(0, 300) } })
+      .create({
+        data: {
+          userId: info.userId,
+          requestId: info.requestId,
+          categoryId: info.categoryId,
+          categoryName: info.categoryName,
+          siteDomain: info.siteDomain,
+          mode,
+          candidates: info.candidates.length,
+          legacyTitles: info.legacyTitles,
+          errorMessage: (error instanceof Error ? error.message : String(error)).slice(0, 300),
+        },
+      })
       .catch(() => {});
   }
 }

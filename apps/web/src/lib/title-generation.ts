@@ -1,7 +1,8 @@
 import { prisma } from "@auto-articulos/db";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
-import { getTitleGuardMode } from "@/lib/title-guard-mode";
-import type { ShadowInfo } from "@/lib/title-guard-shadow";
+import { getTitleGuardModeInfo, getTitleGuardPercent, shouldApplyGuard } from "@/lib/title-guard-mode";
+import { evaluateGuard, guardSafeToApply, writeGuardReport, type ShadowInfo } from "@/lib/title-guard-shadow";
+import { GUARD } from "@/lib/angle-guard-core";
 import { getTitleGenerationPrompt } from "@/lib/title-generation-prompt";
 import {
   MAX_REQUESTS_PER_DAY,
@@ -234,6 +235,10 @@ export interface GenerateResult {
   /** Menos de 9 títulos válidos (nunca se rellenan con títulos inventados). */
   partial: boolean;
   requestsRemaining: number;
+  /** Notas amables para los títulos que se parecen a algo que ya existe (solo con la Guardia de ángulos activa). */
+  notes?: Record<string, string>;
+  /** Aviso de una frase cuando el tema está muy cubierto (solo con la Guardia de ángulos activa). */
+  aviso?: string;
 }
 
 export async function generateTitlesForUser(params: GenerateParams): Promise<GenerateResult> {
@@ -319,6 +324,20 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
     );
   }
 
+  // Guardia de ángulos: solo se aplica si está en modo ACTIVO, esta solicitud cae en el porcentaje elegido y es seguro
+  // para la cuenta. Ante cualquier duda o fallo, todo sigue exactamente como siempre.
+  let guardActive = false;
+  let guardMode: "apagado" | "sombra" | "activo" = "apagado";
+  try {
+    const [info, percent] = await Promise.all([getTitleGuardModeInfo(), getTitleGuardPercent()]);
+    guardMode = info.mode;
+    guardActive = info.mode === "activo" && shouldApplyGuard(requestId, percent) && (await guardSafeToApply(userId));
+  } catch {
+    guardActive = false;
+  }
+  // Con la guardia activa se piden más ideas (14) para tener de dónde escoger; sin ella, 9 como siempre.
+  const target = guardActive ? GUARD.CANDIDATES_ASKED : MAX_TITLES;
+
   let finalized = false;
   try {
     const avoid = await loadAvoid(userId, category.id);
@@ -328,8 +347,8 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
     const accepted: string[] = [];
     // Todo lo que devolvió la IA, para que la guardia (modo sombra) lo evalúe después de responder.
     const allCandidates: string[] = [];
-    for (let call = 1; call <= MAX_AI_CALLS && accepted.length < MAX_TITLES; call++) {
-      const missing = MAX_TITLES - accepted.length;
+    for (let call = 1; call <= MAX_AI_CALLS && accepted.length < target; call++) {
+      const missing = target - accepted.length;
       const { system, user: userMessage } = buildMessages(adminPrompt, {
         categoryName: category.name,
         languageLabel,
@@ -365,9 +384,35 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
       );
     }
 
+    // Lo que se entrega: lo de siempre (hasta 9) o, con la guardia activa, lo que ella decide.
+    let delivered = accepted.slice(0, MAX_TITLES);
+    let notes: Record<string, string> | undefined;
+    let aviso: string | undefined;
+    if (guardActive) {
+      try {
+        const info: ShadowInfo = { mode: "activo", userId, requestId, categoryId: category.id, categoryName: category.name, siteDomain: category.siteDomain ?? "", candidates: accepted, legacyTitles: accepted.slice(0, MAX_TITLES), startedAtMs };
+        const evaluation = await evaluateGuard(info);
+        if (evaluation.result.delivered.length > 0) {
+          delivered = evaluation.result.delivered.map((d) => d.title);
+          const withNotes = evaluation.result.delivered.filter((d) => d.note);
+          if (withNotes.length > 0) notes = Object.fromEntries(withNotes.map((d) => [d.title, d.note as string]));
+          if (evaluation.result.completedWithNotes > 0) {
+            aviso = "Este tema ya está muy cubierto en tu sitio; abajo van las mejores opciones. Para otros ángulos, prueba otro tema o escribe tus propios títulos en CONTENIDO PROPIO.";
+          }
+          await writeGuardReport(info, "activo", evaluation).catch(() => {});
+        }
+      } catch (error) {
+        // Si la guardia falla, la persona recibe exactamente lo de siempre y nunca se entera.
+        console.warn("[guardia-de-angulos] modo activo falló, se entrega como siempre:", error instanceof Error ? error.message : error);
+        delivered = accepted.slice(0, MAX_TITLES);
+        notes = undefined;
+        aviso = undefined;
+      }
+    }
+
     await prisma.titleGenerationRequest.update({
       where: { id: requestId },
-      data: { offeredTitles: accepted },
+      data: { offeredTitles: delivered },
     });
     finalized = true;
 
@@ -375,21 +420,20 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
       where: { userId, dayKey: dayKeyFor(new Date()) },
     });
     // Guardia de ángulos (solo sombra): se avisa a la ruta, que la corre DESPUÉS de responder. Nunca cambia lo entregado.
-    if (params.afterGenerated) {
+    if (params.afterGenerated && !guardActive && guardMode === "sombra") {
       try {
-        const mode = await getTitleGuardMode();
-        if (mode !== "apagado") {
-          params.afterGenerated({ mode, userId, requestId, categoryId: category.id, categoryName: category.name, siteDomain: category.siteDomain ?? "", candidates: allCandidates, legacyTitles: accepted, startedAtMs });
-        }
+        params.afterGenerated({ mode: "sombra", userId, requestId, categoryId: category.id, categoryName: category.name, siteDomain: category.siteDomain ?? "", candidates: allCandidates, legacyTitles: delivered, startedAtMs });
       } catch (error) {
         console.warn("[guardia-de-angulos] no se pudo preparar la sombra:", error instanceof Error ? error.message : error);
       }
     }
     return {
       requestId,
-      titles: accepted,
-      partial: accepted.length < MAX_TITLES,
+      titles: delivered,
+      partial: delivered.length < MAX_TITLES,
       requestsRemaining: remainingRequests(used),
+      ...(notes ? { notes } : {}),
+      ...(aviso ? { aviso } : {}),
     };
   } finally {
     // Si algo falló, la solicitud no se consume: se libera el cupo del día.

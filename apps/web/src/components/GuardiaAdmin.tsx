@@ -23,11 +23,13 @@ type Reporte = {
 const MODOS: Record<string, string> = {
   apagado: "Apagada: no hace nada (como hoy)",
   sombra: "Sombra: mide y registra, sin cambiar lo que recibe la gente",
+  activo: "Activa: evita repetidos en el porcentaje de solicitudes que elijas",
 };
 
 export default function GuardiaAdmin() {
   const [modo, setModo] = useState<string>("");
   const [vence, setVence] = useState<string | null>(null);
+  const [porcentaje, setPorcentaje] = useState<number>(10);
   const [reportes, setReportes] = useState<Reporte[] | null>(null);
   const [total, setTotal] = useState(0);
   const [mensaje, setMensaje] = useState<string | null>(null);
@@ -40,6 +42,7 @@ export default function GuardiaAdmin() {
       if (m.ok) {
         const dm = await m.json();
         setModo(dm.modo);
+        if (typeof dm.porcentaje === "number" && dm.porcentaje > 0) setPorcentaje(dm.porcentaje);
         setVence(dm.aviso ?? (dm.seApagaSolaEl ? `La sombra se apaga sola el ${new Date(dm.seApagaSolaEl).toLocaleDateString()} si no la renuevas (elige «apagada» y luego «sombra»).` : null));
       }
       if (r.ok) {
@@ -63,7 +66,7 @@ export default function GuardiaAdmin() {
 
   async function cambiar(nuevo: string) {
     setMensaje(null);
-    const res = await fetch("/api/admin/title-guard/mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ modo: nuevo }) });
+    const res = await fetch("/api/admin/title-guard/mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ modo: nuevo, porcentaje }) });
     const d = await res.json().catch(() => ({}));
     if (!res.ok) setMensaje(d.error ?? "No se pudo cambiar el modo.");
     else {
@@ -100,6 +103,13 @@ export default function GuardiaAdmin() {
               <option key={valor} value={valor}>{texto}</option>
             ))}
           </select>
+          {modo === "activo" && (
+            <select value={porcentaje} onChange={(e) => { const p = Number(e.target.value); setPorcentaje(p); void fetch("/api/admin/title-guard/mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ modo: "activo", porcentaje: p }) }).then(() => setMensaje(`Se aplica al ${p} % de las solicitudes.`)); }} style={{ padding: "6px 8px", fontSize: 13 }}>
+              {[10, 25, 50, 100].map((p) => (
+                <option key={p} value={p}>{p} % de las solicitudes</option>
+              ))}
+            </select>
+          )}
           <button type="button" onClick={() => void medir()} disabled={cargandoLinea} style={{ ...buttonStyle, padding: "6px 12px", fontSize: 13 }}>
             {cargandoLinea ? "Midiendo..." : "Medir repeticiones en todas las cuentas"}
           </button>
