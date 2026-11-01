@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
+import { logDiscardedOpportunities } from "@/lib/title-discard-log";
 
 export async function DELETE(
   _request: NextRequest,
@@ -11,6 +12,7 @@ export async function DELETE(
   const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities/groups/[id]");
   if (denied) return denied;
   const { id } = await params;
+  await logDiscardedOpportunities({ userId, where: { groupId: id, group: { userId } }, source: "opportunity_group" });
   const result = await prisma.opportunityGroup.deleteMany({
     where: { id, userId },
   });

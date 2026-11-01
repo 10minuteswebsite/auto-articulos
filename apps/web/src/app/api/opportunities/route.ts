@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
+import { logDiscardedOpportunities } from "@/lib/title-discard-log";
 import {
   composioQuerySearchAnalytics,
   decryptSecret,
@@ -121,6 +122,11 @@ export async function DELETE() {
     select: { selectedSiteDomain: true },
   });
   const selectedSiteDomain = user.selectedSiteDomain;
+  await logDiscardedOpportunities({
+    userId,
+    where: { group: { userId, category: selectedSiteDomain ? { siteDomain: selectedSiteDomain } : undefined } },
+    source: "opportunity_all",
+  });
   await prisma.opportunityGroup.deleteMany({
     where: {
       userId,
@@ -454,6 +460,12 @@ export async function POST(request: Request) {
       });
     }
 
+    // Un análisis nuevo REEMPLAZA las oportunidades que seguían sin ejecutarse: se guardan antes de que desaparezcan.
+    await logDiscardedOpportunities({
+      userId,
+      where: { group: { userId, category: { panel: selectedPanel, ...(selectedSiteDomain ? { siteDomain: selectedSiteDomain } : {}) } } },
+      source: "opportunity_replaced",
+    });
     await prisma.$transaction(async (tx) => {
       // Solo las de ESTE panel: un análisis para "English" no debe borrar
       // oportunidades ya generadas para "Español".

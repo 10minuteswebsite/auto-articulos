@@ -9,7 +9,7 @@ import { requireProductAccess } from "@/lib/require-product-access";
 // tiempo de eventos. No toca el contrato de GET /api/runs (que sigue limitado
 // a 20 ejecuciones): esta ruta pagina y no trae capturas de diagnóstico.
 
-const SECCIONES = ["errores", "cancelados", "en-curso", "propuestos", "eventos"] as const;
+const SECCIONES = ["errores", "cancelados", "en-curso", "descartados", "propuestos", "eventos"] as const;
 type Seccion = (typeof SECCIONES)[number];
 
 const PAGE_SIZE = 50;
@@ -62,6 +62,8 @@ export async function GET(request: NextRequest) {
       prisma.title.count({ where: { status: "error", run: runScope } }),
       prisma.title.count({ where: { status: "cancelled", run: runScope } }),
       prisma.title.count({ where: { status: { in: ["pending", "processing"] }, run: runScope } }),
+      // La tabla de descartados es nueva: si todavía no existe, esta sección vale 0 y nada más se afecta.
+      prisma.articleTitleDiscard.count({ where: { userId } }).catch(() => 0),
       prisma.titleGenerationRequest.count({ where: { userId } }),
       prisma.titleEvent.count({ where: { title: { run: runScope } } }),
     ]);
@@ -86,7 +88,26 @@ export async function GET(request: NextRequest) {
 
   let rows: Array<Record<string, unknown> & { id: string }> = [];
 
-  if (seccion === "propuestos") {
+  if (seccion === "descartados") {
+    const found = await prisma.articleTitleDiscard
+      .findMany({ where: { userId }, orderBy: [{ discardedAt: "desc" }, { id: "desc" }], take, ...cursorArgs })
+      .catch(() => []);
+    rows = found.map((d) => ({
+      id: d.id,
+      fecha: d.discardedAt,
+      titulo: d.titleText,
+      categoria: d.categoryName,
+      sitio: d.siteDomain,
+      origen: d.source,
+      quien: d.actor,
+      razonDelTitulo: d.titleRationale,
+      razonDeLaOportunidad: d.groupRationale,
+      impresiones: d.impressions,
+      clics: d.clicks,
+      oportunidadCreada: d.originCreatedAt,
+      claveNormalizada: d.titleKey,
+    }));
+  } else if (seccion === "propuestos") {
     const found = await prisma.titleGenerationRequest.findMany({
       where: { userId },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
