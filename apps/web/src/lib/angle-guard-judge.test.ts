@@ -50,6 +50,7 @@ test("callJudge devuelve los veredictos y envía el modelo y la temperatura corr
   assert.equal(out?.get(2)?.same, true);
   assert.equal(sent.model, "gpt-4o-mini");
   assert.equal(sent.temperature, 0);
+  assert.equal((sent as { max_tokens?: number }).max_tokens, 200 + 80 * 2, "el margen crece con el número de pares");
   assert.equal((sent as { seed?: number }).seed, 7);
   assert.equal(sent.messages?.length, 2);
 });

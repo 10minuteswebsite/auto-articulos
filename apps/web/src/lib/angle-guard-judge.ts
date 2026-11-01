@@ -48,7 +48,7 @@ export const JUDGE_SYSTEM_PROMPT = [
   '- «How to Rent Out Your Garage» / «How to Rent a Garage» → publico_igual false (dueño frente a inquilino).',
   "",
   "Si el título existente está marcado como posible página de categoría, pon enfoque_igual false salvo que sea claramente un artículo sobre la misma pregunta.",
-  'Responde ÚNICAMENTE con JSON válido, sin texto extra: {"results":[{"id":1,"accion_igual":true,"publico_igual":true,"lugar_igual":true,"producto_igual":true,"enfoque_igual":true,"reason":"frase corta en español"}]}. Incluye un resultado por cada par, con su mismo id.',
+  'Responde ÚNICAMENTE con JSON válido, sin texto extra: {"results":[{"id":1,"accion_igual":true,"publico_igual":true,"lugar_igual":true,"producto_igual":true,"enfoque_igual":true,"reason":"frase corta en español de máximo 10 palabras"}]}. Incluye un resultado por cada par, con su mismo id.',
 ].join("\n");
 
 export function buildJudgeMessages(pairs: JudgePair[]): { system: string; user: string } {
@@ -110,7 +110,8 @@ export async function callJudge(
         model: JUDGE_MODEL,
         temperature: 0,
         seed: 7,
-        max_tokens: 1200,
+        // Cada par ocupa unos 50 tokens (cinco respuestas y un motivo corto): se deja margen para que la respuesta nunca se corte.
+        max_tokens: Math.min(4000, 200 + 80 * limited.length),
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
