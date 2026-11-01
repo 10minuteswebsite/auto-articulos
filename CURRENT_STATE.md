@@ -978,3 +978,10 @@ Responsable: Claude. Capitanía liberada.
 - Guardia de ángulos: defensa aplicada también al MÓDULO 2 (lib/opportunity-guard.ts): quita repetidos DESPUÉS del razonamiento GSC/Bing sin tocar señales, nunca vacía un grupo, mismo interruptor/porcentaje/frenos. Medición: 68 % de los artículos de los últimos 30 días salen del módulo 2 (13,4 % casi idénticos a uno anterior). NO activada.
 - Guardia de ángulos: endpoint de administrador /api/admin/title-guard/costo (solo lectura, sin IA) reconstruye 30 días reales y calcula el costo al 100 % con el filtro de historial y los topes.
 - Guardia de ángulos: corregido el tope del módulo 2 (1 llamada del juez por análisis y tope propio de 12 análisis/día ≈0,60 USD/día; techo total ≈1,30 USD/día). El costo es de TODA la plataforma, no por usuario.
+
+## Guardia de ángulos — estado 2026-11-01 (PR #755, #756, #757)
+- Modo **ACTIVO al 50 %** (fijado por API admin tras el OK de Milton). Se apaga en Historial → Detalle administrador → Guardia de ángulos → «Apagada».
+- Módulo 1: juez gpt-4.1, 14 candidatos y 100 títulos previos en el pedido, mínimo 5 entregados, tope 40 revisiones/día.
+- Módulo 2: solo código, sin IA (`JUDGE_MAX_CALLS = 0`), sorteo por ejecución, ≥60 % vs publicado/ofrecido y ≥75 % vs sitio, mínimo 3 por grupo (`GUARD.MODULE2_MIN_PER_GROUP`), nunca vacía el grupo.
+- Costo esperado ≈ 1,10 USD/mes al 50 %; techo duro ≈ 21 USD/mes. Sin verificar contra factura de OpenAI.
+- Pendiente: ver los primeros reportes en modo «activo» en `/api/admin/title-guard/reports` (al cierre solo había de sombra), decidir 50 → 100 %.
