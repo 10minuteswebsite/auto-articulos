@@ -58,3 +58,59 @@ export const HELDOUT_PAIRS: LabeledPair[] = [
   { a: "Is Solar Worth It in Florida?", b: "Solar Panels in Florida: Are They Worth It?", same: true, why: "formato distinto" },
   { a: "Tax Deductions for Freelancers", b: "Tax Deduction for Freelancer", same: true, why: "singular y plural" },
 ];
+
+// ---------------------------------------------------------------------------
+// Casos del JUEZ POR LISTA: un título nuevo frente a 25 existentes. En 6 hay una
+// «aguja» (el mismo ángulo con sinónimos entre los 25) y en 6 no la hay (mismo
+// tema, otra pregunta). Reproducen el caso real de una tanda que repite a la
+// anterior con otras palabras. Textos neutros, sin datos de clientes.
+// ---------------------------------------------------------------------------
+
+import type { ListCase } from "./angle-guard-judge";
+
+const DISTRACTORS: string[] = [
+  "Cómo funciona el período de inscripción abierta", "Qué es un deducible y cómo se aplica", "Diferencias entre HMO y PPO",
+  "Cómo encontrar un médico dentro de la red", "Qué cubre un seguro de visión para adultos", "Guía para elegir un dentista de confianza",
+  "Cuándo conviene contratar un seguro de vida a término", "Seguro de auto: qué cubre la responsabilidad civil", "Cómo proteger tu casa contra huracanes",
+  "Qué es el copago y cuándo se paga", "Beneficios de un plan para jubilados", "Cómo renovar tu plan cada año sin sorpresas",
+  "Qué hacer en una emergencia médica fuera de tu ciudad", "Recetas y medicamentos genéricos: cómo ahorrar en la farmacia", "Cómo funcionan las cuentas de ahorro para gastos médicos",
+  "Seguro para trabajadores por cuenta propia: opciones", "Cobertura para embarazo y parto explicada", "Qué es una preautorización y por qué la piden",
+  "Cómo comparar redes de hospitales en tu zona", "Planes para pequeñas empresas: lo básico", "Vacunas y chequeos preventivos cubiertos",
+  "Cómo leer tu explicación de beneficios", "Seguro de viaje: cuándo es necesario", "Telemedicina: qué cubre tu plan",
+  "Home Insurance Basics for First-Time Owners", "How Flood Insurance Differs from Standard Coverage", "Understanding Your Auto Policy Declarations Page",
+  "What Is Umbrella Insurance and Who Needs It", "How to File a Property Claim Step by Step", "Choosing Between Term and Whole Life Insurance",
+  "Dental Plans: Cleanings, Fillings and Crowns", "Vision Coverage: Exams, Glasses and Contacts", "Renters Insurance: What It Covers and What It Doesn't",
+  "How Deductibles Work in Homeowners Policies", "Medicare Enrollment Periods Explained", "Short-Term Plans: Risks and Alternatives",
+  "Cómo cambiar de plan si te mudas a otro condado", "Qué es el máximo de gastos de bolsillo", "Seguro de salud para estudiantes extranjeros",
+  "Cómo apelar una decisión de tu aseguradora",
+];
+
+function listCase(candidate: string, needle: string | null, nearMiss: string | null, why: string, salt: number): ListCase {
+  const pool = DISTRACTORS.filter((d) => d !== needle && d !== nearMiss);
+  const start = (salt * 7) % pool.length;
+  const picked = Array.from({ length: 24 }, (_, i) => pool[(start + i * 3) % pool.length]);
+  const unique = [...new Set(picked)];
+  while (unique.length < 24) unique.push(pool[(start + unique.length * 5 + 1) % pool.length]);
+  const neighbors = unique.slice(0, 24);
+  const special = needle ?? nearMiss;
+  if (special) neighbors.splice((salt * 5) % 24, 0, special);
+  else neighbors.push(pool[(start + 99) % pool.length]);
+  return { candidate, neighbors, expected: needle ? neighbors.indexOf(needle) : null, why };
+}
+
+export const LIST_CASES: ListCase[] = [
+  // con aguja: el mismo ángulo con sinónimos
+  listCase("Errores que pueden costarte al seleccionar un plan de salud", "Errores que debes evitar al elegir un seguro de salud", null, "elegir/seleccionar, evitar/costarte, seguro/plan", 1),
+  listCase("Cómo ahorrar dinero en tu seguro dental", "Formas de reducir el costo de tu plan dental", null, "ahorrar/reducir costo", 2),
+  listCase("Qué documentos necesitas para inscribirte en Medicaid", "Documentos requeridos para solicitar Medicaid", null, "inscribirte/solicitar", 3),
+  listCase("Beneficios de tener seguro de vida a temprana edad", "Ventajas de contratar un seguro de vida cuando eres joven", null, "beneficios/ventajas, temprana edad/joven", 4),
+  listCase("How to Lower Your Home Insurance Premium", "Ways to Reduce Your Homeowners Insurance Costs", null, "lower premium/reduce costs", 5),
+  listCase("Qué hacer si te niegan una reclamación de seguro", "Pasos a seguir cuando rechazan tu reclamo del seguro", null, "niegan/rechazan, reclamación/reclamo", 6),
+  // sin aguja: mismo tema, otra pregunta (el vecino cercano está en la lista a propósito)
+  listCase("Cómo elegir un seguro de salud para tu familia", null, "Cómo elegir un seguro de salud para jubilados", "otro público", 7),
+  listCase("Costos ocultos de un plan de salud", null, "Beneficios ocultos de un plan de salud", "costos frente a beneficios", 8),
+  listCase("Cómo cancelar tu seguro de auto", null, "Cómo contratar tu seguro de auto", "cancelar frente a contratar", 9),
+  listCase("Requisitos para el subsidio del Marketplace en Florida", null, "Requisitos para Medicaid en Florida", "otro programa", 10),
+  listCase("Seguro de salud para trabajadores independientes", null, "Seguro de salud para pequeñas empresas", "otro público", 11),
+  listCase("Best Dental Plans for Seniors", null, "Best Dental Plans for Children", "otro público", 12),
+];

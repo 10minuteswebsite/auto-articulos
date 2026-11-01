@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/current-user";
-import { HELDOUT_PAIRS, LABELED_PAIRS } from "@/lib/angle-guard-labeled-pairs";
-import { JUDGE_MODEL, callJudge, scoreJudge } from "@/lib/angle-guard-judge";
+import { HELDOUT_PAIRS, LABELED_PAIRS, LIST_CASES } from "@/lib/angle-guard-labeled-pairs";
+import { JUDGE_MODEL, callJudge, callListJudge, scoreJudge, scoreListJudge } from "@/lib/angle-guard-judge";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -21,6 +21,27 @@ export async function GET(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
+  if (request.nextUrl.searchParams.get("formato") === "lista") {
+    // Juez por lista: 12 casos (6 con «aguja» entre 25 existentes y 6 sin ella). Condición: ≥ 5 de 6 agujas y 0 falsos.
+    const requestedModel = request.nextUrl.searchParams.get("modelo");
+    const listModel = requestedModel && TESTABLE_MODELS.includes(requestedModel) ? requestedModel : undefined;
+    const items = LIST_CASES.map((c, index) => ({ id: index + 1, candidate: c.candidate, neighbors: c.neighbors.map((title, j) => ({ id: j + 1, title })) }));
+    const listVerdicts = await callListJudge(items, process.env.OPENAI_API_KEY, { timeoutMs: 25_000, model: listModel });
+    if (!listVerdicts) {
+      return NextResponse.json({ ok: false, mensaje: "El juez por lista no respondió de forma confiable. No se validó nada." });
+    }
+    const listResult = scoreListJudge(LIST_CASES, listVerdicts);
+    return NextResponse.json({
+      ok: true,
+      formato: "lista",
+      modelo: listModel ?? `${JUDGE_MODEL} (el del juez)`,
+      cumple: listResult.passes,
+      resumen: `Agujas encontradas: ${listResult.foundCorrectly} de ${listResult.needles}. Falsos marcados: ${listResult.falseMatches.length}.`,
+      condicion: "Cumple si encuentra al menos 5 de las 6 agujas y no marca ningún título que haga otra pregunta.",
+      ...listResult,
+    });
+  }
+
   // Una sola llamada con los 27 pares de la condición (ids 1–27) y los 10 independientes (ids 28–37).
   const all = [...LABELED_PAIRS, ...HELDOUT_PAIRS];
   const pairs = all.map((p, index) => ({ id: index + 1, candidate: p.a, existing: p.b }));
