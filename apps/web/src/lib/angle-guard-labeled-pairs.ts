@@ -85,16 +85,18 @@ const DISTRACTORS: string[] = [
   "Cómo apelar una decisión de tu aseguradora",
 ];
 
-function listCase(candidate: string, needle: string | null, nearMiss: string | null, why: string, salt: number): ListCase {
-  const pool = DISTRACTORS.filter((d) => d !== needle && d !== nearMiss);
+function listCase(candidate: string, needle: string | null, nearMiss: string | string[] | null, why: string, salt: number): ListCase {
+  const nearMisses = Array.isArray(nearMiss) ? nearMiss : nearMiss ? [nearMiss] : [];
+  const pool = DISTRACTORS.filter((d) => d !== needle && !nearMisses.includes(d));
   const start = (salt * 7) % pool.length;
   const picked = Array.from({ length: 24 }, (_, i) => pool[(start + i * 3) % pool.length]);
   const unique = [...new Set(picked)];
   while (unique.length < 24) unique.push(pool[(start + unique.length * 5 + 1) % pool.length]);
   const neighbors = unique.slice(0, 24);
-  const special = needle ?? nearMiss;
-  if (special) neighbors.splice((salt * 5) % 24, 0, special);
-  else neighbors.push(pool[(start + 99) % pool.length]);
+  const specials = needle ? [needle] : nearMisses;
+  specials.forEach((special, i) => neighbors.splice(((salt * 5) + i * 4) % 24, 0, special));
+  while (neighbors.length < 25) neighbors.push(pool[(start + 99 + neighbors.length) % pool.length]);
+  while (neighbors.length > 25) neighbors.pop();
   return { candidate, neighbors, expected: needle ? neighbors.indexOf(needle) : null, why };
 }
 
@@ -113,4 +115,9 @@ export const LIST_CASES: ListCase[] = [
   listCase("Requisitos para el subsidio del Marketplace en Florida", null, "Requisitos para Medicaid en Florida", "otro programa", 10),
   listCase("Seguro de salud para trabajadores independientes", null, "Seguro de salud para pequeñas empresas", "otro público", 11),
   listCase("Best Dental Plans for Seniors", null, "Best Dental Plans for Children", "otro público", 12),
+  // sin aguja, del tipo que el juez marcaba de más con datos reales: mismo tema general, otra pregunta concreta
+  listCase("Cómo evitar costos extra al usar tu plan de salud", null, ["Cómo comparar los costos de distintos planes de salud", "Cómo entender los costos ocultos de tu plan"], "evitar, comparar y entender costos son preguntas distintas", 13),
+  listCase("Cómo coordinar la mudanza después de vender tu casa", null, ["Cómo fijar el precio correcto de venta de tu casa", "Cómo preparar tu casa antes de venderla"], "mudanza, precio y preparación son preguntas distintas", 14),
+  listCase("Cómo ahorrar dinero usando el programa de subsidios", null, ["Beneficios de inscribirte en el programa de subsidios", "Requisitos para entrar al programa de subsidios"], "ahorrar, beneficios y requisitos son preguntas distintas", 15),
+  listCase("Gastos ocultos al analizar la rentabilidad de una propiedad de alquiler", null, ["Cómo calcular la rentabilidad de una propiedad de alquiler", "Impuestos y cuotas de un condominio de inversión"], "gastos ocultos, cálculo e impuestos son preguntas distintas", 16),
 ];
