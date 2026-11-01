@@ -234,6 +234,10 @@ function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[numbe
 }
 
 export default function HistorialForense() {
+  // Todo el bloque nace COLAPSADO y no consulta nada hasta que alguien lo abre:
+  // a la mayoría de las personas no les hace falta, y mientras más se les
+  // explica más preguntas surgen (pedido de Milton, 2026-11-01).
+  const [abierto, setAbierto] = useState(false);
   const [resumen, setResumen] = useState<Record<string, number> | null>(null);
   const [todos, setTodos] = useState(false);
   const [esAdmin, setEsAdmin] = useState(false);
@@ -241,13 +245,15 @@ export default function HistorialForense() {
   // La exportación a CSV es solo del administrador (también cuando actúa como
   // otro usuario). Si /api/me falla, simplemente no se ofrece el botón.
   useEffect(() => {
+    if (!abierto) return;
     fetch("/api/me", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setEsAdmin(Boolean(d && (d.role === "admin" || d.isActingAdmin))))
       .catch(() => {});
-  }, []);
+  }, [abierto]);
 
   useEffect(() => {
+    if (!abierto) return;
     let vivo = true;
     setResumen(null);
     fetch(`/api/historial/forense?seccion=resumen${todos ? "&todos=1" : ""}`)
@@ -259,15 +265,18 @@ export default function HistorialForense() {
     return () => {
       vivo = false;
     };
-  }, [todos]);
+  }, [todos, abierto]);
 
   return (
-    <>
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 24 }}>
+    <details style={{ marginTop: 24 }} onToggle={(e) => setAbierto((e.currentTarget as HTMLDetailsElement).open)}>
+      <summary style={{ cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, userSelect: "none" }}>
         <div>
           <p className="eyebrow" style={{ margin: "0 0 2px" }}>Más detalle</p>
           <h2 style={{ ...h2Style, margin: 0 }}>Historiales completos</h2>
         </div>
+        <span className="muted" aria-hidden="true">⌄</span>
+      </summary>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
         <label style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" checked={todos} onChange={(e) => setTodos(e.target.checked)} />
           Todos mis sitios
@@ -277,6 +286,6 @@ export default function HistorialForense() {
         <Seccion key={def.id} def={def} total={resumen ? (resumen[def.id] ?? 0) : null} esAdmin={esAdmin} todos={todos} />
       ))}
       <HistorialExplicaciones />
-    </>
+    </details>
   );
 }
