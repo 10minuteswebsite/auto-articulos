@@ -1,3 +1,7 @@
+## WAITLIST-CLOSE-20261101 · Actions CERRADO / reserva LIBERADA
+
+Código3e61b63; ambos workflows autentican por OIDC efímero enmain sin secretosbackend/ID legacy. Runs41347894875 y41349239059 prueban400 autenticado antes de escrituras; migratejob omitido/DB ficticia. Sync41348478173 y replay41348764593:124/0 cadauno. Hub conserva estados/permisos canónicos. WebVercel conserva transporteOIDC previo; no desplegarWorker. [Acta/mapa/límites](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-11-01-waitlist-close.md).
+
 ## 1/11 · SHARED-SECRETS-EXTERNAL-20261101 · CERRADO / LIBERADA
 
 Artículos/Redes integrados mediante OIDC de Vercel y adaptador Cloudflare de
