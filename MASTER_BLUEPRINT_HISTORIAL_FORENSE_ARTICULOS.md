@@ -1,7 +1,7 @@
 # MASTER BLUEPRINT — Historial forense de Artículos
 
 Estado: PLAN para aprobación. No se ha escrito código. Fecha: 2026-11-01.
-Origen: caso INES (info@inesgarcia-arcaya.com) — dice que se repiten temas aunque los borra; hoy no hay forma de comprobarlo.
+Origen: caso INES (cuenta de Inés) — dice que se repiten temas aunque los borra; hoy no hay forma de comprobarlo.
 
 ## 1. Propósito
 Dar a Milton (y a cada usuario sobre lo suyo) evidencia completa de qué pasó con cada título de Artículos: publicado, fallido, cancelado, en curso, repetido, **descartado/borrado**, y **por qué se creó**. Sin esa evidencia no se puede auditar el algoritmo de selección de temas.

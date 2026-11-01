@@ -13207,3 +13207,7 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — LIBERADO 2026-11-01. Historial forense completo (PR #722-#728) en produccion; sin migraciones pendientes.
 
 - **Capitán de migración:** Claude — 2026-11-01: Historiales completos con el recuadro estándar de las demás secciones (sin migración). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: Fase 4, solo documentos (sin código ni migración).
+
+- **Capitán de migración:** Claude — 2026-11-01: Guardia de ángulos Fase 1 (módulo puro, juez, endpoint admin de validación; sin migración, sin cambios visibles). Se libera al fusionar.

@@ -1,0 +1,43 @@
+// Pares etiquetados para validar el detector y el juez de la Guardia de ángulos.
+// Son ejemplos NEUTROS (sin datos de clientes). `same: true` = un lector con la
+// misma necesidad quedaría satisfecho con cualquiera de los dos (repetido);
+// `same: false` = preguntas distintas aunque se parezcan en las palabras.
+
+export interface LabeledPair {
+  a: string;
+  b: string;
+  same: boolean;
+  why: string;
+}
+
+export const LABELED_PAIRS: LabeledPair[] = [
+  // ----- distintos (contrastes): cambia la acción, el público, el lugar o el producto -----
+  { a: "10 Mistakes When Buying a Boat", b: "10 Mistakes When Selling a Boat", same: false, why: "comprar vs vender" },
+  { a: "How to Rent Out Your Condo in Coral Gables", b: "How to Rent a Condo in Coral Gables", same: false, why: "propietario que alquila vs inquilino" },
+  { a: "Best Schools in Coral Gables for Elementary Kids", b: "Best Schools in Coral Gables for High School Students", same: false, why: "otro nivel escolar" },
+  { a: "Cómo comprar una casa en Miami", b: "Cómo vender una casa en Miami", same: false, why: "comprar vs vender" },
+  { a: "Cómo alquilar un apartamento en Miami", b: "Cómo alquilar un apartamento en Orlando", same: false, why: "otra ciudad" },
+  { a: "Seguro de salud para familias en Florida", b: "Seguro de salud para jubilados en Florida", same: false, why: "otro público" },
+  { a: "Pros of Buying a Condo in Coral Gables", b: "Cons of Buying a Condo in Coral Gables", same: false, why: "ventajas vs desventajas" },
+  { a: "Preguntas para hacerle a tu agente antes de comprar", b: "Preguntas para hacerle a tu agente antes de vender", same: false, why: "comprar vs vender" },
+  { a: "Qué es una visa EB-5 y quién califica", b: "Qué es una visa H-1B y quién califica", same: false, why: "otro tipo de visa" },
+  { a: "How to Roll Over a 401k Into an IRA", b: "How to Roll Over a 403b Into an IRA", same: false, why: "otro tipo de cuenta" },
+  { a: "What Taxes Apply When Selling a Home in Coral Gables", b: "What Fees Apply When Selling a Home in Coral Gables", same: false, why: "impuestos vs comisiones" },
+  { a: "Can You Add an ADU in Coral Gables", b: "Can You Use a VA Loan in Coral Gables", same: false, why: "otro tema" },
+  { a: "How to Buy a Condo in Coral Gables", b: "How to Sell a Condo in Coral Gables", same: false, why: "comprar vs vender" },
+  { a: "Cómo vender tu casa rápido en Coral Gables", b: "Qué impuestos pagas al vender tu casa en Coral Gables", same: false, why: "velocidad vs impuestos" },
+  { a: "Best Brunch Spots in Wynwood", b: "Best Dinner Spots in Wynwood", same: false, why: "otra comida" },
+  { a: "How to Build Muscle After 40", b: "How to Lose Fat After 40", same: false, why: "otro objetivo" },
+  { a: "FHA 203k Loans for Fixer Uppers", b: "FHA Loans for First Time Buyers", same: false, why: "otro público y producto" },
+  { a: "Cuánto cuesta un implante dental", b: "Cuánto cuesta un blanqueamiento dental", same: false, why: "otro tratamiento" },
+  // ----- repetidos: la misma pregunta con otras palabras -----
+  { a: "Tips for Embracing Change: Downsizing Your Longtime Residence", b: "Tips for Embracing Change: Downsizing Your Longtime Residence in Coral Gables", same: true, why: "mismo título con sufijo de lugar" },
+  { a: "Cómo vender tu casa rápido", b: "Cómo vender rápido tu casa", same: true, why: "mismo orden alterado" },
+  { a: "5 Ways to Stage Your Home", b: "7 Ways to Stage Your Home", same: true, why: "solo cambia el número de la lista" },
+  { a: "Best Home Prices in Coral Gables", b: "Best Home Price in Coral Gables", same: true, why: "singular vs plural" },
+  { a: "Cómo elegir un seguro de vida en Miami", b: "Cómo elegir el mejor seguro de vida en Miami", same: true, why: "añade un adjetivo" },
+  { a: "Best Brunch Spots in Wynwood", b: "Top Brunch Spots in Wynwood for 2026", same: true, why: "mismo tema con otra palabra de apertura" },
+  { a: "Steps to Prepare Your Home for a Quick Sale", b: "Essential Steps to Prepare Your Home for Sale", same: true, why: "misma pregunta con adjetivos" },
+  { a: "Current Condo Market Trends", b: "What Are the Current Condo Market Trends?", same: true, why: "afirmación vs pregunta" },
+  { a: "¿Cuánto cuesta un seguro de salud para familias en Florida?", b: "¿Cuál es el precio de un seguro de salud familiar en Florida?", same: true, why: "sinónimos (precio/costo)" },
+];
