@@ -13241,3 +13241,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: juez por lista más preciso (única corrección; sin migración, sin activar). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — 2026-11-01: documentos de cierre de pruebas de la guardia (solo documentos). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: conteo real de solicitudes en el endpoint baseline (solo lectura; sin migración). Se libera al fusionar.

@@ -28,6 +28,14 @@ export async function GET() {
     orderBy: [{ userId: "asc" }, { createdAt: "asc" }],
     take: MAX_REQUESTS,
   });
+  // Conteo real de solicitudes de ideas con IA (todas las cuentas, tengan o no 2 solicitudes) por día.
+  const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+  const perDay = new Map<string, number>();
+  for (const r of requests) perDay.set(dayKey(r.createdAt), (perDay.get(dayKey(r.createdAt)) ?? 0) + 1);
+  const cuentasConSolicitudes = new Set(requests.map((r) => r.userId)).size;
+  const dates = requests.map((r) => r.createdAt.getTime());
+  const firstDate = dates.length ? new Date(Math.min(...dates)) : null;
+  const daysActive = firstDate ? Math.max(1, Math.ceil((Date.now() - firstDate.getTime()) / 86_400_000)) : 1;
   const byUser = new Map<string, string[][]>();
   for (const r of requests) byUser.set(r.userId, [...(byUser.get(r.userId) ?? []), r.offeredTitles]);
 
@@ -80,6 +88,15 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     resumen: `${accounts} cuentas con 2 o más solicitudes, ${batches} solicitudes comparadas con las anteriores de su cuenta, ${titles} títulos. Muy parecidos (≥ ${Math.round(GUARD.AUTO * 100)} %): ${auto} (${pct(auto, titles)} %). En la zona del juez (${Math.round(GUARD.BAND * 100)}–${Math.round(GUARD.AUTO * 100) - 1} %): ${band} (${pct(band, titles)} %). Solicitudes con 3 o más parecidos: ${heavyBatches} (${pct(heavyBatches, batches)} %).`,
+    conteoReal: {
+      totalSolicitudesConTitulos: requests.length,
+      cuentasQueLaUsaron: cuentasConSolicitudes,
+      primeraSolicitud: firstDate,
+      diasDesdeLaPrimera: daysActive,
+      promedioPorDia: Math.round((10 * requests.length) / daysActive) / 10,
+      ultimos14Dias: [...perDay.entries()].sort((a, b) => b[0].localeCompare(a[0])).slice(0, 14).map(([dia, solicitudes]) => ({ dia, solicitudes })),
+      nota: requests.length >= 4000 ? "Se leyeron las 4000 más antiguas; el conteo puede ser incompleto." : "Conteo completo de la ventana.",
+    },
     cuentas: accounts,
     solicitudesComparadas: batches,
     titulos: titles,
