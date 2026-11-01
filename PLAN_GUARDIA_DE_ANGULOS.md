@@ -1,5 +1,8 @@
 # PLAN — Guardia de ángulos: que los títulos no se repitan sin una buena razón
 
+> **HISTÓRICO — NO USAR PARA IMPLEMENTAR.** La especificación vigente, sin contradicciones, es `ESPECIFICACION_FINAL_GUARDIA_DE_ANGULOS.md` (2026-11-01). Este archivo conserva la historia de la auditoría; varios valores y reglas de aquí fueron reemplazados.
+
+
 Estado: PLAN para aprobación. No hay código. Fecha: 2026-11-01.
 
 > **Corregido tras la triple auditoría** (`AUDITORIA_TRIPLE_GUARDIA_DE_ANGULOS.md`): los umbrales sobre palabras sueltas eran incorrectos; ahora se usa parecido ponderado por rareza con **≥ 60 % repetido / 38–59 % dudoso**, el juez de IA corre siempre una vez agrupado, y la memoria incluye el sitio y los descartados (90 días) filtrados por sitio. Donde este documento y la auditoría difieran, manda la auditoría. **Auditado en 8 rondas hasta cero errores; la especificación final está al final de `AUDITORIA_TRIPLE_GUARDIA_DE_ANGULOS.md` y reemplaza los umbrales de este plan (85 % rechazo automático, 38–84 % juez de IA).**

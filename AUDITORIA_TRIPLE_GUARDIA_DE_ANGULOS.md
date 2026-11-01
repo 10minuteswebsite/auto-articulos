@@ -1,5 +1,8 @@
 # Triple auditoría — Guardia de ángulos
 
+> **HISTÓRICO — NO USAR PARA IMPLEMENTAR.** La especificación vigente, sin contradicciones, es `ESPECIFICACION_FINAL_GUARDIA_DE_ANGULOS.md` (2026-11-01). Este archivo conserva la historia de la auditoría; varios valores y reglas de aquí fueron reemplazados.
+
+
 > ## PRINCIPIO RECTOR (Milton, 2026-11-01)
 > **Primero, que la persona reciba propuestas para publicar. La guardia solo ordena y prefiere lo más nuevo; es una preferencia, nunca una barrera.** Si hay conflicto entre «no repetir» y «entregar contenido», gana entregar contenido. Una solicitud con candidatos de la IA **nunca termina sin títulos**.
 
