@@ -30,7 +30,7 @@ const JUDGE_ONLY_BEFORE_MS = 30_000;
 const MAX_ROWS = 5000;
 
 /** Memoria de lo ya cubierto en el sitio de la categoría (publicado, del sitio, ofrecido, descartado). */
-export async function loadGuardMemory(userId: string, siteDomain: string, excludeRequestId: string, asOf?: Date): Promise<MemoryEntry[]> {
+export async function loadGuardMemory(userId: string, siteDomain: string, excludeRequestId: string, asOf?: Date, includeSite = true): Promise<MemoryEntry[]> {
   // asOf: reconstruye lo que existía EN ESE MOMENTO (para repetir solicitudes pasadas sin mirar el futuro).
   const siteFilter = siteDomain ? { siteDomain } : {};
   const before = asOf ? { lt: asOf } : undefined;
@@ -43,7 +43,7 @@ export async function loadGuardMemory(userId: string, siteDomain: string, exclud
       orderBy: { processedAt: "desc" },
       take: MAX_ROWS,
     }),
-    prisma.siteArticleTitle.findMany({ where: { userId, ...siteFilter }, select: { title: true, createdAt: true }, take: MAX_ROWS }).catch(() => []),
+    includeSite ? prisma.siteArticleTitle.findMany({ where: { userId, ...siteFilter }, select: { title: true, createdAt: true }, take: MAX_ROWS }).catch(() => []) : Promise.resolve([] as Array<{ title: string; createdAt: Date }>),
     prisma.titleGenerationRequest.findMany({
       where: { userId, id: { not: excludeRequestId }, ...(before ? { createdAt: before } : {}) },
       select: { offeredTitles: true, createdAt: true, categoryId: true },

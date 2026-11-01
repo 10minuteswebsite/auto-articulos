@@ -13,6 +13,9 @@ export const maxDuration = 60;
 // existía en cada momento (sin mirar el futuro). Responde con números reales de cuánto marcaría la guardia, cuántos
 // títulos entregaría y cuánto costaría, sin tocar a ningún usuario. Gasto máximo ≈ 2 centavos por solicitud evaluada.
 //   GET ?limite=20   (máximo 30 por llamada)
+//       &sitio=1     incluye los títulos del sitio DE HOY (sesgado: contiene artículos publicados después de la solicitud,
+//                    entre ellos los propios títulos ofrecidos). Por defecto NO se incluyen, para medir sin mirar el futuro.
+//       &saltar=N    salta las N solicitudes más recientes
 const PER_BATCH = 4;
 const COST_PER_REQUEST_USD = 0.017;
 
@@ -24,6 +27,7 @@ export async function GET(request: NextRequest) {
   }
   const limite = Math.min(30, Math.max(1, Number.parseInt(request.nextUrl.searchParams.get("limite") ?? "20", 10) || 20));
   const desde = Math.max(0, Number.parseInt(request.nextUrl.searchParams.get("saltar") ?? "0", 10) || 0);
+  const includeSite = request.nextUrl.searchParams.get("sitio") === "1";
   const rows = await prisma.titleGenerationRequest.findMany({
     where: { offeredTitles: { isEmpty: false } },
     orderBy: { createdAt: "desc" },
@@ -42,6 +46,7 @@ export async function GET(request: NextRequest) {
   let belowFiveClean = 0;
   let judgeFailed = 0;
   const per: Array<{ solicitud: string; titulos: number; marcados: number; entregaria: number }> = [];
+  const ejemplos: Array<{ titulo: string; seParecenA: string[]; motivo: string }> = [];
 
   for (let i = 0; i < rows.length; i += PER_BATCH) {
     if (Date.now() - started > 45_000) break;
@@ -49,7 +54,7 @@ export async function GET(request: NextRequest) {
     const results = await Promise.all(
       batch.map(async (r) => {
         try {
-          const memory = await loadGuardMemory(r.userId, siteOf.get(r.categoryId) ?? "", r.id, r.createdAt);
+          const memory = await loadGuardMemory(r.userId, siteOf.get(r.categoryId) ?? "", r.id, r.createdAt, includeSite);
           const lists = buildNeighborLists(r.offeredTitles, memory, r.categoryId);
           const items: ListJudgeItem[] = lists.map((l, index) => ({ id: index + 1, candidate: l.candidate, neighbors: l.neighbors.map((n, j) => ({ id: j + 1, title: n.title, mayBeCategoryPage: n.source === "sitio" })) }));
           const verdicts = items.length ? await callListJudge(items, process.env.OPENAI_API_KEY, { timeoutMs: 20_000 }) : null;
@@ -63,7 +68,10 @@ export async function GET(request: NextRequest) {
             listJudge = (c) => by.get(titleKey(c)) ?? null;
           }
           const result = decide(r.offeredTitles, memory, { listJudge });
-          return { r, result, judgeOk: items.length === 0 || Boolean(verdicts) };
+          const marcados = verdicts
+            ? lists.map((l, index) => ({ titulo: l.candidate, seParecenA: (verdicts.get(index + 1)?.sameAs ?? []).map((n) => l.neighbors[n - 1]?.title).filter((t): t is string => Boolean(t)), motivo: verdicts.get(index + 1)?.reason ?? "" })).filter((m) => m.seParecenA.length > 0)
+            : [];
+          return { r, result, marcados, judgeOk: items.length === 0 || Boolean(verdicts) };
         } catch {
           return null;
         }
@@ -78,6 +86,7 @@ export async function GET(request: NextRequest) {
       if (x.result.delivered.length < 9) belowNine += 1;
       if (x.result.nClean < 5) belowFiveClean += 1;
       if (!x.judgeOk) judgeFailed += 1;
+      for (const m of x.marcados) if (ejemplos.length < 14 && Math.random() < 0.35) ejemplos.push(m);
       per.push({ solicitud: `…${x.r.id.slice(-6)}`, titulos: x.r.offeredTitles.length, marcados: marked, entregaria: x.result.delivered.length });
     }
   }
@@ -91,7 +100,9 @@ export async function GET(request: NextRequest) {
     porcentajeMarcado: pct(flagged, titles),
     solicitudesConMenosDeNueve: belowNine,
     solicitudesConMenosDeCincoLimpios: belowFiveClean,
+    sitioIncluido: includeSite,
     juezSinRespuesta: judgeFailed,
+    ejemplos,
     costoDeEstaPruebaUsd: Number((evaluated * COST_PER_REQUEST_USD).toFixed(2)),
     detalle: per,
   });
