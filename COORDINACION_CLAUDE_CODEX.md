@@ -13247,3 +13247,5 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: filtro de historial de la guardia (<20 títulos no se revisa; sin migración, sin activar). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — 2026-11-01: medición de módulos (solo lectura; sin migración). Se libera al fusionar.
+
+- **Capitán de migración:** Claude — 2026-11-01: guardia en el módulo 2 (solo con modo activo; sin migración; no activada). Se libera al fusionar.

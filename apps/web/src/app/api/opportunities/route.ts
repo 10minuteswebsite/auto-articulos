@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { logDiscardedOpportunities } from "@/lib/title-discard-log";
+import { applyGuardToOpportunities } from "@/lib/opportunity-guard";
 import {
   composioQuerySearchAnalytics,
   decryptSecret,
@@ -460,6 +461,10 @@ export async function POST(request: Request) {
       });
     }
 
+    // Guardia de ángulos (módulo 2): quita los títulos repetidos DESPUÉS del razonamiento con Search Console y Bing y sin tocar
+    // ninguna señal; si está apagada o falla, se guarda todo exactamente como siempre.
+    const groupsToSave = (await applyGuardToOpportunities(userId, selectedSiteDomain ?? "", analysis.groups)).groups;
+
     // Un análisis nuevo REEMPLAZA las oportunidades que seguían sin ejecutarse: se guardan antes de que desaparezcan.
     await logDiscardedOpportunities({
       userId,
@@ -472,7 +477,7 @@ export async function POST(request: Request) {
       await tx.opportunityGroup.deleteMany({
         where: { userId, category: { panel: selectedPanel, ...(selectedSiteDomain ? { siteDomain: selectedSiteDomain } : {}) } },
       });
-      for (const group of analysis.groups) {
+      for (const group of groupsToSave) {
         await tx.opportunityGroup.create({
           data: {
             userId,
