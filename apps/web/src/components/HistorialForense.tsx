@@ -9,13 +9,14 @@ import HistorialExplicaciones from "@/components/HistorialExplicaciones";
 // Cada sección carga SOLO cuando se abre (no recarga el Historial entero) y
 // pagina de 50 en 50. Solo lectura.
 
-type SeccionId = "errores" | "cancelados" | "en-curso" | "descartados" | "propuestos" | "eventos";
+type SeccionId = "errores" | "cancelados" | "en-curso" | "descartados" | "propuestos" | "seguimiento" | "pasos-tecnicos";
 type Row = Record<string, unknown> & { id: string };
-type Columna = { clave: string; titulo: string; fecha?: boolean };
+type Columna = { clave: string; titulo: string; fecha?: boolean; soloAdmin?: boolean; tipo?: "icono" | "enlace" };
 
-const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: string; columnas: Columna[] }> = [
+const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: string; columnas: Columna[]; soloAdmin?: boolean }> = [
   {
     id: "errores",
+    soloAdmin: true,
     eyebrow: "Sin publicar",
     titulo: "No se pudieron publicar",
     ayuda: "Cada título que terminó en error, con el motivo que registró el sistema. Incluye los de ejecuciones que sí publicaron otros títulos.",
@@ -27,12 +28,13 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
       { clave: "ejecucionCreada", titulo: "Se creó", fecha: true },
       { clave: "procesado", titulo: "Último intento", fecha: true },
       { clave: "ultimoEvento", titulo: "Último paso registrado" },
-      { clave: "codigoTecnico", titulo: "Código técnico (para soporte)" },
-      { clave: "id", titulo: "Código del título" },
+      { clave: "codigoTecnico", titulo: "Código del error (para soporte)" },
+      { clave: "id", titulo: "Código del título", soloAdmin: true },
     ],
   },
   {
     id: "cancelados",
+    soloAdmin: true,
     eyebrow: "Sin publicar",
     titulo: "Títulos cancelados",
     ayuda: "Títulos que se cancelaron antes de publicarse.",
@@ -43,26 +45,28 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
       { clave: "ejecucionCreada", titulo: "Se creó", fecha: true },
       { clave: "procesado", titulo: "Procesado", fecha: true },
       { clave: "motivo", titulo: "Motivo" },
-      { clave: "id", titulo: "Código del título" },
+      { clave: "id", titulo: "Código del título", soloAdmin: true },
     ],
   },
   {
     id: "en-curso",
+    soloAdmin: true,
     eyebrow: "En marcha",
     titulo: "En curso o en cola",
     ayuda: "Títulos que todavía esperan o se están procesando. Si llevan mucho tiempo aquí, algo se atascó.",
     columnas: [
       { clave: "titulo", titulo: "Título" },
       { clave: "categoria", titulo: "Categoría" },
-      { clave: "estado", titulo: "Estado" },
+      { clave: "icono", titulo: "Estado", tipo: "icono" },
       { clave: "intentos", titulo: "Intentos" },
       { clave: "ejecucionCreada", titulo: "Desde", fecha: true },
       { clave: "ultimoEvento", titulo: "Último paso registrado" },
-      { clave: "id", titulo: "Código del título" },
+      { clave: "id", titulo: "Código del título", soloAdmin: true },
     ],
   },
   {
     id: "descartados",
+    soloAdmin: true,
     eyebrow: "Descartados",
     titulo: "Descartados y borrados",
     ayuda: "Oportunidades que descartaste, que se reemplazaron al analizar de nuevo, y errores o cancelados que se borraron con «Borrar historial». Solo se registran desde el 1 de noviembre de 2026: lo anterior no se puede recuperar.",
@@ -76,35 +80,50 @@ const SECCIONES: Array<{ id: SeccionId; eyebrow: string; titulo: string; ayuda: 
       { clave: "impresiones", titulo: "Veces que se mostró en Google" },
       { clave: "clics", titulo: "Visitas desde Google" },
       { clave: "oportunidadCreada", titulo: "Oportunidad creada", fecha: true },
-      { clave: "id", titulo: "Código" },
+      { clave: "id", titulo: "Código", soloAdmin: true },
     ],
   },
   {
     id: "propuestos",
+    soloAdmin: true,
     eyebrow: "Temas",
     titulo: "Temas que te propusimos",
-    ayuda: "Los títulos que el sistema te ofreció cada día y lo que escribiste en el formulario. Sirve para ver si los temas se repiten.",
+    ayuda: "Cada vez que le pediste ideas de títulos a la inteligencia artificial: qué le pediste y qué títulos te ofreció.",
     columnas: [
       { clave: "fecha", titulo: "Fecha", fecha: true },
       { clave: "categoria", titulo: "Categoría" },
-      { clave: "titulosOfrecidos", titulo: "Títulos ofrecidos" },
-      { clave: "entradasDelUsuario", titulo: "Lo que escribiste" },
-      { clave: "espacio", titulo: "Espacio" },
-      { clave: "id", titulo: "Código" },
+      { clave: "loQuePediste", titulo: "Lo que pediste" },
+      { clave: "titulosOfrecidos", titulo: "Títulos que te ofrecimos" },
     ],
   },
   {
-    id: "eventos",
+    id: "seguimiento",
     eyebrow: "Registro",
-    titulo: "Línea de tiempo de eventos",
-    ayuda: "Todos los pasos que el sistema registró por cada título, del más reciente al más antiguo.",
+    titulo: "Tus artículos",
+    ayuda: "Del más reciente al más antiguo. ✓ se publicó, ✗ no se pudo.",
+    columnas: [
+      { clave: "icono", titulo: "Estado", tipo: "icono" },
+      { clave: "titulo", titulo: "Artículo" },
+      { clave: "categoria", titulo: "Categoría", soloAdmin: true },
+      { clave: "pedido", titulo: "Lo pediste", fecha: true, soloAdmin: true },
+      { clave: "publicado", titulo: "Se publicó", fecha: true },
+      { clave: "enlace", titulo: "Enlace", tipo: "enlace" },
+      { clave: "quePaso", titulo: "Qué pasó" },
+    ],
+  },
+  {
+    id: "pasos-tecnicos",
+    eyebrow: "Solo administrador",
+    titulo: "Pasos técnicos del sistema",
+    ayuda: "El registro interno completo, paso a paso, para investigar problemas. No es para clientes.",
+    soloAdmin: true,
     columnas: [
       { clave: "fecha", titulo: "Fecha", fecha: true },
       { clave: "titulo", titulo: "Título" },
       { clave: "estadoDelTitulo", titulo: "Estado del título" },
-      { clave: "evento", titulo: "Evento" },
+      { clave: "evento", titulo: "Paso registrado" },
       { clave: "categoria", titulo: "Categoría" },
-      { clave: "codigoTitulo", titulo: "Código del título" },
+      { clave: "codigoTitulo", titulo: "Código del título", soloAdmin: true },
     ],
   },
 ];
@@ -131,6 +150,29 @@ function formatCell(value: unknown, fecha?: boolean): string {
   return String(value);
 }
 
+const ICONOS: Record<string, { simbolo: string; color: string; texto: string }> = {
+  ok: { simbolo: "✓", color: "#34c759", texto: "Publicado" },
+  error: { simbolo: "✗", color: "#ff3b30", texto: "No se pudo publicar" },
+  cancelado: { simbolo: "✗", color: "#8e8e93", texto: "Cancelado" },
+  espera: { simbolo: "⏳", color: "#8a4b08", texto: "En proceso" },
+};
+
+function renderCelda(c: Columna, row: Row) {
+  const valor = row[c.clave];
+  if (c.tipo === "icono") {
+    const icono = ICONOS[String(valor)] ?? ICONOS.espera;
+    return <span title={icono.texto} aria-label={icono.texto} style={{ color: icono.color, fontSize: 18, fontWeight: 700 }}>{icono.simbolo}</span>;
+  }
+  if (c.tipo === "enlace") {
+    return typeof valor === "string" && valor ? (
+      <a href={valor} target="_blank" rel="noopener noreferrer" style={{ color: "#0071e3", fontWeight: 600, textDecoration: "none" }}>Ver artículo ↗</a>
+    ) : (
+      "—"
+    );
+  }
+  return formatCell(valor, c.fecha);
+}
+
 function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[number]; total: number | null; esAdmin: boolean; todos: boolean }) {
   const [abierta, setAbierta] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
@@ -138,6 +180,7 @@ function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[numbe
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cargada, setCargada] = useState(false);
+  const columnas = def.columnas.filter((c) => !c.soloAdmin || esAdmin);
 
   const query = useCallback(
     (extra: string) => `/api/historial/forense?seccion=${def.id}${todos ? "&todos=1" : ""}${extra}`,
@@ -204,7 +247,7 @@ function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[numbe
               <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                 <thead>
                   <tr>
-                    {def.columnas.map((c) => (
+                    {columnas.map((c) => (
                       <th key={c.clave} style={thStyle}>{c.titulo}</th>
                     ))}
                   </tr>
@@ -212,8 +255,8 @@ function Seccion({ def, total, esAdmin, todos }: { def: (typeof SECCIONES)[numbe
                 <tbody>
                   {rows.map((row) => (
                     <tr key={row.id} style={{ borderTop: "1px solid #e5e5ea" }}>
-                      {def.columnas.map((c) => (
-                        <td key={c.clave} style={{ ...tdStyle, whiteSpace: "pre-line", fontSize: 13 }}>{formatCell(row[c.clave], c.fecha)}</td>
+                      {columnas.map((c) => (
+                        <td key={c.clave} style={{ ...tdStyle, whiteSpace: "pre-line", fontSize: 13 }}>{renderCelda(c, row)}</td>
                       ))}
                     </tr>
                   ))}
@@ -267,6 +310,12 @@ export default function HistorialForense() {
     };
   }, [todos, abierto]);
 
+  const principales = SECCIONES.filter((def) => !def.soloAdmin);
+  const soloAdministrador = SECCIONES.filter((def) => def.soloAdmin);
+  const verSeccion = (def: (typeof SECCIONES)[number]) => (
+    <Seccion key={def.id} def={def} total={resumen ? (resumen[def.id] ?? 0) : null} esAdmin={esAdmin} todos={todos} />
+  );
+
   return (
     <details style={{ marginTop: 24 }} onToggle={(e) => setAbierto((e.currentTarget as HTMLDetailsElement).open)}>
       <summary style={{ cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, userSelect: "none" }}>
@@ -276,16 +325,20 @@ export default function HistorialForense() {
         </div>
         <span className="muted" aria-hidden="true">⌄</span>
       </summary>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
-        <label style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
-          <input type="checkbox" checked={todos} onChange={(e) => setTodos(e.target.checked)} />
-          Todos mis sitios
-        </label>
-      </div>
-      {SECCIONES.map((def) => (
-        <Seccion key={def.id} def={def} total={resumen ? (resumen[def.id] ?? 0) : null} esAdmin={esAdmin} todos={todos} />
-      ))}
       <HistorialExplicaciones />
+      {principales.map(verSeccion)}
+      {esAdmin && (
+        <details style={{ marginTop: 16 }}>
+          <summary style={{ cursor: "pointer", fontSize: 13, color: "#6e6e73", userSelect: "none" }}>Detalle para el administrador</summary>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+            <label style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+              <input type="checkbox" checked={todos} onChange={(e) => setTodos(e.target.checked)} />
+              Todos mis sitios
+            </label>
+          </div>
+          {soloAdministrador.map(verSeccion)}
+        </details>
+      )}
     </details>
   );
 }

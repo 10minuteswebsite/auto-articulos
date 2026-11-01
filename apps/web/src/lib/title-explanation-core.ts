@@ -31,8 +31,34 @@ export function nextExplanationAt(requestedAt: Date[], max: number, now: Date = 
   return new Date(recent[recent.length - max].getTime() + EXPLANATION_WINDOW_MS);
 }
 
-/** El resumen nunca pasa de dos párrafos, aunque el modelo escriba más. */
-export function limitToTwoParagraphs(text: string): string {
+/** El resumen nunca pasa de tres párrafos (razón, cuidado con repetidos y tranquilidad), aunque el modelo escriba más. */
+export function limitToThreeParagraphs(text: string): string {
   const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-  return paragraphs.slice(0, 2).join("\n\n");
+  return paragraphs.slice(0, 3).join("\n\n");
+}
+
+const ETIQUETAS_PEDIDO: Array<[string, string]> = [
+  ["tema", "Tema que pediste"],
+  ["clienteTipo", "A quién le escribes"],
+  ["deseoCliente", "Lo que busca tu cliente"],
+  ["ubicacionNegocio", "Dónde está tu negocio"],
+  ["ubicacionClientes", "Dónde están tus clientes"],
+];
+
+/**
+ * Convierte lo que la persona escribió en el formulario de Publicar (un objeto
+ * técnico) en líneas legibles con etiqueta en español. Nunca devuelve JSON ni
+ * claves del sistema; lo que no se reconoce se ignora.
+ */
+export function humanizeRequestInputs(inputs: unknown, maxChars = 220): Array<{ etiqueta: string; texto: string }> {
+  if (!inputs || typeof inputs !== "object") return [];
+  const record = inputs as Record<string, unknown>;
+  const lines: Array<{ etiqueta: string; texto: string }> = [];
+  for (const [key, etiqueta] of ETIQUETAS_PEDIDO) {
+    const value = record[key];
+    if (typeof value !== "string" || !value.trim()) continue;
+    const clean = value.trim().replace(/\s+/g, " ");
+    lines.push({ etiqueta, texto: clean.length > maxChars ? `${clean.slice(0, maxChars).trimEnd()}…` : clean });
+  }
+  return lines;
 }
