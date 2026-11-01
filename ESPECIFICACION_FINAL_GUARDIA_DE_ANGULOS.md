@@ -136,3 +136,9 @@ Simulador y pruebas: `docs/guardia-de-angulos/` (`guard-sim.mjs`, `guard-props.m
 - **Velocidad para la persona: ninguna.** El juez corre con `after()`, después de responder; mide 1,1–2,2 s y solo ocupa el servidor unos segundos más por solicitud. Si la generación ya tardó más de 30 s, la sombra se salta el juez.
 - **Otros costos de dejarla abierta:** lecturas de base de datos (hasta ~15.000 filas por solicitud en cuentas grandes), crecimiento de la tabla `TitleGuardReport` (~4 KB por registro) y que genera datos sin beneficio para nadie mientras no se active.
 - **Frenos agregados:** (1) tope de 60 solicitudes observadas por día; (2) la sombra **se apaga sola a los 14 días** si nadie la renueva; (3) limpieza perezosa de registros de más de 60 días.
+
+## 17. Fase 3 — modo activo (2026-11-01)
+- **Hecho:** modo `activo` con porcentaje (`title_guard_percent`, 0–100; cubeta estable por solicitud); en las solicitudes elegidas se piden 14 ideas, se evalúa con el juez por lista y se entregan hasta 9 (mínimo 5) con notas amables y aviso cuando el tema está muy cubierto; los títulos efectivamente entregados son los que cuentan como «ofrecidos». Notas y aviso se muestran en la pantalla de CONTENIDO PROPIO y en la respuesta del asistente MCP. Cualquier fallo de la guardia entrega exactamente lo de siempre.
+- **Frenos automáticos:** freno por cuenta (2 solicitudes seguidas con notas → 24 h sin guardia) y freno global (3 fallos en las últimas 10 solicitudes activas → se salta).
+- **Control de administrador:** modo y porcentaje (10/25/50/100) desde «Guardia de ángulos»; nace APAGADO/en sombra, sin cambios hasta que Milton elija «activo».
+- **Pendiente:** subida automática del porcentaje, aviso por correo, y probar el modo activo con tráfico real (se empieza en 10 %).
