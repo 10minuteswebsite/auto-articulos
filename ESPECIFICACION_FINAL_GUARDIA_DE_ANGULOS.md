@@ -116,3 +116,9 @@ Simulador y pruebas: `docs/guardia-de-angulos/` (`guard-sim.mjs`, `guard-props.m
 - **Seguridad:** con el modo apagado (defecto) solo se hace una lectura de `SystemSetting` por solicitud; con sombra, todo va en `try/catch` y el juez solo corre si la solicitud lleva menos de 30 s. Si la tabla no existe, se ignora. Las pruebas actuales no cambian.
 - **Orden de despliegue:** el código puede fusionarse antes de la migración porque nace apagado; la migración debe aplicarse ANTES de pasar a sombra.
 - **Pendiente:** aplicar el SQL (Milton), pasar a sombra, observar ≥ 48 h y ≥ 20 solicitudes y medir la línea base; recién entonces la Fase 3.
+
+## 14. Puesta en marcha de la sombra (2026-11-01)
+- La app usa el proyecto Supabase `uqqclaezxagukoyiiiol` (verificado desde el diagnóstico de administrador). Las tablas `SiteArticleTitle`, `ArticleTitleDiscard`, `TitleOrigin` y `TitleExplanation` existen; `TitleGuardReport` no existía hasta que Milton aplicó el SQL de la Fase 2 (primer intento no quedó aplicado). Lección: los diagnósticos que tragan errores ocultan hechos; ahora el diagnóstico muestra la causa real, el proyecto y las tablas.
+- **Modo: sombra, activado por Claude con el selector de administrador el 2026-11-01.** Registra lo que la guardia decidiría; lo que recibe la gente es exactamente lo de siempre.
+- **Línea base (120 días, 36 cuentas con 2+ solicitudes, 219 solicitudes comparadas, 1.971 títulos):** casi idénticos (≥ 85 %) 10 (0,5 %); zona del juez (38–84 %) 430 (21,8 %); solicitudes con 3 o más parecidos 68 (31 %). El problema es general, no de una sola cuenta.
+- **Ritmo:** unas 219 solicitudes en 120 días ≈ 2 al día en toda la plataforma. Reunir las 20 solicitudes exigidas para activar tardaría ~10 días sin ayuda; se decide con Milton si se acelera (solicitudes propias, tope 3 por usuario al día) o se ajusta el criterio.
