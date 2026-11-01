@@ -9,7 +9,7 @@ const pairs = [
 ];
 
 test("el prompt del juez contiene las reglas que evitan bloquear títulos distintos", () => {
-  for (const regla of ["misma pregunta", "comprar/vender", "número de una lista", "otro año", "posible página de categoría", "same=false", "JSON"]) {
+  for (const regla of ["misma pregunta", "comprar/vender", "número de una lista nunca cambia", "sufijo con el lugar", "año cuando AMBOS", "singular y el plural", "posible página de categoría", "same=false", "JSON"]) {
     assert.ok(JUDGE_SYSTEM_PROMPT.toLowerCase().includes(regla.toLowerCase()), regla);
   }
   const { user } = buildJudgeMessages(pairs);
