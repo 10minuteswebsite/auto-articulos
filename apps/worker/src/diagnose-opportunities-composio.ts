@@ -2,6 +2,7 @@ import "dotenv/config";
 import { createHash } from "node:crypto";
 import { prisma } from "@auto-articulos/db";
 import { runCensus } from "./census-gsc-connections";
+import { runSocialDiagnosis } from "./diagnose-social-connections";
 import {
   buildConnectionState,
   composioListSearchConsoleSites,
@@ -62,6 +63,11 @@ async function main() {
   // account_numbers="censo" ejecuta el censo global de conexiones (solo conteos).
   if ((process.env.ACCOUNT_NUMBERS ?? "").trim().toLowerCase() === "censo") {
     await runCensus();
+    return;
+  }
+  // account_numbers="social": conexiones de Facebook/Instagram/Pinterest (solo lectura).
+  if ((process.env.ACCOUNT_NUMBERS ?? "").trim().toLowerCase() === "social") {
+    await runSocialDiagnosis();
     return;
   }
   if (NUMBERS.length === 0 && HASHES.length === 0) throw new Error("Falta ACCOUNT_NUMBERS o ACCOUNT_HASHES.");
