@@ -61,3 +61,9 @@ test("sin foto y sin contexto sigue siendo claro", () => {
   assert.match(out, /el artículo/);
   assert.match(out, /imagen destacada/);
 });
+
+test("Composio sin conexión activa se explica como autorización vencida", () => {
+  const out = friendlyPublishError("No active connection found for toolkit(s) 'instagram' in this session.", "Instagram");
+  assert.match(out, /venció|retirada/);
+  assert.doesNotMatch(out, /toolkit|session/i);
+});

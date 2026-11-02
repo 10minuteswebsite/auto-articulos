@@ -128,7 +128,7 @@ const STATUS_LABEL: Record<Connection["status"], { text: string; color: string }
   INITIATED: { text: "Autorización sin terminar", color: "#9a6700" },
   ACTIVE: { text: "Conectada", color: "#1a7f37" },
   FAILED: { text: "No se pudo conectar", color: "#c62828" },
-  REVOKED: { text: "Desconectada", color: "#6e6e73" },
+  REVOKED: { text: "Venció: vuelve a conectar", color: "#c62828" },
 };
 
 const RESULT_MESSAGE: Record<string, { ok: boolean; text: string }> = {

@@ -127,13 +127,44 @@ function selectionLabel(app: ComposioAppId, row: SelectionFields): string | null
   }
 }
 
-/** Estado de las 4 apps para el cliente; no llama a Composio. */
+const SOCIAL_APPS: ComposioAppId[] = ["facebook", "instagram", "pinterest"];
+
+/**
+ * Las redes sociales caducan del lado de Meta/Pinterest sin avisarnos: la fila
+ * sigue en ACTIVE y Redes falla al publicar. Se contrasta con Composio y, si ya
+ * no está activa, se marca REVOKED (se puede reconectar). Si Composio no
+ * responde se deja el estado guardado.
+ */
+async function refreshSocialStatus(rows: Array<{ id: string; app: string; status: string; connectedAccountId: string }>, apiKey: string | null) {
+  if (!apiKey) return;
+  await Promise.all(
+    rows
+      .filter((r) => r.status === "ACTIVE" && (SOCIAL_APPS as string[]).includes(r.app))
+      .map(async (r) => {
+        try {
+          const live = await getConnectedAccount(apiKey, r.connectedAccountId);
+          if (live.status !== "ACTIVE" && live.status !== "UNKNOWN") {
+            await prisma.composioConnection.update({ where: { id: r.id }, data: { status: "REVOKED" } });
+            r.status = "REVOKED";
+          }
+        } catch (error) {
+          if (error instanceof ComposioApiError && error.status === 404) {
+            await prisma.composioConnection.update({ where: { id: r.id }, data: { status: "REVOKED" } });
+            r.status = "REVOKED";
+          }
+        }
+      }),
+  );
+}
+
+/** Estado de las apps para el cliente; las redes sociales se contrastan con Composio. */
 export async function listUserConnections(user: ConnectingUser): Promise<UserConnectionView[]> {
   const [rows, apiKey, authConfigs] = await Promise.all([
     prisma.composioConnection.findMany({ where: { userId: user.id, siteDomain: "" } }),
     getStoredComposioApiKey(),
     getStoredAuthConfigIds(),
   ]);
+  await refreshSocialStatus(rows, apiKey);
   return COMPOSIO_APPS.map((app) => {
     const row = rows.find((r) => r.app === app.id);
     let unavailableReason: string | null = null;
