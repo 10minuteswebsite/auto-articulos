@@ -260,17 +260,17 @@ test("módulo 2: se quitan los repetidos, se conserva el orden y los datos del t
     { text: "Moving tips for first time sellers in Florida", rationale: "señal Bing C" },
   ];
   const { scored, hardDropped } = scoreCandidates(items.map((i) => i.text), memory, {});
-  const kept = dropSimilarKeepOne(items, scored, hardDropped);
+  const kept = dropSimilarKeepOne(items, scored, hardDropped, 1);
   assert.deepEqual(kept.map((k) => k.rationale), ["señal GSC B", "señal Bing C"], "lo casi idéntico sale; la justificación de los demás queda intacta");
   // Si TODO se parece, se conserva uno (el menos parecido) para no perder la señal del grupo.
   const allSimilar = [{ text: "Best Home Prices in Coral Gables", rationale: "x" }, { text: "best home price coral gables", rationale: "y" }];
   const s2 = scoreCandidates(allSimilar.map((i) => i.text), memory, {});
-  const keptOne = dropSimilarKeepOne(allSimilar, s2.scored, s2.hardDropped);
+  const keptOne = dropSimilarKeepOne(allSimilar, s2.scored, s2.hardDropped, 1);
   assert.equal(keptOne.length, 1);
   assert.deepEqual(dropSimilarKeepOne([], [], []), []);
 });
 
-test("módulo 2: si quedan pocos títulos se rellena hasta 3 con los menos parecidos, sin casi idénticos ni exactos", () => {
+test("módulo 2: si quedan pocos títulos se rellena hasta 3 con los menos parecidos, nunca con duplicados exactos", () => {
   const memory = [M("Tips for selling your Coral Gables home fast"), M("How to price your Coral Gables home for sale"), M("Closing costs when selling a home in Miami")];
   const items = [
     { text: "Tips for selling your Coral Gables home fast", rationale: "exacto" },
@@ -280,7 +280,7 @@ test("módulo 2: si quedan pocos títulos se rellena hasta 3 con los menos parec
   ];
   const { scored, hardDropped } = scoreCandidates(items.map((i) => i.text), memory, {});
   const kept = dropSimilarKeepOne(items, scored, hardDropped);
-  assert.deepEqual(kept.map((k) => k.rationale), ["parecido", "limpio"], "vuelve el parecido de 65 %; el casi idéntico (100 %) y el exacto no");
+  assert.deepEqual(kept.map((k) => k.rationale), ["parecido", "parecido 2", "limpio"], "entregar manda: vuelven los parecidos hasta 3, el exacto nunca");
   assert.ok(!kept.some((k) => k.rationale === "exacto"), "el duplicado exacto nunca vuelve");
   assert.ok(kept.some((k) => k.rationale === "limpio"));
   assert.deepEqual(dropSimilarKeepOne(items, scored, hardDropped, 1).length >= 1, true);
