@@ -71,20 +71,30 @@ export async function applyGuardToOpportunities<T extends OpportunityGroupLike>(
       }
     }
 
-    let removed = 0;
-    const removedDetail: Array<{ title: string; neighbor: string | null }> = [];
-    const result = groups.map((group) => {
-      if (!toReview.includes(group)) return group;
-      // Sin veredicto del juez para un título (tope de gasto o falla), solo se quita lo casi idéntico (el código decide ≥ 85 %).
-      const listJudge: ListJudgeFn = (candidate) => verdictFor.get(`${group.categoryId}|${titleKey(candidate)}`) ?? { same: false, neighbor: null };
-      const { scored, hardDropped } = scoreCandidates(group.titles.map((t) => t.text), memory, { listJudge, siteNoJudge: SITE_NO_JUDGE });
-      const kept = dropSimilarKeepOne(group.titles, scored, hardDropped);
-      for (const dropped of group.titles.filter((t) => !kept.includes(t))) {
-        removed += 1;
-        removedDetail.push({ title: dropped.text, neighbor: scored.find((s) => titleKey(s.title) === titleKey(dropped.text))?.near?.title ?? null });
-      }
-      return kept.length === group.titles.length ? group : { ...group, titles: kept };
-    });
+    // Se calcula el resultado por grupo; si en total quedan menos de MIN_TOTAL títulos, se vuelve a calcular pidiendo más por grupo
+    // (primero vuelven los menos parecidos). Entregar títulos manda sobre la exigencia.
+    const MIN_TOTAL = 5;
+    const originalTotal = groups.reduce((n, g) => n + g.titles.length, 0);
+    const compute = (minKeep: number) => {
+      const detail: Array<{ title: string; neighbor: string | null }> = [];
+      const out = groups.map((group) => {
+        if (!toReview.includes(group)) return group;
+        // Sin veredicto del juez para un título (tope de gasto o falla), el código decide solo (60 % vs publicado/ofrecido, 75 % vs sitio).
+        const listJudge: ListJudgeFn = (candidate) => verdictFor.get(`${group.categoryId}|${titleKey(candidate)}`) ?? { same: false, neighbor: null };
+        const { scored, hardDropped } = scoreCandidates(group.titles.map((t) => t.text), memory, { listJudge, siteNoJudge: SITE_NO_JUDGE });
+        const kept = dropSimilarKeepOne(group.titles, scored, hardDropped, minKeep);
+        for (const dropped of group.titles.filter((t) => !kept.includes(t))) {
+          detail.push({ title: dropped.text, neighbor: scored.find((s) => titleKey(s.title) === titleKey(dropped.text))?.near?.title ?? null });
+        }
+        return kept.length === group.titles.length ? group : { ...group, titles: kept };
+      });
+      return { out, detail, total: out.reduce((n, g) => n + g.titles.length, 0) };
+    };
+    let chosen = compute(GUARD.MODULE2_MIN_PER_GROUP);
+    for (let minKeep = GUARD.MODULE2_MIN_PER_GROUP + 1; chosen.total < Math.min(MIN_TOTAL, originalTotal) && minKeep <= 12; minKeep++) chosen = compute(minKeep);
+    const result = chosen.out;
+    const removedDetail = chosen.detail;
+    const removed = removedDetail.length;
 
     // Registro (también cuenta para el tope diario del modo activo). Si falla, se ignora.
     await prisma.titleGuardReport

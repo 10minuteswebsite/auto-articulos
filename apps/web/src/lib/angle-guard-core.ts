@@ -477,11 +477,11 @@ export function dropSimilarKeepOne<T extends { text: string }>(items: T[], score
     const best = [...items].filter((i) => !hard.has(titleKey(i.text))).sort((a, b) => (bySim.get(titleKey(a.text))?.sim ?? 1) - (bySim.get(titleKey(b.text))?.sim ?? 1))[0];
     return best ? [best] : [items[0]];
   }
-  // Mejor de dos mundos: si quedan muy pocos, se devuelven los «parecidos» menos parecidos (nunca los casi idénticos ni los duplicados exactos).
+  // Entregar títulos manda: si quedan menos de los necesarios, vuelven los «parecidos» menos parecidos primero (nunca los duplicados exactos).
   const target = Math.min(minKeep, items.length);
   if (kept.length >= target) return kept;
   const refill = items
-    .filter((i) => similar.has(titleKey(i.text)) && !hard.has(titleKey(i.text)) && (bySim.get(titleKey(i.text))?.sim ?? 1) < GUARD.AUTO)
+    .filter((i) => similar.has(titleKey(i.text)) && !hard.has(titleKey(i.text)) )
     .sort((a, b) => (bySim.get(titleKey(a.text))?.sim ?? 1) - (bySim.get(titleKey(b.text))?.sim ?? 1))
     .slice(0, target - kept.length);
   const back = new Set(refill);
