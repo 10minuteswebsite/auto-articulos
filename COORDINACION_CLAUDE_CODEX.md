@@ -1,4 +1,6 @@
-## OPORTUNIDADES-MONICA-20261102 · EN CURSO
+## OPORTUNIDADES-MONICA-20261102 · CERRADO / LIBERADA
+
+Claude. Caso Mónica Chediak, PR #761 (`b53b91bf`), sin migración. Artículos: el POST contaba oportunidades ocultas (otro sitio o ya publicadas); ahora cuenta solo las visibles. Redes: el límite de inspección se gastaba en artículos ya usados en todas las redes; ahora se descartan antes. Verificado en producción con la cuenta de Mónica: «Analizar contenido» completó el análisis con datos de Search Console y «Crear propuestas» en Meta generó 3 propuestas. Capitanía liberada. No se auditó a otros usuarios (sin acceso a la base de producción desde esta sesión).
 
 Claude. Caso Mónica Chediak: Artículos bloqueaba «Analizar contenido» contando oportunidades ocultas (otro sitio o ya publicadas) y Redes decía «Ya generaste propuestas» porque el límite de inspección (24) se gastaba en los primeros artículos del ranking, ya usados. Fix en `api/opportunities/route.ts` y `api/social-opportunities/generate/route.ts`. Sin migración. Capitán: Claude.
 
