@@ -141,9 +141,16 @@ export async function POST(request: Request) {
   const userId = await getCurrentUserId();
   const denied = await requireProductAccess(userId, "ARTICULOS", "/api/opportunities");
   if (denied) return denied;
-  const pendingCount = await prisma.opportunityTitle.count({
-    where: { group: { userId } },
+  // Solo cuentan las oportunidades que la pantalla realmente muestra: las del
+  // sitio seleccionado y que no figuren ya publicadas. Contar todas las del
+  // usuario bloqueaba el análisis por filas ocultas (otro sitio, o temas ya
+  // publicados) que la persona no podía ver ni borrar (caso Mónica Chediak).
+  const selected = await prisma.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: { selectedSiteDomain: true },
   });
+  const visibleGroups = await list(userId, selected.selectedSiteDomain);
+  const pendingCount = visibleGroups.reduce((sum, group) => sum + group.titles.length, 0);
   if (pendingCount > 0) {
     return NextResponse.json(
       {
