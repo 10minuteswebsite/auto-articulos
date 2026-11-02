@@ -221,7 +221,7 @@ function pathnameOf(url: string): string {
  * descubre temas sin artículo — decisión explícita de Milton: solo prioriza
  * entre lo que ya existe.
  */
-async function selectTrendingArticles(userId: string): Promise<{ candidates: ArticleCandidate[]; totalArticles: number; goneArticles: number; noImageArticles: number; noImageTitles: string[] }> {
+async function selectTrendingArticles(userId: string, integrations: string[] = []): Promise<{ candidates: ArticleCandidate[]; totalArticles: number; goneArticles: number; noImageArticles: number; noImageTitles: string[] }> {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
   const gsc = await prisma.searchIntegration.findFirst({ where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) } });
   const resolvedGsc = await resolveSearchConsoleForUser(userId, user.selectedSiteDomain ?? "");
@@ -431,6 +431,42 @@ async function selectTrendingArticles(userId: string): Promise<{ candidates: Art
       return (b.article.processedAt?.getTime() ?? 0) - (a.article.processedAt?.getTime() ?? 0);
     });
 
+  // Los artículos ya usados en TODAS las redes pedidas se descartan antes de
+  // inspeccionar nada. Sin esto, el límite de inspección se gastaba en los
+  // primeros artículos del ranking (justo los ya usados) y la cuenta recibía
+  // «Ya generaste propuestas para todos tus artículos» teniendo más sin usar
+  // (caso Mónica Chediak, 2/11/2026).
+  let eligible = ranked;
+  if (integrations.length > 0 && ranked.length > 0) {
+    const previous = await prisma.socialOpportunity.findMany({
+      where: {
+        userId,
+        OR: [
+          { titleId: { in: ranked.map(({ article }) => article.id) } },
+          { articleUrl: { in: ranked.map(({ article }) => article.articleUrl!).filter(Boolean) } },
+        ],
+      },
+      select: { titleId: true, articleUrl: true, platform: true },
+    });
+    const usedByTitle = new Map<string, Set<string>>();
+    const usedByUrl = new Map<string, Set<string>>();
+    const mark = (map: Map<string, Set<string>>, key: string | null, platform: string) => {
+      if (!key) return;
+      const set = map.get(key) ?? new Set<string>();
+      set.add(platform);
+      map.set(key, set);
+    };
+    for (const row of previous) {
+      mark(usedByTitle, row.titleId, row.platform);
+      mark(usedByUrl, row.articleUrl, row.platform);
+    }
+    eligible = ranked.filter(({ article }) => {
+      const used = usedByTitle.get(article.id);
+      const usedUrl = article.articleUrl ? usedByUrl.get(article.articleUrl) : undefined;
+      return integrations.some((platform) => !used?.has(platform) && !usedUrl?.has(platform));
+    });
+  }
+
   const verified: typeof ranked = [];
   let goneArticles = 0;
   const noImageTitles: string[] = [];
@@ -443,8 +479,8 @@ async function selectTrendingArticles(userId: string): Promise<{ candidates: Art
   // máximo una propuesta por red. Inspeccionar todos los artículos publicados
   // hacía que esta protección agotara el timeout antes de generar propuestas.
   const maxArticlesToInspect = 24;
-  for (let index = 0; index < Math.min(ranked.length, maxArticlesToInspect); index += 8) {
-    const batch = ranked.slice(index, index + 8);
+  for (let index = 0; index < Math.min(eligible.length, maxArticlesToInspect); index += 8) {
+    const batch = eligible.slice(index, index + 8);
     const states = await Promise.all(batch.map(({ article }) => inspectArticlePage(article.articleUrl!)));
     batch.forEach((candidate, batchIndex) => {
       const state = states[batchIndex];
@@ -465,7 +501,7 @@ async function selectTrendingArticles(userId: string): Promise<{ candidates: Art
     articleUrl: article.articleUrl,
     searchQueries: queriesByPath.get(pathnameOf(article.articleUrl!)) ?? [],
   }));
-  return { candidates, totalArticles: ranked.length, goneArticles, noImageArticles, noImageTitles };
+  return { candidates, totalArticles: eligible.length > 0 ? eligible.length : ranked.length, goneArticles, noImageArticles, noImageTitles };
 }
 
 /**
@@ -642,7 +678,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { candidates: trendingCandidates, totalArticles, goneArticles, noImageArticles, noImageTitles } = await selectTrendingArticles(userId);
+    const { candidates: trendingCandidates, totalArticles, goneArticles, noImageArticles, noImageTitles } = await selectTrendingArticles(userId, integrationsWithinLimit);
     const candidateMap = new Map<string, ArticleCandidate>();
     for (const article of trendingCandidates) {
       candidateMap.set(article.id, article);

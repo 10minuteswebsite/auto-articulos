@@ -1,3 +1,7 @@
+## OPORTUNIDADES-MONICA-20261102 · EN CURSO
+
+Claude. Caso Mónica Chediak: Artículos bloqueaba «Analizar contenido» contando oportunidades ocultas (otro sitio o ya publicadas) y Redes decía «Ya generaste propuestas» porque el límite de inspección (24) se gastaba en los primeros artículos del ranking, ya usados. Fix en `api/opportunities/route.ts` y `api/social-opportunities/generate/route.ts`. Sin migración. Capitán: Claude.
+
 ## WAITLIST-CLOSE-20261101 · Actions CERRADO / reserva LIBERADA
 
 Código3e61b63; ambos workflows autentican por OIDC efímero enmain sin secretosbackend/ID legacy. Runs41347894875 y41349239059 prueban400 autenticado antes de escrituras; migratejob omitido/DB ficticia. Sync41348478173 y replay41348764593:124/0 cadauno. Hub conserva estados/permisos canónicos. WebVercel conserva transporteOIDC previo; no desplegarWorker. [Acta/mapa/límites](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-11-01-waitlist-close.md).
