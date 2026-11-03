@@ -1,9 +1,9 @@
-import { after, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { logDiscardedOpportunities } from "@/lib/title-discard-log";
 import { applyGuardToOpportunities } from "@/lib/opportunity-guard";
 import { MIN_TITLES_PROMISE, recordRedFlag } from "@/lib/opportunity-red-flag";
-import { runComplementShadow } from "@/lib/opportunity-complement";
+import { mergeComplementIntoGroups, runComplement } from "@/lib/opportunity-complement";
 import {
   composioQuerySearchAnalytics,
   decryptSecret,
@@ -437,24 +437,39 @@ export async function POST(request: Request) {
       ...existing.flatMap((title) => (title.finalTitle ? [title.text, title.finalTitle] : [title.text])),
       ...siteTitleRows.map((row) => row.title),
     ];
-    // Modo complementario (Fase 2, sombra): solo calcula y registra para el administrador; nunca cambia lo que ve el usuario.
-    const complementShadow = (delivered: number) => {
-      try {
-        after(() =>
-          runComplementShadow({
-            userId,
-            siteDomain: selectedSiteDomain ?? "",
-            delivered,
-            categories: categoriesWithExamples.map((c) => ({ id: c.id, name: c.name, publishedExamples: c.publishedExamples?.slice(0, 8) })),
-            clientLocations,
-            businessLocations,
-            excludedTopics: splitLocations(user.excludedTopics),
-            existingTitles: existingTitlesAll,
-          }),
-        );
-      } catch {
-        // la sombra nunca debe afectar al análisis
-      }
+    // Modo complementario (Fase 3, activo y autorregulado): si faltan títulos para la promesa, propone ideas sin evidencia (marcadas).
+    // Nunca lanza: si falla o está pausado por gasto, devuelve [] y el análisis queda exactamente como sin él.
+    const complementIdeas = (delivered: number) =>
+      runComplement({
+        userId,
+        siteDomain: selectedSiteDomain ?? "",
+        delivered,
+        categories: categoriesWithExamples.map((c) => ({ id: c.id, name: c.name, publishedExamples: c.publishedExamples?.slice(0, 8) })),
+        clientLocations,
+        businessLocations,
+        excludedTopics: splitLocations(user.excludedTopics),
+        existingTitles: existingTitlesAll,
+      });
+    // Guarda los grupos, reemplazando las oportunidades pendientes de ESTE panel (un análisis para "English" no borra las de "Español").
+    const saveGroups = async (groups: Array<{ categoryId: string; rationale: string; impressions: number; clicks: number; titles: Array<{ text: string; rationale: string }> }>, at: Date) => {
+      await prisma.$transaction(async (tx) => {
+        await tx.opportunityGroup.deleteMany({
+          where: { userId, category: { panel: selectedPanel, ...(selectedSiteDomain ? { siteDomain: selectedSiteDomain } : {}) } },
+        });
+        for (const group of groups) {
+          await tx.opportunityGroup.create({
+            data: {
+              userId,
+              categoryId: group.categoryId,
+              rationale: group.rationale,
+              impressions: group.impressions,
+              clicks: group.clicks,
+              titles: { create: group.titles },
+            },
+          });
+        }
+        await tx.user.update({ where: { id: userId }, data: { lastOpportunityAnalysisAt: at } });
+      });
     };
     const analysis = await analyzeSeoOpportunities({
       categories: categoriesWithExamples,
@@ -480,13 +495,24 @@ export async function POST(request: Request) {
     const now = new Date();
 
     if (analysis.status === "no_new") {
+      // Ni un título con evidencia: el modo complementario intenta completar la promesa mínima con ideas marcadas.
+      const extra = await complementIdeas(0);
+      if (extra.length > 0) {
+        await saveGroups(mergeComplementIntoGroups([], extra), now);
+        const banderaExtra = extra.length < MIN_TITLES_PROMISE ? await recordRedFlag(userId, selectedSiteDomain ?? "", extra.length, analysis.diagnostico).catch(() => null) : null;
+        return NextResponse.json({
+          groups: await list(userId, selectedSiteDomain),
+          lastAnalysisAt: now,
+          diagnostico: analysis.diagnostico,
+          ...(banderaExtra ? { banderaRoja: { mensaje: banderaExtra.usuario } } : {}),
+        });
+      }
       await prisma.user.update({
         where: { id: userId },
         data: { lastOpportunityAnalysisAt: now },
       });
       // Bandera roja: el análisis no dejó ni un título (promesa mínima: MIN_TITLES_PROMISE).
       const banderaSinNuevos = await recordRedFlag(userId, selectedSiteDomain ?? "", 0, analysis.diagnostico).catch(() => null);
-      complementShadow(0);
       return NextResponse.json({
         groups: await list(userId, selectedSiteDomain),
         lastAnalysisAt: now,
@@ -499,7 +525,10 @@ export async function POST(request: Request) {
     // Guardia de ángulos (módulo 2): quita los títulos repetidos DESPUÉS del razonamiento con Search Console y Bing y sin tocar
     // ninguna señal; si está apagada o falla, se guarda todo exactamente como siempre.
     const diagnostico = analysis.diagnostico;
-    const groupsToSave = (await applyGuardToOpportunities(userId, selectedSiteDomain ?? "", analysis.groups)).groups;
+    let groupsToSave: Array<{ categoryId: string; rationale: string; impressions: number; clicks: number; titles: Array<{ text: string; rationale: string }> }> = (await applyGuardToOpportunities(userId, selectedSiteDomain ?? "", analysis.groups)).groups;
+    // Tras la guardia quedaron menos títulos que la promesa mínima: el modo complementario añade ideas marcadas hasta completarla.
+    const baseTotal = groupsToSave.reduce((n, g) => n + g.titles.length, 0);
+    if (baseTotal < MIN_TITLES_PROMISE) groupsToSave = mergeComplementIntoGroups(groupsToSave, await complementIdeas(baseTotal));
 
     // Un análisis nuevo REEMPLAZA las oportunidades que seguían sin ejecutarse: se guardan antes de que desaparezcan.
     await logDiscardedOpportunities({
@@ -507,33 +536,10 @@ export async function POST(request: Request) {
       where: { group: { userId, category: { panel: selectedPanel, ...(selectedSiteDomain ? { siteDomain: selectedSiteDomain } : {}) } } },
       source: "opportunity_replaced",
     });
-    await prisma.$transaction(async (tx) => {
-      // Solo las de ESTE panel: un análisis para "English" no debe borrar
-      // oportunidades ya generadas para "Español".
-      await tx.opportunityGroup.deleteMany({
-        where: { userId, category: { panel: selectedPanel, ...(selectedSiteDomain ? { siteDomain: selectedSiteDomain } : {}) } },
-      });
-      for (const group of groupsToSave) {
-        await tx.opportunityGroup.create({
-          data: {
-            userId,
-            categoryId: group.categoryId,
-            rationale: group.rationale,
-            impressions: group.impressions,
-            clicks: group.clicks,
-            titles: { create: group.titles },
-          },
-        });
-      }
-      await tx.user.update({
-        where: { id: userId },
-        data: { lastOpportunityAnalysisAt: now },
-      });
-    });
-    // Bandera roja: tras la guardia quedaron menos títulos que la promesa mínima. Se registra para el administrador y se avisa con claridad.
+    await saveGroups(groupsToSave, now);
+    // Bandera roja: aun así quedaron menos títulos que la promesa mínima. Se registra para el administrador y se avisa con claridad.
     const totalGuardado = groupsToSave.reduce((n, g) => n + g.titles.length, 0);
     const banderaPocos = totalGuardado < MIN_TITLES_PROMISE ? await recordRedFlag(userId, selectedSiteDomain ?? "", totalGuardado, diagnostico).catch(() => null) : null;
-    if (totalGuardado < MIN_TITLES_PROMISE) complementShadow(totalGuardado);
     return NextResponse.json({
       groups: await list(userId, selectedSiteDomain),
       lastAnalysisAt: now,

@@ -4,34 +4,55 @@ import { scoreCandidates, titleKey, type MemoryEntry } from "@/lib/angle-guard-c
 import { classifyExcludedTopics } from "@/lib/opportunity-analysis";
 import { judgeDoubtfulExclusions } from "@/lib/opportunity-exclusion";
 import { MIN_TITLES_PROMISE } from "@/lib/opportunity-red-flag";
-import { SHADOW_MAX_DAYS, isShadowExpired } from "@/lib/title-guard-mode";
 import { loadGuardMemory } from "@/lib/title-guard-shadow";
 
 // MODO COMPLEMENTARIO del botón 2 (CONTENIDO GENERADO POR IA). Ver DISENO_MODO_COMPLEMENTARIO_BOTON_2.md.
 // Cuando el análisis con evidencia deja menos títulos que la promesa mínima, una llamada de IA propone ideas SIN evidencia de demanda
-// para completar hasta la promesa. FASE 2 = SOMBRA: calcula y registra en el panel del administrador, pero NO muestra ni guarda nada
-// para el usuario. Interruptor propio, guardado en SystemSetting (sin migración). Apagado por defecto.
+// para completar hasta la promesa. FASE 3 = ACTIVO y AUTORREGULADO: las ideas se guardan marcadas y el usuario las ve y elige.
+// Sin vencimiento ni pasos manuales: por defecto está activo; «apagado» es solo el botón de emergencia y «sombra» solo registra.
+// Interruptor propio, guardado en SystemSetting (sin migración).
 export const COMPLEMENT_MODE_KEY = "opportunity_complement_mode";
-export type ComplementMode = "apagado" | "sombra";
+export type ComplementMode = "apagado" | "sombra" | "activo";
 export const COMPLEMENT_REPORT_NAME = "Complementario · Módulo 2";
-/** Topes de gasto: una llamada (≈ 3–5 centavos) solo cuando faltan títulos. */
-export const COMPLEMENT_ACCOUNT_DAILY_CAP = 2;
-export const COMPLEMENT_GLOBAL_DAILY_CAP = 40;
+/** Marca que lleva el motivo de cada idea sin evidencia (sin migración): la pantalla la quita y muestra la etiqueta. */
+export const COMPLEMENT_MARK = "[SIN_EVIDENCIA] ";
+export const COMPLEMENT_DEFAULT_RATIONALE = "Idea propuesta por la IA a partir de tu negocio; todavía no hay búsquedas registradas.";
+/**
+ * Topes de gasto (una llamada ≈ 3–5 centavos, solo cuando faltan títulos). Autorregulación: al llegar al presupuesto del mes la función se
+ * pausa sola hasta el mes siguiente; una cuenta que pidió 3 veces seguidas sin obtener ninguna idea útil se pausa 7 días.
+ */
+export const COMPLEMENT_ACCOUNT_DAILY_CAP = 1;
+export const COMPLEMENT_GLOBAL_DAILY_CAP = 10;
+export const COMPLEMENT_COST_PER_CALL_USD = 0.05;
+export const COMPLEMENT_MONTHLY_BUDGET_USD = 10;
+export const COMPLEMENT_WASTE_STREAK = 3;
+export const COMPLEMENT_WASTE_PAUSE_DAYS = 7;
+
+/** ¿El gasto estimado del mes (llamadas × costo por llamada) ya alcanzó el presupuesto? */
+export function monthlyBudgetReached(callsThisMonth: number): boolean {
+  return callsThisMonth * COMPLEMENT_COST_PER_CALL_USD >= COMPLEMENT_MONTHLY_BUDGET_USD;
+}
+
+/** ¿Las últimas llamadas de esta cuenta (más recientes primero) dejaron todas 0 ideas útiles? Entonces se pausa para no gastar en vano. */
+export function accountWasting(lastResults: number[]): boolean {
+  return lastResults.length >= COMPLEMENT_WASTE_STREAK && lastResults.slice(0, COMPLEMENT_WASTE_STREAK).every((n) => n === 0);
+}
 
 export async function getComplementMode(): Promise<{ mode: ComplementMode; configured: ComplementMode; expiresAt: Date | null }> {
   try {
     const row = await prisma.systemSetting.findUnique({ where: { key: COMPLEMENT_MODE_KEY } });
-    if (!row?.encryptedValue) return { mode: "apagado", configured: "apagado", expiresAt: null };
+    if (!row?.encryptedValue) return { mode: "activo", configured: "activo", expiresAt: null };
     let value = row.encryptedValue;
     try {
       value = decryptSecret(value);
     } catch {
       // el modo se guarda en claro: no es un secreto
     }
-    const configured: ComplementMode = value.trim() === "sombra" ? "sombra" : "apagado";
-    const expired = configured === "sombra" && isShadowExpired(row.updatedAt);
-    return { mode: expired ? "apagado" : configured, configured, expiresAt: configured === "sombra" ? new Date(row.updatedAt.getTime() + SHADOW_MAX_DAYS * 86_400_000) : null };
+    const v = value.trim();
+    const configured: ComplementMode = v === "apagado" ? "apagado" : v === "sombra" ? "sombra" : "activo";
+    return { mode: configured, configured, expiresAt: null };
   } catch {
+    // Si no se puede leer el ajuste, lo seguro es no gastar ni cambiar lo que ve el usuario.
     return { mode: "apagado", configured: "apagado", expiresAt: null };
   }
 }
@@ -48,6 +69,26 @@ export interface ComplementIdea {
   categoryId: string;
   text: string;
   rationale: string;
+}
+
+interface GroupWithTitles {
+  categoryId: string;
+  rationale: string;
+  impressions: number;
+  clicks: number;
+  titles: Array<{ text: string; rationale: string }>;
+}
+
+/** Añade las ideas complementarias (con la marca) a los grupos del análisis; si la categoría no tiene grupo, crea uno sin cifras. */
+export function mergeComplementIntoGroups<T extends GroupWithTitles>(groups: T[], ideas: ComplementIdea[]): GroupWithTitles[] {
+  const out: GroupWithTitles[] = groups.map((g) => ({ ...g, titles: [...g.titles] }));
+  for (const idea of ideas) {
+    const title = { text: idea.text, rationale: COMPLEMENT_MARK + (idea.rationale.trim() || COMPLEMENT_DEFAULT_RATIONALE) };
+    const existing = out.find((g) => g.categoryId === idea.categoryId);
+    if (existing) existing.titles.push(title);
+    else out.push({ categoryId: idea.categoryId, rationale: COMPLEMENT_DEFAULT_RATIONALE, impressions: 0, clicks: 0, titles: [title] });
+  }
+  return out;
 }
 
 /**
@@ -135,10 +176,11 @@ Responde SOLO JSON: {"ideas":[{"categoryId":"id","text":"titulo","rationale":"po
 }
 
 /**
- * FASE 2 (sombra): si faltan títulos para la promesa, calcula qué ideas complementarias se habrían ofrecido y lo registra para el
- * administrador. No cambia nada de lo que ve el usuario. Nunca lanza.
+ * Si faltan títulos para la promesa, pide ideas complementarias, las filtra y las registra para el administrador. En modo «activo» las
+ * devuelve para que el análisis las guarde; en «sombra» devuelve [] (solo registra). Nunca lanza: ante cualquier fallo devuelve [] y el
+ * análisis se entrega exactamente como sin esta función.
  */
-export async function runComplementShadow(params: {
+export async function runComplement(params: {
   userId: string;
   siteDomain: string;
   delivered: number;
@@ -147,24 +189,35 @@ export async function runComplementShadow(params: {
   businessLocations: string[];
   excludedTopics: string[];
   existingTitles: string[];
-}): Promise<void> {
+}): Promise<ComplementIdea[]> {
   try {
     const need = MIN_TITLES_PROMISE - params.delivered;
-    if (need <= 0 || params.categories.length === 0) return;
+    if (need <= 0 || params.categories.length === 0) return [];
     const { mode } = await getComplementMode();
-    if (mode !== "sombra") return;
+    if (mode === "apagado") return [];
     const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) return;
+    if (!apiKey) return [];
     const since = new Date(Date.now() - 24 * 3600_000);
-    const [accountToday, globalToday] = await Promise.all([
+    const now = new Date();
+    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const [accountToday, globalToday, callsThisMonth, recent] = await Promise.all([
       prisma.titleGuardReport.count({ where: { userId: params.userId, categoryName: COMPLEMENT_REPORT_NAME, createdAt: { gte: since } } }),
       prisma.titleGuardReport.count({ where: { categoryName: COMPLEMENT_REPORT_NAME, createdAt: { gte: since } } }),
+      prisma.titleGuardReport.count({ where: { categoryName: COMPLEMENT_REPORT_NAME, createdAt: { gte: monthStart } } }),
+      prisma.titleGuardReport.findMany({
+        where: { userId: params.userId, categoryName: COMPLEMENT_REPORT_NAME, createdAt: { gte: new Date(Date.now() - COMPLEMENT_WASTE_PAUSE_DAYS * 86_400_000) } },
+        orderBy: { createdAt: "desc" },
+        take: COMPLEMENT_WASTE_STREAK,
+        select: { nClean: true },
+      }),
     ]);
-    if (accountToday >= COMPLEMENT_ACCOUNT_DAILY_CAP || globalToday >= COMPLEMENT_GLOBAL_DAILY_CAP) return;
+    if (accountToday >= COMPLEMENT_ACCOUNT_DAILY_CAP || globalToday >= COMPLEMENT_GLOBAL_DAILY_CAP) return [];
+    if (monthlyBudgetReached(callsThisMonth)) return [];
+    if (accountWasting(recent.map((r) => r.nClean))) return [];
 
     const started = Date.now();
     const memory = await loadGuardMemory(params.userId, params.siteDomain, "", undefined, true);
-    const ideas = await askForIdeas(apiKey, { categories: params.categories, clientLocations: params.clientLocations, businessLocations: params.businessLocations, excludedTopics: params.excludedTopics, existingTitles: params.existingTitles, want: Math.max(need * 3, 6) });
+    const ideas = await askForIdeas(apiKey, { categories: params.categories, clientLocations: params.clientLocations, businessLocations: params.businessLocations, excludedTopics: params.excludedTopics, existingTitles: params.existingTitles, want: Math.max(need + 3, 4) });
     // Los títulos dudosos frente a los temas excluidos los decide la IA (una llamada), igual que en el análisis.
     const doubtful = ideas.map((i) => i.text.trim()).filter((text) => classifyExcludedTopics(text, params.excludedTopics).verdict === "doubt");
     const doubtVerdicts = await judgeDoubtfulExclusions(apiKey, params.excludedTopics, doubtful);
@@ -176,7 +229,7 @@ export async function runComplementShadow(params: {
         categoryId: null,
         categoryName: COMPLEMENT_REPORT_NAME,
         siteDomain: params.siteDomain,
-        mode: "sombra",
+        mode,
         candidates: ideas.length,
         legacyTitles: [],
         deliveredTitles: chosen.map((c) => c.text),
@@ -185,7 +238,9 @@ export async function runComplementShadow(params: {
         details: JSON.parse(JSON.stringify({ modulo: 2, complementario: true, entregadosPorElAnalisis: params.delivered, necesarias: need, propuestas: ideas.slice(0, 20), elegidas: chosen, descartadas: discarded })),
       },
     });
+    return mode === "activo" ? chosen : [];
   } catch (error) {
-    console.warn("[complementario] la sombra falló (no afecta al usuario):", error instanceof Error ? error.message : error);
+    console.warn("[complementario] falló (no afecta al análisis):", error instanceof Error ? error.message : error);
+    return [];
   }
 }
