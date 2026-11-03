@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import type { CSSProperties } from "react";
 import LogoutButton from "@/components/LogoutButton";
 import StopImpersonationButton from "@/components/StopImpersonationButton";
@@ -112,21 +113,21 @@ export default function EcosystemHeader({
           margin-left: 0;
           color: #6b7280;
         }
+        .ecosystem-header .hub-account-frame { display:block; width:100%; border:0; }
         .ecosystem-header .global-account {
           order: 0;
           display: flex;
           align-items: center;
           gap: 16px;
-          flex-shrink: 0;
+          flex-wrap: wrap;
+          max-width: 100%;
           color: #6b7280;
           font-size: 12px;
         }
         .ecosystem-header .global-account > span {
-          display: none;
+          display: inline;
           max-width: 220px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          overflow-wrap: anywhere;
         }
         .ecosystem-header .global-account .quiet-button {
           padding: 8px 12px !important;
@@ -158,6 +159,7 @@ export default function EcosystemHeader({
           .ecosystem-header .global-brand-mark { width: 30px; height: 30px; border-radius: 11px !important; }
         }
       `}</style>
+      <div data-hub-account-context data-user-email={email}/><Script src="/hub-account-context.js?v=20261103" strategy="afterInteractive"/>
       <div
         className="global-topbar-inner"
         style={{
@@ -221,7 +223,7 @@ export default function EcosystemHeader({
             minWidth: 0,
           }}
         >
-          <span title={email} style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#6e6e73", fontSize: 12 }}>
+          <span title={email} style={{ maxWidth: 220, overflowWrap: "anywhere", color: "#6e6e73", fontSize: 12 }}>
             {email}
           </span>
           {actingAdmin && <StopImpersonationButton />}

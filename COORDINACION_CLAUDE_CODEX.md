@@ -1,3 +1,7 @@
+## TENANT-IDENTITY-20261103 · EN CURSO
+
+Correciones HUB · 2026-11-03. Reserva limitada a cabecera privada, identidad visible en móvil y aviso de contexto servido por el Hub. Sin cambios de permisos, sesiones, credenciales, datos ni contenido público. Solo main.
+
 ## BLOG-IA-LONGITUD-SIN-TOLERANCIA-20261103 — Claude — publicado
 
 - Segunda prueba con Lorena tras la expansión: 926 palabras de cuerpo (antes 678) — mejoró pero pasó el filtro por la tolerancia del 90 %. Para BLOG IA el mínimo ya no tiene tolerancia (`MIN_ACCEPT_RATIO` = 1); sigue siendo solo con política de longitud. 7 pruebas PASS. Siguiente: desplegar `worker.yml` y tercera prueba.
