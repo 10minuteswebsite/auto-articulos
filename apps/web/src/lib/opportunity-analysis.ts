@@ -923,6 +923,8 @@ export async function analyzeSeoOpportunities(input: {
     modelProposedTitles: 0,
     rejectedInvalidCategory: 0,
     rejectedEmptyOrDuplicateExact: 0,
+    rejectedDuplicateOfExisting: 0,
+    rejectedDuplicateOfThisRun: 0,
     rejectedNoQuotedEvidence: 0,
     rejectedGeoComboNotUsed: 0,
     rejectedExcludedTopic: 0,
@@ -936,6 +938,7 @@ export async function analyzeSeoOpportunities(input: {
   };
 
   const seen = new Set(input.existingTitles.map(normalizeTitle));
+  const existingAtStart = new Set(seen);
   // Bug real encontrado el 11/8/2026 (cuenta de Lorena Álvarez, dejó de
   // recibir oportunidades nuevas): antes, apenas un lote proponía ALGO para
   // una categoría (aunque fuera poco), esa categoría quedaba "cerrada" para
@@ -1305,6 +1308,8 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         const normalized = normalizeTitle(text);
         if (seen.has(normalized)) {
           debugCounters.rejectedEmptyOrDuplicateExact++;
+          if (existingAtStart.has(normalized)) debugCounters.rejectedDuplicateOfExisting++;
+          else debugCounters.rejectedDuplicateOfThisRun++;
           continue;
         }
         const rationale =
