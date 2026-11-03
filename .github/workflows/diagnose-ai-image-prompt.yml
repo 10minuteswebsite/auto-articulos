@@ -27,6 +27,10 @@ on:
         description: "¿Foto de la persona en la pieza? no | si | ambos"
         required: false
         default: "no"
+      logo:
+        description: "Logo a forzar en la prueba: auto | 1 | 2"
+        required: false
+        default: "auto"
 
 jobs:
   comparar:
@@ -46,6 +50,7 @@ jobs:
       DIAG_FORMATS: ${{ github.event.inputs.formats }}
       DIAG_ARMS: ${{ github.event.inputs.arms }}
       DIAG_PERSON: ${{ github.event.inputs.person }}
+      DIAG_LOGO: ${{ github.event.inputs.logo }}
     steps:
       - uses: actions/checkout@v4
 

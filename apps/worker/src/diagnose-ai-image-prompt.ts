@@ -13,7 +13,7 @@ import { getArticleOpenGraphImage } from "./socialPublish";
 //
 // Variables: DIAG_USER_EMAIL (obligatoria), DIAG_ARTICLE_URL (opcional),
 // DIAG_FORMATS (story,reel-image,post,pinterest), DIAG_ARMS (actual,nuevo),
-// DIAG_PERSON (no | si | ambos). Directores: actual (panel), hibrido (panel + guía), nuevo (v2 corto).
+// DIAG_PERSON (no | si | ambos), DIAG_LOGO (auto | 1 | 2). Directores: actual (panel), hibrido (panel + guía), nuevo (v2 corto).
 
 const VALID_FORMATS: AiImageFormat[] = ["story", "reel-image", "post", "facebook-story", "pinterest"];
 
@@ -26,6 +26,7 @@ async function main() {
     .filter((f): f is AiImageFormat => (VALID_FORMATS as string[]).includes(f));
   const arms = (process.env.DIAG_ARMS || "actual,nuevo").split(",").map((a) => a.trim());
   const personMode = (process.env.DIAG_PERSON || "no").trim();
+  const logoMode = (process.env.DIAG_LOGO || "auto").trim();
   const persons = personMode === "ambos" ? [false, true] : [personMode === "si"];
 
   const user = await prisma.user.findUnique({
@@ -40,6 +41,9 @@ async function main() {
     },
   });
   if (!user) throw new Error(`No existe el usuario ${email}.`);
+  const logo1 = user.businessLogoUrl;
+  const logo2 = user.businessLogoUrl2;
+  const selectedLogos = logoMode === "1" ? { logo1, logo2: null } : logoMode === "2" ? { logo1: null, logo2 } : { logo1, logo2 };
 
   const articleUrl = (process.env.DIAG_ARTICLE_URL || "").trim();
   const opportunity = await prisma.socialOpportunity.findFirst({
@@ -83,8 +87,8 @@ async function main() {
           articleSummary: title?.summary || opportunity.articleTitle,
           ogImageUrl,
           format,
-          businessLogoUrl: user.businessLogoUrl,
-          businessLogoUrl2: user.businessLogoUrl2,
+          businessLogoUrl: selectedLogos.logo1,
+          businessLogoUrl2: selectedLogos.logo2,
           profilePhotoUrl: user.profilePhotoUrl,
           profilePhotoUrl2: user.profilePhotoUrl2,
           profilePhotoUrl3: user.profilePhotoUrl3,
