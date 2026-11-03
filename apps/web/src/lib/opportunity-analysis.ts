@@ -891,8 +891,15 @@ export async function analyzeSeoOpportunities(input: {
       position: row.position,
     }));
   const allCurrentRows = [...input.currentRows, ...externalRows];
+  // Las consultas que ya SON el título de un artículo publicado (o del sitio) no aportan oportunidad nueva: la IA las vuelve a
+  // proponer y se descartan como repetidas, y como solo se procesan MAX_BATCHES lotes, ocupan el lugar de consultas aún sin cubrir
+  // (medido el 02/11/2026: 24 de 39 propuestas repetidas en una cuenta real con 2640 filas). Se sacan de los lotes; si no queda
+  // ninguna, se usan todas como antes.
+  const existingTitleKeys = new Set(input.existingTitles.map(normalizeTitle));
+  const uncoveredRows = allCurrentRows.filter((row) => !existingTitleKeys.has(normalizeTitle((row.keys[0] ?? "").replace(/^\[[^\]]+\]\s*/, ""))));
+  const rowsForBatches = uncoveredRows.length > 0 ? uncoveredRows : allCurrentRows;
   const batches = buildPerformanceBatches(
-    allCurrentRows,
+    rowsForBatches,
     input.previousRows,
     BATCH_SIZE,
   );
@@ -1254,9 +1261,9 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
   }
 
   if (allResult.length === 0) {
-    return { status: "no_new", diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length } };
+    return { status: "no_new", diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length, filasYaCubiertas: allCurrentRows.length - uncoveredRows.length } };
   }
-  return { status: "ok", groups: allResult, diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length } };
+  return { status: "ok", groups: allResult, diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length, filasYaCubiertas: allCurrentRows.length - uncoveredRows.length } };
 
   // Procesa un array crudo de "opportunities" devuelto por OpenAI (del lote
   // principal o del paso dedicado de geolocalizacion) con exactamente las
