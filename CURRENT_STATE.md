@@ -1,3 +1,11 @@
+## REDES-BLOG-DESACTIVADO-20261103 — publicado
+
+Redes no ofrece ni publica artículos de un blog de BLOG IA que no esté activo. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
+
+## BLOG-IA-SOLO-BLOG-VALIDACION-20261103 — publicado
+
+La validación previa y el estado de configuración aceptan el destino BLOG IA (sin credenciales de 10minutesWebsite). Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
+
 ## INES-IDIOMA-20261103 — publicado en código; Worker sin desplegar; NO visto con Inés
 
 Guardia de idioma en títulos de Publicar, artículos con estilo propio, reformulación de títulos, FAQ y flujo del sitio. Módulo `packages/shared/src/language-guard.ts`. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md). El Historial de Inés NO se pudo leer en producción desde esta sesión (la sesión del navegador era de otra cuenta, sin permiso de administrador).

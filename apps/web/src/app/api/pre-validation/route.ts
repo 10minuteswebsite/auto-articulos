@@ -1,3 +1,4 @@
+import { publishingReadiness } from "@/lib/publishing-readiness";
 import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
@@ -34,7 +35,9 @@ export async function GET() {
     }),
   ]);
 
-  const credentialsConfigured = Boolean(credential);
+  // Con destino BLOG IA no hay credencial de 10minutesWebsite: el destino listo (blog activo, dirección y HTTPS) cuenta como configurado.
+  const publishing = await publishingReadiness(prisma, userId, Boolean(credential));
+  const credentialsConfigured = publishing.ready;
   const regularCategoriesCount = categories.filter((c) => !c.isSequence).length;
   const sequenceCategoriesCount = categories.filter((c) => c.isSequence).length;
   const hasCategories = categories.length > 0;

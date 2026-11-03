@@ -74,3 +74,26 @@ export async function inspectArticlePage(url: string, fetchImpl: FetchLike = fet
     clearTimeout(timeout);
   }
 }
+
+/** Estado del blog de BLOG IA de un usuario (lo que decide si sus artículos tienen dónde verse). */
+export interface BlogAvailability { hostname: string | null; status: string; dnsVerified: boolean; tlsReady: boolean }
+
+/**
+ * ¿Es la dirección de un artículo publicado en un blog de BLOG IA que hoy NO está disponible (desactivado, suspendido o sin
+ * dominio listo)? Regla de Milton (3/11/2026): sin blog activo no hay dónde publicar esos artículos; Redes no debe ofrecerlos
+ * ni publicarlos aunque el historial siga en Artículos. Solo mira la dirección del propio blog del usuario: los artículos de
+ * 10minutesWebsite u otros sitios no se tocan.
+ */
+export function belongsToUnavailableBlog(articleUrl: string | null | undefined, blog: BlogAvailability | null | undefined): boolean {
+  if (!articleUrl || !blog?.hostname) return false;
+  let host: string;
+  try {
+    host = new URL(articleUrl).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (host !== blog.hostname.toLowerCase()) return false;
+  return !(blog.status === "active" && blog.dnsVerified && blog.tlsReady);
+}
+
+export const UNAVAILABLE_BLOG_MESSAGE = "Tu blog no está activo, así que no hay dónde ver este artículo. Reactiva tu BLOG IA para difundirlo.";

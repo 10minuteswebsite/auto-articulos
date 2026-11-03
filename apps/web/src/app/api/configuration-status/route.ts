@@ -1,3 +1,4 @@
+import { publishingReadiness } from "@/lib/publishing-readiness";
 import { isPlatformDomainConfirmed } from "@/lib/platform-domain-confirmation";
 import { NextResponse } from "next/server";
 import { BING_RECONNECT_MESSAGE, integrationNeedsBingReconnect } from "@/lib/bing-client-change";
@@ -158,18 +159,30 @@ export async function GET() {
   const hasLegacyGoogleAnalytics = Boolean(googleAnalyticsIntegration?.siteUrl && googleAnalyticsIntegration.encryptedRefreshToken);
   const hasActiveComposioAnalytics = Boolean(analyticsComposioConnection?.propertyId || analyticsComposioConnection?.siteUrl);
 
+  const publishing = await publishingReadiness(prisma, userId, Boolean(credential));
   const checks: ConfigurationCheck[] = [
     // ━━━ MÍNIMO PARA PUBLICAR ━━━
-    {
-      id: "credentials",
-      label: `Credenciales de ${productName}`,
-      configured: Boolean(credential),
-      required: true,
-      section: "platform",
-      description: `Tu usuario y contraseña de ${productName} para publicar artículos automáticamente.`,
-      actionUrl: "/dashboard/configuracion?tab=platform#credentials",
-      actionLabel: "Configurar credenciales",
-    },
+    publishing.destination === "blog-ia"
+      ? {
+          id: "credentials",
+          label: "Destino de publicación: tu BLOG IA",
+          configured: publishing.ready,
+          required: true,
+          section: "platform",
+          description: publishing.hostname ? `Tus artículos se publican en tu blog (${publishing.hostname}). No necesitas conectar ninguna otra cuenta.` : "Tus artículos se publican en tu blog.",
+          actionUrl: "https://hub.lasolucionweb.net/api/product-launch?app=blog-ia",
+          actionLabel: "Abrir BLOG IA",
+        }
+      : {
+          id: "credentials",
+          label: `Credenciales de ${productName}`,
+          configured: Boolean(credential),
+          required: true,
+          section: "platform",
+          description: `Tu usuario y contraseña de ${productName} para publicar artículos automáticamente.`,
+          actionUrl: "/dashboard/configuracion?tab=platform#credentials",
+          actionLabel: "Configurar credenciales",
+        },
     {
       id: "categories",
       label: "Categorías sincronizadas",

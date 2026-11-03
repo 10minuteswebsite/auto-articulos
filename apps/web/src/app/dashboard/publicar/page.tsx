@@ -27,6 +27,8 @@ export default function PublicarPage() {
   // a la IA del sistema (CREACION DE PUBLICACIONES PROPIAS).
   const [titlesMode, setTitlesMode] = useState<"manual" | "ai">("manual");
   const [credentialsConfigured, setCredentialsConfigured] = useState(false);
+  // Destino BLOG IA: dirección del blog ("" si no se conoce); null = publica en 10minutesWebsite.
+  const [blogDestination, setBlogDestination] = useState<string | null>(null);
   const [hasImageCredits, setHasImageCredits] = useState(true);
   const [showImageCreditsModal, setShowImageCreditsModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -145,6 +147,7 @@ export default function PublicarPage() {
     if (res.ok) {
       const data = await res.json();
       setCredentialsConfigured(Boolean(data.publishingReady ?? data.configured));
+      setBlogDestination(data.publishingDestination === "blog-ia" ? (data.blogHostname ?? "") : null);
     }
   }, []);
 
@@ -279,6 +282,7 @@ export default function PublicarPage() {
       <PreValidationGuard
         type="publicar"
         credentialsConfigured={credentialsConfigured}
+        blogDestination={blogDestination}
         hasCategories={categories.length > 0}
         categoriesCount={categories.length}
         hasLanguage={Boolean(contentLanguage && contentLanguage.trim().length > 0)}

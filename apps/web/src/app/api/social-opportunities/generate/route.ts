@@ -19,7 +19,7 @@ import { getBingSignals } from "@/lib/bing-signals";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
 import { describeSocialContentLanguage } from "@/lib/social-language";
-import { inspectArticlePage } from "@/lib/social-article-url";
+import { belongsToUnavailableBlog, inspectArticlePage } from "@/lib/social-article-url";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
@@ -359,11 +359,14 @@ async function selectTrendingArticles(userId: string, integrations: string[] = [
     // opcional.
   }
 
-  const articles = await prisma.title.findMany({
+  const publishedArticles = await prisma.title.findMany({
     where: { run: { userId }, status: "success", articleUrl: { not: null } },
     orderBy: { processedAt: "desc" },
     select: { id: true, finalTitle: true, text: true, summary: true, articleUrl: true, processedAt: true },
   });
+  // Sin blog activo no hay dónde ver los artículos publicados en BLOG IA: no se ofrecen (ver belongsToUnavailableBlog).
+  const userBlog = await prisma.blogIaBlog.findUnique({ where: { userId }, select: { hostname: true, status: true, dnsVerified: true, tlsReady: true } });
+  const articles = publishedArticles.filter((article) => !belongsToUnavailableBlog(article.articleUrl, userBlog));
 
   // Si Bing está conectado pero Search Console no aporta consultas, sus
   // señales siguen siendo útiles: se comparan directamente con el contenido

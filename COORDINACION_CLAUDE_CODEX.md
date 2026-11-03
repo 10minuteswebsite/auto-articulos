@@ -5,6 +5,21 @@
 - El escaneo destapó dos falsos positivos del detector (encabezado «Conclusion» y una línea corta en inglés tomada por italiano); corregidos y con pruebas (shared 7/7, worker 38/38, web 24/24).
 - Sigue pendiente lanzar `worker.yml`.
 
+## REDES-BLOG-DESACTIVADO-20261103 — Claude — publicado
+
+- Regla de Milton: sin blog activo no hay dónde publicar los artículos de BLOG IA; Redes no debe ofrecerlos ni publicarlos aunque el historial siga en Artículos.
+- Antes: un blog desactivado responde 503 y Redes lo trataba como «no sé» (`unknown`) y lo seguía ofreciendo. Ahora la decisión sale de la base (estado del blog), no de HTTP.
+- Cambios: `belongsToUnavailableBlog` en `lib/social-article-url.ts`; `/api/social-opportunities/generate` no incluye artículos de un blog no disponible; `/api/social-opportunities/publish` devuelve 409 (`blog_unavailable`) con el mensaje «Tu blog no está activo… Reactiva tu BLOG IA para difundirlo».
+- «No disponible» = estado distinto de `active`, o sin dominio/HTTPS verificados. Solo afecta artículos cuya dirección es la del propio blog del usuario; 10minutesWebsite y otros sitios no cambian.
+- Pruebas: `social-blog-unavailable.test.ts` (4); web 407/407; tsc limpio. Sin migraciones. NO verificado en pantalla (falta una cuenta con blog desactivado).
+
+## BLOG-IA-SOLO-BLOG-VALIDACION-20261103 — Claude — publicado
+
+- Cliente «solo BLOG IA» (sin sitio 10minutesWebsite) ya no se atasca en la validación previa: `/api/pre-validation` y `/api/configuration-status` toman el destino BLOG listo como «configurado» (`publishingReadiness`), y `PreValidationGuard` dice «Destino: tu BLOG IA», «Abrir BLOG IA» y «Traer categorías» en vez de pedir conectar 10minutesWebsite. Con destino 10MWS todo igual (prueba incluida).
+- Revisado y descartado como bloqueo: `hasImageCredits` (por defecto verdadero; solo lo apaga una cuenta 10MWS) y el idioma de Publicar (lista fija).
+- Pruebas: `prevalidation-blog.test.ts` (4); web 403/403; tsc limpio.
+- PENDIENTE de verificar en pantalla con una sesión de destino BLOG; sin cambios para 10MWS/MCP; BLOG IA sigue oculto a clientes (sin cambios de manual).
+
 ## INES-IDIOMA-20261103 — Claude — publicado en código; Worker SIN desplegar
 
 - Pedido de Milton: Inés pide artículos en un idioma y salen títulos y texto interno en español. Punto cero: NO comprobado en producción (el navegador estaba con la sesión de otra cuenta; no se entró a la de Inés). Causas halladas en el código: (1) nada verificaba el idioma del resultado, solo se pedía en el prompt; (2) el prompt de estilo del usuario, escrito en español, se mandaba sin una orden final de traducir sus encabezados; (3) la regla de fuentes decía literalmente «Fuentes»; (4) Publicar generaba títulos con reglas en español y sin filtrar el idioma de salida; (5) en el flujo del sitio, el tema en español se enviaba tal cual a la IA del sitio, que copia ese idioma.

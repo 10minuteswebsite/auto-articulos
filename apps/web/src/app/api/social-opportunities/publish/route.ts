@@ -1,3 +1,4 @@
+import { belongsToUnavailableBlog, UNAVAILABLE_BLOG_MESSAGE } from "@/lib/social-article-url";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@auto-articulos/db";
 import { resolveSocialDailyLimit, startOfSocialDay } from "@auto-articulos/shared";
@@ -107,6 +108,12 @@ export async function POST(request: NextRequest) {
         { error: "El artículo no tiene URL publicada. Publica el artículo primero." },
         { status: 400 }
       );
+    }
+
+    // Una propuesta creada cuando el blog estaba activo no se publica si hoy el blog no está disponible.
+    const blog = await prisma.blogIaBlog.findUnique({ where: { userId }, select: { hostname: true, status: true, dnsVerified: true, tlsReady: true } });
+    if (belongsToUnavailableBlog(opp.articleUrl, blog)) {
+      return NextResponse.json({ error: UNAVAILABLE_BLOG_MESSAGE, code: "blog_unavailable" }, { status: 409 });
     }
 
     // El cupo diario (Administración → Difusión) limita las PUBLICACIONES por día
