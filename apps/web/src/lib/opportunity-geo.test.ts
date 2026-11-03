@@ -20,3 +20,26 @@ test("sigue exigiendo una ubicación de cliente Y una de negocio", () => {
 test("el nombre completo declarado también vale", () => {
   assert.equal(titleUsesDeclaredGeoCombo("Vivir en La Costa del Sol-España si vengo de Colombia", clientes, negocio), true);
 });
+
+import { classifyExcludedTopics } from "./opportunity-analysis";
+
+const EXCLUIDOS = ["Alquiler vacacional en la Costa del Sol", "Golden visa en España", "Miami", "Punta Cana", "Cartagena"];
+
+test("temas excluidos: palabras sueltas de un tema largo ya no excluyen todo el título", () => {
+  // Antes se rechazaban por contener «costa», «sol» o «España».
+  assert.equal(classifyExcludedTopics("Cómo invertir en propiedades en La Costa del Sol si vivo en Perú", EXCLUIDOS).verdict, "doubt");
+  assert.equal(classifyExcludedTopics("Requisitos para comprar una propiedad en España siendo colombiano", EXCLUIDOS).verdict, "pass");
+  assert.equal(classifyExcludedTopics("Qué documentos necesita un extranjero para comprar casa en Málaga", EXCLUIDOS).verdict, "pass");
+});
+
+test("temas excluidos: lo excluido de verdad se sigue rechazando", () => {
+  assert.equal(classifyExcludedTopics("Alquiler vacacional en la Costa del Sol: guía para propietarios", EXCLUIDOS).verdict, "reject");
+  assert.equal(classifyExcludedTopics("Cómo comprar una propiedad en Miami si vivo en México", EXCLUIDOS).verdict, "reject", "tema de una palabra");
+  assert.equal(classifyExcludedTopics("Todo sobre la Golden visa en España para colombianos", EXCLUIDOS).verdict, "reject");
+});
+
+test("temas excluidos: lo dudoso va a la IA y un solo tema compartido no basta", () => {
+  assert.equal(classifyExcludedTopics("Cómo alquilar un apartamento turístico en La Costa del Sol", EXCLUIDOS).verdict, "doubt", "mismo tema con otras palabras: lo decide la IA");
+  assert.equal(classifyExcludedTopics("Mejores zonas de España para vivir", ["Golden visa en España"]).verdict, "pass");
+  assert.equal(classifyExcludedTopics("Cualquier título", []).verdict, "pass");
+});
