@@ -1,3 +1,7 @@
+## BLOG-IA-QUITAR-CATEGORIA-20261103 — publicado, Worker sin desplegar
+
+Quitar categorías solo si no tienen artículos; el selector de Artículos retira las que ya no existen en el blog. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
+
 ## REDES-BLOG-DESACTIVADO-20261103 — publicado
 
 Redes no ofrece ni publica artículos de un blog de BLOG IA que no esté activo. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
