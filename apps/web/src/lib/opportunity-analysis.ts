@@ -1,3 +1,4 @@
+import { judgeDoubtfulExclusions as judgeDoubtfulExclusionsShared } from "@/lib/opportunity-exclusion";
 import { MIN_TITLES_PROMISE } from "@/lib/opportunity-red-flag";
 import type { GoogleSearchAnalyticsRow } from "@auto-articulos/shared";
 
@@ -1045,31 +1046,8 @@ export async function analyzeSeoOpportunities(input: {
     .map((topic) => topic.trim())
     .filter((topic) => topic.length > 0);
 
-  // Veredicto de la IA para los títulos DUDOSOS (comparten varias palabras con un tema excluido, sin llegar al 75 %). Una sola
-  // llamada por tanda de títulos. Si la IA falla, los dudosos se tratan como excluidos: nunca se publica algo que la cuenta excluyó.
-  async function judgeDoubtfulExclusions(texts: string[]): Promise<Map<string, boolean>> {
-    const verdicts = new Map<string, boolean>();
-    if (texts.length === 0) return verdicts;
-    try {
-      const prompt = `Una cuenta pidio NO publicar articulos sobre estos temas excluidos:
-${JSON.stringify(excludedTopicList)}
-
-Para cada titulo numerado, di si su TEMA PRINCIPAL es uno de los temas excluidos (incluye sinonimos y formulaciones equivalentes: por ejemplo, alquilar un apartamento turistico en una zona es el mismo tema que "alquiler vacacional" en esa zona). NO es excluido un titulo que solo menciona un lugar o una palabra del tema excluido pero trata de otra cosa (por ejemplo, invertir o comprar propiedades en esa zona no es "alquiler vacacional").
-
-TITULOS:
-${JSON.stringify(texts.map((text, index) => ({ n: index, titulo: text })))}
-
-Responde SOLO JSON: {"excluidos":[numeros de los titulos cuyo tema principal SI es excluido]}`;
-      const parsed = await callOpenAiWithRetry(prompt, openAiKey);
-      const flagged = Array.isArray(parsed.excluidos) ? new Set((parsed.excluidos as unknown[]).filter((n): n is number => typeof n === "number")) : null;
-      if (!flagged) throw new Error("respuesta sin lista de excluidos");
-      texts.forEach((text, index) => verdicts.set(text, flagged.has(index)));
-    } catch (error) {
-      console.warn("[oportunidades] no se pudo revisar los temas excluidos dudosos; se tratan como excluidos:", error instanceof Error ? error.message : error);
-      texts.forEach((text) => verdicts.set(text, true));
-    }
-    return verdicts;
-  }
+  // Veredicto de la IA para los títulos DUDOSOS (ver opportunity-exclusion.ts; si la IA falla, se tratan como excluidos).
+  const judgeDoubtfulExclusions = (texts: string[]) => judgeDoubtfulExclusionsShared(openAiKey, excludedTopicList, texts);
 
   // needKey por título, guardado aparte de OpportunityAnalysisGroup (que solo
   // persiste text/rationale en la base) para poder mostrarlo en el prompt de

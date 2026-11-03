@@ -2,6 +2,7 @@ import { prisma } from "@auto-articulos/db";
 import { decryptSecret } from "@auto-articulos/shared";
 import { scoreCandidates, titleKey, type MemoryEntry } from "@/lib/angle-guard-core";
 import { classifyExcludedTopics } from "@/lib/opportunity-analysis";
+import { judgeDoubtfulExclusions } from "@/lib/opportunity-exclusion";
 import { MIN_TITLES_PROMISE } from "@/lib/opportunity-red-flag";
 import { SHADOW_MAX_DAYS, isShadowExpired } from "@/lib/title-guard-mode";
 import { loadGuardMemory } from "@/lib/title-guard-shadow";
@@ -56,7 +57,7 @@ export interface ComplementIdea {
  */
 export function filterComplementIdeas(
   ideas: ComplementIdea[],
-  options: { validCategoryIds: Set<string>; memory: MemoryEntry[]; excludedTopics: string[]; need: number; currentYear?: number },
+  options: { validCategoryIds: Set<string>; memory: MemoryEntry[]; excludedTopics: string[]; need: number; currentYear?: number; doubtVerdicts?: Map<string, boolean> },
 ): { chosen: ComplementIdea[]; discarded: Record<string, number> } {
   const year = options.currentYear ?? new Date().getUTCFullYear();
   const discarded = { categoriaInvalida: 0, repetidaEntreSi: 0, repiteLoExistente: 0, anioViejo: 0, tema_excluido: 0, formato: 0 };
@@ -83,7 +84,9 @@ export function filterComplementIdeas(
       discarded.anioViejo += 1;
       continue;
     }
-    if (classifyExcludedTopics(text, options.excludedTopics).verdict !== "pass") {
+    const exclusion = classifyExcludedTopics(text, options.excludedTopics).verdict;
+    // «reject» siempre se descarta; «doubt» se descarta salvo que la IA haya dicho que NO es el tema excluido.
+    if (exclusion === "reject" || (exclusion === "doubt" && options.doubtVerdicts?.get(text) !== false)) {
       discarded.tema_excluido += 1;
       continue;
     }
@@ -162,7 +165,10 @@ export async function runComplementShadow(params: {
     const started = Date.now();
     const memory = await loadGuardMemory(params.userId, params.siteDomain, "", undefined, true);
     const ideas = await askForIdeas(apiKey, { categories: params.categories, clientLocations: params.clientLocations, businessLocations: params.businessLocations, excludedTopics: params.excludedTopics, existingTitles: params.existingTitles, want: Math.max(need * 3, 6) });
-    const { chosen, discarded } = filterComplementIdeas(ideas, { validCategoryIds: new Set(params.categories.map((c) => c.id)), memory, excludedTopics: params.excludedTopics, need });
+    // Los títulos dudosos frente a los temas excluidos los decide la IA (una llamada), igual que en el análisis.
+    const doubtful = ideas.map((i) => i.text.trim()).filter((text) => classifyExcludedTopics(text, params.excludedTopics).verdict === "doubt");
+    const doubtVerdicts = await judgeDoubtfulExclusions(apiKey, params.excludedTopics, doubtful);
+    const { chosen, discarded } = filterComplementIdeas(ideas, { doubtVerdicts, validCategoryIds: new Set(params.categories.map((c) => c.id)), memory, excludedTopics: params.excludedTopics, need });
     await prisma.titleGuardReport.create({
       data: {
         userId: params.userId,
