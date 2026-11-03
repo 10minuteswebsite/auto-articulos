@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { logDiscardedOpportunities } from "@/lib/title-discard-log";
 import { applyGuardToOpportunities } from "@/lib/opportunity-guard";
+import { MIN_TITLES_PROMISE, recordRedFlag } from "@/lib/opportunity-red-flag";
 import {
   composioQuerySearchAnalytics,
   decryptSecret,
@@ -464,11 +465,14 @@ export async function POST(request: Request) {
         where: { id: userId },
         data: { lastOpportunityAnalysisAt: now },
       });
+      // Bandera roja: el análisis no dejó ni un título (promesa mínima: MIN_TITLES_PROMISE).
+      const banderaSinNuevos = await recordRedFlag(userId, selectedSiteDomain ?? "", 0, analysis.diagnostico).catch(() => null);
       return NextResponse.json({
         groups: await list(userId, selectedSiteDomain),
         lastAnalysisAt: now,
         noNewOpportunities: true,
         diagnostico: analysis.diagnostico,
+        ...(banderaSinNuevos ? { banderaRoja: { mensaje: banderaSinNuevos.usuario } } : {}),
       });
     }
 
@@ -506,9 +510,13 @@ export async function POST(request: Request) {
         data: { lastOpportunityAnalysisAt: now },
       });
     });
+    // Bandera roja: tras la guardia quedaron menos títulos que la promesa mínima. Se registra para el administrador y se avisa con claridad.
+    const totalGuardado = groupsToSave.reduce((n, g) => n + g.titles.length, 0);
+    const banderaPocos = totalGuardado < MIN_TITLES_PROMISE ? await recordRedFlag(userId, selectedSiteDomain ?? "", totalGuardado, diagnostico).catch(() => null) : null;
     return NextResponse.json({
       groups: await list(userId, selectedSiteDomain),
       lastAnalysisAt: now,
+      ...(banderaPocos ? { banderaRoja: { mensaje: banderaPocos.usuario } } : {}),
       ...(staleEvidenceFrom ? { staleEvidenceFrom } : {}),
       // Contadores del análisis (cuántos títulos propuso el modelo y en qué regla se perdió cada uno). Solo números.
       diagnostico: { ...diagnostico, enviadosATrabajo: groupsToSave.reduce((n, g) => n + g.titles.length, 0) },
