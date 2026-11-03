@@ -6,11 +6,12 @@ import {
 import { platformBaseUrl, platformProductNameOrNeutral } from "@auto-articulos/shared";
 import { buildImagePrompt, isImageRelevant } from "../imagePrompt";
 import { generateFaqs, type Faq } from "../faqPrompt";
-import { translateText } from "../translateText";
+import { ensureTitleLanguage, translateText } from "../translateText";
 import {
   normalizePhonePlaceholders,
   replacePhonePlaceholders,
 } from "../phonePlaceholders";
+import { findLanguageProblems, isWrongLanguage } from "@auto-articulos/shared";
 import { resolveContentLanguageOption } from "./contentLanguage";
 import { generateCustomArticle, generateTitleVariant } from "./generateCustomArticle";
 
@@ -1075,7 +1076,13 @@ async function createArticleDraft(
   await onStep(`Idioma del contenido aplicado: ${appliedLanguage}.`);
 
   const ideaTextarea = dialog.locator("textarea").first();
-  await ideaTextarea.fill(title);
+  // Guardia de idioma (caso Inés, 3/11/2026): si la idea llega en otro idioma que el pedido, la IA del sitio tiende a
+  // copiarlo al artículo. Se traduce la idea antes de enviarla.
+  const ideaForSite = await ensureTitleLanguage(title, requestedContentLanguage);
+  if (ideaForSite.translated) {
+    await onStep(`El tema estaba en otro idioma; se tradujo al idioma del artículo: "${ideaForSite.title}".`);
+  }
+  await ideaTextarea.fill(ideaForSite.title);
 
   await dialog.getByRole("button", { name: TEXT_GENERAR }).click();
   await onStep(
@@ -1157,6 +1164,21 @@ async function createArticleDraft(
     .nth(1)
     .inputValue()
     .catch(() => "");
+
+  // Guardia de idioma: el sitio a veces entrega el artículo (o partes) en otro idioma que el pedido. Nunca se
+  // publica un artículo entero en otro idioma, ni con varios bloques sueltos; un solo bloque suelto se avisa en el log.
+  {
+    const bodyProblems = findLanguageProblems({ html: contentHtml }, requestedContentLanguage);
+    const wholeWrong = isWrongLanguage(contentHtml.replace(/<[^>]+>/g, " "), requestedContentLanguage);
+    if (wholeWrong || bodyProblems.length >= 2) {
+      throw new Error(
+        `No se publicó: el sitio generó el artículo en un idioma distinto a "${requestedContentLanguage}" (ej.: "${bodyProblems[0]?.sample.slice(0, 80) ?? ""}"). Se detiene para no publicar el idioma equivocado; vuelve a intentarlo.`,
+      );
+    }
+    if (bodyProblems.length === 1) {
+      await onStep(`⚠️ Un fragmento del artículo parece estar en otro idioma: "${bodyProblems[0].sample.slice(0, 80)}".`);
+    }
+  }
 
   if (contentHtml.includes("PHONE_NUMBER")) {
     if (userPhone) {
@@ -1398,9 +1420,18 @@ async function createArticleDraft(
   // remota que usa el sitio (no una búsqueda aproximada, que daría falsos
   // positivos con títulos parecidos pero distintos) ahora, antes de la
   // imagen, para mutar el título desde el inicio si ya existe.
+  // Guardia de idioma: el título que quedó en el formulario debe estar en el idioma pedido.
+  let languageSafeTitle = finalTitle;
+  const titleFix = await ensureTitleLanguage(finalTitle, requestedContentLanguage);
+  if (titleFix.translated) {
+    languageSafeTitle = titleFix.title;
+    await page.locator("#titlees, #title").first().fill(languageSafeTitle.slice(0, 200)).catch(() => {});
+    await onStep(`El título estaba en otro idioma; se tradujo: "${languageSafeTitle}".`);
+  }
+
   const resolvedTitle = await resolveDuplicateTitleEarly(
     page,
-    finalTitle,
+    languageSafeTitle,
     requestedContentLanguage,
     onStep,
   );

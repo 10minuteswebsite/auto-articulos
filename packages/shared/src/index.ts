@@ -34,3 +34,4 @@ export * from "./published-title";
 export * from "./social-limits";
 export * from "./social-day";
 export * from "./site-titles";
+export * from "./language-guard";

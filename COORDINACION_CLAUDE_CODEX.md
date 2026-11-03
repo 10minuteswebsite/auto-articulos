@@ -1,3 +1,12 @@
+## INES-IDIOMA-20261103 — Claude — publicado en código; Worker SIN desplegar
+
+- Pedido de Milton: Inés pide artículos en un idioma y salen títulos y texto interno en español. Punto cero: NO comprobado en producción (el navegador estaba con la sesión de otra cuenta; no se entró a la de Inés). Causas halladas en el código: (1) nada verificaba el idioma del resultado, solo se pedía en el prompt; (2) el prompt de estilo del usuario, escrito en español, se mandaba sin una orden final de traducir sus encabezados; (3) la regla de fuentes decía literalmente «Fuentes»; (4) Publicar generaba títulos con reglas en español y sin filtrar el idioma de salida; (5) en el flujo del sitio, el tema en español se enviaba tal cual a la IA del sitio, que copia ese idioma.
+- Cambios: `language-guard.ts` (detección sin IA, conservadora: solo marca idioma claro y distinto; además detecta bloques sueltos y encabezados heredados como «Fuentes»); `generateCustomArticle.ts` (orden final de idioma sobre el prompt del usuario, regla de fuentes en el idioma pedido, borrador en otro idioma se reescribe hasta 2 veces más y si no sale NO se publica); `generateTitleVariant` y `faqPrompt.ts` (verifican y reintentan; el FAQ descarta lo que siga mal); `10minutesWebsite.ts` + `translateText.ts` (`ensureTitleLanguage`: traduce el tema y el título si están en otro idioma; el artículo del sitio en otro idioma, o con 2+ bloques sueltos, no se publica); web `title-generation*.ts` (regla IDIOMA OBLIGATORIA, nombre de idioma por código base como `en_VI`, y filtro `idioma_incorrecto` sobre los títulos ofrecidos).
+- Costo: llamadas extra a OpenAI solo cuando se detecta el problema.
+- Pruebas: shared 6/6, web title-generation 24/24, worker 110/111 (el único rojo, `paidApiGuard`, ya fallaba en `main` por 5 archivos sin registrar en CUIDADO_DE_TOKENS.md). tsc limpio salvo `publishedGuard` (cliente Prisma sin generar, ajeno).
+- PENDIENTE: lanzar `worker.yml`; mirar el Historial de Inés con administrador y confirmar que los artículos nuevos salen en su idioma; los ya publicados en español NO se corrigen (no se tocaron datos).
+- Manual de clientes: sin cambios (no cambia ninguna pantalla ni flujo visible).
+
 ## BLOG-IA-DESTINO-VISIBLE-20261103 — Claude — publicado
 
 - Con destino BLOG IA, Publicar muestra «Estás publicando en tu BLOG IA: <dirección>. Todo lo que publiques aquí va a ese blog, no a tu sitio de 10minutesWebsite» y el camino de vuelta «Volver a publicar en mi sitio 10minutesWebsite» (con confirmación). Con destino 10MWS o MCP no se muestra nada.

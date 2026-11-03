@@ -1,3 +1,6 @@
+import { isWrongLanguage } from "@auto-articulos/shared";
+import { describeContentLanguage } from "./automation/contentLanguage";
+
 // Traduce el texto propio del usuario (User.articleSignature) al idioma en que
 // se está escribiendo el artículo. Pedido explícito del usuario (7/8/2026,
 // probando la cuenta de Svetlana Botnarciuc): el artículo salía completo en
@@ -83,5 +86,46 @@ export async function translateText(
     return translated;
   } catch {
     return text;
+  }
+}
+
+/**
+ * Guardia de idioma del título (caso Inés, 3/11/2026): si el título que entra
+ * (escrito por la persona, por la IA de Publicar o por un asistente) está
+ * claramente en otro idioma que el pedido, se traduce antes de usarlo, para
+ * que la IA del sitio no copie ese idioma al artículo. Si ya está bien, no hay
+ * llamada. Nunca bloquea: si la traducción falla, devuelve el título original.
+ */
+export async function ensureTitleLanguage(
+  title: string,
+  languageCode: string | null | undefined,
+): Promise<{ title: string; translated: boolean }> {
+  if (!languageCode || !title.trim() || !OPENAI_API_KEY) return { title, translated: false };
+  if (!isWrongLanguage(title, languageCode)) return { title, translated: false };
+
+  const target = describeContentLanguage(languageCode);
+  try {
+    const res = await fetch(OPENAI_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${OPENAI_API_KEY}` },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: `Translate this article title into ${target}. Keep proper names and brands unchanged, keep it a natural headline of at most 200 characters, and reply ONLY with the translated title, no quotes or comments.\n\n${title.trim()}`,
+          },
+        ],
+        temperature: 0.2,
+        max_tokens: 200,
+      }),
+    });
+    if (!res.ok) return { title, translated: false };
+    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const translated = (data.choices?.[0]?.message?.content ?? "").trim().replace(/^["'“”]+|["'“”]+$/g, "");
+    if (!translated || isWrongLanguage(translated, languageCode)) return { title, translated: false };
+    return { title: translated.slice(0, 200), translated: true };
+  } catch {
+    return { title, translated: false };
   }
 }

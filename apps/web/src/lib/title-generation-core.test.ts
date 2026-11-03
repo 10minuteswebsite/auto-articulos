@@ -242,3 +242,33 @@ test("pickAvoidForPrompt prioriza la misma categoría, respeta el límite y no r
   assert.deepEqual(pickAvoidForPrompt(items, 10), ["Misma cat 1", "Misma cat 2", "Otra cat 1", "Otra cat 2"]);
   assert.deepEqual(pickAvoidForPrompt([], 5), []);
 });
+
+test("selectValidTitles descarta títulos en español cuando se pidió inglés", () => {
+  const { titles, rejected } = selectValidTitles(
+    [
+      "Guía completa para comprar una propiedad en la Costa del Sol",
+      "Complete guide to buying a property on the Costa del Sol",
+    ],
+    new Set(),
+    9,
+    "en_VI",
+  );
+  assert.deepEqual(titles, ["Complete guide to buying a property on the Costa del Sol"]);
+  assert.equal(rejected[0].reason, "idioma_incorrecto");
+});
+
+test("selectValidTitles no filtra por idioma si no se indica idioma", () => {
+  const { titles } = selectValidTitles(["Guía completa para comprar una propiedad en la Costa del Sol"], new Set());
+  assert.equal(titles.length, 1);
+});
+
+test("buildMessages exige el idioma aunque los datos estén en otro", () => {
+  const { system, user } = buildMessages("Prompt {{tema}}", {
+    categoryName: "Real Estate",
+    languageLabel: "English",
+    inputs: { clienteTipo: "compradores", tema: "invertir en la Costa del Sol", deseoCliente: "rentabilidad", ubicacionClientes: "España", ubicacionNegocio: "Málaga" },
+    titlesToAvoid: [],
+  });
+  assert.match(system, /IDIOMA OBLIGATORIO: cada título debe estar escrito ÍNTEGRAMENTE en English/);
+  assert.match(user, /deben estar en English/);
+});

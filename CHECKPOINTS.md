@@ -1,3 +1,7 @@
+## Checkpoint — INES-IDIOMA-20261103 — 2026-11-03
+
+- Código en `main` (web por Vercel). El Worker de Artículos NO está desplegado con este cambio: hasta lanzar `worker.yml`, los artículos y FAQ siguen como antes. Falta mirar el Historial de Inés con sesión de administrador.
+
 ## Checkpoint — BLOG-IA-DESTINO-VISIBLE-20261103 — 2026-11-03
 
 - Publicado; falta verlo con una sesión de destino BLOG (Lorena).
