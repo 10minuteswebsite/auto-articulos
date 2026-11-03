@@ -1,3 +1,10 @@
+## INES-IDIOMA-20261103 (parte 2) — Claude — evidencia en producción
+
+- Con «Acceder como» Inés (info@inesgarcia-arcaya.com, idioma `en_VI`) se leyó su Historial (solo lectura, nada publicado): los 37 títulos publicados están en inglés. Lo que estaba en español era el TÍTULO PEDIDO (`Title.text`) de 10 artículos del 22–30/10 («Cómo comprar un condominio en Coral Gables si vivo en Weston»…), que la IA del sitio tradujo al publicar. Esos títulos nacen del generador de Publicar con idioma en español: lo cubre el filtro `idioma_incorrecto` y la regla IDIOMA OBLIGATORIO (parte 1). Desde el 30/10 20:45 los pedidos ya vienen en inglés.
+- Se escanearon los 36 artículos publicados con el detector: el texto generado está en inglés. Los únicos bloques en español (artículos 4, 8, 33) son del widget de «artículos relacionados» de su sitio (posts antiguos de 2025 en español, `user-buller-seller-posts`), NO generados por este sistema; no se tocan.
+- El escaneo destapó dos falsos positivos del detector (encabezado «Conclusion» y una línea corta en inglés tomada por italiano); corregidos y con pruebas (shared 7/7, worker 38/38, web 24/24).
+- Sigue pendiente lanzar `worker.yml`.
+
 ## INES-IDIOMA-20261103 — Claude — publicado en código; Worker SIN desplegar
 
 - Pedido de Milton: Inés pide artículos en un idioma y salen títulos y texto interno en español. Punto cero: NO comprobado en producción (el navegador estaba con la sesión de otra cuenta; no se entró a la de Inés). Causas halladas en el código: (1) nada verificaba el idioma del resultado, solo se pedía en el prompt; (2) el prompt de estilo del usuario, escrito en español, se mandaba sin una orden final de traducir sus encabezados; (3) la regla de fuentes decía literalmente «Fuentes»; (4) Publicar generaba títulos con reglas en español y sin filtrar el idioma de salida; (5) en el flujo del sitio, el tema en español se enviaba tal cual a la IA del sitio, que copia ese idioma.
