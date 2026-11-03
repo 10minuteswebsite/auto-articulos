@@ -430,3 +430,10 @@ publicación; si no hay sitemap, no se llena y nada se bloquea (peor caso:
 algún título repetido). Causa raíz de la carga hacia 10MWS: no era el análisis
 sino la verificación posterior al guardado (listado cada 1,5 s). Regla: toda
 lectura nueva de estas tablas debe tolerar fallo y no bloquear publicaciones.
+## Decisión durable — logos de Redes son assets intocables — 2026-11-03
+
+Un logo debe conservar píxeles, proporción, transparencia y elementos blancos.
+La IA puede recibir estilo, pero nunca el logo para redibujarlo. La imagen
+final compone el asset real por código. Los logos se reducen solo si exceden
+1600×800 y se guardan en PNG lossless.
+

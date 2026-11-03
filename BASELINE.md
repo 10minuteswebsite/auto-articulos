@@ -261,3 +261,12 @@ Se conservarán primero los callbacks canónicos `.com` ya usados. Solo se tocar
   no un error de parseo JSON.
 - Implementado en `ee4066d8`; E2E autenticado pendiente.
 
+## LOGO-INTEGRITY-20261103 · en implementación
+
+Punto cero: producción mostraba logos forzados a 500×250; el generador borraba
+casi-blancos y algunos proveedores dejaban que la IA redibujara la marca. Las
+publicaciones citadas muestran el logo de MY REALTY pequeño y rasterizado.
+Corrección preparada: PNG lossless, proporción/alfa conservados, sin borrado
+heurístico de blancos y composición determinista posterior para todos los
+proveedores. Falta publicar y verificar en producción.
+

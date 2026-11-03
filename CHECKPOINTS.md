@@ -754,3 +754,11 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 
 - Revisión contra `main` del 3/11: espera progresiva y tablas `SiteArticleTitle`/`SiteTitleSeed` siguen vigentes y las usa la Guardia de ángulos; sin duplicados ni reemplazos. Sin cambios de código.
 - Abierto, no urgente: E2E con cuenta con sitemap, medir cargas del listado por publicación y tope de sesiones contra 10MWS. Rama remota `claude/10mws-article-search-optimization-abeb43` retirada (ya fusionada).
+## LOGO-INTEGRITY-20261103
+
+- [x] Punto cero productivo observado y publicaciones citadas revisadas.
+- [x] Causa raíz confirmada en upload y generador.
+- [x] Corrección local y prueba de integridad escrita.
+- [ ] Dependencias, pruebas, commit/push y deployment productivo.
+- [ ] Verificación final con logo real de Rosa Bello.
+

@@ -13382,3 +13382,11 @@ ARCHIVADA. Responsable: Claude.
 ## TITULOS-DEL-SITIO-EN-SUPABASE-20261029 — ARCHIVO FINAL (2026-11-03)
 
 - Verificado contra `main`: el trabajo sigue vigente y es base de la Guardia de ángulos. Sin código nuevo. Rama fusionada retirada. Responsable: Claude. Sin reservas abiertas.
+## LOGO-INTEGRITY-20261103
+
+Codex toma el caso de Rosa Bello. No se crean ramas ni worktrees nuevos. La
+verdad funcional será producción; el registro durable queda en `main`. El
+estándar `Harness-Mario` devolvió 404 y `IA_JOURNEY.md` no existe en este
+checkout; se conserva el protocolo equivalente ya documentado: punto cero,
+cambio mínimo, pruebas, publicación, verificación y memoria.
+

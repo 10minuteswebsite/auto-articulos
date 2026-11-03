@@ -316,33 +316,20 @@ export async function fetchImageAsPng(url: string): Promise<Buffer | null> {
 }
 
 /**
- * Muchos logos se suben con fondo blanco/casi blanco sólido en vez de
- * transparente de verdad. Vuelve transparente cualquier píxel casi blanco
- * (umbral alto: el logo en sí casi nunca usa blanco puro extensivamente).
+ * No se altera el logo. El blanco puede ser parte esencial de la marca y
+ * no tenemos una forma segura de distinguirlo de un fondo blanco. La
+ * transparencia debe venir del asset original.
  */
-export async function removeNearWhiteBackground(png: Buffer, threshold = 245): Promise<Buffer> {
-  const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const { width, height, channels } = info;
-  for (let i = 0; i < data.length; i += channels) {
-    if (data[i] >= threshold && data[i + 1] >= threshold && data[i + 2] >= threshold) {
-      data[i + 3] = 0;
-    }
-  }
-  return sharp(data, { raw: { width, height, channels } }).png().toBuffer();
-}
-
-/**
- * Pega el logo REAL sobre la imagen ya generada, con código determinístico
+/** Pega el logo REAL sobre la imagen ya generada, con código determinístico
  * — nunca se le pide a la IA que lo dibuje. Probado en vivo el 20/8/2026:
  * pedirle al modelo que incorpore el logo como imagen de referencia lo
  * cortaba/deformaba de forma repetida pese a instrucciones explícitas. Esto
  * garantiza matemáticamente que nunca se corte, deforme ni rediseñe.
  */
 export async function compositeLogo(base: Buffer, width: number, height: number, logoPng: Buffer): Promise<Buffer> {
-  const logoTransparent = await removeNearWhiteBackground(logoPng);
   const padding = Math.round(width * 0.06);
   const logoMaxWidth = Math.round(width * 0.34);
-  const logoResized = await sharp(logoTransparent)
+  const logoResized = await sharp(logoPng)
     .resize({ width: logoMaxWidth, height: Math.round(height * 0.1), fit: "inside" })
     .toBuffer();
   const meta = await sharp(logoResized).metadata();
@@ -622,7 +609,7 @@ export async function generateAiSocialImage(params: {
     ogPng,
     buildAssetBriefing({
       // En el camino OpenAI el logo se pega después por código: no se adjunta.
-      logoCount: providerLabel === "openai" ? 0 : logoUrls.length,
+      logoCount: logoUrls.length,
       personPhotoCount: personUrls.length,
       includePerson: Boolean(personUrl),
     }),
@@ -631,15 +618,13 @@ export async function generateAiSocialImage(params: {
   );
   if (!decision) return null;
 
-  // Camino OpenAI: el logo NUNCA se le pasa a la IA como referencia a
-  // dibujar (probado en vivo: lo cortaba/deformaba pese a instrucciones
-  // explícitas) — se pega aparte, después, con código exacto. Solo la OG
-  // y la foto de perfil (cuando aplica) van como referencias reales.
-  // Caminos fal.ai/Nano Banana/GPT Image 2: distinto a propósito (pedido de
-  // Milton) — logos y foto de la persona SÍ se mandan como material de
-  // referencia (en ese orden), y el modelo decide cómo usarlos.
+  // El logo nunca se pasa a la IA como referencia a dibujar: los modelos lo
+  // cortan, deforman o rediseñan. Todos los proveedores usan la composición
+  // determinista posterior; solo la OG y la foto de perfil son referencias.
   const refImages = [ogPng, photoPng].filter((b): b is Buffer => b !== null);
-  const extraRefUrls = [...logoUrls, ...(personUrl ? [personUrl] : [])];
+  // El logo nunca se entrega al modelo: aun con instrucciones, los modelos
+  // lo redibujan, recortan o deforman. Se pega después con píxeles reales.
+  const extraRefUrls = personUrl ? [personUrl] : [];
   const prompt = buildEditPrompt(decision, Boolean(logoPng), Boolean(photoPng), providerLabel);
 
   try {
@@ -694,11 +679,9 @@ export async function generateAiSocialImage(params: {
     const resized = await sharp(rawOutput)
       .resize(target.width, target.height, { fit: "cover", position: "attention" })
       .toBuffer();
-    // Con fal.ai/Nano Banana el logo ya se le mandó al modelo como material
-    // de referencia — no se vuelve a pegar por código encima, para no
-    // terminar con dos logos superpuestos.
-    const withLogo =
-      logoPng && providerLabel === "openai" ? await compositeLogo(resized, target.width, target.height, logoPng) : resized;
+    // Todos los proveedores reciben el mismo contrato: el logo real se
+    // compone aquí, nunca se deja a la IA interpretarlo.
+    const withLogo = logoPng ? await compositeLogo(resized, target.width, target.height, logoPng) : resized;
 
     // JPEG en vez de PNG: los generadores devuelven PNG pesado, e Instagram
     // tarda en procesar el media proporcionalmente a su peso. JPEG calidad

@@ -651,9 +651,9 @@ export default function ConfiguracionContenidoPage() {
             errorMessage={imageUploadError}
             label="Logo 1 de tu negocio"
             description="Tu logo principal, idealmente con fondo transparente."
-            targetWidth={500}
-            targetHeight={250}
-            maxKb={200}
+            targetWidth={1600}
+            targetHeight={800}
+            maxKb={1024}
           />
 
           <PhotoLogoUploader
@@ -666,9 +666,9 @@ export default function ConfiguracionContenidoPage() {
             errorMessage={imageUploadError}
             label="Logo 2 de tu negocio"
             description="Una segunda versión de tu logo, por ejemplo horizontal o cuadrada."
-            targetWidth={500}
-            targetHeight={250}
-            maxKb={200}
+            targetWidth={1600}
+            targetHeight={800}
+            maxKb={1024}
           />
         </section>
       </div>}

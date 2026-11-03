@@ -149,7 +149,7 @@ export default function PhotoLogoUploader({
         <p className="lead-copy" style={{ fontSize: 13, margin: "0 0 10px 0", lineHeight: 1.45 }}>
           {description} El servidor optimiza a{" "}
           <strong>
-            {targetWidth}x{targetHeight}px, ~{maxKb}KB
+            {kind === "logo" ? `máximo ${targetWidth}x${targetHeight}px, conservando proporción y transparencia, ~${maxKb}KB` : `${targetWidth}x${targetHeight}px, ~${maxKb}KB`}
           </strong>{" "}
           automáticamente.
         </p>

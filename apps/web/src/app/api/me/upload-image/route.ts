@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 
-// Dimensiones objetivo para que el archivo salga chico y se vea bien
-// compuesto en los prompts de imagen de redes sociales (carruseles,
-// reels, infografías de Instagram). El servidor SIEMPRE reescala al
-// target, así da igual lo que suba el usuario.
+// Las fotos sí necesitan una composición fija. Los logos no: un lienzo fijo
+// puede hacer que el consumidor confunda el margen con parte de la marca y
+// una transformación posterior puede deformar o eliminar detalles blancos.
+// Para logos solo se define un máximo de seguridad; se conserva la proporción
+// original, el canal alfa y el tamaño si ya cabe.
 const TARGET = {
   profile: { width: 600, height: 600 },
-  logo: { width: 500, height: 250 },
+  logo: { width: 1600, height: 800 },
 } as const;
 
 type UploadType = "profile" | "profile2" | "profile3" | "logo" | "logo2";
@@ -41,10 +42,10 @@ function isProfileType(type: UploadType): boolean {
 // peso final siempre termina muy por debajo de esto.
 const MAX_INPUT_BYTES = 4 * 1024 * 1024;
 
-// Peso máximo objetivo después de reescalar/comprimir. Si tras varios
-// intentos seguimos por encima, devolvemos error para no inflar Vercel
-// Blob.
+// Las fotos se mantienen pequeñas. En logos priorizamos fidelidad lossless;
+// el límite sigue evitando subir archivos accidentalmente enormes.
 const MAX_OUTPUT_BYTES = 200 * 1024;
+const MAX_LOGO_OUTPUT_BYTES = 1024 * 1024;
 
 // Formatos de entrada aceptados. Para el OUTPUT usamos JPEG para fotos
 // (mucho más liviano que PNG) y PNG para logos (preserva transparencia).
@@ -120,9 +121,10 @@ export async function POST(request: NextRequest) {
       outputType = "image/png";
       ext = "png";
       resizedBuffer = await sharp(inputBuffer)
+        .rotate()
         .resize(TARGET.logo.width, TARGET.logo.height, {
-          fit: "contain",
-          background: { r: 0, g: 0, b: 0, alpha: 0 },
+          fit: "inside",
+          withoutEnlargement: true,
         })
         .png({ compressionLevel: 9 })
         .toBuffer();
@@ -141,20 +143,21 @@ export async function POST(request: NextRequest) {
           .jpeg({ quality: 65, mozjpeg: true })
           .toBuffer();
       } else {
+        // No palette conversion: it can quantize brand colors and white
+        // lettering. Logos get one lossless retry only.
         resizedBuffer = await sharp(inputBuffer)
-          .resize(TARGET.logo.width, TARGET.logo.height, {
-            fit: "contain",
-            background: { r: 0, g: 0, b: 0, alpha: 0 },
-          })
-          .png({ compressionLevel: 9, palette: true })
+          .rotate()
+          .resize(TARGET.logo.width, TARGET.logo.height, { fit: "inside", withoutEnlargement: true })
+          .png({ compressionLevel: 9 })
           .toBuffer();
       }
     }
 
-    if (resizedBuffer.length > MAX_OUTPUT_BYTES) {
+    const maxOutputBytes = isProfile ? MAX_OUTPUT_BYTES : MAX_LOGO_OUTPUT_BYTES;
+    if (resizedBuffer.length > maxOutputBytes) {
       return NextResponse.json(
         {
-          error: `Tras la optimización la imagen aún pesa ${(resizedBuffer.length / 1024).toFixed(0)}KB, por encima del máximo de ${MAX_OUTPUT_BYTES / 1024}KB. Intenta con otra imagen.`,
+          error: `El logo optimizado pesa ${(resizedBuffer.length / 1024).toFixed(0)}KB, por encima del máximo de ${maxOutputBytes / 1024}KB. Intenta con un PNG más liviano.`,
         },
         { status: 400 },
       );
@@ -172,13 +175,15 @@ export async function POST(request: NextRequest) {
   // en la base de datos (migración sin aplicar) para que guardar un logo falle.
   await prisma.user.update({ where: { id: userId }, data: { [FIELD_BY_TYPE[type]]: blob.url }, select: { id: true } });
 
+  const finalMetadata = sharp ? await sharp(resizedBuffer).metadata() : null;
+
   // Devolvemos también el peso final en KB para que el UI pueda mostrar
   // "guardada (45KB)" al usuario.
   return NextResponse.json({
     url: blob.url,
     sizeBytes: resizedBuffer.length,
-    width: isProfile ? TARGET.profile.width : TARGET.logo.width,
-    height: isProfile ? TARGET.profile.height : TARGET.logo.height,
+    width: isProfile ? TARGET.profile.width : finalMetadata?.width,
+    height: isProfile ? TARGET.profile.height : finalMetadata?.height,
   });
 }
 
