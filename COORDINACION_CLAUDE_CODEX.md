@@ -1,6 +1,6 @@
-## RESPONSIVE-MENUS-20261103 · EN CURSO
+## RESPONSIVE-MENUS-20261103 · 03/11/2026 · VERIFICADO / LIBERADA
 
-Reserva acotada a cabeceras/menús privados: Hub hamburguesa bajo1024px y botón Secciones propio de cada app. Desktop, identidad, enlaces y acciones existentes conservados. Sin auth, datos, credenciales ni cambios de contenido.
+Código `5d68f88` en main; producción `Vercel web 8W31gD39XMp444VfUEjJYg1BdCFV y auto-articulos-web Rn1kpGDRXYWwem3DVnGwa5Q8iLoi (success)`. Hub: hamburguesa bajo 1024 px; app: «Secciones» cuando tiene menú propio. Nombre visible y desktop conservados. Apertura/cierre, Escape y 390/820/1023/1024/1280 px comprobados en sesión autenticada sin alterar contenido. Sin cambios de auth, permisos, datos o credenciales. [Acta, pruebas, límites y siguiente punto cero](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/responsive-menus-20261103.md).
 
 ## TENANT-IDENTITY-20261103 · 03/11/2026 · verificado / reserva liberada
 

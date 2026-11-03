@@ -1,3 +1,7 @@
+## RESPONSIVE-MENUS-20261103 · 03/11/2026
+
+`5d68f88` · `Vercel web 8W31gD39XMp444VfUEjJYg1BdCFV y auto-articulos-web Rn1kpGDRXYWwem3DVnGwa5Q8iLoi (success)`. Navegación compacta <1024px; Hub hamburguesa / app Secciones, identidad visible. E2E visual y teclado verificados. [Evidencia](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/responsive-menus-20261103.md).
+
 ## 03/11 · TENANT-IDENTITY-20261103
 
 Identidad nunca oculta por breakpoint; aviso del Hub de solo lectura, sin elevar permisos. Código `e9a65f8`, artefacto `Vercel F5xn2AJ6basi5AwLX8gyEDkvxK5e y G2952xJkErHg3aVHL2ij52TvjRf5, success`. [Verificación y límites](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/tenant-identity-20261103.md).
