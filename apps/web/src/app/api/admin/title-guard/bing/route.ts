@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { requireAdmin } from "@/lib/current-user";
 import { getBingSignals } from "@/lib/bing-signals";
+import { getBingTokenForIntegration } from "@/lib/bing-token";
+import { listBingSites } from "@auto-articulos/shared";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -37,8 +39,22 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     ahora = { fallo: error instanceof Error ? error.message : String(error) };
   }
+  // Lo que Bing devuelve de verdad con el permiso guardado: ¿refresca el token? ¿qué sitios lista?
+  let sitiosEnBing: unknown;
+  try {
+    const integration = await prisma.searchIntegration.findFirst({ where: { userId: user.id, provider: "bing" } });
+    if (!integration) sitiosEnBing = { conexion: "no hay" };
+    else {
+      const token = await getBingTokenForIntegration(integration);
+      const sites = await listBingSites(token);
+      sitiosEnBing = { tokenRefrescado: true, sitios: sites.map((x) => ({ url: x.Url, verificado: (x as { IsVerified?: boolean }).IsVerified ?? null })) };
+    }
+  } catch (error) {
+    sitiosEnBing = { fallo: error instanceof Error ? error.message : String(error) };
+  }
   return NextResponse.json({
     ok: true,
+    sitiosEnBing,
     sitioSeleccionado: user.selectedSiteDomain,
     conexiones: integrations,
     consultaDeBingAhora: ahora,
