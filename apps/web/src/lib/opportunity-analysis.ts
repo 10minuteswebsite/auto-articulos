@@ -1216,8 +1216,8 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
       const { group: sourceGroup, index } = flatSourceTitles[i];
       const correctedCategoryId = correctedCategoryIds[i];
       if (!correctedCategoryId || !validCategoryIds.has(correctedCategoryId)) {
+        debugCounters.rejectedCategoryMismatch++;
         if (debugEnabled) {
-          debugCounters.rejectedCategoryMismatch++;
           console.log(
             `[OPPORTUNITY_DEBUG] Rechazado en paso final: ninguna categoria real le corresponde (propuesta original: "${sourceGroup.categoryId}"). Titulo: "${sourceGroup.titles[index].text}"`,
           );
@@ -1319,8 +1319,8 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
           // rationale debe nombrar textualmente (entre comillas) la consulta,
           // página o cluster real que lo respalda, tal como exige el prompt.
           if (!rationaleHasQuotedEvidence(rationale)) {
+            debugCounters.rejectedNoQuotedEvidence++;
             if (debugEnabled) {
-              debugCounters.rejectedNoQuotedEvidence++;
               console.log(`[OPPORTUNITY_DEBUG] Rechazado por falta de cita textual. Titulo: "${text}" | rationale crudo: ${JSON.stringify(rationale)}`);
             }
             continue;
@@ -1337,8 +1337,8 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
               input.businessLocations ?? [],
             )
           ) {
+            debugCounters.rejectedGeoComboNotUsed++;
             if (debugEnabled) {
-              debugCounters.rejectedGeoComboNotUsed++;
               console.log(`[OPPORTUNITY_DEBUG] Rechazado (geo): no usa una combinacion cliente+negocio declarada. Titulo: "${text}"`);
             }
             continue;
@@ -1396,8 +1396,8 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
             apiKey as string,
           );
           if (collidingIndices.size > 0) {
+            debugCounters.rejectedCollisionByReasoning++;
             if (debugEnabled) {
-              debugCounters.rejectedCollisionByReasoning++;
               console.log(
                 `[OPPORTUNITY_DEBUG] Rechazado por razonamiento de colision ambigua. Titulo: "${text}" | colisiona con: ${JSON.stringify([...collidingIndices].map((i) => ambiguousMatches[i]?.source))}`,
               );
