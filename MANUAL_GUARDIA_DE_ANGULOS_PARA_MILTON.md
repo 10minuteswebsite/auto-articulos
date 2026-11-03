@@ -57,3 +57,5 @@ Detalle técnico completo: `ESPECIFICACION_FINAL_GUARDIA_DE_ANGULOS.md`. Histori
 - **Corrección de rigidez (2026-11-02):** botón 2: entregar manda. Si tras quitar repetidos quedan menos de 3 por grupo o menos de 5 en total, vuelven los menos parecidos (incluso casi idénticos; nunca duplicados exactos). Antes podía quedar 1 solo título.
 
 - **Bing y caché (2026-11-02):** una consulta fallida de Bing o GA4 ya no se guarda como «0 filas» durante 14 días, y una caché sin filas no se reutiliza. Caso real: Bing de una cuenta falló con «NotAuthorized» el 28/10 y quedó guardado como vacío hasta el 11/11; hay que reconectar Bing en Conexiones.
+
+- **Botón 2: segunda pasada (2026-11-02):** si el análisis termina con menos de 5 títulos, hace UNA segunda pasada con la misma evidencia y las mismas validaciones, mostrando a la IA lo ya aceptado para que proponga necesidades distintas. Medido: cuenta con 2850 filas de evidencia, 31 propuestas, 21 repetidas, quedó 1. Serie diaria real (45 días): el botón 2 produce ~3,6 artículos por cuenta al día, estable antes y después de la guardia.
