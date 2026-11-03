@@ -14,6 +14,9 @@ export type OpportunityAnalysisResult =
   | { status: "ok"; groups: OpportunityAnalysisGroup[]; diagnostico?: Record<string, number> }
   | { status: "no_new"; diagnostico?: Record<string, number> };
 
+/** Si la primera pasada deja menos de estos títulos, se hace una segunda pasada de recuperación. */
+const MIN_TITLES_TARGET = 5;
+
 const COUNTRY_NAMES: Record<string, string> = {
   usa: "Estados Unidos",
   mex: "México",
@@ -1147,17 +1150,17 @@ Si genuinamente ninguna combinacion tiene sentido real para este negocio, respon
     }
   }
 
-  // Recuperación genérica: si hubo evidencia real pero la primera pasada no
-  // dejó títulos válidos, no declarar `no_new` todavía. Una respuesta del
-  // modelo puede fallar el formato de cita, mezclar categorías o devolver un
-  // JSON demasiado conservador. Esta segunda pasada usa la misma evidencia,
-  // reduce las instrucciones a lo esencial y conserva las validaciones
-  // deterministas de applyOpportunityItems.
-  if (allResult.length === 0 && evidenceRows.length > 0) {
+  // Recuperación: si hubo evidencia real pero la primera pasada dejó muy pocos títulos (o ninguno), se hace UNA segunda pasada
+  // con la misma evidencia y las mismas validaciones deterministas (cita textual, duplicados, colisión, año). Cuando ya hay
+  // títulos aceptados, se le muestran para que proponga necesidades DISTINTAS en vez de repetirlos. Medido el 02/11/2026 en una
+  // cuenta con 2850 filas de evidencia: la IA propuso 31 títulos, 21 eran repetidos y quedó 1. Entregar títulos manda.
+  const acceptedSoFar = allResult.reduce((n, group) => n + group.titles.length, 0);
+  if (acceptedSoFar < MIN_TITLES_TARGET && evidenceRows.length > 0) {
+    const alreadyAccepted = allResult.flatMap((group) => group.titles.map((title) => title.text));
     const recoveryPrompt = `${PROMPT_HEADER}
 
-RECUPERACION OBLIGATORIA: recibiste evidencia real pero la pasada anterior no produjo titulos validos. Devuelve al menos una oportunidad por cada necesidad claramente respaldada; no respondas con una lista vacia si existe una consulta o pagina util.
-
+RECUPERACION OBLIGATORIA: recibiste evidencia real pero la pasada anterior dejo muy pocos titulos validos (${acceptedSoFar}). Devuelve oportunidades por cada necesidad claramente respaldada que NO este ya cubierta; no respondas con una lista vacia si existe una consulta o pagina util que aun no tenga titulo.
+${alreadyAccepted.length > 0 ? `\nTITULOS YA ACEPTADOS EN ESTA CORRIDA (no repitas su necesidad; busca consultas o paginas distintas de la evidencia):\n${JSON.stringify(alreadyAccepted)}\n\nTITULOS YA EXISTENTES EN LA CUENTA Y EL SITIO (no los repitas):\n${JSON.stringify(input.existingTitles.slice(0, 400))}\n` : ""}
 CATEGORIAS PERMITIDAS:
 ${JSON.stringify(input.categories)}
 
