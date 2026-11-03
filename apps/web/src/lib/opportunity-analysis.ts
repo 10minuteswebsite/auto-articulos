@@ -568,6 +568,49 @@ export function titleUsesDeclaredGeoCombo(
   return usesAny(clientLocations) && usesAny(businessLocations);
 }
 
+const EXCLUSION_STOPWORDS = new Set([
+  "al", "con", "de", "del", "el", "en", "la", "las", "lo", "los", "para", "por", "que", "se", "si", "su", "sus", "tu", "un", "una", "unos", "unas", "y", "o", "a", "como", "mi",
+]);
+
+function exclusionTokens(value: string): Set<string> {
+  return new Set(
+    normalizeTitle(value)
+      .split(" ")
+      .filter((token) => token.length > 2 && !EXCLUSION_STOPWORDS.has(token))
+      .map((token) => (token.length > 4 && token.endsWith("es") ? token.slice(0, -2) : token.length > 3 && token.endsWith("s") ? token.slice(0, -1) : token)),
+  );
+}
+
+/**
+ * Compara un título con los temas que la cuenta pidió NO publicar. Antes se partía cada tema en palabras sueltas y se
+ * rechazaba el título si tenía UNA sola («Golden visa en España» excluía todo lo que dijera «España»; «Alquiler vacacional en la
+ * Costa del Sol» excluía todo lo que dijera «Costa» o «Sol»). Ahora:
+ *  - tema de una palabra → se rechaza si el título la contiene (igual que antes);
+ *  - tema de varias palabras → se rechaza si el título contiene la frase completa o al menos el 75 % de sus palabras;
+ *  - si comparte 2 o más palabras pero menos del 75 % → «duda» (lo decide la IA, que entiende sinónimos);
+ *  - si comparte 0 o 1 palabra de un tema largo → pasa.
+ */
+export function classifyExcludedTopics(title: string, topics: string[]): { verdict: "reject" | "doubt" | "pass"; doubtTopics: string[] } {
+  const normalizedTitle = normalizeTitle(title);
+  const titleTokens = exclusionTokens(title);
+  const doubtTopics: string[] = [];
+  for (const topic of topics) {
+    const normalizedTopic = normalizeTitle(topic);
+    if (!normalizedTopic) continue;
+    if (normalizedTitle.includes(normalizedTopic)) return { verdict: "reject", doubtTopics: [] };
+    const tokens = exclusionTokens(topic);
+    if (tokens.size === 0) continue;
+    const shared = [...tokens].filter((token) => titleTokens.has(token)).length;
+    if (tokens.size === 1) {
+      if (shared === 1) return { verdict: "reject", doubtTopics: [] };
+      continue;
+    }
+    if (shared / tokens.size >= 0.75) return { verdict: "reject", doubtTopics: [] };
+    if (shared >= 2) doubtTopics.push(topic);
+  }
+  return doubtTopics.length > 0 ? { verdict: "doubt", doubtTopics } : { verdict: "pass", doubtTopics: [] };
+}
+
 function hasContextualEvidenceForYear(
   title: string,
   year: string,
@@ -878,6 +921,7 @@ export async function analyzeSeoOpportunities(input: {
 }): Promise<OpportunityAnalysisResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY no esta configurada.");
+  const openAiKey: string = apiKey;
 
   // Mantener lotes de tamaño moderado evita que una cuenta con mucha
   // evidencia convierta una ejecución en decenas de llamadas secuenciales a
@@ -943,7 +987,7 @@ export async function analyzeSeoOpportunities(input: {
   };
 
   // Muestras (hasta 6 por regla) de lo que se descarta, para diagnosticar con ejemplos reales y no solo con números.
-  const debugSamples: Record<string, string[]> = { geoRechazados: [], sinCita: [], repetidos: [], colision: [] };
+  const debugSamples: Record<string, string[]> = { geoRechazados: [], sinCita: [], repetidos: [], colision: [], excluidos: [] };
   const sample = (kind: string, text: string) => {
     if (debugSamples[kind].length < 6) debugSamples[kind].push(text);
   };
@@ -994,29 +1038,36 @@ export async function analyzeSeoOpportunities(input: {
   // compartida (el fallo original que motivó este retiro). Ver
   // COORDINACION_CLAUDE_CODEX.md.
 
-  // Palabras clave de temas excluidos, parseadas desde input.excludedTopics
-  const excludedKeywords = new Set<string>();
-  if (input.excludedTopics && input.excludedTopics.trim()) {
-    input.excludedTopics
-      .split(",")
-      .map((t) => t.trim().toLowerCase())
-      .filter((t) => t.length > 0)
-      .forEach((topic) => {
-        // Agregar el topic completo y sus palabras individuales para búsqueda flexible
-        excludedKeywords.add(topic);
-        topic.split(/\s+/).forEach((word) => {
-          if (word.length > 2) excludedKeywords.add(word);
-        });
-      });
-  }
+  // Temas que la cuenta pidió no publicar (separados por coma).
+  const excludedTopicList = (input.excludedTopics ?? "")
+    .split(",")
+    .map((topic) => topic.trim())
+    .filter((topic) => topic.length > 0);
 
-  // Verifica si un título toca temas excluidos. Comparación laxa: si alguna
-  // palabra del título (3+ caracteres) coincide con keyword excluida, rechaza.
-  function titleTouchesExcludedTopic(text: string): boolean {
-    if (excludedKeywords.size === 0) return false;
-    const textNormalized = normalizeTitle(text);
-    const titleWords = textNormalized.split(/\s+/).filter((w) => w.length > 2);
-    return titleWords.some((word) => excludedKeywords.has(word));
+  // Veredicto de la IA para los títulos DUDOSOS (comparten varias palabras con un tema excluido, sin llegar al 75 %). Una sola
+  // llamada por tanda de títulos. Si la IA falla, los dudosos se tratan como excluidos: nunca se publica algo que la cuenta excluyó.
+  async function judgeDoubtfulExclusions(texts: string[]): Promise<Map<string, boolean>> {
+    const verdicts = new Map<string, boolean>();
+    if (texts.length === 0) return verdicts;
+    try {
+      const prompt = `Una cuenta pidio NO publicar articulos sobre estos temas excluidos:
+${JSON.stringify(excludedTopicList)}
+
+Para cada titulo numerado, di si su TEMA PRINCIPAL es uno de los temas excluidos (incluye sinonimos y formulaciones equivalentes: por ejemplo, alquilar un apartamento turistico en una zona es el mismo tema que "alquiler vacacional" en esa zona). NO es excluido un titulo que solo menciona un lugar o una palabra del tema excluido pero trata de otra cosa (por ejemplo, invertir o comprar propiedades en esa zona no es "alquiler vacacional").
+
+TITULOS:
+${JSON.stringify(texts.map((text, index) => ({ n: index, titulo: text })))}
+
+Responde SOLO JSON: {"excluidos":[numeros de los titulos cuyo tema principal SI es excluido]}`;
+      const parsed = await callOpenAiWithRetry(prompt, openAiKey);
+      const flagged = Array.isArray(parsed.excluidos) ? new Set((parsed.excluidos as unknown[]).filter((n): n is number => typeof n === "number")) : null;
+      if (!flagged) throw new Error("respuesta sin lista de excluidos");
+      texts.forEach((text, index) => verdicts.set(text, flagged.has(index)));
+    } catch (error) {
+      console.warn("[oportunidades] no se pudo revisar los temas excluidos dudosos; se tratan como excluidos:", error instanceof Error ? error.message : error);
+      texts.forEach((text) => verdicts.set(text, true));
+    }
+    return verdicts;
   }
 
   // needKey por título, guardado aparte de OpportunityAnalysisGroup (que solo
@@ -1297,6 +1348,23 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
   // analyzeSeoOpportunities, sobre el resultado ya completo — ver el paso
   // final despues del bucle de lotes/geo/recuperacion.
   async function applyOpportunityItems(opportunities: unknown[], source: "evidence" | "geo") {
+    // Temas excluidos: se clasifican todos los títulos de esta tanda; los dudosos van a la IA en UNA sola llamada.
+    const exclusionVerdict = new Map<string, boolean>();
+    if (excludedTopicList.length > 0) {
+      const doubtful: string[] = [];
+      for (const item of opportunities) {
+        const titles = (item as { titles?: unknown } | null)?.titles;
+        if (!Array.isArray(titles)) continue;
+        for (const candidate of titles) {
+          const text = typeof (candidate as { text?: unknown } | null)?.text === "string" ? ((candidate as { text: string }).text).trim() : "";
+          if (!text) continue;
+          const { verdict } = classifyExcludedTopics(text, excludedTopicList);
+          if (verdict === "reject") exclusionVerdict.set(text, true);
+          else if (verdict === "doubt") doubtful.push(text);
+        }
+      }
+      for (const [text, excluded] of await judgeDoubtfulExclusions(doubtful)) exclusionVerdict.set(text, excluded);
+    }
     for (const item of opportunities) {
       if (!item || typeof item !== "object") continue;
       const group = item as Record<string, unknown>;
@@ -1361,8 +1429,9 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         // que no quiere ciertos temas, rechazar CUALQUIER título que los mencione,
         // sin importar cuán buena sea la evidencia. Esta validación corre AQUÍ
         // (en JavaScript), no solo en el prompt, para garantizar cumplimiento.
-        if (titleTouchesExcludedTopic(text)) {
+        if (exclusionVerdict.get(text) === true) {
           debugCounters.rejectedExcludedTopic++;
+          sample("excluidos", text);
           continue;
         }
         // Garantía determinista contra años inventados O desactualizados:
