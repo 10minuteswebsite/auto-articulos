@@ -986,7 +986,9 @@ Responsable: Claude. Capitanía liberada.
 - Costo esperado ≈ 1,10 USD/mes al 50 %; techo duro ≈ 21 USD/mes. Sin verificar contra factura de OpenAI.
 - Pendiente: ver los primeros reportes en modo «activo» en `/api/admin/title-guard/reports` (al cierre solo había de sombra), decidir 50 → 100 %.
 
-## PENDIENTE (2026-11-02): botón «Borrar todas las oportunidades» no funciona (Oportunidades, botón 2)
+## RESUELTO (2026-11-03): botón «Borrar todas las oportunidades» no funcionaba (Oportunidades, botón 2)
+- Causa confirmada con evidencia: en el navegador integrado de la app `window.confirm` devuelve «no» en 1 ms sin abrir ningún diálogo, así que `removeAll()` salía sin llamar al servidor (los botones individuales no piden confirmación y por eso sí funcionaban). Arreglo: confirmación dentro de la página («Sí, borrar todas» / «Cancelar»). Mismo patrón sin arreglar en: oportunidades-redes («Borrar todas las publicaciones pendientes»), conexiones, estilos de redacción y otros paneles (lista en el PR).
+(Historial de la investigación, abajo:)
 - Reporte de Milton: al pulsarlo no borra; hay que borrar las propuestas una a una (cuenta de Mónica Chediak). En la ventana integrada de la app tampoco reaccionó al clic.
 - Lo que se sabe: el botón llama a `removeAll()` en `apps/web/src/app/dashboard/oportunidades/page.tsx` (pide `window.confirm` y luego `DELETE /api/opportunities`). Llamando a ese DELETE directamente desde la sesión de Lorena respondió 200 y borró. Sospechas por verificar, sin confirmar: el aviso `window.confirm` no aparece o se bloquea en algunos navegadores, o el DELETE falla para ciertas cuentas y el mensaje de error no se ve. Falta reproducirlo en la cuenta de Mónica y leer la respuesta real.
 - Arreglo propuesto: reemplazar `window.confirm` por un aviso propio dentro de la página y mostrar siempre el error real si el borrado falla.
