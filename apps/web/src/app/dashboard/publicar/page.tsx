@@ -14,6 +14,7 @@ import {
 } from "@/components/dashboard-ui";
 import ImageCreditsModal from "@/components/ImageCreditsModal";
 import PreValidationGuard from "@/components/PreValidationGuard";
+import PublishingDestinationBanner from "@/components/PublishingDestinationBanner";
 import AiTitleGenerator from "@/components/AiTitleGenerator";
 import { normalizeTitle } from "@/lib/title-generation-core";
 import type { CategoryRow } from "@/types/dashboard";
@@ -274,6 +275,7 @@ export default function PublicarPage() {
 
   return (
     <div>
+      <PublishingDestinationBanner />
       <PreValidationGuard
         type="publicar"
         credentialsConfigured={credentialsConfigured}

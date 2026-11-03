@@ -1,3 +1,7 @@
+## BLOG-IA-DESTINO-VISIBLE-20261103 — publicado, sin ver en pantalla
+
+Aviso «Estás publicando en tu BLOG IA» y «Volver a publicar en mi sitio 10minutesWebsite» en Publicar (solo destino BLOG). Ruta `/api/publishing-destination`. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
+
 ## BLOG-IA-CATEGORIAS-IA-20261103 — publicado, Worker sin desplegar
 
 Código `6ae5b600` en `main` (Vercel por push). El Worker de Artículos NO está desplegado con este cambio: hasta lanzar `worker.yml`, con destino BLOG «Traer las categorías de mi blog» no funciona. Cuentas 10MWS/MCP sin cambios. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).

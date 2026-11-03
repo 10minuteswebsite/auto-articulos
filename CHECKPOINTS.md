@@ -1,3 +1,7 @@
+## Checkpoint — BLOG-IA-DESTINO-VISIBLE-20261103 — 2026-11-03
+
+- Publicado; falta verlo con una sesión de destino BLOG (Lorena).
+
 ## Checkpoint — BLOG-IA-CATEGORIAS-IA-20261103 — 2026-11-03
 
 - `6ae5b600` publicado; falta desplegar el Worker y probar con una cuenta solo-BLOG IA.

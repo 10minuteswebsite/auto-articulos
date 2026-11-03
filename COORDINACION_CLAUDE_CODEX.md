@@ -1,3 +1,10 @@
+## BLOG-IA-DESTINO-VISIBLE-20261103 — Claude — publicado
+
+- Con destino BLOG IA, Publicar muestra «Estás publicando en tu BLOG IA: <dirección>. Todo lo que publiques aquí va a ese blog, no a tu sitio de 10minutesWebsite» y el camino de vuelta «Volver a publicar en mi sitio 10minutesWebsite» (con confirmación). Con destino 10MWS o MCP no se muestra nada.
+- `POST /api/publishing-destination` (`destination:"website"`, `confirm:true`): BLOG → BROWSER solo si hay sitio 10MWS conectado y no hay lotes en curso; idempotente; respeta MCP. Lógica en `lib/publishing-destination.ts`. Sin Hub, sin migraciones.
+- Pruebas: `publishing-destination.test.ts` (5). tsc limpio. Estilos: botones y tarjeta del propio panel de Artículos.
+- NO verificado en pantalla: falta una sesión con destino BLOG (Lorena) para ver el aviso y probar el cambio. BLOG IA sigue oculto a clientes: sin cambios en el manual de clientes.
+
 ## BLOG-IA-CATEGORIAS-IA-20261103 — Claude — publicado (6ae5b600); Worker SIN desplegar
 
 - Decisión de Milton: el blog de BLOG IA es un sitio desconectado; sus categorías nacen en el asistente de BLOG IA (sugeridas por IA). Este repo solo consume.
