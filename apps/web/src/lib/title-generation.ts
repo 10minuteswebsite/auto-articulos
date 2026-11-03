@@ -1,3 +1,4 @@
+import { languageBase } from "@auto-articulos/shared/src/language-guard";
 import { prisma } from "@auto-articulos/db";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { getTitleGuardModeInfo, getTitleGuardPercent, shouldApplyGuard } from "@/lib/title-guard-mode";
@@ -44,6 +45,9 @@ const DEFAULT_LANGUAGE_NAMES: Record<string, string> = {
   fr: "Francés",
   it: "Italiano",
   de: "Alemán",
+  ro: "Rumano",
+  ru: "Ruso",
+  zh: "Chino mandarín",
 };
 
 export class TitleGenerationError extends Error {
@@ -116,7 +120,8 @@ async function resolveLanguageLabel(userId: string, value: string): Promise<stri
     where: { userId_platform_externalId: { userId, platform: PLATFORM, externalId: value } },
     select: { name: true },
   });
-  return row?.name ?? DEFAULT_LANGUAGE_NAMES[value] ?? value;
+  // Valores como "en_VI" o "es_ES" nunca deben llegar crudos al modelo: si no hay fila, se usa el nombre por idioma base.
+  return row?.name ?? DEFAULT_LANGUAGE_NAMES[value] ?? DEFAULT_LANGUAGE_NAMES[languageBase(value)] ?? value;
 }
 
 /** Retención: a los 90 días se borra lo que el usuario escribió; los títulos ofrecidos se conservan. */
@@ -370,7 +375,7 @@ export async function generateTitlesForUser(params: GenerateParams): Promise<Gen
       const candidates = parseModelOutput(raw);
       if (!candidates) continue;
       allCandidates.push(...candidates);
-      const { titles } = selectValidTitles(candidates, avoidSet, missing);
+      const { titles } = selectValidTitles(candidates, avoidSet, missing, languageValue);
       for (const title of titles) {
         avoidSet.add(normalizeTitle(title));
         accepted.push(title);

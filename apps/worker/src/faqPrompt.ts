@@ -1,3 +1,4 @@
+import { isWrongLanguage } from "@auto-articulos/shared";
 import { describeContentLanguage } from "./automation/contentLanguage";
 
 // Genera preguntas frecuentes (FAQ) reales a partir del contenido real del
@@ -37,6 +38,21 @@ export async function generateFaqs(
   plainContent: string,
   contentLanguage = "es",
 ): Promise<Faq[]> {
+  // Guardia de idioma: si alguna pregunta o respuesta sale en otro idioma se pide una vez más; lo que siga mal se descarta.
+  const first = await requestFaqs(title, summary, plainContent, contentLanguage, false);
+  const wrong = (f: Faq) => isWrongLanguage(f.q, contentLanguage) || isWrongLanguage(f.a, contentLanguage);
+  if (!first.some(wrong)) return first;
+  const second = await requestFaqs(title, summary, plainContent, contentLanguage, true);
+  return second.filter((f) => !wrong(f));
+}
+
+async function requestFaqs(
+  title: string,
+  summary: string,
+  plainContent: string,
+  contentLanguage: string,
+  strictLanguage: boolean,
+): Promise<Faq[]> {
   if (!OPENAI_API_KEY) return [];
 
   const targetLanguage = describeContentLanguage(contentLanguage);
@@ -61,14 +77,15 @@ export async function generateFaqs(
       "and content below. Do not copy sentences verbatim. If the article does " +
       "not contain enough information to answer precisely, omit that question.",
     `LANGUAGE RULE: The q and a values must be entirely in ${targetLanguage}. ` +
+      (strictLanguage ? `Your previous answer contained text in another language; translate everything into ${targetLanguage}. ` : "") +
       "Only unavoidable proper names or official brand names may remain in " +
       "their original form.",
     "Respond ONLY with a JSON array of objects containing the string keys " +
       "q and a, with no text before or after it, no markdown, and no code fences.",
     "",
-    `Resumen: ${summary}`,
+    `Summary: ${summary}`,
     "",
-    `Contenido: ${plainContent.slice(0, MAX_CONTENT_CHARS)}`,
+    `Content: ${plainContent.slice(0, MAX_CONTENT_CHARS)}`,
   ].join("\n");
 
   try {

@@ -1,3 +1,7 @@
+## INES-IDIOMA-20261103 — publicado en código; Worker sin desplegar; NO visto con Inés
+
+Guardia de idioma en títulos de Publicar, artículos con estilo propio, reformulación de títulos, FAQ y flujo del sitio. Módulo `packages/shared/src/language-guard.ts`. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md). El Historial de Inés NO se pudo leer en producción desde esta sesión (la sesión del navegador era de otra cuenta, sin permiso de administrador).
+
 ## BLOG-IA-DESTINO-VISIBLE-20261103 — publicado, sin ver en pantalla
 
 Aviso «Estás publicando en tu BLOG IA» y «Volver a publicar en mi sitio 10minutesWebsite» en Publicar (solo destino BLOG). Ruta `/api/publishing-destination`. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
