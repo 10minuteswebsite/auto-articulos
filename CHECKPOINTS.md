@@ -717,3 +717,8 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 
 - Punto cero: `main` con PR #706 (`90aaf0a6`). Tablas `SiteArticleTitle` y `SiteTitleSeed` creadas por Milton en Supabase; despliegue web y worker en success.
 - Siguiente punto de partida: probar con una cuenta con sitemap (Oportunidades → `SiteTitleSeed` «done») y medir cargas del listado por publicación.
+
+## Checkpoint — Títulos del sitio: archivo final — 2026-11-03
+
+- Revisión contra `main` del 3/11: espera progresiva y tablas `SiteArticleTitle`/`SiteTitleSeed` siguen vigentes y las usa la Guardia de ángulos; sin duplicados ni reemplazos. Sin cambios de código.
+- Abierto, no urgente: E2E con cuenta con sitemap, medir cargas del listado por publicación y tope de sesiones contra 10MWS. Rama remota `claude/10mws-article-search-optimization-abeb43` retirada (ya fusionada).
