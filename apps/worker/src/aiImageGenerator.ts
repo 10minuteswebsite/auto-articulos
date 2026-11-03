@@ -454,11 +454,15 @@ function buildEditPrompt(
   hasPhotoRef: boolean,
   provider: "openai" | "fal" | "nano" | "gpt-image-2",
 ): string {
+  const brandSafety = hasLogo
+    ? "Do not reproduce, copy or invent any logo, watermark or brand mark visible in the source photo. Leave the real logo for separate exact compositing."
+    : "";
   if (provider === "fal" || provider === "nano" || provider === "gpt-image-2") {
-    return decision.visualLine;
+    return [decision.visualLine, brandSafety].filter(Boolean).join(" ").slice(0, 4000);
   }
   return [
     decision.visualLine,
+    brandSafety,
     "ABSOLUTE RULE: if the photo contains a person, the face is the highest-priority zone in the whole image — never cover eyes, nose, mouth or expression with text or anything else. Use empty/negative space instead.",
     hasLogo
       ? "Leave a clean, empty, uncluttered rectangular area in the bottom-right corner (roughly the bottom-right 30% width x 10% height of the frame) with nothing important there — no text, no busy detail, no headline text overlapping it. A real logo will be placed there afterward by separate exact compositing, so do not draw, sketch or invent any logo or brand text yourself in that corner."
@@ -497,6 +501,26 @@ const REUSE_MAX_AGE_MS = 48 * 60 * 60 * 1000;
 /** Huella de los logos vigentes: si el usuario cambia un logo, la imagen guardada con el anterior ya no sirve. */
 export function logoFingerprint(logoUrls: Array<string | null | undefined>): string {
   return logoUrls.filter(Boolean).join("|");
+}
+
+/** Elige una versión original del logo por contraste con la zona prevista. */
+export async function selectLogoByContrast(base: Buffer, width: number, height: number, logos: Buffer[]): Promise<Buffer | null> {
+  if (logos.length === 0) return null;
+  if (logos.length === 1) return logos[0];
+  const padding = Math.round(width * 0.06);
+  const cropWidth = Math.min(Math.round(width * 0.34), width);
+  const cropHeight = Math.min(Math.round(height * 0.1), height);
+  const background = await sharp(base)
+    .extract({ left: Math.max(0, width - padding - cropWidth), top: Math.max(0, height - padding - cropHeight), width: cropWidth, height: cropHeight })
+    .stats();
+  const backgroundLuma = (0.2126 * background.channels[0].mean) + (0.7152 * background.channels[1].mean) + (0.0722 * background.channels[2].mean);
+  const scored = await Promise.all(logos.map(async (logo, index) => {
+    const stats = await sharp(logo).stats();
+    const luma = (0.2126 * stats.channels[0].mean) + (0.7152 * stats.channels[1].mean) + (0.0722 * stats.channels[2].mean);
+    return { logo, index, score: Math.abs(luma - backgroundLuma) };
+  }));
+  scored.sort((a, b) => b.score - a.score || a.index - b.index);
+  return scored[0].logo;
 }
 
 export function isReusableAiImage(
@@ -597,7 +621,7 @@ export async function generateAiSocialImage(params: {
   const logoUrls = [params.businessLogoUrl, params.businessLogoUrl2].filter((url): url is string => Boolean(url));
   // Puede existir únicamente el segundo logo; usar siempre el primer recurso
   // disponible evita declarar logo en el briefing y luego pegar null.
-  const logoPng = logoUrls[0] ? await fetchImageAsPng(logoUrls[0]) : null;
+  const logoPngs = (await Promise.all(logoUrls.map((url) => fetchImageAsPng(url)))).filter((buffer): buffer is Buffer => buffer !== null);
   const personUrls = [params.profilePhotoUrl, params.profilePhotoUrl2, params.profilePhotoUrl3].filter((url): url is string => Boolean(url));
   const wantPerson = personUrls.length > 0 && (params.forcePerson ?? Math.random() < PERSON_PHOTO_RATE);
   const personUrl = wantPerson ? personUrls[Math.floor(Math.random() * personUrls.length)] : null;
@@ -625,6 +649,7 @@ export async function generateAiSocialImage(params: {
   // El logo nunca se entrega al modelo: aun con instrucciones, los modelos
   // lo redibujan, recortan o deforman. Se pega después con píxeles reales.
   const extraRefUrls = personUrl ? [personUrl] : [];
+  const logoPng = await selectLogoByContrast(ogPng, target.width, target.height, logoPngs);
   const prompt = buildEditPrompt(decision, Boolean(logoPng), Boolean(photoPng), providerLabel);
 
   try {

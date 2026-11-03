@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import sharp from "sharp";
-import { compositeLogo } from "./aiImageGenerator";
+import { compositeLogo, selectLogoByContrast } from "./aiImageGenerator";
 
 test("compone el logo real sin borrar el blanco ni deformar su proporción", async () => {
   const base = await sharp({
@@ -22,4 +22,11 @@ test("compone el logo real sin borrar el blanco ni deformar su proporción", asy
     if (data[i] > 245 && data[i + 1] > 245 && data[i + 2] > 245) whitePixels++;
   }
   assert.ok(whitePixels > 0, "el blanco del logo debe sobrevivir a la composición");
+});
+
+test("elige la versión del logo con mayor contraste para la zona prevista", async () => {
+  const base = await sharp({ create: { width: 400, height: 300, channels: 3, background: "#eeeeee" } }).png().toBuffer();
+  const dark = await sharp({ create: { width: 80, height: 30, channels: 4, background: "#102030" } }).png().toBuffer();
+  const light = await sharp({ create: { width: 80, height: 30, channels: 4, background: "#ffffff" } }).png().toBuffer();
+  assert.equal(await selectLogoByContrast(base, 400, 300, [light, dark]), dark);
 });
