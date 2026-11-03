@@ -11,8 +11,8 @@ interface OpportunityAnalysisGroup {
 }
 
 export type OpportunityAnalysisResult =
-  | { status: "ok"; groups: OpportunityAnalysisGroup[]; diagnostico?: Record<string, number> }
-  | { status: "no_new"; diagnostico?: Record<string, number> };
+  | { status: "ok"; groups: OpportunityAnalysisGroup[]; diagnostico?: Record<string, unknown> }
+  | { status: "no_new"; diagnostico?: Record<string, unknown> };
 
 /** Si la primera pasada deja menos de estos títulos, se hace una segunda pasada de recuperación. */
 const MIN_TITLES_TARGET = 5;
@@ -937,6 +937,11 @@ export async function analyzeSeoOpportunities(input: {
     accepted: 0,
   };
 
+  // Muestras (hasta 6 por regla) de lo que se descarta, para diagnosticar con ejemplos reales y no solo con números.
+  const debugSamples: Record<string, string[]> = { geoRechazados: [], sinCita: [], repetidos: [], colision: [] };
+  const sample = (kind: string, text: string) => {
+    if (debugSamples[kind].length < 6) debugSamples[kind].push(text);
+  };
   const seen = new Set(input.existingTitles.map(normalizeTitle));
   const existingAtStart = new Set(seen);
   // Bug real encontrado el 11/8/2026 (cuenta de Lorena Álvarez, dejó de
@@ -1254,9 +1259,9 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
   }
 
   if (allResult.length === 0) {
-    return { status: "no_new", diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length } };
+    return { status: "no_new", diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length, muestras: debugSamples, ubicacionesCliente: input.clientLocations ?? [], ubicacionesNegocio: input.businessLocations ?? [] } };
   }
-  return { status: "ok", groups: allResult, diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length } };
+  return { status: "ok", groups: allResult, diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length, muestras: debugSamples, ubicacionesCliente: input.clientLocations ?? [], ubicacionesNegocio: input.businessLocations ?? [] } };
 
   // Procesa un array crudo de "opportunities" devuelto por OpenAI (del lote
   // principal o del paso dedicado de geolocalizacion) con exactamente las
@@ -1308,6 +1313,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         const normalized = normalizeTitle(text);
         if (seen.has(normalized)) {
           debugCounters.rejectedEmptyOrDuplicateExact++;
+          sample("repetidos", text);
           if (existingAtStart.has(normalized)) debugCounters.rejectedDuplicateOfExisting++;
           else debugCounters.rejectedDuplicateOfThisRun++;
           continue;
@@ -1320,6 +1326,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
           // página o cluster real que lo respalda, tal como exige el prompt.
           if (!rationaleHasQuotedEvidence(rationale)) {
             debugCounters.rejectedNoQuotedEvidence++;
+            sample("sinCita", `${text} | rationale: ${rationale.slice(0, 160)}`);
             if (debugEnabled) {
               console.log(`[OPPORTUNITY_DEBUG] Rechazado por falta de cita textual. Titulo: "${text}" | rationale crudo: ${JSON.stringify(rationale)}`);
             }
@@ -1338,6 +1345,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
             )
           ) {
             debugCounters.rejectedGeoComboNotUsed++;
+            sample("geoRechazados", text);
             if (debugEnabled) {
               console.log(`[OPPORTUNITY_DEBUG] Rechazado (geo): no usa una combinacion cliente+negocio declarada. Titulo: "${text}"`);
             }
@@ -1377,6 +1385,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         // en la inicialización de intentSignatures).
         if (collidesWithIntent(signature, intentSignatures)) {
           debugCounters.rejectedCollision++;
+          sample("colision", text);
           continue;
         }
         // Zona ciega del chequeo determinista de arriba (ver
