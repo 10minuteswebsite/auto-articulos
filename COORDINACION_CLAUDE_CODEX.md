@@ -13304,3 +13304,8 @@ ARCHIVADA. Responsable: Claude.
 - **Capitán de migración:** Claude — 2026-11-01: tope propio del módulo 2 (sin migración; no activada). Se libera al fusionar.
 
 - **Capitán de migración:** Claude — Fase 3 complementario activo autorregulado (boton 2). Sin migración. (2026-11-03)
+
+## Cierre 2026-11-03 — Guardia de ángulos: ideas complementarias y botón Borrar todas
+- PR #785 (494e9a4e): ideas complementarias del botón 2 ACTIVAS y autorreguladas (marca `[SIN_EVIDENCIA] ` en el rationale, sin migración; 1/cuenta/día, 10 globales/día, presupuesto 10 USD/mes, pausa 7 días tras 3 llamadas vacías). Capitán Claude: reclamó y liberó el lote, sin migración.
+- PR #786 (2957fc20): «Borrar todas las oportunidades» confirma dentro de la página; causa: `window.confirm` devuelve false al instante en el navegador integrado. Verificado con Mónica (lista en 0). Capitán Claude: reclamó y liberó el lote, sin migración.
+- Pendiente: el ajuste `opportunity_complement_mode` en producción estaba en «sombra» y el clasificador bloqueó cambiarlo por API; Milton debe elegir «Activo (normal)» en Historial → Guardia de ángulos y luego probar con Mónica que sale el tercer título con la etiqueta. Mismo patrón de `window.confirm` en otros paneles (oportunidades-redes, postpeer, bing, composio, estilos, conexiones). Costo de 5 ¢ por llamada sin contrastar con la factura de OpenAI.
