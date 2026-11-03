@@ -1,3 +1,14 @@
+## BLOG-IA-CATEGORIAS-IA-20261103 — Claude — publicado (6ae5b600); Worker SIN desplegar
+
+- Decisión de Milton: el blog de BLOG IA es un sitio desconectado; sus categorías nacen en el asistente de BLOG IA (sugeridas por IA). Este repo solo consume.
+- Cambios: Worker `categorySync.ts` (con destino BLOG lee las categorías del blog por el canal firmado, `blogCategorySync.ts`, `source="blog"`), `blogIaPublisher.ts`/`blogIaQueue.ts`
+  (una categoría que ya existe en el blog no se reenvía ni se pisa su descripción), web `/api/categories/sync` (sin credenciales de 10MWS con destino BLOG) y `OnboardingWizard`
+  (con destino BLOG muestra el destino y trae las categorías del blog). Contrato `postBlogIaJson` (copia de blog-ia). Sin migraciones. Sin cambios para 10MWS/MCP.
+- Pruebas nuevas: `blogCategorySync.test.ts` (3), `blogIaPublisherCategory.test.ts` (2). tsc limpio (web y worker).
+- PENDIENTE: lanzar `worker.yml` sobre `main` (el sistema bloqueó el despliegue; lo lanza Milton) y probar «Traer las categorías de mi blog».
+- Hallazgo ajeno: `paidApiGuard.test.ts` falla en `main` por 5 archivos sin registrar en CUIDADO_DE_TOKENS.md (angle-guard-judge, opportunity-complement, opportunity-exclusion, title-explanation, blogCoverImage).
+- Manual: BLOG IA sigue oculto a clientes (no se anuncia ni se documenta en el manual de clientes).
+
 ## RESPONSIVE-MENUS-20261103 · 03/11/2026 · CERRADO / LIBERADA
 
 Fuente funcional `93144d4`; producción `Vercel web y auto-articulos-web: success (93144d4)`. Hub hamburguesa y app Secciones bajo 1024px; identidad visible y desktop conservados. La regla compartida `width < 1024px` cubre también el zoom y los anchos fraccionarios (borde 1023.636/1024.545 comprobado en Agentes). Recorrido autenticado, cierre, Escape y cinco tamaños verificados en el acta. Agentes ya publicado tras excepción de PR, 37 bindings intactos. Sin cambios de datos, auth, permisos o secretos. [Evidencia y punto cero](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/responsive-menus-20261103.md).

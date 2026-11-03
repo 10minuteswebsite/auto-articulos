@@ -1,3 +1,7 @@
+## Checkpoint — BLOG-IA-CATEGORIAS-IA-20261103 — 2026-11-03
+
+- `6ae5b600` publicado; falta desplegar el Worker y probar con una cuenta solo-BLOG IA.
+
 ## RESPONSIVE-MENUS-20261103 · 03/11/2026 · CERRADO / LIBERADA
 
 Fuente funcional `93144d4`; producción `Vercel web y auto-articulos-web: success (93144d4)`. Hub hamburguesa y app Secciones bajo 1024px; identidad visible y desktop conservados. La regla compartida `width < 1024px` cubre también el zoom y los anchos fraccionarios (borde 1023.636/1024.545 comprobado en Agentes). Recorrido autenticado, cierre, Escape y cinco tamaños verificados en el acta. Agentes ya publicado tras excepción de PR, 37 bindings intactos. Sin cambios de datos, auth, permisos o secretos. [Evidencia y punto cero](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/responsive-menus-20261103.md).
