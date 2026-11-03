@@ -13387,6 +13387,8 @@ ARCHIVADA. Responsable: Claude.
 Codex toma el caso de Rosa Bello. No se crean ramas ni worktrees nuevos. La
 verdad funcional será producción; el registro durable queda en `main`. El
 estándar `Harness-Mario` devolvió 404 y `IA_JOURNEY.md` no existe en este
-checkout; se conserva el protocolo equivalente ya documentado: punto cero,
-cambio mínimo, pruebas, publicación, verificación y memoria.
+ checkout; se conserva el protocolo equivalente ya documentado: punto cero,
+cambio mínimo, pruebas, publicación, verificación y memoria. Caso cerrado en
+`main` con `1e7d988b`; producción verificada con la sesión autenticada de Rosa
+Bello.
 

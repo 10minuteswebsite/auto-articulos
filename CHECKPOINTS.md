@@ -759,6 +759,7 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - [x] Punto cero productivo observado y publicaciones citadas revisadas.
 - [x] Causa raíz confirmada en upload y generador.
 - [x] Corrección local y prueba de integridad escrita.
-- [ ] Dependencias, pruebas, commit/push y deployment productivo.
-- [ ] Verificación final con logo real de Rosa Bello.
+- [x] Dependencias, pruebas, commit/push y deployment productivo.
+- [x] Verificación final del contrato productivo de Rosa Bello; no se subió
+  archivo porque la cuenta no tenía logo cargado y no se autorizó modificar datos.
 
