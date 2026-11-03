@@ -1,3 +1,7 @@
+## RESPONSIVE-MENUS-20261103 · 03/11/2026 · preparado, publicación pendiente
+
+Menú del Hub compacto bajo 1024 px y navegación propia con control «Secciones». Identidad, enlaces y acciones originales conservados. Validación local y revisión del diff; cierre con evidencia productiva pendiente. Sin cambios de auth, permisos, datos, secretos ni cobros.
+
 ## TENANT-IDENTITY-20261103 · 03/11/2026 · verificado / reserva liberada
 
 Código `e9a65f8` en main; producción `Vercel F5xn2AJ6basi5AwLX8gyEDkvxK5e y G2952xJkErHg3aVHL2ij52TvjRf5, success`. Identidad visible en móvil y contexto privado del Hub en cabecera; prueba real con Yoly en Hub/BLOG/Website/Artículos/Quiz y administrador directo en Redes/Formularios. No cambia permisos ni SSO. Salida: volver al Hub; se mantiene CSRF estricto. [Acta, pruebas, límites y siguiente punto cero](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/tenant-identity-20261103.md).

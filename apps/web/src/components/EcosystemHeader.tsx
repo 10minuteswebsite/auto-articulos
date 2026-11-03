@@ -43,6 +43,7 @@ export default function EcosystemHeader({
         WebkitBackdropFilter: "blur(24px)",
       }}
     >
+      <link rel="stylesheet" href="/responsive-navigation.css?v=20261103"/><Script src="/responsive-navigation.js?v=20261103" strategy="afterInteractive"/>
       <style>{`
         .ecosystem-header .global-topbar-inner {
           width: 100%;
@@ -161,13 +162,13 @@ export default function EcosystemHeader({
       `}</style>
       <div data-hub-account-context data-user-email={email}/><Script src="/hub-account-context.js?v=20261103" strategy="afterInteractive"/>
       <div
-        className="global-topbar-inner"
+        data-responsive-navigation="hub" className="global-topbar-inner"
         style={{
           maxWidth: 1280,
         }}
       >
         <a
-          className="global-brand"
+          data-navigation-brand className="global-brand"
           href={`${HUB_URL}/dashboard`}
           style={{
             display: "inline-flex",
@@ -184,7 +185,7 @@ export default function EcosystemHeader({
           LA SOLUCIÓN IA
         </a>
 
-        <nav
+        <nav id="hub-primary-menu" data-navigation-panel
           aria-label="Secciones del Hub"
           className="ecosystem-main-nav global-nav"
           style={{
@@ -213,7 +214,7 @@ export default function EcosystemHeader({
         </nav>
 
         <div
-          className="ecosystem-session global-account"
+          data-navigation-account className="ecosystem-session global-account"
           style={{
             display: "flex",
             alignItems: "center",
@@ -223,12 +224,13 @@ export default function EcosystemHeader({
             minWidth: 0,
           }}
         >
-          <span title={email} style={{ maxWidth: 220, overflowWrap: "anywhere", color: "#6e6e73", fontSize: 12 }}>
+          <span data-navigation-identity title={email} style={{ maxWidth: 220, overflowWrap: "anywhere", color: "#6e6e73", fontSize: 12 }}>
             {email}
           </span>
           {actingAdmin && <StopImpersonationButton />}
           <LogoutButton className="quiet-button" label="Salir" redirectTo={`${HUB_URL}/auth/logout`} />
         </div>
+        <button type="button" data-navigation-toggle aria-label="Menú del Hub" aria-controls="hub-primary-menu" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
       </div>
     </header>
   );

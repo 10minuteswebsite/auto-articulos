@@ -489,7 +489,7 @@ export default function DashboardNav({ initialIsAdmin = false }: { initialIsAdmi
         .dashboard-nav .nav-mobile-toggle {
           border-radius: 9px !important;
         }
-        @media (min-width: 1180px) {
+        @media (min-width: 1024px) {
           .nav-mobile-toggle { display: none !important; }
           .nav-mobile-menu { display: none !important; }
           .nav-desktop-row { display: flex !important; }
@@ -498,10 +498,10 @@ export default function DashboardNav({ initialIsAdmin = false }: { initialIsAdmi
           .nav-mobile-toggle { padding: 11px 12px !important; }
           .nav-mobile-menu { border-radius: 12px !important; }
         }
-        @media (max-width: 1179px) {
+        @media (max-width: 1023px) {
           .dashboard-nav .app-subbar-inner { flex-wrap: wrap; padding: 10px 0; }
           .dashboard-nav .app-identity { flex: 1 1 auto; }
-          .nav-mobile-toggle { width: 48px !important; margin-left: auto; }
+          .nav-mobile-toggle { width: auto !important; margin-left: auto; }
           .nav-mobile-menu { left: auto !important; right: 0 !important; width: min(320px, calc(100vw - 32px)); }
         }
         @media (max-width: 420px) {
@@ -521,7 +521,7 @@ export default function DashboardNav({ initialIsAdmin = false }: { initialIsAdmi
         className="nav-mobile-toggle"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        aria-label={open ? "Cerrar menú" : "Abrir menú"}
+        aria-label={open ? "Cerrar secciones de la aplicación" : "Secciones de la aplicación"}
         style={{
           display: "flex",
           width: "100%",
@@ -541,10 +541,10 @@ export default function DashboardNav({ initialIsAdmin = false }: { initialIsAdmi
         }}
         >
         <span
-          style={{ fontSize: 22, lineHeight: 1, opacity: 0.75, flexShrink: 0 }}
+          style={{ fontSize: 14, lineHeight: 1.2, opacity: 1, flexShrink: 0 }}
           aria-hidden="true"
         >
-          {open ? "×" : "☰"}
+          {open ? "Secciones ▴" : "Secciones ▾"}
         </span>
         </button>
 

@@ -116,7 +116,7 @@ export default async function DashboardLayout({
         @media (min-width: 1024px) {
           .mobile-notice { display: none; }
         }
-        @media (min-width: 1180px) {
+        @media (min-width: 1024px) {
           .dashboard-nav { position: relative !important; top: auto; right: auto; }
         }
         /*
