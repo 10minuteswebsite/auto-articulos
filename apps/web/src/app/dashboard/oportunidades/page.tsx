@@ -51,6 +51,9 @@ export default function OportunidadesPage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisSeconds, setAnalysisSeconds] = useState(0);
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Confirmación dentro de la página: window.confirm no abre ningún diálogo en el navegador integrado de la app (devuelve «no» al instante)
+  // y el botón parecía no hacer nada.
+  const [confirmingDeleteAll, setConfirmingDeleteAll] = useState(false);
   const [maxTitlesPerBatch, setMaxTitlesPerBatch] = useState(0);
   const [dailyArticleLimit, setDailyArticleLimit] = useState<number | null>(null);
   const [monthlyArticleLimit, setMonthlyArticleLimit] = useState<number | null>(null);
@@ -342,7 +345,7 @@ export default function OportunidadesPage() {
   }
 
   async function removeAll() {
-    if (!window.confirm("¿Borrar todas las oportunidades? Esta acción no se puede deshacer.")) return;
+    setConfirmingDeleteAll(false);
     setBusyId("__delete_all__");
     setMessage(null);
     const response = await fetch("/api/opportunities", { method: "DELETE" });
@@ -967,17 +970,39 @@ export default function OportunidadesPage() {
 
         {groups.length > 0 && (
           <div style={{ marginTop: 16 }}>
-            <button
-              onClick={removeAll}
-              disabled={busyId !== null}
-              className="secondary"
-              style={disabledStyle(
-                { ...secondaryButtonStyle, color: "#ff3b30", marginTop: 0, marginBottom: 12 },
-                busyId !== null,
-              )}
-            >
-              {busyId === "__delete_all__" ? "Borrando..." : "Borrar todas las oportunidades"}
-            </button>
+            {confirmingDeleteAll ? (
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 13, color: "#1d1d1f" }}>¿Borrar todas las oportunidades? No se puede deshacer.</span>
+                <button
+                  onClick={removeAll}
+                  disabled={busyId !== null}
+                  className="secondary"
+                  style={disabledStyle({ ...secondaryButtonStyle, color: "#ff3b30", marginTop: 0 }, busyId !== null)}
+                >
+                  Sí, borrar todas
+                </button>
+                <button
+                  onClick={() => setConfirmingDeleteAll(false)}
+                  disabled={busyId !== null}
+                  className="secondary"
+                  style={disabledStyle({ ...secondaryButtonStyle, marginTop: 0 }, busyId !== null)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmingDeleteAll(true)}
+                disabled={busyId !== null}
+                className="secondary"
+                style={disabledStyle(
+                  { ...secondaryButtonStyle, color: "#ff3b30", marginTop: 0, marginBottom: 12 },
+                  busyId !== null,
+                )}
+              >
+                {busyId === "__delete_all__" ? "Borrando..." : "Borrar todas las oportunidades"}
+              </button>
+            )}
             {(() => {
               const totalTitles = groups.reduce(
                 (sum, g) => sum + g.titles.length,
