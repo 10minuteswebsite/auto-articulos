@@ -36,13 +36,15 @@ export default function GuardiaAdmin() {
   const [total, setTotal] = useState(0);
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
   const [cuenta, setCuenta] = useState<string>("");
+  const [complemento, setComplemento] = useState<string>("apagado");
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [linea, setLinea] = useState<string | null>(null);
   const [cargandoLinea, setCargandoLinea] = useState(false);
 
   const cargar = useCallback(async () => {
     try {
-      const [m, r] = await Promise.all([fetch("/api/admin/title-guard/mode"), fetch(`/api/admin/title-guard/reports${cuenta ? `?userId=${encodeURIComponent(cuenta)}` : ""}`)]);
+      const [m, r, cm] = await Promise.all([fetch("/api/admin/title-guard/mode"), fetch(`/api/admin/title-guard/reports${cuenta ? `?userId=${encodeURIComponent(cuenta)}` : ""}`), fetch("/api/admin/title-guard/complemento")]);
+      if (cm.ok) setComplemento((await cm.json()).modo ?? "apagado");
       if (m.ok) {
         const dm = await m.json();
         setModo(dm.modo);
@@ -123,6 +125,25 @@ export default function GuardiaAdmin() {
         {vence && <p className="muted" style={{ fontSize: 12 }}>{vence}</p>}
         {mensaje && <p style={{ fontSize: 13, color: "#8a4b08" }}>{mensaje}</p>}
         {linea && <p style={{ fontSize: 13 }}>{linea}</p>}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", margin: "10px 0" }}>
+          <label className="muted" style={{ fontSize: 12 }}>Modo complementario del botón 2 (ideas sin evidencia, solo registra):</label>
+          <select
+            value={complemento}
+            onChange={(e) => {
+              const modo = e.target.value;
+              void fetch("/api/admin/title-guard/complemento", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ modo }) }).then((r) => {
+                if (r.ok) {
+                  setComplemento(modo);
+                  setMensaje(`Modo complementario: ${modo}.`);
+                } else setMensaje("No se pudo cambiar el modo complementario.");
+              });
+            }}
+            style={{ padding: "6px 8px", fontSize: 13 }}
+          >
+            <option value="apagado">Apagado</option>
+            <option value="sombra">Sombra: calcula y registra, no muestra nada</option>
+          </select>
+        </div>
         {reportes && (
           <>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", margin: "10px 0 6px" }}>

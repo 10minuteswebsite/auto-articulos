@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { logDiscardedOpportunities } from "@/lib/title-discard-log";
 import { applyGuardToOpportunities } from "@/lib/opportunity-guard";
 import { MIN_TITLES_PROMISE, recordRedFlag } from "@/lib/opportunity-red-flag";
+import { runComplementShadow } from "@/lib/opportunity-complement";
 import {
   composioQuerySearchAnalytics,
   decryptSecret,
@@ -432,17 +433,35 @@ export async function POST(request: Request) {
         position: row.position,
       })),
     ];
+    const existingTitlesAll = [
+      ...existing.flatMap((title) => (title.finalTitle ? [title.text, title.finalTitle] : [title.text])),
+      ...siteTitleRows.map((row) => row.title),
+    ];
+    // Modo complementario (Fase 2, sombra): solo calcula y registra para el administrador; nunca cambia lo que ve el usuario.
+    const complementShadow = (delivered: number) => {
+      try {
+        after(() =>
+          runComplementShadow({
+            userId,
+            siteDomain: selectedSiteDomain ?? "",
+            delivered,
+            categories: categoriesWithExamples.map((c) => ({ id: c.id, name: c.name, publishedExamples: c.publishedExamples?.slice(0, 8) })),
+            clientLocations,
+            businessLocations,
+            excludedTopics: splitLocations(user.excludedTopics),
+            existingTitles: existingTitlesAll,
+          }),
+        );
+      } catch {
+        // la sombra nunca debe afectar al análisis
+      }
+    };
     const analysis = await analyzeSeoOpportunities({
       categories: categoriesWithExamples,
       currentRows,
       previousRows,
       countryRows,
-      existingTitles: [
-        ...existing.flatMap((title) =>
-          title.finalTitle ? [title.text, title.finalTitle] : [title.text],
-        ),
-        ...siteTitleRows.map((row) => row.title),
-      ],
+      existingTitles: existingTitlesAll,
       googleAnalyticsSummary: summarizeGoogleAnalyticsSignals(googleAnalyticsSignals),
       bingSummary: summarizeBingSignals(bingSignals),
       clientLocations,
@@ -467,6 +486,7 @@ export async function POST(request: Request) {
       });
       // Bandera roja: el análisis no dejó ni un título (promesa mínima: MIN_TITLES_PROMISE).
       const banderaSinNuevos = await recordRedFlag(userId, selectedSiteDomain ?? "", 0, analysis.diagnostico).catch(() => null);
+      complementShadow(0);
       return NextResponse.json({
         groups: await list(userId, selectedSiteDomain),
         lastAnalysisAt: now,
@@ -513,6 +533,7 @@ export async function POST(request: Request) {
     // Bandera roja: tras la guardia quedaron menos títulos que la promesa mínima. Se registra para el administrador y se avisa con claridad.
     const totalGuardado = groupsToSave.reduce((n, g) => n + g.titles.length, 0);
     const banderaPocos = totalGuardado < MIN_TITLES_PROMISE ? await recordRedFlag(userId, selectedSiteDomain ?? "", totalGuardado, diagnostico).catch(() => null) : null;
+    if (totalGuardado < MIN_TITLES_PROMISE) complementShadow(totalGuardado);
     return NextResponse.json({
       groups: await list(userId, selectedSiteDomain),
       lastAnalysisAt: now,
