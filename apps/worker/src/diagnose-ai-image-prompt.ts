@@ -26,7 +26,7 @@ async function main() {
     .filter((f): f is AiImageFormat => (VALID_FORMATS as string[]).includes(f));
   const arms = (process.env.DIAG_ARMS || "actual,nuevo").split(",").map((a) => a.trim());
   const personMode = (process.env.DIAG_PERSON || "no").trim();
-  const logoMode = (process.env.DIAG_LOGO || "auto").trim();
+  const logoMode = (process.env.DIAG_LOGO || "1").trim();
   const persons = personMode === "ambos" ? [false, true] : [personMode === "si"];
 
   const user = await prisma.user.findUnique({
