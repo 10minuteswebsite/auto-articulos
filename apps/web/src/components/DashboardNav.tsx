@@ -499,6 +499,7 @@ export default function DashboardNav({ initialIsAdmin = false }: { initialIsAdmi
           .nav-mobile-menu { border-radius: 12px !important; }
         }
         @media (max-width: 1023px) {
+          .ecosystem-header + .dashboard-nav { position: relative !important; top: auto !important; right: auto !important; margin: 0 !important; }
           .dashboard-nav .app-subbar-inner { flex-wrap: wrap; padding: 10px 0; }
           .dashboard-nav .app-identity { flex: 1 1 auto; }
           .nav-mobile-toggle { width: auto !important; margin-left: auto; }
