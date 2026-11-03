@@ -91,7 +91,8 @@ export function detectLanguage(text: string): LanguageDetection | null {
   }).sort((a, b) => b.hits - a.hits);
 
   const [best, second] = scores;
-  if (best.hits < 2) return null;
+  // Con 2 aciertos basta una palabra compartida entre idiomas ("in", "per") para equivocarse: se exigen 3.
+  if (best.hits < 3) return null;
   // Palabras ambiguas ("a", "de", "no") se reparten entre idiomas hermanos: se exige ventaja clara.
   if (best.hits < second.hits * 1.5 + 0.5) return null;
   return { language: best.language, margin: (best.hits - second.hits) / best.hits, hits: best.hits };
@@ -110,7 +111,7 @@ export function isWrongLanguage(text: string, targetLanguage: string | null | un
 
 // Encabezados y etiquetas típicas que se filtran desde prompts en español (una palabra no se puede detectar por estadística).
 const SPANISH_LEAK_LABELS =
-  /^(fuentes?|fuentes consultadas|preguntas frecuentes|conclusi[oó]n|conclusiones|introducci[oó]n|resumen|contacta ahora|llama ahora|ll[aá]manos|cont[aá]ctanos|ver m[aá]s|leer m[aá]s|sobre el autor|sobre m[ií]|descargo de responsabilidad|aviso legal|pasos|consejos|ventajas|beneficios|requisitos|recomendaciones|ejemplo)\s*:?$/i;
+  /^(fuentes?|fuentes consultadas|preguntas frecuentes|conclusi[ó]n|conclusiones|introducci[ó]n|resumen|contacta ahora|llama ahora|ll[aá]manos|cont[aá]ctanos|ver m[aá]s|leer m[aá]s|sobre el autor|sobre m[ií]|descargo de responsabilidad|aviso legal|pasos|consejos|ventajas|beneficios|requisitos|recomendaciones|ejemplo)\s*:?$/i;
 
 export interface LanguageProblem {
   where: "title" | "summary" | "body";

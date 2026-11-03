@@ -1,3 +1,10 @@
+## INES-IDIOMA-20261103 (parte 2) — Claude — evidencia en producción
+
+- Con «Acceder como» Inés (info@inesgarcia-arcaya.com, idioma `en_VI`) se leyó su Historial (solo lectura, nada publicado): los 37 títulos publicados están en inglés. Lo que estaba en español era el TÍTULO PEDIDO (`Title.text`) de 10 artículos del 22–30/10 («Cómo comprar un condominio en Coral Gables si vivo en Weston»…), que la IA del sitio tradujo al publicar. Esos títulos nacen del generador de Publicar con idioma en español: lo cubre el filtro `idioma_incorrecto` y la regla IDIOMA OBLIGATORIO (parte 1). Desde el 30/10 20:45 los pedidos ya vienen en inglés.
+- Se escanearon los 36 artículos publicados con el detector: el texto generado está en inglés. Los únicos bloques en español (artículos 4, 8, 33) son del widget de «artículos relacionados» de su sitio (posts antiguos de 2025 en español, `user-buller-seller-posts`), NO generados por este sistema; no se tocan.
+- El escaneo destapó dos falsos positivos del detector (encabezado «Conclusion» y una línea corta en inglés tomada por italiano); corregidos y con pruebas (shared 7/7, worker 38/38, web 24/24).
+- Sigue pendiente lanzar `worker.yml`.
+
 ## BLOG-IA-QUITAR-CATEGORIA-20261103 — Claude — publicado; Worker SIN desplegar
 
 - Regla de Milton: una categoría solo se puede quitar si ya no tiene artículos. BLOG IA (`3db2e16`): el blog acepta `category.delete` y responde 409 si tiene artículos; el asistente quita las vacías y, si no se puede, lo explica y no guarda nada.

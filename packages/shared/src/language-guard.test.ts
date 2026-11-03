@@ -42,3 +42,9 @@ test("un artículo en español no se marca cuando se pidió español", () => {
   const html = "<h2>Fuentes</h2><p>Registro oficial de la región y la oficina nacional de estadística para los compradores.</p>";
   assert.deepEqual(findLanguageProblems({ title: "Guía para invertir en la Costa del Sol", html }, "es"), []);
 });
+
+test("falsos positivos reales de Inés: «Conclusion» y una línea corta en inglés no se marcan", () => {
+  assert.deepEqual(findLanguageProblems({ html: "<h2>Conclusion</h2><p>Buyers are looking for properties that offer a good return.</p>" }, "en_VI"), []);
+  assert.deepEqual(findLanguageProblems({ html: "<ul><li>10%: Increase in average price per square foot.</li></ul>" }, "en_VI"), []);
+  assert.equal(findLanguageProblems({ html: "<h2>Conclusión</h2><p>Los compradores buscan propiedades.</p>" }, "en_VI").length > 0, true);
+});
