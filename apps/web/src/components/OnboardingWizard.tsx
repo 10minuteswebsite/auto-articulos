@@ -42,6 +42,8 @@ export default function OnboardingWizard({
 }: OnboardingWizardProps) {
   const [loading, setLoading] = useState(true);
   const [credentialsConfigured, setCredentialsConfigured] = useState(false);
+  // Destino BLOG IA: no hay cuenta de 10minutesWebsite que conectar; las categorías vienen del blog.
+  const [blogDestination, setBlogDestination] = useState<{ hostname: string | null } | null>(null);
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [languages, setLanguages] = useState<LanguageRow[]>([]);
   const [contentLanguage, setContentLanguage] = useState("");
@@ -136,6 +138,7 @@ export default function OnboardingWizard({
       if (credRes.ok) {
         const data = await credRes.json();
         setCredentialsConfigured(Boolean(data.configured));
+        setBlogDestination(data.publishingDestination === "blog-ia" && data.publishingReady ? { hostname: data.blogHostname ?? null } : null);
       }
       if (catRes.ok) {
         const data = await catRes.json();
@@ -430,7 +433,7 @@ export default function OnboardingWizard({
   // saber si algo estaba pasando — el rollo del Paso 2 durante todo el
   // 14/8/2026.
   async function handleSyncCategories() {
-    if (!siteSelectionConfirmed) {
+    if (!blogDestination && !siteSelectionConfirmed) {
       setMessage({ type: "error", text: "Confirma primero el sitio con el que trabajará esta cuenta." });
       return;
     }
@@ -616,12 +619,12 @@ export default function OnboardingWizard({
   // cuando el sitio ya se confirmó con un login exitoso).
   const step1Saved = credentialsConfigured;
   const step1Verified =
-    step1Saved && (lastSyncStatus === "success" || categories.length > 0 || siteSelectionConfirmed);
+    Boolean(blogDestination) || (step1Saved && (lastSyncStatus === "success" || categories.length > 0 || siteSelectionConfirmed));
   // El paso 1 solo se da por terminado cuando, además de guardar
   // credenciales, el sitio real con el que va a trabajar esta cuenta quedó
   // confirmado — si no, Paso 2 podría sincronizar categorías de un sitio
   // equivocado cuando la cuenta expone más de uno.
-  const step1Done = step1Saved && siteSelectionConfirmed;
+  const step1Done = Boolean(blogDestination) || (step1Saved && siteSelectionConfirmed);
   // Las categorías son opcionales durante el onboarding. Una cuenta nueva
   // puede todavía no tener categorías creadas en su web; eso no debe impedir
   // completar el Wizard. El paso permanece disponible para sincronizarlas o
@@ -839,8 +842,8 @@ export default function OnboardingWizard({
           {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
           <StepCard
             stepNumber={1}
-            title={`Conectar tu cuenta de ${productName}`}
-            subtitle={`Ingresa el usuario y contraseña con los que entras a tu plataforma de ${productName}.`}
+            title={blogDestination ? "Tu destino de publicación: tu BLOG IA" : `Conectar tu cuenta de ${productName}`}
+            subtitle={blogDestination ? "Tus artículos se publican en tu blog. No necesitas conectar ninguna otra cuenta." : `Ingresa el usuario y contraseña con los que entras a tu plataforma de ${productName}.`}
             isDone={step1Verified}
             isActive={activeStep === 1}
             badgeText={
@@ -851,7 +854,11 @@ export default function OnboardingWizard({
                   : "Paso 1 en curso"
             }
           >
-            {step1Saved && !editingCreds ? (
+            {blogDestination ? (
+              <div style={{ marginTop: 10, fontSize: 13, color: "#1d1d1f" }}>
+                Publicas en <strong>{blogDestination.hostname ?? "tu BLOG IA"}</strong>. Todo lo que publiques en SEO TOTAL ARTÍCULOS se publica en ese blog.
+              </div>
+            ) : step1Saved && !editingCreds ? (
               <div
                 style={{
                   display: "flex",
@@ -1172,7 +1179,7 @@ export default function OnboardingWizard({
               </div>
             )}
 
-            {step1Saved && siteSelectionConfirmed && (
+            {!blogDestination && step1Saved && siteSelectionConfirmed && (
               <div style={{ marginTop: 12, fontSize: 12, color: "#1d1d1f" }}>
                 Sitio confirmado{selectedSitePanel ? `: ${selectedSitePanel}` : " (único sitio de la cuenta)"}. Esta cuenta de SEO TOTAL trabaja exclusivamente con él.
               </div>
@@ -1184,8 +1191,8 @@ export default function OnboardingWizard({
           {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
           <StepCard
             stepNumber={2}
-            title="Sincronizar las Categorías de tu Web"
-            subtitle={`SEO TOTAL descarga las categorías creadas en tu web de ${productName} para saber dónde clasificar los artículos.`}
+            title={blogDestination ? "Trae las categorías de tu blog" : "Sincronizar las Categorías de tu Web"}
+            subtitle={blogDestination ? "Las categorías de tu blog se eligen en el asistente de BLOG IA. Aquí se traen para que puedas escoger una al publicar." : `SEO TOTAL descarga las categorías creadas en tu web de ${productName} para saber dónde clasificar los artículos.`}
             isDone={step2Done}
             isActive={activeStep === 2}
             badgeText={
@@ -1199,7 +1206,25 @@ export default function OnboardingWizard({
             }
           >
             <div style={{ marginTop: 10 }}>
-              {!step1Done ? (
+              {blogDestination ? (
+                <div>
+                  <div style={{ fontSize: 13, color: "#1d1d1f", marginBottom: 8 }}>
+                    {categories.length > 0 ? (
+                      <><strong>{categories.length} {categories.length === 1 ? "categoría" : "categorías"}</strong> de tu blog, listas para publicar.</>
+                    ) : syncingCategories || categorySyncInProgress ? (
+                      <>Trayendo las categorías de tu blog…</>
+                    ) : (
+                      <><strong>Todavía no hay categorías.</strong> Las eliges en el asistente de BLOG IA (te sugerimos 10 según tu negocio). Después pulsa «Traer las categorías de mi blog».</>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <button type="button" onClick={handleSyncCategories} disabled={syncingCategories || categorySyncInProgress} style={secondaryButtonStyle}>
+                      {syncingCategories || categorySyncInProgress ? "Trayendo…" : "Traer las categorías de mi blog"}
+                    </button>
+                    <a href="https://hub.lasolucionweb.net/api/product-launch?app=blog-ia" style={{ ...secondaryButtonStyle, textDecoration: "none", display: "inline-block" }}>Elegir categorías en BLOG IA</a>
+                  </div>
+                </div>
+              ) : !step1Done ? (
                 <p style={{ fontSize: 13, color: "#6e6e73", margin: 0 }}>
                   Este paso se desbloqueará automáticamente al completar el Paso 1.
                 </p>

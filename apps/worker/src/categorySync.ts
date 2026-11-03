@@ -13,6 +13,7 @@ import {
 } from "./automation/10minutesWebsite";
 import { tryReserveUser, releaseUser } from "./reservation";
 import { chooseUnambiguousCategoryPanel } from "./categoryPanelFallback";
+import { syncBlogCategories } from "./blogCategorySync";
 
 function languageFromPanel(panel: string): string | null {
   const value = panel.trim().toLocaleLowerCase();
@@ -150,6 +151,15 @@ export async function processNextCategorySync(filterUserId?: string): Promise<bo
   });
 
   try {
+    // Destino BLOG IA: no hay sitio de 10minutesWebsite del que traer nada; las categorías se leen del propio blog.
+    const destination = await prisma.user.findUnique({ where: { id: job.userId }, select: { publishMethod: true } });
+    if (destination?.publishMethod === "BLOG") {
+      const added = await syncBlogCategories(job.userId);
+      await prisma.categorySyncJob.update({ where: { id: job.id }, data: { status: "success", errorMessage: null, finishedAt: new Date() } });
+      console.log(`CategorySyncJob ${job.id} (usuario ${job.userId}): destino BLOG IA, ${added} categoría(s) nueva(s) del blog.`);
+      return true;
+    }
+
     const [credential, user] = await Promise.all([
       prisma.credential.findUnique({
         where: { userId_platform: { userId: job.userId, platform: "10minutesWebsite" } },

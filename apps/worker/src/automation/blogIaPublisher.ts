@@ -30,7 +30,7 @@ export interface BlogIaPublisherContext {
   contentLanguage: string;
   authorName?: string | null;
   /** Categoría de SEO Total del lote; el blog la recibe como categoría propia. */
-  category: { id: string; name: string; description?: string };
+  category: { id: string; name: string; description?: string; /** Ya existe en el blog (la creó el asistente de BLOG IA): no se reenvía ni se pisa su descripción. */ existing?: boolean };
   generate?: GenerateFn;
   /**
    * Portada opcional (generador de imágenes). Devuelve los bytes YA optimizados
@@ -90,12 +90,14 @@ export function createBlogIaPublisher(ctx: BlogIaPublisherContext): ArticlePubli
       const categoryId = ctx.category.id;
       const baseSlug = slugify(generated.title) || `articulo-${sourceId.slice(0, 8)}`;
 
-      await send({
-        eventId: `category:${categoryId}:${hash(ctx.category.name).slice(0, 8)}`,
-        type: "category.upsert",
-        tenantId: ctx.tenantId,
-        data: { id: categoryId, slug: slugify(ctx.category.name) || categoryId.toLowerCase(), name: ctx.category.name, description: ctx.category.description ?? "" },
-      });
+      if (!ctx.category.existing) {
+        await send({
+          eventId: `category:${categoryId}:${hash(ctx.category.name).slice(0, 8)}`,
+          type: "category.upsert",
+          tenantId: ctx.tenantId,
+          data: { id: categoryId, slug: slugify(ctx.category.name) || categoryId.toLowerCase(), name: ctx.category.name, description: ctx.category.description ?? "" },
+        });
+      }
 
       // Portada: se sube al blog con un id estable (`cover-<articulo>`), así la URL
       // pública se conoce antes y reintentar no duplica la imagen.

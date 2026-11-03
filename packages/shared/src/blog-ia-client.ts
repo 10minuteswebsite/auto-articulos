@@ -79,6 +79,31 @@ export async function sendBlogIaEvent(config: BlogIaConfig, event: BlogIaEvent):
   throw new BlogIaError(res.status, payload.error ?? `BLOG IA respondió ${res.status}`, res.status >= 500 || res.status === 429);
 }
 
+/** Rutas de lectura/consulta firmadas del blog (mismo host y firma que /api/ingest). */
+export type BlogIaQueryPath = "/api/categories/suggest" | "/api/categories/list";
+
+/** POST firmado a una ruta de consulta. Devuelve el cuerpo JSON (`ok: true`) o lanza `BlogIaError`. */
+export async function postBlogIaJson<T extends { ok: true }>(config: BlogIaConfig, path: BlogIaQueryPath, payload: Record<string, unknown>): Promise<T> {
+  const body = JSON.stringify(payload);
+  const ts = String(Math.floor((config.now?.() ?? new Date()).getTime() / 1000));
+  const doFetch = config.fetchImpl ?? fetch;
+  let res: Response;
+  try {
+    res = await doFetch(`${config.apiUrl.replace(/\/$/, "")}${path}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-blogia-timestamp": ts, "x-blogia-signature": await signBlogIaBody(config.secret, ts, body) },
+      body,
+      signal: AbortSignal.timeout(config.timeoutMs ?? 30_000),
+    });
+  } catch (e) {
+    throw new BlogIaError(0, `No se pudo contactar con BLOG IA: ${e instanceof Error ? e.message : String(e)}`, true);
+  }
+  let parsed: { ok?: boolean; error?: string } = {};
+  try { parsed = (await res.json()) as typeof parsed; } catch { /* cuerpo no JSON */ }
+  if (res.ok && parsed.ok) return parsed as T;
+  throw new BlogIaError(res.status, parsed.error ?? `BLOG IA respondió ${res.status}`, res.status >= 500 || res.status === 429);
+}
+
 /** Slug legible, minúsculas y con guiones (mismo criterio que el blog). */
 export function slugifyForBlogIa(text: string): string {
   return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120);

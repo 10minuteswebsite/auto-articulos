@@ -4,6 +4,7 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { triggerWorkerNow } from "@/lib/trigger-worker";
 import { checkTrialAccess } from "@/lib/trial-rule-setting";
 import { isStuckSyncJob, STUCK_SYNC_JOB_MESSAGE } from "@/lib/sync-jobs";
+import { publishingReadiness } from "@/lib/publishing-readiness";
 
 export async function POST() {
   const userId = await getCurrentUserId();
@@ -31,7 +32,9 @@ export async function POST() {
   const credential = await prisma.credential.findUnique({
     where: { userId_platform: { userId, platform: "10minutesWebsite" } },
   });
-  if (!credential) {
+  // Con destino BLOG IA las categorías vienen del blog: no hace falta ninguna credencial de 10minutesWebsite.
+  const publishing = await publishingReadiness(prisma, userId, Boolean(credential));
+  if (!credential && publishing.destination !== "blog-ia") {
     return NextResponse.json(
       { error: "Primero debes guardar tus credenciales de la plataforma" },
       { status: 400 }

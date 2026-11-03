@@ -116,7 +116,10 @@ export async function processBlogRunTitle(run: RunForBlog, nextTitle: TitleForBl
     promptText,
     contentLanguage: effectiveLanguage,
     authorName: [run.user.firstName, run.user.lastName].filter(Boolean).join(" ") || run.user.name || null,
-    category: { id: run.category.id, name: run.category.name },
+    // Categoría creada en el asistente de BLOG IA (source "blog"): el blog ya la tiene con ese id; se usa tal cual.
+    category: run.category.source === "blog"
+      ? { id: run.category.externalId, name: run.category.name, existing: true }
+      : { id: run.category.id, name: run.category.name },
     generate: overrides.generate,
     cover: overrides.cover ?? (async (title, summary) => {
       const generated = await generateBlogCover({
