@@ -4,6 +4,7 @@
 - Se escanearon los 36 artículos publicados con el detector: el texto generado está en inglés. Los únicos bloques en español (artículos 4, 8, 33) son del widget de «artículos relacionados» de su sitio (posts antiguos de 2025 en español, `user-buller-seller-posts`), NO generados por este sistema; no se tocan.
 - El escaneo destapó dos falsos positivos del detector (encabezado «Conclusion» y una línea corta en inglés tomada por italiano); corregidos y con pruebas (shared 7/7, worker 38/38, web 24/24).
 - Sigue pendiente lanzar `worker.yml`.
+- Prueba en vivo como Inés (usó 1 de sus 3 solicitudes de títulos del día; nada publicado): datos en español + `en_VI` → 9 títulos, todos en inglés (web ya desplegada con #789/#790, 3/11/2026). Artículos/FAQ con el Worker: sin probar hasta desplegar `worker.yml`.
 
 ## BLOG-IA-QUITAR-CATEGORIA-20261103 — Claude — publicado; Worker SIN desplegar
 
