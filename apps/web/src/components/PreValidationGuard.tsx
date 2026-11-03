@@ -12,6 +12,8 @@ interface PreValidationGuardProps {
   type: "publicar" | "oportunidades";
   credentialsConfigured: boolean;
   hasCategories: boolean;
+  /** Destino BLOG IA: dirección del blog (o "" si aún no se conoce). Con él, el Paso 1 no pide 10minutesWebsite. */
+  blogDestination?: string | null;
   categoriesCount?: number;
   hasLanguage: boolean;
   languageName?: string;
@@ -29,6 +31,7 @@ export default function PreValidationGuard({
   type,
   credentialsConfigured,
   hasCategories,
+  blogDestination = null,
   categoriesCount = 0,
   hasLanguage,
   languageName,
@@ -89,23 +92,23 @@ export default function PreValidationGuard({
   const steps = [
     {
       num: 1,
-      title: `Cuenta de ${productName}`,
-      desc: "Tus credenciales para publicar artículos en tu sitio web.",
+      title: blogDestination !== null ? "Destino: tu BLOG IA" : `Cuenta de ${productName}`,
+      desc: blogDestination !== null ? (blogDestination ? `Tus artículos se publican en tu blog (${blogDestination}).` : "Tus artículos se publican en tu blog.") : "Tus credenciales para publicar artículos en tu sitio web.",
       ready: credentialsConfigured,
-      readyText: "Conectada",
-      missingText: "Falta conectar",
-      actionUrl: "/dashboard/configuracion?tab=wizard",
-      actionLabel: "Conectar",
+      readyText: blogDestination !== null ? "Listo" : "Conectada",
+      missingText: blogDestination !== null ? "Termina tu blog" : "Falta conectar",
+      actionUrl: blogDestination !== null ? "https://hub.lasolucionweb.net/api/product-launch?app=blog-ia" : "/dashboard/configuracion?tab=wizard",
+      actionLabel: blogDestination !== null ? "Abrir BLOG IA" : "Conectar",
     },
     {
       num: 2,
       title: "Categorías de artículos",
-      desc: "Las categorías sincronizadas donde se clasificarán tus artículos.",
+      desc: blogDestination !== null ? "Los temas de tu blog, que eliges en el asistente de BLOG IA." : "Las categorías sincronizadas donde se clasificarán tus artículos.",
       ready: hasCategories,
       readyText: `${categoriesCount} categorías`,
-      missingText: "Falta sincronizar",
+      missingText: blogDestination !== null ? "Falta traerlas de tu blog" : "Falta sincronizar",
       actionUrl: "/dashboard/configuracion?tab=wizard",
-      actionLabel: "Sincronizar",
+      actionLabel: blogDestination !== null ? "Traer categorías" : "Sincronizar",
     },
     {
       num: 3,
