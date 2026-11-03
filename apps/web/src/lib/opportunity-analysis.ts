@@ -11,8 +11,8 @@ interface OpportunityAnalysisGroup {
 }
 
 export type OpportunityAnalysisResult =
-  | { status: "ok"; groups: OpportunityAnalysisGroup[] }
-  | { status: "no_new" };
+  | { status: "ok"; groups: OpportunityAnalysisGroup[]; diagnostico?: Record<string, number> }
+  | { status: "no_new"; diagnostico?: Record<string, number> };
 
 const COUNTRY_NAMES: Record<string, string> = {
   usa: "Estados Unidos",
@@ -1081,12 +1081,12 @@ ${JSON.stringify(input.existingTitles)}
 OPORTUNIDADES YA CREADAS EN ESTA CORRIDA, POR CATEGORIA, CON SU needKey (NO CANIBALIZAR NI REPETIR needKey, NI DENTRO DE LA MISMA CATEGORIA NI CONTRA OTRA CATEGORIA DISTINTA):
 ${JSON.stringify(alreadyProposedByCategory)}`;
 
-    if (debugEnabled) debugCounters.batches++;
+    debugCounters.batches++;
     let parsed: Record<string, unknown>;
     try {
       parsed = await callOpenAiWithRetry(prompt, apiKey);
     } catch (err) {
-      if (debugEnabled) debugCounters.batchesFailed++;
+      debugCounters.batchesFailed++;
       console.error(`Lote ${batchIndex + 1} fallo, continuando con siguientes lotes:`, err);
       continue;
     }
@@ -1231,7 +1231,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         finalResult.push(destGroup);
       }
       if (categoryTitleCap !== null && destGroup.titles.length >= categoryTitleCap) {
-        if (debugEnabled) debugCounters.rejectedCategoryCapReached++;
+        debugCounters.rejectedCategoryCapReached++;
         continue;
       }
       destGroup.titles.push(sourceGroup.titles[index]);
@@ -1248,9 +1248,9 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
   }
 
   if (allResult.length === 0) {
-    return { status: "no_new" };
+    return { status: "no_new", diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length } };
   }
-  return { status: "ok", groups: allResult };
+  return { status: "ok", groups: allResult, diagnostico: { ...debugCounters, filasDeEvidencia: evidenceRows.length } };
 
   // Procesa un array crudo de "opportunities" devuelto por OpenAI (del lote
   // principal o del paso dedicado de geolocalizacion) con exactamente las
@@ -1297,11 +1297,11 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         const value = candidate as Record<string, unknown>;
         if (typeof value.text !== "string") continue;
         const text = value.text.trim();
-        if (debugEnabled && text) debugCounters.modelProposedTitles++;
+        if (text) debugCounters.modelProposedTitles++;
         if (!text) continue;
         const normalized = normalizeTitle(text);
         if (seen.has(normalized)) {
-          if (debugEnabled) debugCounters.rejectedEmptyOrDuplicateExact++;
+          debugCounters.rejectedEmptyOrDuplicateExact++;
           continue;
         }
         const rationale =
@@ -1341,7 +1341,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         // sin importar cuán buena sea la evidencia. Esta validación corre AQUÍ
         // (en JavaScript), no solo en el prompt, para garantizar cumplimiento.
         if (titleTouchesExcludedTopic(text)) {
-          if (debugEnabled) debugCounters.rejectedExcludedTopic++;
+          debugCounters.rejectedExcludedTopic++;
           continue;
         }
         // Garantía determinista contra años inventados O desactualizados:
@@ -1354,7 +1354,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
               !hasContextualEvidenceForYear(text, year, evidenceRows),
           )
         ) {
-          if (debugEnabled) debugCounters.rejectedBadYear++;
+          debugCounters.rejectedBadYear++;
           continue;
         }
         // La categoría es solo el lugar de archivo, no un criterio para
@@ -1368,7 +1368,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         // categorías. NO compara contra lo ya publicado (ver nota arriba,
         // en la inicialización de intentSignatures).
         if (collidesWithIntent(signature, intentSignatures)) {
-          if (debugEnabled) debugCounters.rejectedCollision++;
+          debugCounters.rejectedCollision++;
           continue;
         }
         // Zona ciega del chequeo determinista de arriba (ver
@@ -1378,7 +1378,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         // si es la misma necesidad — no se decide por conteo de palabras.
         const ambiguousMatches = findAmbiguousIntentMatches(signature, intentSignatures);
         if (ambiguousMatches.length > 0) {
-          if (debugEnabled) debugCounters.ambiguousCollisionChecks++;
+          debugCounters.ambiguousCollisionChecks++;
           const collidingIndices = await reasonAboutAmbiguousCollisions(
             { text, needKey },
             ambiguousMatches,
@@ -1400,7 +1400,7 @@ Responde SOLO JSON con este formato: {"opportunities":[{"categoryId":"id","ratio
         seen.add(normalized);
         intentSignatures.push(signature);
         if (needKey) needKeyByTitle.set(text, needKey);
-        if (debugEnabled) debugCounters.accepted++;
+        debugCounters.accepted++;
         newTitles.push({ text, rationale });
       }
 
