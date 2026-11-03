@@ -468,11 +468,13 @@ export async function POST(request: Request) {
         groups: await list(userId, selectedSiteDomain),
         lastAnalysisAt: now,
         noNewOpportunities: true,
+        diagnostico: analysis.diagnostico,
       });
     }
 
     // Guardia de ángulos (módulo 2): quita los títulos repetidos DESPUÉS del razonamiento con Search Console y Bing y sin tocar
     // ninguna señal; si está apagada o falla, se guarda todo exactamente como siempre.
+    const diagnostico = analysis.diagnostico;
     const groupsToSave = (await applyGuardToOpportunities(userId, selectedSiteDomain ?? "", analysis.groups)).groups;
 
     // Un análisis nuevo REEMPLAZA las oportunidades que seguían sin ejecutarse: se guardan antes de que desaparezcan.
@@ -508,6 +510,8 @@ export async function POST(request: Request) {
       groups: await list(userId, selectedSiteDomain),
       lastAnalysisAt: now,
       ...(staleEvidenceFrom ? { staleEvidenceFrom } : {}),
+      // Contadores del análisis (cuántos títulos propuso el modelo y en qué regla se perdió cada uno). Solo números.
+      diagnostico: { ...diagnostico, enviadosATrabajo: groupsToSave.reduce((n, g) => n + g.titles.length, 0) },
     });
   } catch (error) {
     console.error("POST /api/opportunities falló:", error);
