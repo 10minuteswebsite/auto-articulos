@@ -102,7 +102,8 @@ export interface ArticleLengthPolicy {
 
 const DEFAULT_MAX_WORDS = 1200;
 /** Por debajo de este porcentaje del mínimo pedido se hace un segundo intento pidiendo ampliar. */
-const MIN_ACCEPT_RATIO = 0.9;
+// El mínimo de BLOG IA es un mínimo de verdad: sin tolerancia (la prueba real con 90 % dejó pasar 926 palabras).
+const MIN_ACCEPT_RATIO = 1;
 
 /** Palabras visibles del HTML (sin etiquetas). */
 export function countArticleWords(html: string): number {

@@ -51,9 +51,19 @@ test("con política: si todos los intentos quedan cortos, publica el más largo 
   } finally { m.restore(); }
 });
 
-test("con política: un artículo de 950 palabras (≥90 %) se acepta sin reintento", async () => {
+test("con política: 950 palabras NO alcanzan el mínimo de 1,000 y se reintenta (sin tolerancia)", async () => {
+  const { generateCustomArticle, countArticleWords } = await import("./generateCustomArticle");
+  const m = mockOpenAi([950, 1010]);
+  try {
+    const r = await generateCustomArticle("Tema", "p", "es", null, { minWords: 1000, maxWords: 1400 });
+    assert.equal(m.bodies.length, 2);
+    assert.equal(countArticleWords(r.contentHtml), 1010);
+  } finally { m.restore(); }
+});
+
+test("con política: 1,000 exactas se aceptan sin reintento", async () => {
   const { generateCustomArticle } = await import("./generateCustomArticle");
-  const m = mockOpenAi([950]);
+  const m = mockOpenAi([1000]);
   try {
     await generateCustomArticle("Tema", "p", "es", null, { minWords: 1000, maxWords: 1400 });
     assert.equal(m.bodies.length, 1);

@@ -1,3 +1,7 @@
+## BLOG-IA-LONGITUD-SIN-TOLERANCIA-20261103 — Claude — publicado
+
+- Segunda prueba con Lorena tras la expansión: 926 palabras de cuerpo (antes 678) — mejoró pero pasó el filtro por la tolerancia del 90 %. Para BLOG IA el mínimo ya no tiene tolerancia (`MIN_ACCEPT_RATIO` = 1); sigue siendo solo con política de longitud. 7 pruebas PASS. Siguiente: desplegar `worker.yml` y tercera prueba.
+
 ## BLOG-IA-LONGITUD-EXPANSION-20261103 — Claude — publicado
 
 - Prueba real con Lorena (3/11): el artículo BLOG IA salió con ~678 palabras, no 1,000: el reintento no le daba el borrador al modelo. Ahora, SOLO con política de longitud (salida BLOG IA), hay hasta 3 intentos y los reintentos expanden el borrador más largo. Sin política (10MWS, MCP, resto) nada cambia. Sin migraciones. 6 pruebas de longitud PASS. Pendiente: desplegar `worker.yml` y repetir la prueba con Lorena.
