@@ -1,6 +1,6 @@
-## RESPONSIVE-MENUS-20261103 · 03/11/2026
+## RESPONSIVE-MENUS-20261103 · 03/11/2026 · CERRADO / LIBERADA
 
-`5d68f88` · `Vercel web 8W31gD39XMp444VfUEjJYg1BdCFV y auto-articulos-web Rn1kpGDRXYWwem3DVnGwa5Q8iLoi (success)`. Navegación compacta <1024px; Hub hamburguesa / app Secciones, identidad visible. E2E visual y teclado verificados. [Evidencia](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/responsive-menus-20261103.md).
+Fuente funcional `93144d4`; producción `Vercel web y auto-articulos-web: success (93144d4)`. Hub hamburguesa y app Secciones bajo 1024px; identidad visible y desktop conservados. La regla compartida `width < 1024px` cubre también el zoom y los anchos fraccionarios (borde 1023.636/1024.545 comprobado en Agentes). Recorrido autenticado, cierre, Escape y cinco tamaños verificados en el acta. Agentes ya publicado tras excepción de PR, 37 bindings intactos. Sin cambios de datos, auth, permisos o secretos. [Evidencia y punto cero](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/responsive-menus-20261103.md).
 
 ## 03/11 · TENANT-IDENTITY-20261103
 
