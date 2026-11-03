@@ -37,25 +37,6 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
     );
   }
 
-  if (status === "not_configured") {
-    return (
-      <div style={{ marginTop: 7, fontSize: 12 }}>
-        <div style={{ color: "#6e6e73" }}>
-          Google Search Console no estaba conectado cuando se publicó este
-          artículo.
-        </div>
-        <div style={{ marginTop: 5 }}>
-          <a
-            href="/dashboard/configuracion"
-            style={{ color: "#0066cc", fontWeight: 600 }}
-          >
-            Conectar Google Search Console
-          </a>
-        </div>
-      </div>
-    );
-  }
-
   const googleSent = Boolean(title.lastSitemapSentAt);
   const bingSent = title.bingIndexingStatus === "submitted";
   const bingConfigured = title.bingIndexingStatus !== "not_configured";
@@ -85,7 +66,11 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
 
   return (
     <div style={{ marginTop: 7, fontSize: 12 }}>
-      {googleSent ? (
+      {status === "not_configured" ? (
+        <div style={{ color: "#6e6e73" }}>
+          Google Search Console: pendiente de envío. Se enviará automáticamente.
+        </div>
+      ) : googleSent ? (
         <div style={{ color: "#16803c" }}>Sitemap enviado a Google</div>
       ) : (
         <div style={{ color: "#6e6e73" }}>
