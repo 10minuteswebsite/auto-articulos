@@ -14,7 +14,7 @@ test("bandera roja: el motivo para el administrador lleva los números reales y 
   assert.match(flag.admin, /32 propuestas/);
   assert.match(flag.admin, /19 repetían/);
   assert.match(flag.admin, /5 chocaban con los temas excluidos/);
-  assert.match(flag.usuario, /ninguna idea nueva/);
+  assert.match(flag.usuario, /^Hoy no encontramos ideas nuevas\./);
   assert.match(flag.usuario, /ya cubre casi todos los temas/, "predominan los repetidos");
   assert.doesNotMatch(flag.usuario, /rejected|Diagnostico|batches|\d{3,}/);
 });
