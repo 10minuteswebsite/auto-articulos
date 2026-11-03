@@ -1,3 +1,18 @@
+## 2/11 · REDES-VICENTE-CONEXIONES-20261102 · PR #760 ABIERTO, SIN FUSIONAR
+
+Punto cero medido en producción (runs Actions 41481968171 y 41482735317, solo lectura):
+Instagram de Vicente guardado ACTIVE pero EXPIRED en Composio (activado hace 11 días);
+Facebook y Pinterest ACTIVE. Censo: 112 conexiones sociales / 43 cuentas, solo esa vencida
+(instagram 38 ACTIVE + 1 EXPIRED, facebook 41, pinterest 32). Causa del vencimiento: sin
+determinar. Causa del síntoma: Conexiones leía solo la fila local; el error de Composio
+«No active connection…» salía sin traducir.
+PR #760: contrasta Facebook/Instagram/Pinterest con Composio al abrir Conexiones (REVOKED,
+«Venció: vuelve a conectar») y traduce el error. Tests de friendly-publish-error PASS.
+NO verificado en producción: el PR no está fusionado ni desplegado. Pendiente: que Vicente
+desconecte y reconecte Instagram con todas las casillas; error «Falta un permiso en la red»
+(Facebook activo) sin confirmar. Workflow reutilizado: diagnose-opportunities-composio.yml
+con account_numbers=social.
+
 ## WAITLIST-CLOSE-20261101 · Actions CERRADO / reserva LIBERADA
 
 Código3e61b63; ambos workflows autentican por OIDC efímero enmain sin secretosbackend/ID legacy. Runs41347894875 y41349239059 prueban400 autenticado antes de escrituras; migratejob omitido/DB ficticia. Sync41348478173 y replay41348764593:124/0 cadauno. Hub conserva estados/permisos canónicos. WebVercel conserva transporteOIDC previo; no desplegarWorker. [Acta/mapa/límites](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-11-01-waitlist-close.md).
