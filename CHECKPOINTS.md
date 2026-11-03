@@ -1,3 +1,7 @@
+## Checkpoint — REDES-BLOG-DESACTIVADO-20261103 — 2026-11-03
+
+- Publicado; falta verlo con un blog desactivado.
+
 ## Checkpoint — BLOG-IA-SOLO-BLOG-VALIDACION-20261103 — 2026-11-03
 
 - Publicado; falta verlo en pantalla con una sesión de destino BLOG.

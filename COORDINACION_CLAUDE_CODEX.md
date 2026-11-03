@@ -1,3 +1,11 @@
+## REDES-BLOG-DESACTIVADO-20261103 — Claude — publicado
+
+- Regla de Milton: sin blog activo no hay dónde publicar los artículos de BLOG IA; Redes no debe ofrecerlos ni publicarlos aunque el historial siga en Artículos.
+- Antes: un blog desactivado responde 503 y Redes lo trataba como «no sé» (`unknown`) y lo seguía ofreciendo. Ahora la decisión sale de la base (estado del blog), no de HTTP.
+- Cambios: `belongsToUnavailableBlog` en `lib/social-article-url.ts`; `/api/social-opportunities/generate` no incluye artículos de un blog no disponible; `/api/social-opportunities/publish` devuelve 409 (`blog_unavailable`) con el mensaje «Tu blog no está activo… Reactiva tu BLOG IA para difundirlo».
+- «No disponible» = estado distinto de `active`, o sin dominio/HTTPS verificados. Solo afecta artículos cuya dirección es la del propio blog del usuario; 10minutesWebsite y otros sitios no cambian.
+- Pruebas: `social-blog-unavailable.test.ts` (4); web 407/407; tsc limpio. Sin migraciones. NO verificado en pantalla (falta una cuenta con blog desactivado).
+
 ## BLOG-IA-SOLO-BLOG-VALIDACION-20261103 — Claude — publicado
 
 - Cliente «solo BLOG IA» (sin sitio 10minutesWebsite) ya no se atasca en la validación previa: `/api/pre-validation` y `/api/configuration-status` toman el destino BLOG listo como «configurado» (`publishingReadiness`), y `PreValidationGuard` dice «Destino: tu BLOG IA», «Abrir BLOG IA» y «Traer categorías» en vez de pedir conectar 10minutesWebsite. Con destino 10MWS todo igual (prueba incluida).

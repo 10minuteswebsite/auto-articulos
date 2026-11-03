@@ -1,3 +1,7 @@
+## REDES-BLOG-DESACTIVADO-20261103 — publicado
+
+Redes no ofrece ni publica artículos de un blog de BLOG IA que no esté activo. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
+
 ## BLOG-IA-SOLO-BLOG-VALIDACION-20261103 — publicado
 
 La validación previa y el estado de configuración aceptan el destino BLOG IA (sin credenciales de 10minutesWebsite). Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
