@@ -35,16 +35,18 @@ test("con política: pide entre 1,000 y 1,400 y reintenta si queda corto", async
     const r = await generateCustomArticle("Tema", "Escribe {title}", "es", null, { minWords: 1000, maxWords: 1400 });
     assert.equal(m.bodies.length, 2);
     assert.match(m.bodies[0].messages[0].content, /between 1,000 and 1,400 words/);
-    assert.match(m.bodies[1].messages[1].content, /too short \(500 words\)/);
+    assert.match(m.bodies[1].messages[1].content, /EXPAND THE DRAFT BELOW\. It has only 500 words/);
+    assert.match(m.bodies[1].messages[1].content, /DRAFT contentHtml:\n<p>palabra/, "el reintento incluye el borrador anterior");
     assert.equal(countArticleWords(r.contentHtml), 1100);
   } finally { m.restore(); }
 });
 
-test("con política: si ambos intentos quedan cortos, publica el más largo en vez de fallar", async () => {
+test("con política: si todos los intentos quedan cortos, publica el más largo en vez de fallar", async () => {
   const { generateCustomArticle, countArticleWords } = await import("./generateCustomArticle");
-  const m = mockOpenAi([600, 800]);
+  const m = mockOpenAi([600, 800, 700]);
   try {
     const r = await generateCustomArticle("Tema", "p", "es", null, { minWords: 1000, maxWords: 1400 });
+    assert.equal(m.bodies.length, 3);
     assert.equal(countArticleWords(r.contentHtml), 800);
   } finally { m.restore(); }
 });
@@ -56,4 +58,26 @@ test("con política: un artículo de 950 palabras (≥90 %) se acepta sin reinte
     await generateCustomArticle("Tema", "p", "es", null, { minWords: 1000, maxWords: 1400 });
     assert.equal(m.bodies.length, 1);
   } finally { m.restore(); }
+});
+
+test("con política: el tercer intento expande y logra el mínimo (caso real: 678 → 820 → 1,050)", async () => {
+  const { generateCustomArticle, countArticleWords } = await import("./generateCustomArticle");
+  const m = mockOpenAi([678, 820, 1050]);
+  try {
+    const r = await generateCustomArticle("Tema", "p", "es", null, { minWords: 1000, maxWords: 1400 });
+    assert.equal(m.bodies.length, 3);
+    assert.match(m.bodies[2].messages[1].content, /It has only 820 words/, "expande el borrador más largo, no el primero");
+    assert.equal(countArticleWords(r.contentHtml), 1050);
+  } finally { m.restore(); }
+});
+
+test("sin política el reintento sigue siendo el de siempre (2 intentos, sin expandir)", async () => {
+  const { generateCustomArticle } = await import("./generateCustomArticle");
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => { calls++; return new Response(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content: "no es json" } }] }), { status: 200 }); }) as typeof fetch;
+  try {
+    await assert.rejects(() => generateCustomArticle("Tema", "p", "es"));
+    assert.equal(calls, 2);
+  } finally { globalThis.fetch = original; }
 });

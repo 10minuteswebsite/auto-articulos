@@ -164,7 +164,9 @@ Mandatory limits so the result can be saved safely:
   let lastError = "";
   // Si ningún intento llega al mínimo, se publica el más largo en vez de fallar la tarea.
   let shortest: CustomArticleResult | null = null;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  // Con política de longitud hay un intento más: el segundo y el tercero expanden el borrador más largo.
+  const maxAttempts = length ? 3 : 2;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const response = await fetch(OPENAI_CHAT_URL, {
       method: "POST",
       headers: {
@@ -182,7 +184,7 @@ Mandatory limits so the result can be saved safely:
               attempt === 0
                 ? userPrompt
                 : shortest && length
-                  ? `${userPrompt}\n\nRetry: the previous draft was too short (${countArticleWords(shortest.contentHtml)} words). Return a fuller, deeper article of at least ${length.minWords} words as complete JSON, adding useful sections, examples and answers to common questions, without markers or structured code.`
+                  ? `${userPrompt}\n\nEXPAND THE DRAFT BELOW. It has only ${countArticleWords(shortest.contentHtml)} words and the article MUST have at least ${length.minWords} words (aim for about ${Math.round((length.minWords + length.maxWords) / 2)}). Return the complete, expanded article as JSON with the same structure. Keep the same topic, title, headings and facts; make every section deeper with concrete steps, examples, common mistakes, practical tips and extra answers to common questions. Do not repeat sentences, do not invent figures, and keep the language and format rules above.\n\nDRAFT contentHtml:\n${shortest.contentHtml}`
                   : `${userPrompt}\n\nRetry: return a more concise article as complete JSON, without markers or structured code.`,
           },
         ],
@@ -230,7 +232,7 @@ Mandatory limits so the result can be saved safely:
   }
 
   if (shortest) return shortest;
-  throw new Error(`OpenAI no pudo generar un artículo válido tras dos intentos: ${lastError}`);
+  throw new Error(`OpenAI no pudo generar un artículo válido tras varios intentos: ${lastError}`);
 }
 
 /**

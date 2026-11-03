@@ -1,3 +1,7 @@
+## BLOG-IA-LONGITUD-EXPANSION-20261103 — Claude — publicado
+
+- Prueba real con Lorena (3/11): el artículo BLOG IA salió con ~678 palabras, no 1,000: el reintento no le daba el borrador al modelo. Ahora, SOLO con política de longitud (salida BLOG IA), hay hasta 3 intentos y los reintentos expanden el borrador más largo. Sin política (10MWS, MCP, resto) nada cambia. Sin migraciones. 6 pruebas de longitud PASS. Pendiente: desplegar `worker.yml` y repetir la prueba con Lorena.
+
 ## OPORTUNIDADES-MONICA-20261102 · CERRADO / LIBERADA
 
 Claude. Caso Mónica Chediak, PR #761 (`b53b91bf`), sin migración. Artículos: el POST contaba oportunidades ocultas (otro sitio o ya publicadas); ahora cuenta solo las visibles. Redes: el límite de inspección se gastaba en artículos ya usados en todas las redes; ahora se descartan antes. Verificado en producción con la cuenta de Mónica: «Analizar contenido» completó el análisis con datos de Search Console y «Crear propuestas» en Meta generó 3 propuestas. Capitanía liberada. No se auditó a otros usuarios (sin acceso a la base de producción desde esta sesión).
