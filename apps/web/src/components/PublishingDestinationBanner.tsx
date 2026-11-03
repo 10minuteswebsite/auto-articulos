@@ -42,7 +42,7 @@ export default function PublishingDestinationBanner() {
   return (
     <div role="status" style={{ border: "1px solid #e5e5ea", borderRadius: 14, background: "#ffffff", padding: "16px 20px", marginBottom: 16, color: "#1d1d1f" }}>
       <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", color: "#6e6e73", marginBottom: 4 }}>DESTINO DE PUBLICACIÓN</div>
-      <div style={{ fontSize: 15, fontWeight: 600 }}>Estás publicando en tu BLOG IA{info.hostname ? `: ${info.hostname}` : ""}</div>
+      <div style={{ fontSize: 15, fontWeight: 600 }}>BLOG IA{info.hostname ? `: ${info.hostname}` : ""}</div>
       <p style={{ margin: "6px 0 0", fontSize: 13, color: "#6e6e73", lineHeight: 1.5 }}>
         Todo lo que publiques aquí se publica en ese blog, <strong>no</strong> en tu sitio de 10minutesWebsite.
       </p>

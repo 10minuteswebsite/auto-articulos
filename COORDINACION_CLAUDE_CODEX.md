@@ -1,3 +1,7 @@
+## BLOG-IA-AVISO-OPORTUNIDADES-20261103 — Claude — publicado
+
+- El aviso de destino ahora dice «BLOG IA: <subdominio.dominio.com>» (formato pedido por Milton) y aparece también en Oportunidades (antes solo en Publicar). Solo con destino BLOG; con 10MWS/MCP no se muestra nada. Sin migraciones; tsc y pruebas web en verde. Sin verlo en pantalla (falta sesión con destino BLOG).
+
 ## INES-IDIOMA-20261103 (parte 2) — Claude — evidencia en producción
 
 - Con «Acceder como» Inés (info@inesgarcia-arcaya.com, idioma `en_VI`) se leyó su Historial (solo lectura, nada publicado): los 37 títulos publicados están en inglés. Lo que estaba en español era el TÍTULO PEDIDO (`Title.text`) de 10 artículos del 22–30/10 («Cómo comprar un condominio en Coral Gables si vivo en Weston»…), que la IA del sitio tradujo al publicar. Esos títulos nacen del generador de Publicar con idioma en español: lo cubre el filtro `idioma_incorrecto` y la regla IDIOMA OBLIGATORIO (parte 1). Desde el 30/10 20:45 los pedidos ya vienen en inglés.

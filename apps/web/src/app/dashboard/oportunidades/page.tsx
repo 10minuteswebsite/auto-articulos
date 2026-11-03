@@ -14,6 +14,7 @@ import {
 } from "@/components/dashboard-ui";
 import ImageCreditsModal from "@/components/ImageCreditsModal";
 import PreValidationGuard from "@/components/PreValidationGuard";
+import PublishingDestinationBanner from "@/components/PublishingDestinationBanner";
 import MobileInstructions from "@/components/MobileInstructions";
 import {
   platformProductNameOrNeutral,
@@ -546,6 +547,7 @@ export default function OportunidadesPage() {
 
   return (
     <div>
+      <PublishingDestinationBanner />
       <PreValidationGuard
         type="oportunidades"
         credentialsConfigured={true}
