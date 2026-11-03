@@ -22,11 +22,11 @@ export function buildRedFlag(total: number, diag: Diagnostico): { admin: string;
     `Quedaron ${total} de ${MIN_TITLES_PROMISE} títulos prometidos. De ${propuestas} propuestas de la IA: ${repetidos} repetían lo ya publicado, ` +
     `${excluidos} chocaban con los temas excluidos de la cuenta, ${sinCita} no citaban su consulta, ${sinUbicacion} no usaban las ubicaciones declaradas, ` +
     `${colision} chocaban con otra propuesta y ${sinCategoria} no tenían categoría real. Filas de evidencia leídas: ${num(diag, "filasDeEvidencia")}.`;
-  const quedaron = total === 0 ? "ninguna idea nueva" : total === 1 ? "1 idea nueva" : `${total} ideas nuevas`;
+  const quedaron = total === 0 ? "Hoy no encontramos ideas nuevas." : total === 1 ? "Hoy encontramos 1 idea nueva." : `Hoy encontramos ${total} ideas nuevas.`;
   const causa = excluidos > repetidos
     ? "Muchas ideas posibles coinciden con los temas que pediste no publicar. Puedes revisar tus temas excluidos."
     : "Tu sitio ya cubre casi todos los temas que la gente busca. Puedes ampliar los temas de tu negocio o volver a analizar cuando haya datos nuevos.";
-  return { admin, usuario: `Hoy encontramos ${quedaron}. ${causa}` };
+  return { admin, usuario: `${quedaron} ${causa}` };
 }
 
 /** Bandera roja: queda en los reportes de la guardia (panel del administrador). Nunca bloquea ni falla el análisis. */
