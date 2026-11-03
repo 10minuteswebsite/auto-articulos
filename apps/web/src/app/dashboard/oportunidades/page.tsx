@@ -308,7 +308,8 @@ export default function OportunidadesPage() {
             : "Con la información actual de Search Console no encontramos nuevos temas para publicar. Puedes volver a analizar cuando quieras si conectas nuevas fuentes o aparecen datos nuevos, o forzar una nueva búsqueda ahora mismo.",
         });
         if (data.banderaRoja?.mensaje) {
-          setMessage((current) => (current ? { ...current, text: `${current.text} ${data.banderaRoja.mensaje}` } : current));
+          // Un solo mensaje claro (el aviso ya explica la causa); si se forzó, no se repite la sugerencia de forzar.
+          setMessage({ kind: "info", text: force ? data.banderaRoja.mensaje : `${data.banderaRoja.mensaje} Si quieres, también puedes forzar una nueva búsqueda ahora mismo.` });
         }
         if (!force) setCanForce(true);
       } else {
