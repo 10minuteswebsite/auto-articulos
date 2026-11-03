@@ -1,3 +1,4 @@
+import { MIN_TITLES_PROMISE } from "@/lib/opportunity-red-flag";
 import type { GoogleSearchAnalyticsRow } from "@auto-articulos/shared";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
@@ -14,8 +15,8 @@ export type OpportunityAnalysisResult =
   | { status: "ok"; groups: OpportunityAnalysisGroup[]; diagnostico?: Record<string, unknown> }
   | { status: "no_new"; diagnostico?: Record<string, unknown> };
 
-/** Si la primera pasada deja menos de estos títulos, se hace una segunda pasada de recuperación. */
-const MIN_TITLES_TARGET = 5;
+/** Promesa del botón 2 (ver opportunity-red-flag.ts). Si la primera pasada deja menos de estos títulos, se hace una segunda pasada de recuperación. */
+const MIN_TITLES_TARGET = MIN_TITLES_PROMISE;
 
 const COUNTRY_NAMES: Record<string, string> = {
   usa: "Estados Unidos",

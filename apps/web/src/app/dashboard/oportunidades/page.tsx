@@ -297,13 +297,19 @@ export default function OportunidadesPage() {
       }
       setGroups(data.groups ?? []);
       if (data.lastAnalysisAt) setLastAnalysisAt(data.lastAnalysisAt);
-      if (data.noNewOpportunities) {
+      if (data.banderaRoja?.mensaje && !data.noNewOpportunities) {
+        // Salieron menos ideas de las prometidas: se dice con claridad en vez de un «completado» sin más.
+        setMessage({ kind: "info", text: data.banderaRoja.mensaje });
+      } else if (data.noNewOpportunities) {
         setMessage({
           kind: "info",
           text: force
             ? "Con la información actual de Search Console no encontramos nuevos temas para publicar, ni siquiera forzando el análisis."
             : "Con la información actual de Search Console no encontramos nuevos temas para publicar. Puedes volver a analizar cuando quieras si conectas nuevas fuentes o aparecen datos nuevos, o forzar una nueva búsqueda ahora mismo.",
         });
+        if (data.banderaRoja?.mensaje) {
+          setMessage((current) => (current ? { ...current, text: `${current.text} ${data.banderaRoja.mensaje}` } : current));
+        }
         if (!force) setCanForce(true);
       } else {
         setMessage({

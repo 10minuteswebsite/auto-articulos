@@ -18,7 +18,7 @@ type Reporte = {
   completadosConNota: number;
   juez: string;
   error: string | null;
-  detalle?: { entregados?: Array<{ title: string; verdict?: string; note?: string | null; neighbor?: string | null }>; quitados?: Array<{ title: string; neighbor: string | null }> } | null;
+  detalle?: { entregados?: Array<{ title: string; verdict?: string; note?: string | null; neighbor?: string | null }>; quitados?: Array<{ title: string; neighbor: string | null }>; motivo?: string; banderaRoja?: boolean } | null;
 };
 type Cuenta = { userId: string; correo: string; reportes: number };
 
@@ -160,6 +160,7 @@ export default function GuardiaAdmin() {
                         <td style={{ ...tdStyle, fontSize: 13 }}>{r.completadosConNota}</td>
                         <td style={{ ...tdStyle, fontSize: 13 }}>
                           {r.error ? `Falló: ${r.error}` : r.juez}
+                          {r.detalle?.banderaRoja && r.detalle?.motivo ? <p style={{ margin: "4px 0 0", fontSize: 12, color: "#b3261e" }}>🚩 {r.detalle.motivo}</p> : null}
                           {(r.detalle?.quitados?.length || r.detalle?.entregados?.some((e) => e.note)) ? (
                             <details style={{ marginTop: 4 }}>
                               <summary style={{ cursor: "pointer", fontSize: 12 }}>Ver títulos afectados</summary>

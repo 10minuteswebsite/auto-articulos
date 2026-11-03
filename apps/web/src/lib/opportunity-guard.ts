@@ -1,4 +1,5 @@
 import { prisma } from "@auto-articulos/db";
+import { MIN_TITLES_PROMISE } from "@/lib/opportunity-red-flag";
 import { GUARD, buildNeighborLists, dropSimilarKeepOne, scoreCandidates, titleKey, type ListJudgeFn, type MemoryEntry } from "@/lib/angle-guard-core";
 import { JUDGE_MODEL, callListJudge, type ListJudgeItem } from "@/lib/angle-guard-judge";
 import { getTitleGuardModeInfo, getTitleGuardPercent, shouldApplyGuard } from "@/lib/title-guard-mode";
@@ -73,7 +74,7 @@ export async function applyGuardToOpportunities<T extends OpportunityGroupLike>(
 
     // Se calcula el resultado por grupo; si en total quedan menos de MIN_TOTAL títulos, se vuelve a calcular pidiendo más por grupo
     // (primero vuelven los menos parecidos). Entregar títulos manda sobre la exigencia.
-    const MIN_TOTAL = 5;
+    const MIN_TOTAL = MIN_TITLES_PROMISE;
     const originalTotal = groups.reduce((n, g) => n + g.titles.length, 0);
     const compute = (minKeep: number) => {
       const detail: Array<{ title: string; neighbor: string | null }> = [];
