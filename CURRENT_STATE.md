@@ -1,3 +1,7 @@
+## TENANT-IDENTITY-20261103 · 03/11/2026 · verificado / reserva liberada
+
+Código `e9a65f8` en main; producción `Vercel F5xn2AJ6basi5AwLX8gyEDkvxK5e y G2952xJkErHg3aVHL2ij52TvjRf5, success`. Identidad visible en móvil y contexto privado del Hub en cabecera; prueba real con Yoly en Hub/BLOG/Website/Artículos/Quiz y administrador directo en Redes/Formularios. No cambia permisos ni SSO. Salida: volver al Hub; se mantiene CSRF estricto. [Acta, pruebas, límites y siguiente punto cero](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/tenant-identity-20261103.md).
+
 ## WAITLIST-CLOSE-20261101 · Actions CERRADO / reserva LIBERADA
 
 Código3e61b63; ambos workflows autentican por OIDC efímero enmain sin secretosbackend/ID legacy. Runs41347894875 y41349239059 prueban400 autenticado antes de escrituras; migratejob omitido/DB ficticia. Sync41348478173 y replay41348764593:124/0 cadauno. Hub conserva estados/permisos canónicos. WebVercel conserva transporteOIDC previo; no desplegarWorker. [Acta/mapa/límites](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/audits/2026-11-01-waitlist-close.md).

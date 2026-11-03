@@ -1,3 +1,7 @@
+## 03/11 · TENANT-IDENTITY-20261103
+
+Identidad nunca oculta por breakpoint; aviso del Hub de solo lectura, sin elevar permisos. Código `e9a65f8`, artefacto `Vercel F5xn2AJ6basi5AwLX8gyEDkvxK5e y G2952xJkErHg3aVHL2ij52TvjRf5, success`. [Verificación y límites](https://github.com/10minuteswebsite/la-solucion-ia/blob/main/docs/audits/tenant-identity-20261103.md).
+
 ## 30/10/2026 · Contrato Cloudflare comprobado
 
 Acceso por Hub, sesiones nativas aisladas y publicación real HTTPS. La selección
