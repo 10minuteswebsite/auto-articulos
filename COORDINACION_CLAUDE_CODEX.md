@@ -1,3 +1,10 @@
+## BLOG-IA-QUITAR-CATEGORIA-20261103 — Claude — publicado; Worker SIN desplegar
+
+- Regla de Milton: una categoría solo se puede quitar si ya no tiene artículos. BLOG IA (`3db2e16`): el blog acepta `category.delete` y responde 409 si tiene artículos; el asistente quita las vacías y, si no se puede, lo explica y no guarda nada.
+- Artículos: `syncBlogCategories` retira de su selector las categorías `source="blog"` que ya no existen en el blog, solo si ninguna publicación (`runs`) ni oportunidad (`opportunityGroups`) las usó, y nunca con una lista vacía. No toca categorías de 10minutesWebsite.
+- Pruebas: `blogCategorySync.test.ts` (5, +2). tsc limpio. Sin migraciones.
+- PENDIENTE: lanzar `worker.yml` (la sincronización corre en el Worker) y ver el flujo con una cuenta con destino BLOG.
+
 ## REDES-BLOG-DESACTIVADO-20261103 — Claude — publicado
 
 - Regla de Milton: sin blog activo no hay dónde publicar los artículos de BLOG IA; Redes no debe ofrecerlos ni publicarlos aunque el historial siga en Artículos.

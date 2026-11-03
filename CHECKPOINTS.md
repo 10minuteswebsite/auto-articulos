@@ -1,3 +1,7 @@
+## Checkpoint — BLOG-IA-QUITAR-CATEGORIA-20261103 — 2026-11-03
+
+- Publicado; falta desplegar `worker.yml` y verlo con una cuenta BLOG.
+
 ## Checkpoint — REDES-BLOG-DESACTIVADO-20261103 — 2026-11-03
 
 - Publicado; falta verlo con un blog desactivado.

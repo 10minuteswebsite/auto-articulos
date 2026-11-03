@@ -8,6 +8,8 @@ interface BlogCategory { id: string; slug: string; name: string; description: st
 /** Parte de la base que se usa (inyectable para probar sin base real). */
 type Db = Pick<typeof prisma, "blogIaBlog" | "category">;
 
+export interface BlogCategorySyncResult { added: number; removed: number }
+
 export async function syncBlogCategories(userId: string, overrides: { config?: Pick<BlogIaConfig, "fetchImpl">; db?: Db } = {}): Promise<number> {
   const db = overrides.db ?? prisma;
   const apiUrl = process.env.BLOG_IA_API_URL;
@@ -30,6 +32,14 @@ export async function syncBlogCategories(userId: string, overrides: { config?: P
       update: { name: c.name, source: "blog" },
     });
     added++;
+  }
+
+  // Las que se quitaron en el asistente de BLOG IA (solo se pueden quitar las que no tienen artículos) dejan de ofrecerse aquí.
+  // Solo se retiran las que ninguna publicación u oportunidad usó, y nunca con una lista vacía (un blog siempre tiene al menos una).
+  if (res.categories.length > 0) {
+    await db.category.deleteMany({
+      where: { userId, source: "blog", externalId: { notIn: res.categories.map((c) => c.id) }, runs: { none: {} }, opportunityGroups: { none: {} } },
+    });
   }
   return added;
 }
