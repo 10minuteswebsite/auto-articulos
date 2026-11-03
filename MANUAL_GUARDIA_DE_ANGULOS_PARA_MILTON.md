@@ -55,3 +55,5 @@ Detalle técnico completo: `ESPECIFICACION_FINAL_GUARDIA_DE_ANGULOS.md`. Histori
 - **Reporte por cuenta (2026-11-01):** en Guardia de ángulos hay un selector «Ver una cuenta»; muestra los últimos 60 reportes de esa cuenta, con el modo y, en «Ver títulos afectados», qué títulos se quitaron o salieron con nota y contra qué se parecían. Solo administrador, solo lectura, sin costo.
 
 - **Corrección de rigidez (2026-11-02):** botón 2: entregar manda. Si tras quitar repetidos quedan menos de 3 por grupo o menos de 5 en total, vuelven los menos parecidos (incluso casi idénticos; nunca duplicados exactos). Antes podía quedar 1 solo título.
+
+- **Bing y caché (2026-11-02):** una consulta fallida de Bing o GA4 ya no se guarda como «0 filas» durante 14 días, y una caché sin filas no se reutiliza. Caso real: Bing de una cuenta falló con «NotAuthorized» el 28/10 y quedó guardado como vacío hasta el 11/11; hay que reconectar Bing en Conexiones.

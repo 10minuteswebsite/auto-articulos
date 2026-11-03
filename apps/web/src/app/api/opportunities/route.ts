@@ -377,17 +377,20 @@ export async function POST(request: Request) {
 
     const [googleAnalyticsSignals, bingSignals] = await Promise.all([
       readFreshOpportunityEvidenceCache<{ connected: boolean; propertyId?: string; rows: Array<{ pagePath?: string; pageTitle?: string; views?: number; sessions: number; activeUsers: number; events?: number; engagementRate?: number; bounceRate?: number; conversions?: number }>; error?: string }>({ ...cacheScope, source: "ga4" }).then(async (cached) => {
-        if (cached) return cached;
+        // Una caché sin filas no se reutiliza: puede ser un fallo viejo guardado como «ok».
+        if (cached && cached.rows.length > 0) return cached;
         const fresh = await getGoogleAnalyticsSignals(userId);
-        if (fresh.connected) {
+        // No se guarda en la caché una consulta que falló: antes un error de Bing quedaba como «0 filas» durante 14 días.
+        if (fresh.connected && !fresh.error) {
           await writeOpportunityEvidenceCache({ ...cacheScope, source: "ga4" }, JSON.parse(JSON.stringify(fresh)));
         }
         return fresh;
       }),
       readFreshOpportunityEvidenceCache<{ connected: boolean; siteUrl?: string; rows: Array<{ query: string; clicks: number; impressions: number; position: number }>; error?: string }>({ ...cacheScope, source: "bing" }).then(async (cached) => {
-        if (cached) return cached;
+        if (cached && cached.rows.length > 0) return cached;
         const fresh = await getBingSignals(userId);
-        if (fresh.connected) {
+        // No se guarda en la caché una consulta que falló: antes un error de Bing quedaba como «0 filas» durante 14 días.
+        if (fresh.connected && !fresh.error) {
           await writeOpportunityEvidenceCache({ ...cacheScope, source: "bing" }, JSON.parse(JSON.stringify(fresh)));
         }
         return fresh;
