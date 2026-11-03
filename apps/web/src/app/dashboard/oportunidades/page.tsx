@@ -1248,7 +1248,14 @@ export default function OportunidadesPage() {
                       <div
                         style={{ color: "#6e6e73", fontSize: 12, marginTop: 3 }}
                       >
-                        {title.rationale}
+                        {title.rationale.startsWith("[SIN_EVIDENCIA] ") && (
+                          <span
+                            style={{ display: "inline-block", marginRight: 6, padding: "1px 8px", borderRadius: 999, background: "#f5f5f7", color: "#1d1d1f", fontSize: 11, fontWeight: 600 }}
+                          >
+                            Idea sin evidencia de demanda
+                          </span>
+                        )}
+                        {title.rationale.replace("[SIN_EVIDENCIA] ", "")}
                       </div>
                     )}
                   </div>

@@ -2,7 +2,15 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { MemoryEntry } from "./angle-guard-core";
-import { filterComplementIdeas } from "./opportunity-complement";
+import {
+  COMPLEMENT_MARK,
+  COMPLEMENT_MONTHLY_BUDGET_USD,
+  COMPLEMENT_COST_PER_CALL_USD,
+  accountWasting,
+  filterComplementIdeas,
+  mergeComplementIntoGroups,
+  monthlyBudgetReached,
+} from "./opportunity-complement";
 
 const M = (title: string, source: MemoryEntry["source"] = "publicado"): MemoryEntry => ({ title, source, ageDays: 10 });
 const memory = [M("Cómo comprar una propiedad en Málaga siendo colombiano"), M("Impuestos al comprar obra nueva en Málaga", "sitio")];
@@ -61,4 +69,27 @@ test("una idea dudosa frente a un tema excluido pasa solo si la IA dijo que NO e
   // un rechazo claro nunca lo salva la IA
   const claro = idea("Alquiler vacacional en la Costa del Sol: guía para propietarios en 2026");
   assert.equal(filterComplementIdeas([claro], { ...base, doubtVerdicts: new Map([[claro.text, false]]) }).chosen.length, 0);
+});
+
+test("el presupuesto mensual pausa la función al alcanzar el tope", () => {
+  const limite = Math.ceil(COMPLEMENT_MONTHLY_BUDGET_USD / COMPLEMENT_COST_PER_CALL_USD);
+  assert.equal(monthlyBudgetReached(limite - 1), false);
+  assert.equal(monthlyBudgetReached(limite), true);
+});
+
+test("una cuenta con 3 llamadas seguidas sin ideas útiles se pausa; con alguna útil, no", () => {
+  assert.equal(accountWasting([0, 0, 0]), true);
+  assert.equal(accountWasting([0, 1, 0]), false);
+  assert.equal(accountWasting([0, 0]), false, "con menos de 3 llamadas aún no se pausa");
+});
+
+test("las ideas se añaden con la marca: al grupo de su categoría o en uno nuevo sin cifras", () => {
+  const groups = [{ categoryId: "c1", rationale: "r", impressions: 50, clicks: 3, titles: [{ text: "Con evidencia", rationale: "cita" }] }];
+  const out = mergeComplementIntoGroups(groups, [idea("Idea para c1 sobre notarías en Estepona"), idea("Idea para c2 sobre seguros de hogar", "c2")]);
+  assert.equal(out.length, 2);
+  assert.equal(out[0].titles.length, 2);
+  assert.equal(out[0].titles[0].rationale, "cita", "no toca lo que ya tenía evidencia");
+  assert.ok(out[0].titles[1].rationale.startsWith(COMPLEMENT_MARK));
+  assert.equal(out[1].impressions, 0);
+  assert.equal(groups[0].titles.length, 1, "no modifica la entrada");
 });
