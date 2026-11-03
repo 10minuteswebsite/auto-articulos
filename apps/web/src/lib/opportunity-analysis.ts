@@ -549,17 +549,22 @@ function rationaleHasQuotedEvidence(rationale: string): boolean {
 // textual, exige que el título use de verdad al menos una ubicación de
 // cliente Y una de negocio de las listas declaradas (comparación normalizada,
 // sin acentos/mayúsculas), para no perder la garantía de "nada inventado".
-function titleUsesDeclaredGeoCombo(
+export function titleUsesDeclaredGeoCombo(
   text: string,
   clientLocations: string[],
   businessLocations: string[],
 ): boolean {
   const normalizedTitle = normalizeTitle(text);
+  // Una ubicación declarada puede traer sufijos como «La Costa del Sol-España» o «La Florida-USA», y el título natural dice
+  // «La Costa del Sol» o «La Florida». Medido el 02/11/2026: los 9 títulos del paso de ubicaciones de una cuenta real se
+  // rechazaban en cada corrida por esto. Se acepta el nombre completo o el nombre del lugar antes del guion, la coma o la barra.
+  const namesOf = (location: string) => {
+    const full = normalizeTitle(location);
+    const main = normalizeTitle(location.split(/[-–—,/]/)[0] ?? "");
+    return [full, main].filter((name, index, all) => name.length > 0 && all.indexOf(name) === index);
+  };
   const usesAny = (locations: string[]) =>
-    locations.some((location) => {
-      const normalizedLocation = normalizeTitle(location);
-      return normalizedLocation.length > 0 && normalizedTitle.includes(normalizedLocation);
-    });
+    locations.some((location) => namesOf(location).some((name) => normalizedTitle.includes(name)));
   return usesAny(clientLocations) && usesAny(businessLocations);
 }
 
