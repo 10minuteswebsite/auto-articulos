@@ -770,3 +770,9 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - [x] Verificación final del contrato productivo de Rosa Bello; no se subió
   archivo porque la cuenta no tenía logo cargado y no se autorizó modificar datos.
 
+
+## Checkpoint — ASISTENTE-DESTINO-20261104 — CERRADO
+
+- Punto cero: `main` en `c5ab722b` (PR #792), Vercel en success. Sin migración.
+- Verificado en producción (soymiltondavila, sin blog): pregunta de destino, camino BLOG IA sin marca 10minutesWebsite, camino 10MWS sin cambios.
+- Pendiente: probar con una cuenta con blog vinculado (confirmar y cambiar a BLOG); retorno automático desde BLOG IA y aviso del Hub de blogs sin vincular dependen del Hub/BLOG IA.

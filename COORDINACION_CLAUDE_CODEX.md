@@ -13409,7 +13409,7 @@ Solicitud `CONEXIONES-GSC-ADAPTER-20261104-PUBLISH`: origen chat
 deployment, resultado de la barrera backend, verificación legacy o bloqueo.
 
 
-## ASISTENTE-DESTINO-20261104 — Claude — preparado, sin publicar
+## ASISTENTE-DESTINO-20261104 — Claude — PUBLICADO y verificado en producción (c5ab722b, PR #792)
 
 - Pedido de Milton: el asistente de Configuración Inicial pregunta primero dónde se publica («Mi blog de BLOG IA» / «Mi sitio 10MWS») y, con BLOG IA, no muestra 10minutesWebsite ni pide su contraseña.
 - Hallazgo (sin inventar campos): el destino ya vive en `User.publishMethod` (BROWSER/MCP/BLOG) y el blog en `BlogIaBlog` (status, dnsVerified, tlsReady). Solo el Hub los escribe (`/api/integrations/hub/blog-destination`, al pulsar «Usar este blog»). Artículos NO puede leer del Hub si alguien tiene BLOG IA contratado ni si tiene un blog aún no vinculado.
@@ -13417,3 +13417,6 @@ deployment, resultado de la barrera backend, verificación legacy o bloqueo.
 - Decisión de Milton: la pregunta la ve toda cuenta sin nada conectado y que no sea marca blanca. Cuentas con credenciales o sitio confirmado: sin cambio.
 - Pruebas: `publishing-destination` (+3), `publishing-readiness` (+1); web 416/416. tsc sin errores en lo tocado.
 - NO hecho: «traerlo de vuelta» automático desde BLOG IA (el lanzador del Hub no admite retorno; hoy el asistente se revisa solo al volver a la pestaña); detectar un blog creado pero no vinculado (el Hub debe avisar).
+- Cierre: PR #792 fusionado (`c5ab722b`); Vercel web y auto-articulos-web: success. Verificado en producción con la sesión de Milton sobre soymiltondavila@gmail.com (sin blog): aparecen «Mi blog de BLOG IA» y «Mi sitio 10MWS»; con BLOG IA sale «Crea tu blog en BLOG IA» sin ninguna mención de 10minutesWebsite; con 10MWS aparecen los pasos de siempre. La elección de prueba se borró del navegador. No se tocaron datos.
+- NO verificado: caso «blog ya vinculado → ✓ Mi blog de BLOG IA → confirmar» y el cambio real BROWSER→BLOG (requiere una cuenta con blog vinculado, p. ej. Lorena; no se cambió ningún destino real). Cuentas existentes de 10MWS: no se probó con una cuenta con credenciales, solo por código y por la condición del asistente.
+- **Capitán de migración liberó el lote:** Claude. Resultado: PR #792 en producción, sin migración.
