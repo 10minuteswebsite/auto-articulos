@@ -1,3 +1,7 @@
+## GSC-ESTADO-COMPOSIO-20261105 · punto cero
+
+`main` en `eb930c7e` (PR #794 `b1fc62e4` + PR #795). Vercel `web` y `auto-articulos-web` en success. Producción verificada como Juan Carvajal: `/api/configuration-status` → `google-search-console configured:true`, Bing `true`. Ver [estado](CURRENT_STATE.md). Pendiente: envío diario del worker para cuentas solo-Composio.
+
 ## CONEXIONES-GSC-ADAPTER-20261104 · backend publicado / preparación ampliada
 
 Publicador verificó `d137492` en Vercel, 401 negativos y la UI legacy; no se
