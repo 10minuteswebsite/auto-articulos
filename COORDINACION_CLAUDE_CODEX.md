@@ -1,3 +1,12 @@
+## GSC-ESTADO-COMPOSIO-20261105 — Claude — publicado
+
+- Pedido de Milton: la IA de Juan Carvajal decía «Google Search Console sin conectar» aunque la tarjeta mostraba «Conexión activa».
+- Evidencia medida en producción (Acceder como Juan, solo lectura): `/api/composio/status` = ACTIVE con `sc-domain:juanchocarvajal.com`; `/api/configuration-status` = `google-search-console configured:false` (Bing `true`). La IA solo repetía lo que SEO TOTAL le informó; el MCP no estaba roto.
+- Causa: `COMPOSIO_CONSUMER_READY.google_search_console=false` ⇒ `methodFor` devuelve OWN; Juan no tiene conexión propia ⇒ fuente NONE. Todas las escrituras de Composio usan `siteDomain=""`, así que no era un desajuste de dominio.
+- Cambios: #794 (`configuration-status`: Composio activo con propiedad cuenta) y #795 (`/api/sitemap/send`, `ver_estado_indexacion`, vista previa de `enviar_sitemap_google`) con `shouldUseComposioFallback`. Pruebas: 56 pass (`search-console-source` + `mcp/*`); tsc sin errores en los archivos tocados (el resto del repo muestra errores previos por Prisma desactualizado en el worktree).
+- Producción: Vercel success; `configured:true` verificado como Juan tras ambos PR. Sitemap real NO probado.
+- ABIERTO (decisión de producto): envío diario del worker excluye cuentas solo-Composio.
+
 ## BLOG-IA-AVISO-OPORTUNIDADES-20261103 — Claude — publicado
 
 - El aviso de destino ahora dice «BLOG IA: <subdominio.dominio.com>» (formato pedido por Milton) y aparece también en Oportunidades (antes solo en Publicar). Solo con destino BLOG; con 10MWS/MCP no se muestra nada. Sin migraciones; tsc y pruebas web en verde. Sin verlo en pantalla (falta sesión con destino BLOG).
