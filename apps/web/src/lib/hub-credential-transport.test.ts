@@ -23,3 +23,10 @@ test('Actions obtains a short-lived identity only for user sync and never forwar
  globalThis.fetch=async(input:any,init:any)=>{calls.push(String(input));if(String(input).includes('actions.githubusercontent.com'))return Response.json({value:'x'.repeat(64)});assert.equal(new Headers(init.headers).get('authorization'),'Bearer '+'x'.repeat(64));return Response.json({ok:true})};
  try{await hubBackendFetch('/api/integrations/auto-articulos/user-sync',{local_user_id:'native',email:'invalid'});assert.equal(calls.length,2);assert(calls[0].includes('audience='));assert(calls[1].endsWith('/user-sync'));await assert.rejects(hubBackendFetch('/api/product-launch',{app:'seo-total',code:'x'.repeat(48)}));assert.equal(calls.length,2);process.env.ACTIONS_ID_TOKEN_REQUEST_URL='https://evil.invalid/token';await assert.rejects(hubBackendFetch('/api/integrations/auto-articulos/user-sync',{}));assert.equal(calls.length,2)}finally{globalThis.fetch=original;for(const k of ['HUB_CREDENTIAL_TRANSPORT','HUB_WORKLOAD_IDENTITY','GITHUB_ACTIONS','ACTIONS_ID_TOKEN_REQUEST_URL','ACTIONS_ID_TOKEN_REQUEST_TOKEN'])delete process.env[k]}
 });
+
+test('web uses the fixed broker path for connection reads, never a caller-selected URL',async()=>{
+ const{hubConnectionsRead}=await import('./hub-credential-transport');const original=globalThis.fetch;
+ process.env.HUB_CREDENTIAL_TRANSPORT='shared';
+ globalThis.fetch=async(input:any,init:any)=>{assert.equal(String(input),'https://hub-workload-credential-broker.10minuteswebsite.workers.dev/connections-read');assert.equal(new Headers(init.headers).get('authorization'),'Bearer fixture-workload-token');return Response.json({data:{connections:[]}})};
+ try{assert.equal((await hubConnectionsRead({operation:'list',app:'seo-total',hub_user_id:'fixture'})).status,200)}finally{globalThis.fetch=original;delete process.env.HUB_CREDENTIAL_TRANSPORT}
+});

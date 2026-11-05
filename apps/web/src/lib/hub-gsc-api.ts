@@ -16,7 +16,7 @@ export async function handleHubGscRequest(request: Request, deps: {
     const text = await request.text();
     if (Buffer.byteLength(text) > 4096) return reply({ error: "invalid_request" }, 413);
     const input = parseHubGscRequest(JSON.parse(text));
-    if (input.operation === "start" && !deps.startEnabled) return reply({ error: "connection_setup_unavailable" }, 503);
+    if ((input.operation === "start" || input.operation === "submit_sitemap") && !deps.startEnabled) return reply({ error: "connection_setup_unavailable" }, 503);
     return reply({ data: await runHubGscAdapter(input, deps.adapter) });
   } catch (error) {
     if (error instanceof SyntaxError) return reply({ error: "invalid_request" }, 400);

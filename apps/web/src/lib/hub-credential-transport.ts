@@ -15,13 +15,19 @@ async function broker(path:string,body:object){
   const r=await fetch(url,{headers:{authorization:'Bearer '+credential},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(5000)});
   if(!r.ok)throw new HubTransportUnavailable();const d=await r.json();if(typeof d.value!=='string'||d.value.length>16384||!/^[-A-Za-z0-9_.]{32,}$/.test(d.value))throw new HubTransportUnavailable();token=d.value;
  }else{token=await getVercelOidcToken();}
- const response=await fetch(ORIGIN+path,{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??''},body:JSON.stringify(body),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(path==='/access'?3000:12000)});
+ const response=await fetch(ORIGIN+path,{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??''},body:JSON.stringify(body),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(path==='/connections-read'?59000:path==='/access'?3000:12000)});
  if(response.status>=500)throw new HubTransportUnavailable();return response;
 }
 export async function hubBackendFetch(path:'/api/product-launch'|'/api/integrations/auto-articulos/access'|'/api/integrations/auto-articulos/user-sync',body:object){
  if(sharedHubTransport())return broker(path==='/api/product-launch'?'/exchange':path.endsWith('/user-sync')?'/user-sync':'/access',body);
  const origin=process.env.HUB_BASE_URL||'https://hub.lasolucionweb.net';
  return fetch(origin+path,{method:'POST',headers:{'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??'',authorization:'Bearer '+(process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET??'')},body:JSON.stringify(body),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(12000)});
+}
+/** Fixed read-only resource path. No credential is returned to the caller. */
+export async function hubConnectionsRead(body:object){
+ if(sharedHubTransport())return broker('/connections-read',body);
+ const origin=process.env.HUB_BASE_URL||'https://hub.lasolucionweb.net';
+ return fetch(origin+'/api/integrations/auto-articulos/connections',{method:'POST',headers:{'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??'',authorization:'Bearer '+(process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET??'')},body:JSON.stringify(body),cache:'no-store',redirect:'error',signal:AbortSignal.timeout(59000)});
 }
 export async function validHubBackend(request:Request){
  if(request.headers.has('origin')||request.headers.has('cookie')||request.headers.has('sec-fetch-site'))return false;

@@ -2,7 +2,7 @@ import { validHubBackend } from "@/lib/hub-credential-transport";
 import { getStoredAuthConfigIds, getStoredComposioApiKey } from "@/lib/composio";
 import { HubGscError } from "@/lib/hub-gsc-adapter";
 import { handleHubGscRequest } from "@/lib/hub-gsc-api";
-import { composioListSearchConsoleSites, composioQuerySearchAnalytics, createConnectLink, getConnectedAccount } from "@auto-articulos/shared";
+import { composioInspectUrl, composioListSitemaps, composioListSearchConsoleSites, composioQuerySearchAnalytics, composioSubmitSitemap, createConnectLink, getConnectedAccount } from "@auto-articulos/shared";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,6 +22,9 @@ export async function POST(request: Request) {
       account: getConnectedAccount,
       sites: composioListSearchConsoleSites,
       query: composioQuerySearchAnalytics,
+      inspect: composioInspectUrl,
+      sitemaps: composioListSitemaps,
+      submitSitemap: composioSubmitSitemap,
     },
   });
 }

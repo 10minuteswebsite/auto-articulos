@@ -19,6 +19,9 @@ function fixture() {
     async account(_key, id) { return { id, status: "ACTIVE", userId: hubGscProviderUser(tenant, attempt), toolkitSlug: "google_search_console", authConfigId: "fixture-config" }; },
     async sites() { calls.push("sites"); return [{ siteUrl: site, permissionLevel: "siteOwner" }]; },
     async query(_account, selected) { calls.push(`query:${selected}`); return [{ clicks: 3 }]; },
+    async inspect(_account, selected, target) { calls.push(`inspect:${selected}:${target}`); return { verdict: "PASS" }; },
+    async sitemaps(_account, selected) { calls.push(`sitemaps:${selected}`); return ["https://example.test/sitemap.xml"]; },
+    async submitSitemap(_account, selected, target) { calls.push(`submit:${selected}:${target}`); },
   };
   return { deps, calls };
 }
@@ -76,5 +79,20 @@ test("el endpoint rechaza tráfico anónimo y no inicia autorizaciones antes de 
   const closed = await handleHubGscRequest(makeRequest(), { authenticate: async () => true, adapter: deps, startEnabled: false });
   assert.equal(closed.status, 503);
   assert.equal((await closed.json()).error, "connection_setup_unavailable");
+  const write = new Request("https://app.example.test/api/integrations/hub/gsc-adapter", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ operation: "submit_sitemap", tenantId: tenant, attemptId: attempt, accountId: "ca_1", siteUrl: site, targetUrl: "https://example.test/sitemap.xml" }),
+  });
+  assert.equal((await handleHubGscRequest(write, { authenticate: async () => true, adapter: deps, startEnabled: false })).status, 503);
   assert.deepEqual(calls, []);
+});
+
+test("inspección y sitemaps solo aceptan URLs dentro de la propiedad del tenant", async () => {
+  const { deps, calls } = fixture();
+  const base = { tenantId: tenant, attemptId: attempt, accountId: "ca_1", siteUrl: site };
+  assert.deepEqual(await runHubGscAdapter(parseHubGscRequest({ ...base, operation: "sitemaps" }), deps), { sitemaps: ["https://example.test/sitemap.xml"] });
+  assert.deepEqual(await runHubGscAdapter(parseHubGscRequest({ ...base, operation: "inspect", targetUrl: "https://www.example.test/article" }), deps), { inspection: { verdict: "PASS" } });
+  assert.deepEqual(await runHubGscAdapter(parseHubGscRequest({ ...base, operation: "submit_sitemap", targetUrl: "https://example.test/sitemap.xml" }), deps), { submitted: true });
+  await assert.rejects(runHubGscAdapter(parseHubGscRequest({ ...base, operation: "submit_sitemap", targetUrl: "https://example.test.attacker.invalid/sitemap.xml" }), deps), (error: unknown) => error instanceof HubGscError && error.code === "site_not_authorized");
+  assert.equal(calls.filter((entry) => entry.startsWith("submit:")).length, 1);
 });

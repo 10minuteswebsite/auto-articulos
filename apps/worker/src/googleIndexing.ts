@@ -8,6 +8,7 @@ import {
   resolveConnection,
 } from "@auto-articulos/shared";
 import { loadConnectionState } from "./composio-connection-state";
+import { inspectHubGsc, resolveHubGsc } from "./hub-connections-client";
 
 /**
  * Después de publicar solo se consulta el estado de indexación de esta URL.
@@ -15,11 +16,12 @@ import { loadConnectionState } from "./composio-connection-state";
  * independiente envía una vez el sitemap configurado de cada usuario.
  */
 export async function notifyGoogle(titleId: string, userId: string) {
-  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
+  const owner = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, hubUserId: true } });
   const integration = await prisma.searchIntegration.findFirst({
-    where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) },
+    where: { userId, provider: "google", ...(owner.selectedSiteDomain ? { siteDomain: owner.selectedSiteDomain } : {}) },
   });
-  if (!integration?.siteUrl) {
+  const central = await resolveHubGsc(owner.hubUserId, integration?.siteUrl ?? null);
+  if (!integration?.siteUrl && !central) {
     await prisma.title.update({
       where: { id: titleId },
       data: { googleIndexingStatus: "not_configured" },
@@ -28,6 +30,27 @@ export async function notifyGoogle(titleId: string, userId: string) {
   }
   try {
     const title = await prisma.title.findUnique({ where: { id: titleId }, select: { articleUrl: true } });
+    let centralInspection: Awaited<ReturnType<typeof inspectHubGsc>> | null = null;
+    if (central && owner.hubUserId && title?.articleUrl) {
+      try { centralInspection = await inspectHubGsc(owner.hubUserId, central.id, title.articleUrl); }
+      catch (error) { if (!integration?.siteUrl) throw error; }
+    }
+    if (!integration?.siteUrl && !centralInspection && title?.articleUrl) throw new Error("hub_connections_unavailable");
+    if (centralInspection || !title?.articleUrl) {
+      const indexed = centralInspection?.verdict === "PASS";
+      await prisma.title.update({
+        where: { id: titleId },
+        data: {
+          googleIndexingStatus: indexed ? "indexed" : "inspection_pending",
+          googleIndexingMessage: indexed
+            ? `Google informa que la URL está indexada${centralInspection?.coverageState ? `: ${centralInspection.coverageState}` : "."}`
+            : `Google todavía no reporta la URL como indexada${centralInspection?.coverageState ? `: ${centralInspection.coverageState}` : "."}`,
+          googleIndexingAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (!integration?.siteUrl) throw new Error("hub_connections_unavailable");
     const state = await loadConnectionState(userId, "google_search_console", integration.siteDomain);
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, role: true, disabledModules: true } });
     const moduleEnabled = user?.role === "admin" || (() => {

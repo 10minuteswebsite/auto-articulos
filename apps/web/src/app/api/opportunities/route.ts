@@ -13,6 +13,7 @@ import {
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { readHubGscEvidence, resolveHubGsc } from "@/lib/hub-gsc-client";
 import { getStoredComposioApiKey } from "@/lib/composio";
 import { describeNoEvidence, shouldUseComposioFallback } from "@/lib/search-console-source";
 import { analyzeSeoOpportunities } from "@/lib/opportunity-analysis";
@@ -172,7 +173,7 @@ export async function POST(request: Request) {
     .catch(() => ({ force: false, panel: "" }));
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    select: { lastOpportunityAnalysisAt: true, selectedSiteDomain: true, selectedSitePanel: true, platformDomain: true, clientLocations: true, businessLocations: true, excludedTopics: true, dailyArticleLimit: true },
+    select: { hubUserId: true, lastOpportunityAnalysisAt: true, selectedSiteDomain: true, selectedSitePanel: true, platformDomain: true, clientLocations: true, businessLocations: true, excludedTopics: true, dailyArticleLimit: true },
   });
   const selectedSiteDomain = user.selectedSiteDomain;
   // Ubicaciones REALES declaradas por el dueño de la cuenta (Configuración →
@@ -247,7 +248,8 @@ export async function POST(request: Request) {
     })
       ? { ...baseResolved, source: "COMPOSIO" as const, apiKey: await getStoredComposioApiKey() }
       : baseResolved;
-    const hasSearchConsole = Boolean(integration?.siteUrl) || resolved.source === "COMPOSIO";
+    const hubGsc = await resolveHubGsc(user.hubUserId, integration?.siteUrl ?? baseResolved.state.composio?.siteUrl);
+    const hasSearchConsole = Boolean(integration?.siteUrl) || resolved.source === "COMPOSIO" || Boolean(hubGsc);
     // Bug real encontrado 29/9/2026 (cuenta de Flor Méndez): Google Search
     // Console puede rechazar la consulta con un error real y específico (ej.
     // "User does not have sufficient permission for site ...", cuando el
@@ -263,8 +265,18 @@ export async function POST(request: Request) {
     // mensaje explícito de "sin evidencia" de más abajo) tomen el control.
     let gscError: string | null = null;
     if ((!cachedGsc || !hasCachedGscRows) && hasSearchConsole) {
+      let usedCentral = false;
       try {
-        if (resolved.source === "COMPOSIO") {
+        const centralEvidence = hubGsc && user.hubUserId
+          ? await readHubGscEvidence(user.hubUserId, hubGsc.id, {
+              currentStart: isoDate(currentStart), currentEnd: isoDate(end),
+              previousStart: isoDate(previousStart), previousEnd: isoDate(previousEnd),
+            })
+          : null;
+        if (centralEvidence) {
+          usedCentral = true;
+          ({ currentRows, previousRows, countryRows } = centralEvidence);
+        } else if (resolved.source === "COMPOSIO") {
           if (!resolved.apiKey || !resolved.state.composio?.connectedAccountId || !resolved.state.composio.siteUrl) {
             throw new Error("Search Console requiere reconectar la cuenta por Composio y seleccionar un sitio.");
           }
@@ -299,7 +311,7 @@ export async function POST(request: Request) {
         }
         // Uso real exitoso: limpia cualquier error previo marcado en esta
         // conexión (ver aviso rojo unificado en configuration-status).
-        if (resolved.source !== "COMPOSIO" && integration?.lastAccessError) {
+        if (!centralEvidence && resolved.source !== "COMPOSIO" && integration?.lastAccessError) {
           await prisma.searchIntegration.update({
             where: { id: integration.id },
             data: { lastAccessError: null, lastAccessErrorAt: null },
@@ -315,7 +327,7 @@ export async function POST(request: Request) {
         // Milton, 1/10/2026: el mismo protocolo de aviso debe cubrir
         // cualquier caso en que haya que reconectar, no solo la migración a
         // Composio.
-        if (resolved.source !== "COMPOSIO" && integration?.id) {
+        if (!usedCentral && resolved.source !== "COMPOSIO" && integration?.id) {
           await prisma.searchIntegration
             .update({
               where: { id: integration.id },
