@@ -28,6 +28,10 @@ Con él se verificó que la credencial existente de Composio es válida, pero
 leer la configuración del proyecto devuelve 403; no se cambiaron permisos,
 ajustes ni credenciales.
 
+Preparado el canje `complete_auth` para un verificador aislado, que coteja la
+cuenta, tenant, intento y toolkit; permanece cerrado junto a `start`. Las
+pruebas usan sesiones sintéticas y no prueban ni modifican el proyecto actual.
+
 En preparación sobre `main`: lectura de analíticas e inspección central, piloto
 por tenant apagado por defecto y fallback a la conexión previa. La operación
 `start` y el envío central de sitemap permanecen cerrados. No hay consumo

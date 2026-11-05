@@ -16,6 +16,7 @@ function fixture() {
       calls.push(JSON.stringify(input));
       return { redirectUrl: "https://connect.composio.dev/link/fixture", connectedAccountId: "ca_new" };
     },
+    async completeAuth(_key, input) { calls.push(`verify:${input.userId}`); return { connectedAccountId: "ca_new", toolkitSlug: "google_search_console" }; },
     async account(_key, id) { return { id, status: "ACTIVE", userId: hubGscProviderUser(tenant, attempt), toolkitSlug: "google_search_console", authConfigId: "fixture-config" }; },
     async sites() { calls.push("sites"); return [{ siteUrl: site, permissionLevel: "siteOwner" }]; },
     async query(_account, selected) { calls.push(`query:${selected}`); return [{ clicks: 3 }]; },
@@ -75,16 +76,31 @@ test("el endpoint rechaza tráfico anónimo y no inicia autorizaciones antes de 
     method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ operation: "start", tenantId: tenant, attemptId: attempt }),
   });
-  assert.equal((await handleHubGscRequest(makeRequest(), { authenticate: async () => false, adapter: deps, startEnabled: true })).status, 401);
-  const closed = await handleHubGscRequest(makeRequest(), { authenticate: async () => true, adapter: deps, startEnabled: false });
+  assert.equal((await handleHubGscRequest(makeRequest(), { authenticate: async () => false, adapter: deps, startEnabled: true, sitemapEnabled: false })).status, 401);
+  const closed = await handleHubGscRequest(makeRequest(), { authenticate: async () => true, adapter: deps, startEnabled: false, sitemapEnabled: false });
   assert.equal(closed.status, 503);
   assert.equal((await closed.json()).error, "connection_setup_unavailable");
   const write = new Request("https://app.example.test/api/integrations/hub/gsc-adapter", {
     method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ operation: "submit_sitemap", tenantId: tenant, attemptId: attempt, accountId: "ca_1", siteUrl: site, targetUrl: "https://example.test/sitemap.xml" }),
   });
-  assert.equal((await handleHubGscRequest(write, { authenticate: async () => true, adapter: deps, startEnabled: false })).status, 503);
+  assert.equal((await handleHubGscRequest(write, { authenticate: async () => true, adapter: deps, startEnabled: true, sitemapEnabled: false })).status, 503);
+  const verify = new Request("https://app.example.test/api/integrations/hub/gsc-adapter", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ operation: "verify_callback", tenantId: tenant, attemptId: attempt, accountId: "ca_new", sessionUri: "fixture-session" }),
+  });
+  assert.equal((await handleHubGscRequest(verify, { authenticate: async () => true, adapter: deps, startEnabled: false, sitemapEnabled: false })).status, 503);
   assert.deepEqual(calls, []);
+});
+
+test("el callback de un solo uso solo valida el tenant, intento y cuenta esperados", async () => {
+  const { deps, calls } = fixture();
+  const body = { operation: "verify_callback", tenantId: tenant, attemptId: attempt, accountId: "ca_new", sessionUri: "fixture-session" };
+  assert.deepEqual(await runHubGscAdapter(parseHubGscRequest(body), deps), { verified: true });
+  assert.deepEqual(calls, [`verify:hub-connections-${tenant}-${attempt}`]);
+  deps.completeAuth = async () => ({ connectedAccountId: "ca_other", toolkitSlug: "google_search_console" });
+  await assert.rejects(runHubGscAdapter(parseHubGscRequest(body), deps), (error: unknown) => error instanceof HubGscError && error.code === "connection_not_validated");
+  assert.throws(() => parseHubGscRequest({ ...body, sessionUri: "secret\nother" }));
 });
 
 test("inspección y sitemaps solo aceptan URLs dentro de la propiedad del tenant", async () => {

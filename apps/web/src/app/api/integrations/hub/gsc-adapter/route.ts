@@ -2,7 +2,7 @@ import { validHubBackend } from "@/lib/hub-credential-transport";
 import { getStoredAuthConfigIds, getStoredComposioApiKey } from "@/lib/composio";
 import { HubGscError } from "@/lib/hub-gsc-adapter";
 import { handleHubGscRequest } from "@/lib/hub-gsc-api";
-import { composioInspectUrl, composioListSitemaps, composioListSearchConsoleSites, composioQuerySearchAnalytics, composioSubmitSitemap, createConnectLink, getConnectedAccount } from "@auto-articulos/shared";
+import { completeConnectedAccount, composioInspectUrl, composioListSitemaps, composioListSearchConsoleSites, composioQuerySearchAnalytics, composioSubmitSitemap, createConnectLink, getConnectedAccount } from "@auto-articulos/shared";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     authenticate: validHubBackend,
     // A setting alone must not turn on a flow whose Hub callback is unfinished.
     startEnabled: false,
+    sitemapEnabled: false,
     adapter: {
       async config() {
         const [apiKey, configs] = await Promise.all([getStoredComposioApiKey(), getStoredAuthConfigIds()]);
@@ -19,6 +20,7 @@ export async function POST(request: Request) {
         return { apiKey, authConfigId: configs.google_search_console };
       },
       start: createConnectLink,
+      completeAuth: completeConnectedAccount,
       account: getConnectedAccount,
       sites: composioListSearchConsoleSites,
       query: composioQuerySearchAnalytics,

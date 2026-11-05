@@ -6,6 +6,7 @@ export async function handleHubGscRequest(request: Request, deps: {
   authenticate(request: Request): Promise<boolean>;
   adapter: HubGscDependencies;
   startEnabled: boolean;
+  sitemapEnabled: boolean;
 }) {
   const reply = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
   let authenticated = false;
@@ -16,7 +17,8 @@ export async function handleHubGscRequest(request: Request, deps: {
     const text = await request.text();
     if (Buffer.byteLength(text) > 4096) return reply({ error: "invalid_request" }, 413);
     const input = parseHubGscRequest(JSON.parse(text));
-    if ((input.operation === "start" || input.operation === "submit_sitemap") && !deps.startEnabled) return reply({ error: "connection_setup_unavailable" }, 503);
+    if ((input.operation === "start" || input.operation === "verify_callback") && !deps.startEnabled) return reply({ error: "connection_setup_unavailable" }, 503);
+    if (input.operation === "submit_sitemap" && !deps.sitemapEnabled) return reply({ error: "connection_setup_unavailable" }, 503);
     return reply({ data: await runHubGscAdapter(input, deps.adapter) });
   } catch (error) {
     if (error instanceof SyntaxError) return reply({ error: "invalid_request" }, 400);

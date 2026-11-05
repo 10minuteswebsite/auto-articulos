@@ -10,6 +10,7 @@ type Account = { id: string; status: string; userId: string | null; toolkitSlug:
 type Input =
   | { operation: "start"; tenantId: string; attemptId: string }
   | { operation: "sites"; tenantId: string; attemptId: string; accountId: string }
+  | { operation: "verify_callback"; tenantId: string; attemptId: string; accountId: string; sessionUri: string }
   | { operation: "query"; tenantId: string; attemptId: string; accountId: string; siteUrl: string; startDate: string; endDate: string; dimensions: string[] }
   | { operation: "sitemaps"; tenantId: string; attemptId: string; accountId: string; siteUrl: string }
   | { operation: "inspect" | "submit_sitemap"; tenantId: string; attemptId: string; accountId: string; siteUrl: string; targetUrl: string };
@@ -17,6 +18,7 @@ type Input =
 export type HubGscDependencies = {
   config(): Promise<{ apiKey: string; authConfigId: string }>;
   start(apiKey: string, input: { authConfigId: string; userId: string; callbackUrl: string }): Promise<{ redirectUrl: string; connectedAccountId: string }>;
+  completeAuth(apiKey: string, input: { sessionUri: string; userId: string }): Promise<{ connectedAccountId: string; toolkitSlug: string }>;
   account(apiKey: string, accountId: string): Promise<Account>;
   sites(account: { apiKey: string; userId: string; connectedAccountId: string }): Promise<Site[]>;
   query(account: { apiKey: string; userId: string; connectedAccountId: string }, siteUrl: string, startDate: string, endDate: string, dimensions: string[]): Promise<unknown[]>;
@@ -52,6 +54,10 @@ export function parseHubGscRequest(value: unknown): Input {
     return { operation: "start", tenantId: body.tenantId, attemptId: body.attemptId };
   }
   if (typeof body.accountId !== "string" || !ACCOUNT_ID.test(body.accountId)) throw new HubGscError("invalid_request", 400);
+  if (body.operation === "verify_callback" && exactKeys(body, ["operation", "tenantId", "attemptId", "accountId", "sessionUri"])
+    && typeof body.sessionUri === "string" && body.sessionUri.length > 0 && body.sessionUri.length <= 2048 && !/[\u0000-\u001f\u007f]/.test(body.sessionUri)) {
+    return { operation: "verify_callback", tenantId: body.tenantId, attemptId: body.attemptId, accountId: body.accountId, sessionUri: body.sessionUri };
+  }
   if (body.operation === "sites" && exactKeys(body, ["operation", "tenantId", "attemptId", "accountId"])) return { operation: "sites", tenantId: body.tenantId, attemptId: body.attemptId, accountId: body.accountId };
   if (body.operation === "sitemaps" && exactKeys(body, ["operation", "tenantId", "attemptId", "accountId", "siteUrl"])
     && typeof body.siteUrl === "string" && body.siteUrl.length > 0 && body.siteUrl.length <= 256) {
@@ -106,11 +112,18 @@ export async function runHubGscAdapter(input: Input, deps: HubGscDependencies) {
     return { redirectUrl: url.toString(), accountId: link.connectedAccountId };
   }
 
+  if (input.operation === "verify_callback") {
+    const completed = await deps.completeAuth(apiKey, { userId, sessionUri: input.sessionUri });
+    if (completed.connectedAccountId !== input.accountId || completed.toolkitSlug.toLowerCase() !== "google_search_console") {
+      throw new HubGscError("connection_not_validated", 409);
+    }
+  }
   const account = await deps.account(apiKey, input.accountId);
   if (account.id !== input.accountId || account.status !== "ACTIVE" || account.userId !== userId
     || account.toolkitSlug?.toLowerCase() !== "google_search_console" || account.authConfigId !== authConfigId) {
     throw new HubGscError("connection_not_validated", 409);
   }
+  if (input.operation === "verify_callback") return { verified: true };
   const context = { apiKey, userId, connectedAccountId: input.accountId };
   const sites = await deps.sites(context);
   const safeSites = sites

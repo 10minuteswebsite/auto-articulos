@@ -186,6 +186,19 @@ export async function createConnectLink(
   };
 }
 
+/** Redeem a one-use callback session for the server-derived owner. */
+export async function completeConnectedAccount(
+  apiKey: string,
+  input: { sessionUri: string; userId: string },
+): Promise<{ connectedAccountId: string; toolkitSlug: string }> {
+  const body = await request<{ connected_account_id?: string; toolkit_slug?: string }>(apiKey, "POST", "/connected_accounts/complete_auth", {
+    session_uri: input.sessionUri,
+    user_id: input.userId,
+  });
+  if (!body.connected_account_id || !body.toolkit_slug) throw new ComposioApiError("Composio no confirmó la conexión.", null);
+  return { connectedAccountId: body.connected_account_id, toolkitSlug: body.toolkit_slug };
+}
+
 export interface ConnectedAccountInfo {
   id: string;
   status: string;
