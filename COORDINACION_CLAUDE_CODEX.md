@@ -13392,3 +13392,19 @@ cambio mínimo, pruebas, publicación, verificación y memoria. Caso cerrado en
 `main` con `1e7d988b`; producción verificada con la sesión autenticada de Rosa
 Bello.
 
+## CONEXIONES-GSC-ADAPTER-20261104 · preparado / sin cutover
+
+El nuevo endpoint `/api/integrations/hub/gsc-adapter` es un adaptador
+server-to-server para el Hub. Usa la configuración Composio existente sin copiar
+secretos, identidades por tenant e intento, y nunca elimina ni modifica cuentas
+legacy. Rechaza referencias de otro tenant/intento y requiere cuenta activa y
+propiedad verificada. `CURRENT_STATE.md` contiene pruebas y límites. Publicador:
+publicar solo el endpoint privado, verificar negativos y la interfaz legacy;
+`start` permanece cerrado y no se deben activar pilotos ni reconfigurar
+credenciales por esta solicitud.
+
+Solicitud `CONEXIONES-GSC-ADAPTER-20261104-PUBLISH`: origen chat
+`01a1a677-6f7f-7d21-8d52-ba7070d20015`; destino Publicador
+`01a1a1f2-cf9e-7f32-a139-b833b5d48c36`; respuesta requerida al chat origen con
+deployment, resultado de la barrera backend, verificación legacy o bloqueo.
+

@@ -1,3 +1,20 @@
+## CONEXIONES-GSC-ADAPTER-20261104 · preparado / sin cambio a tenants
+
+Adaptador backend GSC para el futuro recurso `Conexiones` del Hub: cada intento
+usa una identidad Composio distinta, vinculada al tenant Hub y al intento. Solo
+inicia una autorización nueva, verifica cuenta/propietario/configuración y lee
+propiedades o analíticas de la propiedad autorizada. No modifica ni revoca
+conexiones nativas. El endpoint exige la autenticación backend del Hub; no se
+exponen secretos ni se acepta una sesión de navegador como autoridad. La
+operación `start` responde 503 hasta que el flujo Hub y sus consumidores estén
+listos, para no iniciar un OAuth cuyo retorno todavía no existe.
+
+Pruebas de aislamiento, cuenta pendiente, proveedor, propiedad y redirección
+negativas pasan. No hay conexión de usuario ni consumo de Artículos/worker
+central habilitados todavía: `COMPOSIO_CONSUMER_READY.google_search_console`
+sigue en `false`. No cambiarlo globalmente hasta cubrir consumidores, fallback
+y un E2E autorizado. Publicación del endpoint privado pendiente del Publicador.
+
 ## BLOG-IA-QUITAR-CATEGORIA-20261103 — publicado, Worker sin desplegar
 
 Quitar categorías solo si no tienen artículos; el selector de Artículos retira las que ya no existen en el blog. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).

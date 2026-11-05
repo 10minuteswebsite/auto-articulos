@@ -1,3 +1,10 @@
+## CONEXIONES-GSC-ADAPTER-20261104 · backend preparado
+
+Preparado endpoint backend aislado para GSC del Hub. Ver [estado](CURRENT_STATE.md).
+No altera credenciales ni consumidores existentes; GSC continúa en el modo previo.
+Faltan publicación controlada, recorrido Hub de autorización/selección, consumo
+web y worker, fallback y E2E antes de ofrecer conexiones nuevas a los tenants.
+
 ## Checkpoint — BLOG-IA-QUITAR-CATEGORIA-20261103 — 2026-11-03
 
 - Publicado; falta desplegar `worker.yml` y verlo con una cuenta BLOG.

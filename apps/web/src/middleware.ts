@@ -43,6 +43,8 @@ const PUBLIC_PATHS = [
   "/api/integrations/hub/access-sync",
   // This exact route validates Hub backend credentials itself; never a browser cookie.
   "/api/integrations/hub/blog-destination",
+  // The Connections adapter authenticates the Hub backend in its route handler.
+  "/api/integrations/hub/gsc-adapter",
 ];
 
 /** Endpoint del servidor MCP; se autentica con Bearer, no con cookie. */
