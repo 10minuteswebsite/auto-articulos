@@ -62,13 +62,17 @@ export const PREFERENCE_TOOLS: ToolDef[] = [
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     handler: async () => {
       const userId = await getCurrentUserId();
-      const [user, integrations] = await Promise.all([
+      const [user, integrations, composioGsc] = await Promise.all([
         prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } }),
         prisma.searchIntegration.findMany({ where: { userId, provider: { in: ["google", "bing"] } }, select: { provider: true, siteUrl: true, siteDomain: true, updatedAt: true }, orderBy: { updatedAt: "desc" } }),
+        // Search Console conectado solo por Composio no deja fila en searchIntegration.
+        prisma.composioConnection.findFirst({ where: { userId, app: "google_search_console", status: "ACTIVE", siteUrl: { not: null } }, orderBy: { updatedAt: "desc" }, select: { siteUrl: true, updatedAt: true } }),
       ]);
-      const lines = integrations.length
-        ? integrations.map((item) => `- ${item.provider}: conectado${item.siteUrl ? ` — ${item.siteUrl}` : ""} (${item.updatedAt.toISOString()})`)
-        : ["- Google y Bing: sin conexiones registradas"];
+      const lines = integrations.map((item) => `- ${item.provider}: conectado${item.siteUrl ? ` — ${item.siteUrl}` : ""} (${item.updatedAt.toISOString()})`);
+      if (composioGsc && !integrations.some((item) => item.provider === "google" && item.siteUrl)) {
+        lines.push(`- google: conectado — ${composioGsc.siteUrl} (${composioGsc.updatedAt.toISOString()})`);
+      }
+      if (lines.length === 0) lines.push("- Google y Bing: sin conexiones registradas");
       return toolText(`Sitio seleccionado: ${user.selectedSiteDomain || "no seleccionado"}\n${lines.join("\n")}`);
     },
   },

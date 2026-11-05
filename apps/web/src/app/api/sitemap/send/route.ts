@@ -9,6 +9,8 @@ import {
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { getStoredComposioApiKey } from "@/lib/composio";
+import { shouldUseComposioFallback } from "@/lib/search-console-source";
 
 function defaultSitemapUrl(siteUrl: string): string {
   try {
@@ -35,7 +37,17 @@ export async function POST() {
     where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) },
   });
   const resolved = await resolveSearchConsoleForUser(userId, user.selectedSiteDomain ?? "");
-  const composioSiteUrl = resolved.source === "COMPOSIO" ? resolved.state.composio?.siteUrl ?? null : null;
+  // Caso Juan Carvajal 05/11/2026: el resolvedor aún elige la conexión propia, así que quien solo
+  // conectó Composio quedaba sin envío. Misma regla que Oportunidades: la propia gana mientras
+  // funciona; Composio toma el relevo si no hay propia o la propia guardó un error.
+  const composioState = resolved.state.composio;
+  const composioUsable = Boolean(composioState?.status === "ACTIVE" && composioState.hasSelection && composioState.siteUrl);
+  const useComposio = resolved.source === "COMPOSIO" || shouldUseComposioFallback({
+    source: resolved.source,
+    composioUsable,
+    ownHasError: Boolean(integration?.lastAccessError),
+  });
+  const composioSiteUrl = useComposio ? composioState?.siteUrl ?? null : null;
   const sitemapUrl = integration?.sitemapUrl ?? (composioSiteUrl ? defaultSitemapUrl(composioSiteUrl) : null);
   if ((!integration?.siteUrl && !composioSiteUrl) || !sitemapUrl) {
     return NextResponse.json(
@@ -45,12 +57,13 @@ export async function POST() {
   }
 
   try {
-    if (resolved.source === "COMPOSIO") {
-      if (!resolved.apiKey || !resolved.state.composio?.connectedAccountId || !resolved.state.composio.siteUrl) {
+    if (useComposio) {
+      const composioApiKey = resolved.apiKey ?? await getStoredComposioApiKey();
+      if (!composioApiKey || !resolved.state.composio?.connectedAccountId || !resolved.state.composio.siteUrl) {
         throw new Error("Search Console requiere reconectar la cuenta por Composio y seleccionar un sitio.");
       }
       await composioSubmitSitemap(
-        { apiKey: resolved.apiKey, userId, connectedAccountId: resolved.state.composio.connectedAccountId },
+        { apiKey: composioApiKey, userId, connectedAccountId: resolved.state.composio.connectedAccountId },
         resolved.state.composio.siteUrl,
         sitemapUrl,
       );

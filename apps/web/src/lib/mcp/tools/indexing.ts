@@ -20,7 +20,15 @@ async function sitemapPreview(provider: "google" | "bing", userId: string) {
     where: { userId, provider, ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) },
     select: { siteUrl: true, sitemapUrl: true, lastSitemapSyncAt: true, lastSitemapSyncStatus: true },
   });
-  return { user, integration };
+  // Quien solo conectó Search Console por Composio no tiene fila propia: se muestra su propiedad.
+  const composio = provider === "google" && !integration?.siteUrl
+    ? await prisma.composioConnection.findFirst({
+        where: { userId, app: "google_search_console", status: "ACTIVE", siteUrl: { not: null } },
+        orderBy: { updatedAt: "desc" },
+        select: { siteUrl: true },
+      })
+    : null;
+  return { user, integration, composioSiteUrl: composio?.siteUrl ?? null };
 }
 
 function sitemapTool(provider: "google" | "bing", route: () => Promise<Response>): ToolDef {
@@ -35,15 +43,15 @@ function sitemapTool(provider: "google" | "bing", route: () => Promise<Response>
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     handler: async (args) => {
       const userId = await getCurrentUserId();
-      const { user, integration } = await sitemapPreview(provider, userId);
-      const operation = { provider, siteDomain: user.selectedSiteDomain ?? null, siteUrl: integration?.siteUrl ?? null, sitemapUrl: integration?.sitemapUrl ?? null };
+      const { user, integration, composioSiteUrl } = await sitemapPreview(provider, userId);
+      const operation = { provider, siteDomain: user.selectedSiteDomain ?? null, siteUrl: integration?.siteUrl ?? composioSiteUrl ?? null, sitemapUrl: integration?.sitemapUrl ?? null };
       const confirmation = await confirmOrPreview({
         userId,
         toolName: name,
         operation,
         confirmar: args.confirmar,
         confirmacion: args.confirmacion,
-        preview: `Sin enviar todavía: ${label}, sitio ${integration?.siteUrl ?? user.selectedSiteDomain ?? "no configurado"}, sitemap ${integration?.sitemapUrl ?? "predeterminado o no configurado"}.`,
+        preview: `Sin enviar todavía: ${label}, sitio ${integration?.siteUrl ?? composioSiteUrl ?? user.selectedSiteDomain ?? "no configurado"}, sitemap ${integration?.sitemapUrl ?? "predeterminado o no configurado"}.`,
       });
       if (!confirmation.confirmed) return toolText(confirmation.text, args.confirmar === true);
       const { ok, data } = await readRoute(await route());
