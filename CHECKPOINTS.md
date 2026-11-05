@@ -9,6 +9,8 @@ piloto apagado y fallback; `07cddf7` está Ready en Vercel
 El lote siguiente `5d8277c` quedó Ready en Vercel
 `dpl_94ryPzPKn1es1PJBJFsDQMf3Zt3o`; Publicador verificó barreras 401. El
 diagnóstico Composio autenticado respondió `unavailable`, sin cambiar ajustes.
+El ajuste `2d9ced8` aclaró que la lectura de configuración responde 403,
+aunque la credencial existente valida; Vercel `dpl_2LtPobgKQKLXctXEMjuJxtsMiDtT` Ready.
 
 ## CONEXIONES-GSC-ADAPTER-20261104 · backend preparado
 

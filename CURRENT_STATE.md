@@ -14,7 +14,7 @@ El piloto, el inicio OAuth y el envío central de sitemap continúan cerrados.
 La verificación de identidad del callback aún debe resolverse sin cambiar la
 configuración compartida del proveedor ni afectar las conexiones legacy.
 
-Se prepara cobertura adicional, aún con piloto apagado, en estado, validación,
+Hay cobertura preparada, aún con piloto apagado, en estado, validación,
 inspección manual y señales de Redes; si el recurso falla se conserva la ruta
 legacy. Un diagnóstico solo de administrador consulta la configuración de
 Composio sin devolver valores, credenciales ni modificarla; no implica que el
@@ -23,6 +23,10 @@ Publicador confirmó este lote `5d8277c` en Vercel Production Ready,
 deployment `dpl_94ryPzPKn1es1PJBJFsDQMf3Zt3o`; negativos de ambos endpoints
 privados 401. El diagnóstico autenticado devolvió `unavailable`: aún no prueba
 ni desmiente la configuración del verificador.
+El ajuste `2d9ced8` quedó Ready en `dpl_2LtPobgKQKLXctXEMjuJxtsMiDtT`.
+Con él se verificó que la credencial existente de Composio es válida, pero
+leer la configuración del proyecto devuelve 403; no se cambiaron permisos,
+ajustes ni credenciales.
 
 En preparación sobre `main`: lectura de analíticas e inspección central, piloto
 por tenant apagado por defecto y fallback a la conexión previa. La operación
