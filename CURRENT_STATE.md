@@ -2,6 +2,19 @@
 
 Código `c5ab722b` (PR #792) en `main`; Vercel `web` y `auto-articulos-web`: success. El asistente de Configuración Inicial pregunta primero dónde se publica («Mi blog de BLOG IA» / «Mi sitio 10MWS»); con BLOG IA no muestra 10minutesWebsite. Solo `apps/web`, sin migración. Verificado en producción con soymiltondavila@gmail.com; falta probar con una cuenta con blog vinculado. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
 
+## CONEXIONES-GSC-ADAPTER-20261104 · endpoint privado publicado / piloto cerrado
+
+Publicador verificó `d137492` en Vercel `dpl_9pCxDF5nQW47cJF1MnppvcHQ2oCh`:
+401 sin credencial o con credencial inválida, 412 pruebas, typecheck y build.
+La interfaz legacy de Search Console seguía visible; sin conectar ni desconectar.
+
+En preparación sobre `main`: lectura de analíticas e inspección central, piloto
+por tenant apagado por defecto y fallback a la conexión previa. La operación
+`start` y el envío central de sitemap permanecen cerrados. No hay consumo
+central disponible para clientes; faltan retorno OAuth real, otros consumidores,
+sitemap manual/diario y E2E. El broker propuesto no está desplegado ni se han
+asignado identidades adicionales. No cambiar `COMPOSIO_CONSUMER_READY`.
+
 ## CONEXIONES-GSC-ADAPTER-20261104 · preparado / sin cambio a tenants
 
 Adaptador backend GSC para el futuro recurso `Conexiones` del Hub: cada intento

@@ -1,3 +1,10 @@
+## CONEXIONES-GSC-ADAPTER-20261104 · backend publicado / preparación ampliada
+
+Publicador verificó `d137492` en Vercel, 401 negativos y la UI legacy; no se
+crearon autorizaciones. Código adicional prepara lecturas e inspección con
+piloto apagado y fallback, todavía sin apertura a clientes. Ver
+[estado](CURRENT_STATE.md) y plan central de Conexiones.
+
 ## CONEXIONES-GSC-ADAPTER-20261104 · backend preparado
 
 Preparado endpoint backend aislado para GSC del Hub. Ver [estado](CURRENT_STATE.md).

@@ -13394,6 +13394,13 @@ Bello.
 
 ## CONEXIONES-GSC-ADAPTER-20261104 · preparado / sin cutover
 
+Actualización: Publicador verificó `d137492` en Vercel. Este lote prepara
+lectura central por piloto en Oportunidades e inspección del worker; por defecto
+el piloto está apagado, `start` y `submit_sitemap` permanecen cerrados y no se
+modifican tablas ni credenciales legacy. Se requieren los demás consumidores,
+broker coordinado, callback real y E2E antes de habilitar tenants. El Publicador
+debe verificar cualquier despliegue automático de `main` y conservar los flags.
+
 El nuevo endpoint `/api/integrations/hub/gsc-adapter` es un adaptador
 server-to-server para el Hub. Usa la configuración Composio existente sin copiar
 secretos, identidades por tenant e intento, y nunca elimina ni modifica cuentas
