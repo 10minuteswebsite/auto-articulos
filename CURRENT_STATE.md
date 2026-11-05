@@ -1,3 +1,7 @@
+## ASISTENTE-DESTINO-20261104 — publicado y verificado
+
+Código `c5ab722b` (PR #792) en `main`; Vercel `web` y `auto-articulos-web`: success. El asistente de Configuración Inicial pregunta primero dónde se publica («Mi blog de BLOG IA» / «Mi sitio 10MWS»); con BLOG IA no muestra 10minutesWebsite. Solo `apps/web`, sin migración. Verificado en producción con soymiltondavila@gmail.com; falta probar con una cuenta con blog vinculado. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
+
 ## CONEXIONES-GSC-ADAPTER-20261104 · preparado / sin cambio a tenants
 
 Adaptador backend GSC para el futuro recurso `Conexiones` del Hub: cada intento
