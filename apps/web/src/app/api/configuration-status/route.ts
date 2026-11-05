@@ -6,6 +6,7 @@ import { prisma } from "@auto-articulos/db";
 import { getCurrentUserId } from "@/lib/current-user";
 import { platformHelpUrl } from "@auto-articulos/shared";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { resolveHubGsc } from "@/lib/hub-gsc-client";
 
 interface ConfigurationCheck {
   id: string;
@@ -24,7 +25,7 @@ export const revalidate = 0;
 export async function GET() {
   const userId = await getCurrentUserId();
   const regionConfirmed = await isPlatformDomainConfirmed(userId);
-  const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, platformDomain: true } });
+  const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, platformDomain: true, hubUserId: true } });
   const productName = account.platformDomain === "tagcrush" ? "tu plataforma" : "10minutesWebsite";
 
   // Parallel queries for performance
@@ -153,7 +154,8 @@ export async function GET() {
       select: { propertyId: true, siteUrl: true },
     }),
   ]);
-  const searchConsoleConfigured = Boolean(googleIntegration?.siteUrl) || (
+  const centralSearchConsole = await resolveHubGsc(account.hubUserId, googleIntegration?.siteUrl ?? resolvedSearchConsole.state.composio?.siteUrl);
+  const searchConsoleConfigured = Boolean(googleIntegration?.siteUrl || centralSearchConsole) || (
     resolvedSearchConsole.source === "COMPOSIO" && Boolean(resolvedSearchConsole.state.composio?.siteUrl)
   );
   const hasLegacyGoogleAnalytics = Boolean(googleAnalyticsIntegration?.siteUrl && googleAnalyticsIntegration.encryptedRefreshToken);

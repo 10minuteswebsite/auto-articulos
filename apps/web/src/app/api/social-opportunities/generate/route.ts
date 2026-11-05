@@ -18,6 +18,7 @@ import { getGoogleAnalyticsSignals, summarizeGoogleAnalyticsSignals } from "@/li
 import { getBingSignals } from "@/lib/bing-signals";
 import { getStoredTumblrAppCredentials } from "@/lib/tumblr-app-config";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { readHubGscRanking, resolveHubGsc } from "@/lib/hub-gsc-client";
 import { describeSocialContentLanguage } from "@/lib/social-language";
 import { belongsToUnavailableBlog, inspectArticlePage } from "@/lib/social-article-url";
 
@@ -221,10 +222,12 @@ function pathnameOf(url: string): string {
  * descubre temas sin artículo — decisión explícita de Milton: solo prioriza
  * entre lo que ya existe.
  */
-async function selectTrendingArticles(userId: string, integrations: string[] = []): Promise<{ candidates: ArticleCandidate[]; totalArticles: number; goneArticles: number; noImageArticles: number; noImageTitles: string[] }> {
-  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
+async function selectTrendingArticles(userId: string, integrations: string[] = []): Promise<{ candidates: ArticleCandidate[]; totalArticles: number; goneArticles: number; noImageArticles: number; noImageTitles: string[]; centralGscUsed: boolean }> {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, hubUserId: true } });
   const gsc = await prisma.searchIntegration.findFirst({ where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) } });
   const resolvedGsc = await resolveSearchConsoleForUser(userId, user.selectedSiteDomain ?? "");
+  const centralGsc = await resolveHubGsc(user.hubUserId, gsc?.siteUrl ?? resolvedGsc.state.composio?.siteUrl, "auto-redes");
+  let centralGscUsed = false;
 
   // Una sola clave por página en todo este cálculo: el PATHNAME normalizado
   // (ej. "/noticias/algo"), nunca la URL completa ni el pagePath de GA4 por
@@ -247,7 +250,7 @@ async function selectTrendingArticles(userId: string, integrations: string[] = [
   // vs 27 previos), agregado por página, con las consultas reales que la
   // alimentan (esto también activa `searchQueries`, que existía en el tipo
   // pero nunca se llenaba — el copy nunca mencionaba la consulta real).
-  if ((gsc?.siteUrl && gsc.encryptedRefreshToken) || resolvedGsc.source === "COMPOSIO") {
+  if ((gsc?.siteUrl && gsc.encryptedRefreshToken) || resolvedGsc.source === "COMPOSIO" || centralGsc) {
     try {
       const end = new Date();
       end.setUTCDate(end.getUTCDate() - 3);
@@ -276,7 +279,14 @@ async function selectTrendingArticles(userId: string, integrations: string[] = [
         return queryGoogleSearchAnalytics(accessToken, gsc.siteUrl, start, finish, dimensions);
       };
 
-      const [currentRows, previousRows] = await Promise.all([
+      const centralRows = centralGsc && user.hubUserId
+        ? await readHubGscRanking(user.hubUserId, centralGsc.id, {
+            currentStart: fmt(currentStart), currentEnd: fmt(end),
+            previousStart: fmt(previousStart), previousEnd: fmt(previousEnd),
+          })
+        : null;
+      centralGscUsed = Boolean(centralRows);
+      const [currentRows, previousRows] = centralRows ?? await Promise.all([
         query(fmt(currentStart), fmt(end), ["page", "query"]),
         query(fmt(previousStart), fmt(previousEnd), ["page"]),
       ]);
@@ -504,7 +514,7 @@ async function selectTrendingArticles(userId: string, integrations: string[] = [
     articleUrl: article.articleUrl,
     searchQueries: queriesByPath.get(pathnameOf(article.articleUrl!)) ?? [],
   }));
-  return { candidates, totalArticles: eligible.length > 0 ? eligible.length : ranked.length, goneArticles, noImageArticles, noImageTitles };
+  return { candidates, totalArticles: eligible.length > 0 ? eligible.length : ranked.length, goneArticles, noImageArticles, noImageTitles, centralGscUsed };
 }
 
 /**
@@ -681,7 +691,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { candidates: trendingCandidates, totalArticles, goneArticles, noImageArticles, noImageTitles } = await selectTrendingArticles(userId, integrationsWithinLimit);
+    const { candidates: trendingCandidates, totalArticles, goneArticles, noImageArticles, noImageTitles, centralGscUsed } = await selectTrendingArticles(userId, integrationsWithinLimit);
     const candidateMap = new Map<string, ArticleCandidate>();
     for (const article of trendingCandidates) {
       candidateMap.set(article.id, article);
@@ -883,7 +893,7 @@ export async function POST(request: Request) {
     const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
     const source = await prisma.searchIntegration.findFirst({ where: { userId, provider: "google", ...(account.selectedSiteDomain ? { siteDomain: account.selectedSiteDomain } : {}) } });
     const resolvedSource = await resolveSearchConsoleForUser(userId, account.selectedSiteDomain ?? "");
-    const usesSearchConsole = Boolean(source?.siteUrl) || resolvedSource.source === "COMPOSIO";
+    const usesSearchConsole = Boolean(source?.siteUrl) || resolvedSource.source === "COMPOSIO" || centralGscUsed;
 
     if (createdOpportunities.length === 0) {
       return NextResponse.json(

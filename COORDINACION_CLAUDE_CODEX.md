@@ -13401,6 +13401,11 @@ modifican tablas ni credenciales legacy. Se requieren los demás consumidores,
 broker coordinado, callback real y E2E antes de habilitar tenants. El Publicador
 debe verificar cualquier despliegue automático de `main` y conservar los flags.
 
+Siguiente lote: lectura piloto en las superficies de estado, inspección manual
+y señales de Redes con fallback; límite de espera acotado. Diagnóstico Composio
+solo admin, de lectura, devuelve exclusivamente nombres de opciones candidatas
+y booleanos, sin valores ni cambios. Las barreras y pendientes se mantienen.
+
 El nuevo endpoint `/api/integrations/hub/gsc-adapter` es un adaptador
 server-to-server para el Hub. Usa la configuración Composio existente sin copiar
 secretos, identidades por tenant e intento, y nunca elimina ni modifica cuentas

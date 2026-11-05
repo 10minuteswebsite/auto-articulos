@@ -8,6 +8,18 @@ Publicador verificó `d137492` en Vercel `dpl_9pCxDF5nQW47cJF1MnppvcHQ2oCh`:
 401 sin credencial o con credencial inválida, 412 pruebas, typecheck y build.
 La interfaz legacy de Search Console seguía visible; sin conectar ni desconectar.
 
+Posteriormente Publicador confirmó `07cddf7` en Vercel Production Ready,
+deployment `dpl_G3LkA8baZ1muMSDyTx4Lms1e8Yii`; endpoint sin credencial 401.
+El piloto, el inicio OAuth y el envío central de sitemap continúan cerrados.
+La verificación de identidad del callback aún debe resolverse sin cambiar la
+configuración compartida del proveedor ni afectar las conexiones legacy.
+
+Se prepara cobertura adicional, aún con piloto apagado, en estado, validación,
+inspección manual y señales de Redes; si el recurso falla se conserva la ruta
+legacy. Un diagnóstico solo de administrador consulta la configuración de
+Composio sin devolver valores, credenciales ni modificarla; no implica que el
+verificador esté activo. No habilitar hasta resolver el callback, trial y sitemap.
+
 En preparación sobre `main`: lectura de analíticas e inspección central, piloto
 por tenant apagado por defecto y fallback a la conexión previa. La operación
 `start` y el envío central de sitemap permanecen cerrados. No hay consumo

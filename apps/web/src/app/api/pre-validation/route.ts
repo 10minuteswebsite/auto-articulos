@@ -5,12 +5,13 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { platformHelpUrl, platformProductNameOrNeutral } from "@auto-articulos/shared";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { resolveHubGsc } from "@/lib/hub-gsc-client";
 
 export async function GET() {
   const userId = await getCurrentUserId();
   const denied = await requireProductAccess(userId, "ARTICULOS", "/api/pre-validation");
   if (denied) return denied;
-  const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, platformDomain: true } });
+  const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, platformDomain: true, hubUserId: true } });
   const productName = platformProductNameOrNeutral(account.platformDomain);
 
   const [credential, categories, user, googleIntegration] = await Promise.all([
@@ -43,11 +44,12 @@ export async function GET() {
   const hasCategories = categories.length > 0;
   const hasContentLanguage = Boolean(user?.contentLanguage && user.contentLanguage.trim().length > 0);
   const contentLanguage = user?.contentLanguage ?? "";
-  const googleConnected = Boolean(googleIntegration);
   const resolvedSearchConsole = await resolveSearchConsoleForUser(userId, account.selectedSiteDomain ?? "");
   const composioConnected = resolvedSearchConsole.source === "COMPOSIO" && Boolean(resolvedSearchConsole.state.composio?.siteUrl);
-  const hasGoogleSiteUrl = Boolean(googleIntegration?.siteUrl) || composioConnected;
-  const googleSiteUrl = googleIntegration?.siteUrl ?? resolvedSearchConsole.state.composio?.siteUrl ?? null;
+  const central = await resolveHubGsc(account.hubUserId, googleIntegration?.siteUrl ?? resolvedSearchConsole.state.composio?.siteUrl);
+  const googleConnected = Boolean(googleIntegration || central);
+  const hasGoogleSiteUrl = Boolean(googleIntegration?.siteUrl || central) || composioConnected;
+  const googleSiteUrl = central?.site_url ?? googleIntegration?.siteUrl ?? resolvedSearchConsole.state.composio?.siteUrl ?? null;
   const hasImageCredits = user?.hasImageCredits ?? true;
 
   const missingForPublish: Array<{

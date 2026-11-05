@@ -4,7 +4,7 @@ const ORIGIN='https://hub-workload-credential-broker.10minuteswebsite.workers.de
 export class HubTransportUnavailable extends Error{constructor(){super('hub_transport_unavailable')}}
 export function sharedHubTransport(){return process.env.HUB_CREDENTIAL_TRANSPORT==='shared'}
 export function hubTransportConfigured(){return !!process.env.AUTO_ARTICULOS_HUB_CLIENT_ID&&(sharedHubTransport()||!!process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET)}
-async function broker(path:string,body:object){
+async function broker(path:string,body:object,connectionsTimeoutMs=59000){
  let token:string;
  if(process.env.HUB_WORKLOAD_IDENTITY==='github-actions'){
   if(path!=='/user-sync'||process.env.GITHUB_ACTIONS!=='true')throw new HubTransportUnavailable();
@@ -15,7 +15,7 @@ async function broker(path:string,body:object){
   const r=await fetch(url,{headers:{authorization:'Bearer '+credential},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(5000)});
   if(!r.ok)throw new HubTransportUnavailable();const d=await r.json();if(typeof d.value!=='string'||d.value.length>16384||!/^[-A-Za-z0-9_.]{32,}$/.test(d.value))throw new HubTransportUnavailable();token=d.value;
  }else{token=await getVercelOidcToken();}
- const response=await fetch(ORIGIN+path,{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??''},body:JSON.stringify(body),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(path==='/connections-read'?59000:path==='/access'?3000:12000)});
+ const response=await fetch(ORIGIN+path,{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??''},body:JSON.stringify(body),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(path==='/connections-read'?connectionsTimeoutMs:path==='/access'?3000:12000)});
  if(response.status>=500)throw new HubTransportUnavailable();return response;
 }
 export async function hubBackendFetch(path:'/api/product-launch'|'/api/integrations/auto-articulos/access'|'/api/integrations/auto-articulos/user-sync',body:object){
@@ -25,9 +25,10 @@ export async function hubBackendFetch(path:'/api/product-launch'|'/api/integrati
 }
 /** Fixed read-only resource path. No credential is returned to the caller. */
 export async function hubConnectionsRead(body:object){
- if(sharedHubTransport())return broker('/connections-read',body);
+ const timeout='operation' in body&&body.operation==='list'?3000:20000;
+ if(sharedHubTransport())return broker('/connections-read',body,timeout);
  const origin=process.env.HUB_BASE_URL||'https://hub.lasolucionweb.net';
- return fetch(origin+'/api/integrations/auto-articulos/connections',{method:'POST',headers:{'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??'',authorization:'Bearer '+(process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET??'')},body:JSON.stringify(body),cache:'no-store',redirect:'error',signal:AbortSignal.timeout(59000)});
+ return fetch(origin+'/api/integrations/auto-articulos/connections',{method:'POST',headers:{'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??'',authorization:'Bearer '+(process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET??'')},body:JSON.stringify(body),cache:'no-store',redirect:'error',signal:AbortSignal.timeout(timeout)});
 }
 export async function validHubBackend(request:Request){
  if(request.headers.has('origin')||request.headers.has('cookie')||request.headers.has('sec-fetch-site'))return false;

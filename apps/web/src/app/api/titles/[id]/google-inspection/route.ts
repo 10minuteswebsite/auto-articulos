@@ -9,17 +9,18 @@ import {
 import { getCurrentUserId } from "@/lib/current-user";
 import { requireProductAccess } from "@/lib/require-product-access";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { inspectHubGsc, resolveHubGsc } from "@/lib/hub-gsc-client";
 
 async function contextFor(userId: string, titleId: string) {
   const title = await prisma.title.findFirst({
     where: { id: titleId, run: { userId } },
     select: { id: true, articleUrl: true },
   });
-  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, hubUserId: true } });
   const integration = await prisma.searchIntegration.findFirst({
     where: { userId, provider: "google", ...(user.selectedSiteDomain ? { siteDomain: user.selectedSiteDomain } : {}) },
   });
-  return { title, integration, selectedSiteDomain: user.selectedSiteDomain ?? "" };
+  return { title, integration, selectedSiteDomain: user.selectedSiteDomain ?? "", hubUserId: user.hubUserId };
 }
 
 function searchConsoleUrl(siteUrl: string, articleUrl: string) {
@@ -37,9 +38,11 @@ export async function GET(
   const denied = await requireProductAccess(userId, "ARTICULOS", "/api/titles/[id]/google-inspection");
   if (denied) return denied;
   const { id } = await params;
-  const { title, integration, selectedSiteDomain } = await contextFor(userId, id);
+  const { title, integration, selectedSiteDomain, hubUserId } = await contextFor(userId, id);
   const resolved = await resolveSearchConsoleForUser(userId, integration?.siteDomain ?? selectedSiteDomain);
-  const siteUrl = integration?.siteUrl ?? (resolved.source === "COMPOSIO" ? resolved.state.composio?.siteUrl ?? null : null);
+  const legacySite = integration?.siteUrl ?? (resolved.source === "COMPOSIO" ? resolved.state.composio?.siteUrl ?? null : null);
+  const central = await resolveHubGsc(hubUserId, legacySite);
+  const siteUrl = central?.site_url ?? legacySite;
   if (!title?.articleUrl || !siteUrl) {
     return NextResponse.redirect(
       new URL("https://search.google.com/search-console"),
@@ -58,7 +61,7 @@ export async function POST(
   const denied = await requireProductAccess(userId, "ARTICULOS", "/api/titles/[id]/google-inspection");
   if (denied) return denied;
   const { id } = await params;
-  const { title, integration, selectedSiteDomain } = await contextFor(userId, id);
+  const { title, integration, selectedSiteDomain, hubUserId } = await contextFor(userId, id);
   if (!title?.articleUrl) {
     return NextResponse.json(
       { error: "El artículo no tiene URL." },
@@ -66,7 +69,9 @@ export async function POST(
     );
   }
   const resolved = await resolveSearchConsoleForUser(userId, integration?.siteDomain ?? selectedSiteDomain);
-  const siteUrl = integration?.siteUrl ?? (resolved.source === "COMPOSIO" ? resolved.state.composio?.siteUrl ?? null : null);
+  const legacySite = integration?.siteUrl ?? (resolved.source === "COMPOSIO" ? resolved.state.composio?.siteUrl ?? null : null);
+  const central = await resolveHubGsc(hubUserId, legacySite);
+  const siteUrl = central?.site_url ?? legacySite;
   if (!siteUrl) {
     return NextResponse.json(
       { error: "Selecciona primero una propiedad de Google Search Console." },
@@ -74,7 +79,12 @@ export async function POST(
     );
   }
   try {
-    const inspection = resolved.source === "COMPOSIO"
+    let centralInspection: Awaited<ReturnType<typeof inspectHubGsc>> | null = null;
+    if (central && hubUserId) {
+      try { centralInspection = await inspectHubGsc(hubUserId, central.id, title.articleUrl); }
+      catch (error) { if (!legacySite) throw error; }
+    }
+    const inspection = centralInspection ?? (resolved.source === "COMPOSIO"
       ? resolved.apiKey && resolved.state.composio?.connectedAccountId && resolved.state.composio.siteUrl
         ? await composioInspectUrl(
             { apiKey: resolved.apiKey, userId, connectedAccountId: resolved.state.composio.connectedAccountId },
@@ -86,7 +96,7 @@ export async function POST(
           await getGoogleAccessToken(decryptSecret(integration!.encryptedRefreshToken)),
           siteUrl,
           title.articleUrl,
-        );
+        ));
     const indexed = inspection.verdict === "PASS";
     const message = indexed
       ? `Google informa que la URL está indexada${inspection.coverageState ? `: ${inspection.coverageState}` : "."}`

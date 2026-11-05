@@ -2,7 +2,8 @@
 
 Publicador verificó `d137492` en Vercel, 401 negativos y la UI legacy; no se
 crearon autorizaciones. Código adicional prepara lecturas e inspección con
-piloto apagado y fallback, todavía sin apertura a clientes. Ver
+piloto apagado y fallback; `07cddf7` está Ready en Vercel
+`dpl_G3LkA8baZ1muMSDyTx4Lms1e8Yii`. No hay apertura a clientes. Ver
 [estado](CURRENT_STATE.md) y plan central de Conexiones.
 
 ## CONEXIONES-GSC-ADAPTER-20261104 · backend preparado

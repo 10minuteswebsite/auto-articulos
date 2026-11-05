@@ -3,6 +3,7 @@ import { prisma } from "@auto-articulos/db";
 import { countPublishedArticles } from "@/lib/article-quota";
 import { getCurrentUserId } from "@/lib/current-user";
 import { resolveSearchConsoleForUser } from "@/lib/composio-search-console-consumer";
+import { resolveHubGsc } from "@/lib/hub-gsc-client";
 
 function startOfDay(d: Date) {
   const copy = new Date(d);
@@ -12,7 +13,7 @@ function startOfDay(d: Date) {
 
 export async function GET() {
   const userId = await getCurrentUserId();
-  const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true } });
+  const account = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { selectedSiteDomain: true, hubUserId: true } });
   const now = new Date();
   const today = startOfDay(now);
   const daysBack = 14;
@@ -72,6 +73,7 @@ export async function GET() {
   const composioSiteUrl = resolvedSearchConsole.source === "COMPOSIO"
     ? resolvedSearchConsole.state.composio?.siteUrl ?? null
     : null;
+  const central = await resolveHubGsc(account.hubUserId, integration?.siteUrl ?? composioSiteUrl);
 
   const chartBuckets = new Map<string, number>();
   for (let i = 0; i < daysBack; i++) {
@@ -132,9 +134,9 @@ export async function GET() {
     daysSinceLastPublish,
     streak,
     chart,
-    googleConnected: Boolean(integration?.siteUrl || composioSiteUrl),
-    googleSiteUrl: integration?.siteUrl ?? composioSiteUrl,
-    googleLastSync: integration?.updatedAt ?? null,
+    googleConnected: Boolean(central || integration?.siteUrl || composioSiteUrl),
+    googleSiteUrl: central?.site_url ?? integration?.siteUrl ?? composioSiteUrl,
+    googleLastSync: central?.validated_at ?? integration?.updatedAt ?? null,
     topCategories,
     pendingOpportunityTitles,
   });
