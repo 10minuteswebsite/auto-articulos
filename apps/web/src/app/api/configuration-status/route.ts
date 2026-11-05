@@ -155,8 +155,18 @@ export async function GET() {
     }),
   ]);
   const centralSearchConsole = await resolveHubGsc(account.hubUserId, googleIntegration?.siteUrl ?? resolvedSearchConsole.state.composio?.siteUrl);
+  // Caso Juan Carvajal 05/11/2026: Composio ACTIVO con propiedad elegida (la tarjeta decía
+  // «Conexión activa») pero este estado decía «sin conectar», porque el resolvedor aún elige
+  // siempre la conexión propia (COMPOSIO_CONSUMER_READY.google_search_console = false). Misma
+  // regla que ya usa Oportunidades: una conexión Composio utilizable cuenta como conectada.
+  const composioSearchConsoleUsable = Boolean(
+    resolvedSearchConsole.state.composio?.status === "ACTIVE" &&
+      resolvedSearchConsole.state.composio.hasSelection &&
+      resolvedSearchConsole.state.composio.siteUrl,
+  );
   const searchConsoleConfigured = Boolean(googleIntegration?.siteUrl || centralSearchConsole) || (
-    resolvedSearchConsole.source === "COMPOSIO" && Boolean(resolvedSearchConsole.state.composio?.siteUrl)
+    (resolvedSearchConsole.source === "COMPOSIO" || composioSearchConsoleUsable) &&
+    Boolean(resolvedSearchConsole.state.composio?.siteUrl)
   );
   const hasLegacyGoogleAnalytics = Boolean(googleAnalyticsIntegration?.siteUrl && googleAnalyticsIntegration.encryptedRefreshToken);
   const hasActiveComposioAnalytics = Boolean(analyticsComposioConnection?.propertyId || analyticsComposioConnection?.siteUrl);
