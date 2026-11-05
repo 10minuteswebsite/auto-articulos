@@ -18,3 +18,14 @@ export function callbackVerifierCandidates(value: unknown) {
   walk(value, 0);
   return found;
 }
+
+export async function readComposioProjectStatus(apiKey: string | null, transport: typeof fetch = fetch) {
+  if (!apiKey) return { state: "not_configured" as const };
+  try {
+    const response = await transport("https://backend.composio.dev/api/v3/org/project/config", {
+      headers: { "x-api-key": apiKey }, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) return { state: "provider_error" as const, provider_status: response.status };
+    return { state: "ok" as const, candidates: callbackVerifierCandidates(await response.json()) };
+  } catch { return { state: "unavailable" as const }; }
+}

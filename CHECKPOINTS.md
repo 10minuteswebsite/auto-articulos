@@ -6,6 +6,10 @@ piloto apagado y fallback; `07cddf7` está Ready en Vercel
 `dpl_G3LkA8baZ1muMSDyTx4Lms1e8Yii`. No hay apertura a clientes. Ver
 [estado](CURRENT_STATE.md) y plan central de Conexiones.
 
+El lote siguiente `5d8277c` quedó Ready en Vercel
+`dpl_94ryPzPKn1es1PJBJFsDQMf3Zt3o`; Publicador verificó barreras 401. El
+diagnóstico Composio autenticado respondió `unavailable`, sin cambiar ajustes.
+
 ## CONEXIONES-GSC-ADAPTER-20261104 · backend preparado
 
 Preparado endpoint backend aislado para GSC del Hub. Ver [estado](CURRENT_STATE.md).

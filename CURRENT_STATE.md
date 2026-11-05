@@ -19,6 +19,10 @@ inspección manual y señales de Redes; si el recurso falla se conserva la ruta
 legacy. Un diagnóstico solo de administrador consulta la configuración de
 Composio sin devolver valores, credenciales ni modificarla; no implica que el
 verificador esté activo. No habilitar hasta resolver el callback, trial y sitemap.
+Publicador confirmó este lote `5d8277c` en Vercel Production Ready,
+deployment `dpl_94ryPzPKn1es1PJBJFsDQMf3Zt3o`; negativos de ambos endpoints
+privados 401. El diagnóstico autenticado devolvió `unavailable`: aún no prueba
+ni desmiente la configuración del verificador.
 
 En preparación sobre `main`: lectura de analíticas e inspección central, piloto
 por tenant apagado por defecto y fallback a la conexión previa. La operación
