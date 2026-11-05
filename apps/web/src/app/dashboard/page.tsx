@@ -6,6 +6,8 @@ import { useEffect, useState, useCallback, useRef, type CSSProperties } from "re
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import Link from "next/link";
 import OnboardingWizard from "@/components/OnboardingWizard";
+import { isWhiteLabelPlatform } from "@auto-articulos/shared";
+import { PUBLISHING_CHOICE_EVENT, readPublishingChoice, type PublishingChoice } from "@/lib/publishing-choice";
 import type { ProductsInfo } from "@/lib/product-page-gate";
 
 const QUICK_LINKS = [
@@ -118,6 +120,16 @@ export default function InicioPage() {
   const [hostProduct, setHostProduct] = useState<HostProductScope>("COMPARTIDO");
   // Vista por productos: empieza APAGADA hasta que /api/me confirme que está activa.
   const [productView, setProductView] = useState(false);
+  // Destino de publicación, para que la introducción no hable de 10minutesWebsite a quien publica en BLOG IA
+  // ni antes de que la persona haya elegido dónde publica.
+  const [destInfo, setDestInfo] = useState<{ blogReady: boolean; websiteConnected: boolean; whiteLabel: boolean } | null>(null);
+  const [destChoice, setDestChoice] = useState<PublishingChoice | null>(null);
+  useEffect(() => {
+    const sync = () => setDestChoice(readPublishingChoice());
+    sync();
+    window.addEventListener(PUBLISHING_CHOICE_EVENT, sync);
+    return () => window.removeEventListener(PUBLISHING_CHOICE_EVENT, sync);
+  }, []);
 
   // Mismo criterio que el botón de Publicar: persistir en la base (solo
   // `true`, el `false` es exclusivo del worker) y quitar el aviso al instante.
@@ -155,6 +167,11 @@ export default function InicioPage() {
         : null;
 
       const step1 = Boolean(credData.publishingReady ?? credData.configured);
+      setDestInfo({
+        blogReady: credData.publishingDestination === "blog-ia" && credData.publishingReady === true,
+        websiteConnected: Boolean(credData.configured),
+        whiteLabel: typeof meData?.platformDomain === "string" && isWhiteLabelPlatform(meData.platformDomain),
+      });
       // Las categorías son opcionales en el onboarding (mismo criterio que
       // OnboardingWizard desde el 7/10/2026): una web nueva puede no tener
       // ninguna. Exigirlas aquí dejaba el wizard en pantalla para siempre
@@ -253,26 +270,43 @@ export default function InicioPage() {
       <ModuleIntro titulo="Inicio" showEyebrow={showWizard !== false} compact={showWizard === false}>
         {showWizard === true ? (
           <>
-            <IntroP>
-              Antes de que la plataforma pueda redactar y publicar por ti, necesitamos configurar 4 cosas, en este orden:
-            </IntroP>
-            <ol
-              style={{
-                margin: "10px 0 0",
-                paddingLeft: 20,
-                fontSize: 16,
-                lineHeight: 1.55,
-                color: "#1d1d1f",
-              }}
-            >
-              <li>Conectar tu cuenta de 10minutesWebsite.</li>
-              <li>Sincronizar las categorías de tu web.</li>
-              <li>Elegir el idioma en el que se redactan los artículos.</li>
-              <li>Conectar Google Search Console.</li>
-            </ol>
-            <IntroP>
-              Complétalos en orden, uno por uno, más abajo. Cuando termines los 4, el resto de la plataforma se desbloquea.
-            </IntroP>
+            {destInfo && !destInfo.blogReady && !destInfo.websiteConnected && !destInfo.whiteLabel && destChoice !== "website" ? (
+              <IntroP>
+                Antes de que la plataforma pueda redactar y publicar por ti, dinos dónde se publican tus artículos. Después completarás el idioma y Google Search Console.
+              </IntroP>
+            ) : (
+              <>
+                <IntroP>
+                  Antes de que la plataforma pueda redactar y publicar por ti, necesitamos configurar 4 cosas, en este orden:
+                </IntroP>
+                <ol
+                  style={{
+                    margin: "10px 0 0",
+                    paddingLeft: 20,
+                    fontSize: 16,
+                    lineHeight: 1.55,
+                    color: "#1d1d1f",
+                  }}
+                >
+                  {destInfo?.blogReady ? (
+                    <>
+                      <li>Confirmar que publicas en tu blog de BLOG IA.</li>
+                      <li>Traer las categorías de tu blog.</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>Conectar tu cuenta de 10minutesWebsite.</li>
+                      <li>Sincronizar las categorías de tu web.</li>
+                    </>
+                  )}
+                  <li>Elegir el idioma en el que se redactan los artículos.</li>
+                  <li>Conectar Google Search Console.</li>
+                </ol>
+                <IntroP>
+                  Complétalos en orden, uno por uno, más abajo. Cuando termines los 4, el resto de la plataforma se desbloquea.
+                </IntroP>
+              </>
+            )}
           </>
         ) : (
           <>

@@ -7,8 +7,17 @@ import Link from "next/link";
 import {
   sectionStyle,
   inputStyle,
+  buttonStyle,
   secondaryButtonStyle,
 } from "./dashboard-ui";
+import {
+  PUBLISHING_CHOICE_EVENT,
+  readPublishingChoice,
+  writePublishingChoice,
+  type PublishingChoice,
+} from "@/lib/publishing-choice";
+
+const BLOG_IA_LAUNCH_URL = "https://hub.lasolucionweb.net/api/product-launch?app=blog-ia";
 import {
   platformForgotPasswordUrl,
   platformProductNameOrNeutral,
@@ -44,6 +53,12 @@ export default function OnboardingWizard({
   const [credentialsConfigured, setCredentialsConfigured] = useState(false);
   // Destino BLOG IA: no hay cuenta de 10minutesWebsite que conectar; las categorías vienen del blog.
   const [blogDestination, setBlogDestination] = useState<{ hostname: string | null } | null>(null);
+  // Blog de BLOG IA ya vinculado por el Hub y listo, aunque hoy el destino sea otro: se propone sin pedir nada más.
+  const [blogAvailable, setBlogAvailable] = useState<{ hostname: string | null } | null>(null);
+  // Primera pregunta del asistente: ¿dónde se publica? (se recuerda en este navegador hasta terminar).
+  const [destChoice, setDestChoice] = useState<PublishingChoice | null>(null);
+  const [destChoiceLoaded, setDestChoiceLoaded] = useState(false);
+  const [switchingBlog, setSwitchingBlog] = useState(false);
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [languages, setLanguages] = useState<LanguageRow[]>([]);
   const [contentLanguage, setContentLanguage] = useState("");
@@ -139,6 +154,7 @@ export default function OnboardingWizard({
         const data = await credRes.json();
         setCredentialsConfigured(Boolean(data.configured));
         setBlogDestination(data.publishingDestination === "blog-ia" && data.publishingReady ? { hostname: data.blogHostname ?? null } : null);
+        setBlogAvailable(data.blogAvailable === true ? { hostname: data.availableBlogHostname ?? null } : null);
       }
       if (catRes.ok) {
         const data = await catRes.json();
@@ -295,6 +311,51 @@ export default function OnboardingWizard({
   useEffect(() => {
     loadAll(true);
   }, [loadAll]);
+
+  // Lo que la persona eligió al empezar («Mi blog de BLOG IA» / «Mi sitio 10MWS»), leído en este navegador.
+  useEffect(() => {
+    const sync = () => setDestChoice(readPublishingChoice());
+    sync();
+    setDestChoiceLoaded(true);
+    window.addEventListener(PUBLISHING_CHOICE_EVENT, sync);
+    return () => window.removeEventListener(PUBLISHING_CHOICE_EVENT, sync);
+  }, []);
+
+  // Quien se fue a crear su blog en BLOG IA vuelve a esta pestaña: se revisa solo si ya quedó vinculado.
+  useEffect(() => {
+    if (destChoice !== "blog") return;
+    const recheck = () => { if (document.visibilityState === "visible") void loadAll(); };
+    document.addEventListener("visibilitychange", recheck);
+    window.addEventListener("focus", recheck);
+    return () => {
+      document.removeEventListener("visibilitychange", recheck);
+      window.removeEventListener("focus", recheck);
+    };
+  }, [destChoice, loadAll]);
+
+  async function handleUseExistingBlog() {
+    setSwitchingBlog(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/publishing-destination", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destination: "blog", confirm: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMessage({ type: "error", text: data.error ?? "No pudimos cambiar el destino. Inténtalo de nuevo." });
+        return;
+      }
+      writePublishingChoice(null);
+      await loadAll();
+      onUpdated?.();
+    } catch {
+      setMessage({ type: "error", text: "No pudimos conectar con el servidor. Inténtalo de nuevo." });
+    } finally {
+      setSwitchingBlog(false);
+    }
+  }
 
   const detectInProgress =
     detectJob?.status === "pending" || detectJob?.status === "running";
@@ -666,6 +727,62 @@ export default function OnboardingWizard({
   }
 
   if (locationRequired) return <LocationStep initial={savedLocation} />;
+
+  // Primera pregunta: ¿dónde se publica? Solo a una cuenta que aún no conectó nada (las actuales de 10MWS
+  // tienen credenciales o sitio confirmado y no ven este paso) y que no es de marca blanca.
+  const askDestination =
+    destChoiceLoaded &&
+    !blogDestination &&
+    !credentialsConfigured &&
+    !siteSelectionConfirmed &&
+    !isWhiteLabelPlatform(platformDomain) &&
+    destChoice !== "website";
+
+  if (askDestination) {
+    const blogPending = destChoice === "blog" && !blogAvailable;
+    const cardStyle = { ...sectionStyle, padding: "24px", marginTop: 24, marginBottom: 24 } as const;
+    return (
+      <div style={cardStyle}>
+        {message && (
+          <p role="alert" style={{ margin: "0 0 14px", fontSize: 13, color: message.type === "error" ? "#ff3b30" : "#1d1d1f" }}>{message.text}</p>
+        )}
+        {blogPending ? (
+          <>
+            <span className="step-badge">TU BLOG</span>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: "6px 0 0", color: "#1d1d1f", letterSpacing: "-0.025em" }}>Crea tu blog en BLOG IA</h2>
+            <p className="lead-copy" style={{ margin: "8px 0 0", maxWidth: 560 }}>
+              Aún no tienes un blog. Créalo en BLOG IA y pulsa allí «Usar este blog para mis artículos». Después vuelve aquí: seguirás con el idioma y Google Search Console.
+            </p>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
+              <a href={BLOG_IA_LAUNCH_URL} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none" }}>Crear mi blog en BLOG IA</a>
+              <button type="button" style={secondaryButtonStyle} onClick={() => void loadAll()}>Ya lo creé, continuar</button>
+              <button type="button" style={secondaryButtonStyle} onClick={() => writePublishingChoice(null)}>Cambiar mi elección</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="step-badge">EMPECEMOS</span>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: "6px 0 0", color: "#1d1d1f", letterSpacing: "-0.025em" }}>¿Dónde quieres publicar tus artículos?</h2>
+            <p className="lead-copy" style={{ margin: "8px 0 0", maxWidth: 560 }}>
+              {blogAvailable
+                ? <>Ya tienes tu blog{blogAvailable.hostname ? <> (<strong>{blogAvailable.hostname}</strong>)</> : null}. Confírmalo para publicar ahí. Puedes cambiarlo después en la configuración.</>
+                : <>Elige el destino. Puedes cambiarlo después en la configuración.</>}
+            </p>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
+              {blogAvailable ? (
+                <button type="button" style={{ ...buttonStyle, marginTop: 0 }} disabled={switchingBlog} onClick={handleUseExistingBlog}>
+                  {switchingBlog ? "Confirmando…" : "✓ Mi blog de BLOG IA"}
+                </button>
+              ) : (
+                <button type="button" style={{ ...buttonStyle, marginTop: 0 }} onClick={() => writePublishingChoice("blog")}>Mi blog de BLOG IA</button>
+              )}
+              <button type="button" style={secondaryButtonStyle} disabled={switchingBlog} onClick={() => writePublishingChoice("website")}>Mi sitio 10MWS</button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{ marginTop: 24, marginBottom: 24 }}>
@@ -1485,6 +1602,7 @@ export default function OnboardingWizard({
                       {savingLanguage ? "Validando en BD..." : "Confirmar y Validar Idioma →"}
                     </button>
 
+{!blogDestination && (
                     <button
                       type="button"
                       onClick={handleSyncLanguagesList}
@@ -1494,6 +1612,7 @@ export default function OnboardingWizard({
                     >
                       {syncingLanguages ? "Sincronizando..." : "Recargar lista"}
                     </button>
+)}
 
                     {step3Done && (
                       <button
@@ -1543,7 +1662,7 @@ export default function OnboardingWizard({
                   video muestra la marca 10minutesWebsite, así que no debe
                   verlo una cuenta de marca blanca (tagcrush). Pedido de
                   Milton, 16/9/2026. */}
-              {!isWhiteLabelPlatform(platformDomain) && (
+              {!isWhiteLabelPlatform(platformDomain) && !blogDestination && (
                 <div
                   style={{
                     borderLeft: "2px solid #e5e5ea",

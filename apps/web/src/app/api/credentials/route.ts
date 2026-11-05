@@ -14,7 +14,7 @@ export async function GET() {
     select: { updatedAt: true },
   });
   const publishing=await publishingReadiness(prisma,userId,Boolean(credential));
-  return NextResponse.json({ configured: Boolean(credential), publishingReady:publishing.ready, publishingDestination:publishing.destination, blogHostname:publishing.hostname, updatedAt: credential?.updatedAt ?? null });
+  return NextResponse.json({ configured: Boolean(credential), publishingReady:publishing.ready, publishingDestination:publishing.destination, blogHostname:publishing.hostname,blogAvailable:publishing.destination==='website'&&publishing.blogAvailable,availableBlogHostname:publishing.availableHostname, updatedAt: credential?.updatedAt ?? null });
 }
 
 export async function POST(request: NextRequest) {
