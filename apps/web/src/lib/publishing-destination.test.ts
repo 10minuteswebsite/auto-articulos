@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DestinationError, switchToWebsite } from "./publishing-destination";
+import { DestinationError, switchToBlog, switchToWebsite } from "./publishing-destination";
 
 function fakeDb(method: string | null, activeRuns = 0) {
   const calls: string[] = [];
@@ -42,4 +42,30 @@ test("con publicaciones en curso se rechaza (no se parte un lote entre dos sitio
 
 test("cuenta inexistente: 404", async () => {
   await assert.rejects(() => switchToWebsite(fakeDb(null).db, "x", true), (e: unknown) => e instanceof DestinationError && e.status === 404);
+});
+
+function blogDb(method: string | null, blog: { status: string; dnsVerified: boolean; tlsReady: boolean } | null, activeRuns = 0) {
+  const { db, calls } = fakeDb(method, activeRuns);
+  return { db: { ...db, blogIaBlog: { findUnique: async () => blog } }, calls };
+}
+const READY = { status: "active", dnsVerified: true, tlsReady: true };
+
+test("a BLOG IA: cambia solo con un blog ya vinculado, activo y con HTTPS", async () => {
+  const { db, calls } = blogDb("BROWSER", READY);
+  assert.deepEqual(await switchToBlog(db, "u1"), { changed: true, method: "BLOG" });
+  assert.deepEqual(calls, ["BROWSER->BLOG"]);
+});
+
+test("a BLOG IA: sin blog, o blog sin terminar, se rechaza y no cambia nada", async () => {
+  for (const blog of [null, { ...READY, status: "pending_dns" }, { ...READY, tlsReady: false }, { ...READY, dnsVerified: false }]) {
+    const { db, calls } = blogDb("BROWSER", blog);
+    await assert.rejects(() => switchToBlog(db, "u1"), (e: unknown) => e instanceof DestinationError && e.code === "blog_not_ready");
+    assert.deepEqual(calls, []);
+  }
+});
+
+test("a BLOG IA: ya en BLOG es idempotente; MCP no se toca; lotes en curso lo bloquean", async () => {
+  assert.deepEqual(await switchToBlog(blogDb("BLOG", READY).db, "u1"), { changed: false, method: "BLOG" });
+  await assert.rejects(() => switchToBlog(blogDb("MCP", READY).db, "u1"), (e: unknown) => e instanceof DestinationError && e.code === "method_not_supported");
+  await assert.rejects(() => switchToBlog(blogDb("BROWSER", READY, 1).db, "u1"), (e: unknown) => e instanceof DestinationError && e.code === "runs_in_progress");
 });

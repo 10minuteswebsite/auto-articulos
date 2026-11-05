@@ -13408,3 +13408,12 @@ Solicitud `CONEXIONES-GSC-ADAPTER-20261104-PUBLISH`: origen chat
 `01a1a1f2-cf9e-7f32-a139-b833b5d48c36`; respuesta requerida al chat origen con
 deployment, resultado de la barrera backend, verificación legacy o bloqueo.
 
+
+## ASISTENTE-DESTINO-20261104 — Claude — preparado, sin publicar
+
+- Pedido de Milton: el asistente de Configuración Inicial pregunta primero dónde se publica («Mi blog de BLOG IA» / «Mi sitio 10MWS») y, con BLOG IA, no muestra 10minutesWebsite ni pide su contraseña.
+- Hallazgo (sin inventar campos): el destino ya vive en `User.publishMethod` (BROWSER/MCP/BLOG) y el blog en `BlogIaBlog` (status, dnsVerified, tlsReady). Solo el Hub los escribe (`/api/integrations/hub/blog-destination`, al pulsar «Usar este blog»). Artículos NO puede leer del Hub si alguien tiene BLOG IA contratado ni si tiene un blog aún no vinculado.
+- Cambios (solo `apps/web`): `publishing-readiness.ts` expone `blogAvailable`; `/api/credentials` lo devuelve; `publishing-destination.ts` + ruta aceptan `destination:"blog"` (`switchToBlog`: solo BROWSER→BLOG con blog activo+HTTPS y sin lotes en curso); `OnboardingWizard` pregunta primero y, con BLOG IA, quita el botón «Recargar lista» de idiomas y el video de la marca; intro de Inicio sin marca para BLOG/sin elegir. La elección pendiente se recuerda en el navegador (`lib/publishing-choice.ts`), sin campo nuevo ni migración.
+- Decisión de Milton: la pregunta la ve toda cuenta sin nada conectado y que no sea marca blanca. Cuentas con credenciales o sitio confirmado: sin cambio.
+- Pruebas: `publishing-destination` (+3), `publishing-readiness` (+1); web 416/416. tsc sin errores en lo tocado.
+- NO hecho: «traerlo de vuelta» automático desde BLOG IA (el lanzador del Hub no admite retorno; hoy el asistente se revisa solo al volver a la pestaña); detectar un blog creado pero no vinculado (el Hub debe avisar).

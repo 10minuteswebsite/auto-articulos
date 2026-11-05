@@ -103,6 +103,13 @@ Ruta: /dashboard/configuracion/inicial
 Repite el asistente de 4 pasos cuando quieras: cuenta de la plataforma,
 categorías, idioma y Google Search Console.
 
+Si todavía no has conectado nada, el asistente empieza preguntando dónde se
+publican tus artículos, con dos botones: **Mi blog de BLOG IA** y **Mi sitio
+10MWS**. Con tu sitio 10MWS todo sigue igual. Con tu blog de BLOG IA no te pide
+usuario ni contraseña de otra plataforma: las categorías se traen de tu blog y
+solo completas el idioma y Google Search Console. Si aún no tienes blog, te
+lleva a crearlo y, al volver a esta pestaña, el asistente continúa.
+
 ### Cuenta
 
 Ruta: /dashboard/configuracion/cuenta

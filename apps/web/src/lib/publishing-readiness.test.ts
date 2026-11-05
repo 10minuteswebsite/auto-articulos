@@ -7,3 +7,11 @@ test('only an explicitly selected active HTTPS blog can publish without website 
  assert.equal((await publishingReadiness(db({publishMethod:'BROWSER'}),'own',false)).ready,false)
  assert.equal((await publishingReadiness(db({publishMethod:'BROWSER'}),'own',true)).ready,true)
 })
+
+test('blogAvailable: un blog vinculado y listo se ofrece aunque hoy se publique en el sitio; sin blog o a medias, no',async()=>{
+ const blog={status:'active',hostname:'own.blogs.lasolucionweb.net',dnsVerified:true,tlsReady:true}
+ const a=await publishingReadiness(db({publishMethod:'BROWSER',blogIaBlog:blog}),'own',false)
+ assert.equal(a.blogAvailable,true);assert.equal(a.availableHostname,'own.blogs.lasolucionweb.net');assert.equal(a.ready,false)
+ assert.equal((await publishingReadiness(db({publishMethod:'BROWSER',blogIaBlog:null}),'own',false)).blogAvailable,false)
+ assert.equal((await publishingReadiness(db({publishMethod:'BROWSER',blogIaBlog:{...blog,status:'pending_dns'}}),'own',false)).blogAvailable,false)
+})
