@@ -1,4 +1,4 @@
-import { hubConnectionsRead } from "./hub-credential-transport";
+import { hubConnectionsRead, hubConnectionsSubmitSitemap } from "./hub-credential-transport";
 import { chooseHubGscConnection, hubGscPilotEnabled } from "./hub-gsc-selection";
 import type { GoogleSearchAnalyticsRow } from "@auto-articulos/shared";
 
@@ -32,6 +32,15 @@ export async function inspectHubGsc(hubUserId: string, connectionId: string, tar
   const item = inspection as Record<string, unknown>;
   if ((item.verdict !== undefined && typeof item.verdict !== "string") || (item.coverageState !== undefined && typeof item.coverageState !== "string")) throw new Error("hub_connections_unavailable");
   return { verdict: item.verdict as string | undefined, coverageState: item.coverageState as string | undefined };
+}
+
+/** Unknown responses remain unconfirmed; never fall back to a second write. */
+export async function submitHubGscSitemap(hubUserId: string, connectionId: string, targetUrl: string) {
+  const response = await hubConnectionsSubmitSitemap({ hub_user_id: hubUserId, app: "seo-total", connection_id: connectionId, target_url: targetUrl });
+  if (!response.ok) throw new Error("hub_sitemap_unconfirmed");
+  const body: unknown = await response.json();
+  if (!body || typeof body !== "object" || !("data" in body) || !body.data || typeof body.data !== "object"
+    || !("submitted" in body.data) || body.data.submitted !== true) throw new Error("hub_sitemap_unconfirmed");
 }
 
 /** Redes uses its own grant; on any failure callers keep their legacy source. */

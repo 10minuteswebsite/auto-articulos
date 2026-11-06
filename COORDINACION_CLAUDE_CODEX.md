@@ -13450,3 +13450,15 @@ READY. `articulos.lasolucionweb.net/login` y
 `redes.lasolucionweb.net/login` redirigen al Hub con 307. APIs y callbacks
 conservan sus rutas técnicas. Sin cambios en datos, auth persistente, secretos
 ni credenciales. [Estado](CURRENT_STATE.md).
+
+## CONEXIONES-ESTADOS-Y-SITEMAP-20261106 · preparado / publicación pendiente
+
+La pantalla de Conexiones de Artículos y Redes agrega un enlace al recurso Hub
+en otra pestaña y conserva las pantallas actuales. Transporte web y worker
+tienen un canal de sitemap central aislado, aún sin consumidores ni activación;
+el worker requiere audiencia OIDC distinta y workflow diario exacto. No hay
+reintento automático ante resultado incierto. OAuth, registro de dominios trial,
+configuración y envío manual/diario central y prueba real siguen pendientes.
+Pruebas web 428/428, worker 38/38, tipos y builds PASS. No se modificaron
+conexiones ni credenciales.
+[Mapa central](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/ECOSISTEMA_APLICACIONES.md).

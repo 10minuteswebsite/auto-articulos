@@ -30,3 +30,10 @@ test('web uses the fixed broker path for connection reads, never a caller-select
  globalThis.fetch=async(input:any,init:any)=>{assert.equal(String(input),'https://hub-workload-credential-broker.10minuteswebsite.workers.dev/connections-read');assert.equal(new Headers(init.headers).get('authorization'),'Bearer fixture-workload-token');return Response.json({data:{connections:[]}})};
  try{assert.equal((await hubConnectionsRead({operation:'list',app:'seo-total',hub_user_id:'fixture'})).status,200)}finally{globalThis.fetch=original;delete process.env.HUB_CREDENTIAL_TRANSPORT}
 });
+
+test('sitemap writes use a separate fixed broker path',async()=>{
+ const{hubConnectionsSubmitSitemap}=await import('./hub-credential-transport');const original=globalThis.fetch;
+ process.env.HUB_CREDENTIAL_TRANSPORT='shared';
+ globalThis.fetch=async(input:any,init:any)=>{assert.equal(String(input),'https://hub-workload-credential-broker.10minuteswebsite.workers.dev/connections-sitemap');assert.equal(new Headers(init.headers).get('authorization'),'Bearer fixture-workload-token');return Response.json({data:{submitted:true}})};
+ try{assert.equal((await hubConnectionsSubmitSitemap({app:'seo-total',hub_user_id:'fixture',connection_id:'fixture',target_url:'https://example.test/sitemap.xml'})).status,200)}finally{globalThis.fetch=original;delete process.env.HUB_CREDENTIAL_TRANSPORT}
+});

@@ -1,3 +1,15 @@
+## CONEXIONES-ESTADOS-Y-SITEMAP-20261106 · preparado / publicación pendiente
+
+La pantalla de Conexiones de Artículos y Redes agrega un enlace al recurso Hub
+en otra pestaña y conserva las pantallas actuales. Transporte web y worker
+tienen un canal de sitemap central aislado, aún sin consumidores ni activación;
+el worker requiere audiencia OIDC distinta y workflow diario exacto. No hay
+reintento automático ante resultado incierto. OAuth, registro de dominios trial,
+configuración y envío manual/diario central y prueba real siguen pendientes.
+Pruebas web 428/428, worker 38/38, tipos y builds PASS. No se modificaron
+conexiones ni credenciales.
+[Mapa central](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/ECOSISTEMA_APLICACIONES.md).
+
 ## GSC-ESTADO-COMPOSIO-20261105 — publicado y verificado
 
 Código `b1fc62e4` (PR #794) y `eb930c7e` (PR #795) en `main`; Vercel `web` y `auto-articulos-web`: success en ambos. Caso Juan Carvajal: la tarjeta de Conexiones decía «Conexión activa» (Composio, `sc-domain:juanchocarvajal.com`) pero `/api/configuration-status` —lo que lee la IA por MCP— decía `google-search-console: configured:false`. Causa: `COMPOSIO_CONSUMER_READY.google_search_console=false` fuerza el método OWN y Juan no tiene conexión propia. Arreglo: misma regla que Oportunidades (Composio activo con propiedad elegida cuenta; la propia sana sigue ganando) en el estado de configuración, el envío manual de sitemap, `ver_estado_indexacion` y la vista previa de `enviar_sitemap_google`. Verificado en producción con «Acceder como» Juan: `configured:true` tras #794 y tras #795. No se tocaron flags, conexiones ni credenciales. NO verificado: envío real de sitemap (habría enviado uno real a Google). ABIERTO: el envío diario del worker (`send-daily-sitemaps.ts`) recorre solo `searchIntegration`; quien solo tiene Composio no entra. Cambiarlo altera un envío automático para varias cuentas y no se puede probar sin enviar: decisión de producto pendiente. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).

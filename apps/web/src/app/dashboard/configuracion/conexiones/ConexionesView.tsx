@@ -46,6 +46,15 @@ function botonVista(activo: boolean): CSSProperties {
 
 const columna: CSSProperties = { display: "flex", flexDirection: "column", gap: 16 };
 
+function HubConnectionsLink() {
+  return <p style={{ margin: "12px 0 18px", fontSize: 13, lineHeight: 1.5, color: "#6e6e73" }}>
+    Consulta el estado de las conexiones compartidas en el Hub. Tus conexiones actuales siguen aquí.{" "}
+    <a href="https://hub.lasolucionweb.net/conexiones" target="_blank" rel="noopener noreferrer" style={{ color: "#1d1d1f", fontWeight: 600 }}>
+      Ver Conexiones del Hub ↗ <span className="sr-only">(abre otra pestaña)</span>
+    </a>
+  </p>;
+}
+
 /**
  * Pantalla «Conexiones»: una tarjeta por red, en dos grupos. Cada red aparece SOLO si
  * la persona la tiene activada (mismas reglas que las pantallas actuales, copiadas de
@@ -238,6 +247,7 @@ export default function ConexionesView() {
     const gruposVisibles = esHostProducto ? grupos.filter((grupo) => grupo.vista === (hostProduct === "ARTICULOS" ? "analiticas" : "difusion")) : grupos;
     return <div>
       <ModuleIntro titulo="Conexiones"><IntroP>Elige qué quieres configurar. Cada opción abre su espacio dedicado, con instrucciones y acciones solo de ese segmento.</IntroP></ModuleIntro>
+      <HubConnectionsLink />
       <div style={{ marginTop: 24 }}>
         {gruposVisibles.map((grupo) => <section key={grupo.vista} style={{ marginBottom: 36 }} aria-labelledby={`grupo-${grupo.vista}`}>
           <div style={{ padding: "0 4px 12px", borderBottom: "1px solid #d2d2d7" }}>
@@ -305,6 +315,7 @@ export default function ConexionesView() {
           </IntroP>
         </ModuleIntro>
       )}
+      {!soloExito && <HubConnectionsLink />}
       {conexion && volverA && (
         <button
           type="button"

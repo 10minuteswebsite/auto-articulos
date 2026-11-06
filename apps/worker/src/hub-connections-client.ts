@@ -14,7 +14,7 @@ export function hubGscPilotEnabled(hubUserId: string | null | undefined) {
   return (process.env.HUB_GSC_CONSUMER_PILOT_IDS ?? "").split(",").map((value) => value.trim().toLowerCase()).includes(hubUserId.toLowerCase());
 }
 
-async function githubIdentity() {
+async function githubIdentity(audience: "github-connections" | "github-sitemap" = "github-connections") {
   if (process.env.GITHUB_ACTIONS !== "true") throw new Error("hub_connections_unavailable");
   const raw = process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
   const requestToken = process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
@@ -22,12 +22,27 @@ async function githubIdentity() {
   let url: URL;
   try { url = new URL(raw); } catch { throw new Error("hub_connections_unavailable"); }
   if (url.protocol !== "https:" || !url.hostname.endsWith(".actions.githubusercontent.com") || url.username || url.password || url.port) throw new Error("hub_connections_unavailable");
-  url.searchParams.set("audience", `${BROKER}/github-connections`);
+  url.searchParams.set("audience", `${BROKER}/${audience}`);
   const response = await fetch(url, { headers: { authorization: `Bearer ${requestToken}` }, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(5000) });
   if (!response.ok) throw new Error("hub_connections_unavailable");
   const body = await response.json() as { value?: unknown };
   if (typeof body.value !== "string" || body.value.length > 16384 || !/^[A-Za-z0-9_.-]{32,}$/.test(body.value)) throw new Error("hub_connections_unavailable");
   return body.value;
+}
+
+/** Isolated sitemap audience; do not retry or fall back after an unknown result. */
+export async function submitHubGscSitemap(hubUserId: string, connectionId: string, targetUrl: string) {
+  if (!UUID.test(hubUserId) || !UUID.test(connectionId) || !targetUrl || targetUrl.length > 2048) throw new Error("hub_sitemap_unconfirmed");
+  const token = await githubIdentity("github-sitemap");
+  const response = await fetch(`${BROKER}/connections-sitemap`, {
+    method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({ hub_user_id: hubUserId, app: "seo-total", connection_id: connectionId, target_url: targetUrl }),
+    cache: "no-store", redirect: "error", signal: AbortSignal.timeout(59000),
+  });
+  if (!response.ok) throw new Error("hub_sitemap_unconfirmed");
+  const body: unknown = await response.json();
+  if (!body || typeof body !== "object" || !("data" in body) || !body.data || typeof body.data !== "object"
+    || !("submitted" in body.data) || body.data.submitted !== true) throw new Error("hub_sitemap_unconfirmed");
 }
 
 /** The broker validates the workflow identity; Hub rechecks tenant, entitlement and grant. */

@@ -1,3 +1,15 @@
+## CONEXIONES-ESTADOS-Y-SITEMAP-20261106 · preparado / publicación pendiente
+
+La pantalla de Conexiones de Artículos y Redes agrega un enlace al recurso Hub
+en otra pestaña y conserva las pantallas actuales. Transporte web y worker
+tienen un canal de sitemap central aislado, aún sin consumidores ni activación;
+el worker requiere audiencia OIDC distinta y workflow diario exacto. No hay
+reintento automático ante resultado incierto. OAuth, registro de dominios trial,
+configuración y envío manual/diario central y prueba real siguen pendientes.
+Pruebas web 428/428, worker 38/38, tipos y builds PASS. No se modificaron
+conexiones ni credenciales.
+[Mapa central](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/ECOSISTEMA_APLICACIONES.md).
+
 ## GSC-ESTADO-COMPOSIO-20261105 · punto cero
 
 `main` en `eb930c7e` (PR #794 `b1fc62e4` + PR #795). Vercel `web` y `auto-articulos-web` en success. Producción verificada como Juan Carvajal: `/api/configuration-status` → `google-search-console configured:true`, Bing `true`. Ver [estado](CURRENT_STATE.md). Pendiente: envío diario del worker para cuentas solo-Composio.
