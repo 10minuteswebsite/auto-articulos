@@ -1,3 +1,10 @@
+## CONEXIONES-GSC-REUSE-20261106
+
+Nuevo objetivo: reutilizar las conexiones de Artículos/Redes sin pedir una
+autorización nueva. El endpoint GSC privado solo descubre referencias y
+propiedades por identidad Hub; no cambia rutas ni credenciales y no afirma
+que una conexión esté validada. Candidato probado, aún sin publicación.
+
 ## GSC-ESTADO-COMPOSIO-20261105 — Claude — publicado
 
 - Pedido de Milton: la IA de Juan Carvajal decía «Google Search Console sin conectar» aunque la tarjeta mostraba «Conexión activa».

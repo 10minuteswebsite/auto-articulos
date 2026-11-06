@@ -1,3 +1,9 @@
+## CONEXIONES-GSC-REUSE-20261106 · candidato
+
+Descubrimiento privado, acotado por tenant, sin credenciales en respuestas
+ni cambios a datos existentes; falta publicar y probar desde Hub.
+Pruebas 433/433, tipos y build PASS. Ver CURRENT_STATE.
+
 ## CONEXIONES-ADMIN-ONLY-20261106 · publicado
 
 El enlace al recurso Hub en preparación solo se presenta a administradores

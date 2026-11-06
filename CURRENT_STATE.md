@@ -1,3 +1,10 @@
+## CONEXIONES-GSC-REUSE-20261106 · candidato de solo lectura
+
+Preparado un endpoint privado para que Hub descubra la configuración GSC
+existente por identidad Hub, sin exponer tokens ni alterar las conexiones.
+Cada resultado requiere validación; no crea grants ni activa consumidores.
+Pruebas web 433/433, tipos y build PASS. Publicación y E2E pendientes.
+
 ## CONEXIONES-ADMIN-ONLY-20261106 · publicado
 
 El enlace al recurso en preparación solo aparece a administradores directos;
