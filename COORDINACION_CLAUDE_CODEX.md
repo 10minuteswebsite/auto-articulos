@@ -13462,3 +13462,9 @@ configuración y envío manual/diario central y prueba real siguen pendientes.
 Pruebas web 428/428, worker 38/38, tipos y builds PASS. No se modificaron
 conexiones ni credenciales.
 [Mapa central](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/ECOSISTEMA_APLICACIONES.md).
+
+`5850e87` publicado: ambos Vercel success; enlace en Artículos y Redes,
+apertura en pestaña nueva y GSC legacy conectada verificados por navegador
+interno. Un candidato Hub devolvió 404 y fue restaurado; su nueva vista está
+publicada tras corrección `f37867e`/Worker `24fde65c` y verificada en IAB.
+No se enviaron sitemaps ni se activó el broker.

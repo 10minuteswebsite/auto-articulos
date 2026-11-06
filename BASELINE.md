@@ -1,8 +1,8 @@
-## CONEXIONES-ESTADOS-20261106 · propuesta en main
+## CONEXIONES-ESTADOS-20261106 · enlace publicado
 
 Las pantallas de Conexiones de Artículos y Redes enlazan al recurso del Hub en
-otra pestaña; las vistas y acciones existentes permanecen disponibles. Vista
-productiva pendiente de publicación y verificación en navegador interno.
+otra pestaña; las vistas y acciones existentes permanecen disponibles.
+Vercel `5850e87` success; verificado en navegador interno en ambos productos.
 
 ## RESPONSIVE-MENUS-20261103 · 03/11/2026 · CERRADO / LIBERADA
 

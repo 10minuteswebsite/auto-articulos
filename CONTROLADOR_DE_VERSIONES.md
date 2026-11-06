@@ -1,3 +1,9 @@
+## CONEXIONES-ESTADOS-20261106 · enlace publicado
+
+`5850e87`: Vercel web y auto-articulos-web success; Artículos/Redes enlazan
+al Hub en pestaña nueva. IAB comprobó enlace y conexión legacy activa. No se
+activó consumo central ni se enviaron sitemaps.
+
 ## 05/11 · GSC-ESTADO-COMPOSIO-20261105
 
 PR #794 → `b1fc62e4` y PR #795 → `eb930c7e` en `main`; Vercel `web` y `auto-articulos-web`: success. Sin migración ni worker. Detalle: [estado](CURRENT_STATE.md).

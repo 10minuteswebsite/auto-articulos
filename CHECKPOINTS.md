@@ -1,4 +1,4 @@
-## CONEXIONES-ESTADOS-Y-SITEMAP-20261106 · preparado / publicación pendiente
+## CONEXIONES-ESTADOS-Y-SITEMAP-20261106 · enlace publicado / adaptador pendiente
 
 La pantalla de Conexiones de Artículos y Redes agrega un enlace al recurso Hub
 en otra pestaña y conserva las pantallas actuales. Transporte web y worker
@@ -9,6 +9,10 @@ configuración y envío manual/diario central y prueba real siguen pendientes.
 Pruebas web 428/428, worker 38/38, tipos y builds PASS. No se modificaron
 conexiones ni credenciales.
 [Mapa central](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/ECOSISTEMA_APLICACIONES.md).
+
+`5850e87`: ambos Vercel success; IAB verifica enlace en Artículos/Redes,
+apertura en otra pestaña y Search Console legacy activa. Hub `f37867e`/
+Worker `24fde65c` publicado y catálogo verificado tras corregir candidato 404.
 
 ## GSC-ESTADO-COMPOSIO-20261105 · punto cero
 
