@@ -19,6 +19,7 @@ import { ConnectionReturnSuccess, LEGACY_RETURN_NETWORKS, useConnectionReturn } 
 import { ConnectionReturnContext } from "@/components/connection-return-context";
 import { isConnectionVisible, isProductViewAllowed } from "@/lib/product-view-filter";
 import { productOfHost, type HostProductScope } from "@/lib/product-routes";
+import { canShowHubConnectionsPreview } from "@/lib/hub-connections-preview";
 
 type Vista = "analiticas" | "difusion";
 type Producto = "articulos" | "redes";
@@ -68,6 +69,7 @@ export default function ConexionesView() {
   const [producto, setProducto] = useState<Producto | null>(null);
   const [conexion, setConexion] = useState<ConexionId | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showHubConnections, setShowHubConnections] = useState(false);
   const [modulosDeshabilitados, setModulosDeshabilitados] = useState<string[]>([]);
   const [permisos, setPermisos] = useState<Record<string, boolean>>({});
   const [configuradas, setConfiguradas] = useState<Record<string, boolean>>({});
@@ -118,6 +120,7 @@ export default function ConexionesView() {
       .then((data) => {
         if (!data) return;
         setIsAdmin(data.role === "admin");
+        setShowHubConnections(canShowHubConnectionsPreview(data));
         if (Array.isArray(data.disabledModules)) setModulosDeshabilitados(data.disabledModules);
         setPermisos({
           instagram: data.allowInstagramPublishing ?? false,
@@ -247,7 +250,7 @@ export default function ConexionesView() {
     const gruposVisibles = esHostProducto ? grupos.filter((grupo) => grupo.vista === (hostProduct === "ARTICULOS" ? "analiticas" : "difusion")) : grupos;
     return <div>
       <ModuleIntro titulo="Conexiones"><IntroP>Elige qué quieres configurar. Cada opción abre su espacio dedicado, con instrucciones y acciones solo de ese segmento.</IntroP></ModuleIntro>
-      <HubConnectionsLink />
+      {showHubConnections && <HubConnectionsLink />}
       <div style={{ marginTop: 24 }}>
         {gruposVisibles.map((grupo) => <section key={grupo.vista} style={{ marginBottom: 36 }} aria-labelledby={`grupo-${grupo.vista}`}>
           <div style={{ padding: "0 4px 12px", borderBottom: "1px solid #d2d2d7" }}>
@@ -315,7 +318,7 @@ export default function ConexionesView() {
           </IntroP>
         </ModuleIntro>
       )}
-      {!soloExito && <HubConnectionsLink />}
+      {!soloExito && showHubConnections && <HubConnectionsLink />}
       {conexion && volverA && (
         <button
           type="button"

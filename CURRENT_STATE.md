@@ -1,3 +1,9 @@
+## CONEXIONES-ADMIN-ONLY-20261106 · preparado / publicación pendiente
+
+El enlace al recurso en preparación solo aparece a administradores directos;
+Hub controla el acceso en servidor. Las conexiones existentes y su pantalla
+permanecen sin cambios. Verificación productiva pendiente. [Mapa](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/ECOSISTEMA_APLICACIONES.md).
+
 ## CONEXIONES-ESTADOS-Y-SITEMAP-20261106 · enlace publicado / adaptador pendiente
 
 La pantalla de Conexiones de Artículos y Redes agrega un enlace al recurso Hub

@@ -1,3 +1,9 @@
+## CONEXIONES-ADMIN-ONLY-20261106 · preparado
+
+El enlace al recurso Hub en preparación solo se presenta a administradores
+directos; Hub protege la ruta de forma independiente. Legacy no cambia.
+Publicación pendiente.
+
 ## CONEXIONES-ESTADOS-Y-SITEMAP-20261106 · enlace publicado / adaptador pendiente
 
 La pantalla de Conexiones de Artículos y Redes agrega un enlace al recurso Hub

@@ -1,3 +1,9 @@
+## CONEXIONES-ADMIN-ONLY-20261106 · cambio preparado
+
+El enlace al recurso Hub en preparación se muestra solo al administrador
+directo. Las vistas y conexiones anteriores siguen disponibles a los tenants.
+Verificación de producción pendiente.
+
 ## CONEXIONES-ESTADOS-20261106 · enlace publicado
 
 Las pantallas de Conexiones de Artículos y Redes enlazan al recurso del Hub en

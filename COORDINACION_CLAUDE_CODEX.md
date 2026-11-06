@@ -13468,3 +13468,9 @@ apertura en pestaña nueva y GSC legacy conectada verificados por navegador
 interno. Un candidato Hub devolvió 404 y fue restaurado; su nueva vista está
 publicada tras corrección `f37867e`/Worker `24fde65c` y verificada en IAB.
 No se enviaron sitemaps ni se activó el broker.
+
+## CONEXIONES-ADMIN-ONLY-20261106 · preparado
+
+Por instrucción del usuario se oculta el enlace de Conexiones Hub a tenants;
+solo se muestra al administrador directo. La barrera principal vive en Hub;
+no se modifican las conexiones ni vistas legacy. Publicación pendiente.
