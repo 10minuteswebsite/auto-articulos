@@ -13484,3 +13484,6 @@ Por instrucción del usuario se oculta el enlace de Conexiones Hub a tenants;
 solo se muestra al administrador directo. La barrera principal vive en Hub;
 no se modifican las conexiones ni vistas legacy. `d73e14d` ambos Vercel
 success; admin y conexión legacy IAB PASS. Tenant probado solo con fixtures.
+## CONEXIONES-GSC-REUSE-20261106 · adaptador read-only publicado
+
+Commit `4d355c1889f526b61551937195dc323724e497fe` publicado en Vercel: `auto-articulos-web` deployment `dpl_E8iJeuzMcamz9efmq1QTmgASvXNi` y `web` deployment `dpl_6t8LiMQ4Rb6KjYrdtFKhwLxAJ8ev`, ambos READY. Typecheck/build web y worker PASS; `/api/integrations/hub/gsc-legacy-read` devuelve 401 anónimo en `articulos` y `redes`; login legacy 307. Sin credenciales, escrituras, migración ni cutover. Rollback: deployments anteriores `dpl_81Lf7WYakVskBYXqSzqQ5DUw36pb` / `dpl_3tB8gQ6nQDUEDwgnrVbDxG7c2c52`.

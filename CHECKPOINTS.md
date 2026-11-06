@@ -832,3 +832,6 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 Prueba productiva: ambas rutas devuelven 307 a
 `https://hub.lasolucionweb.net/`; callbacks y APIs no se redirigen al Hub.
 Tests 2/2, Prisma generate, typecheck y build Vercel PASS. [Acta](AUDITORIA_LOGIN_HUB_REDIRECT_20261106.md).
+## CONEXIONES-GSC-REUSE-20261106 · publicación verificada
+
+Fuente `4d355c1`; Vercel `auto-articulos-web` y `web` READY. Nueva ruta read-only 401 anónimo en ambos hosts; login legacy 307. Rollback disponible en los deployments anteriores; sin cambios de datos ni credenciales.

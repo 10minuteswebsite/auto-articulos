@@ -1152,3 +1152,6 @@ con código ausente conserva su error local esperado y una API sin método váli
 conserva 405. Sin cambios de datos, secretos, credenciales ni base de datos.
 [Acta](AUDITORIA_LOGIN_HUB_REDIRECT_20261106.md).
 
+## CONEXIONES-GSC-REUSE-20261106 · adaptador read-only verificado
+
+Commit `4d355c1` publicado en ambos proyectos Vercel; deployments `dpl_E8iJeuzMcamz9efmq1QTmgASvXNi` y `dpl_6t8LiMQ4Rb6KjYrdtFKhwLxAJ8ev` READY. La ruta privada nueva responde 401 sin identidad backend; no se exponen tokens ni se alteran conexiones existentes.
