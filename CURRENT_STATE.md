@@ -1,9 +1,13 @@
-## CONEXIONES-GSC-REUSE-20261106 · candidato de solo lectura
+## CONEXIONES-GSC-REUSE-20261106 · detección publicada / lectura preparada
 
 Preparado un endpoint privado para que Hub descubra la configuración GSC
 existente por identidad Hub, sin exponer tokens ni alterar las conexiones.
 Cada resultado requiere validación; no crea grants ni activa consumidores.
-Pruebas web 433/433, tipos y build PASS. Publicación y E2E pendientes.
+`34878f9` publicado: ambos Vercel READY y ruta anónima 401. IAB Mario confirmó
+la conexión legacy y el botón de prueba devolvió conexión correcta. Preparado
+además adaptador de lectura que vuelve a comprobar titular, estado y propiedad
+de conexiones nativas o Composio, sin exportar tokens ni escribir. Pruebas
+web 438/438, tipos y build PASS; publicación y E2E del adaptador pendientes.
 
 ## CONEXIONES-ADMIN-ONLY-20261106 · publicado
 

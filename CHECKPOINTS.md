@@ -1,8 +1,9 @@
-## CONEXIONES-GSC-REUSE-20261106 · candidato
+## CONEXIONES-GSC-REUSE-20261106 · lectura preparada
 
-Descubrimiento privado, acotado por tenant, sin credenciales en respuestas
-ni cambios a datos existentes; falta publicar y probar desde Hub.
-Pruebas 433/433, tipos y build PASS. Ver CURRENT_STATE.
+Descubrimiento privado publicado `34878f9`; prueba IAB de conexión legacy PASS.
+Adaptador de lectura preparado sin exportar tokens ni modificar fuentes;
+pruebas 438/438, tipos y build PASS. E2E y publicación pendientes.
+Ver CURRENT_STATE.
 
 ## CONEXIONES-ADMIN-ONLY-20261106 · publicado
 
