@@ -1101,3 +1101,16 @@ Responsable: Claude. Capitanía liberada.
   prueba directa de composición pasa. Producción muestra el contrato nuevo en
   ambos logos. La cuenta sigue sin asset cargado en la sesión inspeccionada.
 
+## LOGIN-HUB-REDIRECT-20261106 — publicado y verificado
+
+Los accesos humanos `/login` de `articulos.lasolucionweb.net` y
+`redes.lasolucionweb.net` mostraban el login legado porque el middleware solo
+reconocía `seototal.lasolucionweb.com`. `main@3a877f4f` amplía la regla a los
+hosts canónicos de Artículos y Redes en `.com` y `.net`, sin afectar APIs,
+callbacks ni usuarios que ya tienen sesión. Vercel Production quedó READY en
+`dpl_791HBrgsjFsWFFAR4MxyxZ2Y2TJT` (`auto-articulos-web`). Las dos URLs
+responden HTTP 307 con `Location: https://hub.lasolucionweb.net/`; `/auth/hub`
+con código ausente conserva su error local esperado y una API sin método válido
+conserva 405. Sin cambios de datos, secretos, credenciales ni base de datos.
+[Acta](AUDITORIA_LOGIN_HUB_REDIRECT_20261106.md).
+

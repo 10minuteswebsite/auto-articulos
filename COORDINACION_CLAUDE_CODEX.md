@@ -13441,3 +13441,12 @@ deployment, resultado de la barrera backend, verificación legacy o bloqueo.
 - Cierre: PR #792 fusionado (`c5ab722b`); Vercel web y auto-articulos-web: success. Verificado en producción con la sesión de Milton sobre soymiltondavila@gmail.com (sin blog): aparecen «Mi blog de BLOG IA» y «Mi sitio 10MWS»; con BLOG IA sale «Crea tu blog en BLOG IA» sin ninguna mención de 10minutesWebsite; con 10MWS aparecen los pasos de siempre. La elección de prueba se borró del navegador. No se tocaron datos.
 - NO verificado: caso «blog ya vinculado → ✓ Mi blog de BLOG IA → confirmar» y el cambio real BROWSER→BLOG (requiere una cuenta con blog vinculado, p. ej. Lorena; no se cambió ningún destino real). Cuentas existentes de 10MWS: no se probó con una cuenta con credenciales, solo por código y por la condición del asistente.
 - **Capitán de migración liberó el lote:** Claude. Resultado: PR #792 en producción, sin migración.
+## LOGIN-HUB-REDIRECT-20261106 — Codex — cerrado
+
+Hallazgo: al migrar los enlaces humanos de login a `.net`,
+`isSeoTotalHumanEntry` quedó limitado al host histórico `.com`. Corrección
+global en `main@3a877f4f`; Vercel Production `dpl_791HBrgsjFsWFFAR4MxyxZ2Y2TJT`
+READY. `articulos.lasolucionweb.net/login` y
+`redes.lasolucionweb.net/login` redirigen al Hub con 307. APIs y callbacks
+conservan sus rutas técnicas. Sin cambios en datos, auth persistente, secretos
+ni credenciales. [Estado](CURRENT_STATE.md).

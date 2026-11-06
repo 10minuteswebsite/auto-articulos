@@ -794,3 +794,11 @@ El siguiente checkpoint solo se cerrará después de publicar desde `main`, comp
 - Punto cero: `main` en `c5ab722b` (PR #792), Vercel en success. Sin migración.
 - Verificado en producción (soymiltondavila, sin blog): pregunta de destino, camino BLOG IA sin marca 10minutesWebsite, camino 10MWS sin cambios.
 - Pendiente: probar con una cuenta con blog vinculado (confirmar y cambiar a BLOG); retorno automático desde BLOG IA y aviso del Hub de blogs sin vincular dependen del Hub/BLOG IA.
+## LOGIN-HUB-REDIRECT-20261106 · CERRADO
+
+`main@3a877f4f` corrige el middleware de entradas humanas para
+`articulos.lasolucionweb.net/login` y `redes.lasolucionweb.net/login`. Vercel
+`auto-articulos-web` publicó `dpl_791HBrgsjFsWFFAR4MxyxZ2Y2TJT` en READY.
+Prueba productiva: ambas rutas devuelven 307 a
+`https://hub.lasolucionweb.net/`; callbacks y APIs no se redirigen al Hub.
+Tests 2/2, Prisma generate, typecheck y build Vercel PASS. [Acta](AUDITORIA_LOGIN_HUB_REDIRECT_20261106.md).
