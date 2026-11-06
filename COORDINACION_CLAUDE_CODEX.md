@@ -2,10 +2,11 @@
 
 Nuevo objetivo: reutilizar las conexiones de Artículos/Redes sin pedir una
 autorización nueva. `34878f9` publica descubrimiento privado sin exponer
-credenciales. La lectura de la fuente propia o Composio está preparada pero
-aún no publicada ni verificada E2E. No cambia rutas de consumidores, grants
-ni credenciales; cada lectura revisa propietario, estado y propiedad antes de
-consultar. Ver CURRENT_STATE.
+credenciales. La lectura de la fuente propia o Composio se publicó con
+`4d355c1`; la prueba Hub 503 no alcanzó Artículos por una referencia de
+credencial compartida que requiere reconciliación central. No cambia rutas de
+consumidores, grants ni credenciales; cada lectura revisa propietario, estado
+y propiedad antes de consultar. Ver CURRENT_STATE.
 
 ## GSC-ESTADO-COMPOSIO-20261105 — Claude — publicado
 

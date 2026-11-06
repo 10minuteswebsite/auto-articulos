@@ -1,8 +1,9 @@
-## CONEXIONES-GSC-REUSE-20261106 · lectura preparada
+## CONEXIONES-GSC-REUSE-20261106 · validación bloqueada
 
 Descubrimiento privado publicado `34878f9`; prueba IAB de conexión legacy PASS.
-Adaptador de lectura preparado sin exportar tokens ni modificar fuentes;
-pruebas 438/438, tipos y build PASS. E2E y publicación pendientes.
+Adaptador de lectura `4d355c1` publicado, sin exportar tokens ni modificar
+fuentes; pruebas 438/438, tipos y build PASS. E2E Hub 503 antes de llegar a
+Artículos, pendiente de reconciliación del secreto compartido.
 Ver CURRENT_STATE.
 
 ## CONEXIONES-ADMIN-ONLY-20261106 · publicado
