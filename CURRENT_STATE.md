@@ -1,8 +1,11 @@
-## CONEXIONES-ADMIN-ONLY-20261106 · preparado / publicación pendiente
+## CONEXIONES-ADMIN-ONLY-20261106 · publicado
 
 El enlace al recurso en preparación solo aparece a administradores directos;
 Hub controla el acceso en servidor. Las conexiones existentes y su pantalla
-permanecen sin cambios. Verificación productiva pendiente. [Mapa](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/ECOSISTEMA_APLICACIONES.md).
+permanecen sin cambios. `d73e14d` con ambos Vercel success; administrador ve
+el enlace y GSC legacy sigue conectada en IAB. Roles de tenant y sesión
+impersonada comprobados con fixtures; no se usó sesión real de tenant.
+[Mapa](https://github.com/10minuteswebsite/Harness-Mario/blob/main/docs/ECOSISTEMA_APLICACIONES.md).
 
 ## CONEXIONES-ESTADOS-Y-SITEMAP-20261106 · enlace publicado / adaptador pendiente
 

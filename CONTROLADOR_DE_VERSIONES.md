@@ -1,3 +1,8 @@
+## CONEXIONES-ADMIN-ONLY-20261106 · publicado
+
+`d73e14d`: ambos Vercel success; enlace de admin y GSC legacy IAB PASS.
+No-admin probado con fixtures. El control definitivo está en Hub.
+
 ## CONEXIONES-ESTADOS-20261106 · enlace publicado
 
 `5850e87`: Vercel web y auto-articulos-web success; Artículos/Redes enlazan

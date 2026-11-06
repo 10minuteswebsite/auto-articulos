@@ -1,8 +1,9 @@
-## CONEXIONES-ADMIN-ONLY-20261106 · preparado
+## CONEXIONES-ADMIN-ONLY-20261106 · publicado
 
 El enlace al recurso Hub en preparación solo se presenta a administradores
 directos; Hub protege la ruta de forma independiente. Legacy no cambia.
-Publicación pendiente.
+`d73e14d` ambos Vercel success; admin y conexión legacy IAB PASS. Tenant y
+sesión impersonada comprobados sintéticamente.
 
 ## CONEXIONES-ESTADOS-Y-SITEMAP-20261106 · enlace publicado / adaptador pendiente
 
