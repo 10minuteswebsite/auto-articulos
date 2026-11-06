@@ -3,16 +3,23 @@ import { test } from "node:test";
 import { isSeoTotalHumanEntry } from "./seo-total-hub-redirect";
 
 test("solo redirige entradas humanas sin sesión de seototal.com", () => {
-  for (const pathname of ["/", "/login", "/dashboard", "/dashboard/configuracion/conexiones"]) {
-    assert.equal(isSeoTotalHumanEntry("seototal.lasolucionweb.com", pathname), true, pathname);
+  for (const hostname of [
+    "seototal.lasolucionweb.com",
+    "articulos.lasolucionweb.com",
+    "articulos.lasolucionweb.net",
+    "redes.lasolucionweb.com",
+    "redes.lasolucionweb.net",
+  ]) {
+    for (const pathname of ["/", "/login", "/dashboard", "/dashboard/configuracion/conexiones"]) {
+      assert.equal(isSeoTotalHumanEntry(hostname, pathname), true, `${hostname}${pathname}`);
+    }
   }
 });
 
 test("no confunde otros dominios ni rutas técnicas con entradas humanas", () => {
   for (const [hostname, pathname] of [
     ["seototal.lasolucionweb.net", "/"],
-    ["articulos.lasolucionweb.com", "/dashboard"],
-    ["redes.lasolucionweb.com", "/dashboard"],
+    ["otro.lasolucionweb.net", "/dashboard"],
     ["seototal.lasolucionweb.com", "/api/search-integrations/google/callback"],
     ["seototal.lasolucionweb.com", "/auth/hub"],
     ["seototal.lasolucionweb.com", "/acerca-de"],
