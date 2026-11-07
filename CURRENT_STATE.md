@@ -1,5 +1,11 @@
 ## CONEXIONES-GSC-REUSE-20261106 · lectura publicada / validación bloqueada
 
+## CONTEXTUAL-LOGOUT-20261107 · preparado para publicación
+
+Commit `b622517` en `main`: Artículos oculta logout durante impersonificación
+nativa y consume el modo contextual del Hub. Tests web 438, worker 38,
+typecheck y build: PASS. Publicación pendiente.
+
 Preparado un endpoint privado para que Hub descubra la configuración GSC
 existente por identidad Hub, sin exponer tokens ni alterar las conexiones.
 Cada resultado requiere validación; no crea grants ni activa consumidores.
