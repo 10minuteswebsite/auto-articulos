@@ -1163,3 +1163,7 @@ conserva 405. Sin cambios de datos, secretos, credenciales ni base de datos.
 ## CONEXIONES-GSC-REUSE-20261106 · adaptador read-only verificado
 
 Commit `4d355c1` publicado en ambos proyectos Vercel; deployments `dpl_E8iJeuzMcamz9efmq1QTmgASvXNi` y `dpl_6t8LiMQ4Rb6KjYrdtFKhwLxAJ8ev` READY. La ruta privada nueva responde 401 sin identidad backend; no se exponen tokens ni se alteran conexiones existentes.
+## CONTEXTUAL-LOGOUT-20261107 · publicado
+
+Código funcional `6132858` y memoria `6c49aef` en `main`. Push aceptado; validaciones web 438/438, typecheck y build PASS. Artículos, Redes y Formularios respondieron en smoke público; deployment Vercel asociado aún no fue expuesto por la CLI disponible. E2E autenticado delegado no disponible. Sin datos, DNS ni credenciales modificados.
+
