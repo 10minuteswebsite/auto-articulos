@@ -244,7 +244,7 @@ export default async function DashboardLayout({
             </span>
           )}
           {actingAdmin && <StopImpersonationButton />}
-          <LogoutButton />
+          {!actingAdmin && <LogoutButton />}
         </div>
       </div>}
       {blocked ? (

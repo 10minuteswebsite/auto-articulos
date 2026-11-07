@@ -24,7 +24,7 @@ export default function LogoutButton({
   }
 
   return (
-    <button type="button" className={className} onClick={handleLogout} style={secondaryButtonStyle}>
+    <button data-hub-contextual-logout type="button" className={className} onClick={handleLogout} style={secondaryButtonStyle}>
       {label}
     </button>
   );

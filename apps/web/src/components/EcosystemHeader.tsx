@@ -228,7 +228,7 @@ export default function EcosystemHeader({
             {email}
           </span>
           {actingAdmin && <StopImpersonationButton />}
-          <LogoutButton className="quiet-button" label="Salir" redirectTo={`${HUB_URL}/auth/logout`} />
+          {!actingAdmin && <LogoutButton className="quiet-button" label="Salir" redirectTo={`${HUB_URL}/auth/logout`} />}
         </div>
         <button type="button" data-navigation-toggle aria-label="Menú del Hub" aria-controls="hub-primary-menu" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
       </div>
