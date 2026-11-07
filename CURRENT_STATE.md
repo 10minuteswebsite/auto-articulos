@@ -13,9 +13,12 @@ Cada resultado requiere validación; no crea grants ni activa consumidores.
 la conexión legacy y el botón de prueba devolvió conexión correcta. Adaptador
 de lectura `4d355c1` publicado en ambos Vercel READY; comprueba titular, estado
 y propiedad, sin exportar tokens ni escribir. Pruebas web 438/438, tipos y build
-PASS. La verificación desde Hub devolvió 503 antes de llegar a Artículos: falta
-reconciliar la referencia compartida Hub–Artículos en su almacén central. Las
-150 copias en Hub siguen pendientes, sin grants ni cutover.
+PASS. La verificación desde Hub devolvió 503 sin llegada observada a Artículos;
+la causa exacta sigue sin establecerse. Hub y broker conservan la referencia
+histórica, pero no se ha comprobado su lectura runtime actual. Vault de ambos
+Supabase está vacío. Hub `c6c236e` prepara diagnóstico seguro, pendiente de
+publicación y prueba real. Las 150 copias siguen pendientes, sin grants ni
+cutover; no se crearon credenciales ni se alteraron conexiones.
 
 ## CONEXIONES-ADMIN-ONLY-20261106 · publicado
 
