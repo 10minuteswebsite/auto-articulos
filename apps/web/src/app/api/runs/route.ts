@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
   const publishing=await publishingReadiness(prisma,userId,Boolean(credential));
   if (!publishing.ready) {
     return NextResponse.json(
-      { error: publishing.destination==='blog-ia'?'Tu BLOG IA está pendiente o suspendido. Revísalo desde el Hub.':`Primero debes guardar tus credenciales de ${account.platformDomain === "tagcrush" ? "tu plataforma" : "10minutesWebsite"}` },
+      { error: publishing.destination==='blog-ia'?'Antes de crear artículos debes crear BLOG IA y conectar y confirmar tu dominio propio. La dirección provisional no permite publicar. Abre BLOG IA para resolverlo.':`Primero debes guardar tus credenciales de ${account.platformDomain === "tagcrush" ? "tu plataforma" : "10minutesWebsite"}`, code: "PUBLISHING_DESTINATION_UNAVAILABLE", actionUrl: "https://hub.lasolucionweb.net/api/product-launch?app=blog-ia" },
       { status: 400 },
     );
   }

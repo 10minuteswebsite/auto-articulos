@@ -8,6 +8,8 @@ import {
   getTitleGenerationStatus,
 } from "@/lib/title-generation";
 import { validateInputs } from "@/lib/title-generation-core";
+import { prisma } from "@auto-articulos/db";
+import { publishingReadiness } from "@/lib/publishing-readiness";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -40,6 +42,23 @@ export async function POST(request: NextRequest) {
   const inputs = validateInputs(body.inputs);
   if (!inputs.ok) {
     return NextResponse.json({ error: inputs.error, code: "INVALID_INPUTS" }, { status: 400 });
+  }
+
+  // La guardia debe ejecutarse antes de generar títulos: un BLOG IA sin dominio
+  // propio válido no puede consumir IA ni dejar un lote incompleto.
+  const credential = await prisma.credential.findUnique({
+    where: { userId_platform: { userId, platform: "10minutesWebsite" } },
+    select: { id: true },
+  });
+  const readiness = await publishingReadiness(prisma, userId, Boolean(credential));
+  if (!readiness.ready) {
+    return NextResponse.json({
+      error: readiness.destination === "blog-ia"
+        ? "Antes de escribir artículos debes crear BLOG IA y conectar y confirmar tu dominio propio. La dirección provisional no permite publicar. Abre BLOG IA para resolverlo."
+        : "Antes de escribir artículos debes conectar un destino publicable.",
+      code: "PUBLISHING_DESTINATION_UNAVAILABLE",
+      actionUrl: "https://hub.lasolucionweb.net/api/product-launch?app=blog-ia",
+    }, { status: 400 });
   }
 
   try {

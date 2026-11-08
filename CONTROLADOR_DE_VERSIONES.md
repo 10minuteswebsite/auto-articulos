@@ -5840,3 +5840,15 @@ valores — 2026-10-19").
 PR #706, merge `90aaf0a6` en `main`, Vercel READY. Migración
 `20261029180000_site_article_titles` aplicada a mano antes del merge. Rollback:
 revertir #706; las tablas nuevas pueden quedarse.
+## Versión preparada — compuerta de destino publicable BLOG IA — 2026-11-07 — NO PUBLICADA
+
+- Cambios locales: `publishing-readiness`, `POST /api/title-generation`,
+  `POST /api/runs` y pruebas de estados del destino.
+- Regla: el dominio provisional `*.lasolucionweb.net` no habilita creación ni
+  consumo de IA; se requiere vínculo activo, propio, provisionado, activado,
+  DNS/TLS confirmados y sin error.
+- Sin migración, sin cambios en BLOG IA/Dominios/Hub, sin connect/disconnect/DNS.
+- Suite local 439/439 PASS, typecheck PASS y build PASS. Producción no verificada.
+  No declarar liberación hasta ejecutar IA_JOURNEY y la verificación con cuenta
+  de prueba.
+- Auditoría: `docs/audits/2026-11-07-blog-destination-gate.md`.

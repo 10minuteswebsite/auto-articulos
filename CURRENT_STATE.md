@@ -1170,3 +1170,10 @@ Commit `4d355c1` publicado en ambos proyectos Vercel; deployments `dpl_E8iJeuzMc
 
 Código funcional `6132858` y memoria `6c49aef` en `main`. Push aceptado; validaciones web 438/438, typecheck y build PASS. Vercel `auto-articulos-web`, deployment `dpl_HAcXEGyoM5fvmkjFFRZt798p6xhs`, Production Ready; Artículos, Redes y Formularios respondieron en smoke público. E2E autenticado delegado no disponible. Sin datos, DNS ni credenciales modificados.
 
+## 2026-11-07 — compuerta de destino publicable para Artículos — IMPLEMENTACIÓN LOCAL, NO LIBERADA
+
+- Se añadió una decisión fail-closed para BLOG IA: exige estado `active`, dominio propio (no `*.lasolucionweb.net`), `tenantId`, provisión y activación, DNS/TLS confirmados y ausencia de error.
+- La guardia corre antes de generar títulos con IA y antes de crear `Run`/`Title`; incluye enlace a BLOG IA. No borra artículos o vínculos provisionales existentes.
+- Pruebas añadidas para ausencia, provisional, pendiente, error, desconectado y conectado.
+- Validación local: 439/439 pruebas PASS, typecheck PASS y build web PASS. Falta la verificación autenticada en producción con cuenta de prueba; no se declara liberación hasta hacerla.
+- Evidencia: `docs/audits/2026-11-07-blog-destination-gate.md`.
