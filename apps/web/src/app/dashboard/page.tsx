@@ -7,7 +7,6 @@ import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
 import Link from "next/link";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import { isWhiteLabelPlatform } from "@auto-articulos/shared";
-import { PUBLISHING_CHOICE_EVENT, readPublishingChoice, type PublishingChoice } from "@/lib/publishing-choice";
 import type { ProductsInfo } from "@/lib/product-page-gate";
 
 const QUICK_LINKS = [
@@ -122,14 +121,7 @@ export default function InicioPage() {
   const [productView, setProductView] = useState(false);
   // Destino de publicación, para que la introducción no hable de 10minutesWebsite a quien publica en BLOG IA
   // ni antes de que la persona haya elegido dónde publica.
-  const [destInfo, setDestInfo] = useState<{ blogReady: boolean; websiteConnected: boolean; whiteLabel: boolean } | null>(null);
-  const [destChoice, setDestChoice] = useState<PublishingChoice | null>(null);
-  useEffect(() => {
-    const sync = () => setDestChoice(readPublishingChoice());
-    sync();
-    window.addEventListener(PUBLISHING_CHOICE_EVENT, sync);
-    return () => window.removeEventListener(PUBLISHING_CHOICE_EVENT, sync);
-  }, []);
+  const [destInfo, setDestInfo] = useState<{ blogSelected: boolean; blogReady: boolean; websiteConnected: boolean; whiteLabel: boolean } | null>(null);
 
   // Mismo criterio que el botón de Publicar: persistir en la base (solo
   // `true`, el `false` es exclusivo del worker) y quitar el aviso al instante.
@@ -168,6 +160,7 @@ export default function InicioPage() {
 
       const step1 = Boolean(credData.publishingReady ?? credData.configured);
       setDestInfo({
+        blogSelected: credData.publishingDestination === "blog-ia",
         blogReady: credData.publishingDestination === "blog-ia" && credData.publishingReady === true,
         websiteConnected: Boolean(credData.configured),
         whiteLabel: typeof meData?.platformDomain === "string" && isWhiteLabelPlatform(meData.platformDomain),
@@ -270,7 +263,7 @@ export default function InicioPage() {
       <ModuleIntro titulo="Inicio" showEyebrow={showWizard !== false} compact={showWizard === false}>
         {showWizard === true ? (
           <>
-            {destInfo && !destInfo.blogReady && !destInfo.websiteConnected && !destInfo.whiteLabel && destChoice !== "website" ? (
+            {destInfo && destInfo.blogSelected && !destInfo.blogReady ? (
               <IntroP>
                 Antes de que la plataforma pueda redactar y publicar por ti, dinos dónde se publican tus artículos. Después completarás el idioma y Google Search Console.
               </IntroP>
@@ -288,7 +281,7 @@ export default function InicioPage() {
                     color: "#1d1d1f",
                   }}
                 >
-                  {destInfo?.blogReady ? (
+                  {destInfo?.blogSelected ? (
                     <>
                       <li>Confirmar que publicas en tu blog de BLOG IA.</li>
                       <li>Traer las categorías de tu blog.</li>

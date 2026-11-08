@@ -39,6 +39,7 @@ export async function GET() {
   // Con destino BLOG IA no hay credencial de 10minutesWebsite: el destino listo (blog activo, dirección y HTTPS) cuenta como configurado.
   const publishing = await publishingReadiness(prisma, userId, Boolean(credential));
   const credentialsConfigured = publishing.ready;
+  const blogSelected = publishing.destination === "blog-ia";
   const regularCategoriesCount = categories.filter((c) => !c.isSequence).length;
   const sequenceCategoriesCount = categories.filter((c) => c.isSequence).length;
   const hasCategories = categories.length > 0;
@@ -71,10 +72,12 @@ export async function GET() {
   if (!credentialsConfigured) {
     const credItem = {
       id: "credentials",
-      label: `${productName} no conectado`,
-      description: `Primero debes conectar tus credenciales de ${productName} para poder publicar.`,
-      actionUrl: "/dashboard/configuracion?tab=platform#credentials",
-      actionLabel: `Conectar ${productName}`,
+      label: blogSelected ? "BLOG IA no está listo" : `${productName} no conectado`,
+      description: blogSelected
+        ? "Conecta y confirma un dominio propio en BLOG IA para poder publicar."
+        : `Primero debes conectar tus credenciales de ${productName} para poder publicar.`,
+      actionUrl: blogSelected ? "https://hub.lasolucionweb.net/api/product-launch?app=blog-ia" : "/dashboard/configuracion?tab=platform#credentials",
+      actionLabel: blogSelected ? "Resolver BLOG IA" : `Conectar ${productName}`,
     };
     missingForPublish.push(credItem);
     missingForOpportunities.push(credItem);
@@ -84,7 +87,9 @@ export async function GET() {
     const catItem = {
       id: "categories",
       label: "Sin categorías sincronizadas",
-      description: `Debes sincronizar al menos una categoría desde ${productName} para organizar tus artículos.`,
+      description: blogSelected
+        ? "Debes traer al menos una categoría desde BLOG IA para organizar tus artículos."
+        : `Debes sincronizar al menos una categoría desde ${productName} para organizar tus artículos.`,
       actionUrl: "/dashboard/configuracion?tab=platform#categories",
       actionLabel: "Sincronizar categorías",
     };
@@ -108,7 +113,7 @@ export async function GET() {
     const imgCreditItem = {
       id: "image-credits",
       label: "Créditos de imagen agotados",
-      description: `Tu cuenta de ${productName} no tiene créditos para generar imágenes con IA.`,
+      description: `Tu cuenta no tiene créditos para generar imágenes con IA.`,
       actionUrl: platformHelpUrl(account.platformDomain) ?? "#",
       actionLabel: "Solicitar créditos de imagen gratuitos",
     };

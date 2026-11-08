@@ -172,6 +172,7 @@ export async function GET() {
   const hasActiveComposioAnalytics = Boolean(analyticsComposioConnection?.propertyId || analyticsComposioConnection?.siteUrl);
 
   const publishing = await publishingReadiness(prisma, userId, Boolean(credential));
+  const blogSelected = publishing.destination === "blog-ia";
   const checks: ConfigurationCheck[] = [
     // ━━━ MÍNIMO PARA PUBLICAR ━━━
     publishing.destination === "blog-ia"
@@ -201,7 +202,9 @@ export async function GET() {
       configured: categories.length > 0,
       required: true,
       section: "platform",
-      description: `Al menos una categoría sincronizada desde ${productName} para clasificar tus artículos.`,
+      description: blogSelected
+        ? "Al menos una categoría traída desde BLOG IA para clasificar tus artículos."
+        : `Al menos una categoría sincronizada desde ${productName} para clasificar tus artículos.`,
       actionUrl: "/dashboard/configuracion?tab=platform#categories",
       actionLabel: "Sincronizar categorías",
     },
