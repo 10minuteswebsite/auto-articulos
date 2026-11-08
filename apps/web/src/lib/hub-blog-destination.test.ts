@@ -5,3 +5,15 @@ function fixture(){let user:any={id:'local',hubUserId:owner,publishMethod:'MCP'}
 test('only a backend client can submit; browser authority and extra tenant selectors fail',()=>{const env={AUTO_ARTICULOS_HUB_CLIENT_ID:'id',AUTO_ARTICULOS_HUB_CLIENT_SECRET:'synthetic'};const request=(headers:any)=>new Request('https://a.invalid',{headers:{'x-platform-client-id':'id',authorization:'Bearer synthetic',...headers}});assert(validBlogHubClient(request({}),env));assert(!validBlogHubClient(request({origin:'https://browser.invalid'}),env));assert(!validBlogHubClient(request({authorization:'Bearer wrong'}),env));assert.throws(()=>parseBlogDestination({...target,email:'another@invalid.test'}));assert.throws(()=>parseBlogDestination({...target,operation:'select'}));});
 test('status does not change MCP; explicit selection persists one owned destination and replays safely',async()=>{const f=fixture();const status=await manageBlogDestination(f.db,target);assert.equal(f.read().user.publishMethod,'MCP');assert.equal(f.read().writes,0);const select={...target,operation:'select' as const,confirm:true as const,expected_revision:status.revision};const selected=await manageBlogDestination(f.db,parseBlogDestination(select));assert.equal(selected.selected,true);assert.equal(f.read().blog.tenantId,target.tenant_id);const n=f.read().writes;await manageBlogDestination(f.db,select);assert.equal(f.read().writes,n);await manageBlogDestination(f.db,{...target,operation:'suspend'});assert.equal(f.read().blog.status,'suspended');assert.equal(f.read().user.publishMethod,'BLOG');});
 test('stale choices and different canonical owners cannot alter a destination',async()=>{const f=fixture();await assert.rejects(manageBlogDestination(f.db,{...target,operation:'select',confirm:true,expected_revision:'0'.repeat(64)}),/destination_changed/);await assert.rejects(manageBlogDestination(f.db,{...target,hub_user_id:'33333333-3333-4333-8333-333333333333'}),/native_account_required/);assert.equal(f.read().writes,0);assert.equal(destinationRevision('MCP',null).length,64);});
+test('a later canonical hostname replaces a stale BLOG projection only through a fresh contractual select',async()=>{
+ const f=fixture();
+ const first={...target,operation:'select' as const,confirm:true as const,expected_revision:(await manageBlogDestination(f.db,target)).revision};
+ await manageBlogDestination(f.db,parseBlogDestination(first));
+ const oldStatus=await manageBlogDestination(f.db,{...target,hostname:'old.blogs.lasolucionweb.net'});
+ assert.equal(oldStatus.selected,false);
+ const replacement={...target,hostname:'blog.segurosdesaludyvida.com',operation:'select' as const,confirm:true as const,expected_revision:oldStatus.revision};
+ const selected=await manageBlogDestination(f.db,parseBlogDestination(replacement));
+ assert.equal(selected.current_hostname,'blog.segurosdesaludyvida.com');
+ assert.equal(f.read().blog.hostname,'blog.segurosdesaludyvida.com');
+ assert.equal(f.read().user.publishMethod,'BLOG');
+});
