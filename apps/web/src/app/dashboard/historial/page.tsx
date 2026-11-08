@@ -1778,6 +1778,7 @@ function RunTable({ titles }: { titles: TitleRow[] }) {
             <th style={thStyle}>Título</th>
             <th style={thStyle}>Estado</th>
             <th style={thStyle}>Intentos</th>
+            <th style={thStyle}>Destino</th>
             <th style={thStyle}>Oportunidad creada</th>
             <th style={thStyle}>Publicado</th>
             <th style={thStyle}>Enlace / Error</th>
@@ -1899,6 +1900,18 @@ function TitleRowWithLog({ title }: { title: TitleRow }) {
       </td>
       <td style={tdStyle} data-label="Intentos">
         {title.attempts}
+      </td>
+      <td style={tdStyle} data-label="Destino">
+        {title.publishedDestination ? (
+          <>
+            <strong>{title.publishedDestination === "blog-ia" ? "BLOG IA" : "10MWS"}</strong>
+            {title.publishedHostname && (
+              <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>{title.publishedHostname}</div>
+            )}
+          </>
+        ) : (
+          <span className="muted">Pendiente de auditoría</span>
+        )}
       </td>
       <td style={tdStyle} data-label="Oportunidad creada">
         {title.opportunityCreatedAt ? (

@@ -24,8 +24,10 @@ export async function switchToWebsite(db: Db, userId: string, hasWebsiteCredenti
   if (!hasWebsiteCredential) {
     throw new DestinationError("website_not_connected", 409, "Todavía no conectaste tu sitio de 10minutesWebsite. Conéctalo primero en Configuración y luego vuelve a intentarlo.");
   }
-  // Cambiar el destino a mitad de un lote mandaría el resto de los títulos a otro sitio.
-  if ((await db.run.count({ where: { userId, status: { in: ["pending", "running"] } } })) > 0) {
+  // Las propuestas y artículos pendientes pueden cambiar de destino: el
+  // destino se resuelve al publicar. Solo se protege una publicación que ya
+  // está ejecutándose para no partirla entre dos destinos.
+  if ((await db.run.count({ where: { userId, status: { in: ["running"] } } })) > 0) {
     throw new DestinationError("runs_in_progress", 409, "Tienes publicaciones en curso. Espera a que terminen y vuelve a intentarlo.");
   }
   const result = await db.user.updateMany({ where: { id: userId, publishMethod: "BLOG" }, data: { publishMethod: "BROWSER" } });
@@ -45,7 +47,7 @@ export async function switchToBlog(db: Db, userId: string): Promise<{ changed: b
   if (!blog || blog.status !== "active" || !blog.dnsVerified || !blog.tlsReady) {
     throw new DestinationError("blog_not_ready", 409, "Tu blog todavía no está listo. Termina de crearlo en BLOG IA y pulsa «Usar este blog para mis artículos».");
   }
-  if ((await db.run.count({ where: { userId, status: { in: ["pending", "running"] } } })) > 0) {
+  if ((await db.run.count({ where: { userId, status: { in: ["running"] } } })) > 0) {
     throw new DestinationError("runs_in_progress", 409, "Tienes publicaciones en curso. Espera a que terminen y vuelve a intentarlo.");
   }
   const result = await db.user.updateMany({ where: { id: userId, publishMethod: "BROWSER" }, data: { publishMethod: "BLOG" } });

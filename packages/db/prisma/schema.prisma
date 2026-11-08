@@ -1014,6 +1014,14 @@ model Title {
   status                 TitleStatus @default(pending)
   attempts               Int         @default(0)
   articleUrl             String?
+  // Snapshot inmutable del destino que confirmó esta publicación. Nunca se
+  // recalcula desde User.publishMethod: el usuario puede cambiar de destino
+  // después y el historial debe seguir mostrando la verdad de este artículo.
+  publishedDestination   String? // "10mws" | "blog-ia"
+  publishedPublisherId   String? // identificador estable del publicador
+  publishedTenantId      String? // tenant de BLOG IA cuando corresponda
+  publishedHostname      String? // dominio público confirmado al publicar
+  publishedCanonicalUrl  String? // URL canónica confirmada por el publicador
   finalTitle             String?
   errorMessage           String?
   // Fecha original de la oportunidad, copiada al convertirla en un Run.

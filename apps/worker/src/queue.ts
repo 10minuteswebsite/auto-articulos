@@ -407,11 +407,18 @@ async function processRunTitle(
       );
     }
 
+    let publishedHostname: string | null = null;
+    try { publishedHostname = new URL(result.articleUrl).hostname; } catch { /* el enlace ya fue validado por el publicador */ }
+
     await prisma.title.update({
       where: { id: nextTitle.id },
       data: {
         status: "success",
         articleUrl: result.articleUrl,
+        publishedDestination: "10mws",
+        publishedPublisherId: "10mws",
+        publishedHostname,
+        publishedCanonicalUrl: result.articleUrl,
         finalTitle: result.finalTitle,
         summary: result.summary,
         publishedAt: new Date(),

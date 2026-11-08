@@ -34,13 +34,17 @@ import {
  * tiene sincronizadas y en qué idioma escribe. El resto (firma, teléfono,
  * fotos, estilo de redacción) vive ahora en Contenido.
  *
- * Lógica y llamadas a la API idénticas a las que ya existían — solo se
- * relocalizaron, no se reescribieron.
+ * La pantalla conserva el flujo de 10MWS y muestra un camino separado cuando
+ * el destino activo es BLOG IA; las categorías de BLOG IA son de solo lectura
+ * aquí y se originan en el propio blog.
  */
 export default function ConfiguracionCuentaPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [credentialsConfigured, setCredentialsConfigured] = useState(false);
+  const [publishingDestination, setPublishingDestination] = useState<"website" | "blog-ia" | null>(null);
+  const [publishingReady, setPublishingReady] = useState(false);
+  const [blogHostname, setBlogHostname] = useState<string | null>(null);
   const [editingCredentials, setEditingCredentials] = useState(false);
   const [savingCreds, setSavingCreds] = useState(false);
   const [categories, setCategories] = useState<CategoryRow[]>([]);
@@ -76,7 +80,7 @@ export default function ConfiguracionCuentaPage() {
     lastSyncStatus === "pending" || lastSyncStatus === "running";
   const languageSyncInProgress =
     lastLanguageSyncStatus === "pending" || lastLanguageSyncStatus === "running";
-  const showCredentialsForm = editingCredentials || !credentialsConfigured;
+  const showCredentialsForm = publishingDestination !== "blog-ia" && (editingCredentials || !credentialsConfigured);
 
   const activeLangName =
     languages.find((l) => l.externalId === contentLanguage)?.name ??
@@ -87,6 +91,9 @@ export default function ConfiguracionCuentaPage() {
     if (res.ok) {
       const data = await res.json();
       setCredentialsConfigured(Boolean(data.configured));
+      setPublishingDestination(data.publishingDestination === "blog-ia" ? "blog-ia" : data.publishingDestination === "website" ? "website" : null);
+      setPublishingReady(Boolean(data.publishingReady));
+      setBlogHostname(typeof data.blogHostname === "string" ? data.blogHostname : null);
     }
   }, []);
 
@@ -276,8 +283,8 @@ export default function ConfiguracionCuentaPage() {
           y el idioma en que escribe tus artículos.
         </IntroP>
         <ol style={{ margin: "12px 0 0", paddingLeft: 22, color: "#1d1d1f", fontSize: 14, lineHeight: 1.65 }}>
-          <li><strong>Guarda tu usuario y contraseña:</strong> son los mismos con los que entras a tu plataforma; el sistema los necesita para publicar por ti.</li>
-          <li><strong>Trae tus categorías:</strong> pulsa "Sincronizar categorías ahora" para copiar las secciones reales de tu web.</li>
+          <li><strong>Conecta tu destino:</strong> 10MWS usa sus credenciales; BLOG IA usa el vínculo confirmado por el Hub y su dominio propio.</li>
+          <li><strong>Trae tus categorías:</strong> en 10MWS se leen de tu sitio; en BLOG IA se leen del propio blog y nunca se crean aquí.</li>
           <li><strong>Elige el idioma:</strong> sincroniza los idiomas disponibles y guarda el que usarán tus artículos.</li>
         </ol>
         <IntroP>
@@ -286,9 +293,33 @@ export default function ConfiguracionCuentaPage() {
         </IntroP>
       </ModuleIntro>
 
+      <section id="publishing-destination" style={readySectionStyle(publishingDestination !== null && publishingReady)}>
+        <h2 style={{ ...h2Style, margin: 0 }}>Destino actual de publicación</h2>
+        <p style={{ fontSize: 13, color: "#6e6e73", margin: "8px 0 0" }}>
+          {publishingDestination === "blog-ia" && publishingReady
+            ? <>Tus artículos se publican actualmente en BLOG IA{blogHostname ? <> · <strong>{blogHostname}</strong></> : null}. Las credenciales antiguas de 10MWS no cambian este destino.</>
+            : publishingDestination === "blog-ia"
+              ? "BLOG IA es el destino elegido, pero todavía no está listo para publicar. Conecta y valida el dominio propio desde BLOG IA/Hub."
+            : publishingDestination === "website"
+              ? <>Tus artículos se publican actualmente en {productName}. Si cambias de destino, hazlo desde Configuración Inicial.</>
+              : "Todavía no hay un destino de publicación confirmado. Completa Configuración Inicial antes de crear artículos."}
+        </p>
+      </section>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Credenciales Card */}
-        <section id="credentials" style={readySectionStyle(credentialsConfigured)}>
+        <section id="credentials" style={readySectionStyle(publishingDestination === "blog-ia" ? publishingReady : credentialsConfigured)}>
+          {publishingDestination === "blog-ia" ? (
+            <>
+              <h2 style={{ ...h2Style, margin: 0 }}>Conexión de BLOG IA</h2>
+              <p style={{ fontSize: 13, color: "#1d1d1f", margin: "10px 0 0" }}>
+                {publishingReady
+                  ? "BLOG IA está conectado y listo para publicar. Sus categorías se administran en BLOG IA y aquí solo se leen para usarlas en Artículos."
+                  : "BLOG IA está seleccionado, pero todavía no está listo. Artículos esperará la confirmación del dominio y la capacidad de publicación."}
+              </p>
+            </>
+          ) : (
+          <>
           <div
             style={{
               display: "flex",
@@ -442,6 +473,8 @@ export default function ConfiguracionCuentaPage() {
               )}
             </p>
           )}
+          </>
+          )}
         </section>
 
         {/* Categorías Card con Tag Cloud View */}
@@ -472,23 +505,27 @@ export default function ConfiguracionCuentaPage() {
           </div>
 
           <p style={{ fontSize: 13, color: "#6e6e73", marginBottom: 14 }}>
-            Las categorías definen en qué secciones se publicarán tus artículos. Sincronízalas desde tu cuenta de {productName} para mantenerlas actualizadas.
+            {publishingDestination === "blog-ia"
+              ? "Las categorías se crean y administran en BLOG IA. Artículos solo las lee desde allí para poder publicar en la categoría correcta."
+              : `Las categorías definen en qué secciones se publicarán tus artículos. Sincronízalas desde tu cuenta de ${productName} para mantenerlas actualizadas.`}
           </p>
 
           <button
             onClick={handleSyncCategories}
-            disabled={syncing || syncInProgress || !credentialsConfigured}
+            disabled={syncing || syncInProgress || (publishingDestination !== "blog-ia" ? !credentialsConfigured : !publishingReady)}
             style={disabledStyle(
               secondaryButtonStyle,
-              syncing || syncInProgress || !credentialsConfigured,
+              syncing || syncInProgress || (publishingDestination !== "blog-ia" ? !credentialsConfigured : !publishingReady),
             )}
           >
             {syncing || syncInProgress
               ? "Sincronizando..."
-              : "Sincronizar categorías ahora"}
+              : publishingDestination === "blog-ia"
+                ? "Traer categorías de BLOG IA"
+                : "Sincronizar categorías ahora"}
           </button>
 
-          {!credentialsConfigured && (
+          {publishingDestination !== "blog-ia" && !credentialsConfigured && (
             <p style={{ fontSize: 13, color: "#ff3b30", marginTop: 8 }}>
               Guarda primero tus credenciales arriba para sincronizar.
             </p>

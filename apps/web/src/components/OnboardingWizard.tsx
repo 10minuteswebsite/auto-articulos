@@ -59,6 +59,7 @@ export default function OnboardingWizard({
   const [destChoice, setDestChoice] = useState<PublishingChoice | null>(null);
   const [destChoiceLoaded, setDestChoiceLoaded] = useState(false);
   const [switchingBlog, setSwitchingBlog] = useState(false);
+  const autoSelectedBlogRef = useRef(false);
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [languages, setLanguages] = useState<LanguageRow[]>([]);
   const [contentLanguage, setContentLanguage] = useState("");
@@ -356,6 +357,22 @@ export default function OnboardingWizard({
       setSwitchingBlog(false);
     }
   }
+
+  // La elección explícita de BLOG IA se completa automáticamente cuando el
+  // contrato/Hub confirma que el blog ya está listo. No se deja una segunda
+  // confirmación de interfaz que pueda hacer que Artículos siga mostrando el
+  // destino anterior aunque BLOG IA ya sea publicable.
+  useEffect(() => {
+    if (
+      destChoice !== "blog" ||
+      !blogAvailable ||
+      blogDestination ||
+      switchingBlog ||
+      autoSelectedBlogRef.current
+    ) return;
+    autoSelectedBlogRef.current = true;
+    void handleUseExistingBlog();
+  }, [destChoice, blogAvailable, blogDestination, switchingBlog]);
 
   const detectInProgress =
     detectJob?.status === "pending" || detectJob?.status === "running";
@@ -687,10 +704,11 @@ export default function OnboardingWizard({
   // equivocado cuando la cuenta expone más de uno.
   const step1Done = Boolean(blogDestination) || (step1Saved && siteSelectionConfirmed);
   // Las categorías son opcionales durante el onboarding. Una cuenta nueva
-  // puede todavía no tener categorías creadas en su web; eso no debe impedir
-  // completar el Wizard. El paso permanece disponible para sincronizarlas o
-  // agregarlas después, pero no actúa como barrera para los pasos siguientes.
-  const step2Done = step1Done;
+  // En 10MWS se conserva el comportamiento histórico: la sincronización de
+  // categorías no bloquea completar el wizard. BLOG IA es distinto: sus
+  // categorías pertenecen al blog y deben llegar desde BLOG IA antes de que
+  // Artículos permita continuar con la creación.
+  const step2Done = blogDestination ? categories.length > 0 : step1Done;
   const step3Done = step1Done && step2Done && Boolean(contentLanguage);
   const step4Done = step1Done && step2Done && step3Done && Boolean(googleData?.connected && googleData?.siteUrl);
   const step5Done = step1Done && step2Done && step3Done && step4Done && hasPublishedAny;

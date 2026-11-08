@@ -21,7 +21,10 @@ export async function syncBlogCategories(userId: string, overrides: { config?: P
   const res = await postBlogIaJson<{ ok: true; categories: BlogCategory[] }>({ apiUrl, secret, ...overrides.config }, "/api/categories/list", { tenant_id: blog.tenantId });
 
   // Las que el publicador ya creó antes en el blog usan el id de nuestra propia Category: ya están representadas.
-  const mine = await db.category.findMany({ where: { userId }, select: { id: true } });
+  // Solo las categorías ya proyectadas desde BLOG IA cuentan como conocidas.
+  // Una categoría histórica de 10MWS puede compartir identificador externo y
+  // no debe impedir que la categoría real del blog se sincronice.
+  const mine = await db.category.findMany({ where: { userId, source: "blog" }, select: { id: true } });
   const known = new Set(mine.map((c) => c.id));
   let added = 0;
   for (const c of res.categories) {

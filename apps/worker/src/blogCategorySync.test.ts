@@ -7,12 +7,12 @@ process.env.BLOG_IA_SECRET = "secreto-de-prueba";
 
 type Upsert = { where: { userId_platform_panel_externalId: { userId: string; externalId: string } }; create: Record<string, unknown>; update: Record<string, unknown> };
 
-function fakeDb(opts: { tenantId?: string | null; mine?: string[] }) {
+function fakeDb(opts: { tenantId?: string | null; mine?: string[]; legacyMine?: string[] }) {
   const upserts: Upsert[] = [];
   const deletes: unknown[] = [];
   const db = {
     blogIaBlog: { findUnique: async () => (opts.tenantId === null ? null : { tenantId: opts.tenantId ?? "t_demo" }) },
-    category: { findMany: async () => (opts.mine ?? []).map((id) => ({ id })), upsert: async (a: Upsert) => { upserts.push(a); return {}; }, deleteMany: async (a: unknown) => { deletes.push(a); return { count: 1 }; } },
+    category: { findMany: async (args: { where?: { source?: string } }) => (args.where?.source === "blog" ? (opts.mine ?? []) : (opts.legacyMine ?? [])).map((id) => ({ id })), upsert: async (a: Upsert) => { upserts.push(a); return {}; }, deleteMany: async (a: unknown) => { deletes.push(a); return { count: 1 }; } },
   };
   return { db: db as never, upserts, deletes };
 }
@@ -42,6 +42,13 @@ test("no duplica categorías que el publicador ya creó antes en el blog (su id 
   const added = await syncBlogCategories("u1", { db, config: { fetchImpl: listResponse([{ id: "cuid-ya-existe", slug: "x", name: "X", description: "" }, { id: "cat-nueva", slug: "nueva", name: "Nueva", description: "" }]) } });
   assert.equal(added, 1);
   assert.deepEqual(upserts.map((u) => u.where.userId_platform_panel_externalId.externalId), ["cat-nueva"]);
+});
+
+test("no confunde una categoría histórica de 10MWS con la misma categoría de BLOG IA", async () => {
+  const { db, upserts } = fakeDb({ legacyMine: ["cat-compartida"] });
+  const added = await syncBlogCategories("u1", { db, config: { fetchImpl: listResponse([{ id: "cat-compartida", slug: "compartida", name: "Compartida", description: "" }]) } });
+  assert.equal(added, 1);
+  assert.equal(upserts[0].create.source, "blog");
 });
 
 test("sin blog todavía: error claro; sin configuración del servidor: error claro; si el blog falla, el error sube", async () => {

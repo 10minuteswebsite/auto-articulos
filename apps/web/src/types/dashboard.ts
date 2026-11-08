@@ -17,6 +17,11 @@ export interface TitleRow {
   status: TitleStatus;
   attempts: number;
   articleUrl: string | null;
+  publishedDestination?: "10mws" | "blog-ia" | null;
+  publishedPublisherId?: string | null;
+  publishedTenantId?: string | null;
+  publishedHostname?: string | null;
+  publishedCanonicalUrl?: string | null;
   finalTitle: string | null;
   errorMessage: string | null;
   opportunityCreatedAt: string | null;

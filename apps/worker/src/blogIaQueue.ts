@@ -141,11 +141,22 @@ export async function processBlogRunTitle(run: RunForBlog, nextTitle: TitleForBl
       disableIndexing: run.disableIndexing,
       onStep,
     });
+    const blog = await prisma.blogIaBlog.findUnique({
+      where: { userId: run.userId },
+      select: { tenantId: true, hostname: true },
+    });
+    let publishedHostname: string | null = null;
+    try { publishedHostname = typeof result.articleUrl === "string" ? new URL(result.articleUrl).hostname : null; } catch { /* el publicador ya confirmó el enlace */ }
     await prisma.title.update({
       where: { id: nextTitle.id },
       data: {
         status: "success",
         articleUrl: result.articleUrl,
+        publishedDestination: "blog-ia",
+        publishedPublisherId: "blog-ia",
+        publishedTenantId: blog?.tenantId ?? null,
+        publishedHostname: blog?.hostname ?? publishedHostname,
+        publishedCanonicalUrl: result.articleUrl,
         finalTitle: result.finalTitle,
         summary: result.summary,
         publishedAt: new Date(),

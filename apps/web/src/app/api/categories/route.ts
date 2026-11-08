@@ -5,9 +5,19 @@ import { getCurrentUserId } from "@/lib/current-user";
 export async function GET() {
   const userId = await getCurrentUserId();
 
+  // Las categorías pertenecen al destino de publicación activo. BLOG IA se
+  // lee por el canal firmado del blog y se proyecta localmente con
+  // `source="blog"`; nunca se mezcla con categorías de 10MWS que hayan
+  // quedado de una configuración anterior.
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { publishMethod: true },
+  });
+  const categorySource = user?.publishMethod === "BLOG" ? "blog" : { notIn: ["blog", "archived"] };
+
   const [categories, lastSyncJob] = await Promise.all([
     prisma.category.findMany({
-      where: { userId, platform: "10minutesWebsite", source: { not: "archived" } },
+      where: { userId, platform: "10minutesWebsite", source: categorySource },
       orderBy: { name: "asc" },
     }),
     prisma.categorySyncJob.findFirst({
@@ -21,6 +31,13 @@ export async function GET() {
 
 export async function POST(request: import("next/server").NextRequest) {
   const userId = await getCurrentUserId();
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { publishMethod: true } });
+  if (user?.publishMethod === "BLOG") {
+    return NextResponse.json(
+      { error: "Las categorías de BLOG IA se crean y administran en BLOG IA. Aquí solo se pueden traer para usarlas en Artículos." },
+      { status: 409 },
+    );
+  }
   const body = await request.json().catch(() => ({}));
   const { name, externalId } = body;
   if (!name || typeof name !== "string") {
