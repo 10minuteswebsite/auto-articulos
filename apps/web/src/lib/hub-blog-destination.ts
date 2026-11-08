@@ -1,6 +1,7 @@
 import {createHash,timingSafeEqual} from 'node:crypto';
 export type Destination={hub_user_id:string;operation:'status'|'select'|'suspend';site_id?:string;tenant_id?:string;hostname?:string;expected_revision?:string;confirm?:true};
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const PROVISIONAL_HOST_SUFFIX='.lasolucionweb.net';
 export class BlogDestinationError extends Error{constructor(readonly code:string,readonly status:number){super(code)}}
 export function validBlogHubClient(req:Request,env:Record<string,string|undefined>){
  if(req.headers.has('origin')||req.headers.has('cookie')||req.headers.has('sec-fetch-site'))return false;
@@ -12,7 +13,7 @@ export function parseBlogDestination(body:unknown):Destination{
  if(!body||typeof body!=='object'||Array.isArray(body))throw new BlogDestinationError('invalid_request',400);
  const b=body as Destination;if(Object.keys(b).some(k=>!['hub_user_id','operation','site_id','tenant_id','hostname','expected_revision','confirm'].includes(k))||!UUID.test(b.hub_user_id)||!['status','select','suspend'].includes(b.operation))throw new BlogDestinationError('invalid_request',400);
  if(b.operation==='suspend')return{hub_user_id:b.hub_user_id,operation:b.operation};
- if(typeof b.site_id!=='string'||!/^site_[0-9a-f-]{36}$/.test(b.site_id)||typeof b.tenant_id!=='string'||!/^t_[a-z0-9_-]{10,110}$/.test(b.tenant_id)||typeof b.hostname!=='string'||b.hostname.length>253||b.hostname!==b.hostname.toLowerCase()||!/^([a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/.test(b.hostname))throw new BlogDestinationError('invalid_destination',400);
+ if(typeof b.site_id!=='string'||!/^site_[0-9a-f-]{36}$/.test(b.site_id)||typeof b.tenant_id!=='string'||!/^t_[a-z0-9_-]{10,110}$/.test(b.tenant_id)||typeof b.hostname!=='string'||b.hostname.length>253||b.hostname!==b.hostname.toLowerCase()||!/^([a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/.test(b.hostname)||b.hostname.endsWith(PROVISIONAL_HOST_SUFFIX))throw new BlogDestinationError('invalid_destination',400);
  if(b.operation==='select'&&(b.confirm!==true||typeof b.expected_revision!=='string'||!/^[a-f0-9]{64}$/.test(b.expected_revision)))throw new BlogDestinationError('confirmation_required',400);return b;
 }
 export const destinationRevision=(method:string,blog:{tenantId:string;hostname:string|null;status:string;config?:unknown}|null)=>createHash('sha256').update(JSON.stringify({method,tenant:blog?.tenantId??null,host:blog?.hostname??null,status:blog?.status??null,config:blog?.config??null})).digest('hex');
