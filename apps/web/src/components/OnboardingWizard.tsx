@@ -362,6 +362,35 @@ export default function OnboardingWizard({
     }
   }
 
+  async function handleRecheckBlog() {
+    setMessage({ type: "info", text: "Revisando el vínculo confirmado de BLOG IA…" });
+    try {
+      const res = await fetch("/api/credentials", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      const available = data.blogAvailable === true;
+      setBlogAvailable(available ? { hostname: data.availableBlogHostname ?? null } : null);
+      setBlogDestination(
+        data.publishingDestination === "blog-ia" && data.publishingReady
+          ? { hostname: data.blogHostname ?? null }
+          : null,
+      );
+      if (!res.ok) {
+        setMessage({ type: "error", text: "No pudimos consultar BLOG IA. Inténtalo de nuevo." });
+        return;
+      }
+      if (available) {
+        setMessage({ type: "success", text: "Encontramos tu blog. Ya puedes continuar con la configuración." });
+        return;
+      }
+      setMessage({
+        type: "error",
+        text: "BLOG IA todavía no ha confirmado este blog para Artículos. En BLOG IA pulsa «Usar este blog para mis artículos» y vuelve a intentarlo.",
+      });
+    } catch {
+      setMessage({ type: "error", text: "No pudimos consultar BLOG IA. Inténtalo de nuevo." });
+    }
+  }
+
   // La elección explícita de BLOG IA se completa automáticamente cuando el
   // contrato/Hub confirma que el blog ya está listo. No se deja una segunda
   // confirmación de interfaz que pueda hacer que Artículos siga mostrando el
@@ -779,7 +808,7 @@ export default function OnboardingWizard({
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
               <a href={BLOG_IA_LAUNCH_URL} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none" }}>Crear mi blog en BLOG IA</a>
-              <button type="button" style={secondaryButtonStyle} onClick={() => void loadAll()}>Ya lo creé, continuar</button>
+              <button type="button" style={secondaryButtonStyle} onClick={() => void handleRecheckBlog()}>Ya lo creé, continuar</button>
               <button type="button" style={secondaryButtonStyle} onClick={() => writePublishingChoice(null)}>Cambiar mi elección</button>
             </div>
           </>
