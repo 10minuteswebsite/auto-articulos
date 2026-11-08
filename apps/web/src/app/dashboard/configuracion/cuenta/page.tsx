@@ -308,7 +308,7 @@ export default function ConfiguracionCuentaPage() {
         <h2 style={{ ...h2Style, margin: 0 }}>Destino actual de publicación</h2>
         <p style={{ fontSize: 13, color: "#6e6e73", margin: "8px 0 0" }}>
           {publishingDestination === "blog-ia" && publishingReady
-            ? <>Tus artículos se publican actualmente en BLOG IA{blogHostname ? <> · <strong>{blogHostname}</strong></> : null}. Las credenciales antiguas de 10MWS no cambian este destino.</>
+            ? <>Tus artículos se publican actualmente en BLOG IA{blogHostname ? <> · <strong>{blogHostname}</strong></> : null}.</>
             : publishingDestination === "blog-ia"
               ? "BLOG IA es el destino elegido, pero todavía no está listo para publicar. Conecta y valida el dominio propio desde BLOG IA/Hub."
             : publishingDestination === "website"

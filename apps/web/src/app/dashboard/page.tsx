@@ -247,7 +247,16 @@ export default function InicioPage() {
         ]
       : [link],
   );
-  const visibleProductCards = PRODUCT_CARDS.filter((card) => hasProductFor(card.href));
+  const publicationSurface = destInfo?.blogSelected ? "tu blog de BLOG IA" : "tu página web";
+  const contextualizeDescription = (description: string) =>
+    description.replaceAll("tu página web", publicationSurface);
+  const contextualQuickLinks = visibleQuickLinks.map((link) => ({
+    ...link,
+    description: contextualizeDescription(link.description),
+  }));
+  const visibleProductCards = PRODUCT_CARDS
+    .filter((card) => hasProductFor(card.href))
+    .map((card) => ({ ...card, description: contextualizeDescription(card.description) }));
 
   useEffect(() => {
     const currentHostProduct = productOfHost(window.location.hostname);
@@ -382,7 +391,7 @@ export default function InicioPage() {
           <h2 style={{ margin: "0 0 14px", fontSize: 22 }}>{productView ? "Elige un producto" : "Acciones posibles"}</h2>
           <div className="inicio-actions-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, 320px)", gap: 16, justifyContent: "start" }}>
           {/* Solo mostramos acciones del producto que la cuenta puede usar. */}
-          {(productView ? visibleProductCards : visibleQuickLinks).map((l, i) => (
+          {(productView ? visibleProductCards : contextualQuickLinks).map((l, i) => (
             (() => {
               return (
                 <Link key={l.href} className="inicio-action-card" href={l.href} style={{ display: "flex", width: 320, height: 320, boxSizing: "border-box", padding: 22, flexDirection: "column", justifyContent: "space-between", textDecoration: "none", color: "#1d1d1f", background: "#ffffff", border: "1px solid #d2d2d7", borderRadius: 6 }}>
