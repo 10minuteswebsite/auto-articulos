@@ -279,14 +279,24 @@ export default function ConfiguracionCuentaPage() {
     <div>
       <ModuleIntro titulo="Cuenta">
         <IntroP>
-          Aquí vive el acceso de tu cuenta: el usuario y contraseña con los
-          que el sistema publica por ti, las categorías donde puede publicar,
-          y el idioma en que escribe tus artículos.
+          Aquí ves cómo Artículos se conecta con tu destino de publicación,
+          las categorías disponibles y el idioma en que escribe tus artículos.
         </IntroP>
         <ol style={{ margin: "12px 0 0", paddingLeft: 22, color: "#1d1d1f", fontSize: 14, lineHeight: 1.65 }}>
-          <li><strong>Conecta tu destino:</strong> 10MWS usa sus credenciales; BLOG IA usa el vínculo confirmado por el Hub y su dominio propio.</li>
-          <li><strong>Trae tus categorías:</strong> en 10MWS se leen de tu sitio; en BLOG IA se leen del propio blog y nunca se crean aquí.</li>
-          <li><strong>Elige el idioma:</strong> sincroniza los idiomas disponibles y guarda el que usarán tus artículos.</li>
+          {publishingDestination === "blog-ia" ? (
+            <>
+              <li><strong>Destino:</strong> Artículos publica en BLOG IA mediante el vínculo confirmado por el Hub y su dominio propio.</li>
+              <li><strong>Categorías:</strong> se crean y administran en BLOG IA; Artículos solo las lee para publicar en la categoría correcta.</li>
+            </>
+          ) : publishingDestination === "website" ? (
+            <>
+              <li><strong>Destino:</strong> Artículos publica en tu sitio conectado mediante las credenciales de 10MWS.</li>
+              <li><strong>Categorías:</strong> se leen de tu sitio conectado y no se crean aquí.</li>
+            </>
+          ) : (
+            <li><strong>Destino:</strong> selecciona y conecta un destino válido antes de crear o publicar artículos.</li>
+          )}
+          <li><strong>Idioma:</strong> sincroniza los idiomas disponibles y guarda el que usarán tus artículos.</li>
         </ol>
         <IntroP>
           Si buscas la firma de tus artículos, tu teléfono de contacto o las
