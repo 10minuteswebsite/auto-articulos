@@ -68,6 +68,8 @@ export default function OnboardingWizard({
   // Vacío a propósito hasta que /api/me diga el servidor real: mientras
   // tanto el texto usa el término genérico y nunca la marca equivocada.
   const [platformDomain, setPlatformDomain] = useState<string>("");
+  const categorySourceLabel = blogDestination ? "tu blog de BLOG IA" : "tu sitio web";
+  const publishedSurfaceLabel = blogDestination ? "tu blog de BLOG IA" : "tu sitio";
   // Cuenta nueva del Hub: primero se pide la ubicación (de ella salen el servidor y el país de los artículos).
   const [locationRequired, setLocationRequired] = useState(false);
   const [savedLocation, setSavedLocation] = useState({ country: "", city: "", timeZone: "" });
@@ -178,7 +180,9 @@ export default function OnboardingWizard({
           } else if (lastJob.status === "success") {
             setMessage({
               type: "info",
-              text: "La última conexión con tu sitio funcionó, pero no se encontraron categorías creadas. Créalas en tu plataforma y vuelve a sincronizar.",
+              text: blogDestination
+                ? "La conexión con BLOG IA funcionó, pero todavía no hay categorías disponibles. Créales categorías en BLOG IA y vuelve a sincronizar."
+                : "La última conexión con tu sitio funcionó, pero no se encontraron categorías creadas. Créalas en tu plataforma y vuelve a sincronizar.",
             });
           }
         }
@@ -454,13 +458,15 @@ export default function OnboardingWizard({
     if (categories.length > 0) {
       setMessage({
         type: "success",
-        text: `¡Listo! Se descargaron ${categories.length} categorías de tu sitio web.`,
+        text: `¡Listo! Se descargaron ${categories.length} categorías de ${categorySourceLabel}.`,
       });
       onUpdated?.();
     } else {
       setMessage({
         type: "info",
-        text: "La conexión funcionó, pero tu sitio no tiene categorías creadas todavía. Créalas en tu plataforma y vuelve a sincronizar.",
+        text: blogDestination
+          ? "La conexión con BLOG IA funcionó, pero todavía no hay categorías disponibles. Créales categorías en BLOG IA y vuelve a sincronizar."
+          : "La conexión funcionó, pero tu sitio no tiene categorías creadas todavía. Créalas en tu plataforma y vuelve a sincronizar.",
       });
     }
     setSyncRequested(false);
@@ -519,7 +525,7 @@ export default function OnboardingWizard({
     setSyncRequested(true);
     setMessage({
       type: "info",
-      text: "Conectando con tu sitio para descargar tus categorías...",
+      text: `Conectando con ${categorySourceLabel} para descargar tus categorías...`,
     });
     try {
       const [catRes] = await Promise.all([
@@ -1528,7 +1534,7 @@ export default function OnboardingWizard({
           <StepCard
             stepNumber={3}
             title="Seleccionar el Idioma de Redacción"
-            subtitle="Indica el idioma en el que la Inteligencia Artificial debe redactar los artículos para tu sitio."
+            subtitle={`Indica el idioma en el que la Inteligencia Artificial debe redactar los artículos para ${blogDestination ? "tu blog de BLOG IA" : "tu sitio"}.`}
             isDone={step3Done}
             isActive={activeStep === 3}
             badgeText={
@@ -1669,7 +1675,7 @@ export default function OnboardingWizard({
                   y por qué es obligatorio (pedido de Milton, 16/9/2026). */}
               <p style={{ margin: "0 0 16px 0", fontSize: 13, color: "#1d1d1f", lineHeight: 1.55 }}>
                 <strong>¿Para qué sirve esto?</strong> Google Search Console le dice a SEO TOTAL qué
-                está buscando de verdad la gente que llega a tu sitio en Google. Con esa información,
+                está buscando de verdad la gente que llega a {publishedSurfaceLabel} en Google. Con esa información,
                 la Inteligencia Artificial elige y escribe artículos sobre los temas que a tu audiencia
                 realmente le interesan, en vez de adivinar. <strong>Es obligatorio</strong>: sin esta
                 conexión, SEO TOTAL no puede posicionar tus artículos en Google. Si todavía no lo has
@@ -1770,7 +1776,7 @@ export default function OnboardingWizard({
                       Instrucción antes de conectar:
                     </p>
                     <p style={{ margin: 0 }}>
-                      Abre tu <a href="https://search.google.com/search-console" target="_blank" rel="noreferrer" style={{ color: "#1d1d1f", fontWeight: 700, textDecoration: "underline" }}>Google Search Console ↗</a> en una pestaña al lado de tu navegador, asegúrate de que funciona y que lo tienes activado con la misma cuenta de Google dueña de tu sitio web, y luego haz clic en el botón de abajo.
+                      Abre tu <a href="https://search.google.com/search-console" target="_blank" rel="noreferrer" style={{ color: "#1d1d1f", fontWeight: 700, textDecoration: "underline" }}>Google Search Console ↗</a> en una pestaña al lado de tu navegador, asegúrate de que funciona y que lo tienes activado con la misma cuenta de Google dueña de {publishedSurfaceLabel}, y luego haz clic en el botón de abajo.
                     </p>
                   </div>
 
@@ -1808,7 +1814,7 @@ export default function OnboardingWizard({
                               onChange={(e) => setSelectedGoogleSite(e.target.value)}
                               style={{ ...inputStyle, maxWidth: 360, background: "#fff", color: "#1d1d1f" }}
                             >
-                              <option value="">-- Selecciona la propiedad de tu sitio --</option>
+                              <option value="">-- Selecciona la propiedad de {publishedSurfaceLabel} --</option>
                               {googleData.sites.map((s) => (
                                 <option key={s.siteUrl} value={s.siteUrl}>
                                   {s.siteUrl}
@@ -1848,7 +1854,7 @@ export default function OnboardingWizard({
                                 padding: 0,
                               }}
                             >
-                              ✏¿No ves tu sitio? Ingresar URL manualmente
+                              ✏¿No ves {publishedSurfaceLabel}? Ingresar URL manualmente
                             </button>
                             <a
                               href="/dashboard/configuracion/conexiones?conexion=google-search-console"
