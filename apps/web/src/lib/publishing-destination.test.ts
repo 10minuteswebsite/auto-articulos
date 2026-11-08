@@ -2,14 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DestinationError, switchToBlog, switchToWebsite } from "./publishing-destination";
 
-function fakeDb(method: string | null, activeRuns = 0) {
+function fakeDb(method: string | null, activeRuns = 0, pendingRuns = 0) {
   const calls: string[] = [];
   const db = {
     user: {
       findUnique: async () => (method === null ? null : { publishMethod: method }),
       updateMany: async (a: { where: { publishMethod: string }; data: { publishMethod: string } }) => { calls.push(`${a.where.publishMethod}->${a.data.publishMethod}`); return { count: 1 }; },
     },
-    run: { count: async () => activeRuns },
+    run: { count: async (args: { where: { status: { in: string[] } } }) => args.where.status.in.includes("running") ? activeRuns : pendingRuns },
   };
   return { db, calls };
 }
@@ -38,6 +38,12 @@ test("con publicaciones en curso se rechaza (no se parte un lote entre dos sitio
   const { db, calls } = fakeDb("BLOG", 2);
   await assert.rejects(() => switchToWebsite(db, "u1", true), (e: unknown) => e instanceof DestinationError && e.code === "runs_in_progress");
   assert.deepEqual(calls, []);
+});
+
+test("las propuestas pendientes no bloquean cambiar de destino; solo una publicación running lo hace", async () => {
+  const { db, calls } = fakeDb("BLOG", 0, 3);
+  assert.deepEqual(await switchToWebsite(db, "u1", true), { changed: true, method: "BROWSER" });
+  assert.deepEqual(calls, ["BLOG->BROWSER"]);
 });
 
 test("cuenta inexistente: 404", async () => {
