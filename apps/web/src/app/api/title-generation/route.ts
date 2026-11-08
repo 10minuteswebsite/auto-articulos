@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         ? "Antes de escribir artículos debes crear BLOG IA y conectar y confirmar tu dominio propio. La dirección provisional no permite publicar. Abre BLOG IA para resolverlo."
         : "Antes de escribir artículos debes conectar un destino publicable.",
       code: "PUBLISHING_DESTINATION_UNAVAILABLE",
-      actionUrl: "https://hub.lasolucionweb.net/api/product-launch?app=blog-ia",
+      actionUrl: readiness.destination === "blog-ia" ? "https://hub.lasolucionweb.net/api/product-launch?app=blog-ia" : "/dashboard/configuracion/cuenta#credentials",
     }, { status: 400 });
   }
 
