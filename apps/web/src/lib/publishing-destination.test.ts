@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DestinationError, switchToBlog, switchToWebsite } from "./publishing-destination";
+import type { BlogIaReadiness } from "./publishing-readiness";
 
 function fakeDb(method: string | null, activeRuns = 0, pendingRuns = 0) {
   const calls: string[] = [];
@@ -50,16 +51,21 @@ test("cuenta inexistente: 404", async () => {
   await assert.rejects(() => switchToWebsite(fakeDb(null).db, "x", true), (e: unknown) => e instanceof DestinationError && e.status === 404);
 });
 
-function blogDb(method: string | null, blog: { status: string; dnsVerified: boolean; tlsReady: boolean } | null, activeRuns = 0) {
+function blogDb(method: string | null, blog: BlogIaReadiness | null, activeRuns = 0) {
   const { db, calls } = fakeDb(method, activeRuns);
   return { db: { ...db, blogIaBlog: { findUnique: async () => blog } }, calls };
 }
-const READY = { status: "active", dnsVerified: true, tlsReady: true };
+const READY = { status: "active", hostname: "blog.example.com", tenantId: "tenant", provisionedAt: new Date(), activatedAt: new Date(), lastError: null, dnsVerified: true, tlsReady: true };
 
 test("a BLOG IA: cambia solo con un blog ya vinculado, activo y con HTTPS", async () => {
   const { db, calls } = blogDb("BROWSER", READY);
   assert.deepEqual(await switchToBlog(db, "u1"), { changed: true, method: "BLOG" });
   assert.deepEqual(calls, ["BROWSER->BLOG"]);
+});
+
+test("un hostname provisional nunca se acepta como destino BLOG IA", async () => {
+  const { db } = blogDb("BROWSER", { ...READY, hostname: "blogia-user.lasolucionweb.net" });
+  await assert.rejects(() => switchToBlog(db, "u1"), (e: unknown) => e instanceof DestinationError && e.code === "blog_not_ready");
 });
 
 test("a BLOG IA: sin blog, o blog sin terminar, se rechaza y no cambia nada", async () => {

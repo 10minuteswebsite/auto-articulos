@@ -1,3 +1,5 @@
+import { isPublishableBlogIa, type BlogIaReadiness } from "./publishing-readiness";
+
 /**
  * Volver a publicar en el sitio de 10minutesWebsite cuando el destino actual es el BLOG IA.
  * El destino BLOG solo lo elige el cliente en BLOG IA (con consentimiento); este es el camino de vuelta, desde Artículos.
@@ -13,7 +15,7 @@ interface Db {
     findUnique(args: { where: { id: string }; select: { publishMethod: true } }): Promise<{ publishMethod: string } | null>;
     updateMany(args: { where: { id: string; publishMethod: string }; data: { publishMethod: string } }): Promise<{ count: number }>;
   };
-  blogIaBlog?: { findUnique(args: { where: { userId: string }; select: { status: true; dnsVerified: true; tlsReady: true } }): Promise<{ status: string; dnsVerified: boolean; tlsReady: boolean } | null> };
+  blogIaBlog?: { findUnique(args: { where: { userId: string }; select: Record<string, true> }): Promise<BlogIaReadiness | null> };
   run: { count(args: { where: { userId: string; status: { in: string[] } } }): Promise<number> };
 }
 
@@ -43,8 +45,11 @@ export async function switchToBlog(db: Db, userId: string): Promise<{ changed: b
   if (!user) throw new DestinationError("no_user", 404, "No encontramos tu cuenta.");
   if (user.publishMethod === "BLOG") return { changed: false, method: "BLOG" };
   if (user.publishMethod !== "BROWSER") throw new DestinationError("method_not_supported", 409, "Tu cuenta publica por otra vía. Escríbenos para cambiarla.");
-  const blog = await db.blogIaBlog?.findUnique({ where: { userId }, select: { status: true, dnsVerified: true, tlsReady: true } });
-  if (!blog || blog.status !== "active" || !blog.dnsVerified || !blog.tlsReady) {
+  const blog = await db.blogIaBlog?.findUnique({
+    where: { userId },
+    select: { status: true, hostname: true, dnsVerified: true, tlsReady: true, tenantId: true, provisionedAt: true, activatedAt: true, lastError: true },
+  });
+  if (!isPublishableBlogIa(blog)) {
     throw new DestinationError("blog_not_ready", 409, "Tu blog todavía no está listo. Termina de crearlo en BLOG IA y pulsa «Usar este blog para mis artículos».");
   }
   if ((await db.run.count({ where: { userId, status: { in: ["running"] } } })) > 0) {
