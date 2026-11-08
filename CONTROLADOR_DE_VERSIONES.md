@@ -5851,4 +5851,6 @@ revertir #706; las tablas nuevas pueden quedarse.
 - Suite local 439/439 PASS, typecheck PASS y build PASS. Producción no verificada.
   No declarar liberación hasta ejecutar IA_JOURNEY y la verificación con cuenta
   de prueba.
+- Commit `37fe966d` ya está en `origin/main`; smoke público de login `.net` y
+  `.com` = 200→Hub. Falta la comprobación autenticada de la compuerta.
 - Auditoría: `docs/audits/2026-11-07-blog-destination-gate.md`.

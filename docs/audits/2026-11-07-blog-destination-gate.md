@@ -3,6 +3,8 @@
 Fecha: 2026-11-07 (America/New_York)
 Estado: IMPLEMENTACIÓN LOCAL, PUBLICACIÓN Y PRODUCCIÓN PENDIENTES
 
+Commit publicado en `main`: `37fe966d`.
+
 ## Decisión
 
 Artículos solo puede crear un lote o pedir títulos a la IA cuando existe un
@@ -44,3 +46,6 @@ compuerta solo impide nuevos lotes y nueva generación.
 - Producción y cuenta de prueba: NO VERIFICADAS; falta ejecutar el flujo
   autenticado con una cuenta de prueba autorizada. Por tanto no se declara
   liberación todavía.
+- Smoke público posterior al push: `articulos.lasolucionweb.net/login` y
+  `.com/login` respondieron `200` y redirigieron al Hub. Esto verifica la
+  entrada pública, no la compuerta autenticada.

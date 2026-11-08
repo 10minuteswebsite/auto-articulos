@@ -1176,4 +1176,5 @@ Código funcional `6132858` y memoria `6c49aef` en `main`. Push aceptado; valida
 - La guardia corre antes de generar títulos con IA y antes de crear `Run`/`Title`; incluye enlace a BLOG IA. No borra artículos o vínculos provisionales existentes.
 - Pruebas añadidas para ausencia, provisional, pendiente, error, desconectado y conectado.
 - Validación local: 439/439 pruebas PASS, typecheck PASS y build web PASS. Falta la verificación autenticada en producción con cuenta de prueba; no se declara liberación hasta hacerla.
+- Commit `37fe966d` publicado directamente en `main`; smoke público de login `.net` y `.com` respondió 200 y redirigió al Hub. La prueba autenticada de los estados de BLOG IA sigue pendiente.
 - Evidencia: `docs/audits/2026-11-07-blog-destination-gate.md`.
