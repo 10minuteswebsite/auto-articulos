@@ -37,6 +37,16 @@ HANDOFF, solo alimenta ideas hacia él).
 
 ## Pendientes
 
+- **(8/11/2026)** Auditoría profunda de coherencia de mensajes y acciones de
+  Artículos según el destino de publicación vigente. Todas las pantallas,
+  validaciones, botones, categorías, wizard, publicación e historial deben
+  reflejar el destino realmente conectado (`BLOG IA` o `10MWS`) y su estado
+  real. No se deben mostrar credenciales, instrucciones, botones ni mensajes
+  de 10MWS cuando el destino activo es BLOG IA, ni mensajes de BLOG IA cuando
+  el destino activo es 10MWS. Debe cubrir también estados sin destino, destino
+  seleccionado pero no listo, conexión antigua/residual, dominio provisional,
+  categorías pendientes y errores de publicación.
+
 - **(6/10/2026)** Pasar a producción la corrección de enlaces del Historial
   para todas las redes y blogs. La corrección está preparada localmente, pero
   queda expresamente en cola: no subir ni desplegar todavía.
