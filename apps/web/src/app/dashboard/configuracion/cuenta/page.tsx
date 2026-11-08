@@ -70,6 +70,7 @@ export default function ConfiguracionCuentaPage() {
   );
   const [platformDomain, setPlatformDomain] = useState<string>("");
   const productName = platformProductNameOrNeutral(platformDomain);
+  const languageSourceName = publishingDestination === "blog-ia" ? "BLOG IA" : productName;
   const helpUrl = platformHelpUrl(platformDomain);
   const [banner, setBanner] = useState<{
     type: "error" | "info";
@@ -729,7 +730,7 @@ export default function ConfiguracionCuentaPage() {
           </div>
 
           <p style={{ fontSize: 13, color: "#6e6e73", marginBottom: 14 }}>
-            Tus artículos se redactarán en este idioma. Sincroniza los idiomas disponibles desde tu cuenta de {productName} y elige el que prefieras.
+            Tus artículos se redactarán en este idioma. Sincroniza los idiomas disponibles desde tu cuenta de {languageSourceName} y elige el que prefieras.
           </p>
 
           <div
@@ -756,7 +757,7 @@ export default function ConfiguracionCuentaPage() {
             >
               {languageSyncing || languageSyncInProgress
                 ? "Sincronizando..."
-                : "Sincronizar idiomas de tu cuenta"}
+                : `Sincronizar idiomas de ${languageSourceName}`}
             </button>
 
             {languages.length > 0 && (
