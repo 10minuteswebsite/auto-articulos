@@ -384,7 +384,7 @@ export default function OnboardingWizard({
       }
       setMessage({
         type: "error",
-        text: "BLOG IA todavía no ha confirmado este blog para Artículos. En BLOG IA pulsa «Usar este blog para mis artículos» y vuelve a intentarlo.",
+        text: "Hub/Dominios todavía no ha confirmado un dominio propio publicable para este blog. Artículos esperará esa confirmación; no puede activarla ni inventar el dominio.",
       });
     } catch {
       setMessage({ type: "error", text: "No pudimos consultar BLOG IA. Inténtalo de nuevo." });
@@ -802,13 +802,13 @@ export default function OnboardingWizard({
         {blogPending ? (
           <>
             <span className="step-badge">TU BLOG</span>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: "6px 0 0", color: "#1d1d1f", letterSpacing: "-0.025em" }}>Crea tu blog en BLOG IA</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: "6px 0 0", color: "#1d1d1f", letterSpacing: "-0.025em" }}>Confirma tu blog de BLOG IA</h2>
             <p className="lead-copy" style={{ margin: "8px 0 0", maxWidth: 560 }}>
-              Aún no tienes un blog. Créalo en BLOG IA y pulsa allí «Usar este blog para mis artículos». Después vuelve aquí: seguirás con el idioma y Google Search Console.
+              Artículos aún no recibe de Hub/Dominios un dominio propio confirmado y publicable. Resuélvelo en BLOG IA/Hub y vuelve aquí para comprobarlo; si todavía no tienes blog, puedes crearlo en BLOG IA.
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
               <a href={BLOG_IA_LAUNCH_URL} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none" }}>Crear mi blog en BLOG IA</a>
-              <button type="button" style={secondaryButtonStyle} onClick={() => void handleRecheckBlog()}>Ya lo creé, continuar</button>
+              <button type="button" style={secondaryButtonStyle} onClick={() => void handleRecheckBlog()}>Volver a comprobar</button>
               <button type="button" style={secondaryButtonStyle} onClick={() => writePublishingChoice(null)}>Cambiar mi elección</button>
             </div>
           </>
