@@ -1,3 +1,27 @@
+## SWITCH-DESTINO-20261110 · construido, interruptor APAGADO
+
+Configuración → Cuenta: bloque «Dónde publica tu cuenta» (casos A–G) para pasar entre
+10MWS y BLOG IA solo cuando el dueño pulsa y confirma. Detrás de
+`DESTINATION_SWITCH_ENABLED=true` (apagado por defecto: sin la variable la pantalla
+no aparece y la API responde 404 a POST). Sin migración.
+
+- Contrato Hub implementado y probado con doble: `POST {hub}/api/integrations/auto-articulos/blog-state`
+  (`apps/web/src/lib/hub-blog-state.ts`), estados `not_purchased|no_blog|blog_pending|blog_ready`,
+  cabeceras `x-request-id`/`x-correlation-id`, solo backend. Si `HUB_CREDENTIAL_TRANSPORT=shared`
+  el puente aún no tiene esa ruta → la pantalla muestra «No pudimos consultar BLOG IA» (caso G).
+- Cambio: `apps/web/src/lib/destination-switch.ts` + `/api/configuracion/destino`. A BLOG IA usa
+  `manageBlogDestination` (select + `expected_revision`) en la MISMA transacción Serializable que
+  mueve los pendientes; de vuelta usa `hubLink.previous_method` (sin `suspend`). Desconectar sin
+  10MWS pausa los lotes (Run `halted` + marca en `Title.errorMessage`, nada se borra) y se reanudan
+  al conectar destino (`POST /api/credentials`) o con `use_blog`. Lote con categoría del otro destino
+  → «necesita categoría» y la persona la elige en la pantalla. Historial en
+  `SystemSetting destination-history:<userId>` (quién, cuándo, de→a, cuántos, request_id).
+- Solo el dueño: con `x-acting-admin-id` (Modo Agencia) los botones salen desactivados y el POST da 403.
+- Pruebas: 19 nuevas (hub-blog-state, destination-switch); ninguna toca cuentas reales.
+- Para encender: el Hub confirma `blog-state` en producción → poner `DESTINATION_SWITCH_ENABLED=true`
+  en Vercel (web) → probar con Milton solo leyendo; el cambio real solo con cuenta de prueba y su autorización.
+- No verificado: la ruta real del Hub, el comportamiento en teléfono en vivo, y que `landing_url` responde.
+
 ## CONEXIONES-GSC-REUSE-20261106 · lectura publicada / validación bloqueada
 
 ## CONTEXTUAL-LOGOUT-20261107 · preparado para publicación
