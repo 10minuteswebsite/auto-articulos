@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@auto-articulos/db";
 import { encryptSecret } from "@auto-articulos/shared";
 import { getCurrentUserId } from "@/lib/current-user";
+import { resumePausedRuns } from "@/lib/destination-switch";
 import { validateAndRegisterTrialCredentials } from "@/lib/domain-validation";
 
 const PLATFORM = "10minutesWebsite";
@@ -45,5 +46,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
+  // Si había lotes en pausa por no tener destino, se reanudan (solo los marcados por el switch).
+  await resumePausedRuns(prisma, userId).catch((e) => console.error("[DESTINO] reanudar", e));
   return NextResponse.json({ ok: true });
 }

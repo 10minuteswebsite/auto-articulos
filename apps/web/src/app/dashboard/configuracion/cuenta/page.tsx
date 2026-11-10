@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import ModuleIntro, { IntroP } from "@/components/ModuleIntro";
+import DestinationSwitch from "@/components/DestinationSwitch";
 import AdminFixPatriciaPanel from "@/components/AdminFixPatriciaPanel";
 import CategorySyncProgress, {
   type CategorySyncStatus,
@@ -316,6 +317,8 @@ export default function ConfiguracionCuentaPage() {
               : "Todavía no hay un destino de publicación confirmado. Completa Configuración Inicial antes de crear artículos."}
         </p>
       </section>
+
+      <DestinationSwitch />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Credenciales Card */}
