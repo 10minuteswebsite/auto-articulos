@@ -2,6 +2,12 @@
 
 #789/#790/#791 en `main`; el Worker ya corre con la guardia (worker.yml en `9cf61b74`, incluye #789; ejecuciones success 11/11). Con Inés: sus 37 artículos publicados están en inglés; lo español eran títulos pedidos (22–30/10), cubiertos por el filtro de Publicar; prueba en vivo de títulos OK. No probado en vivo: artículo/FAQ con estilo propio en otro idioma. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
 
+## Punto cero vigente — Redes: logo solo transparente, nunca en caja — 2026-11-11
+
+- Task ID: `REDES-LOGO-CAJA-20261111`. Caso Ignacio Cubas: el logo (trazo blanco en PNG con fondo negro opaco) se pegó como rectángulo negro sobre la foto.
+- Cambio: `apps/worker/src/logoClean.ts` quita el fondo uniforme del logo (o usa su transparencia real), recorta al dibujo y solo lo pega en una esquina inferior si hay contraste suficiente. Si el fondo no se puede quitar con seguridad o no se lee, la imagen sale SIN logo. El prompt del Director también lo exige.
+- Tests: `logoClean.test.ts`. NO verificado en producción: falta una publicación nueva de Ignacio Cubas tras el despliegue del worker (el worker tarda ~media hora en desplegar).
+
 ## SWITCH-DESTINO-20261110 · construido, interruptor APAGADO
 
 Configuración → Cuenta: bloque «Dónde publica tu cuenta» (casos A–G) para pasar entre
