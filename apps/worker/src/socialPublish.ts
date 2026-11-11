@@ -573,7 +573,6 @@ async function getPinterestPinImage(job: {
       where: { id: job.userId },
       select: {
         aiImageGenerationEnabled: true,
-        imagePrompt: true,
         businessLogoUrl: true,
         businessLogoUrl2: true,
         profilePhotoUrl: true,
@@ -595,7 +594,6 @@ async function getPinterestPinImage(job: {
       profilePhotoUrl: user.profilePhotoUrl,
       profilePhotoUrl2: user.profilePhotoUrl2,
       profilePhotoUrl3: user.profilePhotoUrl3,
-      brandGuidelines: user.imagePrompt,
       pathPrefix: `pinterest/ai/${job.titleId || job.id}`,
     });
     return generated?.imageUrl ?? (await fallback());
@@ -1338,7 +1336,6 @@ async function processInstagramJob(job: {
           where: { id: job.userId },
           select: {
             aiImageGenerationEnabled: true,
-            imagePrompt: true,
             businessLogoUrl: true,
             businessLogoUrl2: true,
             profilePhotoUrl: true,
@@ -1361,7 +1358,6 @@ async function processInstagramJob(job: {
           profilePhotoUrl: aiUser.profilePhotoUrl,
           profilePhotoUrl2: aiUser.profilePhotoUrl2,
           profilePhotoUrl3: aiUser.profilePhotoUrl3,
-          brandGuidelines: aiUser.imagePrompt,
           pathPrefix: `instagram/ai/post/${job.titleId || job.id}`,
         });
       } catch (error) {
@@ -1494,7 +1490,6 @@ async function processInstagramJob(job: {
           profilePhotoUrl: user.profilePhotoUrl,
           profilePhotoUrl2: user.profilePhotoUrl2,
           profilePhotoUrl3: user.profilePhotoUrl3,
-          brandGuidelines: user.imagePrompt,
           pathPrefix: `instagram/ai/reel-image/${job.titleId || job.id}`,
         });
         imageUrl = generated?.imageUrl ?? null;
@@ -1533,7 +1528,6 @@ async function processInstagramJob(job: {
           profilePhotoUrl: user.profilePhotoUrl,
           profilePhotoUrl2: user.profilePhotoUrl2,
           profilePhotoUrl3: user.profilePhotoUrl3,
-          brandGuidelines: user.imagePrompt,
           pathPrefix: `instagram/ai/story/${job.titleId || job.id}`,
         });
         imageUrl = generated?.imageUrl ?? null;
@@ -1572,7 +1566,6 @@ async function processInstagramJob(job: {
           profilePhotoUrl: user.profilePhotoUrl,
           profilePhotoUrl2: user.profilePhotoUrl2,
           profilePhotoUrl3: user.profilePhotoUrl3,
-          brandGuidelines: user.imagePrompt,
           pathPrefix: `instagram/ai/post/${job.titleId || job.id}`,
         });
         imageUrl = generated?.imageUrl ?? null;

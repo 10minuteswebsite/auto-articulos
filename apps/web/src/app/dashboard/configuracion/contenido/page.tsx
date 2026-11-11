@@ -53,8 +53,6 @@ export default function ConfiguracionContenidoPage() {
   const [savingExcludedTopics, setSavingExcludedTopics] = useState(false);
   const [phone, setPhone] = useState("");
   const [savingPhone, setSavingPhone] = useState(false);
-  const [brandGuide, setBrandGuide] = useState("");
-  const [savingBrandGuide, setSavingBrandGuide] = useState(false);
   const [profilePhotoUrls, setProfilePhotoUrls] = useState<Record<"profile" | "profile2" | "profile3", string | null>>({ profile: null, profile2: null, profile3: null });
   const [businessLogoUrls, setBusinessLogoUrls] = useState<Record<"logo" | "logo2", string | null>>({ logo: null, logo2: null });
   const [uploadingImageType, setUploadingImageType] = useState<UploadType | null>(null);
@@ -96,7 +94,6 @@ export default function ConfiguracionContenidoPage() {
       setArticleSignature(data.articleSignature ?? "");
       setDefaultPromptId(data.defaultPromptId ?? "");
       setPhone(data.phone ?? "");
-      setBrandGuide(data.imagePrompt ?? "");
       setClientLocations(data.clientLocations ?? "");
       setBusinessLocations(data.businessLocations ?? "");
       setExcludedTopics(data.excludedTopics ?? "");
@@ -226,26 +223,6 @@ export default function ConfiguracionContenidoPage() {
       setBanner({ type: "info", text: "Número de teléfono guardado con éxito." });
     } finally {
       setSavingPhone(false);
-    }
-  }
-
-  async function handleSaveBrandGuide() {
-    setSavingBrandGuide(true);
-    setBanner(null);
-    try {
-      const res = await fetch("/api/me", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imagePrompt: brandGuide }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setBanner({ type: "error", text: data.error ?? "Error al guardar el manual de marca" });
-        return;
-      }
-      setBanner({ type: "info", text: "Manual de marca guardado. Se aplicará a las imágenes nuevas." });
-    } finally {
-      setSavingBrandGuide(false);
     }
   }
 
@@ -583,38 +560,6 @@ export default function ConfiguracionContenidoPage() {
 
       {/* Foto de perfil y Logo del negocio — cada usuario sube los suyos */}
       {!esArticulos && <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <section style={sectionStyle}>
-          <h2 style={h2Style}>Manual de marca para imágenes</h2>
-          <p style={{ fontSize: 13, color: "#6e6e73", marginBottom: 12 }}>
-            Pega aquí las reglas visuales de tu manual: colores (con códigos HEX si los tienes), tipografías, pesos, estilo, contraste y usos permitidos. Este texto se envía al razonamiento visual de BLOG IA/REDES y se aplica a las imágenes nuevas junto con tus logos.
-          </p>
-          <textarea
-            value={brandGuide}
-            onChange={(e) => setBrandGuide(e.target.value)}
-            placeholder="Ej: Colores principales #123456 y #F5B700. Usar Montserrat SemiBold para titulares y Inter Regular para textos. Estilo sobrio, alto contraste, sin degradados..."
-            rows={8}
-            style={{ ...inputStyle, width: "100%", resize: "vertical", fontFamily: "inherit", lineHeight: 1.5 }}
-          />
-          <label style={{ display: "inline-block", marginTop: 10, fontSize: 13, color: "#1d1d1f", cursor: "pointer" }}>
-            <input
-              type="file"
-              accept=".txt,.md,text/plain,text/markdown"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                setBrandGuide(await file.text());
-                e.target.value = "";
-              }}
-              style={{ marginRight: 8 }}
-            />
-            Cargar manual en TXT o Markdown
-          </label>
-          <div style={{ marginTop: 12 }}>
-            <button onClick={handleSaveBrandGuide} disabled={savingBrandGuide} style={disabledStyle(secondaryButtonStyle, savingBrandGuide)}>
-              {savingBrandGuide ? "Guardando manual..." : "Guardar manual de marca"}
-            </button>
-          </div>
-        </section>
         <section style={sectionStyle}>
           <div
             style={{
