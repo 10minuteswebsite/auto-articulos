@@ -51,3 +51,12 @@ test("fetch: 401, 400, 503, red caída y respuesta rota nunca inventan un estado
   await assert.rejects(() => fetchBlogState(HUB, { fetchImpl: (async () => new Response("no json", { status: 200 })) as any, env }), HubBlogStateError);
   await assert.rejects(() => fetchBlogState(HUB, { env: {} }), HubBlogStateError);
 });
+test("puente compartido (producción): usa el broker con las cabeceras de trazabilidad y sin secret directo", async () => {
+  let seen: any;
+  const brokerImpl = async (body: object, headers: object) => { seen = { body, headers }; return new Response(JSON.stringify(ready), { status: 200 }); };
+  const s = await fetchBlogState(HUB, { env: { HUB_CREDENTIAL_TRANSPORT: "shared" }, brokerImpl, requestId: IDS.requestId, correlationId: IDS.correlationId });
+  assert.deepEqual(seen.body, { hub_user_id: HUB });
+  assert.deepEqual(seen.headers, { "x-request-id": IDS.requestId, "x-correlation-id": IDS.correlationId });
+  assert.equal(s.state, "blog_ready");
+  await assert.rejects(() => fetchBlogState(HUB, { env: { HUB_CREDENTIAL_TRANSPORT: "shared" }, brokerImpl: async () => { throw new Error("broker sin ruta"); } }), HubBlogStateError);
+});
