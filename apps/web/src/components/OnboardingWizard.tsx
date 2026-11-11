@@ -17,7 +17,10 @@ import {
   type PublishingChoice,
 } from "@/lib/publishing-choice";
 
-const BLOG_IA_LAUNCH_URL = "https://hub.lasolucionweb.net/api/product-launch?app=blog-ia";
+import type { BlogChoiceView } from "@/lib/blog-ia-choice";
+import { suggestedLanguageForCountry } from "@/lib/language-for-country";
+
+const BLOG_IA_LAUNCH_URL ="https://hub.lasolucionweb.net/api/product-launch?app=blog-ia";
 import {
   platformForgotPasswordUrl,
   platformProductNameOrNeutral,
@@ -59,6 +62,8 @@ export default function OnboardingWizard({
   const [destChoice, setDestChoice] = useState<PublishingChoice | null>(null);
   const [destChoiceLoaded, setDestChoiceLoaded] = useState(false);
   const [switchingBlog, setSwitchingBlog] = useState(false);
+  // Lo que el Hub dice del BLOG IA de esta persona (listo / pendiente / sin blog / sin comprar), para explicarlo en la primera pantalla.
+  const [blogChoice, setBlogChoice] = useState<(BlogChoiceView & { launchUrl: string; landingUrl: string }) | null>(null);
   const autoSelectedBlogRef = useRef(false);
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [languages, setLanguages] = useState<LanguageRow[]>([]);
@@ -195,7 +200,7 @@ export default function OnboardingWizard({
         const data = await meRes.json();
         const lang = data.contentLanguage || "";
         setContentLanguage(lang);
-        setSelectedLang(lang || "es");
+        setSelectedLang(lang || suggestedLanguageForCountry(data.country));
         setLocationRequired(data.locationRequired === true);
         setSavedLocation({ country: data.country ?? "", city: data.city ?? "", timeZone: data.timeZone ?? "" });
         if (typeof data.platformDomain === "string") {
@@ -338,6 +343,17 @@ export default function OnboardingWizard({
     };
   }, [destChoice, loadAll]);
 
+  // Solo a quien aún no conectó nada: se pregunta qué hay de BLOG IA para poder explicarlo. Si falla, la pantalla funciona igual.
+  const loadBlogChoice = useCallback(async () => {
+    try {
+      const res = await fetch("/api/blog-ia/estado", { cache: "no-store" });
+      if (res.ok) setBlogChoice(await res.json());
+    } catch { /* sin estado se muestra la pantalla básica */ }
+  }, []);
+  useEffect(() => {
+    if (!loading && !credentialsConfigured) void loadBlogChoice();
+  }, [loading, credentialsConfigured, loadBlogChoice]);
+
   async function handleUseExistingBlog() {
     setSwitchingBlog(true);
     setMessage(null);
@@ -382,10 +398,8 @@ export default function OnboardingWizard({
         setMessage({ type: "success", text: "Encontramos tu blog. Ya puedes continuar con la configuración." });
         return;
       }
-      setMessage({
-        type: "error",
-        text: "Hub/Dominios todavía no ha confirmado un dominio propio publicable para este blog. Artículos esperará esa confirmación; no puede activarla ni inventar el dominio.",
-      });
+      await loadBlogChoice();
+      setMessage({ type: "info", text: "Tu blog todavía no está listo. Cuando termines en BLOG IA, vuelve a comprobar." });
     } catch {
       setMessage({ type: "error", text: "No pudimos consultar BLOG IA. Inténtalo de nuevo." });
     }
@@ -792,47 +806,87 @@ export default function OnboardingWizard({
     destChoice !== "website";
 
   if (askDestination) {
+    const kind = blogChoice?.kind ?? "unknown";
+    const host = blogChoice?.hostname ?? blogAvailable?.hostname ?? null;
     const blogPending = destChoice === "blog" && !blogAvailable;
     const cardStyle = { ...sectionStyle, padding: "24px", marginTop: 24, marginBottom: 24 } as const;
+    const h2Style = { fontSize: 22, fontWeight: 600, margin: "6px 0 0", color: "#1d1d1f", letterSpacing: "-0.025em" } as const;
+    const optionStyle = { flex: "1 1 260px", border: "1px solid #e5e5ea", borderRadius: 14, padding: "18px 20px", background: "#ffffff", display: "flex", flexDirection: "column", gap: 8 } as const;
+    const optionTitle = { margin: 0, fontSize: 16, fontWeight: 600, color: "#1d1d1f" } as const;
+    const optionText = { margin: 0, fontSize: 13, lineHeight: 1.55, color: "#6e6e73" } as const;
+    const linkButton = { ...buttonStyle, marginTop: 0, textDecoration: "none", display: "inline-block", textAlign: "center" } as const;
+    const launchUrl = blogChoice?.launchUrl ?? BLOG_IA_LAUNCH_URL;
+    const landingUrl = blogChoice?.landingUrl ?? "https://hub.lasolucionweb.net/productos/blog-ia";
+
+    // La persona dijo «mi blog» pero todavía no se puede publicar en él: se le dice qué falta, en palabras de persona.
+    if (blogPending) {
+      const title = kind === "pending" ? "Tu blog casi está listo" : kind === "not_purchased" ? "BLOG IA todavía no está activo en tu cuenta" : "Aún no tienes un blog en BLOG IA";
+      const body = kind === "pending"
+        ? <>{blogChoice?.detail ?? "Tu blog todavía no está listo para publicar."} Termínalo en BLOG IA y vuelve aquí: esta pantalla se actualiza sola.</>
+        : kind === "not_purchased"
+          ? <>BLOG IA es un servicio aparte que crea y aloja tu blog. Conoce cómo funciona, o publica en tu sitio de 10minutesWebsite mientras tanto.</>
+          : <>En BLOG IA creas tu blog en unos minutos (nombre, estilo y categorías). Cuando lo termines, vuelve aquí y seguimos.</>;
+      return (
+        <div style={cardStyle}>
+          {message && <p role="alert" style={{ margin: "0 0 14px", fontSize: 13, color: message.type === "error" ? "#ff3b30" : "#1d1d1f" }}>{message.text}</p>}
+          <span className="step-badge">TU BLOG</span>
+          <h2 style={h2Style}>{title}</h2>
+          <p className="lead-copy" style={{ margin: "8px 0 0", maxWidth: 560 }}>{body}</p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
+            {kind === "not_purchased"
+              ? <a href={landingUrl} style={linkButton}>Conocer BLOG IA</a>
+              : <a href={launchUrl} style={linkButton}>{kind === "pending" ? "Terminar mi blog" : "Crear mi blog"}</a>}
+            {kind !== "not_purchased" && <button type="button" style={secondaryButtonStyle} onClick={() => void handleRecheckBlog()}>Ya lo terminé, comprobar</button>}
+            <button type="button" style={secondaryButtonStyle} onClick={() => writePublishingChoice(null)}>Ver las opciones otra vez</button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div style={cardStyle}>
-        {message && (
-          <p role="alert" style={{ margin: "0 0 14px", fontSize: 13, color: message.type === "error" ? "#ff3b30" : "#1d1d1f" }}>{message.text}</p>
-        )}
-        {blogPending ? (
-          <>
-            <span className="step-badge">TU BLOG</span>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: "6px 0 0", color: "#1d1d1f", letterSpacing: "-0.025em" }}>Confirma tu blog de BLOG IA</h2>
-            <p className="lead-copy" style={{ margin: "8px 0 0", maxWidth: 560 }}>
-              Artículos aún no recibe de Hub/Dominios un dominio propio confirmado y publicable. Resuélvelo en BLOG IA/Hub y vuelve aquí para comprobarlo; si todavía no tienes blog, puedes crearlo en BLOG IA.
+        {message && <p role="alert" style={{ margin: "0 0 14px", fontSize: 13, color: message.type === "error" ? "#ff3b30" : "#1d1d1f" }}>{message.text}</p>}
+        <span className="step-badge">EMPECEMOS</span>
+        <h2 style={h2Style}>¿Dónde quieres publicar tus artículos?</h2>
+        <p className="lead-copy" style={{ margin: "8px 0 0", maxWidth: 560 }}>
+          Nosotros escribimos los artículos con IA; tú decides dónde aparecen. Elige una opción. Puedes cambiarla después en Configuración.
+        </p>
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 18 }}>
+          <div style={optionStyle}>
+            <h3 style={optionTitle}>Un blog nuevo en BLOG IA</h3>
+            <p style={optionText}>
+              BLOG IA crea y aloja un blog propio, con tu dominio, pensado para posicionar en Google. No necesitas tener una web antes.
             </p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-              <a href={BLOG_IA_LAUNCH_URL} style={{ ...buttonStyle, marginTop: 0, textDecoration: "none" }}>Crear mi blog en BLOG IA</a>
-              <button type="button" style={secondaryButtonStyle} onClick={() => void handleRecheckBlog()}>Volver a comprobar</button>
-              <button type="button" style={secondaryButtonStyle} onClick={() => writePublishingChoice(null)}>Cambiar mi elección</button>
-            </div>
-          </>
-        ) : (
-          <>
-            <span className="step-badge">EMPECEMOS</span>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: "6px 0 0", color: "#1d1d1f", letterSpacing: "-0.025em" }}>¿Dónde quieres publicar tus artículos?</h2>
-            <p className="lead-copy" style={{ margin: "8px 0 0", maxWidth: 560 }}>
-              {blogAvailable
-                ? <>Ya tienes tu blog{blogAvailable.hostname ? <> (<strong>{blogAvailable.hostname}</strong>)</> : null}. Confírmalo para publicar ahí. Puedes cambiarlo después en la configuración.</>
-                : <>Elige el destino. Puedes cambiarlo después en la configuración.</>}
-            </p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-              {blogAvailable ? (
+            {kind === "ready" && <p style={{ ...optionText, color: "#1d1d1f" }}>✓ Ya tienes tu blog{host ? <> (<strong>{host}</strong>)</> : null}. Podemos publicar ahí ahora mismo.</p>}
+            {kind === "pending" && <p style={{ ...optionText, color: "#1d1d1f" }}>Ya creaste un blog{host ? <> (<strong>{host}</strong>)</> : null}, pero aún no está listo. {blogChoice?.detail}</p>}
+            {kind === "not_purchased" && <p style={optionText}>Es un servicio aparte que todavía no tienes activo.</p>}
+            <div style={{ marginTop: "auto", paddingTop: 6, display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {kind === "ready" || blogAvailable ? (
                 <button type="button" style={{ ...buttonStyle, marginTop: 0 }} disabled={switchingBlog} onClick={handleUseExistingBlog}>
-                  {switchingBlog ? "Confirmando…" : "✓ Mi blog de BLOG IA"}
+                  {switchingBlog ? "Confirmando…" : "Usar mi blog"}
                 </button>
+              ) : kind === "pending" ? (
+                <>
+                  <a href={launchUrl} style={linkButton}>Terminar mi blog</a>
+                  <button type="button" style={secondaryButtonStyle} onClick={() => writePublishingChoice("blog")}>Ya lo terminé</button>
+                </>
+              ) : kind === "not_purchased" ? (
+                <a href={landingUrl} style={linkButton}>Conocer BLOG IA</a>
               ) : (
-                <button type="button" style={{ ...buttonStyle, marginTop: 0 }} onClick={() => writePublishingChoice("blog")}>Mi blog de BLOG IA</button>
+                <button type="button" style={{ ...buttonStyle, marginTop: 0 }} onClick={() => writePublishingChoice("blog")}>Quiero un blog en BLOG IA</button>
               )}
-              <button type="button" style={secondaryButtonStyle} disabled={switchingBlog} onClick={() => writePublishingChoice("website")}>Mi sitio 10MWS</button>
             </div>
-          </>
-        )}
+          </div>
+          <div style={optionStyle}>
+            <h3 style={optionTitle}>Mi sitio en 10minutesWebsite</h3>
+            <p style={optionText}>
+              Publicamos en la web que ya tienes en 10minutesWebsite. Te pediremos conectar tu cuenta de ahí, y después nos encargamos de todo.
+            </p>
+            <div style={{ marginTop: "auto", paddingTop: 6 }}>
+              <button type="button" style={secondaryButtonStyle} disabled={switchingBlog} onClick={() => writePublishingChoice("website")}>Usar mi sitio 10minutesWebsite</button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1609,6 +1663,11 @@ export default function OnboardingWizard({
                   <p style={{ fontSize: 13, color: "#1d1d1f", margin: "0 0 10px 0", fontWeight: 500 }}>
                     Elige el idioma principal para tus artículos:
                   </p>
+                  {!contentLanguage && (
+                    <p style={{ fontSize: 12, color: "#6e6e73", margin: "-4px 0 10px 0" }}>
+                      Te proponemos el idioma según el país que indicaste. Cámbialo si lo necesitas.
+                    </p>
+                  )}
 
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
                     <select
