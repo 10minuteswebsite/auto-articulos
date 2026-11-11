@@ -4,7 +4,7 @@ const ORIGIN='https://hub-workload-credential-broker.10minuteswebsite.workers.de
 export class HubTransportUnavailable extends Error{constructor(){super('hub_transport_unavailable')}}
 export function sharedHubTransport(){return process.env.HUB_CREDENTIAL_TRANSPORT==='shared'}
 export function hubTransportConfigured(){return !!process.env.AUTO_ARTICULOS_HUB_CLIENT_ID&&(sharedHubTransport()||!!process.env.AUTO_ARTICULOS_HUB_CLIENT_SECRET)}
-async function broker(path:string,body:object,connectionsTimeoutMs=59000){
+async function broker(path:string,body:object,connectionsTimeoutMs=59000,extraHeaders:Record<string,string>={}){
  let token:string;
  if(process.env.HUB_WORKLOAD_IDENTITY==='github-actions'){
   if(path!=='/user-sync'||process.env.GITHUB_ACTIONS!=='true')throw new HubTransportUnavailable();
@@ -15,7 +15,7 @@ async function broker(path:string,body:object,connectionsTimeoutMs=59000){
   const r=await fetch(url,{headers:{authorization:'Bearer '+credential},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(5000)});
   if(!r.ok)throw new HubTransportUnavailable();const d=await r.json();if(typeof d.value!=='string'||d.value.length>16384||!/^[-A-Za-z0-9_.]{32,}$/.test(d.value))throw new HubTransportUnavailable();token=d.value;
  }else{token=await getVercelOidcToken();}
- const response=await fetch(ORIGIN+path,{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??''},body:JSON.stringify(body),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(path.startsWith('/connections-')?connectionsTimeoutMs:path==='/access'?3000:12000)});
+ const response=await fetch(ORIGIN+path,{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json','x-platform-client-id':process.env.AUTO_ARTICULOS_HUB_CLIENT_ID??'',...extraHeaders},body:JSON.stringify(body),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(path.startsWith('/connections-')?connectionsTimeoutMs:path==='/access'?3000:12000)});
  if(response.status>=500)throw new HubTransportUnavailable();return response;
 }
 export async function hubBackendFetch(path:'/api/product-launch'|'/api/integrations/auto-articulos/access'|'/api/integrations/auto-articulos/user-sync',body:object){
@@ -48,3 +48,5 @@ export async function validHubBackend(request:Request){
  const response=await broker('/verify',{credential:supplied});if(!response.ok)return false;
  const data=await response.json();return data.valid===true;
 }
+/** Read-only BLOG IA state through the shared broker (pending: the Hub must expose /blog-state there). */
+export async function hubBlogStateViaBroker(body:object,headers:{'x-request-id':string;'x-correlation-id':string}){return broker('/blog-state',body,12000,headers)}
