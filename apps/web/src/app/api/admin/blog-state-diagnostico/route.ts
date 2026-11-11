@@ -1,20 +1,31 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { requireAdmin } from "@/lib/current-user";
+import { headers } from "next/headers";
+import { prisma } from "@auto-articulos/db";
+import { getCurrentUser, requireAdmin } from "@/lib/current-user";
 import { hubBlogStateViaBroker } from "@/lib/hub-credential-transport";
 import { parseBlogState } from "@/lib/hub-blog-state";
 
 // TEMPORAL. SOLO ADMINISTRADOR, SOLO LECTURA. Una llamada a /blog-state por el puente desde el despliegue real,
-// siempre con la cuenta de Milton (id fijo, sin parámetros). Se borra tras la prueba (SWITCH-DESTINO-20261110).
+// con el hub_user_id de la cuenta seleccionada ("Acceder como") por el admin; sin parámetros. Se borra tras la prueba (SWITCH-DESTINO-20261110).
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-const HUB_USER_ID = "a5700b1c-91ec-44cb-8cbd-a701181f607c";
 
 export async function GET() {
-  try { await requireAdmin(); } catch { return NextResponse.json({ error: "No autorizado" }, { status: 403, headers: { "cache-control": "no-store" } }); }
+  let hubUserId: string | null = null;
+  try {
+    const actingAdminId = (await headers()).get("x-acting-admin-id");
+    if (actingAdminId) {
+      const admin = await prisma.user.findUnique({ where: { id: actingAdminId }, select: { role: true } });
+      if (admin?.role !== "admin") throw new Error("no admin");
+      hubUserId = (await prisma.user.findUnique({ where: { id: (await getCurrentUser()).id }, select: { hubUserId: true } }))?.hubUserId ?? null;
+    } else hubUserId = (await prisma.user.findUnique({ where: { id: (await requireAdmin()).id }, select: { hubUserId: true } }))?.hubUserId ?? null;
+  } catch { return NextResponse.json({ error: "No autorizado" }, { status: 403, headers: { "cache-control": "no-store" } }); }
+  if (!hubUserId) return NextResponse.json({ error: "La cuenta seleccionada no tiene hub_user_id." }, { status: 400, headers: { "cache-control": "no-store" } });
+  const HUB_USER_ID = hubUserId;
   const requestId = randomUUID(), correlationId = randomUUID();
   const calledAt = new Date().toISOString();
-  const out: Record<string, unknown> = { calledAt, requestIdSent: requestId, correlationIdSent: correlationId };
+  const out: Record<string, unknown> = { calledAt, hubUserId: HUB_USER_ID, requestIdSent: requestId, correlationIdSent: correlationId };
   try {
     const r = await hubBlogStateViaBroker({ hub_user_id: HUB_USER_ID }, { "x-request-id": requestId, "x-correlation-id": correlationId });
     const text = await r.text();
