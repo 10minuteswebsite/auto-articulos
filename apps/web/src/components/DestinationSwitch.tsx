@@ -77,9 +77,9 @@ export default function DestinationSwitch() {
           <div style={dialog}>
             <h3 style={{ margin: 0, fontSize: 17 }}>{confirming.label}</h3>
             <p style={{ ...p, color: "#1d1d1f" }}>{confirming.confirm}</p>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
-              <button style={btn} disabled={busy} onClick={() => void post({ action: ACTION_BODY[confirming.kind], revision: view.revision })}>{busy ? "Un momento…" : "Sí, confirmar"}</button>
-              <button style={{ ...btn, background: "#e8e8ed", color: "#1d1d1f" }} disabled={busy} onClick={() => setConfirming(null)}>Cancelar</button>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }}>
+              <button style={{ ...btn, flex: "1 1 140px" }} disabled={busy} onClick={() => void post({ action: ACTION_BODY[confirming.kind], revision: view.revision })}>{busy ? "Un momento…" : "Sí, confirmar"}</button>
+              <button style={{ ...btn, flex: "1 1 140px", background: "#e8e8ed", color: "#1d1d1f" }} disabled={busy} onClick={() => setConfirming(null)}>Cancelar</button>
             </div>
           </div>
         </div>
@@ -102,8 +102,8 @@ function CategoryPicker({ run, categories, disabled, onPick }: { run: { runId: s
   );
 }
 
-const box = { background: "#fff", border: "1px solid #e5e5ea", borderRadius: 14, padding: 16, marginBottom: 16 } as const;
+const box = { overflowWrap: "anywhere", background: "#fff", border: "1px solid #e5e5ea", borderRadius: 14, padding: 16, marginBottom: 16 } as const;
 const p = { fontSize: 13, color: "#6e6e73", margin: "8px 0 0" } as const;
 const btn = { minHeight: 44, padding: "10px 16px", borderRadius: 10, border: "none", background: "#0071e3", color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", maxWidth: "100%" } as const;
-const overlay = { position: "fixed", inset: 0, background: "rgba(0,0,0,.4)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, zIndex: 50 } as const;
-const dialog = { background: "#fff", borderRadius: 14, padding: 20, maxWidth: 420, width: "100%" } as const;
+const overlay = { position: "fixed", inset: 0, overflowY: "auto", background: "rgba(0,0,0,.4)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, zIndex: 50 } as const;
+const dialog = { background: "#fff", borderRadius: 14, padding: 20, maxWidth: 420, width: "100%", maxHeight: "100%", overflowY: "auto", overflowWrap: "anywhere", fontSize: 16 } as const;
