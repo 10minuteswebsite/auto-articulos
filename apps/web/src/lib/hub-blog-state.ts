@@ -102,22 +102,25 @@ export const destinationSwitchEnabled = (env: Env = process.env) => env.DESTINAT
 
 export async function fetchBlogState(
   hubUserId: string,
-  opts: { fetchImpl?: typeof fetch; env?: Env; requestId?: string; correlationId?: string } = {},
+  opts: { fetchImpl?: typeof fetch; env?: Env; requestId?: string; correlationId?: string; brokerImpl?: (body: object, headers: { "x-request-id": string; "x-correlation-id": string }) => Promise<Response> } = {},
 ): Promise<BlogHubState> {
   const env = opts.env ?? process.env;
   const requestId = opts.requestId ?? randomUUID();
   const correlationId = opts.correlationId ?? randomUUID();
   const id = env.AUTO_ARTICULOS_HUB_CLIENT_ID, secret = env.AUTO_ARTICULOS_HUB_CLIENT_SECRET;
-  // El puente compartido (broker) todavía no tiene esta ruta; sin ella no se inventa nada.
-  if (!id || !secret || env.HUB_CREDENTIAL_TRANSPORT === "shared") throw new HubBlogStateError("transport_unavailable", false);
+  const shared = env.HUB_CREDENTIAL_TRANSPORT === "shared"; // producción usa el puente compartido
+  if (!shared && (!id || !secret)) throw new HubBlogStateError("transport_unavailable", false);
   const origin = env.HUB_BASE_URL || "https://hub.lasolucionweb.net";
   let response: Response;
   try {
-    response = await (opts.fetchImpl ?? fetch)(`${origin}/api/integrations/auto-articulos/blog-state`, {
+    if (shared) {
+      const send = opts.brokerImpl ?? (async (b: object, h: { "x-request-id": string; "x-correlation-id": string }) => (await import("./hub-credential-transport")).hubBlogStateViaBroker(b, h));
+      response = await send({ hub_user_id: hubUserId }, { "x-request-id": requestId, "x-correlation-id": correlationId });
+    } else response = await (opts.fetchImpl ?? fetch)(`${origin}/api/integrations/auto-articulos/blog-state`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-platform-client-id": id,
+        "x-platform-client-id": id ?? "",
         authorization: `Bearer ${secret}`,
         "x-request-id": requestId,
         "x-correlation-id": correlationId,

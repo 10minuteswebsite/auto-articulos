@@ -17,7 +17,8 @@ no aparece y la API responde 404 a POST). Sin migración.
   → «necesita categoría» y la persona la elige en la pantalla. Historial en
   `SystemSetting destination-history:<userId>` (quién, cuándo, de→a, cuántos, request_id).
 - Solo el dueño: con `x-acting-admin-id` (Modo Agencia) los botones salen desactivados y el POST da 403.
-- Pruebas: 19 nuevas (hub-blog-state, destination-switch); ninguna toca cuentas reales.
+- Producción usa `HUB_CREDENTIAL_TRANSPORT=shared` (comprobado 2026-11-10): `blog-state` va por el puente (`hubBlogStateViaBroker`, ruta `/blog-state`) y requiere que el Hub la agregue al Worker `hub-workload-credential-broker`. Pendiente del Hub.
+- Pruebas: 20 nuevas (hub-blog-state, destination-switch); ninguna toca cuentas reales.
 - Para encender: el Hub confirma `blog-state` en producción → poner `DESTINATION_SWITCH_ENABLED=true`
   en Vercel (web) → probar con Milton solo leyendo; el cambio real solo con cuenta de prueba y su autorización.
 - No verificado: la ruta real del Hub, el comportamiento en teléfono en vivo, y que `landing_url` responde.
