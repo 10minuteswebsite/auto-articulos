@@ -33,7 +33,7 @@ no aparece y la API responde 404 a POST). Sin migración.
   en Vercel (web) → probar con Milton solo leyendo; el cambio real solo con cuenta de prueba y su autorización.
 - No verificado: la ruta real del Hub, el comportamiento en teléfono en vivo, y que `landing_url` responde.
 - 2026-11-11: producción en `9cf61b7`, ambos Vercel success. Revisión contra el diseño: caso E ahora muestra «Conectado con BLOG IA · hostname»; confirmación legible en teléfono (botones que ajustan, scroll interno, sin desborde horizontal). Pruebas 27/27. Sigue APAGADO y a la espera de la ruta `/blog-state` del puente (Mario).
-- 2026-11-11: llamada desde terminal → 401 del puente (token `development` y vencido; el puente exige `environment:production`). El Hub decide: llamada desde el despliegue real. Ruta TEMPORAL `GET /api/admin/blog-state-diagnostico` (solo admin, solo lectura, id fijo de la cuenta de Milton). BORRAR después de la prueba. No se enciende `DESTINATION_SWITCH_ENABLED` para todos; no existe encendido por usuario. El proyecto Vercel correcto es `auto-articulos-web` (el llamado `web` está vacío).
+- 2026-11-11: llamada desde terminal → 401 del puente (token `development` y vencido; el puente exige `environment:production`). El Hub decide: llamada desde el despliegue real. Ruta TEMPORAL `GET /api/admin/blog-state-diagnostico` (solo admin, solo lectura; usa el hub_user_id de la cuenta seleccionada con «Acceder como», y acepta al admin que actúa). BORRAR después de la prueba. No se enciende `DESTINATION_SWITCH_ENABLED` para todos; no existe encendido por usuario. El proyecto Vercel correcto es `auto-articulos-web` (el llamado `web` está vacío).
 
 ## CONEXIONES-GSC-REUSE-20261106 · lectura publicada / validación bloqueada
 
