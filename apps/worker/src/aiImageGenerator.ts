@@ -37,7 +37,6 @@ import { list, put } from "@vercel/blob";
 import { prisma } from "@auto-articulos/db";
 import { decryptSecret } from "@auto-articulos/shared";
 import { DIRECTOR_PROMPT_V2 } from "./directorPromptV2";
-import { chooseLogoPlacement, cleanLogoForOverlay, overlayLogo, type CleanLogo } from "./logoClean";
 
 const OPENAI_IMAGE_API_KEY = process.env.OPENAI_IMAGE_API_KEY;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
@@ -623,14 +622,6 @@ export async function generateAiSocialImage(params: {
   // Puede existir únicamente el segundo logo; usar siempre el primer recurso
   // disponible evita declarar logo en el briefing y luego pegar null.
   const logoPngs = (await Promise.all(logoUrls.map((url) => fetchImageAsPng(url)))).filter((buffer): buffer is Buffer => buffer !== null);
-  // Regla estricta: solo el dibujo del logo, sobre fondo transparente, nunca en caja.
-  // Un logo con fondo opaco que no se pueda limpiar con seguridad NO se usa.
-  const cleanLogos = (await Promise.all(logoPngs.map((png) => cleanLogoForOverlay(png).catch(() => null)))).filter(
-    (l): l is CleanLogo => l !== null,
-  );
-  if (logoUrls.length > 0 && cleanLogos.length === 0) {
-    console.warn("[AI Image] Logo descartado: no se pudo dejar sobre fondo transparente sin caja. La imagen sale sin logo.");
-  }
   const personUrls = [params.profilePhotoUrl, params.profilePhotoUrl2, params.profilePhotoUrl3].filter((url): url is string => Boolean(url));
   const wantPerson = personUrls.length > 0 && (params.forcePerson ?? Math.random() < PERSON_PHOTO_RATE);
   const personUrl = wantPerson ? personUrls[Math.floor(Math.random() * personUrls.length)] : null;
@@ -642,7 +633,7 @@ export async function generateAiSocialImage(params: {
     ogPng,
     buildAssetBriefing({
       // En el camino OpenAI el logo se pega después por código: no se adjunta.
-      logoCount: cleanLogos.length,
+      logoCount: logoUrls.length,
       personPhotoCount: personUrls.length,
       includePerson: Boolean(personUrl),
     }),
@@ -658,7 +649,8 @@ export async function generateAiSocialImage(params: {
   // El logo nunca se entrega al modelo: aun con instrucciones, los modelos
   // lo redibujan, recortan o deforman. Se pega después con píxeles reales.
   const extraRefUrls = personUrl ? [personUrl] : [];
-  const prompt = buildEditPrompt(decision, cleanLogos.length > 0,Boolean(photoPng), providerLabel);
+  const logoPng = await selectLogoByContrast(ogPng, target.width, target.height, logoPngs);
+  const prompt = buildEditPrompt(decision, Boolean(logoPng), Boolean(photoPng), providerLabel);
 
   try {
     // Proveedor de generación de imagen (env var IMAGE_PROVIDER, ya configurada en los
@@ -714,12 +706,7 @@ export async function generateAiSocialImage(params: {
       .toBuffer();
     // Todos los proveedores reciben el mismo contrato: el logo real se
     // compone aquí, nunca se deja a la IA interpretarlo.
-    // Solo se pega si se lee con contraste suficiente; si no, sin logo (nunca en caja).
-    const placement = await chooseLogoPlacement(resized, target.width, target.height, cleanLogos);
-    if (cleanLogos.length > 0 && !placement) {
-      console.warn("[AI Image] Logo omitido: ninguna esquina ofrece contraste suficiente para leerlo sin caja.");
-    }
-    const withLogo = placement ? await overlayLogo(resized, placement) : resized;
+    const withLogo = logoPng ? await compositeLogo(resized, target.width, target.height, logoPng) : resized;
 
     // JPEG en vez de PNG: los generadores devuelven PNG pesado, e Instagram
     // tarda en procesar el media proporcionalmente a su peso. JPEG calidad
