@@ -1,3 +1,7 @@
+## INES-IDIOMA-20261103 · CERRADO 11/11/2026
+
+#789/#790/#791 en `main`; el Worker ya corre con la guardia (worker.yml en `9cf61b74`, incluye #789; ejecuciones success 11/11). Con Inés: sus 37 artículos publicados están en inglés; lo español eran títulos pedidos (22–30/10), cubiertos por el filtro de Publicar; prueba en vivo de títulos OK. No probado en vivo: artículo/FAQ con estilo propio en otro idioma. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).
+
 ## SWITCH-DESTINO-20261110 · construido, interruptor APAGADO
 
 Configuración → Cuenta: bloque «Dónde publica tu cuenta» (casos A–G) para pasar entre
