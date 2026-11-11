@@ -1,3 +1,7 @@
+## Checkpoint — INES-IDIOMA-20261103 — 2026-11-11 (CERRADO)
+
+- Punto cero: `main` con #789/#790/#791 y Worker en `9cf61b74`. Rama de trabajo borrada; sin commits sin publicar.
+
 ## CONEXIONES-GSC-REUSE-20261106 · validación bloqueada
 
 Descubrimiento privado publicado `34878f9`; prueba IAB de conexión legacy PASS.

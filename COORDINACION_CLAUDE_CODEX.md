@@ -1,3 +1,7 @@
+## INES-IDIOMA-20261103 — Claude — CERRADO 11/11/2026
+
+- Todo publicado (#789, #790, #791); Worker ejecutando código con la guardia. Rama `claude/ines-articles-language-fix-a7e2a8` borrada del remoto (contenido ya en `main` por squash). Pendiente solo de observación: el próximo artículo de Inés con estilo propio debe salir 100 % en su idioma.
+
 ## CONEXIONES-GSC-REUSE-20261106
 
 Nuevo objetivo: reutilizar las conexiones de Artículos/Redes sin pedir una
