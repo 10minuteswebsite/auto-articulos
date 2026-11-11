@@ -22,6 +22,7 @@ no aparece y la API responde 404 a POST). Sin migración.
 - Para encender: el Hub confirma `blog-state` en producción → poner `DESTINATION_SWITCH_ENABLED=true`
   en Vercel (web) → probar con Milton solo leyendo; el cambio real solo con cuenta de prueba y su autorización.
 - No verificado: la ruta real del Hub, el comportamiento en teléfono en vivo, y que `landing_url` responde.
+- 2026-11-11: producción en `9cf61b7`, ambos Vercel success. Revisión contra el diseño: caso E ahora muestra «Conectado con BLOG IA · hostname»; confirmación legible en teléfono (botones que ajustan, scroll interno, sin desborde horizontal). Pruebas 27/27. Sigue APAGADO y a la espera de la ruta `/blog-state` del puente (Mario).
 
 ## CONEXIONES-GSC-REUSE-20261106 · lectura publicada / validación bloqueada
 

@@ -263,6 +263,7 @@ export function deriveView(i: DestinationViewInput) {
   caseId = "F";
   if (kind === "blog") {
     caseId = "E";
+    notice = `Conectado con BLOG IA · ${i.blog?.hostname ?? ""}`.trim();
     if (i.hasWebsite) actions.push(change({ kind: "switch_to_website", label: "Volver a mi sitio 10MWS", confirm: `${i.pending.toMove ? `Se moverán ${i.pending.toMove} artículos programados a tu sitio 10MWS. ` : ""}Los artículos ya publicados no se tocan.` }));
     else actions.push(change({ kind: "disconnect", label: "Desconectar BLOG IA", confirm: "Tus artículos no se publicarán hasta que conectes un destino. Los programados quedan en pausa y no se borran." }));
   } else {
