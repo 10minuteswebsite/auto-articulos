@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   return handleHubGscRequest(request, {
     authenticate: validHubBackend,
-    // A setting alone must not turn on a flow whose Hub callback is unfinished.
-    startEnabled: false,
+    // Closed by default; enable only after the Hub callback and pilot checks pass.
+    startEnabled: process.env.HUB_GSC_START_ENABLED === "true",
     sitemapEnabled: false,
     adapter: {
       async config() {
