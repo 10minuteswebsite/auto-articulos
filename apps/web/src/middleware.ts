@@ -45,6 +45,8 @@ const PUBLIC_PATHS = [
   "/api/integrations/hub/blog-destination",
   // The Connections adapter authenticates the Hub backend in its route handler.
   "/api/integrations/hub/gsc-adapter",
+  // The isolated Hub adapter bridge authenticates its own server-to-server request.
+  "/api/integrations/hub/composio-adapter",
 ];
 
 /** Endpoint del servidor MCP; se autentica con Bearer, no con cookie. */
