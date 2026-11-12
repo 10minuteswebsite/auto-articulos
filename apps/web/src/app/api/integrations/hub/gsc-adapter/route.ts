@@ -16,7 +16,10 @@ export async function POST(request: Request) {
     adapter: {
       async config() {
         const [apiKey, configs] = await Promise.all([getStoredComposioApiKey(), getStoredAuthConfigIds()]);
-        if (!apiKey || !configs.google_search_console) throw new HubGscError("adapter_unavailable", 503);
+        if (!apiKey || !configs.google_search_console) {
+          console.warn(JSON.stringify({ event: "hub_gsc_config_missing", api_key_present: Boolean(apiKey), auth_config_present: Boolean(configs.google_search_console) }));
+          throw new HubGscError("adapter_unavailable", 503);
+        }
         return { apiKey, authConfigId: configs.google_search_console };
       },
       start: createConnectLink,
