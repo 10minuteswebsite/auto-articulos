@@ -82,6 +82,7 @@ export async function GET() {
       profilePhotoUrl3: user.profilePhotoUrl3,
       businessLogoUrl: user.businessLogoUrl,
       businessLogoUrl2: user.businessLogoUrl2,
+      brandGuidePdfUrl: user.brandGuidePdfUrl,
       allowInstagramPublishing: networks.allowInstagramPublishing,
       allowFacebookPublishing: networks.allowFacebookPublishing,
       allowLinkedInPublishing: networks.allowLinkedInPublishing,

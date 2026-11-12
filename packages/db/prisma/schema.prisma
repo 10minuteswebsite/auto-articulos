@@ -156,6 +156,8 @@ model User {
   profilePhotoUrl3                  String?
   businessLogoUrl                   String?
   businessLogoUrl2                  String?
+  // Manual de marca en PDF, fuente principal del análisis visual/editorial.
+  brandGuidePdfUrl                  String?
   // Plantilla de prompt personalizada para la generación de imágenes de
   // artículos y redes sociales. Null = usar el prompt por defecto del
   // sistema. Guardado en texto plano (no sensible).

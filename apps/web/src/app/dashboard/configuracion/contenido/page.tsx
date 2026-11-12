@@ -55,6 +55,7 @@ export default function ConfiguracionContenidoPage() {
   const [savingPhone, setSavingPhone] = useState(false);
   const [profilePhotoUrls, setProfilePhotoUrls] = useState<Record<"profile" | "profile2" | "profile3", string | null>>({ profile: null, profile2: null, profile3: null });
   const [businessLogoUrls, setBusinessLogoUrls] = useState<Record<"logo" | "logo2", string | null>>({ logo: null, logo2: null });
+  const [brandGuidePdfUrl, setBrandGuidePdfUrl] = useState<string | null>(null);
   const [uploadingImageType, setUploadingImageType] = useState<UploadType | null>(null);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
   const [banner, setBanner] = useState<{
@@ -99,6 +100,7 @@ export default function ConfiguracionContenidoPage() {
       setExcludedTopics(data.excludedTopics ?? "");
       setProfilePhotoUrls({ profile: data.profilePhotoUrl ?? null, profile2: data.profilePhotoUrl2 ?? null, profile3: data.profilePhotoUrl3 ?? null });
       setBusinessLogoUrls({ logo: data.businessLogoUrl ?? null, logo2: data.businessLogoUrl2 ?? null });
+      setBrandGuidePdfUrl(data.brandGuidePdfUrl ?? null);
     }
   }, []);
 
@@ -251,6 +253,7 @@ export default function ConfiguracionContenidoPage() {
             profile3: saved.profilePhotoUrl3,
             logo: saved.businessLogoUrl,
             logo2: saved.businessLogoUrl2,
+            brandGuide: saved.brandGuidePdfUrl,
           }[type]
         : undefined;
       if (savedUrl !== undefined && savedUrl !== data.url) {
@@ -260,15 +263,17 @@ export default function ConfiguracionContenidoPage() {
       }
       if (type === "profile" || type === "profile2" || type === "profile3") {
         setProfilePhotoUrls((current) => ({ ...current, [type]: data.url }));
-      } else {
+      } else if (type === "logo" || type === "logo2") {
         setBusinessLogoUrls((current) => ({ ...current, [type]: data.url }));
+      } else {
+        setBrandGuidePdfUrl(data.url);
       }
       const kb = data.sizeBytes ? Math.round(data.sizeBytes / 1024) : null;
       const sizeNote = kb ? ` (${kb}KB)` : "";
       setBanner({
         type: "info",
         text:
-          (type.startsWith("profile") ? "Foto guardada" : "Logo guardado") + sizeNote + ".",
+          (type.startsWith("profile") ? "Foto guardada" : type === "brandGuide" ? "Manual PDF guardado" : "Logo guardado") + sizeNote + ".",
       });
     } catch (err) {
       const msg =
@@ -294,8 +299,10 @@ export default function ConfiguracionContenidoPage() {
       });
       if (type === "profile" || type === "profile2" || type === "profile3") {
         setProfilePhotoUrls((current) => ({ ...current, [type]: null }));
-      } else {
+      } else if (type === "logo" || type === "logo2") {
         setBusinessLogoUrls((current) => ({ ...current, [type]: null }));
+      } else {
+        setBrandGuidePdfUrl(null);
       }
     } finally {
       setUploadingImageType(null);
@@ -560,6 +567,29 @@ export default function ConfiguracionContenidoPage() {
 
       {/* Foto de perfil y Logo del negocio — cada usuario sube los suyos */}
       {!esArticulos && <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <section style={sectionStyle}>
+          <h2 style={h2Style}>Manual de marca</h2>
+          <p style={{ fontSize: 13, color: "#6e6e73", marginBottom: 12 }}>
+            Sube únicamente el PDF oficial de tu manual de marca. El manual es la fuente principal para crear contenidos coherentes con tu identidad.
+          </p>
+          <input
+            type="file"
+            accept="application/pdf,.pdf"
+            disabled={uploadingImageType === "brandGuide"}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              try { await handleUploadImage("brandGuide", file); } catch { /* el panel muestra el error */ }
+              e.target.value = "";
+            }}
+          />
+          {brandGuidePdfUrl && (
+            <div style={{ marginTop: 10, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+              <a href={brandGuidePdfUrl} target="_blank" rel="noreferrer" style={{ color: "#06c", fontSize: 13 }}>Ver manual de marca PDF</a>
+              <button type="button" onClick={() => handleRemoveImage("brandGuide")} disabled={uploadingImageType === "brandGuide"} style={secondaryButtonStyle}>Eliminar</button>
+            </div>
+          )}
+        </section>
         <section style={sectionStyle}>
           <div
             style={{

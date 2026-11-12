@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { secondaryButtonStyle, disabledStyle } from "@/components/dashboard-ui";
 
-export type UploadType = "profile" | "profile2" | "profile3" | "logo" | "logo2";
+export type UploadType = "profile" | "profile2" | "profile3" | "logo" | "logo2" | "brandGuide";
 type UploadKind = "profile" | "logo";
 
 interface PhotoLogoUploaderProps {

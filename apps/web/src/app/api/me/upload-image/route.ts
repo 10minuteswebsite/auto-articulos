@@ -12,18 +12,19 @@ const TARGET = {
   logo: { width: 1600, height: 800 },
 } as const;
 
-type UploadType = "profile" | "profile2" | "profile3" | "logo" | "logo2";
-const UPLOAD_TYPES: UploadType[] = ["profile", "profile2", "profile3", "logo", "logo2"];
+type UploadType = "profile" | "profile2" | "profile3" | "logo" | "logo2" | "brandGuide";
+const UPLOAD_TYPES: UploadType[] = ["profile", "profile2", "profile3", "logo", "logo2", "brandGuide"];
 
 // Hasta 3 fotos del usuario y 2 logos distintos (p.ej. horizontal + cuadrado)
 // para que el generador de imágenes de redes sociales tenga variedad real de
 // dónde elegir en vez de una sola foto/logo fijos.
-const FIELD_BY_TYPE: Record<UploadType, "profilePhotoUrl" | "profilePhotoUrl2" | "profilePhotoUrl3" | "businessLogoUrl" | "businessLogoUrl2"> = {
+const FIELD_BY_TYPE: Record<UploadType, "profilePhotoUrl" | "profilePhotoUrl2" | "profilePhotoUrl3" | "businessLogoUrl" | "businessLogoUrl2" | "brandGuidePdfUrl"> = {
   profile: "profilePhotoUrl",
   profile2: "profilePhotoUrl2",
   profile3: "profilePhotoUrl3",
   logo: "businessLogoUrl",
   logo2: "businessLogoUrl2",
+  brandGuide: "brandGuidePdfUrl",
 };
 
 const BLOB_PREFIX_BY_TYPE: Record<UploadType, string> = {
@@ -32,6 +33,7 @@ const BLOB_PREFIX_BY_TYPE: Record<UploadType, string> = {
   profile3: "profile-photos-3",
   logo: "business-logos",
   logo2: "business-logos-2",
+  brandGuide: "brand-guides",
 };
 
 function isProfileType(type: UploadType): boolean {
@@ -49,7 +51,7 @@ const MAX_LOGO_OUTPUT_BYTES = 1024 * 1024;
 
 // Formatos de entrada aceptados. Para el OUTPUT usamos JPEG para fotos
 // (mucho más liviano que PNG) y PNG para logos (preserva transparencia).
-const ALLOWED_INPUT_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ALLOWED_INPUT_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"];
 
 export async function POST(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -71,14 +73,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Debes adjuntar un archivo de imagen." }, { status: 400 });
   }
 
-  if (!ALLOWED_INPUT_TYPES.includes(file.type)) {
+  const isBrandGuide = type === "brandGuide";
+  if (isBrandGuide && file.type !== "application/pdf") {
+    return NextResponse.json({ error: "El manual de marca debe ser un archivo PDF." }, { status: 400 });
+  }
+  if (!isBrandGuide && !ALLOWED_INPUT_TYPES.includes(file.type)) {
     return NextResponse.json(
       { error: "Formato no permitido. Sube una imagen JPG, PNG o WEBP." },
       { status: 400 },
     );
   }
 
-  if (file.size > MAX_INPUT_BYTES) {
+  const maxInputBytes = isBrandGuide ? 10 * 1024 * 1024 : MAX_INPUT_BYTES;
+  if (file.size > maxInputBytes) {
     return NextResponse.json(
       { error: `El archivo pesa ${(file.size / (1024 * 1024)).toFixed(1)}MB. El máximo permitido es 4MB.` },
       { status: 400 },
@@ -100,7 +107,11 @@ export async function POST(request: NextRequest) {
   let resizedBuffer: Buffer;
   let outputType: string;
   let ext: string;
-  if (!sharp) {
+  if (isBrandGuide) {
+    resizedBuffer = inputBuffer;
+    outputType = "application/pdf";
+    ext = "pdf";
+  } else if (!sharp) {
     // Sin optimizador se guarda el archivo tal cual (ya validado: JPG/PNG/WEBP y máximo 4MB).
     resizedBuffer = inputBuffer;
     outputType = file.type === "image/jpg" ? "image/jpeg" : file.type;
@@ -175,7 +186,7 @@ export async function POST(request: NextRequest) {
   // en la base de datos (migración sin aplicar) para que guardar un logo falle.
   await prisma.user.update({ where: { id: userId }, data: { [FIELD_BY_TYPE[type]]: blob.url }, select: { id: true } });
 
-  const finalMetadata = sharp ? await sharp(resizedBuffer).metadata() : null;
+  const finalMetadata = sharp && !isBrandGuide ? await sharp(resizedBuffer).metadata() : null;
 
   // Devolvemos también el peso final en KB para que el UI pueda mostrar
   // "guardada (45KB)" al usuario.
