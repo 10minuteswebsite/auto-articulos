@@ -22,8 +22,13 @@ export async function handleHubGscRequest(request: Request, deps: {
     return reply({ data: await runHubGscAdapter(input, deps.adapter) });
   } catch (error) {
     if (error instanceof SyntaxError) return reply({ error: "invalid_request" }, 400);
-    if (error instanceof HubGscError) return reply({ error: error.code }, error.status);
-    // Provider error bodies can contain credentials or tenant data.
+    if (error instanceof HubGscError) {
+      console.warn(JSON.stringify({ event: "hub_gsc_adapter_failure", code: error.code, status: error.status }));
+      return reply({ error: error.code }, error.status);
+    }
+    // Provider error bodies can contain credentials or tenant data; only log a safe class/status.
+    const safeStatus = error && typeof error === "object" && "status" in error && typeof error.status === "number" ? error.status : null;
+    console.warn(JSON.stringify({ event: "hub_gsc_adapter_failure", error_type: error instanceof Error ? error.name : "unknown", status: safeStatus }));
     return reply({ error: "adapter_unavailable" }, 503);
   }
 }
