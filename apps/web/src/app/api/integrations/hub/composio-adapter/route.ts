@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         callbackUrl: body.origin,
       });
-      return reply({ redirectUrl: link.redirectUrl });
+      return reply({ redirectUrl: link.redirectUrl, connectedAccountId: link.connectedAccountId });
     }
 
     if (body?.operation === "complete") {
