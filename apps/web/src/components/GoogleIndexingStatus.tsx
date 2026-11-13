@@ -17,7 +17,7 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
   // "Comprobar indexación" y una copia inicial con useState dejaba visible
   // el resultado anterior hasta recargar toda la página.
   const status = title.googleIndexingStatus;
-  const [enviando, setEnviando] = useState<"google" | "bing" | null>(null);
+  const [enviando, setEnviando] = useState<"bing" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // BLOG IA en su dirección de inicio: va con «no indexar» a propósito. No se envía sitemap ni se puede comprobar
@@ -41,8 +41,8 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
   const bingSent = title.bingIndexingStatus === "submitted";
   const bingConfigured = title.bingIndexingStatus !== "not_configured";
 
-  async function enviar(url: string, clave: "google" | "bing") {
-    setEnviando(clave);
+  async function enviar(url: string) {
+    setEnviando("bing");
     setError(null);
     try {
       const res = await fetch(url, { method: "POST" });
@@ -68,26 +68,13 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
     <div style={{ marginTop: 7, fontSize: 12 }}>
       {status === "not_configured" ? (
         <div style={{ color: "#6e6e73" }}>
-          Google Search Console: pendiente de envío. Se enviará automáticamente.
+          Google Search Console: se enviará automáticamente durante el próximo ciclo diario.
         </div>
       ) : googleSent ? (
         <div style={{ color: "#16803c" }}>Sitemap enviado a Google</div>
       ) : (
         <div style={{ color: "#6e6e73" }}>
-          <div>Sitemap por enviar a Google</div>
-          <div style={{ fontSize: 11 }}>
-            Google permite un envío al día. Yo lo envío solo cuando corresponde;
-            si lo envías ahora, cuenta como el envío de hoy.
-          </div>
-          <button
-            type="button"
-            className="link-button"
-            style={botonStyle}
-            disabled={enviando !== null}
-            onClick={() => enviar("/api/sitemap/send", "google")}
-          >
-            {enviando === "google" ? "Enviando…" : "Enviar ahora"}
-          </button>
+          Google Search Console: se enviará automáticamente durante el próximo ciclo diario.
         </div>
       )}
       {bingConfigured &&
@@ -101,7 +88,7 @@ export default function GoogleIndexingStatus({ title }: { title: TitleRow }) {
               className="link-button"
               style={botonStyle}
               disabled={enviando !== null}
-              onClick={() => enviar("/api/bing/master-index", "bing")}
+              onClick={() => enviar("/api/bing/master-index")}
             >
               {enviando === "bing" ? "Enviando…" : "Enviar ahora"}
             </button>

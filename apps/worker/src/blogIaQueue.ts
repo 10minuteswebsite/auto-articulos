@@ -19,14 +19,15 @@
 // Milton, 2026-10-21). Si no hay ninguno, el lote se detiene y se le pide
 // elegir uno; no existe un prompt por defecto inventado.
 //
-// No se envía aviso a Google/Bing con `notifyGoogle`/`notifyBing`: están
-// pensados para el sitio de 10minutesWebsite. La indexación del subdominio
-// depende de Search Console (blueprint §9.6) y se resuelve aparte.
+// Google se notifica mediante el envío diario de sitemap. Bing se notifica
+// inmediatamente después de confirmar cada artículo y su resultado queda
+// guardado en Title.bingIndexingStatus.
 
 import { prisma, Prisma } from "@auto-articulos/db";
 import { MAX_ATTEMPTS, sendBlogIaEvent } from "@auto-articulos/shared";
 import { generateBlogCover, optimizeCover, resolveCoverProvider, resolveCoverQuality } from "./automation/blogCoverImage";
 import { createBlogIaPublisher, BlogIaPublishError } from "./automation/blogIaPublisher";
+import { notifyBing } from "./bingIndexing";
 import { markTitleError, restoreUnfinishedTitlesToOpportunities } from "./queue";
 
 type RunForBlog = Prisma.RunGetPayload<{
@@ -165,6 +166,7 @@ export async function processBlogRunTitle(run: RunForBlog, nextTitle: TitleForBl
       },
     });
     await onStep("Artículo publicado con éxito en BLOG IA.");
+    await notifyBing(nextTitle.id, run.userId);
     return true;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
