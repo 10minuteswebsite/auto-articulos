@@ -36,6 +36,10 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         callbackUrl: body.origin,
       });
+      // Composio returns the pending account id at link creation time. Include it in
+      // the isolated Hub callback for providers that omit it on redirect.
+      const callback = new URL(body.origin);
+      callback.searchParams.set("connected_account_id", link.connectedAccountId);
       return reply({ redirectUrl: link.redirectUrl });
     }
 
