@@ -47,6 +47,8 @@ const PUBLIC_PATHS = [
   "/api/integrations/hub/gsc-adapter",
   // The isolated Hub adapter bridge authenticates its own server-to-server request.
   "/api/integrations/hub/composio-adapter",
+  // Isolated Hub PostPeer adapter; it authenticates the backend request itself.
+  "/api/integrations/hub/postpeer-adapter",
 ];
 
 /** Endpoint del servidor MCP; se autentica con Bearer, no con cookie. */
