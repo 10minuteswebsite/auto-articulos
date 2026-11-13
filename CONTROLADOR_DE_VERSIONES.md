@@ -104,7 +104,7 @@ documental posterior, sin cambios funcionales. MUSE autenticado sigue abierto.
 
 - Diagnóstico: `7c4191c1` consume tres columnas nuevas de `User`; el último run de migración existente es del 2026-11-01, anterior a la migración del manual de marca.
 - Corrección: `migrate.yml` incorpora `safe_brand_guide` y ejecuta únicamente `20261111180000_add_brand_guide_pdf/migration.sql`, que usa `IF NOT EXISTS`.
-- Estado: preparado; falta push, run de Actions y verificación productiva autenticada. No se ejecuta `db push` ni se acepta pérdida de datos.
+- Estado: publicado en `main` como `01bea498`; run de Actions `43504742422` correcto, migración aplicada y RLS idempotente verificado. Smoke público `login=307`, `/api/me=401`.
 
 ## MCP-CLOUDFLARE-BIC-20261027 — 2026-10-27
 

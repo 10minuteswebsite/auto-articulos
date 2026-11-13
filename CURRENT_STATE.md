@@ -1,6 +1,6 @@
 ## BRAND-GUIDE-SCHEMA-20261113 · reparación preparada
 
-El commit `7c4191c1` añadió lecturas Prisma de `User.brandGuideAnalysis`, `brandGuideStatus` y `brandGuideAnalyzedAt`, junto con la migración SQL aditiva `20261111180000_add_brand_guide_pdf`. No había un run de migración posterior al 2026-11-01; una producción que ya sirve el código nuevo puede responder con `P2022` si esas columnas aún no existen. Se añadió al workflow `migrate.yml` la entrada explícita `safe_brand_guide`, que ejecuta únicamente ese SQL idempotente con `prisma db execute`; no usa `db push` ni `--accept-data-loss`. Pendiente: publicar este cambio, ejecutar el workflow con `safe_brand_guide=true` y verificar la ruta autenticada de Configuración → Contenido.
+El commit `7c4191c1` añadió lecturas Prisma de `User.brandGuideAnalysis`, `brandGuideStatus` y `brandGuideAnalyzedAt`, junto con la migración SQL aditiva `20261111180000_add_brand_guide_pdf`. No había un run de migración posterior al 2026-11-01; una producción que ya sirve el código nuevo podía responder con `P2022` si esas columnas aún no existían. Se añadió al workflow `migrate.yml` la entrada explícita `safe_brand_guide`, que ejecuta únicamente ese SQL idempotente con `prisma db execute`; no usa `db push` ni `--accept-data-loss`. El commit `01bea498` está en `main` y el run `43504742422` terminó correctamente: migración aplicada y RLS idempotente verificado. Smoke público: login protegido y `/api/me` sin sesión responden de forma controlada (`307`/`401`).
 
 ## INES-IDIOMA-20261103 · CERRADO 11/11/2026
 
