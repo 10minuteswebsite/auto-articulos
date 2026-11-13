@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       const link = await createConnectLink(apiKey, {
         authConfigId,
         userId: user.id,
-        callbackUrl: `${body.origin}/api/composio/callback?app=${encodeURIComponent(app)}`,
+        callbackUrl: body.origin,
       });
       return reply({ redirectUrl: link.redirectUrl });
     }
