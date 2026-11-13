@@ -56,6 +56,8 @@ export default function ConfiguracionContenidoPage() {
   const [profilePhotoUrls, setProfilePhotoUrls] = useState<Record<"profile" | "profile2" | "profile3", string | null>>({ profile: null, profile2: null, profile3: null });
   const [businessLogoUrls, setBusinessLogoUrls] = useState<Record<"logo" | "logo2", string | null>>({ logo: null, logo2: null });
   const [brandGuidePdfUrl, setBrandGuidePdfUrl] = useState<string | null>(null);
+  const [brandGuideStatus, setBrandGuideStatus] = useState<string | null>(null);
+  const [analyzingBrandGuide, setAnalyzingBrandGuide] = useState(false);
   const [uploadingImageType, setUploadingImageType] = useState<UploadType | null>(null);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
   const [banner, setBanner] = useState<{
@@ -101,6 +103,7 @@ export default function ConfiguracionContenidoPage() {
       setProfilePhotoUrls({ profile: data.profilePhotoUrl ?? null, profile2: data.profilePhotoUrl2 ?? null, profile3: data.profilePhotoUrl3 ?? null });
       setBusinessLogoUrls({ logo: data.businessLogoUrl ?? null, logo2: data.businessLogoUrl2 ?? null });
       setBrandGuidePdfUrl(data.brandGuidePdfUrl ?? null);
+      setBrandGuideStatus(data.brandGuideStatus ?? null);
     }
   }, []);
 
@@ -267,6 +270,7 @@ export default function ConfiguracionContenidoPage() {
         setBusinessLogoUrls((current) => ({ ...current, [type]: data.url }));
       } else {
         setBrandGuidePdfUrl(data.url);
+        setBrandGuideStatus("pending");
       }
       const kb = data.sizeBytes ? Math.round(data.sizeBytes / 1024) : null;
       const sizeNote = kb ? ` (${kb}KB)` : "";
@@ -306,6 +310,22 @@ export default function ConfiguracionContenidoPage() {
       }
     } finally {
       setUploadingImageType(null);
+    }
+  }
+
+  async function analyzeBrandGuide() {
+    setAnalyzingBrandGuide(true);
+    setBanner(null);
+    try {
+      const res = await fetch("/api/me/brand-guide/analyze", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "No se pudo analizar el manual.");
+      setBrandGuideStatus("completed");
+      setBanner({ type: "info", text: "Manual analizado. Las variables quedaron disponibles para revisión." });
+    } catch (error) {
+      setBanner({ type: "error", text: error instanceof Error ? error.message : "No se pudo analizar el manual." });
+    } finally {
+      setAnalyzingBrandGuide(false);
     }
   }
 
@@ -586,6 +606,8 @@ export default function ConfiguracionContenidoPage() {
           {brandGuidePdfUrl && (
             <div style={{ marginTop: 10, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
               <a href={brandGuidePdfUrl} target="_blank" rel="noreferrer" style={{ color: "#06c", fontSize: 13 }}>Ver manual de marca PDF</a>
+              <span style={{ fontSize: 13, color: "#6e6e73" }}>Estado: {brandGuideStatus === "completed" ? "Analizado" : brandGuideStatus === "analyzing" ? "Analizando" : brandGuideStatus === "error" ? "Error" : "Pendiente de análisis"}</span>
+              <button type="button" onClick={analyzeBrandGuide} disabled={analyzingBrandGuide || brandGuideStatus === "analyzing"} style={secondaryButtonStyle}>{analyzingBrandGuide ? "Analizando..." : "Analizar manual"}</button>
               <button type="button" onClick={() => handleRemoveImage("brandGuide")} disabled={uploadingImageType === "brandGuide"} style={secondaryButtonStyle}>Eliminar</button>
             </div>
           )}

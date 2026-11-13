@@ -361,6 +361,7 @@ async function decideCreativeDirection(
   ogImagePng: Buffer,
   assetBriefing: string,
   formatLabel: string,
+  brandGuidelines?: unknown,
   systemPromptOverride?: string | null,
 ): Promise<CreativeDecision | null> {
   if (!OPENAI_IMAGE_API_KEY) return null;
@@ -392,6 +393,7 @@ async function decideCreativeDirection(
                   `Título del artículo: ${articleTitle}\n` +
                   `Resumen del artículo: ${articleSummary}\n` +
                   `${assetBriefing}\n\n` +
+                  `${brandGuidelines ? `GUÍA DE MARCA APROBADA (respeta únicamente lo especificado; no inventes):\n${JSON.stringify(brandGuidelines).slice(0, 8000)}\n\n` : ""}` +
                   `Aquí está la imagen OG del artículo. Analízala y aplica tu metodología completa.`,
               },
               {
@@ -582,6 +584,7 @@ export async function generateAiSocialImage(params: {
   profilePhotoUrl?: string | null;
   profilePhotoUrl2?: string | null;
   profilePhotoUrl3?: string | null;
+  brandGuidelines?: unknown;
   pathPrefix: string;
   /** Solo diagnóstico: fuerza (true) o prohíbe (false) que aparezca la persona. */
   forcePerson?: boolean;
@@ -638,6 +641,7 @@ export async function generateAiSocialImage(params: {
       includePerson: Boolean(personUrl),
     }),
     formatLabel,
+    params.brandGuidelines,
     params.systemPromptOverride,
   );
   if (!decision) return null;
