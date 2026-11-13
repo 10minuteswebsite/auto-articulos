@@ -1,3 +1,7 @@
+## BRAND-GUIDE-SCHEMA-20261113 · reparación preparada
+
+El commit `7c4191c1` añadió lecturas Prisma de `User.brandGuideAnalysis`, `brandGuideStatus` y `brandGuideAnalyzedAt`, junto con la migración SQL aditiva `20261111180000_add_brand_guide_pdf`. No había un run de migración posterior al 2026-11-01; una producción que ya sirve el código nuevo puede responder con `P2022` si esas columnas aún no existen. Se añadió al workflow `migrate.yml` la entrada explícita `safe_brand_guide`, que ejecuta únicamente ese SQL idempotente con `prisma db execute`; no usa `db push` ni `--accept-data-loss`. Pendiente: publicar este cambio, ejecutar el workflow con `safe_brand_guide=true` y verificar la ruta autenticada de Configuración → Contenido.
+
 ## INES-IDIOMA-20261103 · CERRADO 11/11/2026
 
 #789/#790/#791 en `main`; el Worker ya corre con la guardia (worker.yml en `9cf61b74`, incluye #789; ejecuciones success 11/11). Con Inés: sus 37 artículos publicados están en inglés; lo español eran títulos pedidos (22–30/10), cubiertos por el filtro de Publicar; prueba en vivo de títulos OK. No probado en vivo: artículo/FAQ con estilo propio en otro idioma. Detalle: [Coordinación](COORDINACION_CLAUDE_CODEX.md).

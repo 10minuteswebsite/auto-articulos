@@ -83,6 +83,11 @@ on:
         required: false
         default: false
         type: boolean
+      safe_brand_guide:
+        description: "Aplicar únicamente las columnas aditivas del manual de marca en User"
+        required: false
+        default: false
+        type: boolean
       safe_all_social_publishing_defaults:
         description: "Activar todas las redes publicables por defecto y actualizar las cuentas existentes"
         required: false
@@ -279,6 +284,16 @@ jobs:
           npx prisma db execute \
             --url "$MIGRATION_DATABASE_URL" \
             --file packages/db/prisma/migrations/20261021120000_add_user_indexing_preference/migration.sql
+      - name: Aplicar migración segura del manual de marca
+        if: ${{ inputs.safe_brand_guide }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"
+          MIGRATION_DATABASE_URL="${MIGRATION_DATABASE_URL/?pgbouncer=true/}"
+          npx prisma db execute \
+            --url "$MIGRATION_DATABASE_URL" \
+            --file packages/db/prisma/migrations/20261111180000_add_brand_guide_pdf/migration.sql
       - name: Aplicar migraciones seguras de BLOG IA
         if: ${{ inputs.safe_blog_ia }}
         shell: bash
@@ -325,7 +340,7 @@ jobs:
             npx prisma db push --schema=packages/db/prisma/schema.prisma \
             --accept-data-loss
       - name: Aplicar migraciones con Session pooler
-        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_problem_solution_default_prompt && !inputs.safe_category_editorial_language && !inputs.safe_blogger_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.safe_postpeer_social_connections && !inputs.safe_remove_devto_integration && !inputs.safe_blog_ia && !inputs.safe_hub_identity_mapping && !inputs.safe_meta_social_opportunity_assets && !inputs.safe_user_indexing_preference && !inputs.safe_all_social_publishing_defaults && !inputs.sync_hub_users && !inputs.force_sync }}
+        if: ${{ !inputs.safe_opportunity_dates && !inputs.safe_daily_limit_default && !inputs.safe_problem_solution_default_prompt && !inputs.safe_category_editorial_language && !inputs.safe_blogger_integration && !inputs.safe_client_business_locations && !inputs.safe_composio_connections && !inputs.safe_postpeer_social_connections && !inputs.safe_remove_devto_integration && !inputs.safe_blog_ia && !inputs.safe_hub_identity_mapping && !inputs.safe_meta_social_opportunity_assets && !inputs.safe_user_indexing_preference && !inputs.safe_brand_guide && !inputs.safe_all_social_publishing_defaults && !inputs.sync_hub_users && !inputs.force_sync }}
         shell: bash
         run: |
           MIGRATION_DATABASE_URL="${DATABASE_URL/:6543/:5432}"
