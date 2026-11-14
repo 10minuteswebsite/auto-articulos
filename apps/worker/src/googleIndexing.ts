@@ -8,7 +8,7 @@ import {
   resolveConnection,
 } from "@auto-articulos/shared";
 import { loadConnectionState } from "./composio-connection-state";
-import { inspectHubGsc, resolveHubGsc } from "./hub-connections-client";
+import { hubGscPilotEnabled, inspectHubGsc, resolveHubGsc } from "./hub-connections-client";
 
 /**
  * Después de publicar solo se consulta el estado de indexación de esta URL.
@@ -20,7 +20,14 @@ export async function notifyGoogle(titleId: string, userId: string) {
   const integration = await prisma.searchIntegration.findFirst({
     where: { userId, provider: "google", ...(owner.selectedSiteDomain ? { siteDomain: owner.selectedSiteDomain } : {}) },
   });
-  const central = await resolveHubGsc(owner.hubUserId, integration?.siteUrl ?? null);
+  // An active local Composio connection may exist without a native integration row.
+  const legacyComposio = !integration?.siteUrl && hubGscPilotEnabled(owner.hubUserId)
+    ? await prisma.composioConnection.findFirst({
+        where: { userId, app: "google_search_console", status: "ACTIVE" },
+        select: { id: true },
+      })
+    : null;
+  const central = legacyComposio ? null : await resolveHubGsc(owner.hubUserId, integration?.siteUrl ?? null);
   if (!integration?.siteUrl && !central) {
     await prisma.title.update({
       where: { id: titleId },
