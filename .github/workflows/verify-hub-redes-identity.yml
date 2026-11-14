@@ -33,8 +33,14 @@ jobs:
             signal: AbortSignal.timeout(15000),
           });
           console.log(`Identidad de Redes: HTTP ${response.status}`);
-          if (!response.ok) process.exit(1);
-          const { data } = await response.json();
+          const { data, error } = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            const message = error?.message;
+            const stage = message === "Invalid calendar product client" ? "product_client"
+              : message === "Calendar access is not enabled for this tenant" ? "tenant_access" : "unknown";
+            console.log(`Rechazo clasificado: ${stage}`);
+            process.exit(1);
+          }
           if (!data?.access_token || data.audience !== "connections" || data.context?.tenant_id !== tenant
               || data.context?.app_id !== "auto-redes" || !data.context?.scopes?.includes("connections:publish")) process.exit(1);
           JS
