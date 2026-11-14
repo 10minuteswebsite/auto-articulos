@@ -233,8 +233,9 @@ export async function processNextBusinessProfilePost(
     const postPeerConnection = (POSTPEER_GBP_READY || centralEligible)
       ? await prisma.postPeerConnection.findUnique({ where: { userId: candidate.run.userId } })
       : null;
+    const useHub = centralEligible && !postPeerConnection && Boolean(tenantId);
     let result: unknown;
-    if (centralEligible && !postPeerConnection && tenantId) {
+    if (useHub && tenantId) {
       const hub = await hubSocialClientForTenant(tenantId);
       const connectionId = await hub.resolve("google-business-profile");
       if (!connectionId) throw new Error("Autoriza Google Business Profile para Redes en el Hub.");
@@ -273,7 +274,7 @@ export async function processNextBusinessProfilePost(
       });
     }
 
-    const failureReason = POSTPEER_GBP_READY && postPeerConnection ? describePostPeerFailure(result) : null;
+    const failureReason = POSTPEER_GBP_READY && !useHub ? describePostPeerFailure(result) : null;
     const rejected = Boolean(failureReason) || (result as { state?: string }).state === "REJECTED" || (result as { status?: string }).status === "failed";
     if (rejected) console.error(`Google Business ${candidate.id}: no publicada — ${failureReason ?? "rechazada por Google"}`);
     await prisma.businessProfilePost.update({
@@ -291,7 +292,7 @@ export async function processNextBusinessProfilePost(
       data: {
         status: rejected ? "error" : "published",
         progressPercent: 100,
-        progressStage: rejected ? "Google Business Profile rechazó la publicación" : "Publicado en Google Business Profile mediante PostPeer",
+        progressStage: rejected ? "Google Business Profile rechazó la publicación" : useHub ? "Publicado en Google Business Profile mediante el Hub" : "Publicado en Google Business Profile",
         errorLog: rejected ? (failureReason ?? JSON.stringify(result)) : null,
         postId: extractPostPeerPostUrl(result) || (result as { id?: string; url?: string }).url || (result as { postId?: string }).postId || (result as { id?: string }).id || null,
         publishedAt: rejected ? null : new Date(),

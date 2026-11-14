@@ -31,3 +31,14 @@ test("el filtro por usuario y por artículo se respeta", () => {
   assert.equal(where.run.userId, "u1");
   assert.ok((where.articleUrl as { in?: string[] }).in?.includes("https://x.com/a"));
 });
+
+test("el piloto puede optar a publicaciones aprobadas sin habilitar el envío automático", () => {
+  const tenant = "33333333-3333-4333-8333-333333333333";
+  const where = buildBusinessProfileCandidateWhere(undefined, undefined, false, [tenant]);
+  assert.deepEqual(where.run.user.OR[0], { hubUserId: { in: [tenant] } });
+  assert.deepEqual(where.OR[1], {
+    businessProfilePost: null,
+    summary: { not: null },
+    run: { user: { businessProfileIntegration: { locationName: { not: null } } } },
+  });
+});
