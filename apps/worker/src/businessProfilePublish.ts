@@ -1,3 +1,4 @@
+import { hubSocialClientForTenant, hubSocialPilotEnabled } from "./hub-social-client";
 import { prisma, Prisma } from "@auto-articulos/db";
 import { createHash } from "node:crypto";
 import {
@@ -111,6 +112,7 @@ export function buildBusinessProfileCandidateWhere(
   filterUserId: string | undefined,
   filterArticleUrl: string | undefined,
   postPeerReady: boolean,
+  pilotIds: string[] = [],
 ): Prisma.TitleWhereInput & { run: { user: { OR: unknown[] }; userId?: string }; OR: unknown[] } {
   return {
     status: "success",
@@ -137,6 +139,7 @@ export function buildBusinessProfileCandidateWhere(
       ...(filterUserId ? { userId: filterUserId } : {}),
       user: {
         OR: [
+          ...(pilotIds.length ? [{ hubUserId: { in: pilotIds } }] : []),
           { businessProfileIntegration: { locationName: { not: null } } },
           ...(postPeerReady ? [{ postPeerConnection: { status: "ACTIVE" as const } }] : []),
         ],
@@ -158,7 +161,8 @@ export async function processNextBusinessProfilePost(
   filterArticleUrl?: string,
 ): Promise<boolean> {
   const candidate = await prisma.title.findFirst({
-    where: buildBusinessProfileCandidateWhere(filterUserId, filterArticleUrl, POSTPEER_GBP_READY),
+    where: buildBusinessProfileCandidateWhere(filterUserId, filterArticleUrl, POSTPEER_GBP_READY,
+      (process.env.HUB_SOCIAL_CONSUMER_PILOT_IDS ?? "").split(",").map(id => id.trim()).filter(hubSocialPilotEnabled)),
     orderBy: { processedAt: "asc" },
     include: {
       businessProfilePost: true,
@@ -170,7 +174,7 @@ export async function processNextBusinessProfilePost(
       run: {
         select: {
           userId: true,
-          user: { select: { businessProfileIntegration: true } },
+          user: { select: { businessProfileIntegration: true, hubUserId: true } },
         },
       },
     },
@@ -178,7 +182,10 @@ export async function processNextBusinessProfilePost(
   if (!candidate) return false;
 
   const integration = candidate.run.user.businessProfileIntegration;
-  if (!integration?.locationName && !POSTPEER_GBP_READY) return false;
+  const tenantId = candidate.run.user.hubUserId;
+  const centralEligible = !integration?.locationName && candidate.socialOpportunities.length > 0
+    && hubSocialPilotEnabled(tenantId);
+  if (!integration?.locationName && !POSTPEER_GBP_READY && !centralEligible) return false;
 
   let post = candidate.businessProfilePost;
   if (!post) {
@@ -223,11 +230,21 @@ export async function processNextBusinessProfilePost(
     }
     const imageUrl = await getGoogleBusinessImageUrl(candidate.id, articleImageUrl);
 
-    const postPeerConnection = POSTPEER_GBP_READY
+    const postPeerConnection = (POSTPEER_GBP_READY || centralEligible)
       ? await prisma.postPeerConnection.findUnique({ where: { userId: candidate.run.userId } })
       : null;
     let result: unknown;
-    if (POSTPEER_GBP_READY) {
+    if (centralEligible && !postPeerConnection && tenantId) {
+      const hub = await hubSocialClientForTenant(tenantId);
+      const connectionId = await hub.resolve("google-business-profile");
+      if (!connectionId) throw new Error("Autoriza Google Business Profile para Redes en el Hub.");
+      result = { postId: await hub.publish({
+        connection_id: connectionId,
+        idempotency_key: `redes-gbp-${post.id}`,
+        content: [gbpSummary, candidate.articleUrl].filter(Boolean).join("\n\n"),
+        media: [{ type: "image", url: imageUrl }],
+      }) };
+    } else if (POSTPEER_GBP_READY) {
       if (postPeerConnection?.status !== "ACTIVE") {
         throw new Error("La conexión de PostPeer con Google Business Profile requiere reconexión.");
       }
@@ -256,7 +273,7 @@ export async function processNextBusinessProfilePost(
       });
     }
 
-    const failureReason = POSTPEER_GBP_READY ? describePostPeerFailure(result) : null;
+    const failureReason = POSTPEER_GBP_READY && postPeerConnection ? describePostPeerFailure(result) : null;
     const rejected = Boolean(failureReason) || (result as { state?: string }).state === "REJECTED" || (result as { status?: string }).status === "failed";
     if (rejected) console.error(`Google Business ${candidate.id}: no publicada — ${failureReason ?? "rechazada por Google"}`);
     await prisma.businessProfilePost.update({
