@@ -1,3 +1,7 @@
+## CONEXIONES-PILOTO-LINK-20261114 · despliegue verificado
+
+Vercel sirve `d5c6393` en Artículos y Redes, despliegue `dpl_55MHeygM9u4CKFzXJabgq2iYLaGF`. Reversión: `dpl_BDQSurXNfSnPbfCRa31tePxfcuLc`. Smoke en ambos dominios: inicio y login 307, API de sesión anónima 401. En el navegador interno la sesión piloto regresó al Hub al entrar en ambas apps. El Hub mostró «Sin acceso» a ambos productos. Queda pendiente comprobar el enlace y la apertura en otra pestaña con una sesión piloto que tenga acceso legítimo a ambas apps. No se cambiaron permisos ni conexiones.
+
 ## CONEXIONES-PILOTO-LINK-20261114 · candidato
 
 Mario autorizó adaptar Artículos y Redes para consumir Conexiones. Este primer cambio hace visible en ambas aplicaciones el enlace existente al recurso para la cuenta piloto de Hub en sesión directa, sin mostrarlo a otros clientes; el Hub sigue comprobando identidad y autorización. La pista se deriva del identificador Hub registrado en servidor; si la consulta falla se oculta y no se interrumpe `/api/me`. Las vistas, flujos y conexiones existentes no cambian. Tests de piloto y selección GSC 4/4, typecheck y build web PASS; falta Publicador y verificación en ambos dominios. No se habilitan nuevos proveedores ni se prueba consumo central de Redes.
