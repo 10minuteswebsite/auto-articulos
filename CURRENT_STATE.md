@@ -1,3 +1,7 @@
+## CONEXIONES-GSC-SOURCE-GUARD-20261114 · candidato
+
+Para evitar que la mera coincidencia de una propiedad central sustituya una conexión anterior sin decisión de cambio, el consumidor web y worker conservan la fuente anterior cuando reciben una propiedad legacy. Para una nueva conexión sin propiedad anterior el piloto mantiene su selección previa. Pruebas dirigidas 8/8 y typecheck web PASS. Antes de publicar, Publicador debe comprobar que ningún piloto activo ya dependa de la selección central con propiedad legacy; si lo hace, detener el despliegue y resolver la decisión de cambio durable. Este guard no implementa la transición definitiva, no habilita proveedores y no verifica consumo E2E. Publicador confirmó el despliegue anterior del enlace pero Yoly no pudo entrar a los productos con su sesión por ausencia de acceso.
+
 ## CONEXIONES-PILOTO-LINK-20261114 · despliegue verificado
 
 Vercel sirve `d5c6393` en Artículos y Redes, despliegue `dpl_55MHeygM9u4CKFzXJabgq2iYLaGF`. Reversión: `dpl_BDQSurXNfSnPbfCRa31tePxfcuLc`. Smoke en ambos dominios: inicio y login 307, API de sesión anónima 401. En el navegador interno la sesión piloto regresó al Hub al entrar en ambas apps. El Hub mostró «Sin acceso» a ambos productos. Queda pendiente comprobar el enlace y la apertura en otra pestaña con una sesión piloto que tenga acceso legítimo a ambas apps. No se cambiaron permisos ni conexiones.

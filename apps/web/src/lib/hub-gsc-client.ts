@@ -4,6 +4,9 @@ import type { GoogleSearchAnalyticsRow } from "@auto-articulos/shared";
 
 /** Failure to reach Hub leaves the current legacy resolver unchanged. */
 export async function resolveHubGsc(hubUserId: string | null | undefined, expectedSiteUrl?: string | null, app: "seo-total" | "auto-redes" = "seo-total") {
+  // A matching central property is not a cutover decision. Keep the legacy
+  // source until the resource exposes a verified, durable replacement decision.
+  if (expectedSiteUrl) return null;
   if (!hubGscPilotEnabled(hubUserId)) return null;
   try {
     const response = await hubConnectionsRead({ hub_user_id: hubUserId, app, operation: "list" });

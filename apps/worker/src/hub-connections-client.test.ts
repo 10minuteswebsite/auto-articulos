@@ -55,7 +55,8 @@ test("worker selects only an equivalent property and preserves legacy when Hub f
   assert.equal(calls, 0);
   process.env.HUB_GSC_CONSUMER_PILOT_IDS = tenant;
   try {
-    assert.deepEqual(await resolveHubGsc(tenant, row.site_url, list), row);
+    assert.equal(await resolveHubGsc(tenant, row.site_url, list), null);
+    assert.deepEqual(await resolveHubGsc(tenant, null, list), row);
     assert.equal(await resolveHubGsc(tenant, "sc-domain:other.test", list), null);
     assert.equal(await resolveHubGsc(tenant, null, async () => [row, { ...row, id: "44444444-4444-4444-8444-444444444444" }]), null);
     assert.equal(await resolveHubGsc(tenant, row.site_url, async () => { throw new Error("offline"); }), null);

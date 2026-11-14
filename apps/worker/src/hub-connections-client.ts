@@ -71,6 +71,8 @@ export async function listHubGscConnections(hubUserId: string): Promise<HubGscCo
 
 /** Select only an unambiguous property; failures never disable a legacy source. */
 export async function resolveHubGsc(hubUserId: string | null, legacySite: string | null, list = listHubGscConnections) {
+  // Property equality alone does not authorize replacing an existing source.
+  if (legacySite) return null;
   if (!hubGscPilotEnabled(hubUserId) || !hubUserId) return null;
   try {
     const all = await list(hubUserId);
