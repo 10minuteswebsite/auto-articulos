@@ -45,6 +45,8 @@ const PUBLIC_PATHS = [
   "/api/integrations/hub/blog-destination",
   // The Connections adapter authenticates the Hub backend in its route handler.
   "/api/integrations/hub/gsc-adapter",
+  // The legacy read handler independently authenticates the Hub backend.
+  "/api/integrations/hub/gsc-legacy-read",
   // The isolated Hub adapter bridge authenticates its own server-to-server request.
   "/api/integrations/hub/composio-adapter",
   // Isolated Hub PostPeer adapter; it authenticates the backend request itself.

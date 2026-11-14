@@ -1,3 +1,7 @@
+## CONEXIONES-GSC-MIDDLEWARE-20261114
+
+Cambio preparado para la ruta exacta de lectura GSC, sin tocar credenciales ni conexiones. Pruebas y punto siguiente: [estado actual](CURRENT_STATE.md). Publicación pendiente de Publicador.
+
 ## CONEXIONES-ADMIN-ONLY-20261106 · publicado
 
 `d73e14d`: ambos Vercel success; enlace de admin y GSC legacy IAB PASS.
