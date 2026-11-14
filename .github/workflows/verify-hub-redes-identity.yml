@@ -1,0 +1,40 @@
+name: Verificar identidad de Redes en el Hub
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      HUB_REDES_SOCIAL_CLIENT_ID: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_ID }}
+      HUB_REDES_SOCIAL_CLIENT_SECRET: ${{ secrets.AUTO_ARTICULOS_HUB_CLIENT_SECRET }}
+    steps:
+      - name: Verificar emisión de token sin publicar
+        run: |
+          node --input-type=module <<'JS'
+          const { HUB_REDES_SOCIAL_CLIENT_ID: id, HUB_REDES_SOCIAL_CLIENT_SECRET: secret } = process.env;
+          if (!id || !secret) throw new Error("Faltan credenciales de aplicación");
+          const tenant = "a1049d33-ca3a-4519-b67c-9909b35cdee1";
+          const response = await fetch("https://hub.lasolucionweb.net/api/resources/context/v1/tokens?app=auto-redes", {
+            method: "POST",
+            headers: {
+              "x-platform-client-id": id,
+              "x-platform-user-id": tenant,
+              authorization: `Bearer ${secret}`,
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({ resource: "connections", scopes: ["connections:publish"] }),
+            redirect: "error",
+            signal: AbortSignal.timeout(15000),
+          });
+          console.log(`Identidad de Redes: HTTP ${response.status}`);
+          if (!response.ok) process.exit(1);
+          const { data } = await response.json();
+          if (!data?.access_token || data.audience !== "connections" || data.context?.tenant_id !== tenant
+              || data.context?.app_id !== "auto-redes" || !data.context?.scopes?.includes("connections:publish")) process.exit(1);
+          JS
