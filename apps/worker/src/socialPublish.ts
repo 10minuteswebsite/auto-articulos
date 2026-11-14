@@ -1,3 +1,4 @@
+import { hubSocialClientForTenant, hubSocialPilotEnabled } from "./hub-social-client";
 import { prisma } from "@auto-articulos/db";
 import {
   buildImagePrompt,
@@ -1070,7 +1071,23 @@ async function processBlueskyJob(job: {
   id: string; userId: string; titleId: string | null; articleUrl: string; articleTitle: string; suggestedText: string;
 }): Promise<boolean> {
   const integration = await prisma.blueskyIntegration.findUnique({ where: { userId: job.userId } });
-  if (!integration) throw new Error("Bluesky no está configurado en tu cuenta.");
+  if (!integration) {
+    if (!process.env.HUB_SOCIAL_CONSUMER_PILOT_IDS) throw new Error("Bluesky no está configurado en tu cuenta.");
+    const owner = await prisma.user.findUnique({ where: { id: job.userId }, select: { hubUserId: true } });
+    const tenantId = owner?.hubUserId;
+    if (!hubSocialPilotEnabled(tenantId)) throw new Error("Bluesky no está configurado en tu cuenta.");
+    await validateArticleUrl(job.articleUrl);
+    const client = await hubSocialClientForTenant(tenantId);
+    const connectionId = await client.resolve("bluesky");
+    if (!connectionId) throw new Error("Autoriza una conexión de Bluesky para Redes en el Hub.");
+    const content = buildSafeCaption(job.suggestedText, job.articleUrl, { maxChars: 300, useGraphemes: true });
+    const postId = await client.publish({ connection_id: connectionId, idempotency_key: `redes-bluesky-${job.id}`, content });
+    await prisma.socialOpportunity.update({
+      where: { id: job.id },
+      data: { status: "published", postId, publishedAt: new Date(), errorLog: null },
+    });
+    return true;
+  }
   await validateArticleUrl(job.articleUrl);
   // Bluesky cuenta por "graphemes" (caracteres visibles), no por unidades
   // UTF-16 de JS — con emojis, un recorte por .length puede partir uno a

@@ -52,3 +52,37 @@ export function hubSocialClient(token: string, transport: typeof fetch = fetch) 
     },
   };
 }
+
+/** Obtain a fresh token for one tenant using the Redes product identity. */
+export async function hubSocialClientForTenant(tenantId: string, transport: typeof fetch = fetch) {
+  const clientId = process.env.HUB_REDES_SOCIAL_CLIENT_ID;
+  const clientSecret = process.env.HUB_REDES_SOCIAL_CLIENT_SECRET;
+  if (!CONNECTION_ID.test(tenantId) || !clientId || !clientSecret) throw new Error("hub_social_unavailable");
+
+  const response = await transport("https://hub.lasolucionweb.net/api/resources/context/v1/tokens?app=auto-redes", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${clientSecret}`,
+      "x-platform-client-id": clientId,
+      "x-platform-user-id": tenantId,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ resource: "connections", scopes: ["connections:publish"] }),
+    redirect: "error",
+    cache: "no-store",
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!response.ok) throw new Error("hub_social_unavailable");
+  const { data } = await response.json();
+  if (typeof data?.access_token !== "string" || !data.access_token || data.audience !== "connections"
+    || data.context?.tenant_id !== tenantId || data.context?.app_id !== "auto-redes"
+    || !Array.isArray(data.context?.scopes) || !data.context.scopes.includes("connections:publish")) {
+    throw new Error("hub_social_unavailable");
+  }
+  return hubSocialClient(data.access_token, transport);
+}
+
+export function hubSocialPilotEnabled(tenantId: string | null | undefined): tenantId is string {
+  return Boolean(tenantId && CONNECTION_ID.test(tenantId)
+    && process.env.HUB_SOCIAL_CONSUMER_PILOT_IDS?.split(",").some(id => id.trim() === tenantId));
+}
