@@ -1,5 +1,8 @@
 ## CONEXIONES-GSC-SOURCE-GUARD-20261114 · candidato
 
+Publicador verificó en el Hub 0 grants GSC para Artículos/Redes sobre conexiones activas y 0 decisiones de cutover. Vercel sirve `95a414ca` en los dos dominios, deploy `dpl_4zWBk7ei9aNXN2z17ndiGkuiRKbo`, reversión `dpl_4Yupqe49EAmoyeWzbsScNiYP8K1S`. Login 307 y API de sesión anónima 401 en ambos. El worker programado y el consumo GSC autenticado no se ejecutaron en esta verificación.
+
+
 Para evitar que la mera coincidencia de una propiedad central sustituya una conexión anterior sin decisión de cambio, el consumidor web y worker conservan la fuente anterior cuando reciben una propiedad legacy. Para una nueva conexión sin propiedad anterior el piloto mantiene su selección previa. Pruebas dirigidas 8/8 y typecheck web PASS. Antes de publicar, Publicador debe comprobar que ningún piloto activo ya dependa de la selección central con propiedad legacy; si lo hace, detener el despliegue y resolver la decisión de cambio durable. Este guard no implementa la transición definitiva, no habilita proveedores y no verifica consumo E2E. Publicador confirmó el despliegue anterior del enlace pero Yoly no pudo entrar a los productos con su sesión por ausencia de acceso.
 
 ## CONEXIONES-PILOTO-LINK-20261114 · despliegue verificado
