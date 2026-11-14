@@ -2,5 +2,5 @@
 export function canShowHubConnectionsPreview(identity: unknown) {
   if (!identity || typeof identity !== "object" || Array.isArray(identity)) return false;
   const user = identity as Record<string, unknown>;
-  return user.role === "admin" && user.isActingAdmin === false;
+  return user.isActingAdmin === false && (user.role === "admin" || user.hubConnectionsPilot === true);
 }

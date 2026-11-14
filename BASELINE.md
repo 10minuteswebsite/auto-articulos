@@ -1,3 +1,7 @@
+## CONEXIONES-PILOTO-LINK-20261114 · candidato
+
+El enlace «Ver Conexiones del Hub» de Artículos y Redes aparecerá también al piloto en sesión directa y abrirá otra pestaña. Los demás clientes conservan la visibilidad anterior y Hub decide el acceso. [Estado](CURRENT_STATE.md).
+
 ## CONEXIONES-ADMIN-ONLY-20261106 · publicado
 
 El enlace al recurso Hub en preparación se muestra solo al administrador

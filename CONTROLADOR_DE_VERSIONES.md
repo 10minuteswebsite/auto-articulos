@@ -1,3 +1,7 @@
+## CONEXIONES-PILOTO-LINK-20261114
+
+Primer ajuste de adaptación: enlace del recurso visible para el piloto en Artículos y Redes. [Estado y pruebas](CURRENT_STATE.md); publicación pendiente.
+
 ## CONEXIONES-GSC-MIDDLEWARE-20261114
 
 Cambio preparado para la ruta exacta de lectura GSC, sin tocar credenciales ni conexiones. Pruebas y punto siguiente: [estado actual](CURRENT_STATE.md). Publicación pendiente de Publicador.

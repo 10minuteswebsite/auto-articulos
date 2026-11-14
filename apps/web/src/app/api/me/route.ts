@@ -14,6 +14,7 @@ import {
 import { getSocialHostContext, hasSocialModuleAccess, openAllNetworks } from "@/lib/social-access";
 import { getProductsSummary } from "@/lib/product-access";
 import { getEnforcementMode } from "@/lib/product-enforcement";
+import { isHubConnectionsPilot } from "@/lib/hub-connections-pilot";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -30,6 +31,7 @@ export async function GET() {
   const user = await getCurrentUser();
   const indexingPreference = await prisma.$queryRaw<Array<{ disableIndexing: boolean }>>`SELECT "disableIndexing" FROM "User" WHERE id = ${user.id}`;
   const actingAdmin = await getActingAdmin();
+  const hubIdentity = actingAdmin ? null : await prisma.user.findUnique({ where: { id: user.id }, select: { hubUserId: true } }).catch(() => null);
   const globalDisabledModules = await getGlobalDisabledModules();
   const socialHost = await getSocialHostContext();
   const networks = openAllNetworks(user, socialHost);
@@ -49,6 +51,8 @@ export async function GET() {
       email: user.email,
       role: user.role,
       isActingAdmin: Boolean(actingAdmin),
+      // Navigation hint only: the Hub independently authorizes the direct session.
+      hubConnectionsPilot: isHubConnectionsPilot(hubIdentity?.hubUserId, Boolean(actingAdmin)),
       actingAdmin: actingAdmin
         ? { id: actingAdmin.id, email: actingAdmin.email, name: displayName(actingAdmin) }
         : null,
