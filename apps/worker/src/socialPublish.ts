@@ -663,7 +663,29 @@ async function processThreadsJob(job: {
   });
 
   if (!integration) {
-    throw new Error("Threads no está configurado en tu cuenta.");
+    if (!process.env.HUB_SOCIAL_CONSUMER_PILOT_IDS) throw new Error("Threads no está configurado en tu cuenta.");
+    const owner = await prisma.user.findUnique({ where: { id: job.userId }, select: { hubUserId: true } });
+    const tenantId = owner?.hubUserId;
+    if (!hubSocialPilotEnabled(tenantId)) throw new Error("Threads no está configurado en tu cuenta.");
+    await validateArticleUrl(job.articleUrl);
+    const client = await hubSocialClientForTenant(tenantId);
+    const connectionId = await client.resolve("threads");
+    if (!connectionId) throw new Error("Autoriza una conexión de Threads para Redes en el Hub.");
+    const image = job.titleId
+      ? (await getRehostedThreadsImage(job.titleId, job.articleUrl))?.url
+      : await getArticleOpenGraphImage(job.articleUrl);
+    if (!image) throw new Error("El artículo no tiene una imagen og:image pública para Threads.");
+    const postId = await client.publish({
+      connection_id: connectionId,
+      idempotency_key: `redes-threads-${job.id}`,
+      content: buildSafeCaption(job.suggestedText, job.articleUrl, { maxChars: 500 }),
+      media: [{ type: "image", url: image }],
+    });
+    await prisma.socialOpportunity.update({
+      where: { id: job.id },
+      data: { status: "published", postId, publishedAt: new Date(), errorLog: null },
+    });
+    return true;
   }
 
    let accessToken = decryptSecret(integration.accessTokenEncrypted);
