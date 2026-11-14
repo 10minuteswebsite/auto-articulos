@@ -104,11 +104,20 @@ Repite el asistente de 4 pasos cuando quieras: cuenta de la plataforma,
 categorías, idioma y Google Search Console.
 
 Si todavía no has conectado nada, el asistente empieza preguntando dónde se
-publican tus artículos, con dos botones: **Mi blog de BLOG IA** y **Mi sitio
-10MWS**. Con tu sitio 10MWS todo sigue igual. Con tu blog de BLOG IA no te pide
-usuario ni contraseña de otra plataforma: las categorías se traen de tu blog y
-solo completas el idioma y Google Search Console. Si aún no tienes blog, te
-lleva a crearlo y, al volver a esta pestaña, el asistente continúa.
+publican tus artículos, con dos tarjetas que explican cada opción: **Un blog
+nuevo en BLOG IA** (BLOG IA crea y aloja un blog propio con tu dominio) y **Mi
+sitio en 10minutesWebsite** (publicamos en la web que ya tienes ahí). Con tu
+sitio 10MWS todo sigue igual. Con tu blog de BLOG IA no te pide usuario ni
+contraseña de otra plataforma: las categorías se traen de tu blog y solo
+completas el idioma y Google Search Console.
+
+El asistente revisa si ya tienes un blog en BLOG IA y te lo dice: si ya está
+listo, te ofrece «Usar mi blog»; si lo creaste pero aún falta algo (por
+ejemplo confirmar el dominio), te explica qué falta y te lleva a terminarlo; si
+no tienes blog, te lleva a crearlo; y si BLOG IA no está activo en tu cuenta,
+te deja conocerlo o seguir con 10MWS. Al volver a esta pestaña, el asistente
+continúa solo. El idioma de redacción se propone según el país que indicaste al
+empezar; puedes cambiarlo.
 
 ### Cuenta
 
